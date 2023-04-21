@@ -14,11 +14,13 @@ import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../..
 
 import { EXCEPTIONS_URL } from '../../../urls/navigation';
 import {
-  deleteExceptionListWithRuleReference,
+  deleteExceptionListWithRuleReferenceByListId,
   deleteExceptionListWithoutRuleReference,
   exportExceptionList,
   waitForExceptionsTableToBeLoaded,
   createSharedExceptionList,
+  linkRulesToExceptionList,
+  assertNumberLinkedRules,
 } from '../../../tasks/exceptions_table';
 import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
@@ -45,6 +47,8 @@ describe('Manage shared exception list', () => {
   before(() => {
     esArchiverResetKibana();
     login();
+
+    createRule(getNewRule({ name: 'Another rule' }));
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
@@ -76,7 +80,7 @@ describe('Manage shared exception list', () => {
   it('Export exception list', function () {
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
-    exportExceptionList();
+    exportExceptionList(getExceptionList1().list_id);
 
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response?.body).should(
@@ -89,6 +93,12 @@ describe('Manage shared exception list', () => {
         `Exception list "${EXCEPTION_LIST_NAME}" exported successfully`
       );
     });
+  });
+
+  it('Link rules to shared exception list', function () {
+    assertNumberLinkedRules(getExceptionList2().list_id, '1');
+    linkRulesToExceptionList(getExceptionList2().list_id, 1);
+    assertNumberLinkedRules(getExceptionList2().list_id, '2');
   });
 
   it('Create exception list', function () {
@@ -118,7 +128,7 @@ describe('Manage shared exception list', () => {
     // just checking number of lists shown
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
 
-    deleteExceptionListWithRuleReference();
+    deleteExceptionListWithRuleReferenceByListId(getExceptionList2().list_id);
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
