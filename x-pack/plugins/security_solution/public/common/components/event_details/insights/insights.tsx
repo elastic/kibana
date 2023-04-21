@@ -180,7 +180,7 @@ export const Insights = React.memo<Props>(
   }
 );
 
-function hasCorrectAgentTypeAndEventModule(
+export function hasCorrectAgentTypeAndEventModule(
   agentTypeField?: TimelineEventsDetailsItem,
   eventModuleField?: TimelineEventsDetailsItem
 ): boolean {
