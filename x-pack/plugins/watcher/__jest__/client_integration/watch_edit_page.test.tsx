@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { getWatch } from '../../__fixtures__';
@@ -15,6 +16,23 @@ import { WATCH, WATCH_ID } from './helpers/jest_constants';
 import { API_BASE_PATH } from '../../common/constants';
 
 const { setup } = pageHelpers.watchEditPage;
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+  };
+});
 
 describe('<WatchEditPage />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
@@ -43,14 +61,14 @@ describe('<WatchEditPage />', () => {
       });
 
       test('should populate the correct values', () => {
-        const { find, exists, component } = testBed;
+        const { find, exists } = testBed;
         const { watch } = WATCH;
-        const codeEditor = component.find('EuiCodeEditor').at(1);
+        const jsonEditorValue = testBed.find('jsonEditor').props()['data-currentvalue'];
 
         expect(exists('jsonWatchForm')).toBe(true);
         expect(find('nameInput').props().value).toBe(watch.name);
         expect(find('idInput').props().value).toBe(watch.id);
-        expect(JSON.parse(codeEditor.props().value as string)).toEqual(defaultWatch);
+        expect(JSON.parse(jsonEditorValue)).toEqual(defaultWatch);
 
         // ID should not be editable
         expect(find('idInput').props().readOnly).toEqual(true);
