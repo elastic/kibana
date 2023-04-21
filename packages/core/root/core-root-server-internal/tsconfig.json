@@ -70,6 +70,7 @@
     "@kbn/repo-packages",
     "@kbn/core-node-server",
     "@kbn/core-user-settings-server-internal",
+    "@kbn/core-user-settings-server-mocks",
   ],
   "exclude": [
     "target/**/*",

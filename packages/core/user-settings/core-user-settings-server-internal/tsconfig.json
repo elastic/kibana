@@ -12,6 +12,8 @@
     "@kbn/core-http-server",
     "@kbn/core-base-server-internal",
     "@kbn/logging",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-user-settings-server",
   ],
   "include": [
     "**/*.ts",
