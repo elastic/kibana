@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { ALERT_URL, ALERT_UUID } from '@kbn/rule-data-utils';
+import type { ALERT_URL } from '@kbn/rule-data-utils';
 import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 import type {
   BaseFields840,
   EqlBuildingBlockFields840,
   EqlShellFields840,
   NewTermsFields840,
-  WrappedFields840,
 } from '../8.4.0';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.6.0.
@@ -26,12 +25,6 @@ new schemas to the union of all alert schemas, and re-export the new schemas as 
 export type GenericAlert880 = AlertWithCommonFields800<
   BaseFields840 & { [ALERT_URL]: string | undefined }
 >;
-
-export interface WrappedFields880<T extends BaseFields840> extends WrappedFields840<T> {
-  _id: string;
-  _index: string;
-  _source: T & { [ALERT_URL]: string | undefined; [ALERT_UUID]: string };
-}
 
 export interface EqlShellFields880 extends EqlShellFields840 {
   [ALERT_URL]: string | undefined;
