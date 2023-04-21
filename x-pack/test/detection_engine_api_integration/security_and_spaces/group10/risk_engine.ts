@@ -11,8 +11,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
   deleteAllRules,
+  deleteAllSignals,
   createRule,
   waitForSignalsToBePresent,
   waitForRuleSuccess,
@@ -120,14 +120,14 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       beforeEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllSignals(es);
 
         await deleteAllRules(supertest, log);
         await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllSignals(es);
         await deleteAllRules(supertest, log);
       });
 
