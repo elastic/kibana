@@ -14,17 +14,17 @@ describe('getCasesDeepLinks', () => {
     expect(deepLinks).toEqual({
       id: 'cases',
       path: '/cases',
-      title: 'Cases',
+      title: 'CasesUI',
       deepLinks: [
         {
           id: 'cases_create',
           path: '/cases/create',
-          title: 'Create New Case',
+          title: 'Create New CaseUI',
         },
         {
           id: 'cases_configure',
           path: '/cases/configure',
-          title: 'Configure Cases',
+          title: 'Configure CasesUI',
         },
       ],
     });
@@ -35,17 +35,17 @@ describe('getCasesDeepLinks', () => {
     expect(deepLinks).toEqual({
       id: 'cases',
       path: '/test',
-      title: 'Cases',
+      title: 'CasesUI',
       deepLinks: [
         {
           id: 'cases_create',
           path: '/test/create',
-          title: 'Create New Case',
+          title: 'Create New CaseUI',
         },
         {
           id: 'cases_configure',
           path: '/test/configure',
-          title: 'Configure Cases',
+          title: 'Configure CasesUI',
         },
       ],
     });
@@ -69,19 +69,19 @@ describe('getCasesDeepLinks', () => {
     expect(deepLinks).toEqual({
       id: 'cases',
       path: '/cases',
-      title: 'Cases',
+      title: 'CasesUI',
       searchable: false,
       deepLinks: [
         {
           id: 'cases_create',
           path: '/cases/create',
-          title: 'Create New Case',
+          title: 'Create New CaseUI',
           navLinkStatus: AppNavLinkStatus.hidden,
         },
         {
           id: 'cases_configure',
           path: '/cases/configure',
-          title: 'Configure Cases',
+          title: 'Configure CasesUI',
           order: 8002,
         },
       ],
@@ -110,17 +110,17 @@ describe('getCasesDeepLinks', () => {
     expect(deepLinks).toEqual({
       id: 'cases',
       path: '/cases',
-      title: 'Cases',
+      title: 'CasesUI',
       deepLinks: [
         {
           id: 'cases_create',
           path: '/cases/create',
-          title: 'Create New Case',
+          title: 'Create New CaseUI',
         },
         {
           id: 'cases_configure',
           path: '/cases/configure',
-          title: 'Configure Cases',
+          title: 'Configure CasesUI',
         },
       ],
     });

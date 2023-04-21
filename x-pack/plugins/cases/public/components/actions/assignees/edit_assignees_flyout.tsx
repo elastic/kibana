@@ -21,13 +21,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type { Case } from '../../../../common';
+import type { CaseUI } from '../../../../common';
 import { EditAssigneesSelectable } from './edit_assignees_selectable';
 import * as i18n from './translations';
 import type { ItemsSelectionState } from '../types';
 
 interface Props {
-  selectedCases: Case[];
+  selectedCases: CaseUI[];
   onClose: () => void;
   onSaveAssignees: (args: ItemsSelectionState) => void;
 }

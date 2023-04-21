@@ -86,7 +86,7 @@ const metricsFeaturesTests: FeatureTest[] = [
     feature: 'lifespan',
     items: [
       {
-        title: 'Case created',
+        title: 'CaseUI created',
         value: '2020-02-19T23:06:33Z',
       },
       {

@@ -29,7 +29,7 @@ jest.mock('../../common/lib/kibana');
 const fetchMock = jest.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
-describe('Case Configuration API', () => {
+describe('CaseUI Configuration API', () => {
   describe('fetch connectors', () => {
     beforeEach(() => {
       fetchMock.mockClear();

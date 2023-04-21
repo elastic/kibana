@@ -119,13 +119,13 @@ export const ACTIVITY = i18n.translate('xpack.cases.caseView.activity', {
 export const EMAIL_SUBJECT = (caseTitle: string) =>
   i18n.translate('xpack.cases.caseView.emailSubject', {
     values: { caseTitle },
-    defaultMessage: 'Security Case - {caseTitle}',
+    defaultMessage: 'Security CaseUI - {caseTitle}',
   });
 
 export const EMAIL_BODY = (caseUrl: string) =>
   i18n.translate('xpack.cases.caseView.emailBody', {
     values: { caseUrl },
-    defaultMessage: 'Case reference: {caseUrl}',
+    defaultMessage: 'CaseUI reference: {caseUrl}',
   });
 
 export const CHANGED_CONNECTOR_FIELD = i18n.translate('xpack.cases.caseView.fieldChanged', {
@@ -154,7 +154,7 @@ export const DOES_NOT_EXIST_DESCRIPTION = (caseId: string) =>
   });
 
 export const DOES_NOT_EXIST_BUTTON = i18n.translate('xpack.cases.caseView.doesNotExist.button', {
-  defaultMessage: 'Back to Cases',
+  defaultMessage: 'Back to CasesUI',
 });
 
 export const ACTIVITY_TAB = i18n.translate('xpack.cases.caseView.tabs.activity', {

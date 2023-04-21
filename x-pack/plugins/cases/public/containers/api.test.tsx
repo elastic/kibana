@@ -78,7 +78,7 @@ jest.mock('../common/lib/kibana');
 const fetchMock = jest.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
-describe('Cases API', () => {
+describe('CasesUI API', () => {
   describe('deleteCases', () => {
     beforeEach(() => {
       fetchMock.mockClear();

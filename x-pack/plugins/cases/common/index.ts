@@ -39,12 +39,14 @@ export {
 
 export type {
   Case,
+  Cases,
   CasesBulkGetRequestCertainFields,
   CasesBulkGetResponseCertainFields,
 } from './api';
 
 export type {
-  Case,
+  CaseUI,
+  CasesUI,
   Ecs,
   CasesFeatures,
   CaseViewRefreshPropInterface,

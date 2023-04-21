@@ -12,14 +12,14 @@ import { EuiCommentList, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@e
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import type { OnUpdateFields } from '../case_view/types';
 import { getDescriptionUserAction } from '../user_actions/description';
 import { useUserActionsHandler } from '../user_actions/use_user_actions_handler';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface DescriptionWrapperProps {
-  data: Case;
+  data: CaseUI;
   isLoadingDescription: boolean;
   userProfiles: Map<string, UserProfileWithAvatar>;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;

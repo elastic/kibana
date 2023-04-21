@@ -22,7 +22,7 @@ import { isEmpty, noop } from 'lodash/fp';
 
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { Case, CaseConnectors } from '../../../common/ui/types';
+import type { CaseUI, CaseConnectors } from '../../../common/ui/types';
 import type { ActionConnector, CaseConnector, ConnectorTypeFields } from '../../../common/api';
 import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { ConnectorSelector } from '../connector_selector/form';
@@ -37,7 +37,7 @@ import { PushCallouts } from './push_callouts';
 import { normalizeActionConnector, getNoneConnector } from '../configure_cases/utils';
 
 export interface EditConnectorProps {
-  caseData: Case;
+  caseData: CaseUI;
   caseConnectors: CaseConnectors;
   supportedActionConnectors: ActionConnector[];
   isLoading: boolean;

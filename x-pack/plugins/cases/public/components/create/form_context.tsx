@@ -13,7 +13,7 @@ import { getNoneConnector, normalizeActionConnector } from '../configure_cases/u
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import type { CasePostRequest } from '../../../common/api';
 import { CaseSeverity, NONE_CONNECTOR_ID } from '../../../common/api';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
@@ -39,11 +39,11 @@ const initialCaseValue: FormProps = {
 
 interface Props {
   afterCaseCreated?: (
-    theCase: Case,
+    theCase: CaseUI,
     createAttachments: UseCreateAttachments['createAttachments']
   ) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
-  onSuccess?: (theCase: Case) => void;
+  onSuccess?: (theCase: CaseUI) => void;
   attachments?: CaseAttachmentsWithoutOwner;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }

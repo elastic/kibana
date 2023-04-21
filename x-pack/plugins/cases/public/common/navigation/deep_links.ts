@@ -25,7 +25,7 @@ export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
   extend?: Partial<Record<ICasesDeepLinkId, Partial<T>>>;
 }) => ({
   title: i18n.translate('xpack.cases.navigation.cases', {
-    defaultMessage: 'Cases',
+    defaultMessage: 'CasesUI',
   }),
   ...(extend[CasesDeepLinkId.cases] ?? {}),
   id: CasesDeepLinkId.cases,
@@ -33,7 +33,7 @@ export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
   deepLinks: [
     {
       title: i18n.translate('xpack.cases.navigation.create', {
-        defaultMessage: 'Create New Case',
+        defaultMessage: 'Create New CaseUI',
       }),
       ...(extend[CasesDeepLinkId.casesCreate] ?? {}),
       id: CasesDeepLinkId.casesCreate,
@@ -41,7 +41,7 @@ export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
     },
     {
       title: i18n.translate('xpack.cases.navigation.configure', {
-        defaultMessage: 'Configure Cases',
+        defaultMessage: 'Configure CasesUI',
       }),
       ...(extend[CasesDeepLinkId.casesConfigure] ?? {}),
       id: CasesDeepLinkId.casesConfigure,

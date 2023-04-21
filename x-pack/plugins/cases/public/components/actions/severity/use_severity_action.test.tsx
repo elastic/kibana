@@ -112,10 +112,10 @@ describe('useSeverityAction', () => {
   });
 
   const singleCaseTests = [
-    [CaseSeverity.LOW, 0, 'Case "Another horrible breach!!" was set to Low'],
-    [CaseSeverity.MEDIUM, 1, 'Case "Another horrible breach!!" was set to Medium'],
-    [CaseSeverity.HIGH, 2, 'Case "Another horrible breach!!" was set to High'],
-    [CaseSeverity.CRITICAL, 3, 'Case "Another horrible breach!!" was set to Critical'],
+    [CaseSeverity.LOW, 0, 'CaseUI "Another horrible breach!!" was set to Low'],
+    [CaseSeverity.MEDIUM, 1, 'CaseUI "Another horrible breach!!" was set to Medium'],
+    [CaseSeverity.HIGH, 2, 'CaseUI "Another horrible breach!!" was set to High'],
+    [CaseSeverity.CRITICAL, 3, 'CaseUI "Another horrible breach!!" was set to Critical'],
   ];
 
   it.each(singleCaseTests)(

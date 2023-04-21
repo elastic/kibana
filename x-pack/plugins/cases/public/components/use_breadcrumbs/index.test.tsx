@@ -48,13 +48,13 @@ describe('useCasesBreadcrumbs', () => {
       renderHook(() => useCasesBreadcrumbs(CasesDeepLinkId.cases), { wrapper });
       expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
         { href: '/test', onClick: expect.any(Function), text: 'Test' },
-        { text: 'Cases' },
+        { text: 'CasesUI' },
       ]);
     });
 
     it('should sets the cases title', () => {
       renderHook(() => useCasesBreadcrumbs(CasesDeepLinkId.cases), { wrapper });
-      expect(mockSetTitle).toHaveBeenCalledWith(['Cases', 'Test']);
+      expect(mockSetTitle).toHaveBeenCalledWith(['CasesUI', 'Test']);
     });
   });
 
@@ -63,14 +63,14 @@ describe('useCasesBreadcrumbs', () => {
       renderHook(() => useCasesBreadcrumbs(CasesDeepLinkId.casesCreate), { wrapper });
       expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
         { href: '/test', onClick: expect.any(Function), text: 'Test' },
-        { href: CasesDeepLinkId.cases, onClick: expect.any(Function), text: 'Cases' },
+        { href: CasesDeepLinkId.cases, onClick: expect.any(Function), text: 'CasesUI' },
         { text: 'Create' },
       ]);
     });
 
     it('should sets the cases title', () => {
       renderHook(() => useCasesBreadcrumbs(CasesDeepLinkId.casesCreate), { wrapper });
-      expect(mockSetTitle).toHaveBeenCalledWith(['Create', 'Cases', 'Test']);
+      expect(mockSetTitle).toHaveBeenCalledWith(['Create', 'CasesUI', 'Test']);
     });
   });
 
@@ -80,14 +80,14 @@ describe('useCasesBreadcrumbs', () => {
       renderHook(() => useCasesTitleBreadcrumbs(title), { wrapper });
       expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
         { href: '/test', onClick: expect.any(Function), text: 'Test' },
-        { href: CasesDeepLinkId.cases, onClick: expect.any(Function), text: 'Cases' },
+        { href: CasesDeepLinkId.cases, onClick: expect.any(Function), text: 'CasesUI' },
         { text: title },
       ]);
     });
 
     it('should sets the cases title', () => {
       renderHook(() => useCasesTitleBreadcrumbs(title), { wrapper });
-      expect(mockSetTitle).toHaveBeenCalledWith([title, 'Cases', 'Test']);
+      expect(mockSetTitle).toHaveBeenCalledWith([title, 'CasesUI', 'Test']);
     });
   });
 });

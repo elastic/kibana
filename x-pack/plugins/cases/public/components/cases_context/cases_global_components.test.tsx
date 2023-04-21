@@ -20,7 +20,7 @@ const getCreateCaseFlyoutLazyNoProviderMock = getCreateCaseFlyoutLazyNoProvider 
 const getAllCasesSelectorModalNoProviderLazyMock =
   getAllCasesSelectorModalNoProviderLazy as jest.Mock;
 
-describe('Cases context UI', () => {
+describe('CasesUI context UI', () => {
   let appMock: AppMockRenderer;
 
   beforeEach(() => {

@@ -27,13 +27,7 @@ import {
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import type {
-  Case,
-  CommentAttributes,
-  User,
-  CaseAttributes,
-  CaseStatuses,
-} from '../../../common/api';
+import type { Case, CommentAttributes, User, CaseStatuses } from '../../../common/api';
 import { caseStatuses } from '../../../common/api';
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
@@ -51,12 +45,15 @@ import {
 import type { AttachmentService } from '../attachments';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import { createCaseError } from '../../common/error';
-import type { CaseSavedObject, CaseSavedObjectAttributes } from '../../common/types/case';
+import type {
+  CaseSavedObjectAttributes,
+  CaseSavedObjectTransformed,
+  CaseTransformedAttributes,
+} from '../../common/types/case';
 import { CaseStatusSavedObject } from '../../common/types/case';
 import type {
   GetCaseIdsByAlertIdArgs,
   GetCaseIdsByAlertIdAggs,
-  FindCaseOptions,
   CasesMapWithPageInfo,
   DeleteCaseArgs,
   GetCaseArgs,
@@ -154,14 +151,14 @@ export class CasesService {
   public async findCasesGroupedByID({
     caseOptions,
   }: {
-    caseOptions: FindCaseOptions;
+    caseOptions: SavedObjectFindOptionsKueryNode;
   }): Promise<CasesMapWithPageInfo> {
     const cases = await this.findCases(caseOptions);
 
     const casesMap = cases.saved_objects.reduce((accMap, caseInfo) => {
       accMap.set(caseInfo.id, caseInfo);
       return accMap;
-    }, new Map<string, SavedObjectsFindResult<CaseAttributes>>());
+    }, new Map<string, SavedObjectsFindResult<CaseTransformedAttributes>>());
 
     const commentTotals = await this.attachmentService.getter.getCaseCommentStats({
       caseIds: Array.from(casesMap.keys()),
@@ -263,7 +260,7 @@ export class CasesService {
     }
   }
 
-  public async getCase({ id: caseId }: GetCaseArgs): Promise<CaseSavedObject> {
+  public async getCase({ id: caseId }: GetCaseArgs): Promise<CaseSavedObjectTransformed> {
     try {
       this.log.debug(`Attempting to GET case ${caseId}`);
       const caseSavedObject = await this.unsecuredSavedObjectsClient.get<CaseSavedObjectAttributes>(
@@ -279,7 +276,7 @@ export class CasesService {
 
   public async getResolveCase({
     id: caseId,
-  }: GetCaseArgs): Promise<SavedObjectsResolveResponse<CaseAttributes>> {
+  }: GetCaseArgs): Promise<SavedObjectsResolveResponse<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to resolve case ${caseId}`);
       const resolveCaseResult =
@@ -300,7 +297,7 @@ export class CasesService {
   public async getCases({
     caseIds,
     fields,
-  }: GetCasesArgs): Promise<SavedObjectsBulkResponse<CaseAttributes>> {
+  }: GetCasesArgs): Promise<SavedObjectsBulkResponse<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to GET cases ${caseIds.join(', ')}`);
       const cases = await this.unsecuredSavedObjectsClient.bulkGet<CaseSavedObjectAttributes>(
@@ -315,7 +312,7 @@ export class CasesService {
 
   public async findCases(
     options?: SavedObjectFindOptionsKueryNode
-  ): Promise<SavedObjectsFindResponse<CaseAttributes>> {
+  ): Promise<SavedObjectsFindResponse<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to find cases`);
       const cases = await this.unsecuredSavedObjectsClient.find<CaseSavedObjectAttributes>({
@@ -323,6 +320,7 @@ export class CasesService {
         ...options,
         type: CASE_SAVED_OBJECT,
       });
+
       return transformFindResponseToExternalModel(cases);
     } catch (error) {
       this.log.error(`Error on find cases: ${error}`);
@@ -496,7 +494,11 @@ export class CasesService {
     }
   }
 
-  public async postNewCase({ attributes, id, refresh }: PostCaseArgs): Promise<CaseSavedObject> {
+  public async postNewCase({
+    attributes,
+    id,
+    refresh,
+  }: PostCaseArgs): Promise<CaseSavedObjectTransformed> {
     try {
       this.log.debug(`Attempting to POST a new case`);
       const transformedAttributes = transformAttributesToESModel(attributes);
@@ -523,7 +525,7 @@ export class CasesService {
     originalCase,
     version,
     refresh,
-  }: PatchCaseArgs): Promise<SavedObjectsUpdateResponse<CaseAttributes>> {
+  }: PatchCaseArgs): Promise<SavedObjectsUpdateResponse<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
       const transformedAttributes = transformAttributesToESModel(updatedAttributes);
@@ -549,7 +551,7 @@ export class CasesService {
   public async patchCases({
     cases,
     refresh,
-  }: PatchCasesArgs): Promise<SavedObjectsBulkUpdateResponse<CaseAttributes>> {
+  }: PatchCasesArgs): Promise<SavedObjectsBulkUpdateResponse<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
 

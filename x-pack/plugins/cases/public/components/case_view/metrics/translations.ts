@@ -37,7 +37,7 @@ export const TOTAL_CONNECTORS_METRIC = i18n.translate(
 );
 
 export const CASE_CREATED = i18n.translate('xpack.cases.caseView.metrics.lifespan.caseCreated', {
-  defaultMessage: 'Case created',
+  defaultMessage: 'CaseUI created',
 });
 
 export const CASE_IN_PROGRESS_DURATION = i18n.translate(

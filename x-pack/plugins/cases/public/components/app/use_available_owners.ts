@@ -25,7 +25,7 @@ export const useAvailableCasesOwners = (
 
   return Object.entries(kibanaCapabilities).reduce(
     (availableOwners: string[], [featureId, kibanaCapability]) => {
-      if (!featureId.endsWith('Cases')) {
+      if (!featureId.endsWith('CasesUI')) {
         return availableOwners;
       }
       for (const cap of capabilities) {
@@ -46,5 +46,5 @@ const getOwnerFromFeatureID = (featureID: string) => {
     return APP_ID;
   }
 
-  return featureID.replace('Cases', '');
+  return featureID.replace('CasesUI', '');
 };

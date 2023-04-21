@@ -32,8 +32,8 @@ import { createCaseError } from '../../common/error';
 import { asArray, flattenCaseSavedObject } from '../../common/utils';
 import type { CasesClientArgs, SOWithErrors } from '../types';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
-import type { CaseSavedObject } from '../../common/types';
 import { Operations } from '../../authorization';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
 type CaseSavedObjectWithErrors = SOWithErrors<CaseAttributes>;
 
@@ -66,7 +66,7 @@ export const bulkGet = async <Field extends keyof Case = keyof Case>(
     const [validCases, soBulkGetErrors] = partition(
       cases.saved_objects,
       (caseInfo) => caseInfo.error === undefined
-    ) as [CaseSavedObject[], CaseSavedObjectWithErrors];
+    ) as [CaseSavedObjectTransformed[], CaseSavedObjectWithErrors];
 
     const { authorized: authorizedCases, unauthorized: unauthorizedCases } =
       await authorization.getAndEnsureAuthorizedEntities({
@@ -142,7 +142,7 @@ const throwErrorIfCaseIdsReachTheLimit = (ids: string[]) => {
 
 const constructErrors = (
   soBulkGetErrors: CaseSavedObjectWithErrors,
-  unauthorizedCases: CaseSavedObject[]
+  unauthorizedCases: CaseSavedObjectTransformed[]
 ): CasesBulkGetResponse['errors'] => {
   const errors: CasesBulkGetResponse['errors'] = [];
 

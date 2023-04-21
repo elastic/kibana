@@ -25,7 +25,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CommentType } from '../../../common/api';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import type { EuiMarkdownEditorRef } from '../markdown_editor';
 import { MarkdownEditorForm } from '../markdown_editor';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
@@ -57,7 +57,7 @@ export interface AddCommentProps {
   id: string;
   caseId: string;
   onCommentSaving?: () => void;
-  onCommentPosted: (newCase: Case) => void;
+  onCommentPosted: (newCase: CaseUI) => void;
   showLoading?: boolean;
   statusActionButton: JSX.Element | null;
 }

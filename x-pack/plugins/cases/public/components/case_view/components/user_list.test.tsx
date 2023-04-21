@@ -23,7 +23,7 @@ describe('UserList ', () => {
   const caseLink = 'https://example.com/cases/test';
   const user = {
     email: 'case_all@elastic.co',
-    fullName: 'Cases',
+    fullName: 'CasesUI',
     username: 'cases_all',
   };
 
@@ -66,7 +66,7 @@ describe('UserList ', () => {
         headline={i18n.REPORTER}
         users={[
           {
-            user: { ...user, full_name: 'Cases' },
+            user: { ...user, full_name: 'CasesUI' },
           },
           {
             user: { ...user, username: 'elastic', email: 'elastic@elastic.co', full_name: null },
@@ -80,7 +80,7 @@ describe('UserList ', () => {
 
     const userProfiles = result.getAllByTestId('user-profile-username');
 
-    expect(userProfiles[0].textContent).toBe('Cases');
+    expect(userProfiles[0].textContent).toBe('CasesUI');
     expect(userProfiles[1].textContent).toBe('elastic@elastic.co');
     expect(userProfiles[2].textContent).toBe('test');
   });

@@ -38,7 +38,7 @@ export const ADD_NEW_CONNECTOR = i18n.translate('xpack.cases.configureCases.addN
 export const CASE_CLOSURE_OPTIONS_TITLE = i18n.translate(
   'xpack.cases.configureCases.caseClosureOptionsTitle',
   {
-    defaultMessage: 'Case closures',
+    defaultMessage: 'CaseUI closures',
   }
 );
 
@@ -53,7 +53,7 @@ export const CASE_CLOSURE_OPTIONS_DESC = i18n.translate(
 export const CASE_CLOSURE_OPTIONS_LABEL = i18n.translate(
   'xpack.cases.configureCases.caseClosureOptionsLabel',
   {
-    defaultMessage: 'Case closure options',
+    defaultMessage: 'CaseUI closure options',
   }
 );
 
@@ -81,7 +81,7 @@ export const FIELD_MAPPING_DESC = (thirdPartyName: string): string =>
   i18n.translate('xpack.cases.configureCases.fieldMappingDesc', {
     values: { thirdPartyName },
     defaultMessage:
-      'Map Case fields to { thirdPartyName } fields when pushing data to { thirdPartyName }. Field mappings require an established connection to { thirdPartyName }.',
+      'Map CaseUI fields to { thirdPartyName } fields when pushing data to { thirdPartyName }. Field mappings require an established connection to { thirdPartyName }.',
   });
 
 export const FIELD_MAPPING_DESC_ERR = (thirdPartyName: string): string =>
@@ -157,6 +157,6 @@ export const CASES_WEBHOOK_MAPPINGS = i18n.translate(
   'xpack.cases.configureCases.casesWebhookMappings',
   {
     defaultMessage:
-      'Webhook - Case Management field mappings are configured in the connector settings in the third-party REST API JSON.',
+      'Webhook - CaseUI Management field mappings are configured in the connector settings in the third-party REST API JSON.',
   }
 );

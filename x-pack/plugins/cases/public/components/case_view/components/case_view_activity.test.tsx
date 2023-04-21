@@ -21,7 +21,7 @@ import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
 import { CaseViewActivity } from './case_view_activity';
 import { ConnectorTypes } from '../../../../common/api/connectors';
-import type { Case } from '../../../../common';
+import type { CaseUI } from '../../../../common';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseViewProps } from '../types';
 import { useFindCaseUserActions } from '../../../containers/use_find_case_user_actions';
@@ -54,7 +54,7 @@ jest.mock('../../../containers/use_get_case_users');
 
 (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
 
-const caseData: Case = {
+const caseData: CaseUI = {
   ...basicCase,
   comments: [...basicCase.comments, alertComment],
   connector: {
@@ -122,7 +122,7 @@ const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
 // FLAKY: https://github.com/elastic/kibana/issues/151979
 // FLAKY: https://github.com/elastic/kibana/issues/151980
 // FLAKY: https://github.com/elastic/kibana/issues/151981
-describe.skip('Case View Page activity tab', () => {
+describe.skip('CaseUI View Page activity tab', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
 
   beforeAll(() => {
@@ -372,7 +372,7 @@ describe.skip('Case View Page activity tab', () => {
     });
   });
 
-  describe('Case users', () => {
+  describe('CaseUI users', () => {
     describe('Participants', () => {
       it('should render the participants correctly', async () => {
         appMockRender = createAppMockRenderer();

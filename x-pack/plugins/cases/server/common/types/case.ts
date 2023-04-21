@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { CaseAttributes } from '../../../common/api';
 import type { User, UserProfile } from './user';
 
 export enum CaseSeveritySavedObject {
@@ -21,7 +22,7 @@ export enum CaseStatusSavedObject {
   CLOSED = 20,
 }
 
-interface CaseExternalServiceSavedObject {
+export interface CaseExternalServiceSavedObject {
   connector_name: string;
   external_id: string;
   external_title: string;
@@ -30,12 +31,12 @@ interface CaseExternalServiceSavedObject {
   pushed_by: User;
 }
 
-type ConnectorFieldsSavedObject = Array<{
+export type ConnectorFieldsSavedObject = Array<{
   key: string;
   value: unknown;
 }>;
 
-interface ConnectorSavedObject {
+export interface ConnectorSavedObject {
   name: string;
   type: string;
   fields: ConnectorFieldsSavedObject | null;
@@ -45,8 +46,8 @@ export interface CaseSavedObjectAttributes {
   assignees: UserProfile[];
   closed_at: string | null;
   closed_by: User | null;
-  created_at: string | null;
-  created_by: User | null;
+  created_at: string;
+  created_by: User;
   connector: ConnectorSavedObject;
   description: string;
   duration: number | null;
@@ -63,4 +64,7 @@ export interface CaseSavedObjectAttributes {
   updated_by: User | null;
 }
 
+export type CaseTransformedAttributes = CaseAttributes;
+
 export type CaseSavedObject = SavedObject<CaseSavedObjectAttributes>;
+export type CaseSavedObjectTransformed = SavedObject<CaseTransformedAttributes>;

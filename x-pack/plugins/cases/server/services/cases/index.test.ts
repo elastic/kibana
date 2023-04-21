@@ -41,11 +41,13 @@ import {
   basicCaseFields,
   createSOFindResponse,
 } from '../test_utils';
-import type { ESCaseAttributes } from './types';
-import { ESCaseSeverity, ESCaseStatus } from './types';
 import { AttachmentService } from '../attachments';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import type { CaseSavedObject } from '../../common/types';
+import type {
+  CaseSavedObjectTransformed,
+  CaseSavedObjectAttributes,
+} from '../../common/types/case';
+import { CaseSeveritySavedObject, CaseStatusSavedObject } from '../../common/types/case';
 
 const createUpdateSOResponse = ({
   connector,
@@ -55,15 +57,15 @@ const createUpdateSOResponse = ({
 }: {
   connector?: ESCaseConnectorWithId;
   externalService?: CaseFullExternalService;
-  severity?: ESCaseSeverity;
-  status?: ESCaseStatus;
-} = {}): SavedObjectsUpdateResponse<ESCaseAttributes> => {
+  severity?: CaseSeveritySavedObject;
+  status?: CaseStatusSavedObject;
+} = {}): SavedObjectsUpdateResponse<CaseSavedObjectAttributes> => {
   const references: SavedObjectReference[] = createSavedObjectReferences({
     connector,
     externalService,
   });
 
-  let attributes: Partial<ESCaseAttributes> = { total_alerts: -1, total_comments: -1 };
+  let attributes: Partial<CaseSavedObjectAttributes> = { total_alerts: -1, total_comments: -1 };
 
   if (connector) {
     const { id, ...restConnector } = connector;
@@ -95,9 +97,9 @@ const createFindSO = (
   params: {
     connector?: ESCaseConnectorWithId;
     externalService?: CaseFullExternalService;
-    overrides?: Partial<ESCaseAttributes>;
+    overrides?: Partial<CaseSavedObjectAttributes>;
   } = {}
-): SavedObjectsFindResult<ESCaseAttributes> => ({
+): SavedObjectsFindResult<CaseSavedObjectAttributes> => ({
   ...createCaseSavedObjectResponse(params),
   score: 0,
 });
@@ -174,7 +176,7 @@ describe('CasesService', () => {
     describe('patch', () => {
       it('includes the passed in fields', async () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(
-          {} as SavedObjectsUpdateResponse<ESCaseAttributes>
+          {} as SavedObjectsUpdateResponse<CaseSavedObjectAttributes>
         );
 
         await service.patchCase({
@@ -185,14 +187,15 @@ describe('CasesService', () => {
             severity: CaseSeverity.CRITICAL,
             status: CaseStatuses['in-progress'],
           }),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         const {
           connector: ignoreConnector,
           external_service: ignoreExternalService,
           ...restUpdateAttributes
-        } = unsecuredSavedObjectsClient.update.mock.calls[0][2] as Partial<ESCaseAttributes>;
+        } = unsecuredSavedObjectsClient.update.mock
+          .calls[0][2] as Partial<CaseSavedObjectAttributes>;
         expect(restUpdateAttributes).toMatchInlineSnapshot(`
           Object {
             "assignees": Array [],
@@ -228,7 +231,7 @@ describe('CasesService', () => {
 
       it('transforms the connector.fields to an array of key/value pairs', async () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(
-          {} as SavedObjectsUpdateResponse<ESCaseAttributes>
+          {} as SavedObjectsUpdateResponse<CaseSavedObjectAttributes>
         );
 
         await service.patchCase({
@@ -237,11 +240,11 @@ describe('CasesService', () => {
             connector: createJiraConnector(),
             externalService: createExternalService(),
           }),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         const { connector } = unsecuredSavedObjectsClient.update.mock
-          .calls[0][2] as Partial<ESCaseAttributes>;
+          .calls[0][2] as Partial<CaseSavedObjectAttributes>;
         expect(connector?.fields).toMatchInlineSnapshot(`
           Array [
             Object {
@@ -262,7 +265,7 @@ describe('CasesService', () => {
 
       it('preserves the connector fields but does not have the id', async () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(
-          {} as SavedObjectsUpdateResponse<ESCaseAttributes>
+          {} as SavedObjectsUpdateResponse<CaseSavedObjectAttributes>
         );
 
         await service.patchCase({
@@ -271,11 +274,11 @@ describe('CasesService', () => {
             connector: createJiraConnector(),
             externalService: createExternalService(),
           }),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         const { connector } = unsecuredSavedObjectsClient.update.mock
-          .calls[0][2] as Partial<ESCaseAttributes>;
+          .calls[0][2] as Partial<CaseSavedObjectAttributes>;
         expect(connector).toMatchInlineSnapshot(`
           Object {
             "fields": Array [
@@ -300,17 +303,17 @@ describe('CasesService', () => {
 
       it('removes the connector id and adds it to the references', async () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(
-          {} as SavedObjectsUpdateResponse<ESCaseAttributes>
+          {} as SavedObjectsUpdateResponse<CaseSavedObjectAttributes>
         );
 
         await service.patchCase({
           caseId: '1',
           updatedAttributes: createCaseUpdateParams({ connector: createJiraConnector() }),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         const updateAttributes = unsecuredSavedObjectsClient.update.mock
-          .calls[0][2] as Partial<ESCaseAttributes>;
+          .calls[0][2] as Partial<CaseSavedObjectAttributes>;
         expect(updateAttributes.connector).not.toHaveProperty('id');
 
         const updateOptions = unsecuredSavedObjectsClient.update.mock
@@ -328,7 +331,7 @@ describe('CasesService', () => {
 
       it('removes the external_service connector_id and adds it to the references', async () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(
-          {} as SavedObjectsUpdateResponse<ESCaseAttributes>
+          {} as SavedObjectsUpdateResponse<CaseSavedObjectAttributes>
         );
 
         await service.patchCase({
@@ -337,11 +340,11 @@ describe('CasesService', () => {
             connector: getNoneCaseConnector(),
             externalService: createExternalService(),
           }),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         const updateAttributes = unsecuredSavedObjectsClient.update.mock
-          .calls[0][2] as Partial<ESCaseAttributes>;
+          .calls[0][2] as Partial<CaseSavedObjectAttributes>;
         expect(updateAttributes.external_service).not.toHaveProperty('connector_id');
 
         const updateOptions = unsecuredSavedObjectsClient.update.mock
@@ -359,7 +362,7 @@ describe('CasesService', () => {
 
       it('builds references for external service connector id, case connector id, and includes the existing references', async () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(
-          {} as SavedObjectsUpdateResponse<ESCaseAttributes>
+          {} as SavedObjectsUpdateResponse<CaseSavedObjectAttributes>
         );
 
         await service.patchCase({
@@ -370,7 +373,7 @@ describe('CasesService', () => {
           }),
           originalCase: {
             references: [{ id: 'a', name: 'awesome', type: 'hello' }],
-          } as CaseSavedObject,
+          } as CaseSavedObjectTransformed,
         });
 
         const updateOptions = unsecuredSavedObjectsClient.update.mock
@@ -398,7 +401,7 @@ describe('CasesService', () => {
 
       it('builds references for connector_id and preserves the existing connector.id reference', async () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(
-          {} as SavedObjectsUpdateResponse<ESCaseAttributes>
+          {} as SavedObjectsUpdateResponse<CaseSavedObjectAttributes>
         );
 
         await service.patchCase({
@@ -408,7 +411,7 @@ describe('CasesService', () => {
             references: [
               { id: '1', name: CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
             ],
-          } as CaseSavedObject,
+          } as CaseSavedObjectTransformed,
         });
 
         const updateOptions = unsecuredSavedObjectsClient.update.mock
@@ -431,7 +434,7 @@ describe('CasesService', () => {
 
       it('preserves the external_service fields except for the connector_id', async () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(
-          {} as SavedObjectsUpdateResponse<ESCaseAttributes>
+          {} as SavedObjectsUpdateResponse<CaseSavedObjectAttributes>
         );
 
         await service.patchCase({
@@ -440,11 +443,11 @@ describe('CasesService', () => {
             connector: getNoneCaseConnector(),
             externalService: createExternalService(),
           }),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         const updateAttributes = unsecuredSavedObjectsClient.update.mock
-          .calls[0][2] as Partial<ESCaseAttributes>;
+          .calls[0][2] as Partial<CaseSavedObjectAttributes>;
         expect(updateAttributes.external_service).toMatchInlineSnapshot(`
           Object {
             "connector_name": ".jira",
@@ -463,13 +466,13 @@ describe('CasesService', () => {
 
       it('creates an empty updatedAttributes when there is no connector or external_service as input', async () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(
-          {} as SavedObjectsUpdateResponse<ESCaseAttributes>
+          {} as SavedObjectsUpdateResponse<CaseSavedObjectAttributes>
         );
 
         await service.patchCase({
           caseId: '1',
           updatedAttributes: createCaseUpdateParams({}),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(
@@ -482,13 +485,13 @@ describe('CasesService', () => {
 
       it('creates a updatedAttributes field with the none connector', async () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(
-          {} as SavedObjectsUpdateResponse<ESCaseAttributes>
+          {} as SavedObjectsUpdateResponse<CaseSavedObjectAttributes>
         );
 
         await service.patchCase({
           caseId: '1',
           updatedAttributes: createCaseUpdateParams({ connector: getNoneCaseConnector() }),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -503,49 +506,49 @@ describe('CasesService', () => {
       });
 
       it.each([
-        [CaseSeverity.LOW, ESCaseSeverity.LOW],
-        [CaseSeverity.MEDIUM, ESCaseSeverity.MEDIUM],
-        [CaseSeverity.HIGH, ESCaseSeverity.HIGH],
-        [CaseSeverity.CRITICAL, ESCaseSeverity.CRITICAL],
+        [CaseSeverity.LOW, CaseSeveritySavedObject.LOW],
+        [CaseSeverity.MEDIUM, CaseSeveritySavedObject.MEDIUM],
+        [CaseSeverity.HIGH, CaseSeveritySavedObject.HIGH],
+        [CaseSeverity.CRITICAL, CaseSeveritySavedObject.CRITICAL],
       ])(
         'properly converts "%s" severity to corresponding ES value on updating SO',
         async (patchParamsSeverity, expectedSeverity) => {
           unsecuredSavedObjectsClient.update.mockResolvedValue(
-            {} as SavedObjectsUpdateResponse<ESCaseAttributes>
+            {} as SavedObjectsUpdateResponse<CaseSavedObjectAttributes>
           );
 
           await service.patchCase({
             caseId: '1',
             updatedAttributes: createCaseUpdateParams({ severity: patchParamsSeverity }),
-            originalCase: {} as CaseSavedObject,
+            originalCase: {} as CaseSavedObjectTransformed,
           });
 
           const patchAttributes = unsecuredSavedObjectsClient.update.mock
-            .calls[0][2] as ESCaseAttributes;
+            .calls[0][2] as CaseSavedObjectAttributes;
 
           expect(patchAttributes.severity).toEqual(expectedSeverity);
         }
       );
 
       it.each([
-        [CaseStatuses.open, ESCaseStatus.OPEN],
-        [CaseStatuses['in-progress'], ESCaseStatus.IN_PROGRESS],
-        [CaseStatuses.closed, ESCaseStatus.CLOSED],
+        [CaseStatuses.open, CaseStatusSavedObject.OPEN],
+        [CaseStatuses['in-progress'], CaseStatusSavedObject.IN_PROGRESS],
+        [CaseStatuses.closed, CaseStatusSavedObject.CLOSED],
       ])(
         'properly converts "%s" status to corresponding ES value on updating SO',
         async (patchParamsStatus, expectedStatus) => {
           unsecuredSavedObjectsClient.update.mockResolvedValue(
-            {} as SavedObjectsUpdateResponse<ESCaseAttributes>
+            {} as SavedObjectsUpdateResponse<CaseSavedObjectAttributes>
           );
 
           await service.patchCase({
             caseId: '1',
             updatedAttributes: createCaseUpdateParams({ status: patchParamsStatus }),
-            originalCase: {} as CaseSavedObject,
+            originalCase: {} as CaseSavedObjectTransformed,
           });
 
           const patchAttributes = unsecuredSavedObjectsClient.update.mock
-            .calls[0][2] as ESCaseAttributes;
+            .calls[0][2] as CaseSavedObjectAttributes;
 
           expect(patchAttributes.status).toEqual(expectedStatus);
         }
@@ -571,7 +574,7 @@ describe('CasesService', () => {
                 connector: getNoneCaseConnector(),
                 severity: CaseSeverity.LOW,
               }),
-              originalCase: {} as CaseSavedObject,
+              originalCase: {} as CaseSavedObjectTransformed,
             },
             {
               caseId: '2',
@@ -579,7 +582,7 @@ describe('CasesService', () => {
                 connector: getNoneCaseConnector(),
                 severity: CaseSeverity.MEDIUM,
               }),
-              originalCase: {} as CaseSavedObject,
+              originalCase: {} as CaseSavedObjectTransformed,
             },
             {
               caseId: '3',
@@ -587,7 +590,7 @@ describe('CasesService', () => {
                 connector: getNoneCaseConnector(),
                 severity: CaseSeverity.HIGH,
               }),
-              originalCase: {} as CaseSavedObject,
+              originalCase: {} as CaseSavedObjectTransformed,
             },
             {
               caseId: '4',
@@ -595,18 +598,18 @@ describe('CasesService', () => {
                 connector: getNoneCaseConnector(),
                 severity: CaseSeverity.CRITICAL,
               }),
-              originalCase: {} as CaseSavedObject,
+              originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
         });
 
         const patchResults = unsecuredSavedObjectsClient.bulkUpdate.mock
-          .calls[0][0] as unknown as Array<SavedObject<ESCaseAttributes>>;
+          .calls[0][0] as unknown as Array<SavedObject<CaseSavedObjectAttributes>>;
 
-        expect(patchResults[0].attributes.severity).toEqual(ESCaseSeverity.LOW);
-        expect(patchResults[1].attributes.severity).toEqual(ESCaseSeverity.MEDIUM);
-        expect(patchResults[2].attributes.severity).toEqual(ESCaseSeverity.HIGH);
-        expect(patchResults[3].attributes.severity).toEqual(ESCaseSeverity.CRITICAL);
+        expect(patchResults[0].attributes.severity).toEqual(CaseSeveritySavedObject.LOW);
+        expect(patchResults[1].attributes.severity).toEqual(CaseSeveritySavedObject.MEDIUM);
+        expect(patchResults[2].attributes.severity).toEqual(CaseSeveritySavedObject.HIGH);
+        expect(patchResults[3].attributes.severity).toEqual(CaseSeveritySavedObject.CRITICAL);
       });
 
       it('properly converts status to corresponding ES value on bulk updating SO', async () => {
@@ -626,7 +629,7 @@ describe('CasesService', () => {
                 connector: getNoneCaseConnector(),
                 status: CaseStatuses.open,
               }),
-              originalCase: {} as CaseSavedObject,
+              originalCase: {} as CaseSavedObjectTransformed,
             },
             {
               caseId: '2',
@@ -634,7 +637,7 @@ describe('CasesService', () => {
                 connector: getNoneCaseConnector(),
                 status: CaseStatuses['in-progress'],
               }),
-              originalCase: {} as CaseSavedObject,
+              originalCase: {} as CaseSavedObjectTransformed,
             },
             {
               caseId: '3',
@@ -642,23 +645,25 @@ describe('CasesService', () => {
                 connector: getNoneCaseConnector(),
                 status: CaseStatuses.closed,
               }),
-              originalCase: {} as CaseSavedObject,
+              originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
         });
 
         const patchResults = unsecuredSavedObjectsClient.bulkUpdate.mock
-          .calls[0][0] as unknown as Array<SavedObject<ESCaseAttributes>>;
+          .calls[0][0] as unknown as Array<SavedObject<CaseSavedObjectAttributes>>;
 
-        expect(patchResults[0].attributes.status).toEqual(ESCaseStatus.OPEN);
-        expect(patchResults[1].attributes.status).toEqual(ESCaseStatus.IN_PROGRESS);
-        expect(patchResults[2].attributes.status).toEqual(ESCaseStatus.CLOSED);
+        expect(patchResults[0].attributes.status).toEqual(CaseStatusSavedObject.OPEN);
+        expect(patchResults[1].attributes.status).toEqual(CaseStatusSavedObject.IN_PROGRESS);
+        expect(patchResults[2].attributes.status).toEqual(CaseStatusSavedObject.CLOSED);
       });
     });
 
     describe('post', () => {
       it('creates a null external_service field when the attribute was null in the creation parameters', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue({} as SavedObject<ESCaseAttributes>);
+        unsecuredSavedObjectsClient.create.mockResolvedValue(
+          {} as SavedObject<CaseSavedObjectAttributes>
+        );
 
         await service.postNewCase({
           attributes: createCasePostParams({ connector: createJiraConnector() }),
@@ -671,7 +676,9 @@ describe('CasesService', () => {
       });
 
       it('includes the creation attributes excluding the connector.id and connector_id', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue({} as SavedObject<ESCaseAttributes>);
+        unsecuredSavedObjectsClient.create.mockResolvedValue(
+          {} as SavedObject<CaseSavedObjectAttributes>
+        );
 
         await service.postNewCase({
           attributes: createCasePostParams({
@@ -682,7 +689,7 @@ describe('CasesService', () => {
         });
 
         const creationAttributes = unsecuredSavedObjectsClient.create.mock
-          .calls[0][1] as ESCaseAttributes;
+          .calls[0][1] as CaseSavedObjectAttributes;
         expect(creationAttributes.connector).not.toHaveProperty('id');
         expect(creationAttributes.external_service).not.toHaveProperty('connector_id');
         expect(creationAttributes).toMatchInlineSnapshot(`
@@ -769,7 +776,9 @@ describe('CasesService', () => {
       });
 
       it('includes default values for total_alerts and total_comments', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue({} as SavedObject<ESCaseAttributes>);
+        unsecuredSavedObjectsClient.create.mockResolvedValue(
+          {} as SavedObject<CaseSavedObjectAttributes>
+        );
 
         await service.postNewCase({
           attributes: createCasePostParams({
@@ -779,14 +788,16 @@ describe('CasesService', () => {
         });
 
         const postAttributes = unsecuredSavedObjectsClient.create.mock
-          .calls[0][1] as ESCaseAttributes;
+          .calls[0][1] as CaseSavedObjectAttributes;
 
         expect(postAttributes.total_alerts).toEqual(-1);
         expect(postAttributes.total_comments).toEqual(-1);
       });
 
       it('moves the connector.id and connector_id to the references', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue({} as SavedObject<ESCaseAttributes>);
+        unsecuredSavedObjectsClient.create.mockResolvedValue(
+          {} as SavedObject<CaseSavedObjectAttributes>
+        );
 
         await service.postNewCase({
           attributes: createCasePostParams({
@@ -815,7 +826,9 @@ describe('CasesService', () => {
       });
 
       it('sets fields to an empty array when it is not included with the connector', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue({} as SavedObject<ESCaseAttributes>);
+        unsecuredSavedObjectsClient.create.mockResolvedValue(
+          {} as SavedObject<CaseSavedObjectAttributes>
+        );
 
         await service.postNewCase({
           attributes: createCasePostParams({
@@ -831,7 +844,9 @@ describe('CasesService', () => {
       });
 
       it('does not create a reference for a none connector', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue({} as SavedObject<ESCaseAttributes>);
+        unsecuredSavedObjectsClient.create.mockResolvedValue(
+          {} as SavedObject<CaseSavedObjectAttributes>
+        );
 
         await service.postNewCase({
           attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
@@ -844,7 +859,9 @@ describe('CasesService', () => {
       });
 
       it('does not create a reference for an external_service field that is null', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue({} as SavedObject<ESCaseAttributes>);
+        unsecuredSavedObjectsClient.create.mockResolvedValue(
+          {} as SavedObject<CaseSavedObjectAttributes>
+        );
 
         await service.postNewCase({
           attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
@@ -857,14 +874,16 @@ describe('CasesService', () => {
       });
 
       it.each([
-        [CaseSeverity.LOW, ESCaseSeverity.LOW],
-        [CaseSeverity.MEDIUM, ESCaseSeverity.MEDIUM],
-        [CaseSeverity.HIGH, ESCaseSeverity.HIGH],
-        [CaseSeverity.CRITICAL, ESCaseSeverity.CRITICAL],
+        [CaseSeverity.LOW, CaseSeveritySavedObject.LOW],
+        [CaseSeverity.MEDIUM, CaseSeveritySavedObject.MEDIUM],
+        [CaseSeverity.HIGH, CaseSeveritySavedObject.HIGH],
+        [CaseSeverity.CRITICAL, CaseSeveritySavedObject.CRITICAL],
       ])(
         'properly converts "%s" severity to corresponding ES value on creating SO',
         async (postParamsSeverity, expectedSeverity) => {
-          unsecuredSavedObjectsClient.create.mockResolvedValue({} as SavedObject<ESCaseAttributes>);
+          unsecuredSavedObjectsClient.create.mockResolvedValue(
+            {} as SavedObject<CaseSavedObjectAttributes>
+          );
 
           await service.postNewCase({
             attributes: createCasePostParams({
@@ -875,19 +894,21 @@ describe('CasesService', () => {
           });
 
           const postAttributes = unsecuredSavedObjectsClient.create.mock
-            .calls[0][1] as ESCaseAttributes;
+            .calls[0][1] as CaseSavedObjectAttributes;
           expect(postAttributes.severity).toEqual(expectedSeverity);
         }
       );
 
       it.each([
-        [CaseStatuses.open, ESCaseStatus.OPEN],
-        [CaseStatuses['in-progress'], ESCaseStatus.IN_PROGRESS],
-        [CaseStatuses.closed, ESCaseStatus.CLOSED],
+        [CaseStatuses.open, CaseStatusSavedObject.OPEN],
+        [CaseStatuses['in-progress'], CaseStatusSavedObject.IN_PROGRESS],
+        [CaseStatuses.closed, CaseStatusSavedObject.CLOSED],
       ])(
         'properly converts "%s" status to corresponding ES value on creating SO',
         async (postParamsStatus, expectedStatus) => {
-          unsecuredSavedObjectsClient.create.mockResolvedValue({} as SavedObject<ESCaseAttributes>);
+          unsecuredSavedObjectsClient.create.mockResolvedValue(
+            {} as SavedObject<CaseSavedObjectAttributes>
+          );
 
           await service.postNewCase({
             attributes: createCasePostParams({
@@ -898,7 +919,7 @@ describe('CasesService', () => {
           });
 
           const postAttributes = unsecuredSavedObjectsClient.create.mock
-            .calls[0][1] as ESCaseAttributes;
+            .calls[0][1] as CaseSavedObjectAttributes;
           expect(postAttributes.status).toEqual(expectedStatus);
         }
       );
@@ -929,7 +950,7 @@ describe('CasesService', () => {
                 connector: createJiraConnector(),
                 externalService: createExternalService(),
               }),
-              originalCase: {} as CaseSavedObject,
+              originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
         });
@@ -970,10 +991,16 @@ describe('CasesService', () => {
       it('properly converts the severity field to the corresponding external value in the bulkPatch response', async () => {
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
-            createCaseSavedObjectResponse({ overrides: { severity: ESCaseSeverity.LOW } }),
-            createCaseSavedObjectResponse({ overrides: { severity: ESCaseSeverity.MEDIUM } }),
-            createCaseSavedObjectResponse({ overrides: { severity: ESCaseSeverity.HIGH } }),
-            createCaseSavedObjectResponse({ overrides: { severity: ESCaseSeverity.CRITICAL } }),
+            createCaseSavedObjectResponse({ overrides: { severity: CaseSeveritySavedObject.LOW } }),
+            createCaseSavedObjectResponse({
+              overrides: { severity: CaseSeveritySavedObject.MEDIUM },
+            }),
+            createCaseSavedObjectResponse({
+              overrides: { severity: CaseSeveritySavedObject.HIGH },
+            }),
+            createCaseSavedObjectResponse({
+              overrides: { severity: CaseSeveritySavedObject.CRITICAL },
+            }),
           ],
         });
 
@@ -982,7 +1009,7 @@ describe('CasesService', () => {
             {
               caseId: '1',
               updatedAttributes: createCasePostParams({ connector: getNoneCaseConnector() }),
-              originalCase: {} as CaseSavedObject,
+              originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
         });
@@ -995,9 +1022,11 @@ describe('CasesService', () => {
       it('properly converts the status field to the corresponding external value in the bulkPatch response', async () => {
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
-            createCaseSavedObjectResponse({ overrides: { status: ESCaseStatus.OPEN } }),
-            createCaseSavedObjectResponse({ overrides: { status: ESCaseStatus.IN_PROGRESS } }),
-            createCaseSavedObjectResponse({ overrides: { status: ESCaseStatus.CLOSED } }),
+            createCaseSavedObjectResponse({ overrides: { status: CaseStatusSavedObject.OPEN } }),
+            createCaseSavedObjectResponse({
+              overrides: { status: CaseStatusSavedObject.IN_PROGRESS },
+            }),
+            createCaseSavedObjectResponse({ overrides: { status: CaseStatusSavedObject.CLOSED } }),
           ],
         });
 
@@ -1006,7 +1035,7 @@ describe('CasesService', () => {
             {
               caseId: '1',
               updatedAttributes: createCasePostParams({ connector: getNoneCaseConnector() }),
-              originalCase: {} as CaseSavedObject,
+              originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
         });
@@ -1029,7 +1058,7 @@ describe('CasesService', () => {
             {
               caseId: '1',
               updatedAttributes: createCasePostParams({ connector: getNoneCaseConnector() }),
-              originalCase: {} as CaseSavedObject,
+              originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
         });
@@ -1052,7 +1081,7 @@ describe('CasesService', () => {
         const res = await service.patchCase({
           caseId: '1',
           updatedAttributes: createCaseUpdateParams({}),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         expect(res.attributes).toMatchInlineSnapshot(`
@@ -1076,7 +1105,7 @@ describe('CasesService', () => {
         const res = await service.patchCase({
           caseId: '1',
           updatedAttributes: createCaseUpdateParams({}),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         expect(res.attributes).toMatchInlineSnapshot(`
@@ -1093,7 +1122,7 @@ describe('CasesService', () => {
         const res = await service.patchCase({
           caseId: '1',
           updatedAttributes: createCaseUpdateParams({}),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         expect(res.attributes).toMatchInlineSnapshot(`Object {}`);
@@ -1102,13 +1131,13 @@ describe('CasesService', () => {
 
       it('returns an undefined connector if it is not returned by the update', async () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(
-          {} as SavedObjectsUpdateResponse<ESCaseAttributes>
+          {} as SavedObjectsUpdateResponse<CaseSavedObjectAttributes>
         );
 
         const res = await service.patchCase({
           caseId: '1',
           updatedAttributes: createCaseUpdateParams({}),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         expect(res).toMatchInlineSnapshot(`
@@ -1120,7 +1149,7 @@ describe('CasesService', () => {
 
       it('returns the default none connector when it cannot find the reference', async () => {
         const { name, type, fields } = createESJiraConnector();
-        const returnValue: SavedObjectsUpdateResponse<ESCaseAttributes> = {
+        const returnValue: SavedObjectsUpdateResponse<CaseSavedObjectAttributes> = {
           type: CASE_SAVED_OBJECT,
           id: '1',
           attributes: {
@@ -1139,7 +1168,7 @@ describe('CasesService', () => {
         const res = await service.patchCase({
           caseId: '1',
           updatedAttributes: createCaseUpdateParams({}),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         expect(res.attributes.connector).toMatchInlineSnapshot(`
@@ -1154,7 +1183,7 @@ describe('CasesService', () => {
 
       it('returns none external service connector when it cannot find the reference', async () => {
         const { connector_id: id, ...restExternalConnector } = createExternalService()!;
-        const returnValue: SavedObjectsUpdateResponse<ESCaseAttributes> = {
+        const returnValue: SavedObjectsUpdateResponse<CaseSavedObjectAttributes> = {
           type: CASE_SAVED_OBJECT,
           id: '1',
           attributes: {
@@ -1169,7 +1198,7 @@ describe('CasesService', () => {
         const res = await service.patchCase({
           caseId: '1',
           updatedAttributes: createCaseUpdateParams({}),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         expect(res.attributes.external_service?.connector_id).toBe('none');
@@ -1177,7 +1206,7 @@ describe('CasesService', () => {
 
       it('returns the saved object fields when it cannot find the reference for connector_id', async () => {
         const { connector_id: id, ...restExternalConnector } = createExternalService()!;
-        const returnValue: SavedObjectsUpdateResponse<ESCaseAttributes> = {
+        const returnValue: SavedObjectsUpdateResponse<CaseSavedObjectAttributes> = {
           type: CASE_SAVED_OBJECT,
           id: '1',
           attributes: {
@@ -1192,7 +1221,7 @@ describe('CasesService', () => {
         const res = await service.patchCase({
           caseId: '1',
           updatedAttributes: createCaseUpdateParams({}),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         expect(res).toMatchInlineSnapshot(`
@@ -1228,7 +1257,7 @@ describe('CasesService', () => {
         const res = await service.patchCase({
           caseId: '1',
           updatedAttributes: createCaseUpdateParams({}),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         expect(res.attributes.connector).toMatchInlineSnapshot(`
@@ -1254,7 +1283,7 @@ describe('CasesService', () => {
         const res = await service.patchCase({
           caseId: '1',
           updatedAttributes: createCaseUpdateParams({}),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         expect(res.attributes.external_service).toMatchInlineSnapshot(`
@@ -1276,10 +1305,10 @@ describe('CasesService', () => {
       });
 
       it.each([
-        [ESCaseSeverity.LOW, CaseSeverity.LOW],
-        [ESCaseSeverity.MEDIUM, CaseSeverity.MEDIUM],
-        [ESCaseSeverity.HIGH, CaseSeverity.HIGH],
-        [ESCaseSeverity.CRITICAL, CaseSeverity.CRITICAL],
+        [CaseSeveritySavedObject.LOW, CaseSeverity.LOW],
+        [CaseSeveritySavedObject.MEDIUM, CaseSeverity.MEDIUM],
+        [CaseSeveritySavedObject.HIGH, CaseSeverity.HIGH],
+        [CaseSeveritySavedObject.CRITICAL, CaseSeverity.CRITICAL],
       ])(
         'properly converts "%s" severity to corresponding external value in the patch response',
         async (internalSeverityValue, expectedSeverity) => {
@@ -1290,7 +1319,7 @@ describe('CasesService', () => {
           const res = await service.patchCase({
             caseId: '1',
             updatedAttributes: createCaseUpdateParams({}),
-            originalCase: {} as CaseSavedObject,
+            originalCase: {} as CaseSavedObjectTransformed,
           });
 
           expect(res.attributes.severity).toEqual(expectedSeverity);
@@ -1298,9 +1327,9 @@ describe('CasesService', () => {
       );
 
       it.each([
-        [ESCaseStatus.OPEN, CaseStatuses.open],
-        [ESCaseStatus.IN_PROGRESS, CaseStatuses['in-progress']],
-        [ESCaseStatus.CLOSED, CaseStatuses.closed],
+        [CaseStatusSavedObject.OPEN, CaseStatuses.open],
+        [CaseStatusSavedObject.IN_PROGRESS, CaseStatuses['in-progress']],
+        [CaseStatusSavedObject.CLOSED, CaseStatuses.closed],
       ])(
         'properly converts "%s" status to corresponding external value in the patch response',
         async (internalStatusValue, expectedStatus) => {
@@ -1311,7 +1340,7 @@ describe('CasesService', () => {
           const res = await service.patchCase({
             caseId: '1',
             updatedAttributes: createCaseUpdateParams({}),
-            originalCase: {} as CaseSavedObject,
+            originalCase: {} as CaseSavedObjectTransformed,
           });
 
           expect(res.attributes.status).toEqual(expectedStatus);
@@ -1324,7 +1353,7 @@ describe('CasesService', () => {
         const res = await service.patchCase({
           caseId: '1',
           updatedAttributes: createCaseUpdateParams({}),
-          originalCase: {} as CaseSavedObject,
+          originalCase: {} as CaseSavedObjectTransformed,
         });
 
         expect(res.attributes).not.toHaveProperty('total_alerts');
@@ -1351,10 +1380,10 @@ describe('CasesService', () => {
       });
 
       it.each([
-        [ESCaseSeverity.LOW, CaseSeverity.LOW],
-        [ESCaseSeverity.MEDIUM, CaseSeverity.MEDIUM],
-        [ESCaseSeverity.HIGH, CaseSeverity.HIGH],
-        [ESCaseSeverity.CRITICAL, CaseSeverity.CRITICAL],
+        [CaseSeveritySavedObject.LOW, CaseSeverity.LOW],
+        [CaseSeveritySavedObject.MEDIUM, CaseSeverity.MEDIUM],
+        [CaseSeveritySavedObject.HIGH, CaseSeverity.HIGH],
+        [CaseSeveritySavedObject.CRITICAL, CaseSeverity.CRITICAL],
       ])(
         'properly converts "%s" severity to corresponding external value in the post response',
         async (internalSeverityValue, expectedSeverity) => {
@@ -1372,9 +1401,9 @@ describe('CasesService', () => {
       );
 
       it.each([
-        [ESCaseStatus.OPEN, CaseStatuses.open],
-        [ESCaseStatus.IN_PROGRESS, CaseStatuses['in-progress']],
-        [ESCaseStatus.CLOSED, CaseStatuses.closed],
+        [CaseStatusSavedObject.OPEN, CaseStatuses.open],
+        [CaseStatusSavedObject.IN_PROGRESS, CaseStatuses['in-progress']],
+        [CaseStatusSavedObject.CLOSED, CaseStatuses.closed],
       ])(
         'properly converts "%s" status to corresponding external value in the post response',
         async (internalStatusValue, expectedStatus) => {
@@ -1444,10 +1473,10 @@ describe('CasesService', () => {
       });
 
       it.each([
-        [ESCaseSeverity.LOW, CaseSeverity.LOW],
-        [ESCaseSeverity.MEDIUM, CaseSeverity.MEDIUM],
-        [ESCaseSeverity.HIGH, CaseSeverity.HIGH],
-        [ESCaseSeverity.CRITICAL, CaseSeverity.CRITICAL],
+        [CaseSeveritySavedObject.LOW, CaseSeverity.LOW],
+        [CaseSeveritySavedObject.MEDIUM, CaseSeverity.MEDIUM],
+        [CaseSeveritySavedObject.HIGH, CaseSeverity.HIGH],
+        [CaseSeveritySavedObject.CRITICAL, CaseSeverity.CRITICAL],
       ])(
         'includes the properly converted "%s" severity field in the result',
         async (severity, expectedSeverity) => {
@@ -1463,9 +1492,9 @@ describe('CasesService', () => {
       );
 
       it.each([
-        [ESCaseStatus.OPEN, CaseStatuses.open],
-        [ESCaseStatus.IN_PROGRESS, CaseStatuses['in-progress']],
-        [ESCaseStatus.CLOSED, CaseStatuses.closed],
+        [CaseStatusSavedObject.OPEN, CaseStatuses.open],
+        [CaseStatusSavedObject.IN_PROGRESS, CaseStatuses['in-progress']],
+        [CaseStatusSavedObject.CLOSED, CaseStatuses.closed],
       ])(
         'includes the properly converted "%s" status field in the result',
         async (status, expectedStatus) => {
@@ -1523,16 +1552,16 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({
-              overrides: { severity: ESCaseSeverity.LOW },
+              overrides: { severity: CaseSeveritySavedObject.LOW },
             }),
             createCaseSavedObjectResponse({
-              overrides: { severity: ESCaseSeverity.MEDIUM },
+              overrides: { severity: CaseSeveritySavedObject.MEDIUM },
             }),
             createCaseSavedObjectResponse({
-              overrides: { severity: ESCaseSeverity.HIGH },
+              overrides: { severity: CaseSeveritySavedObject.HIGH },
             }),
             createCaseSavedObjectResponse({
-              overrides: { severity: ESCaseSeverity.CRITICAL },
+              overrides: { severity: CaseSeveritySavedObject.CRITICAL },
             }),
           ],
         });
@@ -1548,13 +1577,13 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({
-              overrides: { status: ESCaseStatus.OPEN },
+              overrides: { status: CaseStatusSavedObject.OPEN },
             }),
             createCaseSavedObjectResponse({
-              overrides: { status: ESCaseStatus.IN_PROGRESS },
+              overrides: { status: CaseStatusSavedObject.IN_PROGRESS },
             }),
             createCaseSavedObjectResponse({
-              overrides: { status: ESCaseStatus.CLOSED },
+              overrides: { status: CaseStatusSavedObject.CLOSED },
             }),
           ],
         });
@@ -1652,7 +1681,7 @@ describe('CasesService', () => {
               type: ACTION_SAVED_OBJECT_TYPE,
             },
           ],
-        } as unknown as SavedObject<ESCaseAttributes>);
+        } as unknown as SavedObject<CaseSavedObjectAttributes>);
         const res = await service.getCase({ id: 'a' });
 
         expect(res.attributes.connector).toMatchInlineSnapshot(`
@@ -1670,7 +1699,7 @@ describe('CasesService', () => {
       it('returns a null external_services when it is already null', async () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue({
           attributes: { external_service: null },
-        } as SavedObject<ESCaseAttributes>);
+        } as SavedObject<CaseSavedObjectAttributes>);
         const res = await service.getCase({ id: 'a' });
 
         expect(res.attributes.connector).toMatchInlineSnapshot(`
@@ -1686,16 +1715,16 @@ describe('CasesService', () => {
       });
 
       it.each([
-        [ESCaseSeverity.LOW, CaseSeverity.LOW],
-        [ESCaseSeverity.MEDIUM, CaseSeverity.MEDIUM],
-        [ESCaseSeverity.HIGH, CaseSeverity.HIGH],
-        [ESCaseSeverity.CRITICAL, CaseSeverity.CRITICAL],
+        [CaseSeveritySavedObject.LOW, CaseSeverity.LOW],
+        [CaseSeveritySavedObject.MEDIUM, CaseSeverity.MEDIUM],
+        [CaseSeveritySavedObject.HIGH, CaseSeverity.HIGH],
+        [CaseSeveritySavedObject.CRITICAL, CaseSeverity.CRITICAL],
       ])(
         'includes the properly converted "%s" severity field in the result',
         async (internalSeverityValue, expectedSeverity) => {
           unsecuredSavedObjectsClient.get.mockResolvedValue({
             attributes: { severity: internalSeverityValue },
-          } as SavedObject<ESCaseAttributes>);
+          } as SavedObject<CaseSavedObjectAttributes>);
 
           const res = await service.getCase({ id: 'a' });
 
@@ -1704,15 +1733,15 @@ describe('CasesService', () => {
       );
 
       it.each([
-        [ESCaseStatus.OPEN, CaseStatuses.open],
-        [ESCaseStatus.IN_PROGRESS, CaseStatuses['in-progress']],
-        [ESCaseStatus.CLOSED, CaseStatuses.closed],
+        [CaseStatusSavedObject.OPEN, CaseStatuses.open],
+        [CaseStatusSavedObject.IN_PROGRESS, CaseStatuses['in-progress']],
+        [CaseStatusSavedObject.CLOSED, CaseStatuses.closed],
       ])(
         'includes the properly converted "%s" status field in the result',
         async (internalStatusValue, expectedStatus) => {
           unsecuredSavedObjectsClient.get.mockResolvedValue({
             attributes: { status: internalStatusValue },
-          } as SavedObject<ESCaseAttributes>);
+          } as SavedObject<CaseSavedObjectAttributes>);
 
           const res = await service.getCase({ id: 'a' });
 
@@ -1726,7 +1755,7 @@ describe('CasesService', () => {
             total_alerts: -1,
             total_comments: -1,
           },
-        } as unknown as SavedObject<ESCaseAttributes>);
+        } as unknown as SavedObject<CaseSavedObjectAttributes>);
 
         const res = await service.getCase({ id: 'a' });
         expect(res.attributes).not.toHaveProperty('total_alerts');
@@ -1760,7 +1789,7 @@ describe('CasesService', () => {
         page: 1,
         per_page: 1,
         aggregations: { myAggregation: { value: 0 } },
-      } as SavedObjectsFindResponse<ESCaseAttributes>);
+      } as SavedObjectsFindResponse<CaseSavedObjectAttributes>);
 
       const res = await service.executeAggregations({ aggregationBuilders });
       expect(res).toEqual({ myAggregation: { value: 0 } });
@@ -1773,7 +1802,7 @@ describe('CasesService', () => {
         page: 1,
         per_page: 1,
         aggregations: { myAggregation: { value: 0 } },
-      } as SavedObjectsFindResponse<ESCaseAttributes>);
+      } as SavedObjectsFindResponse<CaseSavedObjectAttributes>);
 
       await service.executeAggregations({ aggregationBuilders, options: { perPage: 20 } });
       expect(unsecuredSavedObjectsClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`

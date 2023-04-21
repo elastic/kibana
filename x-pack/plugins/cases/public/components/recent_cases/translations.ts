@@ -60,5 +60,5 @@ export const VIEW_ALL_CASES = i18n.translate('xpack.cases.recentCases.viewAllCas
 });
 
 export const CASES_FILTER_CONTROL = i18n.translate('xpack.cases.recentCases.controlLegend', {
-  defaultMessage: 'Cases filter',
+  defaultMessage: 'CasesUI filter',
 });

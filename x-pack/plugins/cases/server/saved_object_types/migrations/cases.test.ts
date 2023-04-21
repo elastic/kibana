@@ -9,8 +9,8 @@ import type { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/co
 import type { CaseAttributes, CaseFullExternalService } from '../../../common/api';
 import { CaseSeverity, CaseStatuses, ConnectorTypes, NONE_CONNECTOR_ID } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CaseSeveritySavedObject, CaseStatusSavedObject } from '../../common/types/case';
 import { getNoneCaseConnector } from '../../common/utils';
-import { ESCaseSeverity, ESCaseStatus } from '../../services/cases/types';
 import type { ESCaseConnectorWithId } from '../../services/test_utils';
 import { createExternalService } from '../../services/test_utils';
 import {
@@ -585,10 +585,10 @@ describe('case migrations', () => {
 
   describe('update severity', () => {
     it.each([
-      [CaseSeverity.LOW, ESCaseSeverity.LOW],
-      [CaseSeverity.MEDIUM, ESCaseSeverity.MEDIUM],
-      [CaseSeverity.HIGH, ESCaseSeverity.HIGH],
-      [CaseSeverity.CRITICAL, ESCaseSeverity.CRITICAL],
+      [CaseSeverity.LOW, CaseSeveritySavedObject.LOW],
+      [CaseSeverity.MEDIUM, CaseSeveritySavedObject.MEDIUM],
+      [CaseSeverity.HIGH, CaseSeveritySavedObject.HIGH],
+      [CaseSeverity.CRITICAL, CaseSeveritySavedObject.CRITICAL],
     ])(
       'migrates "%s" severity keyword value to matching short',
       (oldSeverityValue, expectedSeverityValue) => {
@@ -624,7 +624,7 @@ describe('case migrations', () => {
         ...doc,
         attributes: {
           ...doc.attributes,
-          severity: ESCaseSeverity.LOW,
+          severity: CaseSeveritySavedObject.LOW,
         },
         references: [],
       });
@@ -633,9 +633,9 @@ describe('case migrations', () => {
 
   describe('update status', () => {
     it.each([
-      [CaseStatuses.open, ESCaseStatus.OPEN],
-      [CaseStatuses['in-progress'], ESCaseStatus.IN_PROGRESS],
-      [CaseStatuses.closed, ESCaseStatus.CLOSED],
+      [CaseStatuses.open, CaseStatusSavedObject.OPEN],
+      [CaseStatuses['in-progress'], CaseStatusSavedObject.IN_PROGRESS],
+      [CaseStatuses.closed, CaseStatusSavedObject.CLOSED],
     ])(
       'migrates "%s" status keyword value to matching short',
       (oldStatusValue, expectedStatusValue) => {
@@ -671,7 +671,7 @@ describe('case migrations', () => {
         ...doc,
         attributes: {
           ...doc.attributes,
-          status: ESCaseStatus.OPEN,
+          status: CaseStatusSavedObject.OPEN,
         },
         references: [],
       });

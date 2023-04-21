@@ -6,11 +6,15 @@
  */
 
 import type { KueryNode } from '@kbn/es-query';
-import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
-import type { Case } from '../../../common';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { Case } from '../../../common/api';
 import type { IndexRefresh } from '../types';
 import type { User } from '../../common/types/user';
-import type { CaseSavedObjectAttributes, CaseSavedObject } from '../../common/types/case';
+import type {
+  CaseSavedObjectTransformed,
+  CaseTransformedAttributes,
+} from '../../common/types/case';
+import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 
 export interface GetCaseIdsByAlertIdArgs {
   alertId: string;
@@ -35,23 +39,23 @@ export interface GetCasesArgs {
 
 export interface FindCommentsArgs {
   id: string | string[];
-  options?: SavedObjectsFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
 }
 
 export interface FindCaseCommentsArgs {
   id: string | string[];
-  options?: SavedObjectsFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
 }
 
 export interface PostCaseArgs extends IndexRefresh {
-  attributes: CaseSavedObjectAttributes;
+  attributes: CaseTransformedAttributes;
   id: string;
 }
 
 export interface PatchCase extends IndexRefresh {
   caseId: string;
-  updatedAttributes: Partial<CaseSavedObjectAttributes & PushedArgs>;
-  originalCase: CaseSavedObject;
+  updatedAttributes: Partial<CaseTransformedAttributes & PushedArgs>;
+  originalCase: CaseSavedObjectTransformed;
   version?: string;
 }
 
@@ -67,8 +71,6 @@ export interface CasesMapWithPageInfo {
   perPage: number;
   total: number;
 }
-
-export type FindCaseOptions = CasesFindRequest & SavedObjectsFindOptions;
 
 export interface GetTagsArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;

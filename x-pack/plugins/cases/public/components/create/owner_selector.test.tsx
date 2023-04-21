@@ -18,7 +18,7 @@ import type { FormProps } from './schema';
 import { schema } from './schema';
 import { waitForComponentToPaint } from '../../common/test_utils';
 
-describe('Case Owner Selection', () => {
+describe('CaseUI Owner Selection', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {

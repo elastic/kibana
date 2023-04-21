@@ -21,7 +21,7 @@ import {
 } from '../../services/mocks';
 import { mockAlertsService } from './test_utils/alerts';
 import { createStatusChangeSavedObject } from './test_utils/lifespan';
-import type { CaseSavedObject } from '../../common/types';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
 describe('getCaseMetrics', () => {
   const inProgressStatusChangeTimestamp = new Date('2021-11-23T20:00:43Z');
@@ -191,7 +191,7 @@ function createMockClientArgs() {
       attributes: {
         owner: 'security',
       },
-    } as unknown as CaseSavedObject;
+    } as unknown as CaseSavedObjectTransformed;
   });
 
   const alertsService = mockAlertsService();

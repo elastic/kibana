@@ -89,7 +89,7 @@ const UserActionMarkdownComponent = forwardRef<
         component={MarkdownEditorForm}
         componentProps={{
           ref: editorRef,
-          'aria-label': 'Cases markdown editor',
+          'aria-label': 'CasesUI markdown editor',
           value: content,
           id,
           draftStorageKey,

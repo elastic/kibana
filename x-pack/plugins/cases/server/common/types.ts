@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 import type {
   CommentAttributes,
   CommentRequestExternalReferenceSOType,
   FileAttachmentMetadata,
-  SavedObjectFindOptions,
 } from '../../common/api';
 
 /**
@@ -22,7 +22,22 @@ export interface AlertInfo {
   index: string;
 }
 
-export type SavedObjectFindOptionsKueryNode = Omit<SavedObjectFindOptions, 'filter'> & {
+type FindOptions = Pick<
+  SavedObjectsFindOptions,
+  | 'defaultSearchOperator'
+  | 'hasReferenceOperator'
+  | 'perPage'
+  | 'hasReference'
+  | 'fields'
+  | 'page'
+  | 'search'
+  | 'searchFields'
+  | 'sortField'
+  | 'sortOrder'
+  | 'rootSearchFields'
+>;
+
+export type SavedObjectFindOptionsKueryNode = FindOptions & {
   filter?: KueryNode;
 };
 

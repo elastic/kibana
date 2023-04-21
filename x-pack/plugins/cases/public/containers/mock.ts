@@ -6,7 +6,14 @@
  */
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import type { ActionLicense, Cases, Case, CasesStatus, CaseUserActions, Comment } from './types';
+import type {
+  ActionLicense,
+  CasesUI,
+  CaseUI,
+  CasesStatus,
+  CaseUserActions,
+  Comment,
+} from './types';
 
 import type {
   ResolvedCase,
@@ -208,7 +215,7 @@ export const persistableStateAttachment: PersistableComment = {
   version: 'WzQ3LDFc',
 };
 
-export const basicCase: Case = {
+export const basicCase: CaseUI = {
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
   closedBy: null,
@@ -325,7 +332,7 @@ export const basicCaseMetrics: SingleCaseMetrics = {
   },
 };
 
-export const mockCase: Case = {
+export const mockCase: CaseUI = {
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
   closedBy: null,
@@ -357,7 +364,7 @@ export const mockCase: Case = {
   assignees: [],
 };
 
-export const basicCasePost: Case = {
+export const basicCasePost: CaseUI = {
   ...basicCase,
   updatedAt: null,
   updatedBy: null,
@@ -398,7 +405,7 @@ export const basicPush = {
   pushedBy: elasticUser,
 };
 
-export const pushedCase: Case = {
+export const pushedCase: CaseUI = {
   ...basicCase,
   connector: {
     id: pushConnectorId,
@@ -419,7 +426,7 @@ const basicAction = {
   type: 'title',
 };
 
-export const cases: Case[] = [
+export const cases: CaseUI[] = [
   basicCase,
   {
     ...pushedCase,
@@ -437,7 +444,7 @@ export const cases: Case[] = [
   caseWithRegisteredAttachments,
 ];
 
-export const allCases: Cases = {
+export const allCases: CasesUI = {
   cases,
   page: 1,
   perPage: 5,
@@ -910,7 +917,7 @@ export const useGetCasesMockState = {
   isError: false,
 };
 
-export const basicCaseClosed: Case = {
+export const basicCaseClosed: CaseUI = {
   ...basicCase,
   closedAt: '2020-02-25T23:06:33.798Z',
   closedBy: elasticUser,

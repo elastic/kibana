@@ -49,7 +49,7 @@ const comments: Comment[] = [
   },
 ];
 
-describe('Case view helpers', () => {});
+describe('CaseUI view helpers', () => {});
 
 describe('helpers', () => {
   describe('isUserActionTypeSupported', () => {

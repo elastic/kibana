@@ -21,7 +21,7 @@ describe('EditAssigneesSelectable', () => {
   let appMock: AppMockRenderer;
 
   /**
-   * Case has the following tags: Damaged Raccoon
+   * CaseUI has the following tags: Damaged Raccoon
    * All available tags are: Damaged Raccoon, Physical Dinosaur, Wet Dingo
    */
   const props = {
@@ -31,8 +31,8 @@ describe('EditAssigneesSelectable', () => {
   };
 
   /**
-   * Case one has the following assignees: Damaged Raccoon
-   * Case two has the following assignees: Damaged Raccoon, Physical Dinosaur
+   * CaseUI one has the following assignees: Damaged Raccoon
+   * CaseUI two has the following assignees: Damaged Raccoon, Physical Dinosaur
    * All available assignees are: Damaged Raccoon, Physical Dinosaur, Wet Dingo, Silly Hare, Convenient Orca
    */
   const propsMultipleCases = {

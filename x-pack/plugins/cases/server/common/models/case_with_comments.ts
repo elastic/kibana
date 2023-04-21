@@ -26,7 +26,8 @@ import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
 import { AttachmentLimitChecker } from '../limiter_checker';
-import type { AlertInfo, CaseSavedObject } from '../types';
+import type { AlertInfo } from '../types';
+import type { CaseSavedObjectTransformed } from '../types/case';
 import {
   countAlertsForID,
   flattenCommentSavedObjects,
@@ -45,9 +46,9 @@ type CommentRequestWithId = Array<{ id: string } & CommentRequest>;
  */
 export class CaseCommentModel {
   private readonly params: CaseCommentModelParams;
-  private readonly caseInfo: CaseSavedObject;
+  private readonly caseInfo: CaseSavedObjectTransformed;
 
-  private constructor(caseInfo: CaseSavedObject, params: CaseCommentModelParams) {
+  private constructor(caseInfo: CaseSavedObjectTransformed, params: CaseCommentModelParams) {
     this.caseInfo = caseInfo;
     this.params = params;
   }
@@ -63,7 +64,7 @@ export class CaseCommentModel {
     return new CaseCommentModel(savedObject, options);
   }
 
-  public get savedObject(): CaseSavedObject {
+  public get savedObject(): CaseSavedObjectTransformed {
     return this.caseInfo;
   }
 
@@ -173,7 +174,7 @@ export class CaseCommentModel {
     }
   }
 
-  private newObjectWithInfo(caseInfo: CaseSavedObject): CaseCommentModel {
+  private newObjectWithInfo(caseInfo: CaseSavedObjectTransformed): CaseCommentModel {
     return new CaseCommentModel(caseInfo, this.params);
   }
 

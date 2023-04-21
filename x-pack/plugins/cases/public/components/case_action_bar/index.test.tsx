@@ -149,7 +149,7 @@ describe('CaseActionBar', () => {
     expect(queryByText('Sync alerts')).toBeInTheDocument();
   });
 
-  it('should not show the Case open text when the lifespan feature is enabled', () => {
+  it('should not show the CaseUI open text when the lifespan feature is enabled', () => {
     const props: CaseActionBarProps = { ...defaultProps };
     const { queryByText } = render(
       <TestProviders features={{ metrics: ['lifespan'] }}>
@@ -157,17 +157,17 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    expect(queryByText('Case opened')).not.toBeInTheDocument();
+    expect(queryByText('CaseUI opened')).not.toBeInTheDocument();
   });
 
-  it('should show the Case open text when the lifespan feature is disabled', () => {
+  it('should show the CaseUI open text when the lifespan feature is disabled', () => {
     const { getByText } = render(
       <TestProviders>
         <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
-    expect(getByText('Case opened')).toBeInTheDocument();
+    expect(getByText('CaseUI opened')).toBeInTheDocument();
   });
 
   it('should show the change status text when the user has update privileges', () => {

@@ -11,7 +11,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isValidOwner } from '../../common/utils/owner';
-import type { Case } from '../../common';
+import type { CaseUI } from '../../common';
 import { CommentType } from '../../common';
 import { useKibana, useToasts } from './lib/kibana';
 import { generateCaseViewPath } from './navigation';
@@ -61,7 +61,7 @@ function getToastTitle({
   title,
   attachments,
 }: {
-  theCase: Case;
+  theCase: CaseUI;
   title?: string;
   attachments?: CaseAttachmentsWithoutOwner;
 }): string {
@@ -82,7 +82,7 @@ function getToastContent({
   content,
   attachments,
 }: {
-  theCase: Case;
+  theCase: CaseUI;
   content?: string;
   attachments?: CaseAttachmentsWithoutOwner;
 }): string | undefined {
@@ -131,7 +131,7 @@ export const useCasesToast = () => {
       title,
       content,
     }: {
-      theCase: Case;
+      theCase: CaseUI;
       attachments?: CaseAttachmentsWithoutOwner;
       title?: string;
       content?: string;

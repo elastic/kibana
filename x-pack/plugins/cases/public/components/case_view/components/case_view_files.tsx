@@ -12,7 +12,7 @@ import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import type { Case } from '../../../../common/ui/types';
+import type { CaseUI } from '../../../../common/ui/types';
 import type { CaseFilesFilteringOptions } from '../../../containers/use_get_case_files';
 
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
@@ -22,7 +22,7 @@ import { CaseViewTabs } from '../case_view_tabs';
 import { FilesUtilityBar } from '../../files/files_utility_bar';
 
 interface CaseViewFilesProps {
-  caseData: Case;
+  caseData: CaseUI;
 }
 
 export const DEFAULT_CASE_FILES_FILTERING_OPTIONS = {

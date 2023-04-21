@@ -6,10 +6,10 @@
  */
 
 export interface User {
-  email: undefined | null | string;
-  full_name: undefined | null | string;
-  username: undefined | null | string;
-  profile_uid?: string;
+  email: string | null | undefined;
+  full_name: string | null | undefined;
+  username: string | null | undefined;
+  profile_uid?: string | undefined;
 }
 
 export interface UserProfile {

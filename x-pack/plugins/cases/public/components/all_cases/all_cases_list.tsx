@@ -11,7 +11,7 @@ import { EuiProgress } from '@elastic/eui';
 import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 
-import type { Case, CaseStatusWithAllStatus, FilterOptions } from '../../../common/ui/types';
+import type { CaseUI, CaseStatusWithAllStatus, FilterOptions } from '../../../common/ui/types';
 import { SortFieldCase, StatusAll } from '../../../common/ui/types';
 import { CaseStatuses, caseStatuses } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
@@ -64,7 +64,7 @@ const mapToReadableSolutionName = (solution: string): Solution => {
 export interface AllCasesListProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
-  onRowClick?: (theCase?: Case) => void;
+  onRowClick?: (theCase?: CaseUI) => void;
 }
 
 export const AllCasesList = React.memo<AllCasesListProps>(
@@ -84,7 +84,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       isSelectorView,
       initialFilterOptions
     );
-    const [selectedCases, setSelectedCases] = useState<Case[]>([]);
+    const [selectedCases, setSelectedCases] = useState<CaseUI[]>([]);
 
     const { data = initialData, isFetching: isLoadingCases } = useGetCases({
       filterOptions,
@@ -224,7 +224,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       [data, queryParams]
     );
 
-    const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
+    const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<CaseUI>>(
       () => ({
         onSelectionChange: setSelectedCases,
         initialSelected: selectedCases,
@@ -235,7 +235,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
     const tableRowProps = useCallback(
-      (theCase: Case) => ({
+      (theCase: CaseUI) => ({
         'data-test-subj': `cases-table-row-${theCase.id}`,
       }),
       []

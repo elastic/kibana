@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const CREATE_CASE_PAGE_NAME = i18n.translate('xpack.cases.createCase', {
-  defaultMessage: 'Create Case',
+  defaultMessage: 'Create CaseUI',
 });
 
 export const CONFIGURE_CASES_PAGE_NAME = i18n.translate('xpack.cases.configureCases', {
-  defaultMessage: 'Configure Cases',
+  defaultMessage: 'Configure CasesUI',
 });
 
 export const READ_ONLY_BADGE_TEXT = i18n.translate('xpack.cases.badge.readOnly.text', {

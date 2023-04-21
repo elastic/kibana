@@ -37,7 +37,7 @@ import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
-import type { CaseSavedObject } from '../../common/types';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -181,7 +181,7 @@ export const get = async (
   } = clientArgs;
 
   try {
-    const theCase: CaseSavedObject = await caseService.getCase({
+    const theCase: CaseSavedObjectTransformed = await caseService.getCase({
       id,
     });
 

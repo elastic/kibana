@@ -57,7 +57,7 @@ describe('cases transactions', () => {
 
       result.current.startTransaction({ appId });
 
-      expect(mockStartTransaction).toHaveBeenCalledWith(`Cases [${appId}] createCase`);
+      expect(mockStartTransaction).toHaveBeenCalledWith(`CasesUI [${appId}] createCase`);
       expect(mockAddLabels).not.toHaveBeenCalled();
     });
 
@@ -66,7 +66,9 @@ describe('cases transactions', () => {
 
       result.current.startTransaction({ appId, attachments: singleAttachments });
 
-      expect(mockStartTransaction).toHaveBeenCalledWith(`Cases [${appId}] addAttachmentToNewCase`);
+      expect(mockStartTransaction).toHaveBeenCalledWith(
+        `CasesUI [${appId}] addAttachmentToNewCase`
+      );
       expect(mockAddLabels).not.toHaveBeenCalled();
     });
 
@@ -76,7 +78,7 @@ describe('cases transactions', () => {
       result.current.startTransaction({ appId, attachments: bulkAttachments });
 
       expect(mockStartTransaction).toHaveBeenCalledWith(
-        `Cases [${appId}] bulkAddAttachmentsToNewCase`
+        `CasesUI [${appId}] bulkAddAttachmentsToNewCase`
       );
       expect(mockAddLabels).toHaveBeenCalledWith({ alert_count: 3 });
     });
@@ -89,7 +91,7 @@ describe('cases transactions', () => {
       result.current.startTransaction({ appId, attachments: singleAttachments });
 
       expect(mockStartTransaction).toHaveBeenCalledWith(
-        `Cases [${appId}] addAttachmentToExistingCase`
+        `CasesUI [${appId}] addAttachmentToExistingCase`
       );
       expect(mockAddLabels).not.toHaveBeenCalled();
     });
@@ -100,7 +102,7 @@ describe('cases transactions', () => {
       result.current.startTransaction({ appId, attachments: bulkAttachments });
 
       expect(mockStartTransaction).toHaveBeenCalledWith(
-        `Cases [${appId}] bulkAddAttachmentsToExistingCase`
+        `CasesUI [${appId}] bulkAddAttachmentsToExistingCase`
       );
       expect(mockAddLabels).toHaveBeenCalledWith({ alert_count: 3 });
     });

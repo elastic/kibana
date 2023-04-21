@@ -13,7 +13,7 @@ import {
   caseUserActions,
   getAlertUserAction,
 } from '../../containers/mock';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import type { CaseViewProps } from './types';
 
 export const alertsHit = [
@@ -63,7 +63,7 @@ export const caseViewProps: CaseViewProps = {
   ],
 };
 
-export const caseData: Case = {
+export const caseData: CaseUI = {
   ...basicCase,
   comments: [...basicCase.comments, alertComment],
   connector: {

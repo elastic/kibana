@@ -10,7 +10,7 @@ import type { CaseConnector } from '../../common/api';
 
 import { pushCase } from './api';
 import * as i18n from './translations';
-import type { Case } from './types';
+import type { CaseUI } from './types';
 import { useToasts } from '../common/lib/kibana';
 
 interface PushToServiceState {
@@ -53,7 +53,7 @@ export interface UsePostPushToService extends PushToServiceState {
   pushCaseToExternalService: ({
     caseId,
     connector,
-  }: PushToServiceRequest) => Promise<Case | undefined>;
+  }: PushToServiceRequest) => Promise<CaseUI | undefined>;
 }
 
 export const usePostPushToService = (): UsePostPushToService => {
