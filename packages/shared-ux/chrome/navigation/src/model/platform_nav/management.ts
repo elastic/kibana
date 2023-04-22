@@ -73,17 +73,17 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Index lifecycle policies',
             id: 'index_lifecycle_policies',
-            // locator: { id: LocatorId.ILM },
+            href: '/app/management/data/index_lifecycle_management',
           },
           {
             name: 'Snapshot and restore',
             id: 'snapshot_and_restore',
-            // locator: { id: LocatorId.SnapshotRestore },
+            href: 'app/management/data/snapshot_restore',
           },
           {
             name: 'Rollup jobs',
             id: 'rollup_jobs',
-            // locator: { id: LocatorId.Rollup },
+            href: '/app/management/data/rollup_jobs',
           },
           {
             name: 'Transforms',
@@ -93,12 +93,12 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Cross-cluster replication',
             id: 'cross_cluster_replication',
-            // locator: { id: LocatorId.CrossClusterReplication },
+            href: '/app/management/data/cross_cluster_replication',
           },
           {
             name: 'Remote clusters',
             id: 'remote_clusters',
-            // locator: { id: LocatorId.RemoteClusters },
+            href: '/app/management/data/remote_clusters',
           },
         ],
       },
@@ -124,7 +124,7 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Reporting',
             id: 'reporting',
-            // locator: { id: LocatorId.Reporting },
+            href: '/app/management/insightsAndAlerting/reporting',
           },
           {
             name: 'Machine learning',
@@ -134,7 +134,7 @@ export const managementItemSet: NavItemProps[] = [
           {
             name: 'Watcher',
             id: 'watcher',
-            // locator: { id: LocatorId.Watcher },
+            href: '/app/management/insightsAndAlerting/watcher',
           },
         ],
       },
@@ -203,7 +203,7 @@ export const managementItemSet: NavItemProps[] = [
       {
         name: 'Upgrade assistant',
         id: 'upgrade_assistant',
-        // locator: { id: LocatorId.UpgradeAssistant },
+        href: '/app/management/stack/upgrade_assistant',
       },
     ],
   },

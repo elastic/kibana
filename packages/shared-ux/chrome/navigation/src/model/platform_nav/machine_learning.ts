@@ -98,7 +98,7 @@ export const mlItemSet: NavItemProps[] = [
         href: '/app/ml/filedatavisualizer',
       },
       {
-        name: 'Data page',
+        name: 'Data view',
         id: 'data_view',
         href: '/app/ml/datavisualizer_index_select',
       },
@@ -111,12 +111,12 @@ export const mlItemSet: NavItemProps[] = [
       {
         name: 'Explain log rate spikes',
         id: 'explain_log_rate_spikes',
-        href: '/app/ml/explain_log_rate_spikes_index_select',
+        href: '/app/ml/aiops/explain_log_rate_spikes_index_select',
       },
       {
         name: 'Log pattern analysis',
         id: 'log_pattern_analysis',
-        href: '/app/ml/log_categorization_index_select',
+        href: '/app/ml/aiops/log_categorization_index_select',
       },
     ],
   },
