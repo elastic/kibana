@@ -36,7 +36,7 @@ export const InfraAssetMetricsRT = rt.type({
 export const InfraAssetMetadataRT = rt.type({
   // keep the actual field name from the index mappings
   name: InfraAssetMetadataTypeRT,
-  value: rt.union([rt.string, rt.number, rt.null]),
+  value: rt.union([rt.string, rt.null]),
 });
 
 export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([

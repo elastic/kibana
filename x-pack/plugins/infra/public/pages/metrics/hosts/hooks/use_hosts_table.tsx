@@ -13,7 +13,11 @@ import { TimeRange } from '@kbn/es-query';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { HostsTableEntryTitle } from '../components/hosts_table_entry_title';
-import { InfraAssetMetricsItem, InfraAssetMetricType } from '../../../../../common/http_api';
+import {
+  InfraAssetMetadataType,
+  InfraAssetMetricsItem,
+  InfraAssetMetricType,
+} from '../../../../../common/http_api';
 import { useHostFlyoutOpen } from './use_host_flyout_open_url_state';
 
 /**
@@ -22,14 +26,17 @@ import { useHostFlyoutOpen } from './use_host_flyout_open_url_state';
 export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
 type HostMetrics = Record<InfraAssetMetricType, number | null>;
 
-export interface HostNodeRow extends HostMetrics {
+interface HostMetadata {
   os?: string | null;
   ip?: string | null;
   servicesOnHost?: number | null;
   title: { name: string; cloudProvider?: CloudProvider | null };
-  name: string;
   id: string;
 }
+export type HostNodeRow = HostMetadata &
+  HostMetrics & {
+    name: string;
+  };
 
 interface HostTableParams {
   time: TimeRange;
@@ -42,42 +49,34 @@ const formatMetric = (type: InfraAssetMetricType, value: number | undefined | nu
   return value || value === 0 ? createInventoryMetricFormatter({ type })(value) : 'N/A';
 };
 
-const buildItemsList = (nodes: InfraAssetMetricsItem[]) => {
-  return nodes.map(({ metrics, metadata, name }) => ({
-    ...metadata.reduce((acc, curr) => {
-      switch (curr.name) {
-        case 'host.os.name':
-          const os = curr.value ?? '-';
-          return {
-            ...acc,
-            id: `${name}-${os}`,
-            os,
-          };
-        case 'host.ip':
-          return {
-            ...acc,
-            ip: curr.value ?? '',
-          };
-        case 'cloud.provider':
-          return {
-            ...acc,
-            title: {
-              name,
-              cloudProvider: curr.value ?? null,
-            },
-          };
-        default:
-          return acc;
-      }
-    }, {}),
-    ...metrics.reduce(
+const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
+  return nodes.map(({ metrics, metadata, name }) => {
+    const metadataKeyValue = metadata.reduce(
       (acc, curr) => ({
         ...acc,
         [curr.name]: curr.value,
       }),
-      {} as HostMetrics
-    ),
-  })) as HostNodeRow[];
+      {} as Record<InfraAssetMetadataType, string | null>
+    );
+
+    return {
+      name,
+      id: `${name}-${metadataKeyValue['host.os.name'] ?? '-'}`,
+      title: {
+        name,
+        cloudProvider: (metadataKeyValue['cloud.provider'] as CloudProvider) ?? null,
+      },
+      os: metadataKeyValue['host.os.name'] ?? '-',
+      ip: metadataKeyValue['host.ip'] ?? '',
+      ...metrics.reduce(
+        (acc, curr) => ({
+          ...acc,
+          [curr.name]: curr.value ?? 0,
+        }),
+        {} as HostMetrics
+      ),
+    };
+  });
 };
 
 /**

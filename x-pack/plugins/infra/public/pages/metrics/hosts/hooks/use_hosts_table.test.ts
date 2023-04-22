@@ -66,7 +66,6 @@ describe('useHostTable hook', () => {
         ],
         metadata: [
           { name: 'host.os.name', value: 'macOS' },
-          { name: 'cloud.provider', value: 'aws' },
           { name: 'host.ip', value: '243.86.94.22' },
         ],
         name: 'host-1',

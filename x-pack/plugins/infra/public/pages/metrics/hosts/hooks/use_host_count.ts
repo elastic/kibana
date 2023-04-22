@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import { ES_SEARCH_STRATEGY, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { useCallback, useEffect } from 'react';
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, map, Observable, of, startWith } from 'rxjs';
 import createContainer from 'constate';
 import { estypes } from '@elastic/elasticsearch';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
@@ -30,6 +30,11 @@ export const useHostCount = () => {
           ...query.bool,
           filter: [
             ...query.bool.filter,
+            {
+              exists: {
+                field: 'host.name',
+              },
+            },
             {
               range: {
                 [dataView?.timeFieldName ?? '@timestamp']: {
@@ -87,7 +92,17 @@ export const useHostCount = () => {
 export const HostCount = createContainer(useHostCount);
 export const [HostCountProvider, useHostCountContext] = HostCount;
 
-const normalizeDataSearchResponse = (response$: Observable<IKibanaSearchResponse>) =>
+const INITIAL_STATE = {
+  data: null,
+  errors: [],
+  isPartial: true,
+  isRunning: true,
+  loaded: 0,
+  total: undefined,
+};
+const normalizeDataSearchResponse = (
+  response$: Observable<IKibanaSearchResponse<estypes.SearchResponse<Record<string, unknown>>>>
+) =>
   response$.pipe(
     map((response) => ({
       data: decodeOrThrow(HostCountResponseRT)(response.rawResponse.aggregations),
@@ -97,14 +112,12 @@ const normalizeDataSearchResponse = (response$: Observable<IKibanaSearchResponse
       loaded: response.loaded,
       total: response.total,
     })),
+    startWith(INITIAL_STATE),
     catchError((error) =>
       of({
-        data: null,
+        ...INITIAL_STATE,
         errors: [error.message ?? error],
-        isPartial: true,
         isRunning: false,
-        loaded: 0,
-        total: undefined,
       })
     )
   );
