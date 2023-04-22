@@ -20560,7 +20560,6 @@
     "xpack.maps.mapActions.removeFeatureError": "无法从索引中移除特征。",
     "xpack.maps.mapListing.entityName": "地图",
     "xpack.maps.mapListing.entityNamePlural": "地图",
-    "xpack.maps.mapListing.errorAttemptingToLoadSavedMaps": "无法加载地图",
     "xpack.maps.mapSavedObjectLabel": "地图",
     "xpack.maps.mapSettingsPanel.addCustomIcon": "添加定制图标",
     "xpack.maps.mapSettingsPanel.autoFitToBoundsLocationLabel": "使地图自动适应数据边界",
