@@ -13,9 +13,9 @@ describe('transformToAlertThrottle', () => {
     expect(transformToAlertThrottle('rule')).toBeNull();
     expect(transformToAlertThrottle('no_actions')).toBeNull();
   });
-  it('should return onThrottleInterval for other throttle values', () => {
-    expect(transformToAlertThrottle('1h')).toBe('onThrottleInterval');
-    expect(transformToAlertThrottle('1m')).toBe('onThrottleInterval');
-    expect(transformToAlertThrottle('1d')).toBe('onThrottleInterval');
+  it('should return same value for other throttle values', () => {
+    expect(transformToAlertThrottle('1h')).toBe('1h');
+    expect(transformToAlertThrottle('1m')).toBe('1m');
+    expect(transformToAlertThrottle('1d')).toBe('1d');
   });
 });
