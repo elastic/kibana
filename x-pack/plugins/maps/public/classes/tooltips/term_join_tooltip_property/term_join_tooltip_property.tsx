@@ -8,16 +8,16 @@
 import React, { ReactNode } from 'react';
 import { Filter } from '@kbn/es-query';
 import { ITooltipProperty } from '../tooltip_property';
-import { InnerJoin } from '../../joins/inner_join';
-import { JoinKeyLabel } from './join_key_label';
+import { TermJoinKeyLabel } from './term_join_key_label';
+import type { ITermJoinSource } from '../../sources/join_sources';
 
-export class JoinTooltipProperty implements ITooltipProperty {
+export class TermJoinTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;
-  private readonly _innerJoins: InnerJoin[];
+  private readonly _termJoins: ITermJoinSource[];
 
-  constructor(tooltipProperty: ITooltipProperty, innerJoins: InnerJoin[]) {
+  constructor(tooltipProperty: ITooltipProperty, termJoins: ITermJoinSource[]) {
     this._tooltipProperty = tooltipProperty;
-    this._innerJoins = innerJoins;
+    this._termJoins = termJoins;
   }
 
   isFilterable(): boolean {
@@ -30,9 +30,9 @@ export class JoinTooltipProperty implements ITooltipProperty {
 
   getPropertyName(): ReactNode {
     return (
-      <JoinKeyLabel
+      <TermJoinKeyLabel
         leftFieldName={this._tooltipProperty.getPropertyName() as string}
-        innerJoins={this._innerJoins}
+        termJoins={this._termJoins}
       />
     );
   }
@@ -50,9 +50,8 @@ export class JoinTooltipProperty implements ITooltipProperty {
 
     // only create filters for right sources.
     // do not create filters for left source.
-    for (let i = 0; i < this._innerJoins.length; i++) {
-      const rightSource = this._innerJoins[i].getRightJoinSource();
-      const termField = rightSource.getTermField();
+    for (let i = 0; i < this._termJoins.length; i++) {
+      const termField = this._termJoins[i].getTermField();
       try {
         const esTooltipProperty = await termField.createTooltipProperty(
           this._tooltipProperty.getRawValue()

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { ITermJoinSource } from './term_join_source';
+export { TermJoinTooltipProperty } from './term_join_tooltip_property';

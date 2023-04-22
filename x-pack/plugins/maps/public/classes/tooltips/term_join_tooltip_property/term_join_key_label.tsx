@@ -16,18 +16,18 @@ import React, { Component } from 'react';
 import { asyncMap } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import { InnerJoin } from '../../joins/inner_join';
+import type { ITermJoinSource } from '../../sources/join_sources';
 
 interface Props {
   leftFieldName: string;
-  innerJoins: InnerJoin[];
+  termJoins: ITermJoinSource[];
 }
 
 interface State {
   rightSourceLabels: string[];
 }
 
-export class JoinKeyLabel extends Component<Props, State> {
+export class TermJoinKeyLabel extends Component<Props, State> {
   private _isMounted = false;
 
   state: State = { rightSourceLabels: [] };
@@ -42,9 +42,8 @@ export class JoinKeyLabel extends Component<Props, State> {
   }
 
   async _loadRightSourceLabels() {
-    const rightSourceLabels = await asyncMap(this.props.innerJoins, async (innerJoin) => {
-      const rightSource = innerJoin.getRightJoinSource();
-      const termField = rightSource.getTermField();
+    const rightSourceLabels = await asyncMap(this.props.termJoins, async (termJoin) => {
+      const termField = termJoin.getTermField();
       return `'${await termField.getLabel()}'`;
     });
 
