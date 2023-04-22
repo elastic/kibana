@@ -58,7 +58,7 @@ const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
         <EuiFlexItem>
           <EuiPanel style={{ height: 200 }}>
             <EuiTitle>
-              <h2>CasesUI attachment hooks</h2>
+              <h2>Cases attachment hooks</h2>
             </EuiTitle>
             <EuiFlexGroup
               gutterSize="m"

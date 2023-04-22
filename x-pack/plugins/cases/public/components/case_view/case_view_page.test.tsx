@@ -652,7 +652,7 @@ describe('CaseViewPage', () => {
       it('should set the cases title', () => {
         appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-        expect(mockSetTitle).toHaveBeenCalledWith([caseProps.caseData.title, 'CasesUI', 'Test']);
+        expect(mockSetTitle).toHaveBeenCalledWith([caseProps.caseData.title, 'Cases', 'Test']);
       });
     });
   });

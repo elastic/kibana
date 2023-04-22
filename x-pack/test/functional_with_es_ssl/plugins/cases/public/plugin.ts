@@ -39,7 +39,7 @@ export class CasesFixturePlugin
 
     core.application.register({
       id: 'cases_fixture',
-      title: 'CasesUI Fixture App',
+      title: 'Cases Fixture App',
       async mount(params: AppMountParameters) {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');

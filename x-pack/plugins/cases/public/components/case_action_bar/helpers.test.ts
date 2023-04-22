@@ -36,15 +36,15 @@ describe('helpers', () => {
 
   describe('getStatusTitle', () => {
     it('it return the correct title for open status', () => {
-      expect(getStatusTitle(CaseStatuses.open)).toBe('CaseUI opened');
+      expect(getStatusTitle(CaseStatuses.open)).toBe('Case opened');
     });
 
     it('it return the correct title for in-progress status', () => {
-      expect(getStatusTitle(CaseStatuses['in-progress'])).toBe('CaseUI in progress');
+      expect(getStatusTitle(CaseStatuses['in-progress'])).toBe('Case in progress');
     });
 
     it('it return the correct title for closed status', () => {
-      expect(getStatusTitle(CaseStatuses.closed)).toBe('CaseUI closed');
+      expect(getStatusTitle(CaseStatuses.closed)).toBe('Case closed');
     });
   });
 });

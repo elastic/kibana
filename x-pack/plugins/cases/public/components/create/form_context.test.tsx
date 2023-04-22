@@ -184,7 +184,7 @@ describe('Create case', () => {
     sessionStorage.removeItem(defaultCreateCaseForm.draftStorageKey);
   });
 
-  describe('Step 1 - CaseUI Fields', () => {
+  describe('Step 1 - Case Fields', () => {
     it('renders correctly', async () => {
       mockedContext.render(
         <FormContext onSuccess={onFormSubmitSuccess}>

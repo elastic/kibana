@@ -17,13 +17,13 @@ export const STATUS_ICON_ARIA = i18n.translate('xpack.cases.status.iconAria', {
 });
 
 export const CASE_OPENED = i18n.translate('xpack.cases.caseView.caseOpened', {
-  defaultMessage: 'CaseUI opened',
+  defaultMessage: 'Case opened',
 });
 
 export const CASE_IN_PROGRESS = i18n.translate('xpack.cases.caseView.caseInProgress', {
-  defaultMessage: 'CaseUI in progress',
+  defaultMessage: 'Case in progress',
 });
 
 export const CASE_CLOSED = i18n.translate('xpack.cases.caseView.caseClosed', {
-  defaultMessage: 'CaseUI closed',
+  defaultMessage: 'Case closed',
 });

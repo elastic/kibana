@@ -17,7 +17,7 @@ describe('EditTagsSelectable', () => {
   let appMock: AppMockRenderer;
 
   /**
-   * CaseUI has the following tags: coke, pepsi
+   * Case has the following tags: coke, pepsi
    * All available tags are: one, two, coke, pepsi
    */
   const props = {
@@ -28,8 +28,8 @@ describe('EditTagsSelectable', () => {
   };
 
   /**
-   * CaseUI one has the following tags: coke, pepsi, one
-   * CaseUI two has the following tags: one, three
+   * Case one has the following tags: coke, pepsi, one
+   * Case two has the following tags: one, three
    * All available tags are: one, two, three, coke, pepsi
    */
   const propsMultipleCases = {

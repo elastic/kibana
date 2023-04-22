@@ -15,7 +15,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 
 const casesBreadcrumbTitle: Record<ICasesDeepLinkId, string> = {
   [CasesDeepLinkId.cases]: i18n.translate('xpack.cases.breadcrumbs.all_cases', {
-    defaultMessage: 'CasesUI',
+    defaultMessage: 'Cases',
   }),
   [CasesDeepLinkId.casesCreate]: i18n.translate('xpack.cases.breadcrumbs.create_case', {
     defaultMessage: 'Create',

@@ -20,8 +20,8 @@ describe('EditAssigneesFlyout', () => {
   let appMock: AppMockRenderer;
 
   /**
-   * CaseUI one has the following assignees: coke, pepsi, one
-   * CaseUI two has the following assignees: one, three
+   * Case one has the following assignees: coke, pepsi, one
+   * Case two has the following assignees: one, three
    * All available assignees are: one, two, three, coke, pepsi
    */
   const props = {

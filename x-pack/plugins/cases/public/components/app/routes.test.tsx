@@ -46,7 +46,7 @@ const renderWithRouter = (
   );
 };
 
-describe('CasesUI routes', () => {
+describe('Cases routes', () => {
   describe('All cases', () => {
     it('navigates to the all cases page', () => {
       renderWithRouter();
@@ -60,7 +60,7 @@ describe('CasesUI routes', () => {
     });
   });
 
-  describe('CaseUI view', () => {
+  describe('Case view', () => {
     it.each(getCaseViewPaths())(
       'navigates to the cases view page for path: %s',
       async (path: string) => {

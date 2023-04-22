@@ -19,7 +19,7 @@ const fields = {
 
 const onChange = jest.fn();
 
-describe('Swimlane CasesUI Fields', () => {
+describe('Swimlane Cases Fields', () => {
   test('it does not shows the mapping error callout', () => {
     render(<Fields connector={connector} fields={fields} onChange={onChange} />);
     expect(screen.queryByText(i18n.EMPTY_MAPPING_WARNING_TITLE)).toBeFalsy();

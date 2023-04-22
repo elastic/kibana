@@ -20,8 +20,8 @@ describe('EditTagsFlyout', () => {
   let appMock: AppMockRenderer;
 
   /**
-   * CaseUI one has the following tags: coke, pepsi, one
-   * CaseUI two has the following tags: one, three
+   * Case one has the following tags: coke, pepsi, one
+   * Case two has the following tags: one, three
    * All available tags are: one, two, three, coke, pepsi
    */
   const props = {

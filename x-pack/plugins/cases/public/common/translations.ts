@@ -22,11 +22,11 @@ export const DELETE_CASE = (quantity: number = 1) =>
   });
 
 export const COPY_ID_ACTION_LABEL = i18n.translate('xpack.cases.caseView.copyID', {
-  defaultMessage: 'Copy CaseUI ID',
+  defaultMessage: 'Copy Case ID',
 });
 
 export const COPY_ID_ACTION_SUCCESS = i18n.translate('xpack.cases.caseView.copyIDSuccess', {
-  defaultMessage: 'Copied CaseUI ID to clipboard',
+  defaultMessage: 'Copied Case ID to clipboard',
 });
 
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
@@ -102,7 +102,7 @@ export const OPTIONAL = i18n.translate('xpack.cases.caseView.optional', {
 });
 
 export const PAGE_TITLE = i18n.translate('xpack.cases.pageTitle', {
-  defaultMessage: 'CasesUI',
+  defaultMessage: 'Cases',
 });
 
 export const CREATE_CASE = i18n.translate('xpack.cases.caseView.createCase', {
@@ -126,7 +126,7 @@ export const OPEN_CASE = i18n.translate('xpack.cases.caseView.openCase', {
 });
 
 export const CASE_NAME = i18n.translate('xpack.cases.caseView.caseName', {
-  defaultMessage: 'CaseUI name',
+  defaultMessage: 'Case name',
 });
 
 export const TO = i18n.translate('xpack.cases.caseView.to', {
@@ -296,7 +296,7 @@ export const VIEW_CASE = i18n.translate('xpack.cases.actions.viewCase', {
 });
 
 export const APP_TITLE = i18n.translate('xpack.cases.common.appTitle', {
-  defaultMessage: 'CasesUI',
+  defaultMessage: 'Cases',
 });
 
 export const APP_DESC = i18n.translate('xpack.cases.common.appDescription', {

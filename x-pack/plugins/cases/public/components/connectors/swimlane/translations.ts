@@ -15,11 +15,11 @@ export const ALERT_SOURCE_LABEL = i18n.translate(
 );
 
 export const CASE_ID_LABEL = i18n.translate('xpack.cases.connectors.swimlane.caseIdLabel', {
-  defaultMessage: 'CaseUI Id',
+  defaultMessage: 'Case Id',
 });
 
 export const CASE_NAME_LABEL = i18n.translate('xpack.cases.connectors.swimlane.caseNameLabel', {
-  defaultMessage: 'CaseUI Name',
+  defaultMessage: 'Case Name',
 });
 
 export const SEVERITY_LABEL = i18n.translate('xpack.cases.connectors.swimlane.severityLabel', {
@@ -37,6 +37,6 @@ export const EMPTY_MAPPING_WARNING_DESC = i18n.translate(
   'xpack.cases.connectors.swimlane.emptyMappingWarningDesc',
   {
     defaultMessage:
-      'This connector cannot be selected because it is missing the required case field mappings. You can edit this connector to add required field mappings or select a connector of type CasesUI.',
+      'This connector cannot be selected because it is missing the required case field mappings. You can edit this connector to add required field mappings or select a connector of type Cases',
   }
 );

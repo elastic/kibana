@@ -47,7 +47,7 @@ describe('Mapping', () => {
   test('displays the description correctly', () => {
     const wrapper = mount(<Mapping {...props} />, { wrappingComponent: TestProviders });
     expect(wrapper.find('[data-test-subj="field-mapping-desc"]').first().text()).toBe(
-      'Map CaseUI fields to ServiceNow ITSM fields when pushing data to ServiceNow ITSM. Field mappings require an established connection to ServiceNow ITSM.'
+      'Map Case fields to ServiceNow ITSM fields when pushing data to ServiceNow ITSM. Field mappings require an established connection to ServiceNow ITSM.'
     );
   });
 

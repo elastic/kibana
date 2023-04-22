@@ -26,7 +26,7 @@ const caseData: CaseUI = {
   comments: [...basicCase.comments, alertCommentWithIndices],
 };
 
-describe('CaseUI View Page files tab', () => {
+describe('Case View Page files tab', () => {
   let appMockRender: AppMockRenderer;
 
   useGetCaseFilesMock.mockReturnValue({

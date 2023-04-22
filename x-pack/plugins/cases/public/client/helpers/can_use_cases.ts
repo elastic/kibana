@@ -65,5 +65,5 @@ const getFeatureID = (owner: CasesOwners) => {
     return FEATURE_ID;
   }
 
-  return `${owner}CasesUI`;
+  return `${owner}Cases`;
 };

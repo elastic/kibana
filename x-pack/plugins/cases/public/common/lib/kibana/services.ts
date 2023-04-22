@@ -50,7 +50,7 @@ export class KibanaServices {
 
   private static throwUninitializedError(): never {
     throw new Error(
-      'Kibana services not initialized - are you trying to import this module from outside of the CasesUI app?'
+      'Kibana services not initialized - are you trying to import this module from outside of the Cases app?'
     );
   }
 }

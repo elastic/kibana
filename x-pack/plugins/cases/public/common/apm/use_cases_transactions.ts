@@ -30,16 +30,14 @@ export const useCreateCaseWithAttachmentsTransaction = () => {
     useCallback<StartCreateCaseWithAttachmentsTransaction>(
       ({ appId, attachments }) => {
         if (!attachments) {
-          return startTransaction(`CasesUI [${appId}] ${CREATE_CASE}`);
+          return startTransaction(`Cases [${appId}] ${CREATE_CASE}`);
         }
         const alertCount = getAlertCount(attachments);
         if (alertCount <= 1) {
-          return startTransaction(`CasesUI [${appId}] ${ADD_ATTACHMENT_TO_NEW_CASE}`);
+          return startTransaction(`Cases [${appId}] ${ADD_ATTACHMENT_TO_NEW_CASE}`);
         }
 
-        const transaction = startTransaction(
-          `CasesUI [${appId}] ${BULK_ADD_ATTACHMENT_TO_NEW_CASE}`
-        );
+        const transaction = startTransaction(`Cases [${appId}] ${BULK_ADD_ATTACHMENT_TO_NEW_CASE}`);
         transaction?.addLabels({ alert_count: alertCount });
         return transaction;
       },
@@ -63,10 +61,10 @@ export const useAddAttachmentToExistingCaseTransaction = () => {
       ({ appId, attachments }) => {
         const alertCount = getAlertCount(attachments);
         if (alertCount <= 1) {
-          return startTransaction(`CasesUI [${appId}] ${ADD_ATTACHMENT_TO_EXISTING_CASE}`);
+          return startTransaction(`Cases [${appId}] ${ADD_ATTACHMENT_TO_EXISTING_CASE}`);
         }
         const transaction = startTransaction(
-          `CasesUI [${appId}] ${BULK_ADD_ATTACHMENT_TO_EXISTING_CASE}`
+          `Cases [${appId}] ${BULK_ADD_ATTACHMENT_TO_EXISTING_CASE}`
         );
         transaction?.addLabels({ alert_count: alertCount });
         return transaction;

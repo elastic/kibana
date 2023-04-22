@@ -59,7 +59,7 @@ export const useCasesNavigation = ({
 };
 
 /**
- * CasesUI can be either be part of a solution or a standalone application
+ * Cases can be either be part of a solution or a standalone application
  * The standalone application is registered from the cases plugin and is called
  * the main application. The main application uses paths and the solutions
  * deep links.

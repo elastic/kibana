@@ -19,5 +19,5 @@ export const NO_PRIVILEGES_TITLE = i18n.translate('xpack.cases.noPrivileges.titl
 });
 
 export const NO_PRIVILEGES_BUTTON = i18n.translate('xpack.cases.noPrivileges.button', {
-  defaultMessage: 'Back to CasesUI',
+  defaultMessage: 'Back to Cases',
 });

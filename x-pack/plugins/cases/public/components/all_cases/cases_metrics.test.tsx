@@ -13,7 +13,7 @@ import { CasesMetrics } from './cases_metrics';
 
 jest.mock('../../api');
 
-describe('CasesUI metrics', () => {
+describe('Cases metrics', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {

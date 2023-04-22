@@ -15,7 +15,7 @@ import { useCallback } from 'react';
 import type { TransactionOptions } from '@elastic/apm-rum';
 import { useKibana } from '../lib/kibana';
 
-export type CasesApmTransactionName = `CasesUI [${string}] ${string}`;
+export type CasesApmTransactionName = `Cases [${string}] ${string}`;
 
 interface StartTransactionOptions {
   type?: string;

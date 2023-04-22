@@ -122,7 +122,7 @@ const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
 // FLAKY: https://github.com/elastic/kibana/issues/151979
 // FLAKY: https://github.com/elastic/kibana/issues/151980
 // FLAKY: https://github.com/elastic/kibana/issues/151981
-describe.skip('CaseUI View Page activity tab', () => {
+describe.skip('Case View Page activity tab', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
 
   beforeAll(() => {
@@ -372,7 +372,7 @@ describe.skip('CaseUI View Page activity tab', () => {
     });
   });
 
-  describe('CaseUI users', () => {
+  describe('Case users', () => {
     describe('Participants', () => {
       it('should render the participants correctly', async () => {
         appMockRender = createAppMockRenderer();

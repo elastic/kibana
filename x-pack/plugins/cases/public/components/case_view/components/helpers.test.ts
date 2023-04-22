@@ -49,7 +49,7 @@ const multipleIndices = {
   ],
 };
 
-describe('CaseUI view helpers', () => {
+describe('Case view helpers', () => {
   describe('getRegistrationContextFromAlerts', () => {
     it('returns the correct registration context', () => {
       const result = getRegistrationContextFromAlerts([comment, comment2, multipleIndices]);

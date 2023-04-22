@@ -32,7 +32,7 @@ import { registerInternalAttachments } from './internal_attachments';
 
 /**
  * @public
- * A plugin for retrieving CasesUI UI components
+ * A plugin for retrieving Cases UI components
  */
 export class CasesUiPlugin
   implements Plugin<void, CasesUiStart, CasesPluginSetup, CasesPluginStart>
