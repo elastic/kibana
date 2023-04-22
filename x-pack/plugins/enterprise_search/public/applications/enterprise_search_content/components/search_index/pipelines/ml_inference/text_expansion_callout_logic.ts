@@ -19,7 +19,6 @@ import {
   FetchTextExpansionModelResponse,
 } from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
 
-
 // On page load: call Get API
 // - If no model -> Deploy button
 // - If model is downloading -> Start progress bar
