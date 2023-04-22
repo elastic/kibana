@@ -387,7 +387,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 const expectedRule = getSimpleRuleOutputWithoutRuleId();
                 expectedRule.actions = someActionsWithFrequencies.map((action) => ({
                   ...action,
-                  frequency: NOTIFICATION_DEFAULT_FREQUENCY,
+                  frequency: action.frequency ?? NOTIFICATION_DEFAULT_FREQUENCY,
                 }));
 
                 expect(createdRule).to.eql(expectedRule);
@@ -409,7 +409,11 @@ export default ({ getService }: FtrProviderContext): void => {
               const expectedRule = getSimpleRuleOutputWithoutRuleId();
               expectedRule.actions = someActionsWithFrequencies.map((action) => ({
                 ...action,
-                frequency: { summary: true, throttle, notifyWhen: 'onThrottleInterval' },
+                frequency: action.frequency ?? {
+                  summary: true,
+                  throttle,
+                  notifyWhen: 'onThrottleInterval',
+                },
               }));
 
               expect(createdRule).to.eql(expectedRule);

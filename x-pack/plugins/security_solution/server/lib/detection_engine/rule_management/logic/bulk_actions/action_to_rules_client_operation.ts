@@ -10,25 +10,7 @@ import type { BulkEditOperation } from '@kbn/alerting-plugin/server';
 import type { BulkActionEditForRuleAttributes } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import {
-  transformToActionFrequency,
-  transformToAlertThrottle,
-  transformToNotifyWhen,
-} from '../../normalization/rule_actions';
-
-const getThrottleOperation = (throttle: string) =>
-  ({
-    field: 'throttle',
-    operation: 'set',
-    value: transformToAlertThrottle(throttle),
-  } as const);
-
-const getNotifyWhenOperation = (throttle: string) =>
-  ({
-    field: 'notifyWhen',
-    operation: 'set',
-    value: transformToNotifyWhen(throttle),
-  } as const);
+import { transformToActionFrequency } from '../../normalization/rule_actions';
 
 /**
  * converts bulk edit action to format of rulesClient.bulkEdit operation
@@ -75,12 +57,6 @@ export const bulkEditActionToRulesClientOperation = (
           operation: 'add',
           value: transformToActionFrequency(action.value.actions, action.value.throttle),
         },
-        ...(action.value.throttle
-          ? [
-              getThrottleOperation(action.value.throttle),
-              getNotifyWhenOperation(action.value.throttle),
-            ]
-          : []),
       ];
 
     case BulkActionEditType.set_rule_actions:
@@ -90,12 +66,6 @@ export const bulkEditActionToRulesClientOperation = (
           operation: 'set',
           value: transformToActionFrequency(action.value.actions, action.value.throttle),
         },
-        ...(action.value.throttle
-          ? [
-              getThrottleOperation(action.value.throttle),
-              getNotifyWhenOperation(action.value.throttle),
-            ]
-          : []),
       ];
 
     // schedule actions

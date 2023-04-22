@@ -285,7 +285,7 @@ const internalRuleCreateRequired = t.type({
 });
 const internalRuleCreateOptional = t.partial({
   throttle: t.union([RuleActionThrottle, t.null]),
-  notifywhen: t.union([RuleActionNotifyWhen, t.null]),
+  notifyWhen: t.union([RuleActionNotifyWhen, t.null]),
 });
 export const internalRuleCreate = t.intersection([
   internalRuleCreateOptional,
@@ -304,7 +304,7 @@ const internalRuleUpdateRequired = t.type({
 });
 const internalRuleUpdateOptional = t.partial({
   throttle: t.union([RuleActionThrottle, t.null]),
-  notifywhen: t.union([RuleActionNotifyWhen, t.null]),
+  notifyWhen: t.union([RuleActionNotifyWhen, t.null]),
 });
 export const internalRuleUpdate = t.intersection([
   internalRuleUpdateOptional,
