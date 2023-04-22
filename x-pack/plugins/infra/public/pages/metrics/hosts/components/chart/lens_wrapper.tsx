@@ -46,9 +46,13 @@ export const LensWrapper = ({
   const intersectionRef = useRef(null);
   const [loadedOnce, setLoadedOnce] = useState(false);
 
-  const [currentLastReloadRequestTime, setCurrentLastReloadRequestTime] = useState<
-    number | undefined
-  >(lastReloadRequestTime);
+  const [state, setState] = useState({
+    lastReloadRequestTime,
+    query,
+    filters,
+    dateRange,
+  });
+
   const {
     services: { lens },
   } = useKibanaContextForPlugin();
@@ -60,16 +64,21 @@ export const LensWrapper = ({
 
   useEffect(() => {
     if ((intersection?.intersectionRatio ?? 0) === 1) {
-      setCurrentLastReloadRequestTime(lastReloadRequestTime);
+      setState({
+        lastReloadRequestTime,
+        query,
+        dateRange,
+        filters,
+      });
     }
-  }, [intersection?.intersectionRatio, lastReloadRequestTime]);
+  }, [dateRange, filters, intersection?.intersectionRatio, lastReloadRequestTime, query]);
 
   const isReady = attributes && intersectedOnce;
 
   return (
     <div ref={intersectionRef}>
       <ChartLoader
-        loading={loading || !isReady}
+        loading={loading && !isReady}
         loadedOnce={loadedOnce}
         style={style}
         hasTitle={hasTitle}
@@ -80,11 +89,11 @@ export const LensWrapper = ({
             style={style}
             attributes={attributes}
             viewMode={ViewMode.VIEW}
-            timeRange={dateRange}
-            query={query}
-            filters={filters}
+            timeRange={state.dateRange}
+            query={state.query}
+            filters={state.filters}
             extraActions={extraActions}
-            lastReloadRequestTime={currentLastReloadRequestTime}
+            lastReloadRequestTime={state.lastReloadRequestTime}
             executionContext={{
               type: 'infrastructure_observability_hosts_view',
               name: id,

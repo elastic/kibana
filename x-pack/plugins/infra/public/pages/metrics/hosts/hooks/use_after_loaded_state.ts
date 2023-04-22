@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
-import { useState } from 'react';
-import useCustomCompareEffect from 'react-use/lib/useCustomCompareEffect';
+import { useState, useEffect, useRef } from 'react';
 
 export const useAfterLoadedState = <T>(loading: boolean, state: T) => {
+  const ref = useRef<boolean | undefined>(undefined);
   const [internalState, setInternalState] = useState(state);
 
-  useCustomCompareEffect(
-    () => {
-      if (!loading) {
-        setInternalState(state);
-      }
-    },
-    [loading],
-    (prevDeps, nextDeps) => isEqual(prevDeps, nextDeps)
-  );
+  if (!ref.current || loading !== ref.current) {
+    ref.current = loading;
+  }
+
+  useEffect(() => {
+    if (!loading) {
+      setInternalState(state);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ref.current]);
 
   return { afterLoadedState: internalState };
 };
