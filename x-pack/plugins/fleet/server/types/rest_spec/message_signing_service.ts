@@ -8,7 +8,9 @@
 import { schema } from '@kbn/config-schema';
 
 export const RotateKeyPairSchema = {
-  params: schema.object({
-    acknowledge: schema.boolean({ defaultValue: false }),
-  }),
+  query: schema.maybe(
+    schema.object({
+      acknowledge: schema.boolean({ defaultValue: false }),
+    })
+  ),
 };

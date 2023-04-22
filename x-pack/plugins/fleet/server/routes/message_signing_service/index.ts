@@ -6,10 +6,8 @@
  */
 
 import type { FleetAuthzRouter } from '../../services/security';
-
 import { MESSAGE_SIGNING_SERVICE_API_ROUTES } from '../../constants';
-
-import { RotateKeyPairSchema } from '../../types/rest_spec/message_signing_service';
+import { RotateKeyPairSchema } from '../../types';
 
 import { rotateKeyPairHandler } from './handlers';
 
