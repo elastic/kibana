@@ -167,10 +167,10 @@ export const createThreatSignals = async ({
         `all successes are ${results.success}`
       );
       if (results.createdSignalsCount >= params.maxSignals) {
-        if (results.warningMessages.includes(getMaxSignalsWarning(params.maxSignals))) {
+        if (results.warningMessages.includes(getMaxSignalsWarning())) {
           results.warningMessages = uniq(results.warningMessages);
         } else {
-          results.warningMessages.push(getMaxSignalsWarning(params.maxSignals));
+          results.warningMessages.push(getMaxSignalsWarning());
         }
         ruleExecutionLogger.debug(
           `Indicator match has reached its max signals count ${params.maxSignals}. Additional documents not checked are ${documentCount}`

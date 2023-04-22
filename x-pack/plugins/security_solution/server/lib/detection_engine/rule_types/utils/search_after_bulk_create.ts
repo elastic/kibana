@@ -150,7 +150,7 @@ export const searchAfterAndBulkCreate = async ({
           );
 
           if (bulkCreateResult.alertsWereTruncated) {
-            toReturn.warningMessages.push(getMaxSignalsWarning(tuple.maxSignals));
+            toReturn.warningMessages.push(getMaxSignalsWarning());
             break;
           }
 

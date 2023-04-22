@@ -313,7 +313,7 @@ export const createNewTermsAlertType = (
           );
 
           if (bulkCreateResult.alertsWereTruncated) {
-            result.warningMessages.push(getMaxSignalsWarning(params.maxSignals));
+            result.warningMessages.push(getMaxSignalsWarning());
           }
 
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });

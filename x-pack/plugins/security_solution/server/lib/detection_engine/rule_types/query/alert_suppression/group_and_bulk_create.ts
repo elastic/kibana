@@ -211,7 +211,7 @@ export const groupAndBulkCreate = async ({
       }
 
       if (buckets.length > tuple.maxSignals) {
-        toReturn.warningMessages.push(getMaxSignalsWarning(tuple.maxSignals));
+        toReturn.warningMessages.push(getMaxSignalsWarning());
       }
 
       const suppressionBuckets: SuppressionBuckets[] = buckets.map((bucket) => ({

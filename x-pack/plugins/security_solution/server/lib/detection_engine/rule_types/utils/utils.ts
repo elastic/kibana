@@ -954,6 +954,6 @@ export const getUnprocessedExceptionsWarnings = (
   }
 };
 
-export const getMaxSignalsWarning = (maxSignalsCount: number): string => {
-  return `max_signals value was hit, only the first ${maxSignalsCount} alerts were indexed. Rule may be missing signal data`;
+export const getMaxSignalsWarning = (): string => {
+  return `The max alerts circut breaker was hit but there might still be alerts this rule is missing`;
 };
