@@ -675,7 +675,7 @@ export default ({ getService }: FtrProviderContext) => {
               const expectedRule = getSimpleRuleOutput();
               expectedRule.actions = someActionsWithFrequencies.map((action) => ({
                 ...action,
-                frequency: NOTIFICATION_DEFAULT_FREQUENCY,
+                frequency: action.frequency ?? NOTIFICATION_DEFAULT_FREQUENCY,
               }));
 
               const rule = removeServerGeneratedProperties(createdRule);
@@ -698,7 +698,11 @@ export default ({ getService }: FtrProviderContext) => {
             const expectedRule = getSimpleRuleOutput();
             expectedRule.actions = someActionsWithFrequencies.map((action) => ({
               ...action,
-              frequency: { summary: true, throttle, notifyWhen: 'onThrottleInterval' },
+              frequency: action.frequency ?? {
+                summary: true,
+                throttle,
+                notifyWhen: 'onThrottleInterval',
+              },
             }));
 
             const rule = removeServerGeneratedProperties(createdRule);

@@ -119,8 +119,6 @@ export const baseSchema = buildRuleSchemas({
     output_index: AlertsIndex,
     namespace: AlertsIndexNamespace,
     meta: RuleMetadata,
-    // Throttle
-    throttle: RuleActionThrottle,
   },
   defaultable: {
     // Main attributes
@@ -172,7 +170,10 @@ const responseOptionalFields = {
 };
 
 export type BaseCreateProps = t.TypeOf<typeof BaseCreateProps>;
-export const BaseCreateProps = baseSchema.create;
+export const BaseCreateProps = t.intersection([
+  baseSchema.create,
+  t.exact(t.partial({ throttle: RuleActionThrottle })),
+]);
 
 // -------------------------------------------------------------------------------------------------
 // Shared schemas
@@ -185,6 +186,7 @@ type SharedCreateProps = t.TypeOf<typeof SharedCreateProps>;
 const SharedCreateProps = t.intersection([
   baseSchema.create,
   t.exact(t.partial({ rule_id: RuleSignatureId })),
+  t.exact(t.partial({ throttle: RuleActionThrottle })),
 ]);
 
 type SharedUpdateProps = t.TypeOf<typeof SharedUpdateProps>;
@@ -192,12 +194,14 @@ const SharedUpdateProps = t.intersection([
   baseSchema.create,
   t.exact(t.partial({ rule_id: RuleSignatureId })),
   t.exact(t.partial({ id: RuleObjectId })),
+  t.exact(t.partial({ throttle: RuleActionThrottle })),
 ]);
 
 type SharedPatchProps = t.TypeOf<typeof SharedPatchProps>;
 const SharedPatchProps = t.intersection([
   baseSchema.patch,
   t.exact(t.partial({ rule_id: RuleSignatureId, id: RuleObjectId })),
+  t.exact(t.partial({ throttle: RuleActionThrottle })),
 ]);
 
 export type SharedResponseProps = t.TypeOf<typeof SharedResponseProps>;

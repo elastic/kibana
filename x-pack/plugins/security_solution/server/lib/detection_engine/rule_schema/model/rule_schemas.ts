@@ -14,8 +14,6 @@ import {
   RiskScore,
   RiskScoreMapping,
   RuleActionArrayCamel,
-  RuleActionNotifyWhen,
-  RuleActionThrottle,
   RuleIntervalFrom,
   RuleIntervalTo,
   Severity,
@@ -271,7 +269,7 @@ export const allRuleTypes = t.union([
   t.literal(NEW_TERMS_RULE_TYPE_ID),
 ]);
 
-const internalRuleCreateRequired = t.type({
+const internalRuleCreate = t.type({
   name: RuleName,
   tags: RuleTagArray,
   alertTypeId: allRuleTypes,
@@ -283,17 +281,9 @@ const internalRuleCreateRequired = t.type({
   actions: RuleActionArrayCamel,
   params: ruleParams,
 });
-const internalRuleCreateOptional = t.partial({
-  throttle: t.union([RuleActionThrottle, t.null]),
-  notifywhen: t.union([RuleActionNotifyWhen, t.null]),
-});
-export const internalRuleCreate = t.intersection([
-  internalRuleCreateOptional,
-  internalRuleCreateRequired,
-]);
 export type InternalRuleCreate = t.TypeOf<typeof internalRuleCreate>;
 
-const internalRuleUpdateRequired = t.type({
+const internalRuleUpdate = t.type({
   name: RuleName,
   tags: RuleTagArray,
   schedule: t.type({
@@ -302,12 +292,4 @@ const internalRuleUpdateRequired = t.type({
   actions: RuleActionArrayCamel,
   params: ruleParams,
 });
-const internalRuleUpdateOptional = t.partial({
-  throttle: t.union([RuleActionThrottle, t.null]),
-  notifywhen: t.union([RuleActionNotifyWhen, t.null]),
-});
-export const internalRuleUpdate = t.intersection([
-  internalRuleUpdateOptional,
-  internalRuleUpdateRequired,
-]);
 export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;

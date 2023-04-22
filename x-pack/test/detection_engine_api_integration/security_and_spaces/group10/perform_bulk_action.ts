@@ -1817,14 +1817,8 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(200);
 
-            // Check that the updated rule is returned with the response
-            expect(body.attributes.results.updated[0].actions).to.eql([
-              {
-                ...defaultRuleAction,
-                uuid: createdRule.actions[0].uuid,
-                frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
-              },
-            ]);
+            // Check that the rule is skipped and was not updated
+            expect(body.attributes.results.skipped[0].id).to.eql(createdRule.id);
 
             // Check that the updates have been persisted
             const { body: readRule } = await fetchRule(ruleId).expect(200);
@@ -1838,7 +1832,7 @@ export default ({ getService }: FtrProviderContext): void => {
             ]);
           });
 
-          it('should change throttle if actions list in payload is empty', async () => {
+          it('should not change throttle if actions list in payload is empty', async () => {
             // create a new connector
             const webHookConnector = await createWebHookConnector();
 
@@ -1874,21 +1868,14 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(200);
 
-            // Check that the updated rule is returned with the response
-            expect(body.attributes.results.updated[0].throttle).to.be(undefined);
-
-            const expectedActions = body.attributes.results.updated[0].actions.map(
-              (action: any) => ({
-                ...action,
-                frequency: { summary: true, throttle: '8h', notifyWhen: 'onThrottleInterval' },
-              })
-            );
+            // Check that the rule is skipped and was not updated
+            expect(body.attributes.results.skipped[0].id).to.eql(createdRule.id);
 
             // Check that the updates have been persisted
             const { body: readRule } = await fetchRule(ruleId).expect(200);
 
             expect(readRule.throttle).to.eql(undefined);
-            expect(readRule.actions).to.eql(expectedActions);
+            expect(readRule.actions).to.eql(createdRule.actions);
           });
         });
 
@@ -2028,7 +2015,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ];
           casesForEmptyActions.forEach(({ payloadThrottle }) => {
-            it(`throttle is set to NOTIFICATION_THROTTLE_NO_ACTIONS, if payload throttle="${payloadThrottle}" and actions list is empty`, async () => {
+            it(`should not update throttle, if payload throttle="${payloadThrottle}" and actions list is empty`, async () => {
               const ruleId = 'ruleId';
               const createdRule = await createRule(supertest, log, {
                 ...getSimpleRule(ruleId),
@@ -2051,8 +2038,8 @@ export default ({ getService }: FtrProviderContext): void => {
                 })
                 .expect(200);
 
-              // Check that the updated rule is returned with the response
-              expect(body.attributes.results.updated[0].throttle).to.eql(undefined);
+              // Check that the rule is skipped and was not updated
+              expect(body.attributes.results.skipped[0].id).to.eql(createdRule.id);
 
               // Check that the updates have been persisted
               const { body: rule } = await fetchRule(ruleId).expect(200);
@@ -2143,11 +2130,11 @@ export default ({ getService }: FtrProviderContext): void => {
           const cases = [
             {
               payload: { throttle: '1d' },
-              expected: { notifyWhen: 'onThrottleInterval' },
+              expected: { notifyWhen: null },
             },
             {
               payload: { throttle: NOTIFICATION_THROTTLE_RULE },
-              expected: { notifyWhen: 'onActiveAlert' },
+              expected: { notifyWhen: null },
             },
           ];
           cases.forEach(({ payload, expected }) => {

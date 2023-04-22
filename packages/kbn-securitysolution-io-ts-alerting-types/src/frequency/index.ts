@@ -16,6 +16,9 @@ import { RuleActionThrottle } from '../throttle';
 export type RuleActionSummary = t.TypeOf<typeof RuleActionSummary>;
 export const RuleActionSummary = t.boolean;
 
+/**
+ * The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`,  or `onThrottleInterval`
+ */
 export type RuleActionNotifyWhen = t.TypeOf<typeof RuleActionNotifyWhen>;
 export const RuleActionNotifyWhen = t.union([
   t.literal('onActionGroupChange'),
@@ -23,6 +26,9 @@ export const RuleActionNotifyWhen = t.union([
   t.literal('onThrottleInterval'),
 ]);
 
+/**
+ * The action frequency defines when the action runs (for example, only on rule execution or at specific time intervals).
+ */
 export type RuleActionFrequency = t.TypeOf<typeof RuleActionFrequency>;
 export const RuleActionFrequency = t.type({
   summary: RuleActionSummary,
