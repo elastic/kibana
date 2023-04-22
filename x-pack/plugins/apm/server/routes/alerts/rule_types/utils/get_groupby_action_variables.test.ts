@@ -17,10 +17,10 @@ describe('getGroupByActionVariables', () => {
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
-        'serviceName': 'opbeans-java',
-        'environment': 'development',
-        'transactionType': 'request',
-        'transaction.name': 'tx-java'
+        "environment": "development",
+        "serviceName": "opbeans-java",
+        "transaction.name": "tx-java",
+        "transactionType": "request",
       }
     `);
   });
@@ -34,10 +34,10 @@ describe('getGroupByActionVariables', () => {
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
-        'serviceName': 'opbeans-java',
-        'environment': 'Not defined',
-        'transactionType': 'request',
-        'transaction.name': 'tx-java'
+        "environment": "Not defined",
+        "serviceName": "opbeans-java",
+        "transaction.name": "tx-java",
+        "transactionType": "request",
       }
     `);
   });
@@ -51,10 +51,10 @@ describe('getGroupByActionVariables', () => {
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
-        'serviceName': 'opbeans-java',
-        'environment': 'development',
-        'transactionType': 'request',
-        'transaction.name': 'Not defined'
+        "environment": "development",
+        "serviceName": "opbeans-java",
+        "transaction.name": "Not defined",
+        "transactionType": "request",
       }
     `);
   });
@@ -68,10 +68,10 @@ describe('getGroupByActionVariables', () => {
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
-        'serviceName': 'opbeans-java',
-        'environment': 'Not defined',
-        'transactionType': 'request',
-        'transaction.name': 'Not defined'
+        "environment": "Not defined",
+        "serviceName": "opbeans-java",
+        "transaction.name": "Not defined",
+        "transactionType": "request",
       }
     `);
   });

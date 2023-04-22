@@ -16,8 +16,8 @@ describe('getAlertFieldsFromGroupBy', () => {
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
-        'service.name': 'opbeans-java',
-        'transaction.name': 'tx-java',
+        "service.name": "opbeans-java",
+        "transaction.name": "tx-java",
       }
     `);
   });
@@ -30,8 +30,8 @@ describe('getAlertFieldsFromGroupBy', () => {
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
-        'service.name': 'opbeans-java',
-        'service.environment': 'development',
+        "service.environment": "development",
+        "service.name": "opbeans-java",
       }
     `);
   });
@@ -44,7 +44,7 @@ describe('getAlertFieldsFromGroupBy', () => {
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
-        'service.name': 'opbeans-java',
+        "service.name": "opbeans-java",
       }
     `);
   });
@@ -57,9 +57,9 @@ describe('getAlertFieldsFromGroupBy', () => {
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
-        'service.name': 'opbeans-java',
-        'service.environment': 'development',
-        'transaction.name': 'tx-java',
+        "service.environment": "development",
+        "service.name": "opbeans-java",
+        "transaction.name": "tx-java",
       }
     `);
   });
