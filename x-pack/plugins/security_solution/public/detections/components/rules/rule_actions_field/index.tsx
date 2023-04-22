@@ -200,12 +200,18 @@ export const RuleActionsField: React.FC<Props> = ({
     (key: string, value: RuleActionAlertsFilterProperty, index: number) => {
       field.setValue((prevValue: RuleAction[]) => {
         const updatedActions = [...prevValue];
+        const { alertsFilter, ...rest } = updatedActions[index];
+        const updatedAlertsFilter = { ...alertsFilter };
+
+        if (value) {
+          updatedAlertsFilter[key] = value;
+        } else {
+          delete updatedAlertsFilter[key];
+        }
+
         updatedActions[index] = {
-          ...updatedActions[index],
-          alertsFilter: {
-            ...(updatedActions[index].alertsFilter ?? { query: null, timeframe: null }),
-            [key]: value,
-          },
+          ...rest,
+          ...(!isEmpty(updatedAlertsFilter) ? { alertsFilter: updatedAlertsFilter } : {}),
         };
         return updatedActions;
       });

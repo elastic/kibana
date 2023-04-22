@@ -129,6 +129,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               ruleId: rule.id,
               ruleUuid: params.ruleId,
               ruleName: rule.name,
+              ruleRevision: rule.revision,
               ruleType: rule.ruleTypeId,
               spaceId,
             },

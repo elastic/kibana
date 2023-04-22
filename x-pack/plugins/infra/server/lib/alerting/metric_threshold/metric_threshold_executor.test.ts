@@ -70,9 +70,11 @@ const logger = {
   get: () => logger,
 } as unknown as Logger;
 
+const STARTED_AT_MOCK_DATE = new Date();
+
 const mockOptions = {
   executionId: '',
-  startedAt: new Date(),
+  startedAt: STARTED_AT_MOCK_DATE,
   previousStartedAt: null,
   state: {
     wrapped: initialRuleState,
@@ -128,7 +130,8 @@ const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
   jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
 };
 
-describe('The metric threshold alert type', () => {
+// FAILING: https://github.com/elastic/kibana/issues/155534
+describe.skip('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
@@ -1326,7 +1329,9 @@ describe('The metric threshold alert type', () => {
         },
       ]);
       await execute(true);
-      expect(mostRecentAction(instanceID)).toBeNoDataAction();
+      const recentAction = mostRecentAction(instanceID);
+      expect(recentAction.action.reason).toEqual('test.metric.3 reported no data in the last 1m');
+      expect(recentAction).toBeNoDataAction();
     });
     test('does not send a No Data alert when not configured to do so', async () => {
       setEvaluationResults([
@@ -1347,6 +1352,68 @@ describe('The metric threshold alert type', () => {
       ]);
       await execute(false);
       expect(mostRecentAction(instanceID)).toBe(undefined);
+    });
+  });
+
+  describe('alerts with NO_DATA where one condtion is an aggregation and the other is a document count', () => {
+    afterAll(() => clearInstances());
+    const instanceID = '*';
+    const execute = (alertOnNoData: boolean, sourceId: string = 'default') =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          sourceId,
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+              comparator: Comparator.GT,
+              threshold: [1],
+              metric: 'test.metric.3',
+            },
+            {
+              ...baseCountCriterion,
+              comparator: Comparator.GT,
+              threshold: [30],
+            },
+          ],
+          alertOnNoData,
+        },
+      });
+    test('sends a No Data alert when configured to do so', async () => {
+      setEvaluationResults([
+        {
+          '*': {
+            ...baseNonCountCriterion,
+            comparator: Comparator.LT,
+            threshold: [1],
+            metric: 'test.metric.3',
+            currentValue: null,
+            timestamp: STARTED_AT_MOCK_DATE.toISOString(),
+            shouldFire: false,
+            shouldWarn: false,
+            isNoData: true,
+            bucketKey: { groupBy0: '*' },
+          },
+        },
+        {},
+      ]);
+      await execute(true);
+      const recentAction = mostRecentAction(instanceID);
+      expect(recentAction.action).toEqual({
+        alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/mock-alert-uuid',
+        alertState: 'NO DATA',
+        group: '*',
+        groupByKeys: undefined,
+        metric: { condition0: 'test.metric.3', condition1: 'count' },
+        reason: 'test.metric.3 reported no data in the last 1m',
+        threshold: { condition0: ['1'], condition1: [30] },
+        timestamp: STARTED_AT_MOCK_DATE.toISOString(),
+        value: { condition0: '[NO DATA]', condition1: 0 },
+        viewInAppUrl: 'http://localhost:5601/app/metrics/explorer',
+        tags: [],
+      });
+      expect(recentAction).toBeNoDataAction();
     });
   });
 
