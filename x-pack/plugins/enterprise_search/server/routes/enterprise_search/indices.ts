@@ -351,40 +351,6 @@ export function registerIndexRoutes({
     })
   );
 
-  // TEMPORARY endpoint for testing ELSER deployment
-  router.post(
-    {
-      path: '/internal/enterprise_search/elser',
-      validate: {},
-    },
-    elasticsearchErrorHandler(log, (context, request, response) => {
-      return response.ok({
-        body: {
-          deploymentState: 'downloading',
-          modelId: 'elser-v1',
-        },
-        headers: { 'content-type': 'application/json' },
-      });
-    })
-  );
-
-  // TEMPORARY endpoint for testing ELSER deployment
-  router.get(
-    {
-      path: '/internal/enterprise_search/elser',
-      validate: {},
-    },
-    elasticsearchErrorHandler(log, (context, request, response) => {
-      return response.ok({
-        body: {
-          deploymentState: 'downloading',
-          modelId: 'elser-v1',
-        },
-        headers: { 'content-type': 'application/json' },
-      });
-    })
-  );
-
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors',
