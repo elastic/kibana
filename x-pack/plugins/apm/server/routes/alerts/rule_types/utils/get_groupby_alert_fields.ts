@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { TRANSACTION_NAME } from '../../../../common/es_fields/apm';
-
-export const getGroupByActionVariables = (
+export const getAlertFieldsFromGroupBy = (
   groupByFields: Record<string, string>
 ): Record<string, string> => {
   return Object.keys(groupByFields).reduce<Record<string, string>>(
     (acc, cur) => {
-      acc[cur === TRANSACTION_NAME ? 'transactionName' : cur] =
-        groupByFields[cur];
+      const fieldValue = groupByFields[cur];
+      if (
+        !fieldValue ||
+        fieldValue.includes('NOT_DEFINED') ||
+        fieldValue.endsWith('_ALL')
+      ) {
+        return acc;
+      }
+      acc[cur] = groupByFields[cur];
       return acc;
     },
     {}

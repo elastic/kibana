@@ -197,7 +197,7 @@ describe('Error count alert', () => {
         error_counts: {
           buckets: [
             {
-              key: ['foo', 'env-foo', 'tx-name-foo'],
+              key: ['foo', 'env-foo', 'TRANSACTION_NAME_NOT_DEFINED'],
               doc_count: 5,
             },
             {
@@ -227,7 +227,7 @@ describe('Error count alert', () => {
 
     await executor({ params });
     [
-      'foo_env-foo_tx-name-foo',
+      'foo_env-foo_TRANSACTION_NAME_NOT_DEFINED',
       'foo_env-foo-2_tx-name-foo-2',
       'bar_env-bar_tx-name-bar',
     ].forEach((instanceName) =>
@@ -242,11 +242,11 @@ describe('Error count alert', () => {
       threshold: 2,
       triggerValue: 5,
       reason:
-        'Error count is 5 in the last 5 mins for foo, env-foo, tx-name-foo. Alert when > 2.',
+        'Error count is 5 in the last 5 mins for foo, env-foo, transaction name not defined. Alert when > 2.',
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
-      transactionName: 'tx-name-foo',
+      'transaction.name': 'Not defined',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
@@ -258,7 +258,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
-      transactionName: 'tx-name-foo-2',
+      'transaction.name': 'tx-name-foo-2',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
@@ -270,7 +270,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
-      transactionName: 'tx-name-bar',
+      'transaction.name': 'tx-name-bar',
     });
   });
 
@@ -438,7 +438,8 @@ describe('Error count alert', () => {
       environment: 'Not defined',
       threshold: 2,
       triggerValue: 5,
-      reason: 'Error count is 5 in the last 5 mins for foo. Alert when > 2.',
+      reason:
+        'Error count is 5 in the last 5 mins for foo, environment not defined. Alert when > 2.',
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_ALL',
@@ -448,7 +449,8 @@ describe('Error count alert', () => {
       environment: 'Not defined',
       threshold: 2,
       triggerValue: 4,
-      reason: 'Error count is 4 in the last 5 mins for foo. Alert when > 2.',
+      reason:
+        'Error count is 4 in the last 5 mins for foo, environment not defined. Alert when > 2.',
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_ALL',

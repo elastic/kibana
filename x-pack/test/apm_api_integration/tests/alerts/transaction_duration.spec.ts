@@ -105,7 +105,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               group: 'threshold_met',
               id: actionId,
               params: {
-                documents: [{ message: 'Transaction Name: {{context.transactionName}}' }],
+                documents: [{ message: 'Transaction Name: {{context.transaction.name}}' }],
               },
               frequency: {
                 notify_when: 'onActionGroupChange',

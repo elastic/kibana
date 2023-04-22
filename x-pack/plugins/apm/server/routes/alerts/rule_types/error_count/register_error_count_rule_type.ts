@@ -19,10 +19,7 @@ import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server
 import { termQuery } from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { firstValueFrom } from 'rxjs';
-import {
-  getEnvironmentEsField,
-  getEnvironmentLabel,
-} from '../../../../../common/environment_filter_values';
+import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
@@ -49,8 +46,9 @@ import {
   getServiceGroupFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
-import { getGroupByTerms } from '../../../../../common/utils/get_groupby_terms';
-import { getGroupByActionVariables } from '../get_group_action_variables';
+import { getGroupByTerms } from '../utils/get_groupby_terms';
+import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
+import { getAlertFieldsFromGroupBy } from '../utils/get_groupby_alert_fields';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
@@ -144,20 +142,17 @@ export function registerErrorCountRuleType({
 
         const errorCountResults =
           response.aggregations?.error_counts.buckets.map((bucket) => {
-            const groupByFields: Record<string, string> = {};
-            bucket.key.forEach((key, keyIndex) => {
-              if (!predefinedGroupby.includes(allGroupbyFields[keyIndex])) {
-                groupByFields[allGroupbyFields[keyIndex]] = key;
-              }
-            });
-
-            const [serviceName, environment] = bucket.key;
+            const groupByFields = bucket.key.reduce(
+              (obj, bucketKey, bucketIndex) => {
+                obj[allGroupbyFields[bucketIndex]] = bucketKey;
+                return obj;
+              },
+              {} as Record<string, string>
+            );
 
             const bucketKey = bucket.key;
 
             return {
-              serviceName,
-              environment,
               errorCount: bucket.doc_count,
               sourceFields: getServiceGroupFields(bucket),
               groupByFields,
@@ -168,28 +163,21 @@ export function registerErrorCountRuleType({
         errorCountResults
           .filter((result) => result.errorCount >= ruleParams.threshold)
           .forEach((result) => {
-            const {
-              serviceName,
-              environment,
-              errorCount,
-              sourceFields,
-              groupByFields,
-              bucketKey,
-            } = result;
+            const { errorCount, sourceFields, groupByFields, bucketKey } =
+              result;
             const alertReason = formatErrorCountReason({
-              serviceName,
               threshold: ruleParams.threshold,
               measured: errorCount,
               windowSize: ruleParams.windowSize,
               windowUnit: ruleParams.windowUnit,
-              group: bucketKey
-                .filter((key) => !key.includes('NOT_DEFINED'))
-                .join(', '),
+              groupKey: bucketKey,
             });
 
             const relativeViewInAppUrl = getAlertUrlErrorCount(
-              serviceName,
-              getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT]
+              groupByFields[SERVICE_NAME],
+              getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[
+                SERVICE_ENVIRONMENT
+              ]
             );
 
             const viewInAppUrl = addSpaceIdToPath(
@@ -198,6 +186,7 @@ export function registerErrorCountRuleType({
               relativeViewInAppUrl
             );
 
+            const groupByAlertFields = getAlertFieldsFromGroupBy(groupByFields);
             const groupByActionVariables =
               getGroupByActionVariables(groupByFields);
 
@@ -205,25 +194,21 @@ export function registerErrorCountRuleType({
               .alertWithLifecycle({
                 id: bucketKey.join('_'),
                 fields: {
-                  [SERVICE_NAME]: serviceName,
-                  ...getEnvironmentEsField(environment),
                   [PROCESSOR_EVENT]: ProcessorEvent.error,
                   [ALERT_EVALUATION_VALUE]: errorCount,
                   [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
                   [ERROR_GROUP_ID]: ruleParams.errorGroupingKey,
                   [ALERT_REASON]: alertReason,
                   ...sourceFields,
-                  ...groupByFields,
+                  ...groupByAlertFields,
                 },
               })
               .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-                environment: getEnvironmentLabel(environment),
                 interval: formatDurationFromTimeUnitChar(
                   ruleParams.windowSize,
                   ruleParams.windowUnit as TimeUnitChar
                 ),
                 reason: alertReason,
-                serviceName,
                 threshold: ruleParams.threshold,
                 errorGroupingKey: ruleParams.errorGroupingKey,
                 triggerValue: errorCount,

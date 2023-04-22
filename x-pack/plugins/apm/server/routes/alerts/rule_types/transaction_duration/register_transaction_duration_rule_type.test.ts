@@ -60,11 +60,11 @@ describe('registerTransactionDurationRuleType', () => {
       alertDetailsUrl: expect.stringContaining(
         'http://localhost:5601/eyr/app/observability/alerts/'
       ),
-      transactionName: 'GET /orders',
+      'transaction.name': 'GET /orders',
       environment: 'Not defined',
       interval: `5 mins`,
       reason:
-        'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java, request. Alert when > 3,000 ms.',
+        'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java, environment not defined, request. Alert when > 3,000 ms.',
       transactionType: 'request',
       serviceName: 'opbeans-java',
       threshold: 3000,
@@ -140,7 +140,7 @@ describe('registerTransactionDurationRuleType', () => {
       triggerValue: '5,500 ms',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=development',
-      transactionName: 'GET /products',
+      'transaction.name': 'GET /products',
     });
   });
 
@@ -231,7 +231,7 @@ describe('registerTransactionDurationRuleType', () => {
                 'opbeans-java',
                 'ENVIRONMENT_NOT_DEFINED',
                 'request',
-                'GET /orders',
+                'TRANSACTION_NAME_NOT_DEFINED',
               ],
               avgLatency: {
                 value: 5500000,
@@ -273,14 +273,14 @@ describe('registerTransactionDurationRuleType', () => {
       environment: 'Not defined',
       interval: `5 mins`,
       reason:
-        'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java, request, GET /orders. Alert when > 3,000 ms.',
+        'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java, environment not defined, request, transaction name not defined. Alert when > 3,000 ms.',
       transactionType: 'request',
       serviceName: 'opbeans-java',
       threshold: 3000,
       triggerValue: '5,500 ms',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=ENVIRONMENT_ALL',
-      transactionName: 'GET /orders',
+      'transaction.name': 'Not defined',
     });
   });
 });

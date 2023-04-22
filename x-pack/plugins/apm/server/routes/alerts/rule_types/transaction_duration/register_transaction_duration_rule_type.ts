@@ -22,12 +22,9 @@ import {
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { firstValueFrom } from 'rxjs';
-import { getGroupByTerms } from '../../../../../common/utils/get_groupby_terms';
+import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
-import {
-  getEnvironmentEsField,
-  getEnvironmentLabel,
-} from '../../../../../common/environment_filter_values';
+import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -66,7 +63,8 @@ import {
   averageOrPercentileAgg,
   getMultiTermsSortOrder,
 } from './average_or_percentile_agg';
-import { getGroupByActionVariables } from '../get_group_action_variables';
+import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
+import { getAlertFieldsFromGroupBy } from '../utils/get_groupby_alert_fields';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
@@ -197,14 +195,13 @@ export function registerTransactionDurationRuleType({
       const triggeredBuckets = [];
 
       for (const bucket of response.aggregations.series.buckets) {
-        const groupByFields: Record<string, string> = {};
-        bucket.key.forEach((key, keyIndex) => {
-          if (!predefinedGroupby.includes(allGroupbyFields[keyIndex])) {
-            groupByFields[allGroupbyFields[keyIndex]] = key;
-          }
-        });
-
-        const [serviceName, environment, transactionType] = bucket.key;
+        const groupByFields = bucket.key.reduce(
+          (obj, bucketKey, bucketIndex) => {
+            obj[allGroupbyFields[bucketIndex]] = bucketKey;
+            return obj;
+          },
+          {} as Record<string, string>
+        );
 
         const bucketKey = bucket.key;
 
@@ -218,10 +215,7 @@ export function registerTransactionDurationRuleType({
           transactionDuration > thresholdMicroseconds
         ) {
           triggeredBuckets.push({
-            environment,
-            serviceName,
             sourceFields: getServiceGroupFields(bucket),
-            transactionType,
             transactionDuration,
             groupByFields,
             bucketKey,
@@ -230,16 +224,11 @@ export function registerTransactionDurationRuleType({
       }
 
       for (const {
-        serviceName,
-        environment,
-        transactionType,
         transactionDuration,
         sourceFields,
         groupByFields,
         bucketKey,
       } of triggeredBuckets) {
-        const environmentLabel = getEnvironmentLabel(environment);
-
         const durationFormatter = getDurationFormatter(transactionDuration);
         const transactionDurationFormatted =
           durationFormatter(transactionDuration).formatted;
@@ -248,13 +237,10 @@ export function registerTransactionDurationRuleType({
           aggregationType: String(ruleParams.aggregationType),
           asDuration,
           measured: transactionDuration,
-          serviceName,
           threshold: thresholdMicroseconds,
           windowSize: ruleParams.windowSize,
           windowUnit: ruleParams.windowUnit,
-          group: bucketKey
-            .filter((key) => !key.includes('NOT_DEFINED'))
-            .join(', '),
+          groupKey: bucketKey,
         });
 
         const alertUuid = getAlertUuid(bucketKey.join('_'));
@@ -269,42 +255,39 @@ export function registerTransactionDurationRuleType({
           basePath.publicBaseUrl,
           spaceId,
           getAlertUrlTransaction(
-            serviceName,
-            getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
-            transactionType
+            groupByFields[SERVICE_NAME],
+            getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[
+              SERVICE_ENVIRONMENT
+            ],
+            groupByFields[TRANSACTION_TYPE]
           )
         );
 
+        const groupByAlertFields = getAlertFieldsFromGroupBy(groupByFields);
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
 
         services
           .alertWithLifecycle({
             id: bucketKey.join('_'),
             fields: {
-              [SERVICE_NAME]: serviceName,
-              ...getEnvironmentEsField(environment),
-              [TRANSACTION_TYPE]: transactionType,
               [TRANSACTION_NAME]: ruleParams.transactionName,
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
               [ALERT_EVALUATION_VALUE]: transactionDuration,
               [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
               [ALERT_REASON]: reason,
               ...sourceFields,
-              ...groupByFields,
+              ...groupByAlertFields,
             },
           })
           .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
             alertDetailsUrl,
-            environment: environmentLabel,
             interval: formatDurationFromTimeUnitChar(
               ruleParams.windowSize,
               ruleParams.windowUnit as TimeUnitChar
             ),
             reason,
-            serviceName,
-            transactionName: ruleParams.transactionName, // #Note once we group by transactionName, use the transactionName key from the bucket
+            transactionName: ruleParams.transactionName, // When group by doesn't include transaction.name, the transactionName variable will contain value of the Transaction Name filter
             threshold: ruleParams.threshold,
-            transactionType,
             triggerValue: transactionDurationFormatted,
             viewInAppUrl,
             ...groupByActionVariables,

@@ -106,7 +106,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 documents: [
                   {
                     message: `${errorCountMessage}
-- Transaction name: {{context.transactionName}}`,
+- Transaction name: {{context.transaction.name}}`,
                   },
                 ],
               },

@@ -21,10 +21,7 @@ import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { firstValueFrom } from 'rxjs';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
-import {
-  getEnvironmentEsField,
-  getEnvironmentLabel,
-} from '../../../../../common/environment_filter_values';
+import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
   EVENT_OUTCOME,
   PROCESSOR_EVENT,
@@ -57,8 +54,9 @@ import {
   getServiceGroupFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
-import { getGroupByTerms } from '../../../../../common/utils/get_groupby_terms';
-import { getGroupByActionVariables } from '../get_group_action_variables';
+import { getGroupByTerms } from '../utils/get_groupby_terms';
+import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
+import { getAlertFieldsFromGroupBy } from '../utils/get_groupby_alert_fields';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionErrorRate];
 
@@ -189,14 +187,13 @@ export function registerTransactionErrorRateRuleType({
         const results = [];
 
         for (const bucket of response.aggregations.series.buckets) {
-          const groupByFields: Record<string, string> = {};
-          bucket.key.forEach((key, keyIndex) => {
-            if (!predefinedGroupby.includes(allGroupbyFields[keyIndex])) {
-              groupByFields[allGroupbyFields[keyIndex]] = key;
-            }
-          });
-
-          const [serviceName, environment, transactionType] = bucket.key;
+          const groupByFields = bucket.key.reduce(
+            (obj, bucketKey, bucketIndex) => {
+              obj[allGroupbyFields[bucketIndex]] = bucketKey;
+              return obj;
+            },
+            {} as Record<string, string>
+          );
 
           const bucketKey = bucket.key;
 
@@ -212,9 +209,6 @@ export function registerTransactionErrorRateRuleType({
 
           if (errorRate >= ruleParams.threshold) {
             results.push({
-              serviceName,
-              environment,
-              transactionType,
               errorRate,
               sourceFields: getServiceGroupFields(failedOutcomeBucket),
               groupByFields,
@@ -224,32 +218,23 @@ export function registerTransactionErrorRateRuleType({
         }
 
         results.forEach((result) => {
-          const {
-            serviceName,
-            environment,
-            transactionType,
-            errorRate,
-            sourceFields,
-            groupByFields,
-            bucketKey,
-          } = result;
+          const { errorRate, sourceFields, groupByFields, bucketKey } = result;
 
           const reasonMessage = formatTransactionErrorRateReason({
             threshold: ruleParams.threshold,
             measured: errorRate,
             asPercent,
-            serviceName,
             windowSize: ruleParams.windowSize,
             windowUnit: ruleParams.windowUnit,
-            group: bucketKey
-              .filter((key) => !key.includes('NOT_DEFINED'))
-              .join(', '),
+            groupKey: bucketKey,
           });
 
           const relativeViewInAppUrl = getAlertUrlTransaction(
-            serviceName,
-            getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
-            transactionType
+            groupByFields[SERVICE_NAME],
+            getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[
+              SERVICE_ENVIRONMENT
+            ],
+            groupByFields[TRANSACTION_TYPE]
           );
 
           const viewInAppUrl = addSpaceIdToPath(
@@ -258,6 +243,8 @@ export function registerTransactionErrorRateRuleType({
             relativeViewInAppUrl
           );
 
+          const groupByAlertFields = getAlertFieldsFromGroupBy(groupByFields);
+
           const groupByActionVariables =
             getGroupByActionVariables(groupByFields);
 
@@ -265,27 +252,21 @@ export function registerTransactionErrorRateRuleType({
             .alertWithLifecycle({
               id: bucketKey.join('_'),
               fields: {
-                [SERVICE_NAME]: serviceName,
-                ...getEnvironmentEsField(environment),
-                [TRANSACTION_TYPE]: transactionType,
                 [PROCESSOR_EVENT]: ProcessorEvent.transaction,
                 [ALERT_EVALUATION_VALUE]: errorRate,
                 [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
                 [ALERT_REASON]: reasonMessage,
                 ...sourceFields,
-                ...groupByFields,
+                ...groupByAlertFields,
               },
             })
             .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-              environment: getEnvironmentLabel(environment),
               interval: formatDurationFromTimeUnitChar(
                 ruleParams.windowSize,
                 ruleParams.windowUnit as TimeUnitChar
               ),
               reason: reasonMessage,
-              serviceName,
               threshold: ruleParams.threshold,
-              transactionType,
               triggerValue: asDecimalOrInteger(errorRate),
               viewInAppUrl,
               ...groupByActionVariables,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ENVIRONMENT_NOT_DEFINED } from '../environment_filter_values';
-import { SERVICE_ENVIRONMENT } from '../es_fields/apm';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
+import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 
 export const getGroupByTerms = (groupBy: string[] | undefined) => {
   return (groupBy ?? []).map((group) => {

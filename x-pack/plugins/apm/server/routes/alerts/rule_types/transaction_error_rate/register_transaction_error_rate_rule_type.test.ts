@@ -158,7 +158,12 @@ describe('Transaction error rate alert', () => {
         series: {
           buckets: [
             {
-              key: ['foo', 'env-foo', 'type-foo', 'tx-name-foo'],
+              key: [
+                'foo',
+                'env-foo',
+                'type-foo',
+                'TRANSACTION_NAME_NOT_DEFINED',
+              ],
               outcomes: {
                 buckets: [
                   {
@@ -217,7 +222,7 @@ describe('Transaction error rate alert', () => {
     expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
 
     expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'foo_env-foo_type-foo_tx-name-foo'
+      'foo_env-foo_type-foo_TRANSACTION_NAME_NOT_DEFINED'
     );
     expect(services.alertFactory.create).not.toHaveBeenCalledWith(
       'bar_env-bar_type-bar_tx-name-bar'
@@ -228,13 +233,13 @@ describe('Transaction error rate alert', () => {
       transactionType: 'type-foo',
       environment: 'env-foo',
       reason:
-        'Failed transactions is 10% in the last 5 mins for foo, env-foo, type-foo, tx-name-foo. Alert when > 10%.',
+        'Failed transactions is 10% in the last 5 mins for foo, env-foo, type-foo, transaction name not defined. Alert when > 10%.',
       threshold: 10,
       triggerValue: '10',
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
-      transactionName: 'tx-name-foo',
+      'transaction.name': 'Not defined',
     });
   });
 
@@ -417,7 +422,7 @@ describe('Transaction error rate alert', () => {
       transactionType: 'type-foo',
       environment: 'Not defined',
       reason:
-        'Failed transactions is 10% in the last 5 mins for foo, type-foo. Alert when > 10%.',
+        'Failed transactions is 10% in the last 5 mins for foo, environment not defined, type-foo. Alert when > 10%.',
       threshold: 10,
       triggerValue: '10',
       interval: '5 mins',

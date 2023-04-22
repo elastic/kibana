@@ -40,22 +40,36 @@ const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {
   }),
 };
 
-const formatGroup = (group: string) => (group ? ` for ${group}` : '');
+const notDefinedLabel = i18n.translate('xpack.apm.field.notDefinedLabel', {
+  defaultMessage: 'not defined',
+});
+
+const getValueForNotDefinedField = (key: string) => {
+  return `${key
+    .replace('_NOT_DEFINED', '')
+    .replaceAll('_', ' ')
+    .toLowerCase()} ${notDefinedLabel}`;
+};
+
+const formatGroupKey = (groupKey: string[]) =>
+  ` for ${groupKey
+    .map((key) =>
+      key.includes('NOT_DEFINED') ? getValueForNotDefinedField(key) : key
+    )
+    .join(', ')}`;
 
 export function formatErrorCountReason({
   threshold,
   measured,
-  serviceName,
   windowSize,
   windowUnit,
-  group,
+  groupKey,
 }: {
   threshold: number;
   measured: number;
-  serviceName: string;
   windowSize: number;
   windowUnit: string;
-  group: string;
+  groupKey: string[];
 }) {
   return i18n.translate('xpack.apm.alertTypes.errorCount.reason', {
     defaultMessage: `Error count is {measured} in the last {interval}{group}. Alert when > {threshold}.`,
@@ -66,7 +80,7 @@ export function formatErrorCountReason({
         windowSize,
         windowUnit as TimeUnitChar
       ),
-      group: formatGroup(group),
+      group: formatGroupKey(groupKey),
     },
   });
 }
@@ -74,21 +88,19 @@ export function formatErrorCountReason({
 export function formatTransactionDurationReason({
   threshold,
   measured,
-  serviceName,
   asDuration,
   aggregationType,
   windowSize,
   windowUnit,
-  group,
+  groupKey,
 }: {
   threshold: number;
   measured: number;
-  serviceName: string;
   asDuration: AsDuration;
   aggregationType: string;
   windowSize: number;
   windowUnit: string;
-  group: string;
+  groupKey: string[];
 }) {
   let aggregationTypeFormatted =
     aggregationType.charAt(0).toUpperCase() + aggregationType.slice(1);
@@ -105,7 +117,7 @@ export function formatTransactionDurationReason({
         windowSize,
         windowUnit as TimeUnitChar
       ),
-      group: formatGroup(group),
+      group: formatGroupKey(groupKey),
     },
   });
 }
@@ -113,19 +125,17 @@ export function formatTransactionDurationReason({
 export function formatTransactionErrorRateReason({
   threshold,
   measured,
-  serviceName,
   asPercent,
   windowSize,
   windowUnit,
-  group,
+  groupKey,
 }: {
   threshold: number;
   measured: number;
-  serviceName: string;
   asPercent: AsPercent;
   windowSize: number;
   windowUnit: string;
-  group: string;
+  groupKey: string[];
 }) {
   return i18n.translate('xpack.apm.alertTypes.transactionErrorRate.reason', {
     defaultMessage: `Failed transactions is {measured} in the last {interval}{group}. Alert when > {threshold}.`,
@@ -136,7 +146,7 @@ export function formatTransactionErrorRateReason({
         windowSize,
         windowUnit as TimeUnitChar
       ),
-      group: formatGroup(group),
+      group: formatGroupKey(groupKey),
     },
   });
 }
