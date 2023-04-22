@@ -100,7 +100,6 @@ describe('TextExpansionCalloutLogic', () => {
       it('starts polling when the model is downloading and polling is not active', () => {
         mount({
           ...DEFAULT_VALUES,
-          isPollingTextExpansionModelActive: false,
         });
         jest.spyOn(TextExpansionCalloutLogic.actions, 'startPollingTextExpansionModel');
 
@@ -111,7 +110,7 @@ describe('TextExpansionCalloutLogic', () => {
       it('sets polling timeout when the model is downloading and polling is active', () => {
         mount({
           ...DEFAULT_VALUES,
-          isPollingTextExpansionModelActive: true,
+          textExpansionModelPollTimeoutId: 'timeout-id',
         });
         jest.spyOn(TextExpansionCalloutLogic.actions, 'createTextExpansionModelPollingTimeout');
 
@@ -124,7 +123,7 @@ describe('TextExpansionCalloutLogic', () => {
       it('stops polling when the model is downloaded and polling is active', () => {
         mount({
           ...DEFAULT_VALUES,
-          isPollingTextExpansionModelActive: true,
+          textExpansionModelPollTimeoutId: 'timeout-id',
         });
         jest.spyOn(TextExpansionCalloutLogic.actions, 'stopPollingTextExpansionModel');
 
@@ -138,10 +137,10 @@ describe('TextExpansionCalloutLogic', () => {
     });
 
     describe('fetchTextExpansionModelError', () => {
-      it.only('stops polling if it is active', () => {
+      it('stops polling if it is active', () => {
         mount({
           ...DEFAULT_VALUES,
-          isPollingTextExpansionModelActive: true,
+          textExpansionModelPollTimeoutId: 'timeout-id',
         });
         jest.spyOn(TextExpansionCalloutLogic.actions, 'createTextExpansionModelPollingTimeout');
 
@@ -180,7 +179,7 @@ describe('TextExpansionCalloutLogic', () => {
     });
 
     describe('stopPollingTextExpansionModel', () => {
-      it('clears polling timeout and polling ID if it is set', () => {
+      it('clears polling timeout and poll timeout ID if it is set', () => {
         mount({
           ...DEFAULT_VALUES,
           textExpansionModelPollTimeoutId: 'timeout-id',
@@ -196,15 +195,89 @@ describe('TextExpansionCalloutLogic', () => {
       });
     });
   });
+
+  describe('reducers', () => {
+    describe('textExpansionModelPollTimeoutId', () => {
+      it('gets cleared on clearTextExpansionModelPollingId', () => {
+        TextExpansionCalloutLogic.actions.clearTextExpansionModelPollingId();
+
+        expect(TextExpansionCalloutLogic.values.textExpansionModelPollTimeoutId).toBe(null);
+      });
+      it('gets set on setTextExpansionModelPollingId', () => {
+        const timeout = setTimeout(() => {}, 500);
+        TextExpansionCalloutLogic.actions.setTextExpansionModelPollingId(timeout);
+
+        expect(TextExpansionCalloutLogic.values.textExpansionModelPollTimeoutId).toEqual(timeout);
+      });
+    });
+  });
+
+  describe('selectors', () => {
+    describe('isCreateButtonDisabled', () => {
+      it('is set to false if the fetch model API is idle', () => {
+        CreateTextExpansionModelApiLogic.actions.apiReset();
+        expect(TextExpansionCalloutLogic.values.isCreateButtonDisabled).toBe(false);
+      });
+      it('is set to true if the fetch model API is not idle', () => {
+        CreateTextExpansionModelApiLogic.actions.apiSuccess({
+          deploymentState: 'downloading',
+          modelId: 'mock-model-id',
+        });
+        expect(TextExpansionCalloutLogic.values.isCreateButtonDisabled).toBe(true);
+      });
+    });
+
+    describe('isModelDownloadInProgress', () => {
+      it('is set to true if the model is downloading', () => {
+        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+          deploymentState: 'downloading',
+          modelId: 'mock-model-id',
+        });
+        expect(TextExpansionCalloutLogic.values.isModelDownloadInProgress).toBe(true);
+      });
+      it('is set to false if the model is downloading', () => {
+        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+          deploymentState: 'started',
+          modelId: 'mock-model-id',
+        });
+        expect(TextExpansionCalloutLogic.values.isModelDownloadInProgress).toBe(false);
+      });
+    });
+
+    describe('isModelDownloaded', () => {
+      it('is set to true if the model is downloaded', () => {
+        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+          deploymentState: 'is_fully_downloaded',
+          modelId: 'mock-model-id',
+        });
+        expect(TextExpansionCalloutLogic.values.isModelDownloaded).toBe(true);
+      });
+      it('is set to false if the model is not downloaded', () => {
+        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+          deploymentState: 'started',
+          modelId: 'mock-model-id',
+        });
+        expect(TextExpansionCalloutLogic.values.isModelDownloaded).toBe(false);
+      });
+    });
+
+    describe('isPollingTextExpansionModelActive', () => {
+      it('is set to false if polling is not active', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          textExpansionModelPollTimeoutId: null,
+        });
+
+        expect(TextExpansionCalloutLogic.values.isPollingTextExpansionModelActive).toBe(false);
+      });
+      it('is set to true if polling is active', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          textExpansionModelPollTimeoutId: 'timeout-id',
+        });
+
+        expect(TextExpansionCalloutLogic.values.isPollingTextExpansionModelActive).toBe(true);
+      });
+    });
+  });
 });
-
-// for createTextExpansionModelPollingTimeout: mock setTimeout & clearTimeout
-
-// reducers -> textExpansionModelPollTimeoutId
-// if setTextExpansionModelPollingId is dispatched, verify that value got set to that valeu
-
-// selectors
-// CreateTextExpansionModelApiLogic.actions.apiReset()
-// verify createTextExpansionModelStatus
-// CreateTextExpansionModelApiLogic.actions.apiSuccess()
-// verify createTextExpansionModelStatus
