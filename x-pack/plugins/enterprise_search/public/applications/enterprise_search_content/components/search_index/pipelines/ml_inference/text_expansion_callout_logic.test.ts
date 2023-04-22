@@ -9,13 +9,14 @@ import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
 import { HttpResponse } from '@kbn/core/public';
 
+import { ErrorResponse, Status } from '../../../../../../../common/types/api';
+import { CreateTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
+import { FetchTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
+
 import {
   TextExpansionCalloutLogic,
   TextExpansionCalloutValues,
 } from './text_expansion_callout_logic';
-import { ErrorResponse, Status } from '../../../../../../../common/types/api';
-import { CreateTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
-import { FetchTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
 
 const DEFAULT_VALUES: TextExpansionCalloutValues = {
   createTextExpansionModelStatus: Status.IDLE,
@@ -80,12 +81,12 @@ describe('TextExpansionCalloutLogic', () => {
       it('sets createdTextExpansionModel', () => {
         jest.spyOn(TextExpansionCalloutLogic.actions, 'fetchTextExpansionModel');
         jest.spyOn(TextExpansionCalloutLogic.actions, 'startPollingTextExpansionModel');
-  
+
         TextExpansionCalloutLogic.actions.createTextExpansionModelSuccess({
           deploymentState: 'downloading',
           modelId: 'mock-model-id',
         });
-  
+
         expect(TextExpansionCalloutLogic.actions.fetchTextExpansionModel).toHaveBeenCalled();
         expect(TextExpansionCalloutLogic.actions.startPollingTextExpansionModel).toHaveBeenCalled();
       });
@@ -152,7 +153,9 @@ describe('TextExpansionCalloutLogic', () => {
           },
         } as HttpResponse<ErrorResponse>);
 
-        expect(TextExpansionCalloutLogic.actions.createTextExpansionModelPollingTimeout).toHaveBeenCalled();        
+        expect(
+          TextExpansionCalloutLogic.actions.createTextExpansionModelPollingTimeout
+        ).toHaveBeenCalled();
       });
     });
 
@@ -162,7 +165,9 @@ describe('TextExpansionCalloutLogic', () => {
 
         TextExpansionCalloutLogic.actions.startPollingTextExpansionModel();
 
-        expect(TextExpansionCalloutLogic.actions.createTextExpansionModelPollingTimeout).toHaveBeenCalled();
+        expect(
+          TextExpansionCalloutLogic.actions.createTextExpansionModelPollingTimeout
+        ).toHaveBeenCalled();
       });
       it('clears polling timeout if it is set', () => {
         mount({
@@ -191,7 +196,9 @@ describe('TextExpansionCalloutLogic', () => {
         TextExpansionCalloutLogic.actions.stopPollingTextExpansionModel();
 
         expect(clearTimeout).toHaveBeenCalledWith('timeout-id');
-        expect(TextExpansionCalloutLogic.actions.clearTextExpansionModelPollingId).toHaveBeenCalled();
+        expect(
+          TextExpansionCalloutLogic.actions.clearTextExpansionModelPollingId
+        ).toHaveBeenCalled();
       });
     });
   });
