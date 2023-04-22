@@ -11,7 +11,6 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import { RawRuleAction } from '../../../types';
 import { transformToNotifyWhen } from './transform_to_notify_when';
 import { LegacyIRuleActionsAttributes } from './types';
-import { transformToAlertThrottle } from './transform_to_alert_throttle';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -51,8 +50,8 @@ export const transformFromLegacyActions = (
         actionTypeId,
         frequency: {
           summary: true,
-          notifyWhen: transformToNotifyWhen(legacyActionsAttr.ruleThrottle) ?? 'onActiveAlert',
-          throttle: transformToAlertThrottle(legacyActionsAttr.ruleThrottle),
+          notifyWhen: transformToNotifyWhen(legacyActionsAttr.ruleThrottle) ?? 'onThrottleInterval',
+          throttle: legacyActionsAttr.ruleThrottle,
         },
       },
     ];

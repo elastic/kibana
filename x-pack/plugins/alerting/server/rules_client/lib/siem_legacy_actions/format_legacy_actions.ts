@@ -14,7 +14,6 @@ import { injectReferencesIntoActions } from '../../common';
 import { transformToNotifyWhen } from './transform_to_notify_when';
 import { transformFromLegacyActions } from './transform_legacy_actions';
 import { LegacyIRuleActionsAttributes, legacyRuleActionsSavedObjectType } from './types';
-import { transformToAlertThrottle } from './transform_to_alert_throttle';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -137,9 +136,7 @@ export const formatLegacyActions = async <T extends Rule>(
       return {
         ...rule,
         actions: [...rule.actions, ...legacyRuleActions],
-        throttle: transformToAlertThrottle(
-          (legacyRuleActions.length ? ruleThrottle : rule.throttle) ?? 'no_actions'
-        ),
+        throttle: (legacyRuleActions.length ? ruleThrottle : rule.throttle) ?? 'no_actions',
         notifyWhen: transformToNotifyWhen(ruleThrottle),
         // muteAll property is disregarded in further rule processing in Security Solution when legacy actions are present.
         // So it should be safe to set it as false, so it won't be displayed to user as w/o actions see transformFromAlertThrottle method

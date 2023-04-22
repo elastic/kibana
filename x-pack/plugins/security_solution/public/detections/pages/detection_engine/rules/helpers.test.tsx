@@ -410,22 +410,21 @@ describe('rule helpers', () => {
 
   describe('getActionsStepsData', () => {
     test('returns expected ActionsStepRule rule object', () => {
-      const actions: RuleAlertAction[] = [
-        {
-          id: 'id',
-          group: 'group',
-          params: {},
-          action_type_id: 'action_type_id',
-          frequency: {
-            summary: true,
-            throttle: null,
-            notifyWhen: 'onActiveAlert',
-          },
-        },
-      ];
       const mockedRule = {
         ...mockRule('test-id'),
-        actions,
+        actions: [
+          {
+            id: 'id',
+            group: 'group',
+            params: {},
+            action_type_id: 'action_type_id',
+            frequency: {
+              summary: true,
+              throttle: null,
+              notifyWhen: 'onActiveAlert',
+            },
+          } as RuleAlertAction,
+        ],
       };
       const result: ActionsStepRule = getActionsStepsData(mockedRule);
       const expected = {

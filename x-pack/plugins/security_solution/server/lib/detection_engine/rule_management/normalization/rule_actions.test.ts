@@ -279,7 +279,7 @@ describe('Rule actions normalization', () => {
           expect(transformToActionFrequency(someActionsWithFrequencies, throttle)).toEqual(
             someActionsWithFrequencies.map((action) => ({
               ...action,
-              frequency: action.frequency ?? NOTIFICATION_DEFAULT_FREQUENCY,
+              frequency: NOTIFICATION_DEFAULT_FREQUENCY,
             }))
           );
         }
@@ -291,7 +291,7 @@ describe('Rule actions normalization', () => {
           expect(transformToActionFrequency(someActionsWithFrequencies, throttle)).toEqual(
             someActionsWithFrequencies.map((action) => ({
               ...action,
-              frequency: action.frequency ?? {
+              frequency: {
                 summary: true,
                 throttle,
                 notifyWhen: 'onThrottleInterval',
