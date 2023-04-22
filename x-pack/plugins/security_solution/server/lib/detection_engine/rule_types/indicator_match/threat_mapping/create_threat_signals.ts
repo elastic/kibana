@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import chunk from 'lodash/fp/chunk';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { uniq, chunk } from 'lodash/fp';
 import { getThreatList, getThreatListCount } from './get_threat_list';
 import type {
   CreateThreatSignalsOptions,
@@ -167,7 +167,11 @@ export const createThreatSignals = async ({
         `all successes are ${results.success}`
       );
       if (results.createdSignalsCount >= params.maxSignals) {
-        results.warningMessages.push(getMaxSignalsWarning(params.maxSignals));
+        if (results.warningMessages.includes(getMaxSignalsWarning(params.maxSignals))) {
+          results.warningMessages = uniq(results.warningMessages);
+        } else {
+          results.warningMessages.push(getMaxSignalsWarning(params.maxSignals));
+        }
         ruleExecutionLogger.debug(
           `Indicator match has reached its max signals count ${params.maxSignals}. Additional documents not checked are ${documentCount}`
         );

@@ -210,7 +210,7 @@ export const groupAndBulkCreate = async ({
         return toReturn;
       }
 
-      if (buckets.length >= tuple.maxSignals) {
+      if (buckets.length > tuple.maxSignals) {
         toReturn.warningMessages.push(getMaxSignalsWarning(tuple.maxSignals));
       }
 

@@ -154,7 +154,7 @@ export const createNewTermsAlertType = (
       // it's possible for the array to be truncated but alert documents could fail to be created for other reasons,
       // in which case createdSignalsCount would still be less than maxSignals. Since valid alerts were truncated from
       // the array in that case, we stop and report the errors.
-      while (result.createdSignalsCount < params.maxSignals) {
+      while (result.createdSignalsCount <= params.maxSignals) {
         // PHASE 1: Fetch a page of terms using a composite aggregation. This will collect a page from
         // all of the terms seen over the last rule interval. In the next phase we'll determine which
         // ones are new.
@@ -303,10 +303,6 @@ export const createNewTermsAlertType = (
             ruleExecutionLogger,
           });
 
-          if (wrappedAlerts.length + result.createdSignalsCount > params.maxSignals) {
-            result.warningMessages.push(getMaxSignalsWarning(params.maxSignals));
-          }
-
           const bulkCreateResult = await bulkCreate(
             wrappedAlerts,
             params.maxSignals - result.createdSignalsCount,
@@ -315,6 +311,10 @@ export const createNewTermsAlertType = (
               logger: ruleExecutionLogger,
             })
           );
+
+          if (bulkCreateResult.alertsWereTruncated) {
+            result.warningMessages.push(getMaxSignalsWarning(params.maxSignals));
+          }
 
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });
 

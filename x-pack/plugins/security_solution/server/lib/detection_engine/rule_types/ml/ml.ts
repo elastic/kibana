@@ -103,11 +103,11 @@ export const mlExecutor = async ({
       anomalyThreshold: ruleParams.anomalyThreshold,
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
+      maxSignals: tuple.maxSignals,
       exceptionFilter,
     });
 
-    // Checking before filtering against lists to get original hits value
-    if (anomalyResults.hits.hits.length >= tuple.maxSignals) {
+    if (anomalyResults.hits.total && anomalyResults.hits.total > tuple.maxSignals) {
       result.warningMessages.push(getMaxSignalsWarning(tuple.maxSignals));
     }
 

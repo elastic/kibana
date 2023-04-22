@@ -124,6 +124,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
                 if (filteredAlerts.length === 0) {
                   return { createdAlerts: [], errors: {}, alertsWereTruncated: false };
+                } else if (maxAlerts === 0) {
+                  return { createdAlerts: [], errors: {}, alertsWereTruncated: true };
                 }
 
                 let enrichedAlerts = filteredAlerts;
