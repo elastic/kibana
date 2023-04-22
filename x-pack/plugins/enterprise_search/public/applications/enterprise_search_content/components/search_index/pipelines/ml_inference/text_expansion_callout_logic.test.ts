@@ -1,0 +1,210 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { LogicMounter } from '../../../../../__mocks__/kea_logic';
+
+import { HttpResponse } from '@kbn/core/public';
+
+import {
+  TextExpansionCalloutLogic,
+  TextExpansionCalloutValues,
+} from './text_expansion_callout_logic';
+import { ErrorResponse, Status } from '../../../../../../../common/types/api';
+import { CreateTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
+import { FetchTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
+
+const DEFAULT_VALUES: TextExpansionCalloutValues = {
+  createTextExpansionModelStatus: Status.IDLE,
+  createdTextExpansionModel: undefined,
+  isCreateButtonDisabled: false,
+  isModelDownloadInProgress: false,
+  isModelDownloaded: false,
+  isPollingTextExpansionModelActive: false,
+  textExpansionModel: undefined,
+  textExpansionModelPollTimeoutId: null,
+};
+
+jest.useFakeTimers();
+
+describe('TextExpansionCalloutLogic', () => {
+  const { mount } = new LogicMounter(TextExpansionCalloutLogic);
+  const { mount: mountCreateTextExpansionModelApiLogic } = new LogicMounter(
+    CreateTextExpansionModelApiLogic
+  );
+  const { mount: mountFetchTextExpansionModelApiLogic } = new LogicMounter(
+    FetchTextExpansionModelApiLogic
+  );
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mountCreateTextExpansionModelApiLogic();
+    mountFetchTextExpansionModelApiLogic();
+    mount();
+  });
+
+  it('has expected default values', () => {
+    expect(TextExpansionCalloutLogic.values).toEqual(DEFAULT_VALUES);
+  });
+
+  describe('listeners', () => {
+    describe('createTextExpansionModelPollingTimeout', () => {
+      const duration = 5000;
+      it('sets polling timeout', () => {
+        jest.spyOn(global, 'setTimeout');
+        jest.spyOn(TextExpansionCalloutLogic.actions, 'setTextExpansionModelPollingId');
+
+        TextExpansionCalloutLogic.actions.createTextExpansionModelPollingTimeout(duration);
+
+        expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), duration);
+        expect(TextExpansionCalloutLogic.actions.setTextExpansionModelPollingId).toHaveBeenCalled();
+      });
+      it('clears polling timeout if it is set', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          textExpansionModelPollTimeoutId: 'timeout-id',
+        });
+
+        jest.spyOn(global, 'clearTimeout');
+
+        TextExpansionCalloutLogic.actions.createTextExpansionModelPollingTimeout(duration);
+
+        expect(clearTimeout).toHaveBeenCalledWith('timeout-id');
+      });
+    });
+
+    describe('createTextExpansionModelSuccess', () => {
+      it('sets createdTextExpansionModel', () => {
+        jest.spyOn(TextExpansionCalloutLogic.actions, 'fetchTextExpansionModel');
+        jest.spyOn(TextExpansionCalloutLogic.actions, 'startPollingTextExpansionModel');
+  
+        TextExpansionCalloutLogic.actions.createTextExpansionModelSuccess({
+          deploymentState: 'downloading',
+          modelId: 'mock-model-id',
+        });
+  
+        expect(TextExpansionCalloutLogic.actions.fetchTextExpansionModel).toHaveBeenCalled();
+        expect(TextExpansionCalloutLogic.actions.startPollingTextExpansionModel).toHaveBeenCalled();
+      });
+    });
+
+    describe('fetchTextExpansionModelSuccess', () => {
+      const data = {
+        deploymentState: 'downloading',
+        modelId: 'mock-model-id',
+      };
+
+      it('starts polling when the model is downloading and polling is not active', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          isPollingTextExpansionModelActive: false,
+        });
+        jest.spyOn(TextExpansionCalloutLogic.actions, 'startPollingTextExpansionModel');
+
+        TextExpansionCalloutLogic.actions.fetchTextExpansionModelSuccess(data);
+
+        expect(TextExpansionCalloutLogic.actions.startPollingTextExpansionModel).toHaveBeenCalled();
+      });
+      it('sets polling timeout when the model is downloading and polling is active', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          isPollingTextExpansionModelActive: true,
+        });
+        jest.spyOn(TextExpansionCalloutLogic.actions, 'createTextExpansionModelPollingTimeout');
+
+        TextExpansionCalloutLogic.actions.fetchTextExpansionModelSuccess(data);
+
+        expect(
+          TextExpansionCalloutLogic.actions.createTextExpansionModelPollingTimeout
+        ).toHaveBeenCalled();
+      });
+      it('stops polling when the model is downloaded and polling is active', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          isPollingTextExpansionModelActive: true,
+        });
+        jest.spyOn(TextExpansionCalloutLogic.actions, 'stopPollingTextExpansionModel');
+
+        TextExpansionCalloutLogic.actions.fetchTextExpansionModelSuccess({
+          deploymentState: 'is_fully_downloaded',
+          modelId: 'mock-model-id',
+        });
+
+        expect(TextExpansionCalloutLogic.actions.stopPollingTextExpansionModel).toHaveBeenCalled();
+      });
+    });
+
+    describe('fetchTextExpansionModelError', () => {
+      it.only('stops polling if it is active', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          isPollingTextExpansionModelActive: true,
+        });
+        jest.spyOn(TextExpansionCalloutLogic.actions, 'createTextExpansionModelPollingTimeout');
+
+        TextExpansionCalloutLogic.actions.fetchTextExpansionModelError({
+          body: {
+            error: '',
+            message: 'some error',
+            statusCode: 500,
+          },
+        } as HttpResponse<ErrorResponse>);
+
+        expect(TextExpansionCalloutLogic.actions.createTextExpansionModelPollingTimeout).toHaveBeenCalled();        
+      });
+    });
+
+    describe('startPollingTextExpansionModel', () => {
+      it('sets polling timeout', () => {
+        jest.spyOn(TextExpansionCalloutLogic.actions, 'createTextExpansionModelPollingTimeout');
+
+        TextExpansionCalloutLogic.actions.startPollingTextExpansionModel();
+
+        expect(TextExpansionCalloutLogic.actions.createTextExpansionModelPollingTimeout).toHaveBeenCalled();
+      });
+      it('clears polling timeout if it is set', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          textExpansionModelPollTimeoutId: 'timeout-id',
+        });
+
+        jest.spyOn(global, 'clearTimeout');
+
+        TextExpansionCalloutLogic.actions.startPollingTextExpansionModel();
+
+        expect(clearTimeout).toHaveBeenCalledWith('timeout-id');
+      });
+    });
+
+    describe('stopPollingTextExpansionModel', () => {
+      it('clears polling timeout and polling ID if it is set', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          textExpansionModelPollTimeoutId: 'timeout-id',
+        });
+
+        jest.spyOn(global, 'clearTimeout');
+        jest.spyOn(TextExpansionCalloutLogic.actions, 'clearTextExpansionModelPollingId');
+
+        TextExpansionCalloutLogic.actions.stopPollingTextExpansionModel();
+
+        expect(clearTimeout).toHaveBeenCalledWith('timeout-id');
+        expect(TextExpansionCalloutLogic.actions.clearTextExpansionModelPollingId).toHaveBeenCalled();
+      });
+    });
+  });
+});
+
+// for createTextExpansionModelPollingTimeout: mock setTimeout & clearTimeout
+
+// reducers -> textExpansionModelPollTimeoutId
+// if setTextExpansionModelPollingId is dispatched, verify that value got set to that valeu
+
+// selectors
+// CreateTextExpansionModelApiLogic.actions.apiReset()
+// verify createTextExpansionModelStatus
+// CreateTextExpansionModelApiLogic.actions.apiSuccess()
+// verify createTextExpansionModelStatus
