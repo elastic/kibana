@@ -286,7 +286,7 @@ export function registerTransactionDurationRuleType({
               ruleParams.windowUnit as TimeUnitChar
             ),
             reason,
-            transactionName: ruleParams.transactionName, // When group by doesn't include transaction.name, the transactionName variable will contain value of the Transaction Name filter
+            'transaction.name': ruleParams.transactionName, // When group by doesn't include transaction.name, the transactionName variable will contain value of the Transaction Name filter
             threshold: ruleParams.threshold,
             triggerValue: transactionDurationFormatted,
             viewInAppUrl,
