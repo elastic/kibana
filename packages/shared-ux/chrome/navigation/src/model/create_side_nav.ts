@@ -55,9 +55,11 @@ export const createSideNavDataFactory = (
       }
 
       let isSelected: boolean = false;
+      let subjId = fullId;
       if (!subNav && fullId === activeNavItemId) {
         // if there are no subnav items and ID is current, mark the item as selected
         isSelected = true;
+        subjId += '-selected';
       }
 
       const next: MyEuiSideNavItem = {
@@ -67,7 +69,7 @@ export const createSideNavDataFactory = (
         onClick,
         href,
         items: filteredSubNav,
-        ['data-test-subj']: `nav-item-${fullId}`,
+        ['data-test-subj']: `nav-item-${subjId}`,
       };
       return [...accum, next];
     }, []);

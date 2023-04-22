@@ -78,10 +78,20 @@ export const Navigation = (props: NavigationProps) => {
     };
     const logo =
       loadingCount === 0 ? (
-        <EuiHeaderLogo iconType="logoElastic" aria-label="Go to home page" onClick={navigateHome} />
+        <EuiHeaderLogo
+          iconType="logoElastic"
+          aria-label="Go to home page"
+          onClick={navigateHome}
+          data-test-subj="nav-header-logo"
+        />
       ) : (
         <a href={homeUrl} onClick={navigateHome}>
-          <EuiLoadingSpinner size="l" aria-hidden={false} onClick={navigateHome} />
+          <EuiLoadingSpinner
+            size="l"
+            aria-hidden={false}
+            onClick={navigateHome}
+            data-test-subj="nav-header-loading-spinner"
+          />
         </a>
       );
 
@@ -100,13 +110,21 @@ export const Navigation = (props: NavigationProps) => {
     switch (props.linkToCloud) {
       case 'projects':
         return (
-          <EuiLink href="https://cloud.elastic.co/projects" color="text">
+          <EuiLink
+            href="https://cloud.elastic.co/projects"
+            color="text"
+            data-test-subj="nav-header-link-to-projects"
+          >
             <EuiCollapsibleNavGroup iconType="spaces" title="My projects" />
           </EuiLink>
         );
       case 'deployments':
         return (
-          <EuiLink href="https://cloud.elastic.co/deployments" color="text">
+          <EuiLink
+            href="https://cloud.elastic.co/deployments"
+            color="text"
+            data-test-subj="nav-header-link-to-deployments"
+          >
             <EuiCollapsibleNavGroup iconType="spaces" title="My deployments" />
           </EuiLink>
         );
@@ -123,10 +141,7 @@ export const Navigation = (props: NavigationProps) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="none" style={{ overflowY: 'auto' }}>
       <EuiFlexItem grow={false}>
-        <EuiCollapsibleNavGroup
-          css={{ background: euiTheme.colors.darkestShade, height: '50px' }}
-          data-test-subj="nav-header-logo"
-        >
+        <EuiCollapsibleNavGroup css={{ background: euiTheme.colors.darkestShade, height: '50px' }}>
           <NavHeader />
         </EuiCollapsibleNavGroup>
 

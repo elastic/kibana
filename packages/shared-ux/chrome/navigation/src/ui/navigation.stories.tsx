@@ -16,7 +16,7 @@ import {
 import { action } from '@storybook/addon-actions';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
-import { mocks as solutionProperties, NavigationStorybookMock } from '../../mocks';
+import { getSolutionPropertiesMock, NavigationStorybookMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import { NavigationProps, NavigationServices } from '../../types';
 import { Platform } from '../model';
@@ -92,7 +92,7 @@ export default {
 export const SingleExpanded: ComponentStory<typeof Template> = Template.bind({});
 SingleExpanded.args = {
   activeNavItemId: 'example_project.root.get_started',
-  solutions: [solutionProperties],
+  solutions: [getSolutionPropertiesMock()],
 };
 SingleExpanded.argTypes = storybookMock.getArgumentTypes();
 
@@ -120,7 +120,7 @@ ReducedPlatformLinks.args = {
       },
     },
   },
-  solutions: [solutionProperties],
+  solutions: [getSolutionPropertiesMock()],
 };
 ReducedPlatformLinks.argTypes = storybookMock.getArgumentTypes();
 
@@ -128,7 +128,7 @@ export const WithRecentItems: ComponentStory<typeof Template> = Template.bind({}
 WithRecentItems.args = {
   activeNavItemId: 'example_project.root.get_started',
   recentItems: [{ id: 'recent_1', label: 'This is a test recent link', link: 'testo' }],
-  solutions: [solutionProperties],
+  solutions: [getSolutionPropertiesMock()],
 };
 WithRecentItems.argTypes = storybookMock.getArgumentTypes();
 
@@ -136,7 +136,7 @@ export const WithRequestsLoading: ComponentStory<typeof Template> = Template.bin
 WithRequestsLoading.args = {
   activeNavItemId: 'example_project.root.get_started',
   loadingCount: 1,
-  solutions: [solutionProperties],
+  solutions: [getSolutionPropertiesMock()],
 };
 WithRequestsLoading.argTypes = storybookMock.getArgumentTypes();
 
@@ -145,7 +145,7 @@ CustomElements.args = {
   activeNavItemId: 'example_project.custom',
   solutions: [
     {
-      ...solutionProperties,
+      ...getSolutionPropertiesMock(),
       items: [
         {
           name: (
@@ -173,6 +173,6 @@ export const Collapsed: ComponentStory<typeof Template> = Template.bind({});
 Collapsed.args = {
   activeNavItemId: 'example_project.root.get_started',
   navIsOpen: false,
-  solutions: [solutionProperties],
+  solutions: [getSolutionPropertiesMock()],
 };
 Collapsed.argTypes = storybookMock.getArgumentTypes();

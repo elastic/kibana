@@ -15,7 +15,7 @@ import { BasePathService, NavigateToUrlFn, NavItemClickFn, RecentItem } from './
  * @public
  */
 export interface NavigationServices {
-  activeNavItemId: string | undefined;
+  activeNavItemId?: string;
   basePath: BasePathService;
   loadingCount: number;
   navIsOpen: boolean;

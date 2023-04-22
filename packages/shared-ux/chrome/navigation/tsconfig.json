@@ -7,6 +7,8 @@
       "node",
       "react",
       "@emotion/react/types/css-prop",
+      "@testing-library/jest-dom",
+      "@testing-library/react",
       "@kbn/ambient-ui-types"
     ]
   },
@@ -17,10 +19,9 @@
   "kbn_references": [
     "@kbn/core-application-browser",
     "@kbn/core-http-browser",
-    "@kbn/shared-ux-storybook-mock",
+    "@kbn/shared-ux-storybook-mock"
   ],
   "exclude": [
     "target/**/*"
   ]
 }
-
