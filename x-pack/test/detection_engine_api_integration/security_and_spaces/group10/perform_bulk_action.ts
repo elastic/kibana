@@ -17,7 +17,10 @@ import {
   BulkActionType,
   BulkActionEditType,
 } from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
+import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import {
   binaryToString,
   createLegacyRuleAction,
@@ -35,6 +38,7 @@ import {
   removeServerGeneratedProperties,
   waitForRuleSuccess,
 } from '../../utils';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -416,7 +420,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           query: '',
           action: BulkActionType.duplicate,
-          duplicate: { include_exceptions: false },
+          duplicate: { include_exceptions: false, include_expired_exceptions: false },
         })
         .expect(200);
 
@@ -424,6 +428,216 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Check that the duplicated rule is returned with the response
       expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
+
+      // Check that the updates have been persisted
+      const { body: rulesResponse } = await supertest
+        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      expect(rulesResponse.total).to.eql(2);
+    });
+
+    it('should duplicate rules with exceptions - expired exceptions included', async () => {
+      await deleteAllExceptions(supertest, log);
+
+      const expiredDate = new Date(Date.now() - 1000000).toISOString();
+
+      // create an exception list
+      const { body: exceptionList } = await supertest
+        .post(EXCEPTION_LIST_URL)
+        .set('kbn-xsrf', 'true')
+        .send(getCreateExceptionListDetectionSchemaMock())
+        .expect(200);
+      // create an exception list item
+      await supertest
+        .post(EXCEPTION_LIST_ITEM_URL)
+        .set('kbn-xsrf', 'true')
+        .send({ ...getCreateExceptionListItemMinimalSchemaMock(), expire_time: expiredDate })
+        .expect(200);
+
+      const ruleId = 'ruleId';
+      const ruleToDuplicate = {
+        ...getSimpleRule(ruleId),
+        exceptions_list: [
+          {
+            type: exceptionList.type,
+            list_id: exceptionList.list_id,
+            id: exceptionList.id,
+            namespace_type: exceptionList.namespace_type,
+          },
+        ],
+      };
+      const newRule = await createRule(supertest, log, ruleToDuplicate);
+
+      // add an exception item to the rule
+      await supertest
+        .post(`${DETECTION_ENGINE_RULES_URL}/${newRule.id}/exceptions`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          items: [
+            {
+              description: 'Exception item for rule default exception list',
+              entries: [
+                {
+                  field: 'some.not.nested.field',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'some value',
+                },
+              ],
+              name: 'Sample exception item',
+              type: 'simple',
+              expire_time: expiredDate,
+            },
+          ],
+        })
+        .expect(200);
+
+      const { body } = await postBulkAction()
+        .send({
+          query: '',
+          action: BulkActionType.duplicate,
+          duplicate: { include_exceptions: true, include_expired_exceptions: true },
+        })
+        .expect(200);
+
+      const { body: foundItems } = await supertest
+        .get(
+          `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${body.attributes.results.created[0].exceptions_list[1].list_id}`
+        )
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(200);
+
+      // Item should have been duplicated, even if expired
+      expect(foundItems.total).to.eql(1);
+
+      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+
+      // Check that the duplicated rule is returned with the response
+      expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
+
+      // Check that the exceptions are duplicated
+      expect(body.attributes.results.created[0].exceptions_list).to.eql([
+        {
+          type: exceptionList.type,
+          list_id: exceptionList.list_id,
+          id: exceptionList.id,
+          namespace_type: exceptionList.namespace_type,
+        },
+        {
+          id: body.attributes.results.created[0].exceptions_list[1].id,
+          list_id: body.attributes.results.created[0].exceptions_list[1].list_id,
+          namespace_type: 'single',
+          type: 'rule_default',
+        },
+      ]);
+
+      // Check that the updates have been persisted
+      const { body: rulesResponse } = await supertest
+        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      expect(rulesResponse.total).to.eql(2);
+    });
+
+    it('should duplicate rules with exceptions - expired exceptions excluded', async () => {
+      await deleteAllExceptions(supertest, log);
+
+      const expiredDate = new Date(Date.now() - 1000000).toISOString();
+
+      // create an exception list
+      const { body: exceptionList } = await supertest
+        .post(EXCEPTION_LIST_URL)
+        .set('kbn-xsrf', 'true')
+        .send(getCreateExceptionListDetectionSchemaMock())
+        .expect(200);
+      // create an exception list item
+      await supertest
+        .post(EXCEPTION_LIST_ITEM_URL)
+        .set('kbn-xsrf', 'true')
+        .send({ ...getCreateExceptionListItemMinimalSchemaMock(), expire_time: expiredDate })
+        .expect(200);
+
+      const ruleId = 'ruleId';
+      const ruleToDuplicate = {
+        ...getSimpleRule(ruleId),
+        exceptions_list: [
+          {
+            type: exceptionList.type,
+            list_id: exceptionList.list_id,
+            id: exceptionList.id,
+            namespace_type: exceptionList.namespace_type,
+          },
+        ],
+      };
+      const newRule = await createRule(supertest, log, ruleToDuplicate);
+
+      // add an exception item to the rule
+      await supertest
+        .post(`${DETECTION_ENGINE_RULES_URL}/${newRule.id}/exceptions`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          items: [
+            {
+              description: 'Exception item for rule default exception list',
+              entries: [
+                {
+                  field: 'some.not.nested.field',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'some value',
+                },
+              ],
+              name: 'Sample exception item',
+              type: 'simple',
+              expire_time: expiredDate,
+            },
+          ],
+        })
+        .expect(200);
+
+      const { body } = await postBulkAction()
+        .send({
+          query: '',
+          action: BulkActionType.duplicate,
+          duplicate: { include_exceptions: true, include_expired_exceptions: false },
+        })
+        .expect(200);
+
+      const { body: foundItems } = await supertest
+        .get(
+          `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${body.attributes.results.created[0].exceptions_list[1].list_id}`
+        )
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(200);
+
+      // Item should NOT have been duplicated, since it is expired
+      expect(foundItems.total).to.eql(0);
+
+      expect(body.attributes.summary).to.eql({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+
+      // Check that the duplicated rule is returned with the response
+      expect(body.attributes.results.created[0].name).to.eql(`${ruleToDuplicate.name} [Duplicate]`);
+
+      // Check that the exceptions are duplicted
+      expect(body.attributes.results.created[0].exceptions_list).to.eql([
+        {
+          type: exceptionList.type,
+          list_id: exceptionList.list_id,
+          id: exceptionList.id,
+          namespace_type: exceptionList.namespace_type,
+        },
+        {
+          id: body.attributes.results.created[0].exceptions_list[1].id,
+          list_id: body.attributes.results.created[0].exceptions_list[1].list_id,
+          namespace_type: 'single',
+          type: 'rule_default',
+        },
+      ]);
 
       // Check that the updates have been persisted
       const { body: rulesResponse } = await supertest
@@ -462,7 +676,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           query: '',
           action: BulkActionType.duplicate,
-          duplicate: { include_exceptions: false },
+          duplicate: { include_exceptions: false, include_expired_exceptions: false },
         })
         .expect(200);
 

@@ -136,6 +136,7 @@ export const BulkActionEditPayload = t.union([
 const bulkActionDuplicatePayload = t.exact(
   t.type({
     include_exceptions: t.boolean,
+    include_expired_exceptions: t.boolean,
   })
 );
 

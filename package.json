@@ -673,6 +673,7 @@
     "@kbn/upgrade-assistant-plugin": "link:x-pack/plugins/upgrade_assistant",
     "@kbn/url-drilldown-plugin": "link:x-pack/plugins/drilldowns/url_drilldown",
     "@kbn/url-forwarding-plugin": "link:src/plugins/url_forwarding",
+    "@kbn/url-state": "link:packages/kbn-url-state",
     "@kbn/usage-collection-plugin": "link:src/plugins/usage_collection",
     "@kbn/usage-collection-test-plugin": "link:test/plugin_functional/plugins/usage_collection",
     "@kbn/user-profile-components": "link:packages/kbn-user-profile-components",

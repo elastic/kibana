@@ -684,6 +684,7 @@ src/plugins/unified_search @elastic/kibana-visualizations
 x-pack/plugins/upgrade_assistant @elastic/platform-deployment-management
 x-pack/plugins/drilldowns/url_drilldown @elastic/kibana-app-services
 src/plugins/url_forwarding @elastic/kibana-visualizations
+packages/kbn-url-state @elastic/security-threat-hunting-investigations
 src/plugins/usage_collection @elastic/kibana-core
 test/plugin_functional/plugins/usage_collection @elastic/kibana-core
 packages/kbn-user-profile-components @elastic/kibana-security

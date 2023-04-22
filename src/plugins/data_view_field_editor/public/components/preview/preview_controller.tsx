@@ -9,13 +9,23 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { BehaviorSubject } from 'rxjs';
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import { renderToString } from 'react-dom/server';
+import React from 'react';
 import { PreviewState } from './types';
 import { BehaviorObservable } from '../../state_utils';
-import { EsDocument } from './types';
+import { EsDocument, ScriptErrorCodes, Params } from './types';
+import type { FieldFormatsStart } from '../../shared_imports';
+
+export const defaultValueFormatter = (value: unknown) => {
+  const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
+  return renderToString(<>{content}</>);
+};
 
 interface PreviewControllerDependencies {
   dataView: DataView;
   search: ISearchStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 const previewStateDefault: PreviewState = {
@@ -30,12 +40,14 @@ const previewStateDefault: PreviewState = {
   documentSource: 'cluster',
   /** Keep track if the script painless syntax is being validated and if it is valid  */
   scriptEditorValidation: { isValidating: false, isValid: true, message: null },
+  previewResponse: { fields: [], error: null },
 };
 
 export class PreviewController {
-  constructor({ dataView, search }: PreviewControllerDependencies) {
+  constructor({ dataView, search, fieldFormats }: PreviewControllerDependencies) {
     this.dataView = dataView;
     this.search = search;
+    this.fieldFormats = fieldFormats;
 
     this.internalState$ = new BehaviorSubject<PreviewState>({
       ...previewStateDefault,
@@ -44,10 +56,13 @@ export class PreviewController {
     this.state$ = this.internalState$ as BehaviorObservable<PreviewState>;
   }
 
+  // dependencies
   // @ts-ignore
   private dataView: DataView;
   // @ts-ignore
   private search: ISearchStart;
+  private fieldFormats: FieldFormatsStart;
+
   private internalState$: BehaviorSubject<PreviewState>;
   state$: BehaviorObservable<PreviewState>;
 
@@ -103,5 +118,53 @@ export class PreviewController {
 
   setCustomId = (customId?: string) => {
     this.updateState({ customId });
+  };
+
+  setPreviewError = (error: PreviewState['previewResponse']['error']) => {
+    this.updateState({
+      previewResponse: { ...this.internalState$.getValue().previewResponse, error },
+    });
+  };
+
+  setPreviewResponse = (previewResponse: PreviewState['previewResponse']) => {
+    this.updateState({ previewResponse });
+  };
+
+  clearPreviewError = (errorCode: ScriptErrorCodes) => {
+    const { previewResponse: prev } = this.internalState$.getValue();
+    const error = prev.error === null || prev.error?.code === errorCode ? null : prev.error;
+    this.updateState({
+      previewResponse: {
+        ...prev,
+        error,
+      },
+    });
+  };
+
+  valueFormatter = ({
+    value,
+    format,
+    type,
+  }: {
+    value: unknown;
+    format: Params['format'];
+    type: Params['type'];
+  }) => {
+    if (format?.id) {
+      const formatter = this.fieldFormats.getInstance(format.id, format.params);
+      if (formatter) {
+        return formatter.getConverterFor('html')(value) ?? JSON.stringify(value);
+      }
+    }
+
+    if (type) {
+      const fieldType = castEsToKbnFieldTypeName(type);
+      const defaultFormatterForType = this.fieldFormats.getDefaultInstance(fieldType);
+      if (defaultFormatterForType) {
+        return defaultFormatterForType.getConverterFor('html')(value) ?? JSON.stringify(value);
+      }
+    }
+
+    return defaultValueFormatter(value);
   };
 }

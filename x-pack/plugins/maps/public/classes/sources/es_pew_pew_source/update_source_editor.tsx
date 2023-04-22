@@ -6,17 +6,31 @@
  */
 
 import React, { Component, Fragment } from 'react';
-
-import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
-import { MetricsEditor } from '../../../components/metrics_editor';
-import { getIndexPatternService } from '../../../kibana_services';
+import type { DataViewField } from '@kbn/data-plugin/common';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { indexPatterns } from '@kbn/data-plugin/public';
+import { MetricsEditor } from '../../../components/metrics_editor';
+import { getIndexPatternService } from '../../../kibana_services';
+import type { AggDescriptor } from '../../../../common/descriptor_types';
+import type { OnSourceChangeArgs } from '../source';
 
-export class UpdateSourceEditor extends Component {
+interface Props {
+  bucketsName: string;
+  indexPatternId: string;
+  metrics: AggDescriptor[];
+  onChange: (...args: OnSourceChangeArgs[]) => void;
+}
+
+interface State {
+  fields: DataViewField[];
+}
+
+export class UpdateSourceEditor extends Component<Props, State> {
+  private _isMounted: boolean = false;
+
   state = {
-    fields: null,
+    fields: [],
   };
 
   componentDidMount() {
@@ -33,11 +47,6 @@ export class UpdateSourceEditor extends Component {
     try {
       indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
     } catch (err) {
-      if (this._isMounted) {
-        this.setState({
-          loadError: getDataViewNotFoundMessage(this.props.indexPatternId),
-        });
-      }
       return;
     }
 
@@ -50,7 +59,7 @@ export class UpdateSourceEditor extends Component {
     });
   }
 
-  _onMetricsChange = (metrics) => {
+  _onMetricsChange = (metrics: AggDescriptor[]) => {
     this.props.onChange({ propName: 'metrics', value: metrics });
   };
 
@@ -69,6 +78,8 @@ export class UpdateSourceEditor extends Component {
           <EuiSpacer size="m" />
           <MetricsEditor
             allowMultipleMetrics={true}
+            bucketsName={this.props.bucketsName}
+            isJoin={false}
             fields={this.state.fields}
             metrics={this.props.metrics}
             onChange={this._onMetricsChange}
