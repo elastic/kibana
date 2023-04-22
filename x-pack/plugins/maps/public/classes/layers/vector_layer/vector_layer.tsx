@@ -996,8 +996,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       for (let j = 0; j < this.getJoins().length; j++) {
         const join = this.getJoins()[j];
         const joinRightSource = join.getRightJoinSource();
-        if ('getTermField' in (joinRightSource as ITermJoinSource)
-          && this.getJoins()[j].getLeftField().getName() === tooltipProperty.getPropertyKey()) {
+        if (
+          'getTermField' in (joinRightSource as ITermJoinSource) &&
+          this.getJoins()[j].getLeftField().getName() === tooltipProperty.getPropertyKey()
+        ) {
           matchingTermJoins.push(joinRightSource as ITermJoinSource);
         }
       }

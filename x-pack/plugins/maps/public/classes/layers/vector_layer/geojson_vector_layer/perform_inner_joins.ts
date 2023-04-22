@@ -82,7 +82,7 @@ export async function performInnerJoins(
   // term joins are easy to misconfigure.
   // Users often are unaware of left values and right values and whether they allign for joining
   // Provide messaging that helps users debug term joins with no matches
-  // 
+  //
   const termJoinStatusesWithoutAnyMatches = joinStatuses.filter((joinStatus) => {
     if (!('getTermField' in (joinStatus.joinState.join.getRightJoinSource() as ITermJoinSource))) {
       return false;
@@ -107,9 +107,7 @@ export async function performInnerJoins(
     const joinStatus = termJoinStatusesWithoutAnyMatches[0];
     const leftFieldName = await joinStatus.joinState.join.getLeftField().getLabel();
     const termJoinSource = joinStatus.joinState.join.getRightJoinSource() as ITermJoinSource;
-    const rightFieldName = await termJoinSource
-      .getTermField()
-      .getLabel();
+    const rightFieldName = await termJoinSource.getTermField().getLabel();
     const reason =
       joinStatus.keys.length === 0
         ? i18n.translate('xpack.maps.vectorLayer.joinError.noLeftFieldValuesMsg', {
