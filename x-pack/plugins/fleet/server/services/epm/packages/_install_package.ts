@@ -16,6 +16,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
+import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
+
 import { getNormalizedDataStreams } from '../../../../common/services';
 
 import {
@@ -74,6 +76,7 @@ export async function _installPackage({
   installSource,
   spaceId,
   verificationResult,
+  authorizationHeader,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -88,6 +91,7 @@ export async function _installPackage({
   installSource: InstallSource;
   spaceId: string;
   verificationResult?: PackageVerificationResult;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
 }): Promise<AssetReference[]> {
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
 
@@ -245,7 +249,15 @@ export async function _installPackage({
     );
 
     ({ esReferences } = await withPackageSpan('Install transforms', () =>
-      installTransforms(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
+      installTransforms(
+        packageInfo,
+        paths,
+        esClient,
+        savedObjectsClient,
+        logger,
+        esReferences,
+        authorizationHeader
+      )
     ));
 
     // If this is an update or retrying an update, delete the previous version's pipelines

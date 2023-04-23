@@ -13,3 +13,4 @@ export * from './metrics_api';
 export * from './log_alerts';
 export * from './snapshot_api';
 export * from './host_details';
+export * from './infra';

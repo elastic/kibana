@@ -197,6 +197,7 @@ export function alertToListItem(
     isMuted,
     sortPriority,
     flapping: alert.flapping,
+    ...(alert.maintenanceWindowIds ? { maintenanceWindowIds: alert.maintenanceWindowIds } : {}),
   };
 }
 

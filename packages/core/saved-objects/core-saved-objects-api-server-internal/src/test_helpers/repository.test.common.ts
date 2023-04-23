@@ -583,13 +583,23 @@ export const expectBulkGetResult = (
 
 export const getMockBulkCreateResponse = (
   objects: SavedObjectsBulkCreateObject[],
-  namespace?: string
+  namespace?: string,
+  managed?: boolean
 ) => {
   return {
     errors: false,
     took: 1,
     items: objects.map(
-      ({ type, id, originId, attributes, references, migrationVersion, typeMigrationVersion }) => ({
+      ({
+        type,
+        id,
+        originId,
+        attributes,
+        references,
+        migrationVersion,
+        typeMigrationVersion,
+        managed: docManaged,
+      }) => ({
         create: {
           // status: 1,
           // _index: '.kibana',
@@ -602,6 +612,7 @@ export const getMockBulkCreateResponse = (
             references,
             ...mockTimestampFieldsWithCreated,
             typeMigrationVersion: typeMigrationVersion || migrationVersion?.[type] || '1.1.1',
+            managed: managed ?? docManaged ?? false,
           },
           ...mockVersionProps,
         },
@@ -616,7 +627,7 @@ export const bulkCreateSuccess = async (
   objects: SavedObjectsBulkCreateObject[],
   options?: SavedObjectsCreateOptions
 ) => {
-  const mockResponse = getMockBulkCreateResponse(objects, options?.namespace);
+  const mockResponse = getMockBulkCreateResponse(objects, options?.namespace, options?.managed);
   client.bulk.mockResponse(mockResponse);
   const result = await repository.bulkCreate(objects, options);
   return result;
@@ -626,10 +637,12 @@ export const expectCreateResult = (obj: {
   type: string;
   namespace?: string;
   namespaces?: string[];
+  managed?: boolean;
 }) => ({
   ...obj,
   coreMigrationVersion: expect.any(String),
   typeMigrationVersion: '1.1.1',
+  managed: obj.managed ?? false,
   version: mockVersion,
   namespaces: obj.namespaces ?? [obj.namespace ?? 'default'],
   ...mockTimestampFieldsWithCreated,
