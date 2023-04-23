@@ -902,7 +902,7 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-      expect(document.body.querySelectorAll('button.euiButtonIcon[disabled]')).toHaveLength(8);
+      expect(document.body.querySelectorAll('button.euiButtonIcon[disabled]')).toHaveLength(5);
       hasExecuteActionsCapability.mockReturnValue(true);
     });
 
