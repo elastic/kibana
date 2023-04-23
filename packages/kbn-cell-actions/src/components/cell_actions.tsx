@@ -36,11 +36,17 @@ export const CellActions: React.FC<CellActionsProps> = ({
     [field, triggerId, metadata]
   );
 
+  const anchorPosition = useMemo(
+    () => (mode === CellActionsMode.HOVER_DOWN ? 'downCenter' : 'rightCenter'),
+    [mode]
+  );
+
   const dataTestSubj = `cellActions-renderContent-${field.name}`;
-  if (mode === CellActionsMode.HOVER) {
+  if (mode === CellActionsMode.HOVER_DOWN || mode === CellActionsMode.HOVER_RIGHT) {
     return (
       <div className={className} ref={nodeRef} data-test-subj={dataTestSubj}>
         <HoverActionsPopover
+          anchorPosition={anchorPosition}
           actionContext={actionContext}
           showActionTooltips={showActionTooltips}
           visibleCellActions={visibleCellActions}
@@ -65,6 +71,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
       <EuiFlexItem grow={false}>{children}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <InlineActions
+          anchorPosition={anchorPosition}
           actionContext={actionContext}
           showActionTooltips={showActionTooltips}
           visibleCellActions={visibleCellActions}
