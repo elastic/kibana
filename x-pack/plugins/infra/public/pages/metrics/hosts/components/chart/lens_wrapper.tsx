@@ -16,7 +16,7 @@ import { useIntersectedOnce } from '../../../../../hooks/use_intersection_once';
 import { LensAttributes } from '../../../../../common/visualizations';
 import { ChartLoader } from './chart_loader';
 
-export interface Props {
+export interface LensWrapperProps {
   id: string;
   attributes: LensAttributes | null;
   dateRange: TimeRange;
@@ -43,7 +43,7 @@ export const LensWrapper = ({
   lastReloadRequestTime,
   loading = false,
   hasTitle = false,
-}: Props) => {
+}: LensWrapperProps) => {
   const intersectionRef = useRef(null);
   const [loadedOnce, setLoadedOnce] = useState(false);
 

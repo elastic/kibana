@@ -7,7 +7,6 @@
 import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { Action } from '@kbn/ui-actions-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import {
   EuiIcon,
@@ -49,7 +48,7 @@ export const Tile = ({
 }: KPIChartProps) => {
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
-  const { baseRequest, hostNodes, loading: hostsLoading } = useHostsViewContext();
+  const { requestTs, hostNodes, loading: hostsLoading } = useHostsViewContext();
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
 
   const getSubtitle = () => {
@@ -86,18 +85,16 @@ export const Tile = ({
     );
   }, [hostNodes, dataView]);
 
-  const filters = [
-    ...searchCriteria.filters,
-    ...searchCriteria.panelFilters,
-    ...[hostsFilterQuery],
-  ];
+  const filters = useMemo(
+    () => [...searchCriteria.filters, ...searchCriteria.panelFilters, ...[hostsFilterQuery]],
+    [hostsFilterQuery, searchCriteria.filters, searchCriteria.panelFilters]
+  );
+
   const extraActionOptions = getExtraActions({
     timeRange: searchCriteria.dateRange,
     filters,
     query: searchCriteria.query,
   });
-
-  const extraActions: Action[] = [extraActionOptions.openInLens];
 
   const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
     const [min, max] = range;
@@ -113,10 +110,9 @@ export const Tile = ({
   const loading = hostsLoading || !attributes || hostCountLoading;
   const { afterLoadedState } = useAfterLoadedState(loading, {
     attributes,
-    lastReloadRequestTime: baseRequest.requestTs,
+    lastReloadRequestTime: requestTs,
+    ...searchCriteria,
     filters,
-    query: searchCriteria.query,
-    dateRange: searchCriteria.dateRange,
   });
 
   return (
@@ -157,7 +153,7 @@ export const Tile = ({
             id={`hostViewKPIChart-${type}`}
             attributes={afterLoadedState.attributes}
             style={{ height: MIN_HEIGHT }}
-            extraActions={extraActions}
+            extraActions={[extraActionOptions.openInLens]}
             lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
             dateRange={afterLoadedState.dateRange}
             filters={afterLoadedState.filters}

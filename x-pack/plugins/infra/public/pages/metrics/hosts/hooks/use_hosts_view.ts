@@ -77,7 +77,7 @@ export const useHostsView = () => {
   const { value, error, loading } = state;
 
   return {
-    baseRequest,
+    requestTs: baseRequest.requestTs,
     loading,
     error,
     hostNodes: value?.nodes ?? [],
