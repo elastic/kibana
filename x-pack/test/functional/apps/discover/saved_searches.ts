@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardCustomizePanel = getService('dashboardCustomizePanel');
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
+  const testSubjects = getService('testSubjects');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -77,6 +78,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.clickNewSearchButton();
 
+      expect(await testSubjects.getVisibleText('discover-dataView-switch-link')).to.be('ecommerce');
+
       expect(await filterBar.hasFilter('category', `Men's Shoes`)).to.be(false);
       expect(await queryBar.getQueryString()).to.eql('');
 
@@ -89,6 +92,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await filterBar.hasFilter('category', `Men's Shoes`)).to.be(false);
       expect(await queryBar.getQueryString()).to.eql('');
+
+      await PageObjects.discover.clickNewSearchButton();
+      expect(await testSubjects.getVisibleText('discover-dataView-switch-link')).to.be('ecommerce');
     });
   });
 }
