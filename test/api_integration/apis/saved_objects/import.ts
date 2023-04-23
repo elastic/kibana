@@ -40,17 +40,59 @@ export default function ({ getService }: FtrProviderContext) {
       id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
       meta: { title: 'Requests', icon: 'dashboardApp' },
     };
+    const managedVis = {
+      id: '3fdaa535-5baf-46bc-8265-705eda43b181',
+      type: 'visualization',
+      meta: {
+        icon: 'visualizeApp',
+        title: 'Managed Count of requests',
+      },
+      managed: true,
+    };
+    const managedTag = {
+      id: '0ed60f29-2021-4fd2-ba4e-943c61e2738c',
+      type: 'tag',
+      meta: {
+        icon: 'tag',
+        title: 'managed',
+      },
+      managed: true,
+    };
+    const unmanagedTag = {
+      id: '00ad6a46-6ac3-4f6c-892c-2f72c54a5e7d',
+      type: 'tag',
+      meta: {
+        icon: 'tag',
+        title: 'unmanaged',
+      },
+      managed: false,
+    };
+    const managedDB = {
+      id: '11fb046d-0e50-48a0-a410-a744b82cbffd',
+      type: 'dashboard',
+      meta: {
+        icon: 'dashboardApp',
+        title: 'Managed Requests',
+      },
+      managed: true,
+    };
 
     describe('with basic data existing', () => {
       before(async () => {
         await kibanaServer.importExport.load(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
+        // await kibanaServer.importExport.load(
+        //   'test/api_integration/fixtures/kbn_archiver/saved_objects/managed_basic.json'
+        // );
       });
       after(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
+        // await kibanaServer.importExport.unload(
+        //   'test/api_integration/fixtures/kbn_archiver/saved_objects/managed_basic.json'
+        // );
       });
 
       it('should return 415 when no file passed in', async () => {
@@ -269,6 +311,41 @@ export default function ({ getService }: FtrProviderContext) {
                   type: 'config',
                   managed: true,
                 },
+              ],
+              warnings: [],
+            });
+          });
+      });
+
+      it('should not overwrite managed if set on objects beging imported', async () => {
+        await supertest
+          .post('/api/saved_objects/_import')
+          .attach('file', join(__dirname, '../../fixtures/import_managed.ndjson'))
+          .expect(200)
+          .then((resp) => {
+            expect(resp.body).to.eql({
+              success: true,
+              successCount: 4,
+              successResults: [managedVis, unmanagedTag, managedTag, managedDB],
+              warnings: [],
+            });
+          });
+      });
+      it('should return 200 when conflicts exist but overwrite is passed in, without changing managed property on the object', async () => {
+        await supertest
+          .post('/api/saved_objects/_import')
+          .query({ overwrite: true })
+          .attach('file', join(__dirname, '../../fixtures/import_managed.ndjson'))
+          .expect(200)
+          .then((resp) => {
+            expect(resp.body).to.eql({
+              success: true,
+              successCount: 4,
+              successResults: [
+                { ...managedVis, overwrite: true },
+                { ...unmanagedTag, overwrite: true },
+                { ...managedTag, overwrite: true },
+                { ...managedDB, overwrite: true },
               ],
               warnings: [],
             });

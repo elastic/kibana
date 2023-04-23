@@ -75,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 coreMigrationVersion: '8.8.0',
                 typeMigrationVersion: resp.body.saved_objects[1].typeMigrationVersion,
-                managed: resp.body.saved_objects[1].managed,
+                managed: false,
                 references: [],
                 namespaces: [SPACE_ID],
               },
