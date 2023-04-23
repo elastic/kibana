@@ -152,7 +152,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         />
       </>
     ),
-    [actionMessageParams]
+    [actionMessageParams, summaryActionMessageParams]
   );
   const displayResponseActionsOptions = useMemo(() => {
     if (isQueryRule(ruleType)) {
