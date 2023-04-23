@@ -87,6 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.nodes).eql([
           {
             metadata: [
+              { name: 'host.ip', value: null },
               { name: 'host.os.name', value: 'CentOS Linux' },
               { name: 'cloud.provider', value: 'gcp' },
             ],
@@ -118,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.nodes).eql([
           {
             metadata: [
+              { name: 'host.ip', value: null },
               { name: 'host.os.name', value: 'CentOS Linux' },
               { name: 'cloud.provider', value: 'gcp' },
             ],
@@ -126,6 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           {
             metadata: [
+              { name: 'host.ip', value: null },
               { name: 'host.os.name', value: 'CentOS Linux' },
               { name: 'cloud.provider', value: 'gcp' },
             ],
@@ -134,6 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           {
             metadata: [
+              { name: 'host.ip', value: null },
               { name: 'host.os.name', value: 'CentOS Linux' },
               { name: 'cloud.provider', value: 'gcp' },
             ],

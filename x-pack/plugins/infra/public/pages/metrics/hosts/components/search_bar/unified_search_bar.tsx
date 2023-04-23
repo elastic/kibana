@@ -72,7 +72,7 @@ export const UnifiedSearchBar = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup direction="row" alignItems="center" wrap gutterSize="xs">
+          <EuiFlexGroup direction="row" alignItems="center" wrap={false} gutterSize="xs">
             <EuiFlexItem>
               <ControlsContent
                 timeRange={searchCriteria.dateRange}

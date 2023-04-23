@@ -13,12 +13,13 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { FilterStateStore } from '@kbn/es-query';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useUrlState } from '../../../../utils/use_url_state';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
 } from '../../../../hooks/use_kibana_timefilter_time';
-import { HostLimitOptions } from '../types';
+import { DEFAULT_HOST_LIMIT, LOCAL_STORAGE_HOST_LIMIT_KEY } from '../constants';
 
 const DEFAULT_QUERY = {
   language: 'kuery',
@@ -27,14 +28,13 @@ const DEFAULT_QUERY = {
 
 const DEFAULT_FROM_MINUTES_VALUE = 15;
 const INITIAL_DATE_RANGE = { from: `now-${DEFAULT_FROM_MINUTES_VALUE}m`, to: 'now' };
-const INITIAL_SELECTED_LIMIT: HostLimitOptions = 100;
 
 const INITIAL_HOSTS_STATE: HostsState = {
   query: DEFAULT_QUERY,
   filters: [],
   panelFilters: [],
   dateRange: INITIAL_DATE_RANGE,
-  limit: INITIAL_SELECTED_LIMIT,
+  limit: DEFAULT_HOST_LIMIT,
 };
 
 const reducer = (prevState: HostsState, params: HostsSearchPayload) => {
@@ -48,9 +48,17 @@ const reducer = (prevState: HostsState, params: HostsSearchPayload) => {
 
 export const useHostsUrlState = (): [HostsState, HostsStateUpdater] => {
   const [getTime] = useKibanaTimefilterTime(INITIAL_DATE_RANGE);
+  const [localStorageHostLimit, setLocalStorageHostLimit] = useLocalStorage<number>(
+    LOCAL_STORAGE_HOST_LIMIT_KEY,
+    INITIAL_HOSTS_STATE.limit
+  );
 
   const [urlState, setUrlState] = useUrlState<HostsState>({
-    defaultState: { ...INITIAL_HOSTS_STATE, dateRange: getTime() },
+    defaultState: {
+      ...INITIAL_HOSTS_STATE,
+      dateRange: getTime(),
+      limit: localStorageHostLimit ?? INITIAL_HOSTS_STATE.limit,
+    },
     decodeUrlState,
     encodeUrlState,
     urlStateKey: '_a',
@@ -60,6 +68,9 @@ export const useHostsUrlState = (): [HostsState, HostsStateUpdater] => {
   const [search, setSearch] = useReducer(reducer, urlState);
   if (!deepEqual(search, urlState)) {
     setUrlState(search);
+    if (localStorageHostLimit !== search.limit) {
+      setLocalStorageHostLimit(search.limit);
+    }
   }
 
   useSyncKibanaTimeFilterTime(INITIAL_DATE_RANGE, urlState.dateRange, (dateRange) =>

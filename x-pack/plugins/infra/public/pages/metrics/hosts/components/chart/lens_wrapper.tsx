@@ -47,9 +47,14 @@ export const LensWrapper = ({
   const intersectionRef = useRef(null);
   const [loadedOnce, setLoadedOnce] = useState(false);
 
-  const [currentLastReloadRequestTime, setCurrentLastReloadRequestTime] = useState<
-    number | undefined
-  >(lastReloadRequestTime);
+  const [state, setState] = useState({
+    attributes,
+    lastReloadRequestTime,
+    query,
+    filters,
+    dateRange,
+  });
+
   const {
     services: { lens },
   } = useKibanaContextForPlugin();
@@ -61,11 +66,24 @@ export const LensWrapper = ({
 
   useEffect(() => {
     if ((intersection?.intersectionRatio ?? 0) === 1) {
-      setCurrentLastReloadRequestTime(lastReloadRequestTime);
+      setState({
+        attributes,
+        lastReloadRequestTime,
+        query,
+        filters,
+        dateRange,
+      });
     }
-  }, [intersection?.intersectionRatio, lastReloadRequestTime]);
+  }, [
+    attributes,
+    dateRange,
+    filters,
+    intersection?.intersectionRatio,
+    lastReloadRequestTime,
+    query,
+  ]);
 
-  const isReady = attributes && intersectedOnce;
+  const isReady = state.attributes && intersectedOnce;
 
   return (
     <div ref={intersectionRef}>
@@ -75,17 +93,17 @@ export const LensWrapper = ({
         style={style}
         hasTitle={hasTitle}
       >
-        {isReady && (
+        {state.attributes && (
           <EmbeddableComponent
             id={id}
             style={style}
-            attributes={attributes}
+            attributes={state.attributes}
             viewMode={ViewMode.VIEW}
-            timeRange={dateRange}
-            query={query}
-            filters={filters}
+            timeRange={state.dateRange}
+            query={state.query}
+            filters={state.filters}
             extraActions={extraActions}
-            lastReloadRequestTime={currentLastReloadRequestTime}
+            lastReloadRequestTime={state.lastReloadRequestTime}
             executionContext={{
               type: 'infrastructure_observability_hosts_view',
               name: id,

@@ -53,7 +53,7 @@ export const useHostCount = () => {
           params: {
             allow_no_indices: true,
             ignore_unavailable: true,
-            index: dataView?.getIndexPattern() ?? metricAlias,
+            index: metricAlias,
             size: 0,
             track_total_hits: false,
             body: {
