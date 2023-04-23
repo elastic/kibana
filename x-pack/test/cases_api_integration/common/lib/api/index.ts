@@ -22,7 +22,7 @@ import {
 } from '@kbn/cases-plugin/common/constants';
 import {
   CasesConfigureResponse,
-  CaseResponse,
+  Case,
   CaseStatuses,
   CasesResponse,
   CasesFindResponse,
@@ -371,7 +371,7 @@ export const updateCase = async ({
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null } | null;
   headers?: Record<string, unknown>;
-}): Promise<CaseResponse[]> => {
+}): Promise<Case[]> => {
   const apiCall = supertest.patch(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`);
 
   setupAuth({ apiCall, headers, auth });
@@ -463,7 +463,7 @@ export const getCase = async ({
   includeComments?: boolean;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<CaseResponse> => {
+}): Promise<Case> => {
   const { body: theCase } = await supertest
     .get(
       `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}?includeComments=${includeComments}`
@@ -623,7 +623,7 @@ export const pushCase = async ({
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null } | null;
   headers?: Record<string, unknown>;
-}): Promise<CaseResponse> => {
+}): Promise<Case> => {
   const apiCall = supertest.post(
     `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/connector/${connectorId}/_push`
   );

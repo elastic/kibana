@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import {
-  CaseResponse,
+  Case,
   CaseSeverity,
   CaseStatuses,
   CommentType,
@@ -342,7 +342,7 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('rbac', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-      let caseInfo: CaseResponse;
+      let caseInfo: Case;
       beforeEach(async () => {
         caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
           user: superUser,

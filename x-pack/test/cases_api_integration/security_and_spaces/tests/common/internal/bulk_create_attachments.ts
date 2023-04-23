@@ -11,7 +11,7 @@ import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import {
   BulkCreateCommentRequest,
-  CaseResponse,
+  Case,
   CaseStatuses,
   CommentRequestAlertType,
   CommentRequestExternalReferenceSOType,
@@ -79,10 +79,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  const validateComments = (
-    comments: CaseResponse['comments'],
-    attachments: BulkCreateCommentRequest
-  ) => {
+  const validateComments = (comments: Case['comments'], attachments: BulkCreateCommentRequest) => {
     comments?.forEach((attachment, index) => {
       const comment = removeServerGeneratedPropertiesFromSavedObject(attachment);
 
