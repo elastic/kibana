@@ -110,7 +110,7 @@ export const DeployModel = ({
               onClick={() => createTextExpansionModel(undefined)}
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.addMapping',
+                'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.deployButton.label',
                 {
                   defaultMessage: 'Deploy',
                 }
