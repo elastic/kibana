@@ -78,7 +78,7 @@ export const LensWrapper = ({
   return (
     <div ref={intersectionRef}>
       <ChartLoader
-        loading={loading && !isReady}
+        loading={loading || !isReady}
         loadedOnce={loadedOnce}
         style={style}
         hasTitle={hasTitle}

@@ -7,7 +7,16 @@
 import React, { useMemo } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import { EuiIcon, EuiPanel, EuiI18n, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiPanel,
+  EuiI18n,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useLensAttributes } from '../../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -28,6 +37,7 @@ export interface MetricChartProps {
 const MIN_HEIGHT = 300;
 
 export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) => {
+  const { euiTheme } = useEuiTheme();
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { baseRequest, loading } = useHostsViewContext();
@@ -87,7 +97,10 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
       hasShadow={false}
       hasBorder
       paddingSize={error ? 'm' : 'none'}
-      style={{ minHeight: MIN_HEIGHT, position: 'relative' }}
+      css={css`
+        min-height: calc(${MIN_HEIGHT} + ${euiTheme.size.l}),
+        position: 'relative'
+      `}
       data-test-subj={`hostsView-metricChart-${type}`}
     >
       {error ? (
