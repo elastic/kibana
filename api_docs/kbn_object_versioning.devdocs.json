@@ -768,6 +768,28 @@
             "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/object-versioning",
+            "id": "def-common.ServicesDefinition.mSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "mSearch",
+            "description": [],
+            "signature": [
+              "{ out?: { result?: ",
+              {
+                "pluginId": "@kbn/object-versioning",
+                "scope": "common",
+                "docId": "kibKbnObjectVersioningPluginApi",
+                "section": "def-common.VersionableObject",
+                "text": "VersionableObject"
+              },
+              "<any, any, any, any> | undefined; } | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -966,6 +988,28 @@
                 "text": "ObjectTransforms"
               },
               "<any, any, any, any>; }; out: { result: ",
+              {
+                "pluginId": "@kbn/object-versioning",
+                "scope": "common",
+                "docId": "kibKbnObjectVersioningPluginApi",
+                "section": "def-common.ObjectTransforms",
+                "text": "ObjectTransforms"
+              },
+              "<any, any, any, any>; }; }"
+            ],
+            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/object-versioning",
+            "id": "def-common.ServiceTransforms.mSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "mSearch",
+            "description": [],
+            "signature": [
+              "{ out: { result: ",
               {
                 "pluginId": "@kbn/object-versioning",
                 "scope": "common",
