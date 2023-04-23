@@ -59,4 +59,10 @@ export interface LegacyUrlAlias {
    * created because of saved object conversion, then we will display a toast telling the user that the object has a new URL.
    */
   purpose?: 'savedObjectConversion' | 'savedObjectImport';
+  /**
+   * Flag indicating if a saved object is managed by Kibana (default=false).
+   * Only used when upserting a saved object. If the saved object already
+   * exist this option has no effect.
+   */
+  managed?: boolean;
 }

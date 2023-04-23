@@ -967,7 +967,9 @@ describe(`POST ${URL}`, () => {
         attributes: { title: 'Look at my visualization' },
         references: [],
       };
-      savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [obj1] });
+      savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [{ ...obj1, managed: false }],
+      });
 
       // Prepare mock results for the created legacy URL alias (for obj1 only).
       const legacyUrlAliasObj1 = {
@@ -1018,6 +1020,7 @@ describe(`POST ${URL}`, () => {
             id: obj1.originId,
             meta: { title: obj1.attributes.title, icon: 'visualization-icon' },
             destinationId: obj1.id,
+            managed: false,
           },
         ],
         errors: [
@@ -1031,6 +1034,7 @@ describe(`POST ${URL}`, () => {
               type: 'unknown',
             },
             meta: { title: 'Legacy URL alias (my-vis -> new-id-1)', icon: 'legacy-url-alias-icon' },
+            managed: false,
           },
         ],
         warnings: [],

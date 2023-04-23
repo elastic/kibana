@@ -112,7 +112,6 @@ export const createSavedObjects = async <T>({
       ...{ managed: managed ?? object.managed ?? false }, // trictly speaking this shouldn't be needed since the objects passed in should already have the flag set
     };
   });
-  console.log('objectsToCreate:', JSON.stringify(objectsToCreate));
 
   const resolvableErrors = ['conflict', 'ambiguous_conflict', 'missing_references'];
   const hasResolvableErrors = accumulatedErrors.some(({ error: { type } }) =>
@@ -181,10 +180,6 @@ export const createSavedObjects = async <T>({
           })
         ).saved_objects // already have managed specified
       : [];
-  console.log(
-    'remappedResults.filter((obj) => !obj.error)',
-    JSON.stringify(remappedResults.filter((obj) => !obj.error))
-  );
   return {
     createdObjects: remappedResults.filter((obj) => !obj.error),
     errors: extractErrors(remappedResults, objects, legacyUrlAliasResults, legacyUrlAliases),

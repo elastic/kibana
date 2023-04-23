@@ -25,6 +25,9 @@ interface CreateOptions {
   originId?: string;
   managed?: boolean;
 }
+/** Utility function to add default `managed` flag to objects that don't have one declared. */
+const addManagedDefault = (objs: SavedObject[]) =>
+  objs.map((obj) => ({ ...obj, managed: obj.managed ?? false }));
 /**
  * Function to create a realistic-looking import object given a type, ID, and optional originId
  */
@@ -137,7 +140,12 @@ describe('#createSavedObjects', () => {
     objects: (n: number, objects: SavedObject[], retry?: boolean) => {
       const expectedObjects = getExpectedBulkCreateArgsObjects(objects, retry);
       const expectedOptions = expect.any(Object);
-      expect(bulkCreate).toHaveBeenNthCalledWith(n, expectedObjects, expectedOptions);
+      const expectedObjectsWithManagedDefault = addManagedDefault(expectedObjects);
+      expect(bulkCreate).toHaveBeenNthCalledWith(
+        n,
+        expectedObjectsWithManagedDefault,
+        expectedOptions
+      );
     },
     legacyUrlAliases: (n: number, expectedAliasObjects: SavedObject[]) => {
       const expectedOptions = expect.any(Object);
@@ -314,8 +322,6 @@ describe('#createSavedObjects', () => {
 
   it('filters out version from objects before create and accepts managed', async () => {
     const options = setupParams({ objects: [{ ...obj1, version: 'foo' }] }); // here optionsManaged is undefined
-    // const saved_objects = [getResultMock.success(obj1, options)];
-    // console.log('saved_objects[0]', JSON.stringify(saved_objects[0]));
     bulkCreate.mockResolvedValue({ saved_objects: [getResultMock.success(obj1, options)] });
 
     await createSavedObjects(options);
@@ -327,7 +333,13 @@ describe('#createSavedObjects', () => {
     compatibilityMode,
     managed,
   }: { namespace?: string; compatibilityMode?: boolean; managed?: boolean } = {}) => {
-    const options = setupParams({ objects: objs, namespace, compatibilityMode, managed });
+    const objsWithMissingManaged = addManagedDefault(objs);
+    const options = setupParams({
+      objects: objsWithMissingManaged,
+      namespace,
+      compatibilityMode,
+      managed,
+    });
     setupMockResults(options);
 
     await createSavedObjects(options);
@@ -337,7 +349,8 @@ describe('#createSavedObjects', () => {
     const x4 = { ...obj4, id: importId4 }; // this import object already has an originId
     const x8 = { ...obj8, id: importId8, originId: obj8.id }; // this import object doesn't have an originId, so it is set before create
     const argObjs = [obj1, obj2, x3, x4, obj5, obj6, obj7, x8, obj9, obj10, obj11, obj12, obj13];
-    expectBulkCreateArgs.objects(1, argObjs);
+    const argObjsWithMissingManaged = addManagedDefault(argObjs);
+    expectBulkCreateArgs.objects(1, argObjsWithMissingManaged);
 
     if (compatibilityMode) {
       // Rewrite namespace in the legacy URL alias.
@@ -388,10 +401,8 @@ describe('#createSavedObjects', () => {
 
   describe('with an undefined namespace', () => {
     test('calls bulkCreate according to input objects and compatibilityMode option', async () => {
-      const expectedObjects = await testBulkCreateObjects();
-      console.log('expectedObjects:', expectedObjects);
-      const realObjects = await testBulkCreateObjects({ compatibilityMode: true });
-      console.log('realObjects:', realObjects);
+      await testBulkCreateObjects();
+      await testBulkCreateObjects({ compatibilityMode: true });
     });
     test('calls bulkCreate once with input options', async () => {
       await testBulkCreateOptions();
