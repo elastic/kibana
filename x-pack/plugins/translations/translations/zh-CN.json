@@ -10619,8 +10619,6 @@
     "xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle": "添加 KSPM 集成",
     "xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle": "了解有关云安全态势的详情",
     "xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle": "在云资源中检测安全配置错误！",
-    "xpack.csp.cloudPostureScoreChart.counterLink.failedFindingsTooltip": "失败的结果",
-    "xpack.csp.cloudPostureScoreChart.counterLink.passedFindingsTooltip": "通过的结果",
     "xpack.csp.createPackagePolicy.customAssetsTab.dashboardViewLabel": "查看 CSP 仪表板",
     "xpack.csp.createPackagePolicy.customAssetsTab.findingsViewLabel": "查看 CSP 结果 ",
     "xpack.csp.createPackagePolicy.customAssetsTab.rulesViewLabel": "查看 CSP 规则 ",
