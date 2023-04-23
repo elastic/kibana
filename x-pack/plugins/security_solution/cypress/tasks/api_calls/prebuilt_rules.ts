@@ -8,7 +8,7 @@
 import { ELASTIC_SECURITY_RULE_ID } from '../../../common/detection_engine/constants';
 import type { PrePackagedRulesStatusResponse } from '../../../public/detection_engine/rule_management/logic/types';
 import { getPrebuiltRuleWithExceptionsMock } from '../../../server/lib/detection_engine/prebuilt_rules/mocks';
-import { createRuleAssetSavedObject } from '../../helpers/rules';
+import { createRuleAssetSavedObject, createRuleSavedObject } from '../../helpers/rules';
 
 export const getPrebuiltRulesStatus = () => {
   return cy.request<PrePackagedRulesStatusResponse>({
@@ -49,7 +49,6 @@ export const createNewRuleAsset = (index: string, rule = SAMPLE_PREBUILT_RULE) =
   const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_doc/security-rule:${
     rule['security-rule'].rule_id
   }`;
-  console.log({ url });
   cy.waitUntil(
     () => {
       return cy
@@ -61,7 +60,6 @@ export const createNewRuleAsset = (index: string, rule = SAMPLE_PREBUILT_RULE) =
           body: rule,
         })
         .then((response) => {
-          console.log({ response });
           if (response.status !== 200) {
             return false;
           }
@@ -71,30 +69,30 @@ export const createNewRuleAsset = (index: string, rule = SAMPLE_PREBUILT_RULE) =
     { interval: 500, timeout: 12000 }
   );
 };
-// export const createNewRuleAsset = (index: string, rule = SAMPLE_PREBUILT_RULE) => {
-//   const url = `${Cypress.env('ELASTICSEARCH_URL')}/_bulk`;
-//   console.log({ url });
-//   cy.waitUntil(
-//     () => {
-//       return cy
-//         .request({
-//           method: 'POST',
-//           url,
-//           headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
-//           failOnStatusCode: false,
-//           body: JSON.stringify([
-//             { index: { _index: index, _id: `security-rule:${rule['security-rule'].rule_id}` } },
-//             rule,
-//           ]),
-//         })
-//         .then((response) => {
-//           console.log({ response });
-//           if (response.status !== 200) {
-//             return false;
-//           }
-//           return true;
-//         });
-//     },
-//     { interval: 500, timeout: 12000 }
-//   );
-// };
+
+export const SAMPLE_RULE = createRuleSavedObject({
+  rule_id: ELASTIC_SECURITY_RULE_ID,
+  tags: ['test-tag-1'],
+  enabled: true,
+});
+
+export const installAvailableRules = () => {
+  cy.waitUntil(
+    () => {
+      return cy
+        .request({
+          method: 'PUT',
+          url: 'api/detection_engine/rules/prepackaged',
+          headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
+          failOnStatusCode: false,
+        })
+        .then((response) => {
+          if (response.status !== 200) {
+            return false;
+          }
+          return true;
+        });
+    },
+    { interval: 500, timeout: 12000 }
+  );
+};

@@ -80,7 +80,7 @@ export const convertHistoryStartToSize = (relativeTime: string) => {
 };
 
 /**
- * A helper function to create a rule asset saved object
+ * A helper function to create a rule asset saved object (type: security-rule)
  *
  * @param overrideParams Params to override the default mock
  * @returns Created rule asset saved object
@@ -91,6 +91,26 @@ export const createRuleAssetSavedObject = (overrideParams: Partial<PrebuiltRuleA
     ...overrideParams,
   },
   type: 'security-rule',
+  references: [],
+  coreMigrationVersion: '8.6.0',
+  updated_at: '2022-11-01T12:56:39.717Z',
+  created_at: '2022-11-01T12:56:39.717Z',
+});
+
+/**
+ * A helper function to create a rule saved object (type: alert)
+ *
+ * @param overrideParams Params to override the default mock
+ * @returns Created rule asset saved object
+ */
+export const createRuleSavedObject = (overrideParams: Partial<PrebuiltRuleAsset>) => ({
+  alert: {
+    tags: ['Elastic', 'Kubernetes'],
+    alertTypeId: 'siem.queryRule',
+    consumer: 'siem',
+    ...overrideParams,
+  },
+  type: 'alert',
   references: [],
   coreMigrationVersion: '8.6.0',
   updated_at: '2022-11-01T12:56:39.717Z',
