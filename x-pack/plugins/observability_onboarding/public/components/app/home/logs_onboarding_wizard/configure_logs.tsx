@@ -24,8 +24,6 @@ import {
   StepPanelFooter,
 } from '../../../shared/step_panel';
 import { useWizard } from '.';
-import { OpentelemetrySvg } from './icons/opentelemetry_svg';
-import { AwsSvg } from './icons/aws_svg';
 
 export function ConfigureLogs() {
   const { goToStep, goBack, getState, setState } = useWizard();
@@ -107,24 +105,6 @@ export function ConfigureLogs() {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <OptionCard
-                title="Stream from OpenTelemetry"
-                iconType={OpentelemetrySvg}
-                onClick={createLogsTypeToggle('opentelemetry')}
-                isSelected={logsType === 'opentelemetry'}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <OptionCard
-                title="Stream from Amazon Firehose"
-                iconType={AwsSvg}
-                onClick={createLogsTypeToggle('amazon-firehose')}
-                isSelected={logsType === 'amazon-firehose'}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </LogsTypeSection>
         <EuiHorizontalRule margin="l" />
         <LogsTypeSection title="Stream logs" description="Lorem ipsum">
