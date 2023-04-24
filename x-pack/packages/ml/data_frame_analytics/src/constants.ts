@@ -35,3 +35,8 @@ export const INDEX_CREATED_BY = {
 } as const;
 
 export type JobMapNodeTypes = typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES];
+
+export const FEATURE_IMPORTANCE = 'feature_importance';
+export const FEATURE_INFLUENCE = 'feature_influence';
+export const TOP_CLASSES = 'top_classes';
+export const OUTLIER_SCORE = 'outlier_score';

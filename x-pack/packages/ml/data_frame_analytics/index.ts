@@ -6,11 +6,23 @@
  */
 
 export {
+  getDependentVar,
+  getPredictionFieldName,
+  isClassificationAnalysis,
+  isOutlierAnalysis,
+  isRegressionAnalysis,
+} from './src/analytics_utils';
+
+export {
   ANALYSIS_CONFIG_TYPE,
   DATA_FRAME_TASK_STATE,
   DEFAULT_RESULTS_FIELD,
   JOB_MAP_NODE_TYPES,
   INDEX_CREATED_BY,
+  FEATURE_IMPORTANCE,
+  FEATURE_INFLUENCE,
+  OUTLIER_SCORE,
+  TOP_CLASSES,
   type JobMapNodeTypes,
 } from './src/constants';
 
@@ -36,8 +48,8 @@ export {
 } from './src/feature_importance';
 
 export {
-  isKeywordAndTextType,
   sortExplorationResultsFields,
+  DEFAULT_REGRESSION_COLUMNS,
   ML__ID_COPY,
   ML__INCREMENTAL_ID,
 } from './src/fields';
