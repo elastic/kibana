@@ -24,27 +24,26 @@ const getContent = (groups: Group[]) => {
     .join('\n');
 
   return `---
-  id: uiMlKibanaRestApi
-  slug: /ml-team/docs/ui/rest-api/ml-kibana-rest-api
-  title: Machine Learning Kibana REST API
-  image: https://source.unsplash.com/400x175/?Nature
-  description: This page contains documentation for the ML Kibana REST API.
-  date: ${moment().format('YYYY-MM-DD')}
-  tags: ['machine learning','internal docs', 'UI']
-  ---
+id: uiMlKibanaRestApi
+slug: /ml-team/docs/ui/rest-api/ml-kibana-rest-api
+title: Machine Learning Kibana REST API
+image: https://source.unsplash.com/400x175/?Nature
+description: This page contains documentation for the ML Kibana REST API.
+date: ${moment().format('YYYY-MM-DD')}
+tags: ['machine learning','internal docs', 'UI']
+---
 
-  _Updated for ${kibanaPackageJson.version}_
+_Updated for ${kibanaPackageJson.version}_
 
-  Some of the features of the Machine Learning (ML) Kibana plugin are provided via a REST API, which is ideal for creating an integration with the ML plugin.
+Some of the features of the Machine Learning (ML) Kibana plugin are provided via a REST API, which is ideal for creating an integration with the ML plugin.
 
-  Each API is experimental and can include breaking changes in any version of the ML plugin, or might have been entirely removed from the plugin.
+Each API is experimental and can include breaking changes in any version of the ML plugin, or might have been entirely removed from the plugin.
 
-  - <DocLink id="uiMlApi" text="View complete API documentation" />
+- <DocLink id="uiMlApi" text="View complete API documentation" />
 
-  The following APIs are available:
+The following APIs are available:
 
-${groupsStr}
-  `;
+${groupsStr}`;
 };
 
 export const generateContentPage = () => {
