@@ -27,21 +27,6 @@ jest.mock('react-redux', () => {
   };
 });
 
-const createReactQueryWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        // Turn retries off, otherwise we won't be able to test errors
-        retry: false,
-      },
-    },
-  });
-  const wrapper: React.FC = ({ children }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-  return wrapper;
-};
-
 describe('NotePreviews', () => {
   let mockResults: OpenTimelineResult[];
   let note1updated: number;
@@ -58,7 +43,6 @@ describe('NotePreviews', () => {
     queryClient = new QueryClient({
       defaultOptions: {
         queries: {
-          // Turn retries off, otherwise we won't be able to test errors
           retry: false,
         },
       },

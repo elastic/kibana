@@ -41,3 +41,17 @@ export const DELETE_NOTE_ERROR = (error: string) =>
 export const DELETE_NOTE = i18n.translate('xpack.securitySolution.timeline.deleteNoteLabel', {
   defaultMessage: 'Delete Note',
 });
+
+export const CANCEL_DELETE_NOTE = i18n.translate(
+  'xpack.securitySolution.timeline.cancelDeleteNoteLabel',
+  {
+    defaultMessage: 'Keep Note',
+  }
+);
+
+export const DELETE_NOTE_CONFIRM = i18n.translate(
+  'xpack.securitySolution.timeline.promptDeleteNoteLabel',
+  {
+    defaultMessage: 'Delete timeline note?',
+  }
+);
