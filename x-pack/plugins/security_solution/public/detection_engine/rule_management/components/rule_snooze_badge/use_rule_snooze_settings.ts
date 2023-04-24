@@ -23,7 +23,9 @@ export function useRuleSnoozeSettings(id: string): UseRuleSnoozeSettingsResult {
     data: rulesSnoozeSettings,
     isFetching: isSingleSnoozeSettingsFetching,
     isError: isSingleSnoozeSettingsError,
-  } = useFetchRulesSnoozeSettings([id], { enabled: !rulesTableSnoozeSettings?.data[id] });
+  } = useFetchRulesSnoozeSettings([id], {
+    enabled: !rulesTableSnoozeSettings?.data[id] && !rulesTableSnoozeSettings?.isFetching,
+  });
   const snoozeSettings = rulesTableSnoozeSettings?.data[id] ?? rulesSnoozeSettings?.[0];
   const isFetching = rulesTableSnoozeSettings?.isFetching || isSingleSnoozeSettingsFetching;
   const isError = rulesTableSnoozeSettings?.isError || isSingleSnoozeSettingsError;
