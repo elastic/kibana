@@ -9,6 +9,7 @@ export const ANALYZER_GRAPH_TEST_ID = 'securitySolutionDocumentDetailsFlyoutAnal
 export const ANALYZE_GRAPH_ERROR_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutAnalyzerGraphError';
 export const SESSION_VIEW_TEST_ID = 'securitySolutionDocumentDetailsFlyoutSessionView';
+export const SESSION_VIEW_ERROR_TEST_ID = 'securitySolutionDocumentDetailsFlyoutSessionViewError';
 export const ENTITIES_DETAILS_TEST_ID = 'securitySolutionDocumentDetailsFlyoutEntitiesDetails';
 export const THREAT_INTELLIGENCE_DETAILS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutThreatIntelligenceDetails';

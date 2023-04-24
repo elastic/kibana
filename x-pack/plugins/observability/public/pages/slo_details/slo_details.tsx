@@ -26,6 +26,7 @@ import { paths } from '../../config/paths';
 import type { SloDetailsPathParams } from './types';
 import type { ObservabilityAppServices } from '../../application/types';
 import { AutoRefreshButton } from '../slos/components/auto_refresh_button';
+import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 
 export function SloDetailsPage() {
   const {
@@ -69,6 +70,7 @@ export function SloDetailsPage() {
             isAutoRefreshing={isAutoRefreshing}
             onClick={handleToggleAutoRefresh}
           />,
+          <FeedbackButton />,
         ],
         bottomBorder: false,
       }}

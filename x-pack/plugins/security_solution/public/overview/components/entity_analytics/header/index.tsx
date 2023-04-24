@@ -41,7 +41,7 @@ const HOST_RISK_QUERY_ID = 'hostRiskScoreKpiQuery';
 const USER_RISK_QUERY_ID = 'userRiskScoreKpiQuery';
 
 export const EntityAnalyticsHeader = () => {
-  const { from, to } = useGlobalTime(false);
+  const { from, to } = useGlobalTime();
   const timerange = useMemo(
     () => ({
       from,
