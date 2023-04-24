@@ -173,7 +173,11 @@ test('Container view mode change propagates to new children', async () => {
 
 test('searchSessionId propagates to children', async () => {
   const searchSessionId1 = 'searchSessionId1';
-  const container = new DashboardContainer(getSampleDashboardInput(), mockedReduxEmbeddablePackage, searchSessionId1);
+  const container = new DashboardContainer(
+    getSampleDashboardInput(),
+    mockedReduxEmbeddablePackage,
+    searchSessionId1
+  );
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
