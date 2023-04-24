@@ -303,7 +303,7 @@ const EditRulePageComponent: FC = () => {
             <StepPanel loading={loading}>
               {actionsStep.data != null && (
                 <StepRuleActions
-                  id={rule?.id}
+                  ruleId={rule?.id}
                   isReadOnlyView={false}
                   isLoading={isLoading}
                   isUpdateView
