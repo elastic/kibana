@@ -8,11 +8,11 @@
 import type { Logger } from '@kbn/core/server';
 import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { generatePngObservable } from '@kbn/reporting-export-types/server';
+import { getAbsoluteUrlFactory } from '@kbn/reporting-export-types/server/export_types/common/get_absolute_url';
 import { lastValueFrom } from 'rxjs';
 import type { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { generatePngObservable } from '../../export_types/common';
-import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
 import { authorizedUserPreRouting, getCounters } from '../lib';
 
 const path = `${API_DIAGNOSE_URL}/screenshot`;

@@ -8,17 +8,16 @@
 import moment from 'moment';
 import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { JobStatus, ReportOutput, ReportSource } from '@kbn/reporting-export-types/common';
 import { statuses } from '..';
 import type { ReportingCore } from '../..';
 import { ILM_POLICY_NAME, REPORTING_SYSTEM_INDEX } from '../../../common/constants';
-import type { JobStatus, ReportOutput, ReportSource } from '../../../common/types';
 import type { ReportTaskParams } from '../tasks';
-import type { IReport, Report, ReportDocument } from '.';
-import { SavedReport } from '.';
+import { Report, ReportDocument, MIGRATION_VERSION } from './report';
+import { IReport, SavedReport } from '.';
 import { IlmPolicyManager } from './ilm_policy_manager';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
-import { MIGRATION_VERSION } from './report';
 
 /*
  * When an instance of Kibana claims a report job, this information tells us about that instance

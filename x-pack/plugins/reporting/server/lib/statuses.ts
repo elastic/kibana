@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JobStatus } from '../../common/types';
+import { JobStatus } from '@kbn/reporting-export-types/server';
 
 export const statuses: Record<string, JobStatus> = {
   JOB_STATUS_PENDING: 'pending',

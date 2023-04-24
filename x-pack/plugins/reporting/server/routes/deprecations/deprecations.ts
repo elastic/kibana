@@ -6,12 +6,12 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { Logger, RequestHandler } from '@kbn/core/server';
+import { IlmPolicyStatusResponse } from '@kbn/reporting-export-types/server';
 import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,
   ILM_POLICY_NAME,
 } from '../../../common/constants';
-import type { IlmPolicyStatusResponse } from '../../../common/types';
 import type { ReportingCore } from '../../core';
 import { IlmPolicyManager } from '../../lib';
 import { deprecations } from '../../lib/deprecations';
