@@ -1,0 +1,74 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { flowRight } from 'lodash';
+import type { LogsLocatorParams } from './logs_locator';
+import type { NodeLogsLocatorParams } from './node_logs_locator';
+import type { InventoryItemType } from '../../common/inventory_models/types';
+import { findInventoryFields } from '../../common/inventory_models';
+import { replaceLogViewInQueryString } from '../observability_logs/log_view_state';
+import { replaceLogFilterInQueryString } from '../observability_logs/log_stream_query_state';
+import { replaceLogPositionInQueryString } from '../observability_logs/log_stream_position_state/src/url_state_storage_service';
+
+export const parseSearchString = ({
+  time,
+  filter = '',
+  logViewId = 'default',
+}: LogsLocatorParams) =>
+  flowRight(
+    replaceLogFilterInQueryString({ language: 'kuery', query: filter }, time),
+    replaceLogPositionInQueryString(time),
+    replaceLogViewInQueryString({ type: 'log-view-reference', logViewId })
+  )('');
+
+export const constructUrlSearchString = ({
+  nodeId,
+  nodeType,
+  time = 1550671089404,
+  filter = '',
+  logViewId = 'default',
+}: Partial<NodeLogsLocatorParams>) => {
+  return `/stream?logView=${getLogView(logViewId!)}&logPosition=${getLogPosition(
+    time!
+  )}&logFilter=${getLogFilter(filter!, time!, nodeId, nodeType)}`;
+};
+
+const getLogView = (logViewId: string) => {
+  return `(logViewId:${logViewId},type:log-view-reference)`;
+};
+
+const getLogPosition = (time: number) => {
+  return `(position:(tiebreaker:0,time:${time}))`;
+};
+
+const getLogFilter = (
+  filter: string,
+  time?: number,
+  nodeId?: string,
+  nodeType?: InventoryItemType
+) => {
+  let finalFilter = filter;
+  if (nodeId) {
+    const nodeFilter = `${findInventoryFields(nodeType!).id}: ${nodeId}`;
+    finalFilter = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
+  }
+  const query = encodeURI(
+    `(query:(language:kuery,query:'${finalFilter}'),refreshInterval:(pause:!t,value:5000)`
+  );
+
+  if (!time) return `${query})`;
+
+  const from = addHoursToTimestamp(time, -1);
+  const to = addHoursToTimestamp(time, 1);
+  return `${query},timeRange:(from:'${from}',to:'${to}'))`;
+};
+
+export const addHoursToTimestamp = (timestamp: number, hours: number): string => {
+  const date = new Date(timestamp);
+  date.setHours(date.getHours() + hours);
+  return date.toISOString();
+};

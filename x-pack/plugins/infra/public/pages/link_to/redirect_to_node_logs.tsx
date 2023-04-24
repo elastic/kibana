@@ -11,7 +11,6 @@ import { LinkDescriptor, useFetcher } from '@kbn/observability-plugin/public';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
-import { findInventoryFields } from '../../../common/inventory_models';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { LoadingPage } from '../../components/loading_page';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
@@ -40,13 +39,17 @@ export const RedirectToNodeLogs = ({
     load();
   });
 
-  const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
-  const userFilter = getFilterFromLocation(location);
-  const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
+  const filter = getFilterFromLocation(location);
   const time = getTimeFromLocation(location);
 
   const { data } = useFetcher(async () => {
-    return services.locators.logsLocator.getLocation({ time, filter, logViewId });
+    return await services.locators.nodeLogsLocator.getLocation({
+      nodeId,
+      nodeType,
+      time,
+      filter,
+      logViewId,
+    });
   }, []);
 
   if (isLoading) {

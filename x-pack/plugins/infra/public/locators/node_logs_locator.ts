@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import { flowRight } from 'lodash';
 import { findInventoryFields } from '../../common/inventory_models';
-import { InventoryItemType } from '../../common/inventory_models/types';
-import { replaceLogFilterInQueryString } from '../observability_logs/log_stream_query_state';
-import { replaceLogPositionInQueryString } from '../observability_logs/log_stream_position_state/src/url_state_storage_service';
-import { replaceLogViewInQueryString } from '../observability_logs/log_view_state';
-import { LogsLocatorParams } from './logs_locator';
+import type { InventoryItemType } from '../../common/inventory_models/types';
+import type { LogsLocatorParams } from './logs_locator';
+import { parseSearchString } from './helpers';
 
 const NODE_LOGS_LOCATOR_ID = 'NODE_LOGS_LOCATOR';
 
-export interface NodeLogsLocatorParams extends LogsLocatorParams, SerializableRecord {
+export interface NodeLogsLocatorParams extends LogsLocatorParams {
   nodeId: string;
   nodeType: InventoryItemType;
 }
@@ -30,23 +26,17 @@ export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLoca
   public readonly getLocation = async ({
     nodeId,
     nodeType,
-    time = NaN,
-    filter = '',
-    logViewId = 'default',
+    time,
+    filter,
+    logViewId,
   }: NodeLogsLocatorParams) => {
     const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
     const query = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
+    const searchString = parseSearchString({ time, filter: query, logViewId });
 
     // TODO: check serverless flag
     // if enabled, use discover locator to return a path to discover
     // if disabled continue with the normal flow
-
-    const searchString = flowRight(
-      replaceLogFilterInQueryString({ language: 'kuery', query }, time),
-      replaceLogPositionInQueryString(time),
-      replaceLogViewInQueryString({ type: 'log-view-reference', logViewId })
-    )('');
-
     const path = `/stream?${searchString}`;
 
     return {
