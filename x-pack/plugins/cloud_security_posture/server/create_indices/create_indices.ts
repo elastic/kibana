@@ -198,6 +198,10 @@ const updateIndexSafe = async (
   mappings: MappingTypeMapping
 ) => {
   try {
+    if (mappings && mappings.properties) {
+      delete mappings.properties.stream;
+      delete mappings.properties.data_stream;
+    }
     await esClient.indices.putMapping({
       index,
       properties: mappings.properties,
