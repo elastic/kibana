@@ -6,16 +6,16 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH } from '@kbn/alerting-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 import { fetchActiveMaintenanceWindows } from './api';
-import { GET_ACTIVE_MAINTENANCE_WINDOWS_URL } from './constants';
 
 export const useFetchActiveMaintenanceWindows = () => {
   const { addError } = useAppToasts();
 
   return useQuery(
-    ['GET', GET_ACTIVE_MAINTENANCE_WINDOWS_URL],
+    ['GET', INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH],
     ({ signal }) => fetchActiveMaintenanceWindows(signal),
     {
       refetchInterval: 60000,

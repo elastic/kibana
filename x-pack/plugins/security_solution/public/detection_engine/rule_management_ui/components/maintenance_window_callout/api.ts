@@ -6,13 +6,13 @@
  */
 
 import type { MaintenanceWindow } from '@kbn/alerting-plugin/common/maintenance_window';
+import { INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH } from '@kbn/alerting-plugin/common';
 import { KibanaServices } from '../../../../common/lib/kibana';
-import { GET_ACTIVE_MAINTENANCE_WINDOWS_URL } from './constants';
 
 export const fetchActiveMaintenanceWindows = async (
   signal?: AbortSignal
 ): Promise<MaintenanceWindow[]> =>
-  KibanaServices.get().http.fetch(GET_ACTIVE_MAINTENANCE_WINDOWS_URL, {
+  KibanaServices.get().http.fetch(INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH, {
     method: 'GET',
     signal,
   });
