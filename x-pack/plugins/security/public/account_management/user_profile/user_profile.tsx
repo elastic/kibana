@@ -174,7 +174,7 @@ function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfi
               <FormLabel for="data.userSettings.darkMode">
                 <FormattedMessage
                   id="xpack.security.accountManagement.userProfile.userSettings.theme"
-                  defaultMessage="Theme"
+                  defaultMessage="Theme mode"
                 />
               </FormLabel>
             }
