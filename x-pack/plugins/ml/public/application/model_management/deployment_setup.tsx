@@ -32,11 +32,17 @@ import type { CoreTheme, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { numberValidator } from '@kbn/ml-agg-utils';
 import { isCloudTrial } from '../services/ml_server_info';
-import { composeValidators, requiredValidator } from '../../../common/util/validators';
+import {
+  composeValidators,
+  dictionaryValidator,
+  requiredValidator,
+} from '../../../common/util/validators';
+import { ModelItem } from './models_list';
 
 interface DeploymentSetupProps {
   config: ThreadingParams;
   onConfigChange: (config: ThreadingParams) => void;
+  errors: Partial<Record<keyof ThreadingParams, object>>;
 }
 
 export interface ThreadingParams {
@@ -51,7 +57,7 @@ const THREADS_MAX_EXPONENT = 4;
 /**
  * Form for setting threading params.
  */
-export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChange }) => {
+export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChange, errors }) => {
   const numOfAllocation = config.numOfAllocations;
   const threadsPerAllocations = config.threadsPerAllocations;
 
@@ -99,8 +105,16 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChan
             />
           }
           hasChildLabel={false}
+          isInvalid={!!errors.deploymentId}
+          error={
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.startDeployment.deploymentIdError"
+              defaultMessage="Deployment with this ID already exist"
+            />
+          }
         >
           <EuiFieldText
+            isInvalid={!!errors.deploymentId}
             value={config.deploymentId ?? ''}
             onChange={(e) => {
               onConfigChange({ ...config, deploymentId: e.target.value });
@@ -278,7 +292,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChan
 };
 
 interface StartDeploymentModalProps {
-  modelId: string;
+  model: ModelItem;
   startModelDeploymentDocUrl: string;
   onConfigChange: (config: ThreadingParams) => void;
   onClose: () => void;
@@ -289,7 +303,7 @@ interface StartDeploymentModalProps {
  * Modal window wrapper for {@link DeploymentSetup}
  */
 export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
-  modelId,
+  model,
   onConfigChange,
   onClose,
   startModelDeploymentDocUrl,
@@ -300,18 +314,29 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       numOfAllocations: 1,
       threadsPerAllocations: 1,
       priority: isCloudTrial() ? 'low' : 'normal',
-      deploymentId: modelId,
+      deploymentId: model.model_id,
     }
   );
 
   const isUpdate = initialParams !== undefined;
+
+  const deploymentIdValidator = useMemo(
+    () => dictionaryValidator(model.deployment_ids),
+    [model.deployment_ids]
+  );
 
   const numOfAllocationsValidator = composeValidators(
     requiredValidator(),
     numberValidator({ min: 1, integerOnly: true })
   );
 
-  const errors = numOfAllocationsValidator(config.numOfAllocations);
+  const numOfAllocationsErrors = numOfAllocationsValidator(config.numOfAllocations);
+  const deploymentIdErrors = deploymentIdValidator(config.deploymentId ?? '');
+
+  const errors = {
+    ...(numOfAllocationsErrors ? { numOfAllocations: numOfAllocationsErrors } : {}),
+    ...(deploymentIdErrors ? { deploymentId: deploymentIdErrors } : {}),
+  };
 
   return (
     <EuiModal
@@ -326,13 +351,13 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.updateDeployment.modalTitle"
               defaultMessage="Update {modelId} deployment"
-              values={{ modelId }}
+              values={{ modelId: model.model_id }}
             />
           ) : (
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.startDeployment.modalTitle"
               defaultMessage="Start {modelId} deployment"
-              values={{ modelId }}
+              values={{ modelId: model.model_id }}
             />
           )}
         </EuiModalHeaderTitle>
@@ -352,7 +377,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
         />
         <EuiSpacer size={'m'} />
 
-        <DeploymentSetup config={config} onConfigChange={setConfig} />
+        <DeploymentSetup config={config} onConfigChange={setConfig} errors={errors} />
 
         <EuiSpacer size={'m'} />
       </EuiModalBody>
@@ -385,7 +410,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           form={'startDeploymentForm'}
           onClick={onConfigChange.bind(null, config)}
           fill
-          disabled={!!errors}
+          disabled={Object.keys(errors).length > 0}
           data-test-subj={'mlModelsStartDeploymentModalStartButton'}
         >
           {isUpdate ? (
@@ -414,7 +439,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
  */
 export const getUserInputModelDeploymentParamsProvider =
   (overlays: OverlayStart, theme$: Observable<CoreTheme>, startModelDeploymentDocUrl: string) =>
-  (modelId: string, initialParams?: ThreadingParams): Promise<ThreadingParams | void> => {
+  (model: ModelItem, initialParams?: ThreadingParams): Promise<ThreadingParams | void> => {
     return new Promise(async (resolve) => {
       try {
         const modalSession = overlays.openModal(
@@ -423,7 +448,7 @@ export const getUserInputModelDeploymentParamsProvider =
               <StartUpdateDeploymentModal
                 startModelDeploymentDocUrl={startModelDeploymentDocUrl}
                 initialParams={initialParams}
-                modelId={modelId}
+                model={model}
                 onConfigChange={(config) => {
                   modalSession.close();
 

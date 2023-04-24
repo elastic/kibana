@@ -156,7 +156,7 @@ export function useModelActions({
         },
         available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
         onClick: async (item) => {
-          const modelDeploymentParams = await getUserInputModelDeploymentParams(item.model_id);
+          const modelDeploymentParams = await getUserInputModelDeploymentParams(item);
 
           if (!modelDeploymentParams) return;
 
@@ -166,7 +166,9 @@ export function useModelActions({
               number_of_allocations: modelDeploymentParams.numOfAllocations,
               threads_per_allocation: modelDeploymentParams.threadsPerAllocations!,
               priority: modelDeploymentParams.priority!,
-              deployment_id: modelDeploymentParams.deploymentId,
+              deployment_id: !!modelDeploymentParams.deploymentId
+                ? modelDeploymentParams.deploymentId
+                : item.model_id,
             });
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
