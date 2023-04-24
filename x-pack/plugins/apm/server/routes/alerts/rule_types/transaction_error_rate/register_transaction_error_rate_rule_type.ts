@@ -28,6 +28,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
 import {
@@ -85,6 +86,7 @@ export function registerTransactionErrorRateRuleType({
           apmActionVariables.interval,
           apmActionVariables.reason,
           apmActionVariables.serviceName,
+          apmActionVariables.transactionName,
           apmActionVariables.threshold,
           apmActionVariables.transactionType,
           apmActionVariables.transactionName,
@@ -149,8 +151,15 @@ export function registerTransactionErrorRateRuleType({
                       ],
                     },
                   },
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName),
-                  ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType),
+                  ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                    queryEmptyString: false,
+                  }),
+                  ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
+                    queryEmptyString: false,
+                  }),
+                  ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
+                    queryEmptyString: false,
+                  }),
                   ...environmentQuery(ruleParams.environment),
                 ],
               },
@@ -252,6 +261,7 @@ export function registerTransactionErrorRateRuleType({
             .alertWithLifecycle({
               id: bucketKey.join('_'),
               fields: {
+                [TRANSACTION_NAME]: ruleParams.transactionName,
                 [PROCESSOR_EVENT]: ProcessorEvent.transaction,
                 [ALERT_EVALUATION_VALUE]: errorRate,
                 [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
@@ -267,6 +277,7 @@ export function registerTransactionErrorRateRuleType({
               ),
               reason: reasonMessage,
               threshold: ruleParams.threshold,
+              'transaction.name': ruleParams.transactionName,
               triggerValue: asDecimalOrInteger(errorRate),
               viewInAppUrl,
               ...groupByActionVariables,

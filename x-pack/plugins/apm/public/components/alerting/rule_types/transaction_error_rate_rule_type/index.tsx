@@ -26,6 +26,7 @@ import {
   IsAboveField,
   ServiceField,
   TransactionTypeField,
+  TransactionNameField,
 } from '../../utils/fields';
 import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
@@ -37,17 +38,18 @@ import {
   TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 
-interface RuleParams {
+export interface RuleParams {
   windowSize?: number;
   windowUnit?: string;
   threshold?: number;
   serviceName?: string;
   transactionType?: string;
+  transactionName?: string;
   environment?: string;
   groupBy?: string[] | undefined;
 }
 
-interface Props {
+export interface Props {
   ruleParams: RuleParams;
   metadata?: AlertMetadata;
   setRuleParams: (key: string, value: any) => void;
@@ -89,6 +91,7 @@ export function TransactionErrorRateRuleType(props: Props) {
                 environment: params.environment,
                 serviceName: params.serviceName,
                 transactionType: params.transactionType,
+                transactionName: params.transactionName,
                 interval,
                 start,
                 end,
@@ -100,6 +103,7 @@ export function TransactionErrorRateRuleType(props: Props) {
     },
     [
       params.transactionType,
+      params.transactionName,
       params.environment,
       params.serviceName,
       params.windowSize,
@@ -120,7 +124,8 @@ export function TransactionErrorRateRuleType(props: Props) {
       onChange={(value) => {
         if (value !== params.serviceName) {
           setRuleParams('serviceName', value);
-          setRuleParams('transactionType', '');
+          setRuleParams('transactionType', undefined);
+          setRuleParams('transactionName', undefined);
           setRuleParams('environment', ENVIRONMENT_ALL.value);
         }
       }}
@@ -133,6 +138,11 @@ export function TransactionErrorRateRuleType(props: Props) {
     <EnvironmentField
       currentValue={params.environment}
       onChange={(value) => setRuleParams('environment', value)}
+      serviceName={params.serviceName}
+    />,
+    <TransactionNameField
+      currentValue={params.transactionName}
+      onChange={(value) => setRuleParams('transactionName', value)}
       serviceName={params.serviceName}
     />,
     <IsAboveField
