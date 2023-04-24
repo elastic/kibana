@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CELL_VALUE_TRIGGER, CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { CELL_VALUE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type * as H from 'history';
 import type { SecurityAppStore } from '../common/store/types';
@@ -23,7 +23,6 @@ import {
 import { createToggleColumnCellActionFactory } from './toggle_column';
 import { SecurityCellActionsTrigger } from './constants';
 import type { SecurityCellActionName, SecurityCellActions } from './types';
-import { createAddToNewCaseLensAction } from './add_to_new_case/lens/add_to_new_case';
 
 export const registerUIActions = (
   { uiActions }: StartPlugins,
@@ -31,24 +30,16 @@ export const registerUIActions = (
   history: H.History,
   services: StartServices
 ) => {
-  registerLensActions(uiActions, store, history, services);
+  registerLensActions(uiActions, store);
   registerCellActions(uiActions, store, history, services);
 };
 
-const registerLensActions = (
-  uiActions: UiActionsStart,
-  store: SecurityAppStore,
-  history: H.History,
-  services: StartServices
-) => {
+const registerLensActions = (uiActions: UiActionsStart, store: SecurityAppStore) => {
   const addToTimelineAction = createAddToTimelineLensAction({ store, order: 1 });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, addToTimelineAction);
 
   const copyToClipboardAction = createCopyToClipboardLensAction({ order: 2 });
   uiActions.addTriggerAction(CELL_VALUE_TRIGGER, copyToClipboardAction);
-
-  const addToNewCaseAction = createAddToNewCaseLensAction({ order: 41, store, history, services });
-  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToNewCaseAction);
 };
 
 const registerCellActions = (

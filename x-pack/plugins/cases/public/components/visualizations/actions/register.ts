@@ -11,6 +11,7 @@ import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import type { CasesPluginStart } from '../../../types';
 import type { CasesContextProps } from '../../cases_context';
 import { createAddToNewCaseLensAction } from './add_to_new_case';
+import { createAddToExistingCaseLensAction } from './add_to_existing_case';
 
 export const registerUIActions = (
   { uiSettings }: CoreStart,
@@ -26,9 +27,16 @@ const registerLensActions = (
   uiSettings: IUiSettingsClient
 ) => {
   const addToNewCaseAction = createAddToNewCaseLensAction({
-    order: 41,
+    // order: 42,
     getCreateCaseFlyoutProps,
     uiSettings,
   });
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToNewCaseAction);
+
+  const addToExistingCaseAction = createAddToExistingCaseLensAction({
+    // order: 41,
+    getCreateCaseFlyoutProps,
+    uiSettings,
+  });
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToExistingCaseAction);
 };

@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const COPY_TO_CLIPBOARD_ICON = 'copyClipboard';
-export const ADD_TO_NEW_CASE_ICON = 'plusInCircle';
 export const COPY_TO_CLIPBOARD = i18n.translate(
   'xpack.securitySolution.actions.cellValue.copyToClipboard.displayName',
   {
@@ -20,19 +19,5 @@ export const COPY_TO_CLIPBOARD_SUCCESS = i18n.translate(
   'xpack.securitySolution.actions.cellValue.copyToClipboard.successMessage',
   {
     defaultMessage: 'Copied to the clipboard',
-  }
-);
-
-export const ADD_TO_NEW_CASE = i18n.translate(
-  'xpack.securitySolution.actions.visualizationActions.addToNewCase.displayName',
-  {
-    defaultMessage: 'Add to new case',
-  }
-);
-
-export const ADD_TO_CASE_SUCCESS = i18n.translate(
-  'xpack.securitySolution.actions.visualizationActions.addToNewCase.successMessage',
-  {
-    defaultMessage: 'Successfully added visualization to the case',
   }
 );
