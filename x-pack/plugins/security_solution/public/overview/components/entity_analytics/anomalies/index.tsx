@@ -60,7 +60,7 @@ export const EntityAnalyticsAnomalies = () => {
 
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID);
-  const { deleteQuery, setQuery, from, to } = useGlobalTime(false);
+  const { deleteQuery, setQuery, from, to } = useGlobalTime();
   const {
     isLoading: isSearchLoading,
     data,

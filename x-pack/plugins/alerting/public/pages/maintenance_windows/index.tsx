@@ -31,15 +31,19 @@ import { LicensePrompt } from './components/license_prompt';
 
 export const MaintenanceWindowsPage = React.memo(() => {
   const { docLinks } = useKibana().services;
-
   const { isAtLeastPlatinum } = useLicense();
+
   const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
-  const { isLoading, maintenanceWindows } = useFindMaintenanceWindows();
+
+  const { isLoading, maintenanceWindows, refetch } = useFindMaintenanceWindows();
+
   useBreadcrumbs(AlertingDeepLinkId.maintenanceWindows);
 
   const handleClickCreate = useCallback(() => {
     navigateToCreateMaintenanceWindow();
   }, [navigateToCreateMaintenanceWindow]);
+
+  const refreshData = useCallback(() => refetch(), [refetch]);
 
   const showEmptyPrompt = !isLoading && maintenanceWindows.length === 0;
   const hasLicense = isAtLeastPlatinum();
@@ -82,7 +86,11 @@ export const MaintenanceWindowsPage = React.memo(() => {
       ) : (
         <>
           <EuiSpacer size="xl" />
-          <MaintenanceWindowsList loading={isLoading} items={maintenanceWindows} />
+          <MaintenanceWindowsList
+            refreshData={refreshData}
+            loading={isLoading}
+            items={maintenanceWindows}
+          />
         </>
       )}
     </>
