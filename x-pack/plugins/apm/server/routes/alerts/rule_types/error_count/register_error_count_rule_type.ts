@@ -170,7 +170,7 @@ export function registerErrorCountRuleType({
               measured: errorCount,
               windowSize: ruleParams.windowSize,
               windowUnit: ruleParams.windowUnit,
-              groupKey: bucketKey,
+              groupByFields,
             });
 
             const relativeViewInAppUrl = getAlertUrlErrorCount(

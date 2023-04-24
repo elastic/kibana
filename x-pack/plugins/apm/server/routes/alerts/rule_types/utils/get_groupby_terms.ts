@@ -8,14 +8,14 @@
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 
-export const getGroupByTerms = (groupBy: string[] | undefined) => {
-  return (groupBy ?? []).map((group) => {
+export const getGroupByTerms = (groupByFields: string[] | undefined = []) => {
+  return groupByFields.map((groupByField) => {
     return {
-      field: group,
+      field: groupByField,
       missing:
-        group === SERVICE_ENVIRONMENT
+        groupByField === SERVICE_ENVIRONMENT
           ? ENVIRONMENT_NOT_DEFINED.value
-          : group.replaceAll('.', '_').toUpperCase().concat('_NOT_DEFINED'),
+          : undefined,
     };
   });
 };

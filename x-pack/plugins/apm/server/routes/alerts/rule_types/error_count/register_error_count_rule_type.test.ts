@@ -143,7 +143,7 @@ describe('Error count alert', () => {
       threshold: 2,
       triggerValue: 5,
       reason:
-        'Error count is 5 in the last 5 mins for foo, env-foo. Alert when > 2.',
+        'Error count is 5 in the last 5 mins for service: foo, env: env-foo. Alert when > 2.',
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
@@ -154,7 +154,7 @@ describe('Error count alert', () => {
       threshold: 2,
       triggerValue: 4,
       reason:
-        'Error count is 4 in the last 5 mins for foo, env-foo-2. Alert when > 2.',
+        'Error count is 4 in the last 5 mins for service: foo, env: env-foo-2. Alert when > 2.',
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
@@ -163,7 +163,7 @@ describe('Error count alert', () => {
       serviceName: 'bar',
       environment: 'env-bar',
       reason:
-        'Error count is 3 in the last 5 mins for bar, env-bar. Alert when > 2.',
+        'Error count is 3 in the last 5 mins for service: bar, env: env-bar. Alert when > 2.',
       threshold: 2,
       triggerValue: 3,
       interval: '5 mins',
@@ -197,7 +197,7 @@ describe('Error count alert', () => {
         error_counts: {
           buckets: [
             {
-              key: ['foo', 'env-foo', 'TRANSACTION_NAME_NOT_DEFINED'],
+              key: ['foo', 'env-foo', 'tx-name-foo'],
               doc_count: 5,
             },
             {
@@ -227,7 +227,7 @@ describe('Error count alert', () => {
 
     await executor({ params });
     [
-      'foo_env-foo_TRANSACTION_NAME_NOT_DEFINED',
+      'foo_env-foo_tx-name-foo',
       'foo_env-foo-2_tx-name-foo-2',
       'bar_env-bar_tx-name-bar',
     ].forEach((instanceName) =>
@@ -242,11 +242,11 @@ describe('Error count alert', () => {
       threshold: 2,
       triggerValue: 5,
       reason:
-        'Error count is 5 in the last 5 mins for foo, env-foo, transaction name not defined. Alert when > 2.',
+        'Error count is 5 in the last 5 mins for service: foo, env: env-foo, name: tx-name-foo. Alert when > 2.',
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
-      'transaction.name': 'Not defined',
+      'transaction.name': 'tx-name-foo',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
@@ -254,7 +254,7 @@ describe('Error count alert', () => {
       threshold: 2,
       triggerValue: 4,
       reason:
-        'Error count is 4 in the last 5 mins for foo, env-foo-2, tx-name-foo-2. Alert when > 2.',
+        'Error count is 4 in the last 5 mins for service: foo, env: env-foo-2, name: tx-name-foo-2. Alert when > 2.',
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
@@ -264,7 +264,7 @@ describe('Error count alert', () => {
       serviceName: 'bar',
       environment: 'env-bar',
       reason:
-        'Error count is 3 in the last 5 mins for bar, env-bar, tx-name-bar. Alert when > 2.',
+        'Error count is 3 in the last 5 mins for service: bar, env: env-bar, name: tx-name-bar. Alert when > 2.',
       threshold: 2,
       triggerValue: 3,
       interval: '5 mins',
@@ -340,7 +340,7 @@ describe('Error count alert', () => {
       threshold: 2,
       triggerValue: 5,
       reason:
-        'Error count is 5 in the last 5 mins for foo, env-foo. Alert when > 2.',
+        'Error count is 5 in the last 5 mins for service: foo, env: env-foo. Alert when > 2.',
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
@@ -351,7 +351,7 @@ describe('Error count alert', () => {
       threshold: 2,
       triggerValue: 4,
       reason:
-        'Error count is 4 in the last 5 mins for foo, env-foo-2. Alert when > 2.',
+        'Error count is 4 in the last 5 mins for service: foo, env: env-foo-2. Alert when > 2.',
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
@@ -360,7 +360,7 @@ describe('Error count alert', () => {
       serviceName: 'bar',
       environment: 'env-bar',
       reason:
-        'Error count is 3 in the last 5 mins for bar, env-bar. Alert when > 2.',
+        'Error count is 3 in the last 5 mins for service: bar, env: env-bar. Alert when > 2.',
       threshold: 2,
       triggerValue: 3,
       interval: '5 mins',
@@ -369,7 +369,7 @@ describe('Error count alert', () => {
     });
   });
 
-  it('sends alert when rule is configured with group by field that does not exist in the source', async () => {
+  it('sends alert when service.environment field does not exist in the source', async () => {
     const { services, dependencies, executor, scheduleActions } =
       createRuleTypeMocks();
 
@@ -439,7 +439,7 @@ describe('Error count alert', () => {
       threshold: 2,
       triggerValue: 5,
       reason:
-        'Error count is 5 in the last 5 mins for foo, environment not defined. Alert when > 2.',
+        'Error count is 5 in the last 5 mins for service: foo, env: Not defined. Alert when > 2.',
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_ALL',
@@ -450,7 +450,7 @@ describe('Error count alert', () => {
       threshold: 2,
       triggerValue: 4,
       reason:
-        'Error count is 4 in the last 5 mins for foo, environment not defined. Alert when > 2.',
+        'Error count is 4 in the last 5 mins for service: foo, env: Not defined. Alert when > 2.',
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_ALL',
@@ -459,7 +459,7 @@ describe('Error count alert', () => {
       serviceName: 'bar',
       environment: 'env-bar',
       reason:
-        'Error count is 3 in the last 5 mins for bar, env-bar. Alert when > 2.',
+        'Error count is 3 in the last 5 mins for service: bar, env: env-bar. Alert when > 2.',
       threshold: 2,
       triggerValue: 3,
       interval: '5 mins',

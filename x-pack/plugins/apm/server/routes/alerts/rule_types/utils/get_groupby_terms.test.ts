@@ -19,13 +19,10 @@ describe('get terms fields for multi-terms aggregation', () => {
     };
     const terms = getGroupByTerms(ruleParams.groupBy);
     expect(terms).toEqual([
-      { field: 'service.name', missing: 'SERVICE_NAME_NOT_DEFINED' },
-      {
-        field: 'service.environment',
-        missing: 'ENVIRONMENT_NOT_DEFINED',
-      },
-      { field: 'transaction.type', missing: 'TRANSACTION_TYPE_NOT_DEFINED' },
-      { field: 'transaction.name', missing: 'TRANSACTION_NAME_NOT_DEFINED' },
+      { field: 'service.name' },
+      { field: 'service.environment', missing: 'ENVIRONMENT_NOT_DEFINED' },
+      { field: 'transaction.type' },
+      { field: 'transaction.name' },
     ]);
   });
 

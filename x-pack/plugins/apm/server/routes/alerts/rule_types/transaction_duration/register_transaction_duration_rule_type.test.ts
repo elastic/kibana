@@ -27,7 +27,7 @@ describe('registerTransactionDurationRuleType', () => {
         series: {
           buckets: [
             {
-              key: ['opbeans-java', 'ENVIRONMENT_NOT_DEFINED', 'request'],
+              key: ['opbeans-java', 'development', 'request'],
               avgLatency: {
                 value: 5500000,
               },
@@ -61,16 +61,16 @@ describe('registerTransactionDurationRuleType', () => {
         'http://localhost:5601/eyr/app/observability/alerts/'
       ),
       'transaction.name': 'GET /orders',
-      environment: 'Not defined',
+      environment: 'development',
       interval: `5 mins`,
       reason:
-        'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java, environment not defined, request. Alert when > 3,000 ms.',
+        'Avg. latency is 5,500 ms in the last 5 mins for service: opbeans-java, env: development, type: request. Alert when > 3,000 ms.',
       transactionType: 'request',
       serviceName: 'opbeans-java',
       threshold: 3000,
       triggerValue: '5,500 ms',
       viewInAppUrl:
-        'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=ENVIRONMENT_ALL',
+        'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=development',
     });
   });
 
@@ -133,7 +133,7 @@ describe('registerTransactionDurationRuleType', () => {
       environment: 'development',
       interval: `5 mins`,
       reason:
-        'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java, development, request, GET /products. Alert when > 3,000 ms.',
+        'Avg. latency is 5,500 ms in the last 5 mins for service: opbeans-java, env: development, type: request, name: GET /products. Alert when > 3,000 ms.',
       transactionType: 'request',
       serviceName: 'opbeans-java',
       threshold: 3000,
@@ -199,7 +199,7 @@ describe('registerTransactionDurationRuleType', () => {
       environment: 'development',
       interval: `5 mins`,
       reason:
-        'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java, development, request. Alert when > 3,000 ms.',
+        'Avg. latency is 5,500 ms in the last 5 mins for service: opbeans-java, env: development, type: request. Alert when > 3,000 ms.',
       transactionType: 'request',
       serviceName: 'opbeans-java',
       threshold: 3000,
@@ -209,7 +209,7 @@ describe('registerTransactionDurationRuleType', () => {
     });
   });
 
-  it('sends alert when rule is configured with group by field that does not exist in the source', async () => {
+  it('sends alert when service.environment field does not exist in the source', async () => {
     const { services, dependencies, executor, scheduleActions } =
       createRuleTypeMocks();
 
@@ -231,7 +231,7 @@ describe('registerTransactionDurationRuleType', () => {
                 'opbeans-java',
                 'ENVIRONMENT_NOT_DEFINED',
                 'request',
-                'TRANSACTION_NAME_NOT_DEFINED',
+                'tx-java',
               ],
               avgLatency: {
                 value: 5500000,
@@ -273,14 +273,14 @@ describe('registerTransactionDurationRuleType', () => {
       environment: 'Not defined',
       interval: `5 mins`,
       reason:
-        'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java, environment not defined, request, transaction name not defined. Alert when > 3,000 ms.',
+        'Avg. latency is 5,500 ms in the last 5 mins for service: opbeans-java, env: Not defined, type: request, name: tx-java. Alert when > 3,000 ms.',
       transactionType: 'request',
       serviceName: 'opbeans-java',
       threshold: 3000,
       triggerValue: '5,500 ms',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=ENVIRONMENT_ALL',
-      'transaction.name': 'Not defined',
+      'transaction.name': 'tx-java',
     });
   });
 });

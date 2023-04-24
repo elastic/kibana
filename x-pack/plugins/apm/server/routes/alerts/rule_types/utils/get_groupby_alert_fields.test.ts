@@ -22,34 +22,7 @@ describe('getAlertFieldsFromGroupBy', () => {
     `);
   });
 
-  it('should not contain transaction.name', () => {
-    const result = getAlertFieldsFromGroupBy({
-      'service.name': 'opbeans-java',
-      'service.environment': 'development',
-      'transaction.name': 'TRANSACTION_NAME_NOT_DEFINED',
-    });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "service.environment": "development",
-        "service.name": "opbeans-java",
-      }
-    `);
-  });
-
-  it('should not contain service.environment and transaction.name', () => {
-    const result = getAlertFieldsFromGroupBy({
-      'service.name': 'opbeans-java',
-      'service.environment': 'ENVIRONMENT_NOT_DEFINED',
-      'transaction.name': 'TRANSACTION_NAME_NOT_DEFINED',
-    });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "service.name": "opbeans-java",
-      }
-    `);
-  });
-
-  it('should contain service.environment and transaction.name', () => {
+  it('should contain service.environment', () => {
     const result = getAlertFieldsFromGroupBy({
       'service.name': 'opbeans-java',
       'service.environment': 'development',

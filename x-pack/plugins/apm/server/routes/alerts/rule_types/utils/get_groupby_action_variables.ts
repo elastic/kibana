@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { getFieldValueLabel } from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -25,30 +25,15 @@ const renameActionVariable = (field: string): string => {
   }
 };
 
-export const allValueLabel = i18n.translate('xpack.apm.filter.field.allLabel', {
-  defaultMessage: 'All',
-});
-
-export function getFieldValueLabel(fieldValue: string): string {
-  if (!fieldValue || fieldValue.includes('NOT_DEFINED')) {
-    return i18n.translate('xpack.apm.filter.field.notDefinedLabel', {
-      defaultMessage: 'Not defined',
-    });
-  }
-
-  if (fieldValue.endsWith('_ALL')) {
-    return allValueLabel;
-  }
-
-  return fieldValue;
-}
-
 export const getGroupByActionVariables = (
   groupByFields: Record<string, string>
 ): Record<string, string> => {
   return Object.keys(groupByFields).reduce<Record<string, string>>(
     (acc, cur) => {
-      acc[renameActionVariable(cur)] = getFieldValueLabel(groupByFields[cur]);
+      acc[renameActionVariable(cur)] = getFieldValueLabel(
+        cur,
+        groupByFields[cur]
+      );
       return acc;
     },
     {}

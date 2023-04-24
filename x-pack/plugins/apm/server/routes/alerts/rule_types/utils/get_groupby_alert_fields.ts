@@ -5,20 +5,19 @@
  * 2.0.
  */
 
+import { isEnvironmentDefined } from '../../../../../common/environment_filter_values';
+import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
+
 export const getAlertFieldsFromGroupBy = (
   groupByFields: Record<string, string>
 ): Record<string, string> => {
   return Object.keys(groupByFields).reduce<Record<string, string>>(
     (acc, cur) => {
       const fieldValue = groupByFields[cur];
-      if (
-        !fieldValue ||
-        fieldValue.includes('NOT_DEFINED') ||
-        fieldValue.endsWith('_ALL')
-      ) {
+      if (cur === SERVICE_ENVIRONMENT && !isEnvironmentDefined(fieldValue)) {
         return acc;
       }
-      acc[cur] = groupByFields[cur];
+      acc[cur] = fieldValue;
       return acc;
     },
     {}

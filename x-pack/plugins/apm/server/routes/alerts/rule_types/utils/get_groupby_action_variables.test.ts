@@ -41,38 +41,4 @@ describe('getGroupByActionVariables', () => {
       }
     `);
   });
-
-  it('transaction.name action variable should have value "Not defined"', () => {
-    const result = getGroupByActionVariables({
-      'service.name': 'opbeans-java',
-      'service.environment': 'development',
-      'transaction.type': 'request',
-      'transaction.name': 'TRANSACTION_NAME_NOT_DEFINED',
-    });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "environment": "development",
-        "serviceName": "opbeans-java",
-        "transaction.name": "Not defined",
-        "transactionType": "request",
-      }
-    `);
-  });
-
-  it('environment and transaction.name action variables should have value "Not defined"', () => {
-    const result = getGroupByActionVariables({
-      'service.name': 'opbeans-java',
-      'service.environment': 'ENVIRONMENT_NOT_DEFINED',
-      'transaction.type': 'request',
-      'transaction.name': 'TRANSACTION_NAME_NOT_DEFINED',
-    });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "environment": "Not defined",
-        "serviceName": "opbeans-java",
-        "transaction.name": "Not defined",
-        "transactionType": "request",
-      }
-    `);
-  });
 });

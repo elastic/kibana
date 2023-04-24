@@ -15,6 +15,13 @@ import type {
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../ml_constants';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../es_fields/apm';
+import { getEnvironmentLabel } from '../environment_filter_values';
 
 export const APM_SERVER_FEATURE_ID = 'apm';
 
@@ -40,36 +47,53 @@ const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {
   }),
 };
 
-const notDefinedLabel = i18n.translate('xpack.apm.field.notDefinedLabel', {
-  defaultMessage: 'not defined',
-});
-
-const getValueForNotDefinedField = (key: string) => {
-  return `${key
-    .replace('_NOT_DEFINED', '')
-    .replaceAll('_', ' ')
-    .toLowerCase()} ${notDefinedLabel}`;
+const getFieldNameLabel = (field: string): string => {
+  switch (field) {
+    case SERVICE_NAME:
+      return 'service';
+    case SERVICE_ENVIRONMENT:
+      return 'env';
+    case TRANSACTION_TYPE:
+      return 'type';
+    case TRANSACTION_NAME:
+      return 'name';
+    default:
+      return field;
+  }
 };
 
-const formatGroupKey = (groupKey: string[]) =>
-  ` for ${groupKey
-    .map((key) =>
-      key.includes('NOT_DEFINED') ? getValueForNotDefinedField(key) : key
-    )
-    .join(', ')}`;
+export const getFieldValueLabel = (
+  field: string,
+  fieldValue: string
+): string => {
+  return field === SERVICE_ENVIRONMENT
+    ? getEnvironmentLabel(fieldValue)
+    : fieldValue;
+};
+
+const formatGroupByFields = (groupByFields: Record<string, string>): string => {
+  const groupByFieldLabels = Object.keys(groupByFields).map(
+    (field) =>
+      `${getFieldNameLabel(field)}: ${getFieldValueLabel(
+        field,
+        groupByFields[field]
+      )}`
+  );
+  return ` for ${groupByFieldLabels.join(', ')}`;
+};
 
 export function formatErrorCountReason({
   threshold,
   measured,
   windowSize,
   windowUnit,
-  groupKey,
+  groupByFields,
 }: {
   threshold: number;
   measured: number;
   windowSize: number;
   windowUnit: string;
-  groupKey: string[];
+  groupByFields: Record<string, string>;
 }) {
   return i18n.translate('xpack.apm.alertTypes.errorCount.reason', {
     defaultMessage: `Error count is {measured} in the last {interval}{group}. Alert when > {threshold}.`,
@@ -80,7 +104,7 @@ export function formatErrorCountReason({
         windowSize,
         windowUnit as TimeUnitChar
       ),
-      group: formatGroupKey(groupKey),
+      group: formatGroupByFields(groupByFields),
     },
   });
 }
@@ -92,7 +116,7 @@ export function formatTransactionDurationReason({
   aggregationType,
   windowSize,
   windowUnit,
-  groupKey,
+  groupByFields,
 }: {
   threshold: number;
   measured: number;
@@ -100,7 +124,7 @@ export function formatTransactionDurationReason({
   aggregationType: string;
   windowSize: number;
   windowUnit: string;
-  groupKey: string[];
+  groupByFields: Record<string, string>;
 }) {
   let aggregationTypeFormatted =
     aggregationType.charAt(0).toUpperCase() + aggregationType.slice(1);
@@ -117,7 +141,7 @@ export function formatTransactionDurationReason({
         windowSize,
         windowUnit as TimeUnitChar
       ),
-      group: formatGroupKey(groupKey),
+      group: formatGroupByFields(groupByFields),
     },
   });
 }
@@ -128,14 +152,14 @@ export function formatTransactionErrorRateReason({
   asPercent,
   windowSize,
   windowUnit,
-  groupKey,
+  groupByFields,
 }: {
   threshold: number;
   measured: number;
   asPercent: AsPercent;
   windowSize: number;
   windowUnit: string;
-  groupKey: string[];
+  groupByFields: Record<string, string>;
 }) {
   return i18n.translate('xpack.apm.alertTypes.transactionErrorRate.reason', {
     defaultMessage: `Failed transactions is {measured} in the last {interval}{group}. Alert when > {threshold}.`,
@@ -146,7 +170,7 @@ export function formatTransactionErrorRateReason({
         windowSize,
         windowUnit as TimeUnitChar
       ),
-      group: formatGroupKey(groupKey),
+      group: formatGroupByFields(groupByFields),
     },
   });
 }

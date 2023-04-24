@@ -226,7 +226,7 @@ export function registerTransactionErrorRateRuleType({
             asPercent,
             windowSize: ruleParams.windowSize,
             windowUnit: ruleParams.windowUnit,
-            groupKey: bucketKey,
+            groupByFields,
           });
 
           const relativeViewInAppUrl = getAlertUrlTransaction(

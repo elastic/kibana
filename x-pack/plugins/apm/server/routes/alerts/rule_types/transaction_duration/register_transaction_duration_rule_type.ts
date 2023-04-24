@@ -240,7 +240,7 @@ export function registerTransactionDurationRuleType({
           threshold: thresholdMicroseconds,
           windowSize: ruleParams.windowSize,
           windowUnit: ruleParams.windowUnit,
-          groupKey: bucketKey,
+          groupByFields,
         });
 
         const alertUuid = getAlertUuid(bucketKey.join('_'));
