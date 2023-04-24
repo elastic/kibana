@@ -179,4 +179,23 @@ describe('SlackParamsFields renders', () => {
     fireEvent.click(screen.getByText('general'));
     expect(screen.getByTitle('general').getAttribute('aria-checked')).toEqual('true');
   });
+
+  test('show error message when no channel is selected', async () => {
+    render(
+      <IntlProvider locale="en">
+        <SlackParamsFields
+          actionParams={{
+            subAction: 'postMessage',
+            subActionParams: { channels: [], text: 'some text' },
+          }}
+          errors={{ message: [], channels: ['my error message'] }}
+          editAction={() => {}}
+          index={0}
+          defaultMessage="default message"
+          messageVariables={[]}
+        />
+      </IntlProvider>
+    );
+    expect(screen.getByText('my error message')).toBeInTheDocument();
+  });
 });
