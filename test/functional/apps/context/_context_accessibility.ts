@@ -32,22 +32,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    it('should navigate to the single doc view and give focus to the title h1 on navigate', async () => {
+    it('should give focus to the table Load link when Tab is pressed', async () => {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
       await rowActions[1].click();
-      const titleElement = await testSubjects.find('discoverContextAppTitle');
-      const activeElement = await find.activeElement();
-      expect(await titleElement.getAttribute('data-test-subj')).to.eql(
-        await activeElement.getAttribute('data-test-subj')
-      );
-    });
-
-    it('should give focus to the table tab link when Tab is pressed', async () => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await browser.pressKeys(browser.keys.TAB);
-      const dataViewSwitchLink = await testSubjects.find('showQueryBarMenu');
+      await browser.pressKeys(browser.keys.SPACE);
+      await browser.pressKeys(browser.keys.TAB);
+      const loadMoreLink = await testSubjects.find('predecessorsLoadMoreButton');
       const activeElement = await find.activeElement();
-      expect(await dataViewSwitchLink.getAttribute('data-test-subj')).to.eql(
+      expect(await loadMoreLink.getAttribute('data-test-subj')).to.eql(
         await activeElement.getAttribute('data-test-subj')
       );
     });
