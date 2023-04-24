@@ -257,21 +257,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clearUnsavedChanges();
       });
 
-      it('changes to selections can be discarded', async () => {
-        await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSelectOption('bark');
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-        let selections = await dashboardControls.optionsListGetSelectionsString(controlId);
-        expect(selections).to.equal('hiss, grr, bark');
+      describe('discarding changes', async () => {
+        describe('changes can be discarded', async () => {
+          let selections = '';
 
-        await dashboard.clickCancelOutOfEditMode();
-        selections = await dashboardControls.optionsListGetSelectionsString(controlId);
-        expect(selections).to.equal('hiss, grr');
-      });
+          beforeEach(async () => {
+            await dashboardControls.optionsListOpenPopover(controlId);
+            await dashboardControls.optionsListPopoverSelectOption('bark');
+            await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+            selections = await dashboardControls.optionsListGetSelectionsString(controlId);
+            expect(selections).to.equal('hiss, grr, bark');
+          });
 
-      it('dashboard does not load with unsaved changes when changes are discarded', async () => {
-        await dashboard.switchToEditMode();
-        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+          afterEach(async () => {
+            selections = await dashboardControls.optionsListGetSelectionsString(controlId);
+            expect(selections).to.equal('hiss, grr');
+          });
+
+          it('by clicking the discard changes button', async () => {
+            await dashboard.clickDiscardChanges();
+          });
+
+          it('by switching to view mode', async () => {
+            await dashboard.clickCancelOutOfEditMode();
+          });
+        });
+
+        it('dashboard does not load with unsaved changes when changes are discarded', async () => {
+          await dashboard.switchToEditMode();
+          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        });
       });
     });
 

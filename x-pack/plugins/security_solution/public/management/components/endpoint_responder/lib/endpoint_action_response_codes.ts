@@ -123,6 +123,97 @@ const CODES = Object.freeze({
     'xpack.securitySolution.endpointActionResponseCodes.killProcess.notPermittedSuccess',
     { defaultMessage: 'The provided process cannot be killed' }
   ),
+
+  // -----------------------------------------------------------------
+  // EXECUTE CODES
+  // -----------------------------------------------------------------
+
+  // Dev:
+  // Something interrupted preparing the zip: file read error, zip error. I think these should be rare,
+  // and should succeed on retry by the user or result in file-not-found. We might implement some retries
+  // internally but I'm leaning to the opinion that we should rather quickly send the feedback to the
+  // user to let them decide.
+  ra_execute_error_processing: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.execute.processingError',
+    {
+      defaultMessage: 'Unable to create execution output zip file.',
+    }
+  ),
+
+  // Dev:
+  // Executing timeout has been reached, the command was killed.
+  'ra_execute_error_processing-timeout': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.execute.processingTimeout',
+    { defaultMessage: 'Command execution was terminated. It exceeded the provided timeout.' }
+  ),
+
+  // Dev:
+  // Execution was interrupted, for example: system shutdown, endpoint service stop/restart.
+  'ra_execute_error_processing-interrupted': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.execute.processingInterrupted',
+    {
+      defaultMessage: 'Command execution was absolutely interrupted.',
+    }
+  ),
+
+  // Dev:
+  // Too many active execute actions, limit 10. Execute actions are allowed to run in parallel, we must
+  // take into account resource use impact on endpoint as customers are piky about CPU/MEM utilization.
+  'ra_execute_error_to-many-requests': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.execute.toManyRequests',
+    {
+      defaultMessage: 'Too many concurrent command execution actions.',
+    }
+  ),
+
+  // Dev:
+  // generic failure (rare corner case, software bug, etc)
+  ra_execute_error_failure: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.execute.failure',
+    { defaultMessage: 'Unknown failure while executing command.' }
+  ),
+
+  // Dev:
+  // Max pending response zip uploads has been reached, limit 10. Endpoint can't use unlimited disk space.
+  'ra_execute_error_disk-quota': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.execute.diskQuotaError',
+    {
+      defaultMessage: 'Too many pending command execution output zip files.',
+    }
+  ),
+
+  // Dev:
+  // The fleet upload API was unreachable (not just busy). This may mean policy misconfiguration, in which
+  // case health status in Kibana should indicate degraded, or maybe network configuration problems, or fleet
+  // server problems HTTP 500. This excludes offline status, where endpoint should just wait for network connection.
+  'ra_execute_error_upload-api-unreachable': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.execute.uploadApiUnreachable',
+    {
+      defaultMessage:
+        'Failed to upload command execution output zip file. Unable to reach Fleet Server upload API.',
+    }
+  ),
+
+  // Dev:
+  // Perhaps internet connection was too slow or unstable to upload all chunks before unique
+  // upload-id expired. Endpoint will re-try a bit, max 3 times.
+  'ra_execute_error_upload-timeout': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.execute.outputUploadTimeout',
+    {
+      defaultMessage: 'Failed to upload command execution output zip file. Upload timed out',
+    }
+  ),
+
+  // DEV:
+  // Upload API could be busy, endpoint should periodically re-try (2 days = 192 x 15min, assuming
+  // that with 1Mbps 15min is enough to upload 100MB)
+  'ra_execute_error_queue-timeout': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.execute.queueTimeout',
+    {
+      defaultMessage:
+        'Failed to upload command execution output zip file. Timed out while queued waiting for Fleet Server',
+    }
+  ),
 });
 
 /**
