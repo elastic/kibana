@@ -158,6 +158,6 @@ export const ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS = i18n.translate(
 export const ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionDoNotSuppressOnMissingFieldsDescription',
   {
-    defaultMessage: 'One rule execution',
+    defaultMessage: 'Do not suppress',
   }
 );

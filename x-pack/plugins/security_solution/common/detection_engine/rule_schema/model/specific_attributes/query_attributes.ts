@@ -57,10 +57,6 @@ export const AlertSuppression = t.intersection([
   t.exact(
     t.partial({
       duration: AlertSuppressionDuration,
-    })
-  ),
-  t.exact(
-    t.partial({
       missing_fields_strategy: AlertSuppressionMissingFields,
     })
   ),
@@ -76,10 +72,6 @@ export const AlertSuppressionCamel = t.intersection([
   t.exact(
     t.partial({
       duration: AlertSuppressionDuration,
-    })
-  ),
-  t.exact(
-    t.partial({
       missingFieldsStrategy: AlertSuppressionMissingFields,
     })
   ),
