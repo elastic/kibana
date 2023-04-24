@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
 import { lastValueFrom } from 'rxjs';
 
 import { useAppDependencies } from '../app_dependencies';
@@ -12,24 +13,27 @@ import { useAppDependencies } from '../app_dependencies';
 export const useDataSearch = () => {
   const { data } = useAppDependencies();
 
-  return async (esSearchRequest: any, abortSignal?: AbortSignal) => {
-    try {
-      const { rawResponse: resp } = await lastValueFrom(
-        data.search.search(
-          {
-            params: esSearchRequest,
-          },
-          { abortSignal }
-        )
-      );
+  return useCallback(
+    async (esSearchRequest: any, abortSignal?: AbortSignal) => {
+      try {
+        const { rawResponse: resp } = await lastValueFrom(
+          data.search.search(
+            {
+              params: esSearchRequest,
+            },
+            { abortSignal }
+          )
+        );
 
-      return resp;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        // ignore abort errors
-      } else {
-        return error;
+        return resp;
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          // ignore abort errors
+        } else {
+          return error;
+        }
       }
-    }
-  };
+    },
+    [data]
+  );
 };
