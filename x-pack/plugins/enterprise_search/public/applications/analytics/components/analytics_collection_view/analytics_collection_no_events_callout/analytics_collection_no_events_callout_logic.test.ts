@@ -40,7 +40,7 @@ describe('analyticsEventsExistLogic', () => {
         ...DEFAULT_VALUES,
         data: { exists: indexName },
         hasEvents: true,
-        isLoading: true,
+        isLoading: false,
         status: Status.SUCCESS,
       });
     });
