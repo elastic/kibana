@@ -20,7 +20,13 @@ import { fileObjectType, fileShareObjectType, hiddenTypes } from '../saved_objec
 import { BlobStorageService } from '../blob_storage_service';
 import { FileClientImpl } from '../file_client/file_client';
 import { InternalFileShareService } from '../file_share_service';
-import { CreateFileArgs, FindFileArgs, GetByIdArgs, UpdateFileArgs } from './file_action_types';
+import {
+  CreateFileArgs,
+  FindFileArgs,
+  GetByIdArgs,
+  BulkGetByIdArgs,
+  UpdateFileArgs,
+} from './file_action_types';
 import { InternalFileService } from './internal_file_service';
 import { FileServiceStart } from './file_service';
 import { FileKindsRegistry } from '../../common/file_kinds_registry';
@@ -98,6 +104,9 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
       },
       async getById<M>(args: GetByIdArgs) {
         return internalFileService.getById(args) as Promise<File<M>>;
+      },
+      async bulkGetById<M>(args: BulkGetByIdArgs) {
+        return internalFileService.bulkGetById(args) as Promise<File<M>[]>;
       },
       async find<M>(args: FindFileArgs) {
         return internalFileService.findFilesJSON(args) as Promise<{

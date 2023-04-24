@@ -63,6 +63,16 @@ export interface GetArg {
   id: string;
 }
 
+/**
+ * Bulk get files
+ */
+export interface BulkGetArg {
+  /**
+   * Unique IDs of file metadata
+   */
+  ids: string[];
+}
+
 export interface DeleteArg {
   /**
    * Unique ID of file metadata to delete
@@ -97,6 +107,13 @@ export interface FileMetadataClient {
    * @param arg - Arguments to retrieve file metadata
    */
   get(arg: GetArg): Promise<FileDescriptor>;
+
+  /**
+   * Bulk get file metadata
+   *
+   * @param arg - Arguments to bulk retrieve file metadata
+   */
+  bulkGet(arg: BulkGetArg): Promise<FileDescriptor[]>;
 
   /**
    * The file metadata to update

@@ -13,6 +13,7 @@ import type {
   UpdateFileArgs,
   DeleteFileArgs,
   GetByIdArgs,
+  BulkGetByIdArgs,
   FindFileArgs,
 } from './file_action_types';
 
@@ -49,6 +50,13 @@ export interface FileServiceStart {
    * @param args - get file by ID args
    */
   getById<M>(args: GetByIdArgs): Promise<File<M>>;
+
+  /**
+   * Bulk get files by IDs. Will throw if any of the files fail to load.
+   *
+   * @param args - bulk get files by IDs args
+   */
+  bulkGetById<M>(args: BulkGetByIdArgs): Promise<File<M>[]>;
 
   /**
    * Find files given a set of parameters.

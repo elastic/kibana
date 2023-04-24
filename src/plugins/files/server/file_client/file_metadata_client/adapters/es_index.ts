@@ -19,6 +19,7 @@ import type {
   FileDescriptor,
   FileMetadataClient,
   GetArg,
+  BulkGetArg,
   GetUsageMetricsArgs,
   UpdateArgs,
 } from '../file_metadata_client';
@@ -118,6 +119,10 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
       id,
       metadata: doc.file,
     };
+  }
+
+  async bulkGet({ ids }: BulkGetArg): Promise<FileDescriptor[]> {
+    return await Promise.all(ids.map((id) => this.get({ id })));
   }
 
   async delete({ id }: DeleteArg): Promise<void> {

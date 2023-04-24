@@ -22,6 +22,7 @@ import type {
   DeleteFileArgs,
   FindFileArgs,
   GetByIdArgs,
+  BulkGetByIdArgs,
 } from './file_action_types';
 import { createFileClient, FileClientImpl } from '../file_client/file_client';
 /**
@@ -80,8 +81,31 @@ export class InternalFileService {
     }
   }
 
+  private async bulkGet(ids: string[]): Promise<IFile[]> {
+    try {
+      const metadatas = await this.metadataClient.bulkGet({ ids });
+      const result = metadatas.map(({ id, metadata }) => {
+        if (metadata.Status === 'DELETED') {
+          throw new FileNotFoundError('File has been deleted');
+        }
+        return this.toFile(id, metadata, metadata.FileKind);
+      });
+      return result;
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw new FileNotFoundError('Files not found');
+      }
+      this.logger.error(`Could not retrieve files: ${e}`);
+      throw e;
+    }
+  }
+
   public async getById({ id }: GetByIdArgs): Promise<IFile> {
     return await this.get(id);
+  }
+
+  public async bulkGetById({ ids }: BulkGetByIdArgs): Promise<IFile[]> {
+    return await this.bulkGet(ids);
   }
 
   public getFileKind(id: string): FileKind {

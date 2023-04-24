@@ -73,6 +73,16 @@ export interface GetByIdArgs {
 }
 
 /**
+ * Arguments to bulk get multiple files by their IDs.
+ */
+export interface BulkGetByIdArgs {
+  /**
+   * File IDs.
+   */
+  ids: string[];
+}
+
+/**
  * Arguments to filter for files.
  *
  * @note Individual values in a filter are "OR"ed together filters are "AND"ed together.
