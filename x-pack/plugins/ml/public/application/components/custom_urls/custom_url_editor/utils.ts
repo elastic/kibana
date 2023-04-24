@@ -11,7 +11,7 @@ import rison from '@kbn/rison';
 import url from 'url';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { isFilterPinned, Filter } from '@kbn/es-query';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
@@ -92,7 +92,10 @@ export function getNewCustomUrlDefaults(
   // which matches the indices configured in the job datafeed.
   let query: estypes.QueryDslQueryContainer = {};
   let indicesName: string | undefined;
+  let backupIndicesName: string | undefined;
+  let backupDataViewId: string | undefined;
   let jobId;
+
   if (
     isAnomalyDetectionJob(job) &&
     dataViews !== undefined &&
@@ -106,12 +109,16 @@ export function getNewCustomUrlDefaults(
     jobId = job.job_id;
   } else if (isDataFrameAnalyticsConfigs(job) && dataViews !== undefined && dataViews.length > 0) {
     indicesName = job.dest.index;
+    backupIndicesName = job.source.index[0];
     query = job.source?.query ?? {};
     jobId = job.id;
   }
 
   const defaultDataViewId = dataViews.find((dv) => dv.title === indicesName)?.id;
-  kibanaSettings.discoverIndexPatternId = defaultDataViewId;
+  if (defaultDataViewId === undefined && backupIndicesName !== undefined) {
+    backupDataViewId = dataViews.find((dv) => dv.title === backupIndicesName)?.id;
+  }
+  kibanaSettings.discoverIndexPatternId = defaultDataViewId ?? backupDataViewId ?? '';
   kibanaSettings.filters =
     defaultDataViewId === null ? [] : getFiltersForDSLQuery(query, defaultDataViewId, jobId);
 
@@ -134,17 +141,23 @@ export function getNewCustomUrlDefaults(
 // Returns the list of supported field names that can be used
 // to add to the query used when linking to a Kibana dashboard or Discover.
 export function getSupportedFieldNames(
-  job: DataFrameAnalyticsConfig,
+  job: DataFrameAnalyticsConfig | Job,
   dataView: DataView
 ): string[] {
-  const resultsField = job.dest.results_field;
   const sortedFields = dataView.fields.getAll().sort((a, b) => a.name.localeCompare(b.name)) ?? [];
-  const categoryFields = sortedFields.filter(
-    (f) =>
+  let filterFunction: (field: DataViewField) => boolean = (field: DataViewField) =>
+    categoryFieldTypes.some((type) => {
+      return field.esTypes?.includes(type);
+    });
+
+  if (isDataFrameAnalyticsConfigs(job)) {
+    const resultsField = job.dest.results_field;
+    filterFunction = (f) =>
       categoryFieldTypes.some((type) => {
         return f.esTypes?.includes(type);
-      }) && !f.name.startsWith(resultsField ?? DEFAULT_RESULTS_FIELD)
-  );
+      }) && !f.name.startsWith(resultsField ?? DEFAULT_RESULTS_FIELD);
+  }
+  const categoryFields = sortedFields.filter(filterFunction);
   return categoryFields.map((field) => field.name);
 }
 

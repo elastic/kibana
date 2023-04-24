@@ -6,7 +6,6 @@
  */
 
 import React, { FC, useState, useEffect, useCallback, useContext } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -23,7 +22,10 @@ import {
   EuiModalBody,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { resetAdvancedJob } from '../../../../../common/job_creator/util/general';
@@ -31,7 +33,6 @@ import {
   CombinedJob,
   Datafeed,
 } from '../../../../../../../../../common/types/anomaly_detection_jobs';
-import { extractErrorMessage } from '../../../../../../../../../common/util/errors';
 import type { DatafeedValidationResponse } from '../../../../../../../../../common/types/job_validation';
 
 import {
