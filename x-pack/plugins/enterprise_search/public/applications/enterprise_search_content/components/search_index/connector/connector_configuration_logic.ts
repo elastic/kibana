@@ -76,8 +76,8 @@ export interface ConfigEntry {
  * otherwise by alphabetic order of keys
  *
  */
-function sortConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry[] {
-  return Object.keys(config)
+function sortAndFilterConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry[] {
+  const sortedConfig = Object.keys(config)
     .map(
       (key) =>
         ({
@@ -98,6 +98,20 @@ function sortConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry
       }
       return a.key.localeCompare(b.key);
     });
+
+  const dependencyLookup: DependencyLookup = sortedConfig.reduce(
+    (prev: Record<string, string | number | boolean | null>, configEntry: ConfigEntry) => ({
+      ...prev,
+      [configEntry.key]: configEntry.value,
+    }),
+    {}
+  );
+
+  return sortedConfig.filter(
+    (configEntry) =>
+      configEntry.ui_restrictions.length <= 0 &&
+      dependenciesSatisfied(configEntry.depends_on, dependencyLookup)
+  );
 }
 
 export function ensureStringType(value: string | number | boolean | null): string {
@@ -280,11 +294,11 @@ export const ConnectorConfigurationLogic = kea<
   selectors: ({ selectors }) => ({
     configView: [
       () => [selectors.configState],
-      (configState: ConnectorConfiguration) => sortConnectorConfiguration(configState),
+      (configState: ConnectorConfiguration) => sortAndFilterConnectorConfiguration(configState),
     ],
     localConfigView: [
       () => [selectors.localConfigState],
-      (configState) => sortConnectorConfiguration(configState),
+      (configState) => sortAndFilterConnectorConfiguration(configState),
     ],
   }),
 });
