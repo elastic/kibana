@@ -13,6 +13,7 @@ export const createInventoryViewAttributesRequestPayloadRT = rt.intersection([
     name: nonEmptyStringRt,
   }),
   rt.UnknownRecord,
+  rt.exact(rt.partial({ isDefault: rt.undefined, isStatic: rt.undefined })),
 ]);
 
 export type CreateInventoryViewAttributesRequestPayload = rt.TypeOf<

@@ -7,8 +7,8 @@
 
 import * as rt from 'io-ts';
 
-export const getInventoryViewRequestQueryRT = rt.partial({
-  sourceId: rt.string,
+export const getInventoryViewRequestParamsRT = rt.type({
+  inventoryViewId: rt.string,
 });
 
-export type GetInventoryViewRequestQuery = rt.TypeOf<typeof getInventoryViewRequestQueryRT>;
+export type GetInventoryViewRequestParams = rt.TypeOf<typeof getInventoryViewRequestParamsRT>;

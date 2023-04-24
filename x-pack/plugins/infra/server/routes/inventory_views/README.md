@@ -219,6 +219,8 @@ Status code: 409
 
 Updates an inventory view.
 
+Any attribute can be updated except for `isDefault` and `isStatic`, which are derived by the source configuration preference set by the user.
+
 ### Request
 
 - **Method**: PUT

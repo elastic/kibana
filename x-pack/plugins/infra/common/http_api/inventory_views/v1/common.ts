@@ -6,14 +6,27 @@
  */
 import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
+import { either } from 'fp-ts/Either';
 
 export const INVENTORY_VIEW_URL = '/api/infra/inventory_views';
 export const INVENTORY_VIEW_URL_ENTITY = `${INVENTORY_VIEW_URL}/{inventoryViewId}`;
 export const getInventoryViewUrl = (inventoryViewId?: string) =>
   [INVENTORY_VIEW_URL, inventoryViewId].filter(Boolean).join('/');
 
+const inventoryViewIdRT = new rt.Type<string, string, unknown>(
+  'InventoryViewId',
+  rt.string.is,
+  (u, c) =>
+    either.chain(rt.string.validate(u, c), (id) => {
+      return id === '0'
+        ? rt.failure(u, c, `The inventory view with id ${id} is not configurable.`)
+        : rt.success(id);
+    }),
+  String
+);
+
 export const inventoryViewRequestParamsRT = rt.type({
-  inventoryViewId: rt.string,
+  inventoryViewId: inventoryViewIdRT,
 });
 
 export type InventoryViewRequestParams = rt.TypeOf<typeof inventoryViewRequestParamsRT>;

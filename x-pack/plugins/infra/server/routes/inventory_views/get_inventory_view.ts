@@ -9,9 +9,9 @@ import { isBoom } from '@hapi/boom';
 import { createValidationFunction } from '../../../common/runtime_types';
 import {
   inventoryViewResponsePayloadRT,
-  inventoryViewRequestParamsRT,
   inventoryViewRequestQueryRT,
   INVENTORY_VIEW_URL_ENTITY,
+  getInventoryViewRequestParamsRT,
 } from '../../../common/http_api/latest';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 
@@ -24,7 +24,7 @@ export const initGetInventoryViewRoute = ({
       method: 'get',
       path: INVENTORY_VIEW_URL_ENTITY,
       validate: {
-        params: createValidationFunction(inventoryViewRequestParamsRT),
+        params: createValidationFunction(getInventoryViewRequestParamsRT),
         query: createValidationFunction(inventoryViewRequestQueryRT),
       },
     },
