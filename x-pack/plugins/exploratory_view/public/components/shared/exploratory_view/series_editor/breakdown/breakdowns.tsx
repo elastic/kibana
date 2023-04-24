@@ -140,21 +140,18 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
 }
 
 export const NO_BREAK_DOWN_LABEL = i18n.translate(
-  'xpack.exploratoryView.exp.breakDownFilter.noBreakdown',
+  'xpack.exploratoryView.breakDownFilter.noBreakdown',
   {
     defaultMessage: 'No breakdown',
   }
 );
 
-export const BREAKDOWN_WARNING = i18n.translate(
-  'xpack.exploratoryView.exp.breakDownFilter.warning',
-  {
-    defaultMessage: 'Breakdowns can be applied to only one series at a time.',
-  }
-);
+export const BREAKDOWN_WARNING = i18n.translate('xpack.exploratoryView.breakDownFilter.warning', {
+  defaultMessage: 'Breakdowns can be applied to only one series at a time.',
+});
 
 export const BREAKDOWN_UNAVAILABLE = i18n.translate(
-  'xpack.exploratoryView.exp.breakDownFilter.unavailable',
+  'xpack.exploratoryView.breakDownFilter.unavailable',
   {
     defaultMessage:
       'Step name breakdown is not available for monitor duration metric. Use step duration metric to breakdown by step name.',

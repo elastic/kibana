@@ -55,16 +55,10 @@ export function SeriesColorPicker({ seriesId, series }: { seriesId: number; seri
   );
 }
 
-const PICK_A_COLOR_LABEL = i18n.translate(
-  'xpack.exploratoryView.overview.exploratoryView.pickColor',
-  {
-    defaultMessage: 'Pick a color',
-  }
-);
+const PICK_A_COLOR_LABEL = i18n.translate('xpack.exploratoryView.pickColor', {
+  defaultMessage: 'Pick a color',
+});
 
-const EDIT_SERIES_COLOR_LABEL = i18n.translate(
-  'xpack.exploratoryView.overview.exploratoryView.editSeriesColor',
-  {
-    defaultMessage: 'Edit color for series',
-  }
-);
+const EDIT_SERIES_COLOR_LABEL = i18n.translate('xpack.exploratoryView.editSeriesColor', {
+  defaultMessage: 'Edit color for series',
+});
