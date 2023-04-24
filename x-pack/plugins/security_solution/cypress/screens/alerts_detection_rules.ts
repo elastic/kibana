@@ -67,6 +67,8 @@ export const INSTALL_ALL_RULES_BUTTON = '[data-test-subj="installAllRulesButton"
 
 export const UPDATE_PREBUILT_RULES_CALLOUT = '[data-test-subj="update-callout"]';
 
+export const UPDATE_PREBUILT_RULES_CALLOUT_BUTTON = '[data-test-subj="update-callout-button"]';
+
 export const RULES_TABLE_INITIAL_LOADING_INDICATOR =
   '[data-test-subj="initialLoadingPanelAllRulesTable"]';
 
