@@ -26,6 +26,7 @@ node scripts/build \
   --docker-images \
   --docker-namespace="kibana-ci" \
   --docker-tag="git-$GIT_ABBREV_COMMIT" \
+  --skip-docker-ubuntu \
   --skip-docker-ubi \
   --skip-docker-cloud \
   --skip-docker-contexts
