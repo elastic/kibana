@@ -6,7 +6,12 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { ControlPanelState, OptionsListEmbeddableInput } from '@kbn/controls-plugin/common';
+import type {
+  ControlInputTransform,
+  ControlPanelState,
+  OptionsListEmbeddableInput,
+} from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import type {
   ControlGroupInput,
   ControlGroupInputBuilder,
@@ -22,6 +27,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import { cloneDeep, debounce, isEqual } from 'lodash';
+import type { ControlGroupCreationOptions } from '@kbn/controls-plugin/public/control_group/types';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import type { FilterGroupProps, FilterItemObj } from './types';
@@ -300,6 +306,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       return {
         initialInput,
         settings: {
+          fieldFilterPredicate: (f) => f.type !== 'number',
           showAddButton: false,
           staticDataViewId: dataViewId ?? '',
           editorConfig: {
@@ -308,7 +315,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             hideAdditionalSettings: true,
           },
         },
-      };
+      } as ControlGroupCreationOptions;
     },
     [dataViewId, timeRange, filters, chainingSystem, query, selectControlsWithPriority]
   );
@@ -379,8 +386,20 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     setShowFiltersChangedBanner(false);
   }, [switchToViewMode, upsertPersistableControls]);
 
+  const newControlInputTranform: ControlInputTransform = (newInput, controlType) => {
+    // for any new controls, we want to avoid
+    // default placeholder
+    if (controlType === OPTIONS_LIST_CONTROL) {
+      return {
+        ...newInput,
+        placeholder: '',
+      };
+    }
+    return newInput;
+  };
+
   const addControlsHandler = useCallback(() => {
-    controlGroup?.openAddDataControlFlyout();
+    controlGroup?.openAddDataControlFlyout(newControlInputTranform);
   }, [controlGroup]);
 
   return (
