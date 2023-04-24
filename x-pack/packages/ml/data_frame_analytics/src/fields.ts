@@ -17,11 +17,10 @@ import {
   isClassificationAnalysis,
   isOutlierAnalysis,
   isRegressionAnalysis,
-} from '../../../../common/util/analytics_utils';
+} from './analytics_utils';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-
 import { FEATURE_IMPORTANCE, FEATURE_INFLUENCE, OUTLIER_SCORE, TOP_CLASSES } from './constants';
-import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
+import { DataFrameAnalyticsConfig } from './types';
 
 export type EsId = string;
 export type EsDocSource = Record<string, any>;

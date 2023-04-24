@@ -14,16 +14,14 @@ import useObservable from 'react-use/lib/useObservable';
 import { euiPaletteColorBlind, EuiDataGridColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-
 import {
   isNumericChartData,
   isOrdinalChartData,
-  ChartData,
-  ChartDataItem,
-  NumericDataItem,
-  OrdinalDataItem,
+  type ChartData,
+  type ChartDataItem,
+  type NumericDataItem,
+  type OrdinalDataItem,
 } from './field_histograms';
 
 const NON_AGGREGATABLE = 'non-aggregatable';

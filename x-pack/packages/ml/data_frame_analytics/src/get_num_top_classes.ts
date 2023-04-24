@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { isClassificationAnalysis } from './analytics_utils';
+import type { ClassificationAnalysis, AnalysisConfig } from './types';
+
 export const getNumTopClasses = (
   analysis: AnalysisConfig
 ): ClassificationAnalysis['classification']['num_top_classes'] => {
