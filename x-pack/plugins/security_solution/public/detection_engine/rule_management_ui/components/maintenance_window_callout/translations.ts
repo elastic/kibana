@@ -17,7 +17,7 @@ export const MAINTENANCE_WINDOW_RUNNING = i18n.translate(
 export const MAINTENANCE_WINDOW_RUNNING_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagementUi.maintenanceWindowCallout.maintenanceWindowActiveDescription',
   {
-    defaultMessage: "Notification actions won't run while a maintenance window is running",
+    defaultMessage: "Notification actions won't run while a maintenance window is running.",
   }
 );
 
