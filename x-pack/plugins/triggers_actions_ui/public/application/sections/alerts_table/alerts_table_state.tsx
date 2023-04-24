@@ -318,13 +318,18 @@ const AlertsTableStateWithQueryProvider = ({
   const CasesContext = casesService?.ui.getCasesContext();
   const isCasesContextAvailable = casesService && CasesContext;
 
+  const memoizedCases = useMemo(
+    () => ({
+      data: cases ?? new Map(),
+      isLoading: isLoadingCases,
+    }),
+    [cases, isLoadingCases]
+  );
+
   const tableProps: AlertsTableProps = useMemo(
     () => ({
       alertsTableConfiguration,
-      cases: {
-        data: cases ?? new Map(),
-        isLoading: isLoadingCases,
-      },
+      cases: memoizedCases,
       columns,
       bulkActions: [],
       deletedEventIds: [],
@@ -356,8 +361,7 @@ const AlertsTableStateWithQueryProvider = ({
     }),
     [
       alertsTableConfiguration,
-      cases,
-      isLoadingCases,
+      memoizedCases,
       columns,
       flyoutSize,
       pagination.pageSize,
