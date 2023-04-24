@@ -56,7 +56,7 @@ export interface FileServiceStart {
    *
    * @param args - bulk get files by IDs args
    */
-  bulkGetById<M>(args: BulkGetByIdArgs): Promise<File<M>[]>;
+  bulkGetById<M>(args: BulkGetByIdArgs): Promise<Array<File<M>>>;
 
   /**
    * Find files given a set of parameters.

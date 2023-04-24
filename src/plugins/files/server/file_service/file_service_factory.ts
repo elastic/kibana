@@ -106,7 +106,7 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
         return internalFileService.getById(args) as Promise<File<M>>;
       },
       async bulkGetById<M>(args: BulkGetByIdArgs) {
-        return internalFileService.bulkGetById(args) as Promise<File<M>[]>;
+        return internalFileService.bulkGetById(args) as Promise<Array<File<M>>>;
       },
       async find<M>(args: FindFileArgs) {
         return internalFileService.findFilesJSON(args) as Promise<{
