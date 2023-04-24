@@ -62,6 +62,9 @@ jest.mock('../../lib/ml/get_ml_model_deployment_status', () => ({
 jest.mock('../../lib/ml/start_ml_model_deployment', () => ({
   startMlModelDeployment: jest.fn(),
 }));
+jest.mock('../../lib/ml/start_ml_model_download', () => ({
+  startMlModelDownload: jest.fn(),
+}));
 jest.mock('@kbn/ml-plugin/server/saved_objects/service', () => ({
   mlSavedObjectServiceFactory: jest.fn(),
 }));
@@ -84,6 +87,7 @@ import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml
 import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { registerIndexRoutes } from './indices';
+import { startMlModelDownload } from '../../lib/ml/start_ml_model_download';
 
 describe('Enterprise Search Managed Indices', () => {
   let mockRouter: MockRouter;
@@ -1169,7 +1173,7 @@ describe('Enterprise Search Managed Indices', () => {
         targetAllocationCount: 0,
       };
 
-      (startMlModelDeployment as jest.Mock).mockResolvedValueOnce(mockResponse);
+      (startMlModelDownload as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       await mockRouter.callRoute(request);
 
