@@ -110,31 +110,32 @@ export function Table<T extends UserContentCommonSchema>({
     );
   }, [deleteItems, dispatch, entityName, entityNamePlural, selectedIds.length]);
 
-  let selection: EuiTableSelectionType<T> | undefined;
-
-  if (deleteItems) {
-    selection = {
-      onSelectionChange: (obj: T[]) => {
-        dispatch({ type: 'onSelectionChange', data: obj });
-      },
-      selectable: (obj) => {
-        const actions = tableItemsRowActions[obj.id];
-        return actions?.delete?.enabled !== false;
-      },
-      selectableMessage: (selectable, obj) => {
-        if (!selectable) {
+  const selection = useMemo<EuiTableSelectionType<T> | undefined>(() => {
+    if (deleteItems) {
+      return {
+        onSelectionChange: (obj: T[]) => {
+          dispatch({ type: 'onSelectionChange', data: obj });
+        },
+        selectable: (obj) => {
           const actions = tableItemsRowActions[obj.id];
-          return (
-            actions?.delete?.reason ??
-            i18n.translate('contentManagement.tableList.actionsDisabledLabel', {
-              defaultMessage: 'Actions disabled for this item',
-            })
-          );
-        }
-        return '';
-      },
-    };
-  }
+          return actions?.delete?.enabled !== false;
+        },
+        selectableMessage: (selectable, obj) => {
+          if (!selectable) {
+            const actions = tableItemsRowActions[obj.id];
+            return (
+              actions?.delete?.reason ??
+              i18n.translate('contentManagement.tableList.actionsDisabledLabel', {
+                defaultMessage: 'Actions disabled for this item',
+              })
+            );
+          }
+          return '';
+        },
+        initialSelected: [],
+      };
+    }
+  }, [deleteItems, dispatch, tableItemsRowActions]);
 
   const {
     isPopoverOpen,
@@ -237,6 +238,7 @@ export function Table<T extends UserContentCommonSchema>({
       data-test-subj="itemsInMemTable"
       rowHeader="attributes.title"
       tableCaption={tableCaption}
+      isSelectable
     />
   );
 }
