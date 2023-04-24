@@ -14,7 +14,7 @@ interface TableActionButtonProps {
   dataTestSubjPostfix: string;
   isDisabled: boolean;
   label: string;
-  message?: string;
+  tooltipText?: string;
   onClick: () => void;
 }
 
@@ -23,7 +23,7 @@ export const TableActionButton: FC<TableActionButtonProps> = ({
   dataTestSubjPostfix,
   isDisabled,
   label,
-  message,
+  tooltipText,
   onClick,
 }) => {
   const buttonContent = (
@@ -38,7 +38,7 @@ export const TableActionButton: FC<TableActionButtonProps> = ({
       data-test-subj={`aiopsTableActionButton${dataTestSubjPostfix} enabled`}
       onClick={onClick}
       color={'text'}
-      aria-label={message}
+      aria-label={tooltipText}
     >
       {buttonContent}
     </EuiLink>
@@ -47,15 +47,15 @@ export const TableActionButton: FC<TableActionButtonProps> = ({
       data-test-subj={`aiopsTableActionButton${dataTestSubjPostfix} disabled`}
       size="s"
       color={'subdued'}
-      aria-label={message}
+      aria-label={tooltipText}
       css={{ fontWeight: 500 }}
     >
       {buttonContent}
     </EuiText>
   );
 
-  if (message) {
-    return <EuiToolTip content={message}>{unwrappedButton}</EuiToolTip>;
+  if (tooltipText) {
+    return <EuiToolTip content={tooltipText}>{unwrappedButton}</EuiToolTip>;
   }
 
   return unwrappedButton;

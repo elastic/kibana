@@ -83,7 +83,7 @@ export const useViewInDiscoverAction = (dataViewId?: string): TableItemAction =>
 
   return {
     render: (tableItem: SignificantTerm | GroupTableItem) => {
-      const message = discoverUrlError ? discoverUrlError : viewInDiscoverMessage;
+      const tooltipText = discoverUrlError ? discoverUrlError : viewInDiscoverMessage;
 
       const clickHandler = async () => {
         const openInDiscoverUrl = await generateDiscoverUrl(tableItem);
@@ -98,7 +98,7 @@ export const useViewInDiscoverAction = (dataViewId?: string): TableItemAction =>
           iconType="discoverApp"
           isDisabled={discoverUrlError !== undefined}
           label={viewInDiscoverMessage}
-          message={message}
+          tooltipText={tooltipText}
           onClick={clickHandler}
         />
       );
