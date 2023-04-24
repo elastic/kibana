@@ -673,15 +673,21 @@ describe('isFilteredOut', () => {
     });
     expect(alert.isFilteredOut(null)).toBe(false);
   });
-  test('returns false if the alert is in summarizedAlerts', () => {
+  test('returns false if the alert with same ID is in summarizedAlerts', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3, uuid: 'no' },
+    });
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(false);
+  });
+  test('returns false if the alert with same UUID is in summarizedAlerts', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2', {
       meta: { pendingRecoveredCount: 3, uuid: '1' },
     });
-    expect(alert.isFilteredOut(null)).toBe(false);
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(false);
   });
-  test('returns true if the alert is not in summarizedAlerts', () => {
+  test('returns true if the alert with same UUID or ID is not in summarizedAlerts', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2', {
-      meta: { pendingRecoveredCount: 3, uuid: '2' },
+      meta: { pendingRecoveredCount: 3, uuid: '3' },
     });
     expect(alert.isFilteredOut(summarizedAlerts)).toBe(true);
   });
