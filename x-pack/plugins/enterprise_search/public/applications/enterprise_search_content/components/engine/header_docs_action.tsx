@@ -21,7 +21,7 @@ export const EngineHeaderDocsAction: React.FC = () => (
         target="_blank"
         iconType="documents"
       >
-        Engine Docs
+        Search Application Docs
       </EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
