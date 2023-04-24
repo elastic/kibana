@@ -72,8 +72,13 @@ export interface ConfigEntry {
 
 /**
  *
- * Sorts the connector configuration by specified order (if present)
+ * Sorts and filters the connector configuration
+ *
+ * Sorting is done by specified order (if present)
  * otherwise by alphabetic order of keys
+ *
+ * Filtering is done on any fields with ui_restrictions
+ * or that have not had their dependencies met
  *
  */
 function sortAndFilterConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry[] {
