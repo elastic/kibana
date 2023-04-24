@@ -7,7 +7,7 @@
     "server": true,
     "browser": false,
     "configPath": ["xpack"],
-    "requiredPlugins": [],
+    "requiredPlugins": ["reporting"],
     "optionalPlugins": [],
     "requiredBundles": [],
   },

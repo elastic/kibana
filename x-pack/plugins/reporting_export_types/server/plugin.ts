@@ -17,10 +17,10 @@ export interface ExportTypesPluginSetupDependencies {
 
 /** This plugin creates the export types in export type definitions to be registered in the Reporting Export Type Registry */
 export class ExportTypesPlugin implements Plugin<void, void> {
-  public type: ExportTypeDefinition | undefined;
+  public exportTypeEntry: ExportTypeDefinition | undefined;
   // on setup() this plugin needs to use the reporting plugin to register the export types
   public setup({}, { reporting }: ExportTypesPluginSetupDependencies) {
-    reporting.registerExportType(this.type);
+    reporting.registerExportType(this.exportTypeEntry);
   }
 
   // do nothing here

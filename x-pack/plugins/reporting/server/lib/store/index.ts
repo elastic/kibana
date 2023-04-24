@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { ReportDocument } from '../../../common/types';
+export type { ReportDocument } from '@kbn/reporting-export-types/server';
 export { Report } from './report';
 export { SavedReport } from './saved_report';
 export { ReportingStore } from './store';

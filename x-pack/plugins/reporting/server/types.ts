@@ -30,7 +30,7 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Writable } from 'stream';
 import type { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
-import type { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '../common/types';
+import { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '@kbn/reporting-export-types/server';
 import type { ReportingConfigType } from './config';
 import type { ReportingCore } from './core';
 import type { ReportTaskParams } from './lib/tasks';
@@ -44,8 +44,8 @@ export interface ReportingSetup {
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
    */
   usesUiCapabilities: () => boolean;
-  // export the registry to other plugins
-  registerExportType: ExportTypesRegistry['register'];
+  /** Used to inform the ExportTypes plugin of the reporting plugin */
+  registerExportType?: ExportTypesRegistry['register'];
 }
 
 /**

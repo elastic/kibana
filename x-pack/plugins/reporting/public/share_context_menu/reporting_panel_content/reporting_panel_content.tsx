@@ -21,6 +21,7 @@ import React, { Component, ReactElement } from 'react';
 import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { BaseParams } from '@kbn/reporting-export-types/common';
 import {
   CSV_REPORT_TYPE,
   PDF_REPORT_TYPE,
@@ -28,7 +29,6 @@ import {
   PNG_REPORT_TYPE,
   PNG_REPORT_TYPE_V2,
 } from '../../../common/constants';
-import { BaseParams } from '../../../common/types';
 import { ReportingAPIClient } from '../../lib/reporting_api_client';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
 import { getMaxUrlLength } from './constants';

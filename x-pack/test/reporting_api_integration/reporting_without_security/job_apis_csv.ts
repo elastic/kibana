@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { pick } from 'lodash';
-import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
+import { ReportApiJSON } from '@kbn/reporting-export-types/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const apiResponseFields = [

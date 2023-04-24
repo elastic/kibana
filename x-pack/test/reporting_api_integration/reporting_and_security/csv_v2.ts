@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import type {
   JobParamsCsvFromSavedObject,
   ReportApiJSON,
-} from '@kbn/reporting-plugin/common/types';
+} from '@kbn/reporting-export-types/common';
 import rison from '@kbn/rison';
 import request from 'supertest';
 import { FtrProviderContext } from '../ftr_provider_context';

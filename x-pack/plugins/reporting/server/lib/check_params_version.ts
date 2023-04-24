@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { BaseParams } from '../../common';
+import { BaseParams } from '@kbn/reporting-export-types/server';
 import { UNVERSIONED_VERSION } from '../../common/constants';
 
 export function checkParamsVersion(jobParams: BaseParams, logger: Logger) {

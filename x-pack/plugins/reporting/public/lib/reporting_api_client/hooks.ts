@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { IlmPolicyStatusResponse } from '@kbn/reporting-export-types/common';
 import { useRequest, UseRequestResponse } from '../../shared_imports';
-import { IlmPolicyStatusResponse } from '../../../common/types';
 
 import { API_GET_ILM_POLICY_STATUS } from '../../../common/constants';
 

@@ -8,9 +8,9 @@
 import { ResponseHeaders } from '@kbn/core-http-server';
 import { ExportTypeDefinition } from '@kbn/reporting-export-types/server/export_types/types';
 import { Stream } from 'stream';
+import { ReportApiJSON } from '@kbn/reporting-export-types/server';
 import { ReportingCore } from '../..';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
-import { ReportApiJSON } from '../../../common/types';
 import { getContentStream, statuses } from '../../lib';
 import { jobsQueryFactory } from './jobs_query';
 
