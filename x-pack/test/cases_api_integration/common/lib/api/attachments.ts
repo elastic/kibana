@@ -128,7 +128,7 @@ export const createCaseAndBulkCreateAttachments = async ({
 
 export const getAttachments = (numberOfAttachments: number): BulkCreateCommentRequest => {
   return [...Array(numberOfAttachments)].map((_, index) => {
-    if (index % 0) {
+    if (index % 10 === 0) {
       return {
         type: CommentType.user,
         comment: `Test ${index + 1}`,

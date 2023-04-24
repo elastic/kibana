@@ -17,6 +17,7 @@ import {
   CommentRequestExternalReferenceSOType,
   CommentType,
 } from '@kbn/cases-plugin/common/api';
+import { isEqual } from 'lodash';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
@@ -70,6 +71,7 @@ import {
 } from '../../../../common/lib/alerts';
 import { User } from '../../../../common/lib/authentication/types';
 import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
+import { arraysToEqual } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -79,25 +81,35 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  const validateComments = (
+  const validateCommentsIgnoreOrder = (
     comments: CaseResponse['comments'],
     attachments: BulkCreateCommentRequest
   ) => {
-    comments?.forEach((attachment, index) => {
-      const comment = removeServerGeneratedPropertiesFromSavedObject(attachment);
+    expect(comments?.length).to.eql(attachments.length);
 
-      expect(comment).to.eql({
-        ...attachments[index],
+    const commentsWithoutGeneratedProps = [];
+    const attachmentsWithoutGeneratedProps = [];
+
+    for (const comment of comments!) {
+      commentsWithoutGeneratedProps.push(removeServerGeneratedPropertiesFromSavedObject(comment));
+    }
+
+    for (const attachment of attachments) {
+      attachmentsWithoutGeneratedProps.push({
+        ...attachment,
         created_by: defaultUser,
         pushed_at: null,
         pushed_by: null,
         updated_by: null,
       });
-    });
+    }
+
+    expect(arraysToEqual(commentsWithoutGeneratedProps, attachmentsWithoutGeneratedProps)).to.be(
+      true
+    );
   };
 
-  // FAILING: https://github.com/elastic/kibana/issues/154859
-  describe.skip('bulk_create_attachments', () => {
+  describe.only('bulk_create_attachments', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
@@ -118,7 +130,7 @@ export default ({ getService }: FtrProviderContext): void => {
           numberOfAttachments: 1,
         });
 
-        validateComments(theCase.comments, attachments);
+        validateCommentsIgnoreOrder(theCase.comments, attachments);
       });
 
       it('should bulk create multiple attachments', async () => {
@@ -129,7 +141,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(theCase.totalComment).to.eql(attachments.length);
         expect(theCase.updated_by).to.eql(defaultUser);
 
-        validateComments(theCase.comments, attachments);
+        validateCommentsIgnoreOrder(theCase.comments, attachments);
       });
 
       it('creates the correct user action', async () => {
@@ -1343,10 +1355,24 @@ export default ({ getService }: FtrProviderContext): void => {
         const attachments = await getAllComments({ supertest, caseId: postedCase.id });
         expect(attachments.length).to.eql(2);
 
-        const secondAttachment = attachments[1] as CommentRequestAlertType;
+        let foundAlert3 = false;
 
-        expect(secondAttachment.alertId).to.eql(['test-id-3']);
-        expect(secondAttachment.index).to.eql(['test-index-3']);
+        for (const attachment of attachments) {
+          const castedAlertAttachment = attachment as CommentRequestAlertType;
+
+          if (
+            isEqual(castedAlertAttachment.alertId, ['test-id-3']) &&
+            isEqual(castedAlertAttachment.index, ['test-index-3'])
+          ) {
+            if (!foundAlert3) {
+              foundAlert3 = true;
+            } else {
+              expect().fail('found test-id/index-3 multiple times');
+            }
+          }
+        }
+
+        expect(foundAlert3).to.be(true);
       });
 
       it('does not remove user comments when filtering out duplicate alerts', async () => {

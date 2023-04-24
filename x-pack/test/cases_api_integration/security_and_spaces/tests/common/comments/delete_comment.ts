@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('delete_comment', () => {
+  describe.only('delete_comment', () => {
     afterEach(async () => {
       await deleteCasesByESQuery(es);
       await deleteComments(es);
@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext): void => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
           await createSignalsIndex(supertest, log);
-          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const signals = await createSecuritySolutionAlerts(supertest, log, 2);
           alerts = [signals.hits.hits[0], signals.hits.hits[1]];
         });
 
