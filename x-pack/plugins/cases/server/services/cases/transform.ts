@@ -35,12 +35,12 @@ import {
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
 import type {
   CaseExternalServiceSavedObject,
-  CaseSavedObjectAttributes,
+  CasePersistedAttributes,
   CaseTransformedAttributes,
 } from '../../common/types/case';
 
 export function transformUpdateResponsesToExternalModels(
-  response: SavedObjectsBulkUpdateResponse<CaseSavedObjectAttributes>
+  response: SavedObjectsBulkUpdateResponse<CasePersistedAttributes>
 ): SavedObjectsBulkUpdateResponse<CaseTransformedAttributes> {
   return {
     ...response,
@@ -52,7 +52,7 @@ export function transformUpdateResponsesToExternalModels(
 }
 
 export function transformUpdateResponseToExternalModel(
-  updatedCase: SavedObjectsUpdateResponse<CaseSavedObjectAttributes>
+  updatedCase: SavedObjectsUpdateResponse<CasePersistedAttributes>
 ): SavedObjectsUpdateResponse<CaseTransformedAttributes> {
   const {
     connector,
@@ -67,7 +67,7 @@ export function transformUpdateResponseToExternalModel(
     ({
       total_alerts: -1,
       total_comments: -1,
-    } as CaseSavedObjectAttributes);
+    } as CasePersistedAttributes);
 
   const transformedConnector = transformESConnectorToExternalModel({
     // if the saved object had an error the attributes field will not exist
@@ -98,15 +98,15 @@ export function transformUpdateResponseToExternalModel(
 }
 
 export function transformAttributesToESModel(caseAttributes: CaseTransformedAttributes): {
-  attributes: CaseSavedObjectAttributes;
+  attributes: CasePersistedAttributes;
   referenceHandler: ConnectorReferenceHandler;
 };
 export function transformAttributesToESModel(caseAttributes: Partial<CaseTransformedAttributes>): {
-  attributes: Partial<CaseSavedObjectAttributes>;
+  attributes: Partial<CasePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 };
 export function transformAttributesToESModel(caseAttributes: Partial<CaseTransformedAttributes>): {
-  attributes: Partial<CaseSavedObjectAttributes>;
+  attributes: Partial<CasePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {
   const { connector, external_service, severity, status, ...restAttributes } = caseAttributes;
@@ -157,14 +157,14 @@ function buildReferenceHandler(
  * definition like this:
  *
  * export function transformArrayResponseToExternalModel(
- *  response: SavedObjectsBulkResponse<CaseSavedObjectAttributes> | SavedObjectsFindResponse<CaseSavedObjectAttributes>
+ *  response: SavedObjectsBulkResponse<CasePersistedAttributes> | SavedObjectsFindResponse<CasePersistedAttributes>
  * ): SavedObjectsBulkResponse<CaseTransformedAttributes> | SavedObjectsFindResponse<CaseTransformedAttributes> {
  *
  * See this issue for more details: https://stackoverflow.com/questions/49510832/typescript-how-to-map-over-union-array-type
  */
 
 export function transformBulkResponseToExternalModel(
-  response: SavedObjectsBulkResponse<CaseSavedObjectAttributes>
+  response: SavedObjectsBulkResponse<CasePersistedAttributes>
 ): SavedObjectsBulkResponse<CaseTransformedAttributes> {
   return {
     ...response,
@@ -176,7 +176,7 @@ export function transformBulkResponseToExternalModel(
 }
 
 export function transformFindResponseToExternalModel(
-  response: SavedObjectsFindResponse<CaseSavedObjectAttributes>
+  response: SavedObjectsFindResponse<CasePersistedAttributes>
 ): SavedObjectsFindResponse<CaseTransformedAttributes> {
   return {
     ...response,
@@ -188,7 +188,7 @@ export function transformFindResponseToExternalModel(
 }
 
 export function transformSavedObjectToExternalModel(
-  caseSavedObject: SavedObject<CaseSavedObjectAttributes>
+  caseSavedObject: SavedObject<CasePersistedAttributes>
 ): SavedObject<CaseTransformedAttributes> {
   const connector = transformESConnectorOrUseDefault({
     // if the saved object had an error the attributes field will not exist
@@ -212,7 +212,7 @@ export function transformSavedObjectToExternalModel(
     ({
       total_alerts: -1,
       total_comments: -1,
-    } as CaseSavedObjectAttributes);
+    } as CasePersistedAttributes);
 
   return {
     ...caseSavedObject,

@@ -42,7 +42,7 @@ export interface ConnectorSavedObject {
   fields: ConnectorFieldsSavedObject | null;
 }
 
-export interface CaseSavedObjectAttributes {
+export interface CasePersistedAttributes {
   assignees: UserProfile[];
   closed_at: string | null;
   closed_by: User | null;
@@ -66,5 +66,5 @@ export interface CaseSavedObjectAttributes {
 
 export type CaseTransformedAttributes = CaseAttributes;
 
-export type CaseSavedObject = SavedObject<CaseSavedObjectAttributes>;
+export type CaseSavedObject = SavedObject<CasePersistedAttributes>;
 export type CaseSavedObjectTransformed = SavedObject<CaseTransformedAttributes>;

@@ -46,7 +46,7 @@ import type { AttachmentService } from '../attachments';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import { createCaseError } from '../../common/error';
 import type {
-  CaseSavedObjectAttributes,
+  CasePersistedAttributes,
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
 } from '../../common/types/case';
@@ -194,7 +194,7 @@ export class CasesService {
     [status in CaseStatuses]: number;
   }> {
     const cases = await this.unsecuredSavedObjectsClient.find<
-      CaseSavedObjectAttributes,
+      CasePersistedAttributes,
       {
         statuses: {
           buckets: Array<{
@@ -263,7 +263,7 @@ export class CasesService {
   public async getCase({ id: caseId }: GetCaseArgs): Promise<CaseSavedObjectTransformed> {
     try {
       this.log.debug(`Attempting to GET case ${caseId}`);
-      const caseSavedObject = await this.unsecuredSavedObjectsClient.get<CaseSavedObjectAttributes>(
+      const caseSavedObject = await this.unsecuredSavedObjectsClient.get<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
         caseId
       );
@@ -280,7 +280,7 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to resolve case ${caseId}`);
       const resolveCaseResult =
-        await this.unsecuredSavedObjectsClient.resolve<CaseSavedObjectAttributes>(
+        await this.unsecuredSavedObjectsClient.resolve<CasePersistedAttributes>(
           CASE_SAVED_OBJECT,
           caseId
         );
@@ -300,7 +300,7 @@ export class CasesService {
   }: GetCasesArgs): Promise<SavedObjectsBulkResponse<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to GET cases ${caseIds.join(', ')}`);
-      const cases = await this.unsecuredSavedObjectsClient.bulkGet<CaseSavedObjectAttributes>(
+      const cases = await this.unsecuredSavedObjectsClient.bulkGet<CasePersistedAttributes>(
         caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId, fields }))
       );
       return transformBulkResponseToExternalModel(cases);
@@ -315,7 +315,7 @@ export class CasesService {
   ): Promise<SavedObjectsFindResponse<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to find cases`);
-      const cases = await this.unsecuredSavedObjectsClient.find<CaseSavedObjectAttributes>({
+      const cases = await this.unsecuredSavedObjectsClient.find<CasePersistedAttributes>({
         sortField: defaultSortField,
         ...options,
         type: CASE_SAVED_OBJECT,
@@ -407,7 +407,7 @@ export class CasesService {
       this.log.debug(`Attempting to GET all reporters`);
 
       const results = await this.unsecuredSavedObjectsClient.find<
-        CaseSavedObjectAttributes,
+        CasePersistedAttributes,
         {
           reporters: {
             buckets: Array<{
@@ -469,7 +469,7 @@ export class CasesService {
       this.log.debug(`Attempting to GET all cases`);
 
       const results = await this.unsecuredSavedObjectsClient.find<
-        CaseSavedObjectAttributes,
+        CasePersistedAttributes,
         { tags: { buckets: Array<{ key: string }> } }
       >({
         type: CASE_SAVED_OBJECT,
@@ -506,7 +506,7 @@ export class CasesService {
       transformedAttributes.attributes.total_alerts = -1;
       transformedAttributes.attributes.total_comments = -1;
 
-      const createdCase = await this.unsecuredSavedObjectsClient.create<CaseSavedObjectAttributes>(
+      const createdCase = await this.unsecuredSavedObjectsClient.create<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
         transformedAttributes.attributes,
         { id, references: transformedAttributes.referenceHandler.build(), refresh }
@@ -530,7 +530,7 @@ export class CasesService {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
       const transformedAttributes = transformAttributesToESModel(updatedAttributes);
 
-      const updatedCase = await this.unsecuredSavedObjectsClient.update<CaseSavedObjectAttributes>(
+      const updatedCase = await this.unsecuredSavedObjectsClient.update<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
         caseId,
         transformedAttributes.attributes,
@@ -567,7 +567,7 @@ export class CasesService {
       });
 
       const updatedCases =
-        await this.unsecuredSavedObjectsClient.bulkUpdate<CaseSavedObjectAttributes>(bulkUpdate, {
+        await this.unsecuredSavedObjectsClient.bulkUpdate<CasePersistedAttributes>(bulkUpdate, {
           refresh,
         });
 
@@ -591,7 +591,7 @@ export class CasesService {
       }, {});
 
       const res = await this.unsecuredSavedObjectsClient.find<
-        CaseSavedObjectAttributes,
+        CasePersistedAttributes,
         AggregationResponse
       >({
         sortField: defaultSortField,

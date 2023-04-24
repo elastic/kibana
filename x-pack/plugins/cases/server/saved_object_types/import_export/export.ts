@@ -25,7 +25,7 @@ import {
 } from '../../../common/constants';
 import { defaultSortField } from '../../common/utils';
 import { createCaseError } from '../../common/error';
-import type { CaseSavedObjectAttributes } from '../../common/types/case';
+import type { CasePersistedAttributes } from '../../common/types/case';
 
 export async function handleExport({
   context,
@@ -34,13 +34,13 @@ export async function handleExport({
   logger,
 }: {
   context: SavedObjectsExportTransformContext;
-  objects: Array<SavedObject<CaseSavedObjectAttributes>>;
+  objects: Array<SavedObject<CasePersistedAttributes>>;
   coreSetup: CoreSetup;
   logger: Logger;
 }): Promise<
   Array<
     SavedObject<
-      | CaseSavedObjectAttributes
+      | CasePersistedAttributes
       | CommentAttributesWithoutRefs
       | CaseUserActionAttributesWithoutConnectorId
     >

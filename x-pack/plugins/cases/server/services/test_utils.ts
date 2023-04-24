@@ -19,7 +19,7 @@ import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constan
 import { getNoneCaseConnector } from '../common/utils';
 import type {
   CaseExternalServiceSavedObject,
-  CaseSavedObjectAttributes,
+  CasePersistedAttributes,
   ConnectorFieldsSavedObject,
 } from '../common/types/case';
 import { CaseSeveritySavedObject, CaseStatusSavedObject } from '../common/types/case';
@@ -100,7 +100,7 @@ export const createExternalService = (
   ...overrides,
 });
 
-export const basicESCaseFields: CaseSavedObjectAttributes = {
+export const basicESCaseFields: CasePersistedAttributes = {
   closed_at: null,
   closed_by: null,
   created_at: '2019-11-25T21:54:48.952Z',
@@ -170,9 +170,9 @@ export const createCaseSavedObjectResponse = ({
 }: {
   connector?: ESCaseConnectorWithId;
   externalService?: CaseFullExternalService;
-  overrides?: Partial<CaseSavedObjectAttributes>;
+  overrides?: Partial<CasePersistedAttributes>;
   caseId?: string;
-} = {}): SavedObject<CaseSavedObjectAttributes> => {
+} = {}): SavedObject<CasePersistedAttributes> => {
   const references: SavedObjectReference[] = createSavedObjectReferences({
     connector,
     externalService,

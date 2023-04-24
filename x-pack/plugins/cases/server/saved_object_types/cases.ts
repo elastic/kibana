@@ -13,7 +13,7 @@ import type {
   SavedObjectsType,
 } from '@kbn/core/server';
 import { CASE_SAVED_OBJECT } from '../../common/constants';
-import type { CaseSavedObjectAttributes } from '../common/types/case';
+import type { CasePersistedAttributes } from '../common/types/case';
 import { handleExport } from './import_export/export';
 import { caseMigrations } from './migrations';
 
@@ -193,10 +193,10 @@ export const createCaseSavedObjectType = (
     importableAndExportable: true,
     defaultSearchField: 'title',
     icon: 'casesApp',
-    getTitle: (savedObject: SavedObject<CaseSavedObjectAttributes>) => savedObject.attributes.title,
+    getTitle: (savedObject: SavedObject<CasePersistedAttributes>) => savedObject.attributes.title,
     onExport: async (
       context: SavedObjectsExportTransformContext,
-      objects: Array<SavedObject<CaseSavedObjectAttributes>>
+      objects: Array<SavedObject<CasePersistedAttributes>>
     ) => handleExport({ context, objects, coreSetup, logger }),
   },
 });

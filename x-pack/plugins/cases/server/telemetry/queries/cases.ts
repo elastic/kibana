@@ -35,14 +35,14 @@ import {
   getReferencesAggregationQuery,
   getSolutionValues,
 } from './utils';
-import type { CaseSavedObjectAttributes } from '../../common/types/case';
+import type { CasePersistedAttributes } from '../../common/types/case';
 import { CaseStatusSavedObject } from '../../common/types/case';
 
 export const getLatestCasesDates = async ({
   savedObjectsClient,
 }: CollectTelemetryDataParams): Promise<LatestDates> => {
   const find = async (sortField: string) =>
-    savedObjectsClient.find<CaseSavedObjectAttributes>({
+    savedObjectsClient.find<CasePersistedAttributes>({
       page: 1,
       perPage: 1,
       sortField,
