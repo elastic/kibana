@@ -50,6 +50,6 @@ export const AnalyticsCollectionNoEventsCalloutLogic = kea<
     isLoading: [
       () => [selectors.status],
       (status: AnalyticsCollectionNoEventsCalloutValues['status']) => status === Status.LOADING,
-    ]
+    ],
   }),
 });
