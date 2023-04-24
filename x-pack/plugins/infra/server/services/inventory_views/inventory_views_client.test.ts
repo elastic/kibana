@@ -15,6 +15,10 @@ import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import { inventoryViewSavedObjectName } from '../../saved_objects/inventory_view';
 import { InventoryViewsClient } from './inventory_views_client';
 import { createInventoryViewMock } from '../../../common/inventory_views/inventory_view.mock';
+import {
+  CreateInventoryViewAttributesRequestPayload,
+  UpdateInventoryViewAttributesRequestPayload,
+} from '../../../common/http_api/latest';
 
 describe('InventoryViewsClient class', () => {
   const mockFindInventoryList = (savedObjectsClient: jest.Mocked<SavedObjectsClientContract>) => {
@@ -130,7 +134,7 @@ describe('InventoryViewsClient class', () => {
 
       const inventoryView = await inventoryViewsClient.create({
         name: 'New view',
-      } as InventoryViewAttributes);
+      } as CreateInventoryViewAttributesRequestPayload);
 
       expect(savedObjectsClient.create).toHaveBeenCalled();
       expect(inventoryView).toEqual(inventoryViewMock);
@@ -145,7 +149,7 @@ describe('InventoryViewsClient class', () => {
         async () =>
           await inventoryViewsClient.create({
             name: 'Custom',
-          } as InventoryViewAttributes)
+          } as CreateInventoryViewAttributesRequestPayload)
       ).rejects.toThrow('A view with that name already exists.');
     });
   });
@@ -177,7 +181,7 @@ describe('InventoryViewsClient class', () => {
         'default_id',
         {
           name: 'New name',
-        } as InventoryViewAttributes,
+        } as UpdateInventoryViewAttributesRequestPayload,
         {}
       );
 
@@ -196,7 +200,7 @@ describe('InventoryViewsClient class', () => {
             'default_id',
             {
               name: 'Custom',
-            } as InventoryViewAttributes,
+            } as UpdateInventoryViewAttributesRequestPayload,
             {}
           )
       ).rejects.toThrow('A view with that name already exists.');
