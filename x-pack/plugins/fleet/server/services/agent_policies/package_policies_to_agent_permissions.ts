@@ -19,6 +19,16 @@ import { pkgToPkgKey } from '../epm/registry';
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
+export const UNIVERSAL_PROFILING_PERMISSIONS = [
+  'auto_configure',
+  'read',
+  'create_doc',
+  'create',
+  'write',
+  'index',
+  'view_index_metadata'
+];
+
 export async function storedPackagePoliciesToAgentPermissions(
   packageInfoCache: Map<string, PackageInfo>,
   packagePolicies?: PackagePolicy[]
@@ -41,6 +51,12 @@ export async function storedPackagePoliciesToAgentPermissions(
       }
 
       const pkg = packageInfoCache.get(pkgToPkgKey(packagePolicy.package))!;
+
+      // Special handling for Universal Profiling packages, as it does not use data streams _only_,
+      // but also indices that do not adhere to the convention.
+      if (pkg.name==='profiler_symbolizer') {
+        return Promise.resolve(universalProfilingPermissions(packagePolicy.id));
+      }
 
       const dataStreams = getNormalizedDataStreams(pkg);
       if (!dataStreams || dataStreams.length === 0) {
@@ -167,11 +183,24 @@ export function getDataStreamPrivileges(dataStream: DataStreamMeta, namespace: s
   }
 
   const privileges = dataStream?.elasticsearch?.privileges?.indices?.length
-    ? dataStream.elasticsearch.privileges.indices
-    : PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES;
+      ? dataStream.elasticsearch.privileges.indices
+      :PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES;
 
   return {
     names: [index],
     privileges,
   };
+}
+
+async function universalProfilingPermissions(packagePolicyId: string): Promise<[string, any]> {
+  const profilingIndexPattern = 'profiling-*';
+  return [
+    packagePolicyId,
+    {
+      indices: [{
+        names: [profilingIndexPattern],
+        privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+      }]
+    }
+  ];
 }
