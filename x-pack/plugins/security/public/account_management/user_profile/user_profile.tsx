@@ -155,7 +155,7 @@ function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfi
         <h2>
           <FormattedMessage
             id="xpack.security.accountManagement.userProfile.userSettingsTitle"
-            defaultMessage="User Settings"
+            defaultMessage="Theme"
           />
         </h2>
       }
