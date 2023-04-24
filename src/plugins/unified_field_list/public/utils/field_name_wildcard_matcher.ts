@@ -13,6 +13,12 @@ const makeRegEx = memoize(function makeRegEx(glob: string) {
   return new RegExp(globRegex.includes('*') ? `^${globRegex}$` : globRegex, 'i');
 });
 
+/**
+ * Checks if field displayName or name matches the provided search string.
+ * The search string can have wildcard.
+ * @param field
+ * @param fieldSearchHighlight
+ */
 export const fieldNameWildcardMatcher = (
   field: { name: string; displayName?: string },
   fieldSearchHighlight: string
