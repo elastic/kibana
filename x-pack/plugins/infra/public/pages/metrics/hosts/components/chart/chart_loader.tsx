@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiFlexGroup, EuiProgress, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import {} from 'react-use/lib/useEffectOnce';
 
 export const ChartLoader = ({
   children,
