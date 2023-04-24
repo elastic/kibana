@@ -140,17 +140,31 @@ export const getRiskScoreColumns = (
     truncateText: false,
     mobileOptions: { show: true },
     render: (alertCount: number, risk) => (
-      <EuiLink
-        data-test-subj="risk-score-alerts"
-        disabled={alertCount === 0}
-        onClick={() =>
-          openEntityOnAlertsPage(
-            riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name
-          )
-        }
+      <SecurityCellActions
+        field={{
+          name: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+          value: riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name,
+          type: 'keyword',
+          aggregatable: true,
+        }}
+        mode={CellActionsMode.HOVER_RIGHT}
+        triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        metadata={{
+          andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
+        }}
       >
-        <FormattedCount count={alertCount} />
-      </EuiLink>
+        <EuiLink
+          data-test-subj="risk-score-alerts"
+          disabled={alertCount === 0}
+          onClick={() =>
+            openEntityOnAlertsPage(
+              riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name
+            )
+          }
+        >
+          <FormattedCount count={alertCount} />
+        </EuiLink>
+      </SecurityCellActions>
     ),
   },
 ];
