@@ -261,15 +261,12 @@ export function useModelActions({
         isPrimary: true,
         available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
         enabled: (item) =>
-          canStartStopTrainedModels &&
-          !isLoading &&
-          isPopulatedObject(item.stats?.deployment_stats) &&
-          item.stats?.deployment_stats?.state !== DEPLOYMENT_STATE.STOPPING,
+          canStartStopTrainedModels && !isLoading && item.deployment_ids.length > 0,
         onClick: async (item) => {
           const requireForceStop = isPopulatedObject(item.pipelines);
           const hasMultipleDeployments = item.deployment_ids.length > 1;
 
-          let deploymentIds: string[] = [item.model_id];
+          let deploymentIds: string[] = item.deployment_ids;
           if (requireForceStop || hasMultipleDeployments) {
             try {
               deploymentIds = await getUserConfirmation(item);

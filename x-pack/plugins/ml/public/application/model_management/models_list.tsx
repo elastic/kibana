@@ -57,7 +57,7 @@ export type ModelItem = TrainedModelConfigResponse & {
   type?: string[];
   stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
   pipelines?: ModelPipelines['pipelines'] | null;
-  deployment_ids?: string[];
+  deployment_ids: string[];
 };
 
 export type ModelItemFull = Required<ModelItem>;
