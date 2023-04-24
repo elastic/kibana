@@ -85,7 +85,7 @@ const formatGroupByFields = (groupByFields: Record<string, string>): string => {
         groupByFields[field]
       )}`
   );
-  return ` for ${groupByFieldLabels.join(', ')}`;
+  return groupByFieldLabels.join(', ');
 };
 
 export function formatErrorCountReason({
