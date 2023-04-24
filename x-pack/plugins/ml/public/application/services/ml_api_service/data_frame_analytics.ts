@@ -6,6 +6,8 @@
  */
 
 import { useMemo } from 'react';
+
+import type { NewJobCapsResponse } from '@kbn/ml-common';
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 
@@ -14,7 +16,6 @@ import type { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/a
 import type { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
 import type { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common';
 import type { DeepPartial } from '../../../../common/types/common';
-import type { NewJobCapsResponse } from '../../../../common/types/fields';
 import type { UpdateDataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 import type { JobMessage } from '../../../../common/types/audit_message';
 import type {

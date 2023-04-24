@@ -10,10 +10,9 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { type Field, EVENT_RATE_FIELD_ID, OMIT_FIELDS } from '@kbn/ml-common';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
-import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
-import { OMIT_FIELDS } from '../../../../../../../common/constants/field_types';
 import { BASIC_NUMERICAL_TYPES, EXTENDED_NUMERICAL_TYPES } from '../../../../common/fields';
 import { CATEGORICAL_TYPES } from './form_options_validation';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';

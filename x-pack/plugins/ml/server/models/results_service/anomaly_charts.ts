@@ -13,6 +13,7 @@ import { extent, max, min } from 'd3';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import { MlAnomalyRecordDoc, MlRecordForInfluencer } from '@kbn/ml-common';
+import { _DOC_COUNT, DOC_COUNT, ES_AGGREGATION, ML_JOB_AGGREGATION } from '@kbn/ml-common';
 import type { MlClient } from '../../lib/ml_client';
 import { isRuntimeMappings } from '../../../common';
 import type {
@@ -43,9 +44,7 @@ import {
 } from '../../../common/util/anomaly_utils';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { CombinedJob, Datafeed } from '../../shared';
-import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { _DOC_COUNT, DOC_COUNT } from '../../../common/constants/field_types';
 
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';

@@ -7,6 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import { FieldsForHistograms } from '@kbn/ml-agg-utils';
+import { RuntimeMappings } from '@kbn/ml-common';
 import { wrapError } from '../client/error_wrapper';
 import { DataVisualizer } from '../models/data_visualizer';
 import {
@@ -14,7 +15,6 @@ import {
   indexPatternSchema,
 } from './schemas/data_visualizer_schema';
 import { RouteInitialization } from '../types';
-import { RuntimeMappings } from '../../common/types/fields';
 
 function getHistogramsForFields(
   client: IScopedClusterClient,

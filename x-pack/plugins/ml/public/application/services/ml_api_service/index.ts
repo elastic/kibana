@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Observable } from 'rxjs';
 import type { HttpStart } from '@kbn/core/public';
+import type { RuntimeMappings } from '@kbn/ml-common';
 import { jsonSchemaProvider } from './json_schema';
 import { HttpService } from '../http_service';
 
@@ -43,7 +44,6 @@ import type {
 import type { FieldHistogramRequestConfig } from '../../datavisualizer/index_based/common/request';
 import type { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
-import type { RuntimeMappings } from '../../../../common/types/fields';
 import type { DatafeedValidationResponse } from '../../../../common/types/job_validation';
 import { notificationsProvider } from './notifications';
 

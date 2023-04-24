@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+export {
+  aggregations,
+  mlOnlyAggregations,
+  ES_AGGREGATION,
+  ML_JOB_AGGREGATION,
+  SPARSE_DATA_AGGREGATIONS,
+} from './constants/aggregation_types';
+
 export type {
   MlAnomalyResultType,
   MlAnomalyRecordDoc,
@@ -24,6 +32,31 @@ export {
   type MlKibanaUrlConfig,
   type MlUrlConfig,
 } from './types/custom_urls';
+
+export {
+  DOC_COUNT,
+  _DOC_COUNT,
+  MLCATEGORY,
+  ML_JOB_FIELD_TYPES,
+  OMIT_FIELDS,
+} from './constants/field_types';
+
+export {
+  mlCategory,
+  type Aggregation,
+  type AggFieldPair,
+  type AggFieldNamePair,
+  type AggId,
+  type Field,
+  type FieldId,
+  type NewJobCaps,
+  type NewJobCapsResponse,
+  type RollupFields,
+  type RuntimeMappings,
+  type SplitField,
+  EVENT_RATE_FIELD_ID,
+  METRIC_AGG_TYPE,
+} from './types/fields';
 
 export {
   ML_ANOMALY_RESULT_TYPE,

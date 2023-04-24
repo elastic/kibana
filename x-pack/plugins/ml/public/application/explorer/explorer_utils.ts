@@ -18,15 +18,14 @@ import { asyncForEach } from '@kbn/std';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { type MlInfluencer, type MlRecordForInfluencer, ML_JOB_AGGREGATION } from '@kbn/ml-common';
 
-import { MlInfluencer, MlRecordForInfluencer } from '@kbn/ml-common';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
 import { EntityField, getEntityFieldList } from '../../../common/util/anomaly_utils';
 import { getDataViewIdFromName } from '../util/index_utils';
-import { ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,

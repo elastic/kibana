@@ -15,7 +15,7 @@ import { getEntityFieldList } from '../../../../common/util/anomaly_utils';
 import { buildConfigFromDetector } from '../../util/chart_config_builder';
 import { mlJobService } from '../../services/job_service';
 import { mlFunctionToESAggregation } from '../../../../common/util/job_utils';
-import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-common';
 
 // Builds the chart configuration for the provided anomaly record, returning
 // an object with properties used for the display (series function and field, aggregation interval etc),

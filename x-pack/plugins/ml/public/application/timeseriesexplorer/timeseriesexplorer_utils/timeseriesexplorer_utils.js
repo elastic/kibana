@@ -14,6 +14,8 @@
 import { each, get, find } from 'lodash';
 import moment from 'moment-timezone';
 
+import { ML_JOB_AGGREGATION } from '@kbn/ml-common';
+
 import { isMultiBucketAnomaly } from '../../../../common/util/anomaly_utils';
 import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
@@ -21,7 +23,6 @@ import { parseInterval } from '../../../../common/util/parse_interval';
 import { getBoundsRoundedToInterval, getTimeBucketsFromCache } from '../../util/time_buckets';
 
 import { CHARTS_POINT_TARGET, TIME_FIELD_NAME } from '../timeseriesexplorer_constants';
-import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 
 // create new job objects based on standard job config objects
 // new job objects just contain job id, bucket span in seconds and a selected flag.

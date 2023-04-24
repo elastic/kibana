@@ -7,8 +7,8 @@
 
 import { get } from 'lodash';
 
+import type { RuntimeMappings } from '@kbn/ml-common';
 import { ml } from '../../../../services/ml_api_service';
-import { RuntimeMappings } from '../../../../../../common/types/fields';
 import { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
 
 interface CategoryResults {

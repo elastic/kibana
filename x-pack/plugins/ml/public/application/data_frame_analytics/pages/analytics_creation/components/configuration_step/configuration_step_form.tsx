@@ -21,6 +21,7 @@ import { debounce, cloneDeep } from 'lodash';
 import { Query } from '@kbn/data-plugin/common/query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import { type RuntimeMappings as RuntimeMappingsType } from '@kbn/ml-common';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   EuiComboBoxWithFieldStats,
@@ -37,7 +38,6 @@ import {
   TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
-import { RuntimeMappings as RuntimeMappingsType } from '../../../../../../../common/types/fields';
 import { FieldSelectionItem } from '../../../../../../../common/types/data_frame_analytics';
 import {
   isRuntimeMappings,

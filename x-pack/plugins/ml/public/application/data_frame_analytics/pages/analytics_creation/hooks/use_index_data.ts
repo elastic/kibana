@@ -15,9 +15,9 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { RuntimeMappings } from '@kbn/ml-common';
 
 import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
-import { RuntimeMappings } from '../../../../../../common/types/fields';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
 import { newJobCapsServiceAnalytics } from '../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 

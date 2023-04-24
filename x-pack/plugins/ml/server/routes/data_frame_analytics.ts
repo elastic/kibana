@@ -7,11 +7,11 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { Field, Aggregation } from '@kbn/ml-common';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import type { RouteInitialization } from '../types';
 import { JOB_MAP_NODE_TYPES } from '../../common/constants/data_frame_analytics';
-import type { Field, Aggregation } from '../../common/types/fields';
 import {
   dataAnalyticsJobConfigSchema,
   dataAnalyticsJobUpdateSchema,

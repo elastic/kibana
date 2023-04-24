@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { ML_JOB_FIELD_TYPES } from '../constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-common';
 
 export type MlJobFieldType = typeof ML_JOB_FIELD_TYPES[keyof typeof ML_JOB_FIELD_TYPES];

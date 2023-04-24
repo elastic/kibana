@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuntimeMappings } from '../../../../../../../common/types/fields';
+import type { RuntimeMappings } from '@kbn/ml-common';
 import { DataFrameAnalyticsMeta } from '../../../../../../../common/types/data_frame_analytics';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';

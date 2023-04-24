@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { RuntimeMappings } from '@kbn/ml-common';
 import { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import { EntityField } from '../../../../common/util/anomaly_utils';
-import { RuntimeMappings } from '../../../../common/types/fields';
 
 export function resultsServiceProvider(mlApiServices: MlApiServices): {
   getScoresByBucket(

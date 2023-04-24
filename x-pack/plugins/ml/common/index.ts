@@ -10,7 +10,6 @@ export type { ChartData } from './types/field_histograms';
 export { getSeverityColor, getSeverityType } from './util/anomaly_utils';
 export { composeValidators, patternValidator } from './util/validators';
 export { isRuntimeMappings, isRuntimeField } from './util/runtime_field_utils';
-export type { RuntimeMappings } from './types/fields';
 export { getDefaultCapabilities as getDefaultMlCapabilities } from './types/capabilities';
 export { DATAFEED_STATE, JOB_STATE } from './constants/states';
 export type { MlSummaryJob, SummaryJobState } from './types/anomaly_detection_jobs';

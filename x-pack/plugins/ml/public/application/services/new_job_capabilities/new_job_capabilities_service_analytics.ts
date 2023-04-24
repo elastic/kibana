@@ -7,7 +7,7 @@
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { Field, NewJobCapsResponse } from '../../../../common/types/fields';
+import type { Field, NewJobCapsResponse } from '@kbn/ml-common';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 import { ml } from '../ml_api_service';
 
