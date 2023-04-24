@@ -77,6 +77,13 @@ export const SPARSE_DATA_AGGREGATIONS = [
 ] as const;
 
 /**
+ * Type definition of SPARSE_DATA_AGGREGATIONS values.
+ * @export
+ * @typedef {SparseDataAggregation}
+ */
+export type SparseDataAggregation = typeof SPARSE_DATA_AGGREGATIONS[number];
+
+/**
  * Enum for Kibana aggregations.
  * @export
  * @enum {number}

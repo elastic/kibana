@@ -12,6 +12,7 @@ import {
   mlCategory,
   type Field,
   type AggFieldPair,
+  type SparseDataAggregation,
   DOC_COUNT,
   _DOC_COUNT,
   EVENT_RATE_FIELD_ID,
@@ -221,7 +222,7 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
   // return true
   if (distinctCountField === undefined) {
     for (const detector of detectors) {
-      if (SPARSE_DATA_AGGREGATIONS.includes(detector.function as ML_JOB_AGGREGATION)) {
+      if (SPARSE_DATA_AGGREGATIONS.includes(detector.function as SparseDataAggregation)) {
         return true;
       }
     }

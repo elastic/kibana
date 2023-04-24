@@ -18,6 +18,11 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
 import {
+  formatHumanReadableDateTimeSeconds,
+  isRuntimeMappings,
+  type RuntimeMappings,
+} from '@kbn/ml-anomaly-utils';
+import {
   type FeatureImportance,
   type FeatureImportanceClassName,
   type TopClasses,
@@ -31,12 +36,9 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
-import { RuntimeMappings } from '../../../../common/types/fields';
-import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 
 export const INIT_MAX_COLUMNS = 10;
 export const COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD = 10000;
