@@ -10,7 +10,7 @@ import { ES_SEARCH_STRATEGY, IKibanaSearchResponse } from '@kbn/data-plugin/comm
 import { useCallback, useEffect } from 'react';
 import { catchError, map, Observable, of, startWith } from 'rxjs';
 import createContainer from 'constate';
-import { estypes } from '@elastic/elasticsearch';
+import type { QueryDslQueryContainer, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useDataSearch, useLatestPartialDataSearchResponse } from '../../../../utils/data_search';
 import { useMetricsDataViewContext } from './use_data_view';
@@ -25,7 +25,7 @@ export const useHostCount = () => {
       const query = buildQuery();
       const dateRange = getParsedDateRange();
 
-      const filters: estypes.QueryDslQueryContainer = {
+      const filters: QueryDslQueryContainer = {
         bool: {
           ...query.bool,
           filter: [
@@ -101,7 +101,7 @@ const INITIAL_STATE = {
   total: undefined,
 };
 const normalizeDataSearchResponse = (
-  response$: Observable<IKibanaSearchResponse<estypes.SearchResponse<Record<string, unknown>>>>
+  response$: Observable<IKibanaSearchResponse<SearchResponse<Record<string, unknown>>>>
 ) =>
   response$.pipe(
     map((response) => ({

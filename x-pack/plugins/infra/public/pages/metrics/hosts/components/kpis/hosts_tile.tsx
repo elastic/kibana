@@ -28,8 +28,7 @@ export const HostsTile = () => {
   const { searchCriteria } = useUnifiedSearchContext();
 
   const getSubtitle = () => {
-    const showLimitSubtitle = searchCriteria.limit < (hostCountData?.count.value ?? 0);
-    return showLimitSubtitle
+    return searchCriteria.limit < (hostCountData?.count.value ?? 0)
       ? i18n.translate('xpack.infra.hostsViewPage.metricTrend.subtitle.hostCount.limit', {
           defaultMessage: 'Limited to {limit}',
           values: {

@@ -52,8 +52,7 @@ export const Tile = ({
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
 
   const getSubtitle = () => {
-    const showLimitSubtitle = searchCriteria.limit < (hostCountData?.count.value ?? 0);
-    return showLimitSubtitle
+    return searchCriteria.limit < (hostCountData?.count.value ?? 0)
       ? i18n.translate('xpack.infra.hostsViewPage.metricTrend.subtitle.average.limit', {
           defaultMessage: 'Average (of {limit} hosts)',
           values: {
