@@ -152,7 +152,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     isExpanded,
     setIsExpanded,
   }) => {
-    const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
+    const { to, from, deleteQuery, setQuery } = useGlobalTime();
 
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuidv4()}`, []);
