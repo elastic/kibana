@@ -24,7 +24,7 @@ export const MAINTENANCE_WINDOW_RUNNING_DESCRIPTION = i18n.translate(
 export const FETCH_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagementUi.maintenanceWindowCallout.fetchError',
   {
-    defaultMessage: 'Failed to check if maintenance window is running',
+    defaultMessage: 'Failed to check if any maintenance window is currently running',
   }
 );
 
