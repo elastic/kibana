@@ -16,6 +16,7 @@ import type { InfraStaticSourceConfiguration } from '../common/source_configurat
 import { InfraServerPluginStartDeps } from './lib/adapters/framework';
 import { InventoryViewsServiceStart } from './services/inventory_views';
 import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views/types';
+import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
 
 export type { InfraConfig } from '../common/plugin_config_types';
 
@@ -33,6 +34,7 @@ export interface InfraPluginSetup {
 export interface InfraPluginStart {
   inventoryViews: InventoryViewsServiceStart;
   logViews: LogViewsServiceStart;
+  metricsExplorerViews: MetricsExplorerViewsServiceStart;
   getMetricIndices: (
     savedObjectsClient: SavedObjectsClientContract,
     sourceId?: string
