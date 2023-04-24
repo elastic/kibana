@@ -8,6 +8,7 @@
 export {
   mlJobAggregations,
   mlJobAggregationsWithoutEsEquivalent,
+  type SparseDataAggregation,
   ES_AGGREGATION,
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
