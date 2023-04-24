@@ -11,7 +11,7 @@ import {
   JobExistResult,
   MlCapabilitiesResponse,
 } from '@kbn/ml-plugin/public';
-import { extractErrorMessage } from '@kbn/ml-plugin/common';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { apiService } from './utils';
 import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
 import { API_URLS, ML_MODULE_ID } from '../../../../common/constants';
