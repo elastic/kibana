@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, FC } from 'react';
+import React, { ChangeEvent, useMemo, useState, useRef, useEffect, FC } from 'react';
 
 import {
   EuiComboBox,
@@ -25,11 +25,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { CustomUrlSettings, isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
+import { type DataFrameAnalyticsConfig } from '../../../../../common/types/data_frame_analytics';
+import { Job, isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
 
 import { TIME_RANGE_TYPE, TimeRangeType, URL_TYPE } from './constants';
 import { UrlConfig } from '../../../../../common/types/custom_urls';
+import { useMlKibana } from '../../../contexts/kibana';
+import { getDropDownOptions } from './get_dropdown_options';
 
 function getLinkToOptions() {
   return [
@@ -60,8 +65,8 @@ interface CustomUrlEditorProps {
   savedCustomUrls: UrlConfig[];
   dashboards: Array<{ id: string; title: string }>;
   dataViewListItems: DataViewListItem[];
-  queryEntityFieldNames: string[];
   showTimeRangeSelector?: boolean;
+  job: Job | DataFrameAnalyticsConfig;
 }
 
 /*
@@ -73,9 +78,42 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   savedCustomUrls,
   dashboards,
   dataViewListItems,
-  queryEntityFieldNames,
-  showTimeRangeSelector = true,
+  job,
 }) => {
+  const [queryEntityFieldNames, setQueryEntityFieldNames] = useState<string[]>([]);
+  const isAnomalyJob = useMemo(() => isAnomalyDetectionJob(job), [job]);
+
+  const {
+    services: {
+      data: { dataViews },
+    },
+  } = useMlKibana();
+
+  const isFirst = useRef(true);
+
+  useEffect(() => {
+    async function getQueryEntityDropdownOptions() {
+      let dataViewToUse: DataView | undefined;
+      const dataViewId = customUrl?.kibanaSettings?.discoverIndexPatternId;
+
+      try {
+        dataViewToUse = await dataViews.get(dataViewId ?? '');
+      } catch (e) {
+        dataViewToUse = undefined;
+      }
+      const dropDownOptions = await getDropDownOptions(isFirst.current, job, dataViewToUse);
+      setQueryEntityFieldNames(dropDownOptions);
+
+      if (isFirst.current) {
+        isFirst.current = false;
+      }
+    }
+
+    if (job !== undefined) {
+      getQueryEntityDropdownOptions();
+    }
+  }, [dataViews, job, customUrl?.kibanaSettings?.discoverIndexPatternId]);
+
   if (customUrl === undefined) {
     return null;
   }
@@ -112,6 +150,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
       kibanaSettings: {
         ...kibanaSettings,
         discoverIndexPatternId: e.target.value,
+        queryFieldNames: [],
       },
     });
   };
@@ -307,58 +346,57 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
             </EuiFormRow>
           )}
 
-        {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
-          showTimeRangeSelector && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
+        {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) && isAnomalyJob && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.ml.customUrlsEditor.timeRangeLabel"
+                      defaultMessage="Time range"
+                    />
+                  }
+                  className="url-time-range"
+                  display="rowCompressed"
+                >
+                  <EuiSelect
+                    options={timeRangeOptions}
+                    value={timeRange.type}
+                    onChange={onTimeRangeTypeChange}
+                    data-test-subj="mlJobCustomUrlTimeRangeInput"
+                    compressed
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              {timeRange.type === TIME_RANGE_TYPE.INTERVAL && (
+                <EuiFlexItem>
                   <EuiFormRow
                     label={
                       <FormattedMessage
-                        id="xpack.ml.customUrlsEditor.timeRangeLabel"
-                        defaultMessage="Time range"
+                        id="xpack.ml.customUrlsEditor.intervalLabel"
+                        defaultMessage="Interval"
                       />
                     }
                     className="url-time-range"
+                    error={invalidIntervalError}
+                    isInvalid={isInvalidTimeRange}
                     display="rowCompressed"
                   >
-                    <EuiSelect
-                      options={timeRangeOptions}
-                      value={timeRange.type}
-                      onChange={onTimeRangeTypeChange}
-                      data-test-subj="mlJobCustomUrlTimeRangeInput"
+                    <EuiFieldText
+                      value={timeRange.interval}
+                      onChange={onTimeRangeIntervalChange}
+                      isInvalid={isInvalidTimeRange}
+                      data-test-subj="mlJobCustomUrlTimeRangeIntervalInput"
                       compressed
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
-                {timeRange.type === TIME_RANGE_TYPE.INTERVAL && (
-                  <EuiFlexItem>
-                    <EuiFormRow
-                      label={
-                        <FormattedMessage
-                          id="xpack.ml.customUrlsEditor.intervalLabel"
-                          defaultMessage="Interval"
-                        />
-                      }
-                      className="url-time-range"
-                      error={invalidIntervalError}
-                      isInvalid={isInvalidTimeRange}
-                      display="rowCompressed"
-                    >
-                      <EuiFieldText
-                        value={timeRange.interval}
-                        onChange={onTimeRangeIntervalChange}
-                        isInvalid={isInvalidTimeRange}
-                        data-test-subj="mlJobCustomUrlTimeRangeIntervalInput"
-                        compressed
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </>
-          )}
+              )}
+            </EuiFlexGroup>
+          </>
+        )}
 
         {type === URL_TYPE.OTHER && (
           <EuiFormRow
