@@ -1117,6 +1117,69 @@ describe('Enterprise Search Managed Indices', () => {
     });
   });
 
+  describe('POST /internal/enterprise_search/ml/models/{modelName}/download', () => {
+    let mockMl: SharedServices;
+    let mockTrainedModelsProvider: MlTrainedModels;
+
+    beforeEach(() => {
+      const context = {
+        core: Promise.resolve(mockCore),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'post',
+        path: '/internal/enterprise_search/ml/models/{modelName}/download',
+      });
+
+      mockTrainedModelsProvider = {
+        getTrainedModels: jest.fn(),
+        getTrainedModelsStats: jest.fn(),
+      } as MlTrainedModels;
+
+      mockMl = {
+        trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
+      } as unknown as jest.Mocked<SharedServices>;
+
+      registerIndexRoutes({
+        ...mockDependencies,
+        ml: mockMl,
+        router: mockRouter.router,
+      });
+    });
+    const modelName = '.elser_model_1_SNAPSHOT';
+
+    it('fails validation without modelName', () => {
+      const request = {
+        params: {},
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('downloads the model', async () => {
+      const request = {
+        params: { modelName },
+      };
+
+      const mockResponse = {
+        deploymentState: MlModelDeploymentState.Downloading,
+        modelId: modelName,
+        nodeAllocationCount: 0,
+        startTime: 0,
+        targetAllocationCount: 0,
+      };
+
+      (startMlModelDeployment as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      await mockRouter.callRoute(request);
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: mockResponse,
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+  });
+
   describe('POST /internal/enterprise_search/ml/models/{modelName}/deploy', () => {
     let mockMl: SharedServices;
     let mockTrainedModelsProvider: MlTrainedModels;
@@ -1156,7 +1219,7 @@ describe('Enterprise Search Managed Indices', () => {
       mockRouter.shouldThrow(request);
     });
 
-    it('deploys or downloads the model', async () => {
+    it('deploys the model', async () => {
       const request = {
         params: { modelName },
       };

@@ -41,6 +41,7 @@ import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_infere
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
 import { getMlModelDeploymentStatus } from '../../lib/ml/get_ml_model_deployment_status';
 import { startMlModelDeployment } from '../../lib/ml/start_ml_model_deployment';
+import { startMlModelDownload } from '../../lib/ml/start_ml_model_download';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
@@ -996,6 +997,67 @@ export function registerIndexRoutes({
 
   router.post(
     {
+      path: '/internal/enterprise_search/ml/models/{modelName}/download',
+      validate: {
+        params: schema.object({
+          modelName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const modelName = decodeURIComponent(request.params.modelName);
+      const {
+        elasticsearch: { client },
+        savedObjects: { client: savedObjectsClient },
+      } = await context.core;
+      const trainedModelsProvider = ml
+        ? await ml.trainedModelsProvider(request, savedObjectsClient)
+        : undefined;
+
+      const savedObjectService = mlSavedObjectServiceFactory(
+        savedObjectsClient,
+        savedObjectsClient,
+        true,
+        undefined,
+        client,
+        () => Promise.resolve() // pretend isMlReady, to allow us to initialize the saved objects
+      );
+
+      const mlClient = savedObjectService
+        ? await getMlClient(client, savedObjectService)
+        : undefined;
+
+      try {
+        const deployResult = await startMlModelDownload(
+          modelName,
+          client,
+          mlClient,
+          trainedModelsProvider,
+          savedObjectService
+        );
+
+        return response.ok({
+          body: deployResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          // return specific message if model doesn't exist
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: error.meta?.body?.error?.reason,
+            response,
+            statusCode: 404,
+          });
+        }
+        // otherwise, let the default handler wrap it
+        throw error;
+      }
+    })
+  );
+
+  router.post(
+    {
       path: '/internal/enterprise_search/ml/models/{modelName}/deploy',
       validate: {
         params: schema.object({
@@ -1029,10 +1091,8 @@ export function registerIndexRoutes({
       try {
         const deployResult = await startMlModelDeployment(
           modelName,
-          client,
           mlClient,
-          trainedModelsProvider,
-          savedObjectService
+          trainedModelsProvider
         );
 
         return response.ok({
