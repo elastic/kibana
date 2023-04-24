@@ -7,7 +7,6 @@
 
 import { userInfo } from 'os';
 import execa from 'execa';
-import nodeFetch from 'node-fetch';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   packagePolicyRouteService,
@@ -21,28 +20,12 @@ import {
   fetchAgentPolicyEnrollmentKey,
   fetchAgentPolicyList,
   fetchFleetServerUrl,
+  getAgentDownloadUrl,
   waitForHostToEnroll,
 } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 import { type PolicyData, ProtectionModes } from '../../../common/endpoint/types';
 import { dump } from './utils';
-
-interface ElasticArtifactSearchResponse {
-  manifest: {
-    'last-update-time': string;
-    'seconds-since-last-update': number;
-  };
-  packages: {
-    [packageFileName: string]: {
-      architecture: string;
-      os: string[];
-      type: string;
-      asc_url: string;
-      sha_url: string;
-      url: string;
-    };
-  };
-}
 
 export const enrollEndpointHost = async (): Promise<string | undefined> => {
   let vmName;
@@ -89,7 +72,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 
     log.verbose(await execa('multipass', ['info', vmName]));
 
-    const agentDownloadUrl = await getAgentDownloadUrl(version);
+    const agentDownloadUrl = await getAgentDownloadUrl(version, falase, log);
     const agentDownloadedFile = agentDownloadUrl.substring(agentDownloadUrl.lastIndexOf('/') + 1);
     const vmDirName = agentDownloadedFile.replace(/\.tar\.gz$/, '');
 
@@ -153,36 +136,6 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
   log.indent(-4);
 
   return vmName;
-};
-
-const getAgentDownloadUrl = async (version: string): Promise<string> => {
-  const { log } = getRuntimeServices();
-  const downloadArch =
-    { arm64: 'arm64', x64: 'x86_64' }[process.arch] ?? `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
-  const agentFile = `elastic-agent-${version}-linux-${downloadArch}.tar.gz`;
-  const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${version}/${agentFile}`;
-
-  log.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
-
-  const searchResult: ElasticArtifactSearchResponse = await nodeFetch(artifactSearchUrl).then(
-    (response) => {
-      if (!response.ok) {
-        throw new Error(
-          `Failed to search elastic's artifact repository: ${response.statusText} (HTTP ${response.status})`
-        );
-      }
-
-      return response.json();
-    }
-  );
-
-  log.verbose(searchResult);
-
-  if (!searchResult.packages[agentFile]) {
-    throw new Error(`Unable to find an Agent download URL for version [${version}]`);
-  }
-
-  return searchResult.packages[agentFile].url;
 };
 
 const getOrCreateAgentPolicyId = async (): Promise<string> => {
