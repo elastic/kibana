@@ -147,7 +147,7 @@ export const Description = ({
             </EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
-                {permissions.create ? (
+                {permissions.update ? (
                   <EuiButtonIcon
                     aria-label={i18n.EDIT_DESCRIPTION}
                     iconType="pencil"

@@ -13,7 +13,7 @@ import { basicCase } from '../../containers/mock';
 
 import { Description } from '.';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, noCreateCasesPermissions, TestProviders } from '../../common/mock';
+import { createAppMockRenderer, noUpdateCasesPermissions, TestProviders } from '../../common/mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -109,9 +109,9 @@ describe('Description', () => {
     });
   });
 
-  it('should hide the edit button when the user does not have create permissions', () => {
+  it('should hide the edit button when the user does not have update permissions', () => {
     appMockRender.render(
-      <TestProviders permissions={noCreateCasesPermissions()}>
+      <TestProviders permissions={noUpdateCasesPermissions()}>
         <Description {...defaultProps} onUpdateField={onUpdateField} />
       </TestProviders>
     );
