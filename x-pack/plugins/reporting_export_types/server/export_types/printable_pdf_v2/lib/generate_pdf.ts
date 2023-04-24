@@ -8,15 +8,12 @@
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import type { ReportingCore } from '@kbn/reporting-plugin/server';
-import type {
-  LocatorParams,
-  PdfMetrics,
-  UrlOrUrlLocatorTuple,
-} from '@kbn/reporting-plugin/common/types';
-import type { PdfScreenshotOptions } from '@kbn/reporting-plugin/server/types';
+import { PdfMetrics } from '@kbn/reporting-common/metrics';
+import { PdfScreenshotOptions } from '@kbn/screenshotting-plugin/server';
+import { TaskPayloadPDFV2 } from '../../../../common/types/printable_pdf_v2';
+import { LocatorParams, UrlOrUrlLocatorTuple } from '../../../../common';
 import { getFullRedirectAppUrl } from '../../common/v2/get_full_redirect_app_url';
 import { getTracker } from '../../common/pdf_tracker';
-import type { TaskPayloadPDFV2 } from '../types';
 
 interface PdfResult {
   buffer: Uint8Array | null;

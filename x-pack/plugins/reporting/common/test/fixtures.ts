@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReportApiJSON } from '../types';
+import { ReportApiJSON } from '@kbn/reporting-export-types/common';
 import type { ReportMock } from './types';
 
 const buildMockReport = (baseObj: ReportMock): ReportApiJSON => ({

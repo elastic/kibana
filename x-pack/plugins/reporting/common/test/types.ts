@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReportApiJSON } from '../types';
+import { ReportApiJSON } from '@kbn/reporting-export-types/common';
 
 /** @internal */
 export interface PayloadMock {

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
-import moment from 'moment';
-import Puid from 'puid';
-import { JOB_STATUSES } from '../../../common/constants';
 import {
   ReportApiJSON,
   ReportDocument,
   ReportDocumentHead,
   ReportFields,
   ReportSource,
-} from '../../../common/types';
+} from '@kbn/reporting-export-types/server';
+import { omit } from 'lodash';
+import moment from 'moment';
+import Puid from 'puid';
+import { JOB_STATUSES } from '../../../common/constants';
 import type { ReportTaskParams } from '../tasks';
 
 export type { ReportDocument };
