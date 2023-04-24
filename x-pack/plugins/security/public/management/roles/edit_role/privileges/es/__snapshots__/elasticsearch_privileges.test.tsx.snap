@@ -165,6 +165,7 @@ exports[`it renders without crashing 1`] = `
     }
     editable={true}
     indexPatterns={Array []}
+    indexType="indices"
     indicesAPIClient={
       Object {
         "getFields": [MockFunction],
@@ -199,18 +200,5 @@ exports[`it renders without crashing 1`] = `
       }
     }
   />
-  <EuiHorizontalRule />
-  <EuiButton
-    color="primary"
-    iconType="plusInCircle"
-    onClick={[Function]}
-    size="m"
-  >
-    <FormattedMessage
-      defaultMessage="Add index privilege"
-      id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
-      values={Object {}}
-    />
-  </EuiButton>
 </CollapsiblePanel>
 `;

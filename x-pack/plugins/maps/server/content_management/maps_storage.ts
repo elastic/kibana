@@ -6,11 +6,16 @@
  */
 import Boom from '@hapi/boom';
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
-import type { ContentStorage, StorageContext } from '@kbn/content-management-plugin/server';
+import type {
+  ContentStorage,
+  StorageContext,
+  MSearchConfig,
+} from '@kbn/content-management-plugin/server';
 import type {
   SavedObject,
   SavedObjectReference,
   SavedObjectsFindOptions,
+  SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 
 import { CONTENT_ID } from '../../common/content_management';
@@ -86,7 +91,9 @@ function savedObjectToMapItem(
 
 const SO_TYPE: MapContentType = 'map';
 
-export class MapsStorage implements ContentStorage<MapItem, PartialMapItem> {
+export class MapsStorage
+  implements ContentStorage<MapItem, PartialMapItem, MSearchConfig<MapItem, MapAttributes>>
+{
   constructor() {}
 
   async get(ctx: StorageContext, id: string): Promise<MapGetOut> {
@@ -306,4 +313,29 @@ export class MapsStorage implements ContentStorage<MapItem, PartialMapItem> {
 
     return value;
   }
+
+  // Configure `mSearch` to opt-in maps into the multi content type search API
+  mSearch = {
+    savedObjectType: SO_TYPE,
+    toItemResult: (
+      ctx: StorageContext,
+      savedObject: SavedObjectsFindResult<MapAttributes>
+    ): MapItem => {
+      const {
+        utils: { getTransforms },
+      } = ctx;
+      const transforms = getTransforms(cmServicesDefinition);
+
+      // Validate DB response and DOWN transform to the request version
+      const { value, error: resultError } = transforms.mSearch.out.result.down<MapItem, MapItem>(
+        savedObjectToMapItem(savedObject, false)
+      );
+
+      if (resultError) {
+        throw Boom.badRequest(`Invalid response. ${resultError.message}`);
+      }
+
+      return value;
+    },
+  };
 }
