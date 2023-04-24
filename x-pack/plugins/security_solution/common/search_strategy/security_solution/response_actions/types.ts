@@ -8,7 +8,7 @@
 import type { IEsSearchRequest } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { LogsEndpointAction } from '../../../endpoint/types';
-import type { LogOsqueryAction } from './actions';
+import type { LogsOsqueryAction } from './actions';
 import type { ResponseActionsQueries } from '.';
 
 export enum Direction {
@@ -27,7 +27,7 @@ export interface RequestBasicOptions extends IEsSearchRequest {
 }
 
 export type ResultEdges = estypes.SearchResponse<
-  LogOsqueryAction | LogsEndpointAction
+  LogsOsqueryAction | LogsEndpointAction
 >['hits']['hits'];
 
 export interface Inspect {

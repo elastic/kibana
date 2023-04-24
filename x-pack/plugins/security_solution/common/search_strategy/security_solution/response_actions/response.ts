@@ -8,22 +8,10 @@
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { LogsEndpointActionResponse } from '../../../endpoint/types';
-import type { Direction, Inspect, Maybe, RequestBasicOptions } from './types';
+import type { Direction, Inspect, Maybe } from './types';
+import type { RequestOptionsPaginated } from './common';
 
 export type ResultEdges = estypes.SearchResponse<unknown>['hits']['hits'];
-
-export interface PaginationInputPaginated {
-  /** The activePage parameter defines the page of results you want to fetch */
-  activePage: number;
-  /** The cursorStart parameter defines the start of the results to be displayed */
-  cursorStart: number;
-  /** The querySize parameter is the number of items to be returned */
-  querySize: number;
-}
-
-export interface RequestOptionsPaginated<Field = string> extends RequestBasicOptions {
-  pagination: PaginationInputPaginated;
-}
 
 export interface ActionResponsesRequestOptions extends RequestOptionsPaginated {
   expiration: string;

@@ -10,6 +10,7 @@ import { lastValueFrom, of } from 'rxjs';
 
 import { mergeMap } from 'rxjs/operators';
 
+import type { PaginationInputPaginated } from '../../../../common/search_strategy/security_solution/response_actions/common';
 import { Direction } from '../../../../common/search_strategy/security_solution/response_actions/types';
 import type {
   ActionResponsesRequestOptions,
@@ -23,7 +24,6 @@ import type {
   EndpointAutomatedActionListRequestQuery,
   EndpointAutomatedActionResponseRequestQuery,
 } from '../../../../common/endpoint/schema/automated_actions';
-import type { PaginationInputPaginated } from '../../../../common/search_strategy/security_solution/response_actions/actions';
 
 interface GetAutomatedActionsListOptions {
   skip?: boolean;
@@ -97,7 +97,7 @@ export const useGetAutomatedActionResponseList = (
             mergeMap((val) => {
               const responded =
                 val.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count ?? 0;
-              // TODO const pending = agent - responded;
+              // TODO const pending = agent - responded; - I believe that we always have just one agent one
               const pending = 1 - responded;
 
               const expired = !expiration ? true : new Date(expiration) < new Date();

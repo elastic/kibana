@@ -6,20 +6,8 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { Direction, Inspect, Maybe, RequestBasicOptions, ResultEdges } from './types';
-
-export interface PaginationInputPaginated {
-  /** The activePage parameter defines the page of results you want to fetch */
-  activePage: number;
-  /** The cursorStart parameter defines the start of the results to be displayed */
-  cursorStart: number;
-  /** The querySize parameter is the number of items to be returned */
-  querySize: number;
-}
-
-export interface RequestOptionsPaginated<Field = string> extends RequestBasicOptions {
-  pagination: PaginationInputPaginated;
-}
+import type { RequestOptionsPaginated } from './common';
+import type { Direction, Inspect, Maybe, ResultEdges } from './types';
 
 export interface ActionRequestOptions extends RequestOptionsPaginated {
   alertIds: string[];
@@ -35,7 +23,7 @@ export interface ActionRequestStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
-export interface LogOsqueryAction {
+export interface LogsOsqueryAction {
   '@timestamp': string;
   action_id: string;
   agent_ids: string[];

@@ -11,6 +11,7 @@ import { EuiComment, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { map } from 'lodash';
 import { FormattedRelative } from '@kbn/i18n-react';
+import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { LogsEndpointAction, ActionDetails } from '../../../../common/endpoint/types';
 import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
@@ -123,7 +124,6 @@ interface EndpointResponseActionResultsProps {
   ruleName?: string;
 }
 
-// TODO add i18n an move outside of this file
 const EndpointResponseActionResults = ({
   action,
   ruleName,
@@ -131,17 +131,7 @@ const EndpointResponseActionResults = ({
   const { action_id: actionId, expiration } = action.EndpointActions;
   const { data: responseData } = useGetAutomatedActionResponseList({ actionId, expiration });
 
-  const eventText = useMemo(() => {
-    const command = action.EndpointActions.data.command;
-    if (command === 'isolate') {
-      return 'isolated the host';
-    }
-    if (command === 'unisolate') {
-      return 'released the host';
-    }
-    return `executed command ${command}`;
-  }, [action.EndpointActions.data.command]);
-
+  const eventText = getCommentText(action.EndpointActions.data.command);
   return (
     <EuiComment
       username={ruleName}
@@ -155,9 +145,20 @@ const EndpointResponseActionResults = ({
             ...action.EndpointActions.data,
             startedAt: action['@timestamp'],
             ...responseData,
+            // Did not type this strictly, because we're still waiting for UI, but this component will not be used in the long run
           } as unknown as ActionDetails
         }
       />
     </EuiComment>
   );
+};
+
+const getCommentText = (command: ResponseActionsApiCommandNames) => {
+  if (command === 'isolate') {
+    return i18n.ENDPOINT_COMMANDS.isolated;
+  }
+  if (command === 'unisolate') {
+    return i18n.ENDPOINT_COMMANDS.released;
+  }
+  return `executed command ${command}`;
 };

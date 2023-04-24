@@ -71,7 +71,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the automated endpoint response action in rule + alerts
    */
-  endpointResponseActionsEnabled: true,
+  endpointResponseActionsEnabled: false,
 
   /**
    * Enables using common tab for response actions results in rule + alerts

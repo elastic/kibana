@@ -146,3 +146,19 @@ export const ALERT_REASON = i18n.translate('xpack.securitySolution.eventDetails.
 export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {
   defaultMessage: 'View all fields in table',
 });
+
+export const ENDPOINT_COMMANDS_ISOLATED = i18n.translate(
+  'xpack.securitySolution.eventDetails.responseActions.endpoint.isolate',
+  {
+    defaultMessage: 'isolated the host',
+  }
+);
+
+export const ENDPOINT_COMMANDS = {
+  isolated: i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.isolate', {
+    defaultMessage: 'isolated the host',
+  }),
+  released: i18n.translate('xpack.securitySolution.eventDetails.responseActions.endpoint.release', {
+    defaultMessage: 'released the host',
+  }),
+};
