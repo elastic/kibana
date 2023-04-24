@@ -11,4 +11,7 @@ import { DataViewField } from '@kbn/data-views-plugin/public';
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
 
 export const fieldSupportsBreakdown = (field: DataViewField) =>
-  supportedTypes.has(field.type) && field.aggregatable && !field.scripted;
+  supportedTypes.has(field.type) &&
+  field.aggregatable &&
+  !field.scripted &&
+  field.timeSeriesMetric !== 'counter';
