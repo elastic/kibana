@@ -19,6 +19,11 @@ import {
 
 import type { K8sMode, CSPMode } from './types';
 
+interface CSPObject {
+  status: CSPMode;
+  cloudformationUrl: string;
+}
+
 // Packages that requires custom elastic-agent manifest
 const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE]);
 
@@ -53,7 +58,10 @@ export function useAgentPolicyWithPackagePolicies(policyId?: string) {
 
 export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
   const [isK8s, setIsK8s] = useState<K8sMode>('IS_LOADING');
-  const [isCSP, setIsCSP] = useState<CSPMode>('IS_LOADING');
+  const [isCSP, setIsCSP] = useState<CSPObject>({
+    status: 'IS_LOADING',
+    cloudformationUrl: 'PlaceHolder',
+  });
   useEffect(() => {
     async function checkifK8s() {
       if (!agentPolicy) {
@@ -70,20 +78,20 @@ export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
 
     async function checkifCSP() {
       if (!agentPolicy) {
-        setIsCSP('IS_LOADING');
+        setIsCSP({ status: 'IS_LOADING', cloudformationUrl: 'PlaceHolder' });
         return;
       }
 
       const pkgArray = agentPolicy?.package_policies?.map((e) => isCSPPackage(e));
 
       if (pkgArray?.includes('IS_CSP_KSPM')) {
-        setIsCSP('IS_CSP_KSPM');
+        setIsCSP({ status: 'IS_CSP_KSPM', cloudformationUrl: 'PlaceHolder' });
       } else if (pkgArray?.includes('IS_CSP_CSPM')) {
-        setIsCSP('IS_CSP_CSPM');
+        setIsCSP({ status: 'IS_CSP_CSPM', cloudformationUrl: 'PlaceHolder' });
       } else if (pkgArray?.includes('IS_CSP_CNVM')) {
-        setIsCSP('IS_CSP_CNVM');
+        setIsCSP({ status: 'IS_CSP_CNVM', cloudformationUrl: 'PlaceHolder' });
       } else {
-        setIsCSP('IS_NOT_CSP');
+        setIsCSP({ status: 'IS_NOT_CSP', cloudformationUrl: 'PlaceHolder' });
       }
     }
 

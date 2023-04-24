@@ -98,6 +98,16 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
+  const placeHolderCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.placeHolderCallout', {
+        defaultMessage: 'PLACEHOLDER',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
   const commandsByPlatform: Record<PLATFORM_TYPE, string> = {
     linux: linuxCommand,
     mac: macCommand,
@@ -132,6 +142,18 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
         {(platform === 'deb' || platform === 'rpm') && (
           <>
             {systemPackageCallout}
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {platform === 'mac' && typeOfCSPIntegration === 'IS_CSP_CSPM' && (
+          <>
+            {placeHolderCallout}
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {platform === 'kubernetes' && typeOfCSPIntegration === 'IS_CSP_CSPM' && (
+          <>
+            {placeHolderCallout}
             <EuiSpacer size="m" />
           </>
         )}
