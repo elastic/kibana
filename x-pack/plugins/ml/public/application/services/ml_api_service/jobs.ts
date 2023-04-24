@@ -7,6 +7,7 @@
 
 import { Observable } from 'rxjs';
 import { useMemo } from 'react';
+import type { AggFieldNamePair, RuntimeMappings } from '@kbn/ml-anomaly-utils';
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 
@@ -21,7 +22,6 @@ import type {
 } from '../../../../common/types/anomaly_detection_jobs';
 import type { JobMessage } from '../../../../common/types/audit_message';
 import type { JobAction } from '../../../../common/constants/job_actions';
-import type { AggFieldNamePair, RuntimeMappings } from '../../../../common/types/fields';
 import type { Group } from '../../../../common/types/groups';
 import type { ExistingJobsAndGroups } from '../job_service';
 import type {

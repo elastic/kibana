@@ -8,13 +8,8 @@
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Field, SplitField, AggFieldPair, RuntimeMappings } from '@kbn/ml-anomaly-utils';
 import { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
-import {
-  Field,
-  SplitField,
-  AggFieldPair,
-  RuntimeMappings,
-} from '../../../../../../common/types/fields';
 import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';
 import { getCategoryFields as getCategoryFieldsOrig } from './searches';

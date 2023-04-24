@@ -21,13 +21,13 @@ import { debounce, cloneDeep } from 'lodash';
 import { Query } from '@kbn/data-plugin/common/query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import { type RuntimeMappings as RuntimeMappingsType } from '@kbn/ml-anomaly-utils';
 import {
   type FieldSelectionItem,
   ANALYSIS_CONFIG_TYPE,
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
 } from '@kbn/ml-data-frame-analytics-utils';
-
 import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   EuiComboBoxWithFieldStats,
@@ -39,7 +39,6 @@ import { useMlContext } from '../../../../../contexts/ml';
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
 
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
-import { RuntimeMappings as RuntimeMappingsType } from '../../../../../../../common/types/fields';
 import {
   isRuntimeMappings,
   isRuntimeField,

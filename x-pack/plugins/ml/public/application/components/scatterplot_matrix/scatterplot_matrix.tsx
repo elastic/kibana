@@ -28,10 +28,11 @@ import { Query } from '@kbn/data-plugin/common/query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
-import { RuntimeMappings } from '../../../../common/types/fields';
+import type { RuntimeMappings } from '@kbn/ml-anomaly-utils';
+import { getCombinedRuntimeMappings, getProcessedFields } from '@kbn/ml-data-grid';
 
-import { getCombinedRuntimeMappings, getProcessedFields } from '../data_grid';
+import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
+
 import { useCurrentThemeVars, useMlApiContext, useMlKibana } from '../../contexts/kibana';
 
 // Separate imports for lazy loadable VegaChart and related code

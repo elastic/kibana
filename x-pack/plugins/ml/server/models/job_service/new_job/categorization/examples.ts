@@ -9,13 +9,13 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import { chunk } from 'lodash';
+import type { RuntimeMappings } from '@kbn/ml-anomaly-utils';
 import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/categorization_job';
 import {
   Token,
   CategorizationAnalyzer,
   CategoryFieldExample,
 } from '../../../../../common/types/categories';
-import { RuntimeMappings } from '../../../../../common/types/fields';
 import { IndicesOptions } from '../../../../../common/types/anomaly_detection_jobs';
 import { ValidationResults } from './validation_results';
 

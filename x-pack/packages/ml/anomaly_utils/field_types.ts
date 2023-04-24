@@ -17,6 +17,8 @@ export const ML_JOB_FIELD_TYPES = {
   UNKNOWN: 'unknown',
 } as const;
 
+export type MlJobFieldType = typeof ML_JOB_FIELD_TYPES[keyof typeof ML_JOB_FIELD_TYPES];
+
 export const MLCATEGORY = 'mlcategory';
 
 /**

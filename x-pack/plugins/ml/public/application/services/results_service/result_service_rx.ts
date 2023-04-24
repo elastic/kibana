@@ -21,13 +21,13 @@ import {
   aggregationTypeTransform,
   type MlEntityField,
   type MlRecordForInfluencer,
+  ES_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { findAggField } from '../../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
-import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import { isRuntimeMappings } from '../../../../common';
 import { MlApiServices } from '../ml_api_service';

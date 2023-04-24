@@ -23,6 +23,7 @@ import {
   type MlEntityField,
   type MlInfluencer,
   type MlRecordForInfluencer,
+  ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 
 import {
@@ -30,7 +31,6 @@ import {
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
 import { getDataViewIdFromName } from '../util/index_utils';
-import { ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,

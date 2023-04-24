@@ -7,10 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Field, Aggregation, SplitField } from '@kbn/ml-anomaly-utils';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 
 import { JobCreator } from './job_creator';
-import { Field, Aggregation, SplitField } from '../../../../../../common/types/fields';
 import {
   Job,
   Datafeed,
