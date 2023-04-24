@@ -15,7 +15,6 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormControlLayout,
   EuiHorizontalRule,
   EuiLink,
   EuiPanel,
@@ -190,7 +189,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
               }
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.Indices',
+                'xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.Schema',
                 {
                   defaultMessage: 'Schema',
                 }
