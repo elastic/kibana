@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
     );
   };
 
-  describe.only('bulk_create_attachments', () => {
+  describe('bulk_create_attachments', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });

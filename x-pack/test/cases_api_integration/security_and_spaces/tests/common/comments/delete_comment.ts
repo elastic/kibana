@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe.only('delete_comment', () => {
+  describe('delete_comment', () => {
     afterEach(async () => {
       await deleteCasesByESQuery(es);
       await deleteComments(es);
