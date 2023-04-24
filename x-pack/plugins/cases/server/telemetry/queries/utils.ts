@@ -230,7 +230,7 @@ export const getAttachmentsFrameworkStats = ({
     return emptyAttachmentFramework();
   }
 
-  const averageFileSize = filesAggregations?.averageSize?.value;
+  const averageFileSize = getAverageFileSize(filesAggregations);
   const topMimeTypes = filesAggregations?.topMimeTypes;
 
   return {
@@ -251,6 +251,14 @@ export const getAttachmentsFrameworkStats = ({
       }),
     },
   };
+};
+
+const getAverageFileSize = (filesAggregations?: FileAttachmentAggsResult) => {
+  if (filesAggregations?.averageSize?.value == null) {
+    return 0;
+  }
+
+  return Math.round(filesAggregations.averageSize.value);
 };
 
 const getAttachmentRegistryStats = (

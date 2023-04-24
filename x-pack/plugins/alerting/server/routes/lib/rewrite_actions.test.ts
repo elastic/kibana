@@ -27,6 +27,7 @@ describe('rewrite Actions', () => {
               query: {
                 kql: 'test:1s',
                 dsl: '{test:1}',
+                filters: [],
               },
               timeframe: {
                 days: [1, 2, 3],
@@ -42,7 +43,7 @@ describe('rewrite Actions', () => {
       ).toEqual([
         {
           alerts_filter: {
-            query: { dsl: '{test:1}', kql: 'test:1s' },
+            query: { dsl: '{test:1}', kql: 'test:1s', filters: [] },
             timeframe: {
               days: [1, 2, 3],
               hours: { end: '15:00', start: '00:00' },
@@ -77,6 +78,7 @@ describe('rewrite Actions', () => {
             query: {
               kql: 'test:1s',
               dsl: '{test:1}',
+              filters: [],
             },
             timeframe: {
               days: [1, 2, 3],
@@ -104,6 +106,7 @@ describe('rewrite Actions', () => {
           query: {
             kql: 'test:1s',
             dsl: '{test:1}',
+            filters: [],
           },
           timeframe: {
             days: [1, 2, 3],
