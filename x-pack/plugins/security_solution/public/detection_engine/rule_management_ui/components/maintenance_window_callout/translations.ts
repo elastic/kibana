@@ -17,14 +17,14 @@ export const MAINTENANCE_WINDOW_RUNNING = i18n.translate(
 export const MAINTENANCE_WINDOW_RUNNING_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagementUi.maintenanceWindowCallout.maintenanceWindowActiveDescription',
   {
-    defaultMessage: "Notification actions won't run while a maintenance window is running",
+    defaultMessage: "Notification actions won't run while a maintenance window is running.",
   }
 );
 
 export const FETCH_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagementUi.maintenanceWindowCallout.fetchError',
   {
-    defaultMessage: 'Failed to check if maintenance window is running',
+    defaultMessage: 'Failed to check if any maintenance window is currently running',
   }
 );
 
