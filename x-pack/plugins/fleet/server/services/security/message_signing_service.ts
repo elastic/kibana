@@ -147,8 +147,9 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     const currentKeyPair = await this.getCurrentKeyPairObj();
     if (currentKeyPair) {
       await this.soClient.delete(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, currentKeyPair.id);
+      return true;
     }
-    return true;
+    return false;
   }
 
   private get soClient() {

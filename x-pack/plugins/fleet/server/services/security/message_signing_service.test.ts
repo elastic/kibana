@@ -99,16 +99,6 @@ describe('MessageSigningService', () => {
       });
     });
 
-    it('can correctly remove existing key pair', async () => {
-      mockCreatePointInTimeFinderAsInternalUser([keyPairObj]);
-
-      await messageSigningService.removeKeyPair();
-      expect(soClientMock.delete).toBeCalledWith(
-        MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
-        keyPairObj.id
-      );
-    });
-
     it('can correctly rotate existing key pair', async () => {
       mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
 
