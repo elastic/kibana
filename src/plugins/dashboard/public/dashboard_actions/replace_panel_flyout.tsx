@@ -81,7 +81,6 @@ export class ReplacePanelFlyout extends React.Component<Props> {
         } as DashboardPanelState,
       },
     });
-    container.reload();
 
     this.showToast(name);
     this.props.onClose();

@@ -22,6 +22,8 @@ import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithB
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
+import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
+
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
@@ -209,7 +211,11 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     agentPolicy: NewAgentPolicy,
-    options: { id?: string; user?: AuthenticatedUser } = {}
+    options: {
+      id?: string;
+      user?: AuthenticatedUser;
+      authorizationHeader?: HTTPAuthorizationHeader | null;
+    } = {}
   ): Promise<AgentPolicy> {
     // Ensure an ID is provided, so we can include it in the audit logs below
     if (!options.id) {
@@ -444,7 +450,12 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     id: string,
     agentPolicy: Partial<AgentPolicy>,
-    options?: { user?: AuthenticatedUser; force?: boolean; spaceId?: string }
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      spaceId?: string;
+      authorizationHeader?: HTTPAuthorizationHeader | null;
+    }
   ): Promise<AgentPolicy> {
     if (agentPolicy.name) {
       await this.requireUniqueName(soClient, {
@@ -479,6 +490,7 @@ class AgentPolicyService {
         esClient,
         packagesToInstall,
         spaceId: options?.spaceId || DEFAULT_SPACE_ID,
+        authorizationHeader: options?.authorizationHeader,
       });
     }
 

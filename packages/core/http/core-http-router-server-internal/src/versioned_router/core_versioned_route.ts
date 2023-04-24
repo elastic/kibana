@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { schema } from '@kbn/config-schema';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type {
@@ -148,7 +147,7 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     const response = await handler.fn(ctx, mutableCoreKibanaRequest, res);
 
-    if (this.router.validateResponses && validation?.response?.[response.status]) {
+    if (this.router.isDev && validation?.response?.[response.status]) {
       const responseValidation = validation.response[response.status];
       try {
         validate(

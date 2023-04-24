@@ -52,7 +52,7 @@ describe('Span links', () => {
         cy.contains('2 Span links');
         cy.getByTestSubj(
           `spanLinksBadge_${ids.producerInternalOnlyIds.spanAId}`
-        ).realHover();
+        ).trigger('mouseover');
         cy.contains('2 Span links found');
         cy.contains('2 incoming');
         cy.contains('0 outgoing');
@@ -66,7 +66,7 @@ describe('Span links', () => {
         cy.contains('2 Span links');
         cy.getByTestSubj(
           `spanLinksBadge_${ids.producerExternalOnlyIds.spanBId}`
-        ).realHover();
+        ).trigger('mouseover');
         cy.contains('2 Span links found');
         cy.contains('1 incoming');
         cy.contains('1 outgoing');
@@ -80,7 +80,7 @@ describe('Span links', () => {
         cy.contains('2 Span links');
         cy.getByTestSubj(
           `spanLinksBadge_${ids.producerConsumerIds.transactionCId}`
-        ).realHover();
+        ).trigger('mouseover');
         cy.contains('2 Span links found');
         cy.contains('1 incoming');
         cy.contains('1 outgoing');
@@ -94,7 +94,7 @@ describe('Span links', () => {
         cy.contains('1 Span link');
         cy.getByTestSubj(
           `spanLinksBadge_${ids.producerConsumerIds.spanCId}`
-        ).realHover();
+        ).trigger('mouseover');
         cy.contains('1 Span link found');
         cy.contains('1 incoming');
         cy.contains('0 outgoing');
@@ -108,7 +108,7 @@ describe('Span links', () => {
         cy.contains('2 Span links');
         cy.getByTestSubj(
           `spanLinksBadge_${ids.producerMultipleIds.transactionDId}`
-        ).realHover();
+        ).trigger('mouseover');
         cy.contains('2 Span links found');
         cy.contains('0 incoming');
         cy.contains('2 outgoing');
@@ -122,7 +122,7 @@ describe('Span links', () => {
         cy.contains('2 Span links');
         cy.getByTestSubj(
           `spanLinksBadge_${ids.producerMultipleIds.spanEId}`
-        ).realHover();
+        ).trigger('mouseover');
         cy.contains('2 Span links found');
         cy.contains('0 incoming');
         cy.contains('2 outgoing');

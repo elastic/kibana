@@ -174,7 +174,7 @@ export class SyntheticsService {
                 service.isAllowed = allowed;
                 service.signupUrl = signupUrl;
 
-                if (service.isAllowed) {
+                if (service.isAllowed && service.config.manifestUrl) {
                   service.setupIndexTemplates();
                   await service.pushConfigs();
                 }
@@ -349,7 +349,7 @@ export class SyntheticsService {
 
     subject.subscribe(async (monitors) => {
       try {
-        if (monitors.length === 0) {
+        if (monitors.length === 0 || !this.config.manifestUrl) {
           return;
         }
 

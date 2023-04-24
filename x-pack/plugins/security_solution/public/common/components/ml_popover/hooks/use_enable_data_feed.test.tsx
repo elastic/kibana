@@ -18,6 +18,8 @@ import { createStore } from '../../../store';
 import type { State } from '../../../store';
 
 import type { SecurityJob } from '../types';
+import { createTelemetryServiceMock } from '../../../lib/telemetry/telemetry_service.mock';
+import { ML_JOB_TELEMETRY_STATUS } from '../../../lib/telemetry';
 
 const state: State = mockGlobalState;
 const { storage } = createSecuritySolutionStorageMock();
@@ -27,9 +29,15 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders store={store}>{children}</TestProviders>
 );
 
+const moduleId = 'test_module_id';
+const jobId = 'test_job_id';
+
 const TIMESTAMP = 99999999;
 const JOB = {
+  id: jobId,
   isInstalled: false,
+  isElasticJob: true,
+  moduleId,
   datafeedState: 'failed',
   jobState: 'failed',
   isCompatible: true,
@@ -45,11 +53,26 @@ jest.mock('../api', () => ({
   stopDatafeeds: () => mockStopDatafeeds(),
 }));
 
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../lib/kibana', () => {
+  const original = jest.requireActual('../../../lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
+
 describe('useSecurityJobsHelpers', () => {
   afterEach(() => {
     mockSetupMlJob.mockReset();
     mockStartDatafeeds.mockReset();
     mockStopDatafeeds.mockReset();
+    mockSetupMlJob.mockReset();
   });
 
   it('renders isLoading=true when installing job', async () => {
@@ -132,8 +155,101 @@ describe('useSecurityJobsHelpers', () => {
       await result.current.enableDatafeed(JOB, TIMESTAMP, true);
     });
     expect(mockStartDatafeeds).toBeCalledWith({
-      datafeedIds: [`datafeed-undefined`],
+      datafeedIds: [`datafeed-test_job_id`],
       start: new Date('1989-02-21').getTime(),
+    });
+  });
+
+  describe('telemetry', () => {
+    it('reports telemetry when installing and enabling a job', async () => {
+      mockSetupMlJob.mockReturnValue(new Promise((resolve) => resolve({})));
+      const { result } = renderHook(() => useEnableDataFeed(), {
+        wrapper,
+      });
+
+      await act(async () => {
+        await result.current.enableDatafeed(JOB, TIMESTAMP, true);
+      });
+
+      expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+        status: ML_JOB_TELEMETRY_STATUS.moduleInstalled,
+        isElasticJob: true,
+        jobId,
+        moduleId,
+      });
+
+      expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+        status: ML_JOB_TELEMETRY_STATUS.started,
+        isElasticJob: true,
+        jobId,
+      });
+    });
+
+    it('reports telemetry when stopping a job', async () => {
+      const { result } = renderHook(() => useEnableDataFeed(), {
+        wrapper,
+      });
+      await act(async () => {
+        await result.current.enableDatafeed({ ...JOB, isInstalled: true }, TIMESTAMP, false);
+      });
+
+      expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+        status: ML_JOB_TELEMETRY_STATUS.stopped,
+        isElasticJob: true,
+        jobId,
+      });
+    });
+
+    it('reports telemetry when stopping a job fails', async () => {
+      mockStopDatafeeds.mockReturnValue(Promise.reject(new Error('test_error')));
+      const { result } = renderHook(() => useEnableDataFeed(), {
+        wrapper,
+      });
+      await act(async () => {
+        await result.current.enableDatafeed({ ...JOB, isInstalled: true }, TIMESTAMP, false);
+      });
+
+      expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+        status: ML_JOB_TELEMETRY_STATUS.stopError,
+        errorMessage: 'Stop job failure - test_error',
+        isElasticJob: true,
+        jobId,
+      });
+    });
+
+    it('reports telemetry when starting a job fails', async () => {
+      mockStartDatafeeds.mockReturnValue(Promise.reject(new Error('test_error')));
+      const { result } = renderHook(() => useEnableDataFeed(), {
+        wrapper,
+      });
+      await act(async () => {
+        await result.current.enableDatafeed({ ...JOB, isInstalled: true }, TIMESTAMP, true);
+      });
+
+      expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+        status: ML_JOB_TELEMETRY_STATUS.startError,
+        errorMessage: 'Start job failure - test_error',
+        isElasticJob: true,
+        jobId,
+      });
+    });
+
+    it('reports telemetry when installing a module fails', async () => {
+      mockSetupMlJob.mockReturnValue(Promise.reject(new Error('test_error')));
+      const { result } = renderHook(() => useEnableDataFeed(), {
+        wrapper,
+      });
+      await act(async () => {
+        await result.current.enableDatafeed(JOB, TIMESTAMP, true);
+      });
+
+      expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+        status: ML_JOB_TELEMETRY_STATUS.installationError,
+        errorMessage: 'Create job failure - test_error',
+        isElasticJob: true,
+        jobId,
+        moduleId,
+      });
     });
   });
 });

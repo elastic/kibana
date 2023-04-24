@@ -283,11 +283,10 @@ export class MbMap extends Component<Props, State> {
   }
 
   _initResizerChecker() {
+    this.state.mbMap?.resize(); // ensure map is sized for container prior to monitoring
     this._checker = new ResizeChecker(this._containerRef!);
     this._checker.on('resize', () => {
-      if (this.state.mbMap) {
-        this.state.mbMap.resize();
-      }
+      this.state.mbMap?.resize();
     });
   }
 
