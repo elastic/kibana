@@ -11,6 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -109,9 +110,6 @@ class InternalEngineTransporter implements Transporter {
   }
 }
 
-const pageTitle = i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.pageTitle', {
-  defaultMessage: 'Search Preview',
-});
 interface ConfigurationPopOverProps {
   engineName: string;
   setCloseConfiguration: () => void;
@@ -135,14 +133,14 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
         panelPaddingSize="none"
         closePopover={setCloseConfiguration}
         button={
-          <EuiButton
+          <EuiButtonEmpty
             color="primary"
             iconType="arrowDown"
             iconSide="right"
             onClick={setCloseConfiguration}
           >
             Configuration
-          </EuiButton>
+          </EuiButtonEmpty>
         }
       >
         <EuiContextMenuPanel style={{ width: 300 }}>
@@ -302,11 +300,22 @@ export const EngineSearchPreview: React.FC = () => {
 
   return (
     <EnterpriseSearchEnginesPageTemplate
-      pageChrome={[engineName, pageTitle]}
+      pageChrome={[
+        engineName,
+        i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.pageChrome', {
+          defaultMessage: 'Search Preview',
+        }),
+      ]}
       pageViewTelemetry={EngineViewTabs.PREVIEW}
       isLoading={isLoadingEngine}
       pageHeader={{
-        pageTitle,
+        pageTitle: (
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.engine.searchPreview.pageTitle"
+            defaultMessage="{engineName}"
+            values={{ engineName }}
+          />
+        ),
         rightSideItems: [
           <>
             <ConfigurationPopover
