@@ -10,7 +10,12 @@ import React from 'react';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiCallOut, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { useFilterGroupInternalContext } from './hooks/use_filters';
-import { ADD_CONTROLS, ADD_CONTROLS_MAX_LIMIT, PENDING_CHANGES_REMINDER } from './translations';
+import {
+  ADD_CONTROLS,
+  ADD_CONTROLS_MAX_LIMIT,
+  PENDING_CHANGES_REMINDER,
+  SAVE_CHANGES,
+} from './translations';
 import { TEST_IDS } from './constants';
 
 interface AddControlProps extends Partial<EuiButtonIconProps> {
@@ -25,6 +30,7 @@ export const AddControl: FC<AddControlProps> = ({ onClick, ...rest }) => {
         size="s"
         iconSize="m"
         display="base"
+        aria-label={isDisabled ? ADD_CONTROLS_MAX_LIMIT : ADD_CONTROLS}
         data-test-subj={TEST_IDS.ADD_CONTROL}
         onClick={onClick}
         {...rest}
@@ -50,6 +56,7 @@ export const SaveControls: FC<SaveControlsProps> = ({ onClick }) => {
     <EuiPopover
       button={
         <EuiButtonIcon
+          aria-label={SAVE_CHANGES}
           size="s"
           iconSize="m"
           display="base"
