@@ -163,6 +163,7 @@ export const useFetchIndex = (
           });
           setLoading(false);
         } catch (exc) {
+          setLoading(false);
           addError(exc?.message, { title: i18n.ERROR_INDEX_FIELDS_SEARCH });
         }
       };
@@ -176,8 +177,7 @@ export const useFetchIndex = (
     if (!isEmpty(indexNames)) {
       indexFieldsSearch(indexNames);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexNames]);
+  }, [indexNames, indexFieldsSearch]);
 
   return [isLoading, state];
 };
