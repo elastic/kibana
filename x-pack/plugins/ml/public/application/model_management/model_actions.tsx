@@ -152,13 +152,7 @@ export function useModelActions({
         type: 'icon',
         isPrimary: true,
         enabled: (item) => {
-          const { state } = item.stats?.deployment_stats ?? {};
-          return (
-            canStartStopTrainedModels &&
-            !isLoading &&
-            state !== DEPLOYMENT_STATE.STARTED &&
-            state !== DEPLOYMENT_STATE.STARTING
-          );
+          return canStartStopTrainedModels && !isLoading;
         },
         available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
         onClick: async (item) => {

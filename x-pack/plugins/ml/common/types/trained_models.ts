@@ -51,7 +51,7 @@ export interface TrainedModelStat {
       }
     >;
   };
-  deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
+  deployment_stats?: TrainedModelDeploymentStatsResponse;
   model_size_stats?: TrainedModelModelSizeStats;
 }
 
@@ -164,6 +164,8 @@ export interface TrainedModelDeploymentStatsResponse {
 }
 
 export interface AllocatedModel {
+  key: string;
+  deployment_id: string;
   inference_threads: number;
   allocation_status: {
     target_allocation_count: number;

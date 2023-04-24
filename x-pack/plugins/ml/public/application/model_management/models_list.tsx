@@ -18,7 +18,7 @@ import {
   EuiTitle,
   SearchFilterConfig,
 } from '@elastic/eui';
-
+import { groupBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -28,14 +28,16 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { BUILT_IN_MODEL_TYPE, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
+import { isDefined } from '@kbn/ml-is-defined';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../components/stats_bar';
 import { useMlKibana } from '../contexts/kibana';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
-import {
+import type {
   ModelPipelines,
   TrainedModelConfigResponse,
+  TrainedModelDeploymentStatsResponse,
   TrainedModelStat,
 } from '../../../common/types/trained_models';
 import { DeleteModelsModal } from './delete_models_modal';
@@ -49,13 +51,13 @@ import { useRefresh } from '../routing/use_refresh';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { TestTrainedModelFlyout } from './test_models';
 
-type Stats = Omit<TrainedModelStat, 'model_id'>;
+type Stats = Omit<TrainedModelStat, 'model_id' | 'deployment_stats'>;
 
 export type ModelItem = TrainedModelConfigResponse & {
   type?: string[];
-  stats?: Stats;
+  stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
   pipelines?: ModelPipelines['pipelines'] | null;
-  deployment_ids: string[];
+  deployment_ids?: string[];
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -220,22 +222,19 @@ export const ModelsList: FC<Props> = ({
         const { trained_model_stats: modelsStatsResponse } =
           await trainedModelsApiService.getTrainedModelStats(models.map((m) => m.model_id));
 
-        for (const { model_id: id, ...stats } of modelsStatsResponse) {
-          const model = models.find((m) => m.model_id === id);
-          if (model) {
-            model.stats = {
-              ...(model.stats ?? {}),
-              ...stats,
-            };
+        const groupByModelId = groupBy(modelsStatsResponse, 'model_id');
 
-            if (stats.deployment_stats) {
-              if (!Array.isArray(model.deployment_ids)) {
-                model.deployment_ids = [];
-              }
-              model.deployment_ids.push(stats.deployment_stats.deployment_id);
-            }
-          }
-        }
+        models.forEach((model) => {
+          const modelStats = groupByModelId[model.model_id];
+          model.stats = {
+            ...(model.stats ?? {}),
+            ...modelStats[0],
+            deployment_stats: modelStats.map((d) => d.deployment_stats).filter(isDefined),
+          };
+          model.deployment_ids = modelStats
+            .map((v) => v.deployment_stats?.deployment_id)
+            .filter(isDefined);
+        });
       }
 
       return true;
@@ -355,19 +354,20 @@ export const ModelsList: FC<Props> = ({
       ),
       'data-test-subj': 'mlModelsTableColumnType',
     },
-    {
-      name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
-        defaultMessage: 'State',
-      }),
-      sortable: (item) => item.stats?.deployment_stats?.state,
-      align: 'left',
-      truncateText: true,
-      render: (model: ModelItem) => {
-        const state = model.stats?.deployment_stats?.state;
-        return state ? <EuiBadge color="hollow">{state}</EuiBadge> : null;
-      },
-      'data-test-subj': 'mlModelsTableColumnDeploymentState',
-    },
+    // FIXME show combined deploymnetss state
+    // {
+    //   name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
+    //     defaultMessage: 'State',
+    //   }),
+    //   sortable: (item) => item.stats?.deployment_stats?.state,
+    //   align: 'left',
+    //   truncateText: true,
+    //   render: (model: ModelItem) => {
+    //     const state = model.stats?.deployment_stats?.state;
+    //     return state ? <EuiBadge color="hollow">{state}</EuiBadge> : null;
+    //   },
+    //   'data-test-subj': 'mlModelsTableColumnDeploymentState',
+    // },
     {
       field: ModelsTableToConfigMapping.createdAt,
       name: i18n.translate('xpack.ml.trainedModels.modelsList.createdAtHeader', {
