@@ -172,24 +172,24 @@ export function getShouldRefresh(
   lastInput: DashboardContainerInput,
   input: DashboardContainerInput
 ): boolean {
-  for (const refetchKey of sessionChangeKeys) {
+  for (const key of sessionChangeKeys) {
     if (
       !isKeyEqual(
-        refetchKey,
+        key,
         {
           container: this,
-          currentValue: input[refetchKey],
+          currentValue: input[key],
           currentInput: input,
-          lastValue: lastInput[refetchKey],
+          lastValue: lastInput[key],
           lastInput,
         },
         shouldRefreshDiffingFunctions
       )
     ) {
-      return false;
+      return true;
     }
   }
-  return true;
+  return false;
 }
 
 function updateUnsavedChangesState(

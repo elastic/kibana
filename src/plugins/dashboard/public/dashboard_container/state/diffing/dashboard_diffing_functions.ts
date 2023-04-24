@@ -62,10 +62,11 @@ export const isKeyEqual = (
   if (!diffingFunction) {
     return fastIsEqual(diffFunctionProps.currentValue, diffFunctionProps.lastValue);
   }
-  if (diffingFunction?.prototype?.name === 'AsyncFunction') throw new Error('The function for key');
-  if (diffingFunction) {
-    return diffingFunction(propsAsNever);
+
+  if (diffingFunction?.prototype?.name === 'AsyncFunction') {
+    throw new Error(`The function for key "${key}" is async, must use isKeyEqualAsync for asynchronous functions`);
   }
+  return diffingFunction(propsAsNever);
 };
 
 /**
