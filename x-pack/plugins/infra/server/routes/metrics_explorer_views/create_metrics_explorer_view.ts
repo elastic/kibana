@@ -45,7 +45,7 @@ export const initCreateMetricsExplorerViewRoute = ({
             body: { message: error.output.payload.message },
           });
         }
-        console.log(error);
+
         return response.customError({
           statusCode: error.statusCode ?? 500,
           body: {
