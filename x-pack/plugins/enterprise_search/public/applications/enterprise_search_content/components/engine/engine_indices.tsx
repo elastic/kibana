@@ -183,7 +183,7 @@ export const EngineIndices: React.FC = () => {
                 'xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.description',
                 {
                   defaultMessage:
-                    'Some data might be unreachable from this search application. Check for any pending operations or errors on affected indices, or remove those that should no longer be used by this search application.',
+                    'Some data might be unreachable from this search application. Check for any pending operations or errors on affected indices, or remove indices that should no longer be used by this search application.',
                 }
               )}
             </p>
@@ -227,7 +227,7 @@ export const EngineIndices: React.FC = () => {
           }}
           title={i18n.translate(
             'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.title',
-            { defaultMessage: 'Remove this index from the Search Application' }
+            { defaultMessage: 'Remove this index from the search application' }
           )}
           buttonColor="danger"
           cancelButtonText={CANCEL_BUTTON_LABEL}
