@@ -118,7 +118,7 @@ export const MONITOR_TYPE_CONFIG = {
     ),
     link: '#',
     icon: 'videoPlayer',
-    beta: true,
+    beta: false,
   },
   [FormMonitorType.SINGLE]: {
     id: 'syntheticsMonitorTypeSingle',
@@ -142,7 +142,7 @@ export const MONITOR_TYPE_CONFIG = {
     ),
     link: '#',
     icon: 'videoPlayer',
-    beta: true,
+    beta: false,
   },
   [FormMonitorType.HTTP]: {
     id: 'syntheticsMonitorTypeHTTP',
