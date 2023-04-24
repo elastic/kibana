@@ -5,16 +5,9 @@
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiTabbedContent,
-  EuiFormRow,
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiTabbedContent, EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from './code_editor';
 import { ScriptRecorderFields } from './script_recorder_fields';
 import { ConfigKey, MonacoEditorLangId } from '../types';
@@ -51,40 +44,16 @@ export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: Sou
   const allTabs = [
     {
       id: 'syntheticsBrowserScriptRecorderConfig',
-      name: (
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            {isEditFlow ? (
-              <FormattedMessage
-                id="xpack.synthetics.monitorConfig.scriptRecorderEdit.label"
-                defaultMessage="Upload new script"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.synthetics.monitorConfig.scriptRecorder.label"
-                defaultMessage="Upload script"
-              />
-            )}
-          </EuiFlexItem>
-          <StyledBetaBadgeWrapper grow={false}>
-            <EuiBetaBadge
-              label={i18n.translate(
-                'xpack.synthetics.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalLabel',
-                {
-                  defaultMessage: 'Tech preview',
-                }
-              )}
-              iconType="beaker"
-              tooltipContent={i18n.translate(
-                'xpack.synthetics.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalTooltip',
-                {
-                  defaultMessage:
-                    'Preview the quickest way to create Elastic Synthetics monitoring scripts with our Elastic Synthetics Recorder',
-                }
-              )}
-            />
-          </StyledBetaBadgeWrapper>
-        </EuiFlexGroup>
+      name: isEditFlow ? (
+        <FormattedMessage
+          id="xpack.synthetics.monitorConfig.scriptRecorderEdit.label"
+          defaultMessage="Upload new script"
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.synthetics.monitorConfig.scriptRecorder.label"
+          defaultMessage="Upload script"
+        />
       ),
       'data-test-subj': 'syntheticsSourceTab__scriptRecorder',
       content: (
@@ -171,9 +140,3 @@ export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: Sou
     />
   );
 };
-
-const StyledBetaBadgeWrapper = styled(EuiFlexItem)`
-  .euiToolTipAnchor {
-    display: flex;
-  }
-`;
