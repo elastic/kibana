@@ -71,7 +71,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
   private readonly _termField: ESDocField;
   readonly _descriptor: ESTermSourceDescriptor;
 
-  constructor(descriptor: ESTermSourceDescriptor) {
+  constructor(descriptor: Partial<ESTermSourceDescriptor>) {
     const sourceDescriptor = ESTermSource.createDescriptor(descriptor);
     super(sourceDescriptor);
     this._descriptor = sourceDescriptor;
