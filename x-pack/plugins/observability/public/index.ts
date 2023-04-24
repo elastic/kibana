@@ -17,7 +17,6 @@ import {
   ObservabilityPublicStart,
   ObservabilityPublicSetup,
 } from './plugin';
-export { ALL_VALUES_SELECTED } from './components/shared/exploratory_view/configurations/constants/url_constants';
 export type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -53,8 +52,6 @@ export {
   FieldValueSuggestions,
   FieldValueSelection,
   FilterValueLabel,
-  SelectableUrlList,
-  ExploratoryView,
   DatePicker,
   LoadWhenInView,
   ObservabilityAlertSearchBar,
@@ -93,9 +90,6 @@ export type { LinkDescriptor } from './hooks/use_link_props';
 
 export { NavigationWarningPromptProvider, Prompt } from './utils/navigation_warning_prompt';
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
-export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
-export type { AllSeries } from './components/shared/exploratory_view/hooks/use_series_storage';
-export type { SeriesUrl, UrlFilter } from './components/shared/exploratory_view/types';
 
 export type {
   ObservabilityRuleTypeFormatter,
@@ -103,25 +97,11 @@ export type {
   ObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
 export { createObservabilityRuleTypeRegistryMock } from './rules/observability_rule_type_registry_mock';
-export type { ExploratoryEmbeddableProps } from './components/shared/exploratory_view/embeddable/embeddable';
 
 export type { AddInspectorRequest } from './context/inspector/inspector_context';
 export { InspectorContextProvider } from './context/inspector/inspector_context';
 export { useInspectorContext } from './context/inspector/use_inspector_context';
 
-export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_view/types';
-export {
-  ReportTypes,
-  FILTER_RECORDS,
-  ENVIRONMENT_ALL,
-  REPORT_METRIC_FIELD,
-  USE_BREAK_DOWN_COLUMN,
-  RECORDS_FIELD,
-  OPERATION_COLUMN,
-  TERMS_COLUMN,
-  RECORDS_PERCENTAGE_FIELD,
-} from './components/shared/exploratory_view/configurations/constants';
-export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
 export { fromQuery, toQuery } from './utils/url';
 export { getAlertSummaryTimeRange } from './utils/alert_summary_widget';
 export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate_bucket_size';
