@@ -153,11 +153,11 @@ export const ModelsList: FC<Props> = ({
                 type: [
                   model.model_type,
                   ...Object.keys(model.inference_config),
-                  ...(isBuiltInModel(model) ? [BUILT_IN_MODEL_TYPE] : []),
+                  ...(isBuiltInModel(model as ModelItem) ? [BUILT_IN_MODEL_TYPE] : []),
                 ],
               }
             : {}),
-        };
+        } as ModelItem;
         newItems.push(tableItem);
 
         if (itemIdToExpandedRowMap[model.model_id]) {
@@ -165,7 +165,8 @@ export const ModelsList: FC<Props> = ({
         }
       }
 
-      // Need to fetch state for all models to enable/disable actions
+      // Need to fetch stats for all models to enable/disable actions
+      // TODO combine fetching models definitions and stats into a single function
       await fetchModelsStats(newItems);
 
       setItems(newItems);

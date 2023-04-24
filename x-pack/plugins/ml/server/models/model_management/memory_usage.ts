@@ -199,6 +199,8 @@ export class MemoryUsageService {
               ...rest,
               ...modelSizeState,
               node: nodeRest,
+              // @ts-ignore
+              key: `${rest.deployment_id}_${nodeId}`,
             };
           });
 
