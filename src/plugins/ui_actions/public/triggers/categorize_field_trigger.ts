@@ -11,6 +11,6 @@ import { Trigger } from '.';
 export const CATEGORIZE_FIELD_TRIGGER = 'CATEGORIZE_FIELD_TRIGGER';
 export const categorizeFieldTrigger: Trigger = {
   id: CATEGORIZE_FIELD_TRIGGER,
-  title: 'Categorize field',
-  description: 'Triggered when user wants to categorize a field.',
+  title: 'Run pattern analysis',
+  description: 'Triggered when user wants to run pattern analysis on a field.',
 };
