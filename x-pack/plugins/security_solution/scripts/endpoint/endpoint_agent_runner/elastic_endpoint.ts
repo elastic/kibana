@@ -14,15 +14,10 @@ import {
   type UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import chalk from 'chalk';
+import { createAndEnrollEndpointHost } from '../common/endpoint_host_services';
 import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import {
-  fetchAgentPolicyEnrollmentKey,
-  fetchAgentPolicyList,
-  fetchFleetServerUrl,
-  getAgentDownloadUrl,
-  waitForHostToEnroll,
-} from '../common/fleet_services';
+import { fetchAgentPolicyList } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 import { type PolicyData, ProtectionModes } from '../../../common/endpoint/types';
 import { dump } from './utils';
@@ -44,81 +39,26 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
     const policyId: string = policy || (await getOrCreateAgentPolicyId());
 
     if (!policyId) {
-      throw new Error(`No valid policy id provide or unable to create it`);
+      throw new Error(`No valid policy id provided or unable to create it`);
     }
 
     if (!version) {
       throw new Error(`No 'version' specified`);
     }
 
-    const [fleetServerHostUrl, enrollmentToken] = await Promise.all([
-      fetchFleetServerUrl(kbnClient),
-      fetchAgentPolicyEnrollmentKey(kbnClient, policyId),
-    ]);
-
-    if (!fleetServerHostUrl) {
-      throw new Error(`Fleet setting does not have a Fleet Server host defined!`);
-    }
-
-    if (!enrollmentToken) {
-      throw new Error(`No API enrollment key found for policy id [${policyId}]`);
-    }
-
     vmName = `${username}-dev-${uniqueId}`;
 
     log.info(`Creating VM named: ${vmName}`);
 
-    await execa.command(`multipass launch --name ${vmName} --disk 8G`);
-
-    log.verbose(await execa('multipass', ['info', vmName]));
-
-    const agentDownloadUrl = await getAgentDownloadUrl(version, falase, log);
-    const agentDownloadedFile = agentDownloadUrl.substring(agentDownloadUrl.lastIndexOf('/') + 1);
-    const vmDirName = agentDownloadedFile.replace(/\.tar\.gz$/, '');
-
-    log.info(`Downloading and installing agent`);
-    log.verbose(`Agent download:\n    ${agentDownloadUrl}`);
-
-    await execa.command(
-      `multipass exec ${vmName} -- curl -L ${agentDownloadUrl} -o ${agentDownloadedFile}`
-    );
-    await execa.command(`multipass exec ${vmName} -- tar -zxf ${agentDownloadedFile}`);
-    await execa.command(`multipass exec ${vmName} -- rm -f ${agentDownloadedFile}`);
-
-    const agentInstallArguments = [
-      'exec',
-
-      vmName,
-
-      '--working-directory',
-      `/home/ubuntu/${vmDirName}`,
-
-      '--',
-
-      'sudo',
-
-      './elastic-agent',
-
-      'install',
-
-      '--insecure',
-
-      '--force',
-
-      '--url',
-      fleetServerHostUrl,
-
-      '--enrollment-token',
-      enrollmentToken,
-    ];
-
-    log.info(`Enrolling elastic agent with Fleet`);
-    log.verbose(`Command: multipass ${agentInstallArguments.join(' ')}`);
-
-    await execa(`multipass`, agentInstallArguments);
-
-    log.info(`Waiting for Agent to check-in with Fleet`);
-    await waitForHostToEnroll(kbnClient, vmName);
+    await createAndEnrollEndpointHost({
+      kbnClient,
+      log,
+      hostname: vmName,
+      agentPolicyId: policyId,
+      version,
+      useClosestVersionMatch: false,
+      disk: '8G',
+    });
 
     log.info(`VM created using Multipass.
     VM Name: ${vmName}
