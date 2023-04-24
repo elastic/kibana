@@ -9,6 +9,9 @@
 import { random } from 'lodash';
 import { apm, Instance, ApmFields } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
+import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+
+const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async ({ logger }) => {
   const languages = ['go', 'dotnet', 'java', 'python'];
@@ -22,7 +25,7 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
         apm
           .service({
             name: `${service}-${languages[index % languages.length]}`,
-            environment: 'production',
+            environment: ENVIRONMENT,
             agentName: languages[index % languages.length],
           })
           .instance(`instance-${index}`)

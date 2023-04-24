@@ -15,8 +15,9 @@ export const DisabledCallout = ({ total }: { total: number }) => {
   const { enablement, enableSynthetics, invalidApiKeyError, loading } = useEnablement();
 
   const showDisableCallout = !enablement.isEnabled && total > 0;
+  const showInvalidApiKeyError = invalidApiKeyError && total > 0;
 
-  if (invalidApiKeyError) {
+  if (showInvalidApiKeyError) {
     return <InvalidApiKeyCalloutCallout />;
   }
 
@@ -42,7 +43,11 @@ export const DisabledCallout = ({ total }: { total: number }) => {
       ) : (
         <p>
           {labels.CALLOUT_MANAGEMENT_CONTACT_ADMIN}{' '}
-          <EuiLink data-test-subj="syntheticsMonitorManagementPageLink" href="#" target="_blank">
+          <EuiLink
+            data-test-subj="syntheticsMonitorManagementPageLink"
+            href="https://www.elastic.co/guide/en/observability/current/synthetics-get-started-ui.html#uptime-set-up-prereq"
+            target="_blank"
+          >
             {labels.LEARN_MORE_LABEL}
           </EuiLink>
         </p>

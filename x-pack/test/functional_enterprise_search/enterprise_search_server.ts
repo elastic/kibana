@@ -52,7 +52,7 @@ export async function setupEnterpriseSearch(logger: ToolingLog): Promise<void> {
         `--name=enterprise-search-ftr`,
         `--rm`,
         `-p`,
-        `3002:3002`,
+        `3022:3022`,
         `-e`,
         `elasticsearch.host='http://host.docker.internal:9220'`,
         `-e`,
@@ -66,9 +66,9 @@ export async function setupEnterpriseSearch(logger: ToolingLog): Promise<void> {
         `-e`,
         `ENT_SEARCH_DEFAULT_PASSWORD=changeme`,
         `-e`,
-        `ent_search.listen_port=3002`,
+        `ent_search.listen_port=3022`,
         `-e`,
-        `ent_search.external_url='http://localhost:3002'`,
+        `ent_search.external_url='http://localhost:3022'`,
         `docker.elastic.co/enterprise-search/enterprise-search:${await getLatestVersion()}`,
       ];
 
