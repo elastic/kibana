@@ -31,3 +31,7 @@ export const AN_UNKNOWN_USER = i18n.translate(
     defaultMessage: 'an unknown user',
   }
 );
+
+export const DELETE_NOTE = i18n.translate('xpack.securitySolution.timeline.deleteNoteLabel', {
+  defaultMessage: 'Delete Note',
+});

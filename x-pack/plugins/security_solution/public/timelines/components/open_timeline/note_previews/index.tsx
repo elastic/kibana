@@ -156,8 +156,7 @@ const DeleteNoteButton = React.memo<{ noteId?: string | null; timelineId?: strin
       setConfirmingNoteId(null);
     }, [confirmingNoteId]);
 
-    const { status, data, error, isFetching } = useDeleteNote(noteToDelete);
-    console.log({ status, data, error, isFetching });
+    useDeleteNote(noteToDelete);
 
     if (noteId == null) {
       return null;
@@ -165,8 +164,9 @@ const DeleteNoteButton = React.memo<{ noteId?: string | null; timelineId?: strin
       return (
         <>
           <EuiButtonIcon
-            title={'Delete Note'}
-            aria-label={'Delete Note'}
+            title={i18n.DELETE_NOTE}
+            aria-label={i18n.DELETE_NOTE}
+            data-test-subj={'delete-note'}
             color="text"
             iconType="trash"
             onClick={handleOpenDeleteModal}
