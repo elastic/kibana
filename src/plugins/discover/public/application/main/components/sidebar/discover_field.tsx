@@ -19,7 +19,7 @@ import {
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
-  FieldPopoverVisualize,
+  FieldPopoverFooter,
 } from '@kbn/unified-field-list-plugin/public';
 import { DragDrop } from '@kbn/dom-drag-drop';
 import { DiscoverFieldStats } from './discover_field_stats';
@@ -307,7 +307,7 @@ function DiscoverFieldComponent({
           </>
         )}
 
-        <FieldPopoverVisualize
+        <FieldPopoverFooter
           field={field}
           dataView={dataView}
           multiFields={rawMultiFields}

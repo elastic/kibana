@@ -24,11 +24,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '@kbn/unified-field-list-plugin/public/services/field_stats';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
-import {
-  FieldIcon,
-  FieldStats,
-  FieldPopoverVisualize,
-} from '@kbn/unified-field-list-plugin/public';
+import { FieldIcon, FieldStats, FieldPopoverFooter } from '@kbn/unified-field-list-plugin/public';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),
@@ -454,7 +450,7 @@ describe('Lens Field Item', () => {
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(FieldStats).text()).toBe('Analysis is not available for this field.');
-    expect(wrapper.find(FieldPopoverVisualize).exists()).toBeFalsy();
+    expect(wrapper.find(FieldPopoverFooter).exists()).toBeFalsy();
   });
 
   it('should request examples for geo fields and render Visualize button', async () => {
@@ -479,7 +475,7 @@ describe('Lens Field Item', () => {
     expect(wrapper.find(FieldStats).text()).toBe(
       'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.'
     );
-    expect(wrapper.find(FieldPopoverVisualize).exists()).toBeTruthy();
+    expect(wrapper.find(FieldPopoverFooter).exists()).toBeTruthy();
   });
 
   it('should display Explore in discover button', async () => {

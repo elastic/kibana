@@ -8,4 +8,4 @@
 
 export { type FieldPopoverProps, FieldPopover } from './field_popover';
 export { type FieldPopoverHeaderProps, FieldPopoverHeader } from './field_popover_header';
-export { type FieldPopoverVisualizeProps, FieldPopoverVisualize } from './field_popover_visualize';
+export { type FieldPopoverFooterProps, FieldPopoverFooter } from './field_popover_footer';

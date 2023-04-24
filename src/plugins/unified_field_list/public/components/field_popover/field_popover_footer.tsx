@@ -11,9 +11,9 @@ import { EuiPopoverFooter, EuiSpacer } from '@elastic/eui';
 import { type FieldVisualizeButtonProps, getFieldVisualizeButton } from '../field_visualize_button';
 import { FieldCategorizeButtonProps, getFieldCategorizeButton } from '../field_categorize_button';
 
-export type FieldPopoverVisualizeProps = FieldVisualizeButtonProps | FieldCategorizeButtonProps;
+export type FieldPopoverFooterProps = FieldVisualizeButtonProps | FieldCategorizeButtonProps;
 
-export const FieldPopoverVisualize: React.FC<FieldPopoverVisualizeProps> = (props) => {
+export const FieldPopoverFooter: React.FC<FieldPopoverFooterProps> = (props) => {
   const [visualizeButton, setVisualizeButton] = useState<JSX.Element | null>(null);
   const [categorizeButton, setCategorizeButton] = useState<JSX.Element | null>(null);
 
