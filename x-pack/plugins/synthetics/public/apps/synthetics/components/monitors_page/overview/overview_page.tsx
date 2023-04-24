@@ -101,8 +101,8 @@ export const OverviewPage: React.FC = () => {
 
   return (
     <>
-      <AlertingCallout />
       <DisabledCallout total={absoluteTotal} />
+      <AlertingCallout />
       <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <SearchField />
@@ -118,7 +118,7 @@ export const OverviewPage: React.FC = () => {
       {!noMonitorFound ? (
         <>
           <EuiFlexGroup gutterSize="m" wrap>
-            <EuiFlexItem grow={2}>
+            <EuiFlexItem grow={false}>
               <OverviewStatus />
             </EuiFlexItem>
             <EuiFlexItem grow={3} style={{ minWidth: 300 }}>

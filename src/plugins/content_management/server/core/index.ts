@@ -17,6 +17,7 @@ export type {
   ContentTypeDefinition,
   StorageContext,
   StorageContextGetTransformFn,
+  MSearchConfig,
 } from './types';
 
 export type { ContentRegistry } from './registry';

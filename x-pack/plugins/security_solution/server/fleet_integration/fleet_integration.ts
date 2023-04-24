@@ -20,6 +20,7 @@ import type {
   PackagePolicy,
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
 import type { ManifestManager } from '../endpoint/services';
@@ -43,6 +44,17 @@ const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   return packagePolicy.package?.name === 'endpoint';
 };
 
+const shouldUpdateMetaValues = (
+  endpointPackagePolicy: PolicyConfig,
+  currentLicenseType: string,
+  currentCloudInfo: boolean
+) => {
+  return (
+    endpointPackagePolicy.meta.license !== currentLicenseType ||
+    endpointPackagePolicy.meta.cloud !== currentCloudInfo
+  );
+};
+
 /**
  * Callback to handle creation of PackagePolicies in Fleet
  */
@@ -52,7 +64,8 @@ export const getPackagePolicyCreateCallback = (
   securitySolutionRequestContextFactory: IRequestContextFactory,
   alerts: AlertsStartContract,
   licenseService: LicenseService,
-  exceptionsClient: ExceptionListClient | undefined
+  exceptionsClient: ExceptionListClient | undefined,
+  cloud: CloudSetup
 ): PostPackagePolicyCreateCallback => {
   return async (
     newPackagePolicy,
@@ -114,7 +127,11 @@ export const getPackagePolicyCreateCallback = (
     ]);
 
     // Add the default endpoint security policy
-    const defaultPolicyValue = createDefaultPolicy(licenseService, endpointIntegrationConfig);
+    const defaultPolicyValue = createDefaultPolicy(
+      licenseService,
+      endpointIntegrationConfig,
+      cloud
+    );
 
     return {
       // We cast the type here so that any changes to the Endpoint
@@ -146,7 +163,8 @@ export const getPackagePolicyUpdateCallback = (
   logger: Logger,
   licenseService: LicenseService,
   featureUsageService: FeatureUsageService,
-  endpointMetadataService: EndpointMetadataService
+  endpointMetadataService: EndpointMetadataService,
+  cloud: CloudSetup
 ): PutPackagePolicyUpdateCallback => {
   return async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
     if (!isEndpointPackagePolicy(newPackagePolicy)) {
@@ -163,6 +181,22 @@ export const getPackagePolicyUpdateCallback = (
     );
 
     notifyProtectionFeatureUsage(newPackagePolicy, featureUsageService, endpointMetadataService);
+
+    const newEndpointPackagePolicy = newPackagePolicy.inputs[0].config?.policy
+      ?.value as PolicyConfig;
+
+    if (
+      newPackagePolicy.inputs[0].config?.policy?.value &&
+      shouldUpdateMetaValues(
+        newEndpointPackagePolicy,
+        licenseService.getLicenseType(),
+        cloud?.isCloudEnabled
+      )
+    ) {
+      newEndpointPackagePolicy.meta.license = licenseService.getLicenseType();
+      newEndpointPackagePolicy.meta.cloud = cloud?.isCloudEnabled;
+      newPackagePolicy.inputs[0].config.policy.value = newEndpointPackagePolicy;
+    }
 
     return newPackagePolicy;
   };

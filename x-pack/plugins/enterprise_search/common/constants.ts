@@ -119,8 +119,8 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
 };
 
 export const ENGINES_PLUGIN = {
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.engines.navTitle', {
-    defaultMessage: 'Engines',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.applications.navTitle', {
+    defaultMessage: 'Applications',
   }),
 };
 
@@ -157,10 +157,9 @@ export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
 };
 
 export enum INGESTION_METHOD_IDS {
-  api = 'api',
-  connector = 'connector',
-  crawler = 'crawler',
-  native_connector = 'native_connector',
+  API = 'api',
+  CONNECTOR = 'connector',
+  CRAWLER = 'crawler',
 }
 
 export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {

@@ -78,9 +78,7 @@ export type SelectorCondition =
   | 'operation'
   | 'processExecutable'
   | 'processName'
-  | 'processUserId'
-  | 'sessionLeaderInteractive'
-  | 'sessionLeaderName';
+  | 'sessionLeaderInteractive';
 
 export interface SelectorConditionOptions {
   type: SelectorConditionType;
@@ -141,9 +139,7 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
   ignoreVolumeMounts: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeFiles'] },
   processExecutable: { selectorType: 'process', type: 'stringArray', not: ['processName'] },
   processName: { selectorType: 'process', type: 'stringArray', not: ['processExecutable'] },
-  processUserId: { selectorType: 'process', type: 'stringArray' },
   sessionLeaderInteractive: { selectorType: 'process', type: 'boolean' },
-  sessionLeaderName: { selectorType: 'process', type: 'stringArray', maxValueBytes: 16 },
 };
 
 export type ResponseAction = 'log' | 'alert' | 'block';
@@ -168,9 +164,7 @@ export interface Selector {
   // process selector properties
   processExecutable?: string[];
   processName?: string[];
-  processUserId?: string[];
   sessionLeaderInteractive?: string[];
-  sessionLeaderName?: string[];
 
   // non yaml fields
   type: SelectorType;
@@ -230,6 +224,7 @@ export interface ViewDeps extends SettingsDeps {
 export interface ControlGeneralViewSelectorDeps {
   selector: Selector;
   selectors: Selector[];
+  usedByResponse: boolean;
   index: number;
   onChange(selector: Selector, index: number): void;
   onRemove(index: number): void;
