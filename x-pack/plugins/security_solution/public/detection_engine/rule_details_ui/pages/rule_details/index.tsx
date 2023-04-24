@@ -330,7 +330,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
-  const fetchDataViews = useCallback(() => {
+  useEffect(() => {
     const fetchDV = async () => {
       const dataViewsRefs = await data.dataViews.getIdsWithTitle();
       const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
@@ -345,8 +345,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     fetchDV();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => fetchDataViews(), [fetchDataViews]);
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);

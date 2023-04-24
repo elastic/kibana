@@ -286,10 +286,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
   const previousRuleType = usePrevious(ruleType);
-  const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] = useFetchIndex(
-    index,
-    false
-  );
+  const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
+    useFetchIndex(index);
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
 
   const { data } = useKibana().services;
