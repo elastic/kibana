@@ -35,9 +35,10 @@ const UserActionMarkdownComponent = forwardRef<
       id={id}
       content={content}
       caseId={caseId}
+      editorRef={editorRef}
       onChangeEditable={onChangeEditable}
       onSaveContent={onSaveContent}
-      editorRef={editorRef}
+      ref={ref}
       fieldName={fieldName}
       formSchema={schema}
     />
