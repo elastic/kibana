@@ -197,7 +197,6 @@ const updateIndexTemplate = async (
 ) => {
   const { indexTemplateName, indexPattern, template, composedOf, _meta } = indexTemplateParams;
   try {
-    const mappings = simulateResult.template.mappings;
     // for now, remove from object so as not to update stream or data stream properties of the index until type and name
     // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
     // to skip updating and assume the value in the index mapping is correct
