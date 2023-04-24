@@ -23,7 +23,7 @@ import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ResponseAction } from '../../../../../common/detection_engine/rule_response_actions/schemas';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/rule_schema';
 import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
