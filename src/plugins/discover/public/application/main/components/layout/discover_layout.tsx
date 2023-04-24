@@ -195,11 +195,6 @@ export function DiscoverLayout({
     [onChangeDataView, stateContainer]
   );
 
-  const savedSearchTitle = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    savedSearchTitle.current?.focus();
-  }, []);
-
   const textBasedLanguageModeErrors = useMemo(() => {
     if (isPlainRecord) {
       return dataState.error;
@@ -287,8 +282,6 @@ export function DiscoverLayout({
         id="savedSearchTitle"
         className="euiScreenReaderOnly"
         data-test-subj="discoverSavedSearchTitle"
-        tabIndex={-1}
-        ref={savedSearchTitle}
       >
         {savedSearch.title
           ? i18n.translate('discover.pageTitleWithSavedSearch', {
