@@ -29,7 +29,6 @@ import { dashboardContainerReducers } from '../dashboard_container_reducers';
 export const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = [
   'setTimeslice',
   'setFullScreenMode',
-  'setSearchSessionId',
   'setExpandedPanelId',
   'setHasUnsavedChanges',
 ];
@@ -40,7 +39,6 @@ export const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = 
 const keysToOmitFromSessionStorage: Array<keyof DashboardContainerInput> = [
   'lastReloadRequestTime',
   'executionContext',
-  'searchSessionId',
   'timeslice',
   'id',
 
@@ -55,7 +53,6 @@ const keysToOmitFromSessionStorage: Array<keyof DashboardContainerInput> = [
 export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerInput> = [
   'lastReloadRequestTime',
   'executionContext',
-  'searchSessionId',
   'timeslice',
   'viewMode',
   'id',
