@@ -19,6 +19,7 @@ import {
   type EmbeddableOutput,
   type EmbeddableFactory,
   isErrorEmbeddable,
+  isResettableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
@@ -346,9 +347,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     for (const child of Object.values(this.children)) {
       const lastSavedChildInput = lastSavedInput.panels[child.id].explicitInput;
-      // TODO properly type onReset function with an interface. Use a type guard to determine if the embeddable can be reset.
-      if (!isErrorEmbeddable(child) && (child as any).onReset) {
-        (child as any).onReset(lastSavedChildInput);
+      if (!isErrorEmbeddable(child) && isResettableEmbeddable(child)) {
+        child.onReset(lastSavedChildInput);
       }
     }
   }

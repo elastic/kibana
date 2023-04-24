@@ -87,6 +87,7 @@ export {
   EmbeddableRenderer,
   useEmbeddableFactory,
   isFilterableEmbeddable,
+  isResettableEmbeddable,
   shouldFetch$,
   shouldRefreshFilterCompareOptions,
   PANEL_HOVER_TRIGGER,

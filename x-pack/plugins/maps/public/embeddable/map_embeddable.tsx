@@ -49,9 +49,6 @@ import {
   setGotoWithCenter,
   setEmbeddableSearchContext,
   setExecutionContext,
-  setOpenTOCDetails,
-  setIsLayerTOCOpen,
-  setHiddenLayers,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -381,13 +378,7 @@ export class MapEmbeddable
   }
 
   public onReset(lastInput: MapByValueInput) {
-    // TODO add some test / typings that ensure that every piece of Map Input which can be changed in _handleStoreChanges is also reset properly in this function
-    const { mapCenter, isLayerTOCOpen, openTOCDetails, hiddenLayers } = lastInput;
-    if (mapCenter) this._savedMap.getStore().dispatch(setGotoWithCenter(mapCenter));
-    if (isLayerTOCOpen !== undefined)
-      this._savedMap.getStore().dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
-    if (hiddenLayers) this._savedMap.getStore().dispatch<any>(setHiddenLayers(hiddenLayers));
-    if (openTOCDetails) this._savedMap.getStore().dispatch(setOpenTOCDetails(openTOCDetails));
+    this._savedMap.syncWithInput(lastInput);
   }
 
   getInspectorAdapters() {
