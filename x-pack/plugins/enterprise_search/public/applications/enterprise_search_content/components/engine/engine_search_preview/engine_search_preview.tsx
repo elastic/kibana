@@ -16,10 +16,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import {
@@ -129,6 +131,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
       <EuiPopover
         anchorPosition="downCenter"
         isOpen={showConfiguration}
+        panelPaddingSize="none"
         closePopover={setCloseConfiguration}
         button={
           <EuiButton
@@ -142,7 +145,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
         }
       >
         <EuiContextMenuPanel style={{ width: 300 }}>
-          <EuiPanel color="transparent" paddingSize="xs">
+          <EuiPanel color="transparent" paddingSize="s">
             <EuiTitle size="xxxs">
               <p>
                 {i18n.translate(
@@ -153,49 +156,48 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                 )}
               </p>
             </EuiTitle>
-            <EuiHorizontalRule margin="s" />
-
-            <EuiContextMenuItem
-              size="s"
-              key="Indices"
-              icon="tableDensityExpanded"
-              onClick={() =>
-                navigateToUrl(
-                  generateEncodedPath(ENGINE_TAB_PATH, {
-                    engineName,
-                    tabId: EngineViewTabs.INDICES,
-                  })
-                )
-              }
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.Indices',
-                {
-                  defaultMessage: 'Indices',
-                }
-              )}
-            </EuiContextMenuItem>
-            <EuiContextMenuItem
-              size="s"
-              key="Schema"
-              icon="kqlField"
-              onClick={() =>
-                navigateToUrl(
-                  generateEncodedPath(ENGINE_TAB_PATH, {
-                    engineName,
-                    tabId: EngineViewTabs.SCHEMA,
-                  })
-                )
-              }
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.Schema',
-                {
-                  defaultMessage: 'Schema',
-                }
-              )}
-            </EuiContextMenuItem>
           </EuiPanel>
+          <EuiHorizontalRule margin="none" />
+
+          <EuiContextMenuItem
+            key="Indices"
+            icon="tableDensityExpanded"
+            onClick={() =>
+              navigateToUrl(
+                generateEncodedPath(ENGINE_TAB_PATH, {
+                  engineName,
+                  tabId: EngineViewTabs.INDICES,
+                })
+              )
+            }
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.Indices',
+              {
+                defaultMessage: 'Indices',
+              }
+            )}
+          </EuiContextMenuItem>
+          <EuiContextMenuItem
+            key="Schema"
+            icon="kqlField"
+            onClick={() =>
+              navigateToUrl(
+                generateEncodedPath(ENGINE_TAB_PATH, {
+                  engineName,
+                  tabId: EngineViewTabs.SCHEMA,
+                })
+              )
+            }
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.Schema',
+              {
+                defaultMessage: 'Schema',
+              }
+            )}
+          </EuiContextMenuItem>
+
           <EuiPanel color="transparent" paddingSize="s">
             <EuiTitle size="xxxs">
               <p>
@@ -207,29 +209,28 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                 )}
               </p>
             </EuiTitle>
-
-            <EuiHorizontalRule margin="s" />
-            <EuiContextMenuItem
-              size="s"
-              key="Api"
-              icon="lock"
-              onClick={() =>
-                navigateToUrl(
-                  generateEncodedPath(SEARCH_APPLICATION_CONNECT_PATH, {
-                    connectTabId: SearchApplicationConnectTabs.API,
-                    engineName,
-                  })
-                )
-              }
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.engine.searchPreview.configuration.connect.Api',
-                {
-                  defaultMessage: 'Api',
-                }
-              )}
-            </EuiContextMenuItem>
           </EuiPanel>
+          <EuiHorizontalRule margin="none" />
+          <EuiContextMenuItem
+            key="Api"
+            icon="lock"
+            onClick={() =>
+              navigateToUrl(
+                generateEncodedPath(SEARCH_APPLICATION_CONNECT_PATH, {
+                  connectTabId: SearchApplicationConnectTabs.API,
+                  engineName,
+                })
+              )
+            }
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.connect.Api',
+              {
+                defaultMessage: 'API',
+              }
+            )}
+          </EuiContextMenuItem>
+
           <EuiPanel color="transparent" paddingSize="s">
             <EuiTitle size="xxxs">
               <p>
@@ -241,30 +242,32 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                 )}
               </p>
             </EuiTitle>
-
-            <EuiHorizontalRule margin="s" />
-            <EuiContextMenuItem
-              size="s"
-              key="delete"
-              icon="trash"
-              onClick={() => {
-                if (engineData) {
-                  openDeleteEngineModal();
-                  sendEnterpriseSearchTelemetry({
-                    action: 'clicked',
-                    metric: 'entSearchContent-engines-engineView-deleteEngine',
-                  });
-                }
-              }}
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.engine.searchPreview.configuration.settings.delete',
-                {
-                  defaultMessage: 'Delete this app',
-                }
-              )}
-            </EuiContextMenuItem>
           </EuiPanel>
+          <EuiHorizontalRule margin="none" />
+          <EuiContextMenuItem
+            key="delete"
+            icon={<EuiIcon type="trash" color="danger" />}
+            onClick={() => {
+              if (engineData) {
+                openDeleteEngineModal();
+                sendEnterpriseSearchTelemetry({
+                  action: 'clicked',
+                  metric: 'entSearchContent-engines-engineView-deleteEngine',
+                });
+              }
+            }}
+          >
+            <EuiTextColor color="danger">
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.engine.searchPreview.configuration.settings.delete',
+                  {
+                    defaultMessage: 'Delete this app',
+                  }
+                )}
+              </p>
+            </EuiTextColor>
+          </EuiContextMenuItem>
         </EuiContextMenuPanel>
       </EuiPopover>
     </>
