@@ -21,6 +21,8 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useEndpointResponseActionsTab } from './endpoint_response_actions_tab';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { RawEventData } from './types';
 import { useResponseActionsTab } from './response_actions_tab';
 import type { SearchHit } from '../../../../common/search_strategy';
@@ -56,6 +58,7 @@ import { useRiskScoreData } from './use_risk_score_data';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { DETAILS_CLASS_NAME } from '../../../timelines/components/timeline/body/renderers/helpers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { useOsqueryTab } from './osquery_tab';
 
 export const EVENT_DETAILS_CONTEXT_ID = 'event-details';
 
@@ -66,6 +69,9 @@ export type EventViewId =
   | EventsViewType.jsonView
   | EventsViewType.summaryView
   | EventsViewType.threatIntelView
+  // Depending on commonResponseActionsTabEnabled flag whether to render the Endpoint + Osquery 2 or the ResponseActions - ultimately we should migrate to ResponseActions
+  | EventsViewType.osqueryView
+  | EventsViewType.endpointView
   | EventsViewType.responseActionsView;
 
 export enum EventsViewType {
@@ -73,6 +79,8 @@ export enum EventsViewType {
   jsonView = 'json-view',
   summaryView = 'summary-view',
   threatIntelView = 'threat-intel-view',
+  osqueryView = 'osquery-results-view',
+  endpointView = 'endpoint-results-view',
   responseActionsView = 'response-actions-results-view',
 }
 
@@ -212,7 +220,9 @@ const EventDetailsComponent: React.FC<Props> = ({
     const hasRiskInfoWithLicense = isLicenseValid && (hostRisk || userRisk);
     return hasEnrichments || hasRiskInfoWithLicense;
   }, [enrichmentCount, hostRisk, isLicenseValid, userRisk]);
-
+  const commonResponseActionsTabEnabled = useIsExperimentalFeatureEnabled(
+    'commonResponseActionsTabEnabled'
+  );
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
@@ -424,17 +434,28 @@ const EventDetailsComponent: React.FC<Props> = ({
     }),
     [rawEventData]
   );
-
   const responseActionsTab = useResponseActionsTab({
     rawEventData: rawEventData as RawEventData,
     ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
   });
+  const osqueryTab = useOsqueryTab({
+    rawEventData: rawEventData as RawEventData,
+    ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
+  });
+  const endpointResponseActionsTab = useEndpointResponseActionsTab({
+    rawEventData: rawEventData as RawEventData,
+  });
 
+  const responseActionsTabs = useMemo(() => {
+    return commonResponseActionsTabEnabled
+      ? [responseActionsTab]
+      : [osqueryTab, endpointResponseActionsTab];
+  }, [commonResponseActionsTabEnabled, endpointResponseActionsTab, osqueryTab, responseActionsTab]);
   const tabs = useMemo(() => {
-    return [summaryTab, threatIntelTab, tableTab, jsonTab, responseActionsTab].filter(
+    return [summaryTab, threatIntelTab, tableTab, jsonTab, ...responseActionsTabs].filter(
       (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
     );
-  }, [summaryTab, threatIntelTab, tableTab, jsonTab, responseActionsTab]);
+  }, [summaryTab, threatIntelTab, tableTab, jsonTab, responseActionsTabs]);
 
   const selectedTab = useMemo(
     () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],

@@ -74,6 +74,11 @@ export const allowedExperimentalValues = Object.freeze({
   endpointResponseActionsEnabled: true,
 
   /**
+   * Enables using common tab for response actions results in rule + alerts
+   */
+  commonResponseActionsTabEnabled: false,
+
+  /**
    * Enables endpoint package level rbac
    */
   endpointRbacEnabled: true,

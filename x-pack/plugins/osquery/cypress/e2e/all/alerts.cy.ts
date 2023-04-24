@@ -382,8 +382,8 @@ describe('Alert Event Details', () => {
     it('sees osquery results from last action and add to a case', () => {
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click({ force: true });
-      cy.getBySel('responseActionsViewTab').click();
-      cy.getBySel('osquery-results-comment').should('exist');
+      cy.contains('Osquery Results').click();
+      cy.getBySel('osquery-results').should('exist');
       cy.contains('select * from users;');
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");
       cy.getBySel('osquery-results-comment').each(($comment) => {
@@ -432,8 +432,8 @@ describe('Alert Event Details', () => {
       const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click({ force: true });
-      cy.getBySel('responseActionsViewTab').click();
-      cy.getBySel('osquery-results-comment').should('exist');
+      cy.contains('Osquery Results').click();
+      cy.getBySel('osquery-results').should('exist');
       checkActionItemsInResults({
         lens: true,
         discover: true,
@@ -473,7 +473,8 @@ describe('Alert Event Details', () => {
       const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click({ force: true });
-      cy.getBySel('responseActionsViewTab').click();
+      cy.contains('Osquery Results').click();
+      cy.getBySel('osquery-results').should('exist');
       checkActionItemsInResults({
         lens: true,
         discover: true,
@@ -522,7 +523,8 @@ describe('Alert Event Details', () => {
       const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click({ force: true });
-      cy.getBySel('responseActionsViewTab').click();
+      cy.contains('Osquery Results').click();
+      cy.getBySel('osquery-results').should('exist');
       checkActionItemsInResults({
         lens: true,
         discover: true,
@@ -564,21 +566,21 @@ describe('Alert Event Details', () => {
       let updatedNotificationCount: number;
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click({ force: true });
-      cy.getBySel('response-actions-notification')
+      cy.getBySel('osquery-actions-notification')
         .should('not.have.text', '0')
         .then((element) => {
           initialNotificationCount = parseInt(element.text(), 10);
         });
       takeOsqueryActionWithParams();
       cy.getBySel('osquery-empty-button').click();
-      cy.getBySel('response-actions-notification')
+      cy.getBySel('osquery-actions-notification')
         .should('not.have.text', '0')
         .then((element) => {
           updatedNotificationCount = parseInt(element.text(), 10);
           expect(initialNotificationCount).to.be.equal(updatedNotificationCount - 1);
         })
         .then(() => {
-          cy.getBySel('responseActionsViewTab').click();
+          cy.contains('Osquery Results').click();
           cy.getBySel('osquery-results').within(() => {
             cy.contains('tags');
             cy.getBySel('osquery-results-comment').should('have.length', updatedNotificationCount);

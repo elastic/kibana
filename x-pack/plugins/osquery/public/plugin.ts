@@ -18,6 +18,7 @@ import { useAllLiveQueries } from './actions/use_all_live_queries';
 import { getLazyOsqueryResponseActionTypeForm } from './shared_components/lazy_osquery_action_params_form';
 import { useFetchStatus } from './fleet_integration/use_fetch_status';
 import { getLazyOsqueryResult } from './shared_components/lazy_osquery_result';
+import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
 import type {
   OsqueryPluginSetup,
   OsqueryPluginStart,
@@ -123,6 +124,12 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         ...plugins,
       }),
       OsqueryResult: getLazyOsqueryResult({
+        ...core,
+        ...plugins,
+        storage: this.storage,
+        kibanaVersion: this.kibanaVersion,
+      }),
+      OsqueryResults: getLazyOsqueryResults({
         ...core,
         ...plugins,
         storage: this.storage,
