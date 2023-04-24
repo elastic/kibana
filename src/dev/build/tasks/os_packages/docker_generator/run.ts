@@ -17,7 +17,6 @@ import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
 import { TemplateContext } from './template_context';
 import { bundleDockerFiles } from './bundle_dockerfiles';
-import { FlagsReader } from '@kbn/dev-cli-runner';
 
 const accessAsync = promisify(access);
 const linkAsync = promisify(link);
