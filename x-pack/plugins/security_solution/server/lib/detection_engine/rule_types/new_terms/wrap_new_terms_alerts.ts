@@ -7,9 +7,6 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import objectHash from 'object-hash';
-import { ALERT_URL, ALERT_UUID } from '@kbn/rule-data-utils';
-import { getAlertDetailsUrl } from '../../../../../common/utils/alert_detail_path';
-import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import type {
   BaseFieldsLatest,
   NewTermsFieldsLatest,
@@ -65,23 +62,17 @@ export const wrapNewTermsAlerts = ({
       buildReasonMessageForNewTermsAlert,
       indicesToQuery,
       alertTimestampOverride,
-      ruleExecutionLogger
+      ruleExecutionLogger,
+      id,
+      publicBaseUrl
     );
-    const alertUrl = getAlertDetailsUrl({
-      alertId: id,
-      index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-      timestamp: baseAlert['@timestamp'],
-      basePath: publicBaseUrl,
-      spaceId,
-    });
+
     return {
       _id: id,
       _index: '',
       _source: {
         ...baseAlert,
         [ALERT_NEW_TERMS]: eventAndTerms.newTerms,
-        [ALERT_UUID]: id,
-        [ALERT_URL]: alertUrl,
       },
     };
   });

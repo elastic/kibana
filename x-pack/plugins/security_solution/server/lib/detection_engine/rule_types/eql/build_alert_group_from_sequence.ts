@@ -68,7 +68,9 @@ export const buildAlertGroupFromSequence = (
         buildReasonMessage,
         indicesToQuery,
         alertTimestampOverride,
-        ruleExecutionLogger
+        ruleExecutionLogger,
+        'placeholder-alert-uuid', // This is overriden below
+        publicBaseUrl
       )
     );
   } catch (error) {
@@ -156,6 +158,8 @@ export const buildAlertRoot = (
     spaceId,
     reason,
     indicesToQuery,
+    'placeholder-uuid', // These will be overriden below
+    publicBaseUrl, // Not necessary now, but when the ID is created ahead of time this can be passed
     alertTimestampOverride
   );
   const alertId = generateAlertId(doc);

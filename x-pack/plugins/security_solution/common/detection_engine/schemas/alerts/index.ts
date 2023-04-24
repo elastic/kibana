@@ -7,14 +7,17 @@
 
 import type { DetectionAlert800 } from './8.0.0';
 
-import type { Ancestor840, BaseFields840, DetectionAlert840, WrappedFields840 } from './8.4.0';
+import type { DetectionAlert840 } from './8.4.0';
 import type { DetectionAlert860 } from './8.6.0';
 import type { DetectionAlert870 } from './8.7.0';
 import type {
+  Ancestor880,
+  BaseFields880,
   DetectionAlert880,
   EqlBuildingBlockFields880,
   EqlShellFields880,
   NewTermsFields880,
+  WrappedFields880,
 } from './8.8.0';
 
 // When new Alert schemas are created for new Kibana versions, add the DetectionAlert type from the new version
@@ -27,10 +30,10 @@ export type DetectionAlert =
   | DetectionAlert880;
 
 export type {
-  Ancestor840 as AncestorLatest,
-  BaseFields840 as BaseFieldsLatest,
+  Ancestor880 as AncestorLatest,
+  BaseFields880 as BaseFieldsLatest,
   DetectionAlert880 as DetectionAlertLatest,
-  WrappedFields840 as WrappedFieldsLatest,
+  WrappedFields880 as WrappedFieldsLatest,
   EqlBuildingBlockFields880 as EqlBuildingBlockFieldsLatest,
   EqlShellFields880 as EqlShellFieldsLatest,
   NewTermsFields880 as NewTermsFieldsLatest,

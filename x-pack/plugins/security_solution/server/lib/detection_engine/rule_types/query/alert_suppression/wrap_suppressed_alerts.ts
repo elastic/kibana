@@ -8,17 +8,13 @@
 import objectHash from 'object-hash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import {
-  ALERT_UUID,
   ALERT_SUPPRESSION_TERMS,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_START,
   ALERT_INSTANCE_ID,
-  ALERT_URL,
 } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import { getAlertDetailsUrl } from '../../../../../../common/utils/alert_detail_path';
-import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
@@ -96,16 +92,10 @@ export const wrapSuppressedAlerts = ({
       buildReasonMessage,
       indicesToQuery,
       alertTimestampOverride,
-      ruleExecutionLogger
+      ruleExecutionLogger,
+      id,
+      publicBaseUrl
     );
-
-    const alertUrl = getAlertDetailsUrl({
-      alertId: id,
-      index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-      timestamp: baseAlert['@timestamp'],
-      basePath: publicBaseUrl,
-      spaceId,
-    });
 
     return {
       _id: id,
@@ -116,8 +106,6 @@ export const wrapSuppressedAlerts = ({
         [ALERT_SUPPRESSION_START]: bucket.start,
         [ALERT_SUPPRESSION_END]: bucket.end,
         [ALERT_SUPPRESSION_DOCS_COUNT]: bucket.count - 1,
-        [ALERT_UUID]: id,
-        [ALERT_URL]: alertUrl,
         [ALERT_INSTANCE_ID]: instanceId,
       },
     };
