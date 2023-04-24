@@ -14,3 +14,9 @@ export * from './log_alerts';
 export * from './snapshot_api';
 export * from './host_details';
 export * from './infra';
+
+/**
+ * Exporting versioned APIs types
+ */
+export * from './latest';
+export * as inventoryViewsV1 from './inventory_views/v1';

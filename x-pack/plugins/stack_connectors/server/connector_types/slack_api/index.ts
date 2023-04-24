@@ -13,6 +13,7 @@ import {
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 import type {
   SlackApiExecutorOptions,
   SlackApiConnectorType,
@@ -34,6 +35,7 @@ export const getConnectorType = (): SlackApiConnectorType => {
     name: SLACK_CONNECTOR_NAME,
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
+      config: { schema: schema.object({}, { defaultValue: {} }) },
       secrets: {
         schema: SlackApiSecretsSchema,
         customValidator: validateSlackUrl,

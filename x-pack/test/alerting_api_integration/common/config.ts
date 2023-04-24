@@ -175,6 +175,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'localhost',
             'some.non.existent.com',
             'smtp.live.com',
+            'slack.com',
           ])}`,
           `--xpack.actions.enableFooterInEmail=${enableFooterInEmail}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
