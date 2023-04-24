@@ -7,7 +7,7 @@
 
 import React, { useState, useMemo } from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
@@ -15,6 +15,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormControlLayout,
   EuiHorizontalRule,
   EuiLink,
   EuiPanel,
@@ -44,6 +45,7 @@ import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
+import { TelemetryLogic } from '../../../../shared/telemetry';
 import {
   EngineViewTabs,
   ENGINE_TAB_PATH,
@@ -55,7 +57,6 @@ import { EnterpriseSearchEnginesPageTemplate } from '../../layout/engines_page_t
 import { EngineIndicesLogic } from '../engine_indices_logic';
 import { EngineViewLogic } from '../engine_view_logic';
 
-import { APICallData } from './api_call_flyout';
 import { DocumentProvider } from './document_context';
 import { DocumentFlyout } from './document_flyout';
 import { EngineSearchPreviewLogic } from './engine_search_preview_logic';
@@ -73,8 +74,7 @@ import {
 class InternalEngineTransporter implements Transporter {
   constructor(
     private http: HttpSetup,
-    private engineName: string,
-    private setLastAPICall: (apiCallData: APICallData) => void
+    private engineName: string // uncomment and add setLastAPICall to constructor when view this API call is needed // private setLastAPICall?: (apiCallData: APICallData) => void
   ) {}
 
   async performRequest(request: SearchRequest) {
@@ -84,7 +84,7 @@ class InternalEngineTransporter implements Transporter {
       body: JSON.stringify(request),
     });
 
-    this.setLastAPICall({ request, response });
+    // this.setLastAPICall({ request, response }); Uncomment when view this API call is needed
 
     const withUniqueIds = {
       ...response,
@@ -122,7 +122,9 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
   setCloseConfiguration,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
-
+  const { engineData } = useValues(EngineViewLogic);
+  const { openDeleteEngineModal } = useActions(EngineViewLogic);
+  const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   return (
     <>
       <EuiPopover
@@ -140,7 +142,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
           </EuiButton>
         }
       >
-        <EuiContextMenuPanel>
+        <EuiContextMenuPanel style={{ width: 300 }}>
           <EuiPanel color="transparent" paddingSize="xs">
             <EuiTitle size="xxxs">
               <p>
@@ -152,8 +154,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                 )}
               </p>
             </EuiTitle>
-            <EuiSpacer size="xs" />
-            <EuiHorizontalRule margin="none" />
+            <EuiHorizontalRule margin="s" />
 
             <EuiContextMenuItem
               size="s"
@@ -196,7 +197,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
               )}
             </EuiContextMenuItem>
           </EuiPanel>
-          <EuiPanel color="transparent" paddingSize="xs">
+          <EuiPanel color="transparent" paddingSize="s">
             <EuiTitle size="xxxs">
               <p>
                 {i18n.translate(
@@ -207,8 +208,8 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                 )}
               </p>
             </EuiTitle>
-            <EuiSpacer size="xs" />
-            <EuiHorizontalRule margin="none" />
+
+            <EuiHorizontalRule margin="s" />
             <EuiContextMenuItem
               size="s"
               key="Api"
@@ -229,9 +230,8 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                 }
               )}
             </EuiContextMenuItem>
-            {/* <EuiContextMenu initialPanelId={2} panels={panelConnect} /> */}
           </EuiPanel>
-          <EuiPanel color="transparent" paddingSize="xs">
+          <EuiPanel color="transparent" paddingSize="s">
             <EuiTitle size="xxxs">
               <p>
                 {i18n.translate(
@@ -242,20 +242,21 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                 )}
               </p>
             </EuiTitle>
-            <EuiSpacer size="xs" />
-            <EuiHorizontalRule margin="none" />
+
+            <EuiHorizontalRule margin="s" />
             <EuiContextMenuItem
               size="s"
               key="delete"
               icon="trash"
-              onClick={() =>
-                navigateToUrl(
-                  generateEncodedPath(SEARCH_APPLICATION_CONNECT_PATH, {
-                    connectTabId: SearchApplicationConnectTabs.API,
-                    engineName,
-                  })
-                )
-              }
+              onClick={() => {
+                if (engineData) {
+                  openDeleteEngineModal();
+                  sendEnterpriseSearchTelemetry({
+                    action: 'clicked',
+                    metric: 'entSearchContent-engines-engineView-deleteEngine',
+                  });
+                }
+              }}
             >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.engine.searchPreview.configuration.settings.delete',
@@ -272,15 +273,15 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
 };
 export const EngineSearchPreview: React.FC = () => {
   const { http } = useValues(HttpLogic);
-  // const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);
+  // const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);    Uncomment when view this API call is needed
   const [showConfigurationPopover, setShowConfigurationPopover] = useState<boolean>(false);
-  const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null);
+  // const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null); Uncomment when view this API call is needed
   const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
   const { resultFields, searchableFields, sortableFields } = useValues(EngineSearchPreviewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
-    const transporter = new InternalEngineTransporter(http, engineName, setLastAPICall);
+    const transporter = new InternalEngineTransporter(http, engineName);
     const connector = new EnginesAPIConnector(transporter);
 
     return {
@@ -292,7 +293,7 @@ export const EngineSearchPreview: React.FC = () => {
         search_fields: searchableFields,
       },
     };
-  }, [http, engineName, setLastAPICall, resultFields, searchableFields]);
+  }, [http, engineName, resultFields, searchableFields]);
 
   if (!engineData) return null;
 
@@ -311,16 +312,6 @@ export const EngineSearchPreview: React.FC = () => {
               setCloseConfiguration={() => setShowConfigurationPopover(!showConfigurationPopover)}
             />
           </>,
-          // <>
-          //   <EuiButton
-          //     color="primary"
-          //     iconType="eye"
-          //     onClick={() => setShowAPICallFlyout(true)}
-          //     isLoading={lastAPICall == null}
-          //   >
-          //     View this API call
-          //   </EuiButton>
-          // </>,
         ],
       }}
       engineName={engineName}
@@ -354,13 +345,17 @@ export const EngineSearchPreview: React.FC = () => {
           </EuiFlexGroup>
         </SearchProvider>
         <DocumentFlyout />
-        {/* {showAPICallFlyout && lastAPICall && (
+        {/*
+        Uncomment when view this API call needed
+
+        {showAPICallFlyout && lastAPICall && (
           <APICallFlyout
             onClose={() => setShowAPICallFlyout(false)}
             lastAPICall={lastAPICall}
             engineName={engineName}
           />
-        )} */}
+        )}
+        */}
       </DocumentProvider>
     </EnterpriseSearchEnginesPageTemplate>
   );
