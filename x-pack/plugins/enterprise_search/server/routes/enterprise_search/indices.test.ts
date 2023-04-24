@@ -1121,7 +1121,7 @@ describe('Enterprise Search Managed Indices', () => {
     });
   });
 
-  describe('POST /internal/enterprise_search/ml/models/{modelName}/download', () => {
+  describe('POST /internal/enterprise_search/ml/models/{modelName}', () => {
     let mockMl: SharedServices;
     let mockTrainedModelsProvider: MlTrainedModels;
 
@@ -1133,7 +1133,7 @@ describe('Enterprise Search Managed Indices', () => {
       mockRouter = new MockRouter({
         context,
         method: 'post',
-        path: '/internal/enterprise_search/ml/models/{modelName}/download',
+        path: '/internal/enterprise_search/ml/models/{modelName}',
       });
 
       mockTrainedModelsProvider = {

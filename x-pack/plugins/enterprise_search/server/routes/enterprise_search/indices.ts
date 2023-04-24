@@ -997,7 +997,7 @@ export function registerIndexRoutes({
 
   router.post(
     {
-      path: '/internal/enterprise_search/ml/models/{modelName}/download',
+      path: '/internal/enterprise_search/ml/models/{modelName}',
       validate: {
         params: schema.object({
           modelName: schema.string(),
