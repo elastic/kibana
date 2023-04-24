@@ -60,6 +60,7 @@ const defaultProps: Props = {
   patternRollups,
   patterns,
   selectedIndex: null,
+  setSelectedIndex: jest.fn(),
   theme: DARK_THEME,
   updatePatternIndexNames: jest.fn(),
   updatePatternRollup: jest.fn(),

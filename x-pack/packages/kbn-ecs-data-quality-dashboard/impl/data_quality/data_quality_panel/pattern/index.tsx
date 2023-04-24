@@ -86,6 +86,7 @@ interface Props {
   pattern: string;
   patternRollup: PatternRollup | undefined;
   selectedIndex: SelectedIndex | null;
+  setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
   theme: Theme;
   updatePatternIndexNames: ({
     indexNames,
@@ -109,6 +110,7 @@ const PatternComponent: React.FC<Props> = ({
   pattern,
   patternRollup,
   selectedIndex,
+  setSelectedIndex,
   theme,
   updatePatternIndexNames,
   updatePatternRollup,
@@ -254,14 +256,22 @@ const PatternComponent: React.FC<Props> = ({
         setPageIndex(selectedPageIndex);
       }
 
-      // if the selected index is not expanded, expand it
       if (itemIdToExpandedRowMap[selectedIndex.indexName] == null) {
-        toggleExpanded(selectedIndex.indexName);
-
-        containerRef.current?.scrollIntoView();
+        toggleExpanded(selectedIndex.indexName); // expand the selected index
       }
+
+      containerRef.current?.scrollIntoView();
+      setSelectedIndex(null);
     }
-  }, [itemIdToExpandedRowMap, items, pageSize, pattern, selectedIndex, toggleExpanded]);
+  }, [
+    itemIdToExpandedRowMap,
+    items,
+    pageSize,
+    pattern,
+    selectedIndex,
+    setSelectedIndex,
+    toggleExpanded,
+  ]);
 
   return (
     <EuiPanel data-test-subj={`${pattern}PatternPanel`} hasBorder={false} hasShadow={false}>

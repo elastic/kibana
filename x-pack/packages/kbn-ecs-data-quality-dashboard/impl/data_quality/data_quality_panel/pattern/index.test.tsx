@@ -49,6 +49,7 @@ const defaultProps = {
   openCreateCaseFlyout: jest.fn(),
   patternRollup: undefined,
   selectedIndex: null,
+  setSelectedIndex: jest.fn(),
   theme: DARK_THEME,
   updatePatternIndexNames: jest.fn(),
   updatePatternRollup: jest.fn(),

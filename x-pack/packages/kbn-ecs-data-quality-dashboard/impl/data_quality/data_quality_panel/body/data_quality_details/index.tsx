@@ -111,6 +111,7 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
         patternIndexNames={patternIndexNames}
         patternRollups={patternRollups}
         selectedIndex={selectedIndex}
+        setSelectedIndex={setSelectedIndex}
         updatePatternIndexNames={updatePatternIndexNames}
         updatePatternRollup={updatePatternRollup}
       />

@@ -50,6 +50,7 @@ export interface Props {
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
   selectedIndex: SelectedIndex | null;
+  setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
   theme: Theme;
   updatePatternIndexNames: ({
     indexNames,
@@ -73,6 +74,7 @@ const IndicesDetailsComponent: React.FC<Props> = ({
   patternRollups,
   patterns,
   selectedIndex,
+  setSelectedIndex,
   theme,
   updatePatternIndexNames,
   updatePatternRollup,
@@ -92,6 +94,7 @@ const IndicesDetailsComponent: React.FC<Props> = ({
           pattern={pattern}
           patternRollup={patternRollups[pattern]}
           selectedIndex={selectedIndex}
+          setSelectedIndex={setSelectedIndex}
           theme={theme}
           updatePatternIndexNames={updatePatternIndexNames}
           updatePatternRollup={updatePatternRollup}
