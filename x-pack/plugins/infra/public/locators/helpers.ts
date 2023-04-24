@@ -20,15 +20,17 @@ export const parseSearchString = ({
   to,
   filter = '',
   logViewId = 'default',
-}: LogsLocatorParams) =>
-  flowRight(
+}: LogsLocatorParams) => {
+  return flowRight(
     replaceLogFilterInQueryString({ language: 'kuery', query: filter }, time, from, to),
     replaceLogPositionInQueryString(time),
     replaceLogViewInQueryString({ type: 'log-view-reference', logViewId })
   )('');
+};
 
 export const constructUrlSearchString = (params: Partial<NodeLogsLocatorParams>) => {
   const { time = 1550671089404, logViewId } = params;
+
   return `/stream?logView=${getLogView(logViewId)}&logPosition=${getLogPosition(
     time
   )}&logFilter=${getLogFilter(params)}`;
@@ -51,10 +53,12 @@ const getLogFilter = ({
   time,
 }: Partial<NodeLogsLocatorParams>) => {
   let finalFilter = filter || '';
+
   if (nodeId) {
     const nodeFilter = `${findInventoryFields(nodeType!).id}: ${nodeId}`;
     finalFilter = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
   }
+
   const query = encodeURI(
     `(query:(language:kuery,query:'${finalFilter}'),refreshInterval:(pause:!t,value:5000)`
   );
@@ -63,6 +67,7 @@ const getLogFilter = ({
 
   const fromDate = from ? addHoursToTimestamp(from, 0) : addHoursToTimestamp(time, -1);
   const toDate = to ? addHoursToTimestamp(to, 0) : addHoursToTimestamp(time, 1);
+
   return `${query},timeRange:(from:'${fromDate}',to:'${toDate}'))`;
 };
 
