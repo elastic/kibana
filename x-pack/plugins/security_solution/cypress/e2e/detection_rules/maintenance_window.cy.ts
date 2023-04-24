@@ -24,7 +24,7 @@ describe('Maintenance window callout on Rule Management page', () => {
       headers: { 'kbn-xsrf': 'cypress-creds' },
       body: {
         title: 'My maintenance window',
-        duration: 10000,
+        duration: 60000, // 1 minute
         r_rule: {
           dtstart: new Date().toISOString(),
           tzid: 'Europe/Amsterdam',
