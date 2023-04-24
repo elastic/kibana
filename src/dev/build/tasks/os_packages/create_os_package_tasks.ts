@@ -175,5 +175,11 @@ export const CreateDockerContexts: Task = {
       context: true,
       image: false,
     });
+    await runDockerGenerator(config, log, build, {
+      baseImage: 'ubuntu',
+      serverless: true,
+      context: true,
+      image: false,
+    });
   },
 };

@@ -49,6 +49,7 @@ export async function runDockerGenerator(
   if (flags.baseImage === 'ubi9') imageFlavor += `-ubi9`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
+  if (flags.serverless) imageFlavor += '-serverless';
 
   // General docker var config
   const license = 'Elastic License';
@@ -132,6 +133,14 @@ export async function runDockerGenerator(
   // into kibana-docker folder
   for (const [, dockerTemplate] of Object.entries(dockerTemplates)) {
     await write(resolve(dockerBuildDir, dockerTemplate.name), dockerTemplate.generator(scope));
+  }
+
+  // Copy serverless-only configuration files
+  if (flags.serverless) {
+    await mkdirp(resolve(dockerBuildDir, 'config'));
+    await copyAll(config.resolveFromRepo('config'), resolve(dockerBuildDir, 'config'), {
+      select: ['serverless*.yml']
+    });
   }
 
   // Copy all the needed resources into kibana-docker folder
