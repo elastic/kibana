@@ -27,7 +27,7 @@ function addActionUuid(
   doc: SavedObjectUnsanitizedDoc<RawRule>
 ): SavedObjectUnsanitizedDoc<RawRule> {
   const {
-    attributes: { throttle, actions },
+    attributes: { actions },
   } = doc;
 
   return {
@@ -38,21 +38,44 @@ function addActionUuid(
         ? actions.map((action) => ({
             ...action,
             uuid: uuidv4(),
-            // Till now SIEM worked without action level frequencies. Instead rule level `throttle` and `notifyWhen` used
-            frequency: action.frequency ?? {
-              summary: true,
-              notifyWhen: transformToNotifyWhen(throttle) ?? 'onActiveAlert',
-              throttle: transformToAlertThrottle(throttle),
-            },
           }))
         : [],
     },
   };
 }
 
+function addSecuritySolutionActionsFrequency(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  if (isDetectionEngineAADRuleType(doc)) {
+    const {
+      attributes: { throttle, actions },
+    } = doc;
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        actions: actions
+          ? actions.map((action) => ({
+              ...action,
+              // Till now SIEM worked without action level frequencies. Instead rule level `throttle` and `notifyWhen` used
+              frequency: action.frequency ?? {
+                summary: true,
+                notifyWhen: transformToNotifyWhen(throttle) ?? 'onActiveAlert',
+                throttle: transformToAlertThrottle(throttle),
+              },
+            }))
+          : [],
+      },
+    };
+  }
+  return doc;
+}
+
 export const getMigrations880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(addActionUuid, addRevision)
+    pipeMigrations(addActionUuid, addRevision, addSecuritySolutionActionsFrequency)
   );

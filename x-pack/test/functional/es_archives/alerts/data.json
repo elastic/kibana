@@ -1009,10 +1009,15 @@
               "interval":"1m"
            },
            "enabled":true,
-           "actions":[
-              
-           ],
-           "throttle":null,
+           "actions": [{
+              "actionRef": "action_1",
+              "actionTypeId": ".slack",
+              "group": "default",
+              "params": {
+                "message": "something happened!"
+              }
+            }],
+           "throttle":"1h",
            "apiKeyOwner":null,
            "apiKey":null,
            "createdBy":"elastic",
