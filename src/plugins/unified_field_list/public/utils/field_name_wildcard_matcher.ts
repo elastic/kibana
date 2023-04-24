@@ -7,7 +7,6 @@
  */
 
 import { escapeRegExp, memoize } from 'lodash';
-import { FieldListItem } from '../types';
 
 const makeRegEx = memoize(function makeRegEx(glob: string) {
   const globRegex = glob.split('*').map(escapeRegExp).join('.*');
@@ -15,7 +14,7 @@ const makeRegEx = memoize(function makeRegEx(glob: string) {
 });
 
 export const fieldNameWildcardMatcher = (
-  field: FieldListItem,
+  field: { name: string; displayName?: string },
   fieldSearchHighlight: string
 ): boolean => {
   if (!fieldSearchHighlight) {
