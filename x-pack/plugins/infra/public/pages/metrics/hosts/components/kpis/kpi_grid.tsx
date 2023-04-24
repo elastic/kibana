@@ -6,11 +6,8 @@
  */
 import React from 'react';
 
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { KPIChartProps, Tile } from './tile';
 import { HostsTile } from './hosts_tile';
 import { ChartBaseProps } from '../chart/metric_chart_wrapper';

@@ -32,6 +32,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
 import {
@@ -86,6 +87,7 @@ export function registerTransactionErrorRateRuleType({
           apmActionVariables.interval,
           apmActionVariables.reason,
           apmActionVariables.serviceName,
+          apmActionVariables.transactionName,
           apmActionVariables.threshold,
           apmActionVariables.transactionType,
           apmActionVariables.triggerValue,
@@ -142,8 +144,15 @@ export function registerTransactionErrorRateRuleType({
                       ],
                     },
                   },
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName),
-                  ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType),
+                  ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                    queryEmptyString: false,
+                  }),
+                  ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
+                    queryEmptyString: false,
+                  }),
+                  ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
+                    queryEmptyString: false,
+                  }),
                   ...environmentQuery(ruleParams.environment),
                 ],
               },
@@ -232,6 +241,7 @@ export function registerTransactionErrorRateRuleType({
             serviceName,
             transactionType,
             environment,
+            ruleParams.transactionName,
           ]
             .filter((name) => name)
             .join('_');
@@ -255,6 +265,7 @@ export function registerTransactionErrorRateRuleType({
                 [SERVICE_NAME]: serviceName,
                 ...getEnvironmentEsField(environment),
                 [TRANSACTION_TYPE]: transactionType,
+                [TRANSACTION_NAME]: ruleParams.transactionName,
                 [PROCESSOR_EVENT]: ProcessorEvent.transaction,
                 [ALERT_EVALUATION_VALUE]: errorRate,
                 [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
@@ -272,6 +283,7 @@ export function registerTransactionErrorRateRuleType({
               serviceName,
               threshold: ruleParams.threshold,
               transactionType,
+              transactionName: ruleParams.transactionName,
               triggerValue: asDecimalOrInteger(errorRate),
               viewInAppUrl,
             });
