@@ -16,6 +16,8 @@ import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../ml_constants';
 import {
+  ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -57,6 +59,10 @@ const getFieldNameLabel = (field: string): string => {
       return 'type';
     case TRANSACTION_NAME:
       return 'name';
+    case ERROR_GROUP_ID:
+      return 'error key';
+    case ERROR_GROUP_NAME:
+      return 'error name';
     default:
       return field;
   }

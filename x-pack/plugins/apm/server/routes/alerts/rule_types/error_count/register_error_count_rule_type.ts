@@ -79,6 +79,7 @@ export function registerErrorCountRuleType({
           apmActionVariables.serviceName,
           apmActionVariables.transactionName,
           apmActionVariables.errorGroupingKey,
+          apmActionVariables.errorGroupingName,
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
           apmActionVariables.viewInAppUrl,
@@ -210,7 +211,7 @@ export function registerErrorCountRuleType({
                 ),
                 reason: alertReason,
                 threshold: ruleParams.threshold,
-                errorGroupingKey: ruleParams.errorGroupingKey,
+                'error.grouping_key': ruleParams.errorGroupingKey, // When group by doesn't include error.grouping_key, the context.error.grouping_key action variable will contain value of the Error Grouping Key filter
                 triggerValue: errorCount,
                 viewInAppUrl,
                 ...groupByActionVariables,

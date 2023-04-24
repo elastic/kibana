@@ -34,6 +34,8 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
+  ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
 } from '../../../../../common/es_fields/apm';
 
 export interface RuleParams {
@@ -187,7 +189,7 @@ export function ErrorCountRuleType(props: Props) {
         <APMRuleGroupBy
           onChange={onGroupByChange}
           options={{ groupBy: ruleParams.groupBy }}
-          fields={[TRANSACTION_NAME]}
+          fields={[TRANSACTION_NAME, ERROR_GROUP_ID, ERROR_GROUP_NAME]}
           preSelectedOptions={[SERVICE_NAME, SERVICE_ENVIRONMENT]}
         />
       </EuiFormRow>
