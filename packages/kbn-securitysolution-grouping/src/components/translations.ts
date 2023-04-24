@@ -35,9 +35,11 @@ export const GROUP_BY_CUSTOM_FIELD = i18n.translate('grouping.customGroupByPanel
   defaultMessage: 'Group By Custom Field',
 });
 
-export const SELECT_FIELD = i18n.translate('grouping.groupByPanelTitle', {
-  defaultMessage: 'Select Field',
-});
+export const SELECT_FIELD = (groupingLevelsCount: number) =>
+  i18n.translate('grouping.groupByPanelTitle', {
+    values: { groupingLevelsCount },
+    defaultMessage: 'Select up to {groupingLevelsCount} groupings',
+  });
 
 export const NONE = i18n.translate('grouping.noneGroupByOptionName', {
   defaultMessage: 'None',
