@@ -15,6 +15,8 @@ import {
   FetchAnalyticsCollectionsApiLogicResponse,
 } from '../../api/index/fetch_analytics_collections_api_logic';
 
+const SEARCH_COOLDOWN = 200;
+
 export interface AnalyticsCollectionsActions {
   fetchAnalyticsCollections(): void;
   makeRequest: Actions<{}, FetchAnalyticsCollectionsApiLogicResponse>['makeRequest'];
@@ -50,7 +52,7 @@ export const AnalyticsCollectionsLogic = kea<
     },
     searchAnalyticsCollections: async ({ query }, breakpoint) => {
       if (query) {
-        await breakpoint(200);
+        await breakpoint(SEARCH_COOLDOWN);
       }
       actions.makeRequest({ query });
     },

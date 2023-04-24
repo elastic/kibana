@@ -42,6 +42,7 @@ import {
 } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
 const BASE_PAGE_SIZE = 10;
+const SEARCH_COOLDOWN = 200;
 
 export interface Sorting<T extends ExploreTableItem = ExploreTableItem> {
   direction: 'asc' | 'desc';
@@ -342,7 +343,7 @@ export const AnalyticsCollectionExploreTableLogic = kea<
     return {
       onTableChange: fetchItems,
       setSearch: async (_, breakpoint) => {
-        await breakpoint(200);
+        await breakpoint(SEARCH_COOLDOWN);
         fetchItems();
       },
       setSearchSessionId: fetchItems,
