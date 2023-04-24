@@ -23,8 +23,8 @@ export enum AlertSuppressionMissingFieldsStrategy {
 
 export type AlertSuppressionMissingFields = t.TypeOf<typeof AlertSuppressionMissingFields>;
 export const AlertSuppressionMissingFields = t.union([
-  t.literal(AlertSuppressionMissingFieldsStrategy.DoNotSuppress),
-  t.literal(AlertSuppressionMissingFieldsStrategy.Suppress),
+  t.literal('doNotSuppress'),
+  t.literal('suppress'),
 ]);
 
 export const AlertSuppressionGroupBy = LimitedSizeArray({

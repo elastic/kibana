@@ -37,6 +37,7 @@ import type {
   DefineStepRule,
   ScheduleStepRule,
   ActionsStepRule,
+  SuppressionMissingFieldsOptions,
 } from './types';
 import { DataSourceType, GroupByOptions } from './types';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
@@ -141,8 +142,8 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     ? GroupByOptions.PerTimePeriod
     : GroupByOptions.PerRuleExecution,
   groupByDuration: rule.alert_suppression?.duration ?? { value: 5, unit: 'm' },
-  suppressionMissingFields:
-    rule.alert_suppression?.missing_fields_strategy || DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  suppressionMissingFields: (rule.alert_suppression?.missing_fields_strategy ||
+    DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) as SuppressionMissingFieldsOptions,
 });
 
 const convertHistoryStartToSize = (relativeTime: string) => {
