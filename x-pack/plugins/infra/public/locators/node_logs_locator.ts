@@ -23,16 +23,12 @@ export type NodeLogsLocator = LocatorPublic<NodeLogsLocatorParams>;
 export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLocatorParams> {
   public readonly id = NODE_LOGS_LOCATOR_ID;
 
-  public readonly getLocation = async ({
-    nodeId,
-    nodeType,
-    time,
-    filter,
-    logViewId,
-  }: NodeLogsLocatorParams) => {
+  public readonly getLocation = async (params: NodeLogsLocatorParams) => {
+    const { nodeType, nodeId, filter } = params;
     const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
     const query = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
-    const searchString = parseSearchString({ time, filter: query, logViewId });
+
+    const searchString = parseSearchString({ ...params, filter: query });
 
     // TODO: check serverless flag
     // if enabled, use discover locator to return a path to discover

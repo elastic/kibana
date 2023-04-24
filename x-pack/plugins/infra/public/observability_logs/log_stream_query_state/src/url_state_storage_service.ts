@@ -290,18 +290,15 @@ const decodePositionQueryValueFromUrl = (queryValueFromUrl: unknown) => {
   return legacyPositionStateInUrlRT.decode(queryValueFromUrl);
 };
 
-const ONE_HOUR = 3600000;
-export const replaceLogFilterInQueryString = (query: Query, time?: number) =>
+export const replaceLogFilterInQueryString = (
+  query: Query,
+  time?: number,
+  from?: number,
+  to?: number
+) =>
   replaceStateKeyInQueryString<FilterStateInUrl>(defaultFilterStateKey, {
     query,
-    ...(time && !Number.isNaN(time)
-      ? {
-          timeRange: {
-            from: new Date(time - ONE_HOUR).toISOString(),
-            to: new Date(time + ONE_HOUR).toISOString(),
-          },
-        }
-      : {}),
+    ...getTimeRange(time, from, to),
     refreshInterval: DEFAULT_REFRESH_INTERVAL,
   });
 
@@ -312,3 +309,23 @@ const getTimeRangeStartFromTime = (time: number): string =>
 
 const getTimeRangeEndFromTime = (time: number): string =>
   moment(time).add(defaultTimeRangeFromPositionOffset).toISOString();
+
+const getTimeRange = (time?: number, fromTime?: number, toTime?: number) => {
+  if (fromTime && toTime) {
+    return {
+      timeRange: {
+        from: new Date(fromTime).toISOString(),
+        to: new Date(toTime).toISOString(),
+      },
+    };
+  } else if (time) {
+    return {
+      timeRange: {
+        from: getTimeRangeStartFromTime(time),
+        to: getTimeRangeEndFromTime(time),
+      },
+    };
+  } else {
+    return {};
+  }
+};

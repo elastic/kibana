@@ -18,6 +18,8 @@ const LOG_VIEW_ID = 'testView';
 const FILTER_QUERY = 'trace.id:1234';
 const nodeId = uuidv4();
 const time = 1550671089404;
+const from = 1676815089000;
+const to = 1682351734323;
 
 const setupLogsLocator = async () => {
   const logsLocator = new LogsLocatorDefinition();
@@ -32,16 +34,19 @@ const setupLogsLocator = async () => {
 describe('Infra Locators', () => {
   describe('Logs Locator', () => {
     it('should create a link to Logs with no state', async () => {
+      const params: LogsLocatorParams = {
+        time,
+      };
       const { logsLocator } = await setupLogsLocator();
-      const { app, path, state } = await logsLocator.getLocation({ time });
+      const { app, path, state } = await logsLocator.getLocation(params);
 
       expect(app).toBe(APP_ID);
-      expect(path).toBe(constructUrlSearchString({}));
+      expect(path).toBe(constructUrlSearchString(params));
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
     });
 
-    it('should allow specifying specific time range', async () => {
+    it('should allow specifying specific logPosition', async () => {
       const params: LogsLocatorParams = {
         time,
       };
@@ -68,6 +73,19 @@ describe('Infra Locators', () => {
       const params: LogsLocatorParams = {
         time,
         logViewId: LOG_VIEW_ID,
+      };
+      const { logsLocator } = await setupLogsLocator();
+      const { path } = await logsLocator.getLocation(params);
+
+      const expected = constructUrlSearchString(params);
+      expect(path).toBe(expected);
+    });
+
+    it('should allow specifying specific time range', async () => {
+      const params: LogsLocatorParams = {
+        time,
+        from,
+        to,
       };
       const { logsLocator } = await setupLogsLocator();
       const { path } = await logsLocator.getLocation(params);
@@ -96,20 +114,21 @@ describe('Infra Locators', () => {
 
   describe('Node Logs Locator', () => {
     it('should create a link to Node Logs with no state', async () => {
-      const { nodeLogsLocator } = await setupLogsLocator();
-      const { app, path, state } = await nodeLogsLocator.getLocation({
+      const params: NodeLogsLocatorParams = {
         nodeId,
         nodeType,
         time,
-      });
+      };
+      const { nodeLogsLocator } = await setupLogsLocator();
+      const { app, path, state } = await nodeLogsLocator.getLocation(params);
 
       expect(app).toBe(APP_ID);
-      expect(path).toBe(constructUrlSearchString({ nodeId, nodeType }));
+      expect(path).toBe(constructUrlSearchString(params));
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
     });
 
-    it('should allow specifying specific time range', async () => {
+    it('should allow specifying specific logPosition', async () => {
       const params: NodeLogsLocatorParams = {
         nodeId,
         nodeType,
@@ -141,6 +160,22 @@ describe('Infra Locators', () => {
         nodeId,
         nodeType,
         time,
+        logViewId: LOG_VIEW_ID,
+      };
+      const { nodeLogsLocator } = await setupLogsLocator();
+      const { path } = await nodeLogsLocator.getLocation(params);
+
+      const expected = constructUrlSearchString(params);
+      expect(path).toBe(expected);
+    });
+
+    it('should allow specifying specific time range', async () => {
+      const params: NodeLogsLocatorParams = {
+        nodeId,
+        nodeType,
+        time,
+        from,
+        to,
         logViewId: LOG_VIEW_ID,
       };
       const { nodeLogsLocator } = await setupLogsLocator();

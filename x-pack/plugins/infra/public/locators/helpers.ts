@@ -6,9 +6,9 @@
  */
 
 import { flowRight } from 'lodash';
+import moment from 'moment';
 import type { LogsLocatorParams } from './logs_locator';
 import type { NodeLogsLocatorParams } from './node_logs_locator';
-import type { InventoryItemType } from '../../common/inventory_models/types';
 import { findInventoryFields } from '../../common/inventory_models';
 import { replaceLogViewInQueryString } from '../observability_logs/log_view_state';
 import { replaceLogFilterInQueryString } from '../observability_logs/log_stream_query_state';
@@ -16,42 +16,41 @@ import { replaceLogPositionInQueryString } from '../observability_logs/log_strea
 
 export const parseSearchString = ({
   time,
+  from,
+  to,
   filter = '',
   logViewId = 'default',
 }: LogsLocatorParams) =>
   flowRight(
-    replaceLogFilterInQueryString({ language: 'kuery', query: filter }, time),
+    replaceLogFilterInQueryString({ language: 'kuery', query: filter }, time, from, to),
     replaceLogPositionInQueryString(time),
     replaceLogViewInQueryString({ type: 'log-view-reference', logViewId })
   )('');
 
-export const constructUrlSearchString = ({
-  nodeId,
-  nodeType,
-  time = 1550671089404,
-  filter = '',
-  logViewId = 'default',
-}: Partial<NodeLogsLocatorParams>) => {
-  return `/stream?logView=${getLogView(logViewId!)}&logPosition=${getLogPosition(
-    time!
-  )}&logFilter=${getLogFilter(filter!, time!, nodeId, nodeType)}`;
+export const constructUrlSearchString = (params: Partial<NodeLogsLocatorParams>) => {
+  const { time = 1550671089404, logViewId } = params;
+  return `/stream?logView=${getLogView(logViewId)}&logPosition=${getLogPosition(
+    time
+  )}&logFilter=${getLogFilter(params)}`;
 };
 
-const getLogView = (logViewId: string) => {
+const getLogView = (logViewId: string = 'default') => {
   return `(logViewId:${logViewId},type:log-view-reference)`;
 };
 
-const getLogPosition = (time: number) => {
+const getLogPosition = (time: number = 1550671089404) => {
   return `(position:(tiebreaker:0,time:${time}))`;
 };
 
-const getLogFilter = (
-  filter: string,
-  time?: number,
-  nodeId?: string,
-  nodeType?: InventoryItemType
-) => {
-  let finalFilter = filter;
+const getLogFilter = ({
+  nodeType,
+  nodeId,
+  filter,
+  from,
+  to,
+  time,
+}: Partial<NodeLogsLocatorParams>) => {
+  let finalFilter = filter || '';
   if (nodeId) {
     const nodeFilter = `${findInventoryFields(nodeType!).id}: ${nodeId}`;
     finalFilter = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
@@ -62,13 +61,11 @@ const getLogFilter = (
 
   if (!time) return `${query})`;
 
-  const from = addHoursToTimestamp(time, -1);
-  const to = addHoursToTimestamp(time, 1);
-  return `${query},timeRange:(from:'${from}',to:'${to}'))`;
+  const fromDate = from ? addHoursToTimestamp(from, 0) : addHoursToTimestamp(time, -1);
+  const toDate = to ? addHoursToTimestamp(to, 0) : addHoursToTimestamp(time, 1);
+  return `${query},timeRange:(from:'${fromDate}',to:'${toDate}'))`;
 };
 
 export const addHoursToTimestamp = (timestamp: number, hours: number): string => {
-  const date = new Date(timestamp);
-  date.setHours(date.getHours() + hours);
-  return date.toISOString();
+  return moment(timestamp).add({ hours }).toISOString();
 };

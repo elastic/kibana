@@ -13,6 +13,8 @@ const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 
 export interface LogsLocatorParams extends SerializableRecord {
   time: number;
+  from?: number;
+  to?: number;
   filter?: string;
   logViewId?: string;
 }
