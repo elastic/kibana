@@ -559,7 +559,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           </RuleStatus>
         )}
         <EuiFlexItem grow={false}>
-          <RuleSnoozeBadge id={ruleId} showTooltipInline />
+          <RuleSnoozeBadge ruleId={ruleId} showTooltipInline />
         </EuiFlexItem>
       </>
     );
