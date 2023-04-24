@@ -57,7 +57,7 @@ export const apmRuleTypeAlertFieldMap = {
     required: false,
   },
   [ERROR_GROUP_NAME]: {
-    type: 'text',
+    type: 'keyword',
     required: false,
   },
   [PROCESSOR_EVENT]: {
