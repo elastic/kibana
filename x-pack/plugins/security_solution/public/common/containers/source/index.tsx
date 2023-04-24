@@ -17,6 +17,7 @@ import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 import { getDataViewStateFromIndexFields } from './use_data_view';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import type { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../../../../common/endpoint/constants';
 
 export type { BrowserField, BrowserFields };
 
@@ -124,7 +125,7 @@ interface FetchIndexReturn {
 export const useFetchIndex = (
   indexNames: string[],
   onlyCheckIfIndicesExist: boolean = false,
-  strategy: 'indexFields' | 'dataView' = 'indexFields',
+  strategy: 'indexFields' | 'dataView' | typeof ENDPOINT_FIELDS_SEARCH_STRATEGY = 'indexFields',
   includeUnmapped: boolean = false
 ): [boolean, FetchIndexReturn] => {
   const { data } = useKibana().services;
