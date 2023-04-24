@@ -162,7 +162,7 @@ function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfi
       description={
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.themeFormGroupDescription"
-          defaultMessage="Choose your desired theme for Kibana"
+          defaultMessage="Select the interface theme that you wish to apply across the platform."
         />
       }
     >
