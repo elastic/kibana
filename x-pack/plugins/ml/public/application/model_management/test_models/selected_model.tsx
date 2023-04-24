@@ -29,9 +29,10 @@ import { INPUT_TYPE } from './models/inference_base';
 interface Props {
   model: estypes.MlTrainedModelConfig;
   inputType: INPUT_TYPE;
+  deploymentId: string;
 }
 
-export const SelectedModel: FC<Props> = ({ model, inputType }) => {
+export const SelectedModel: FC<Props> = ({ model, inputType, deploymentId }) => {
   const { trainedModels } = useMlApiContext();
 
   const inferrer: InferrerType | undefined = useMemo(() => {
@@ -65,6 +66,11 @@ export const SelectedModel: FC<Props> = ({ model, inputType }) => {
       return new LangIdentInference(trainedModels, model, inputType);
     }
   }, [inputType, model, trainedModels]);
+
+  useEffect(() => {
+    if (!inferrer) return;
+    inferrer.deploymentId = deploymentId;
+  }, [deploymentId, inferrer]);
 
   useEffect(() => {
     return () => {

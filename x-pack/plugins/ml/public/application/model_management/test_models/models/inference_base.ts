@@ -61,6 +61,8 @@ export abstract class InferenceBase<TInferResponse> {
   protected abstract readonly inferenceTypeLabel: string;
   protected readonly modelInputField: string;
 
+  protected _deploymentId: string | null = null;
+
   protected inputText$ = new BehaviorSubject<string[]>([]);
   private inputField$ = new BehaviorSubject<string>('');
   private inferenceResult$ = new BehaviorSubject<TInferResponse[] | null>(null);
@@ -84,6 +86,17 @@ export abstract class InferenceBase<TInferResponse> {
 
   public destroy() {
     this.subscriptions$.unsubscribe();
+  }
+
+  public set deploymentId(deploymentId: string) {
+    this._deploymentId = deploymentId;
+  }
+
+  public get deploymentId() {
+    if (!this._deploymentId) {
+      throw new Error('Deployment ID is required');
+    }
+    return this._deploymentId;
   }
 
   protected initialize(
@@ -243,7 +256,7 @@ export abstract class InferenceBase<TInferResponse> {
   ): estypes.IngestProcessorContainer[] {
     const processor: estypes.IngestProcessorContainer = {
       inference: {
-        model_id: this.model.model_id,
+        model_id: this.deploymentId,
         target_field: this.inferenceType,
         field_map: {
           [this.inputField$.getValue()]: this.modelInputField,
@@ -277,7 +290,7 @@ export abstract class InferenceBase<TInferResponse> {
       const inferenceConfig = getInferenceConfig();
 
       const resp = (await this.trainedModelsApi.inferTrainedModel(
-        this.model.model_id,
+        this.deploymentId,
         {
           docs: this.getInferDocs(),
           ...(inferenceConfig ? { inference_config: inferenceConfig } : {}),

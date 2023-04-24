@@ -34,7 +34,7 @@ export function useModelActions({
   fetchModels,
 }: {
   isLoading: boolean;
-  onTestAction: (model: string) => void;
+  onTestAction: (model: ModelItem) => void;
   onModelsDeleteRequest: (modelsIds: string[]) => void;
   onLoading: (isLoading: boolean) => void;
   fetchModels: () => void;
@@ -211,9 +211,9 @@ export function useModelActions({
           item.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
           canStartStopTrainedModels &&
           !isLoading &&
-          item.stats?.deployment_stats?.state === DEPLOYMENT_STATE.STARTED,
+          !!item.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTED),
         onClick: async (item) => {
-          const threadingParams = await getUserInputModelDeploymentParams(item.model_id, {
+          const threadingParams = await getUserInputModelDeploymentParams(item, {
             numOfAllocations: item.stats?.deployment_stats?.number_of_allocations!,
           });
 
@@ -358,7 +358,7 @@ export function useModelActions({
         type: 'icon',
         isPrimary: true,
         available: isTestable,
-        onClick: (item) => onTestAction(item.model_id),
+        onClick: (item) => onTestAction(item),
         enabled: (item) => canTestTrainedModels && isTestable(item, true),
       },
     ],
