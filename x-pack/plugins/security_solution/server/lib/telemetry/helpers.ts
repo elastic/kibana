@@ -312,6 +312,7 @@ function isAllowlistK8sUsername(username: string) {
     username === 'edit' ||
     username === 'view' ||
     username === 'admin' ||
+    username === 'elastic-agent' ||
     username === 'cluster-admin' ||
     username.startsWith('system')
   );
