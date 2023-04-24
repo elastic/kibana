@@ -114,8 +114,8 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
 
   return (
     <EuiPopover
-      data-test-subj="dvRandomSamplerOptionsPopover"
-      id="dataVisualizerSamplingOptions"
+      data-test-subj="aiopsRandomSamplerOptionsPopover"
+      id="aiopsSamplingOptions"
       button={
         <EuiButtonEmpty
           onClick={() => setShowSamplingOptionsPopover(!showSamplingOptionsPopover)}
@@ -137,7 +137,7 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
         <EuiSpacer size="m" />
 
         <EuiFormRow
-          data-test-subj="dvRandomSamplerOptionsFormRow"
+          data-test-subj="aiopsRandomSamplerOptionsFormRow"
           label={i18n.translate(
             'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.randomSamplerRowLabel',
             {
@@ -146,7 +146,7 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
           )}
         >
           <EuiSelect
-            data-test-subj="dvRandomSamplerOptionsSelect"
+            data-test-subj="aiopsRandomSamplerOptionsSelect"
             options={RANDOM_SAMPLER_SELECT_OPTIONS}
             value={randomSamplerPreference}
             onChange={(e) => setRandomSamplerPreference(e.target.value as RandomSamplerOption)}
@@ -172,7 +172,7 @@ const ProbabilityUsedMessage: FC<{ samplingProbability: number | null }> = ({
   samplingProbability,
 }) => {
   return samplingProbability !== null ? (
-    <div data-test-subj="dvRandomSamplerProbabilityUsedMsg">
+    <div data-test-subj="aiopsRandomSamplerProbabilityUsedMsg">
       <EuiSpacer size="m" />
 
       <FormattedMessage

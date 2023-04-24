@@ -39,7 +39,7 @@ export const TableHeader: FC<Props> = ({
             {selectedCategoriesCount > 0 ? (
               <>
                 <FormattedMessage
-                  id="xpack.aiops.logCategorization.counts"
+                  id="xpack.aiops.logCategorization.selectedCounts"
                   defaultMessage=" | {count} selected"
                   values={{ count: selectedCategoriesCount }}
                 />

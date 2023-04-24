@@ -25,7 +25,8 @@ export const FieldPopoverVisualize: React.FC<FieldPopoverVisualizeProps> = (prop
   return visualizeButton || categorizeButton ? (
     <EuiPopoverFooter>
       {visualizeButton}
-      {visualizeButton && categorizeButton ? <EuiSpacer size="s" /> : null} {categorizeButton}
+      {visualizeButton && categorizeButton ? <EuiSpacer size="s" /> : null}
+      {categorizeButton}
     </EuiPopoverFooter>
   ) : null;
 };
