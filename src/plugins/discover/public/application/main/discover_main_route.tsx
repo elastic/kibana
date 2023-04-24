@@ -251,7 +251,7 @@ export function DiscoverMainRoute({ registerExtensions, isDev }: MainRouteProps)
     return <DiscoverError error={error} />;
   }
 
-  if (loading) {
+  if (loading || !extensionRegistry) {
     return <LoadingIndicator type={hasCustomBranding ? 'spinner' : 'elastic'} />;
   }
 
