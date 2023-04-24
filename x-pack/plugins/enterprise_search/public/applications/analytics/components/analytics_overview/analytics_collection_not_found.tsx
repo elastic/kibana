@@ -26,7 +26,7 @@ export const AnalyticsCollectionNotFound: React.FC<AnalyticsCollectionNotFoundPr
     icon={<EuiImage size={ICON_WIDTH} src={noMlModelsGraphicDark} alt="icon" />}
     title={
       <h2>
-        {i18n.translate('xpack.enterpriseSearch.analytics.collections.emptyState.headingTitle', {
+        {i18n.translate('xpack.enterpriseSearch.analytics.collections.notFound.headingTitle', {
           defaultMessage: 'No results found for “{query}”',
           values: { query },
         })}
@@ -34,7 +34,7 @@ export const AnalyticsCollectionNotFound: React.FC<AnalyticsCollectionNotFoundPr
     }
     body={
       <p>
-        {i18n.translate('xpack.enterpriseSearch.analytics.collections.emptyState.subHeading', {
+        {i18n.translate('xpack.enterpriseSearch.analytics.collections.notFound.subHeading', {
           defaultMessage: 'Try searching for another term.',
         })}
       </p>
