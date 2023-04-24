@@ -84,7 +84,7 @@ describe('Isolate command', () => {
       cy.getByTestSubj('hostIsolateConfirmButton').click();
       cy.contains(`Isolation on host ${endpointHostname} successfully submitted`);
       cy.getByTestSubj('euiFlyoutCloseButton').click();
-      cy.getByTestSubj('rowIsolationStatus').should('contain.text', 'Isolated');
+      cy.getByTestSubj('rowHostStatus-actionStatuses').should('contain.text', 'Isolated');
       filterOutIsolatedHosts();
 
       checkEndpointListForIsolatedHosts();
