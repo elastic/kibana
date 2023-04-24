@@ -42,7 +42,7 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
           titleSize="xs"
           body={
             <FormattedMessage
-              id="xpack.osquery.cases.permissionDenied"
+              id="xpack.osquery.results.permissionDenied"
               defaultMessage="To access these results, ask your administrator for {osquery} Kibana
               privileges."
               // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
