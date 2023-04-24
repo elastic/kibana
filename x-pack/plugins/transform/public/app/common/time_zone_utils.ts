@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment-timezone';
+import { isDefined } from '@kbn/ml-is-defined';
 
 // Partial list of packages/core/ui-settings/core-ui-settings-common/src/timezones.ts
 const ACCEPTED_TIMEZONES = new Set([
@@ -18,4 +19,4 @@ const ACCEPTED_TIMEZONES = new Set([
 
 export const TIMEZONE_OPTIONS = [...ACCEPTED_TIMEZONES].map((value) => ({ value, text: value }));
 
-export const isValidTimeZone = (s?: string) => s && ACCEPTED_TIMEZONES.has(s);
+export const isValidTimeZone = (s?: string) => isDefined(s) && ACCEPTED_TIMEZONES.has(s);
