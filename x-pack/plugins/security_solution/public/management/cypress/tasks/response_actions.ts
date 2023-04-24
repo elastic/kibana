@@ -94,7 +94,7 @@ export const waitForActionToComplete = (
     )
     .then(() => {
       if (!action) {
-        throw new Error(`Unable to completed action`);
+        throw new Error(`Failed to retrieve completed action`);
       }
 
       return action;
