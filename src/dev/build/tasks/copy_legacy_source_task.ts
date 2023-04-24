@@ -22,7 +22,6 @@ export const CopyLegacySource: Task = {
       'yarn.lock',
       '.npmrc',
       'config/kibana.yml',
-      'config/serverless.*yml',
       'config/node.options',
       '.i18nrc.json',
       'src/cli/**',
