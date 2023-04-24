@@ -45,7 +45,7 @@ describe('EnableJob', () => {
     fireEvent.click(getByText('Run job'));
 
     await waitFor(() => {
-      expect(enableDatafeedMock).toHaveBeenCalledWith(job, job.latestTimestampMs, true);
+      expect(enableDatafeedMock).toHaveBeenCalledWith(job, job.latestTimestampMs);
       expect(onJobEnabledMock).toHaveBeenCalledWith(job);
     });
   });

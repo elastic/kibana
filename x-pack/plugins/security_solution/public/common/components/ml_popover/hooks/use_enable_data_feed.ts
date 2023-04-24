@@ -20,7 +20,7 @@ import { setupMlJob, startDatafeeds, stopDatafeeds } from '../api';
 import type { ErrorResponse, SecurityJob } from '../types';
 import * as i18n from './translations';
 
-// Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
+// Enable/Disable Job & Datafeed
 export const useEnableDataFeed = () => {
   const { telemetry } = useKibana().services;
 
@@ -28,9 +28,12 @@ export const useEnableDataFeed = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const enableDatafeed = useCallback(
-    async (job: SecurityJob, latestTimestampMs: number, enable: boolean) => {
-      submitTelemetry(job, enable);
+    async (job: SecurityJob, latestTimestampMs: number) => {
       setIsLoading(true);
+      track(
+        METRIC_TYPE.COUNT,
+        job.isElasticJob ? TELEMETRY_EVENT.SIEM_JOB_ENABLED : TELEMETRY_EVENT.CUSTOM_JOB_ENABLED
+      );
 
       if (!job.isInstalled) {
         try {
@@ -40,7 +43,6 @@ export const useEnableDataFeed = () => {
             jobIdErrorFilter: [job.id],
             groups: job.groups,
           });
-          setIsLoading(false);
           telemetry.reportMLJobUpdate({
             jobId: job.id,
             isElasticJob: job.isElasticJob,
@@ -48,8 +50,8 @@ export const useEnableDataFeed = () => {
             status: ML_JOB_TELEMETRY_STATUS.moduleInstalled,
           });
         } catch (error) {
-          addError(error, { title: i18n.CREATE_JOB_FAILURE });
           setIsLoading(false);
+          addError(error, { title: i18n.CREATE_JOB_FAILURE });
           telemetry.reportMLJobUpdate({
             jobId: job.id,
             isElasticJob: job.isElasticJob,
@@ -67,94 +69,88 @@ export const useEnableDataFeed = () => {
       const maxStartTime = date.setDate(date.getDate() - 14);
 
       const datafeedId = `datafeed-${job.id}`;
-      if (enable) {
-        const startTime = Math.max(latestTimestampMs, maxStartTime);
-        const reportEnableJobError = (error: Error) => {
-          track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
-          addError(error, { title: i18n.START_JOB_FAILURE });
-          telemetry.reportMLJobUpdate({
-            jobId: job.id,
-            isElasticJob: job.isElasticJob,
-            status: ML_JOB_TELEMETRY_STATUS.startError,
-            errorMessage: `${i18n.START_JOB_FAILURE} - ${error.message}`,
-          });
-        };
 
-        try {
-          const response = await startDatafeeds({
-            datafeedIds: [datafeedId],
-            start: startTime,
-          });
+      const startTime = Math.max(latestTimestampMs, maxStartTime);
 
-          if (response[datafeedId]?.error) {
-            throw new Error(response[datafeedId].error);
-          }
+      try {
+        const response = await startDatafeeds({
+          datafeedIds: [datafeedId],
+          start: startTime,
+        });
 
-          telemetry.reportMLJobUpdate({
-            jobId: job.id,
-            isElasticJob: job.isElasticJob,
-            status: ML_JOB_TELEMETRY_STATUS.started,
-          });
-
-          return { enabled: response[datafeedId] ? response[datafeedId].started : false };
-        } catch (error) {
-          reportEnableJobError(error);
-        } finally {
-          setIsLoading(false);
+        if (response[datafeedId]?.error) {
+          throw new Error(response[datafeedId].error);
         }
-      } else {
-        const reportDisableError = (error: Error) => {
-          track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
-          addError(error, { title: i18n.STOP_JOB_FAILURE });
-          telemetry.reportMLJobUpdate({
-            jobId: job.id,
-            isElasticJob: job.isElasticJob,
-            status: ML_JOB_TELEMETRY_STATUS.stopError,
-            errorMessage: `${i18n.STOP_JOB_FAILURE} - ${error.message}`,
-          });
-        };
 
-        try {
-          const [response] = await stopDatafeeds({ datafeedIds: [datafeedId] });
+        telemetry.reportMLJobUpdate({
+          jobId: job.id,
+          isElasticJob: job.isElasticJob,
+          status: ML_JOB_TELEMETRY_STATUS.started,
+        });
 
-          if (isErrorResponse(response)) {
-            throw new Error(response.error);
-          }
-
-          telemetry.reportMLJobUpdate({
-            jobId: job.id,
-            isElasticJob: job.isElasticJob,
-            status: ML_JOB_TELEMETRY_STATUS.stopped,
-          });
-
-          return { enabled: response[datafeedId] ? !response[datafeedId].stopped : true };
-        } catch (error) {
-          reportDisableError(error);
-        } finally {
-          setIsLoading(false);
-        }
+        return { enabled: response[datafeedId] ? response[datafeedId].started : false };
+      } catch (error) {
+        track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
+        addError(error, { title: i18n.START_JOB_FAILURE });
+        telemetry.reportMLJobUpdate({
+          jobId: job.id,
+          isElasticJob: job.isElasticJob,
+          status: ML_JOB_TELEMETRY_STATUS.startError,
+          errorMessage: `${i18n.START_JOB_FAILURE} - ${error.message}`,
+        });
+      } finally {
+        setIsLoading(false);
       }
-      return { enabled: !enable };
+
+      return { enabled: false };
     },
     [addError, telemetry]
   );
 
-  return { enableDatafeed, isLoading };
+  const disableDatafeed = useCallback(
+    async (job: SecurityJob) => {
+      track(
+        METRIC_TYPE.COUNT,
+        job.isElasticJob ? TELEMETRY_EVENT.SIEM_JOB_DISABLED : TELEMETRY_EVENT.CUSTOM_JOB_DISABLED
+      );
+      setIsLoading(true);
+
+      const datafeedId = `datafeed-${job.id}`;
+
+      try {
+        const [response] = await stopDatafeeds({ datafeedIds: [datafeedId] });
+
+        if (isErrorResponse(response)) {
+          throw new Error(response.error);
+        }
+
+        telemetry.reportMLJobUpdate({
+          jobId: job.id,
+          isElasticJob: job.isElasticJob,
+          status: ML_JOB_TELEMETRY_STATUS.stopped,
+        });
+
+        return { enabled: response[datafeedId] ? !response[datafeedId].stopped : true };
+      } catch (error) {
+        track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
+        addError(error, { title: i18n.STOP_JOB_FAILURE });
+        telemetry.reportMLJobUpdate({
+          jobId: job.id,
+          isElasticJob: job.isElasticJob,
+          status: ML_JOB_TELEMETRY_STATUS.stopError,
+          errorMessage: `${i18n.STOP_JOB_FAILURE} - ${error.message}`,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+
+      return { enabled: true };
+    },
+    [addError, telemetry]
+  );
+
+  return { enableDatafeed, disableDatafeed, isLoading };
 };
 
 const isErrorResponse = (response: ErrorResponse): response is ErrorResponse =>
   !isEmpty(response.error);
-
-const submitTelemetry = (job: SecurityJob, enabled: boolean) => {
-  // Report type of job enabled/disabled
-  track(
-    METRIC_TYPE.COUNT,
-    job.isElasticJob
-      ? enabled
-        ? TELEMETRY_EVENT.SIEM_JOB_ENABLED
-        : TELEMETRY_EVENT.SIEM_JOB_DISABLED
-      : enabled
-      ? TELEMETRY_EVENT.CUSTOM_JOB_ENABLED
-      : TELEMETRY_EVENT.CUSTOM_JOB_DISABLED
-  );
-};

@@ -24,7 +24,7 @@ export const EnableJob = ({
   const { enableDatafeed, isLoading: isEnabling } = useEnableDataFeed();
 
   const handleChange = useCallback(async () => {
-    const result = await enableDatafeed(job, job.latestTimestampMs || 0, true);
+    const result = await enableDatafeed(job, job.latestTimestampMs || 0);
 
     if (result.enabled) {
       onJobEnabled(job);
