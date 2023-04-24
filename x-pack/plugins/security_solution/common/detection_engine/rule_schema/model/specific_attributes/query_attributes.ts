@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import {
   LimitedSizeArray,
   PositiveIntegerGreaterThanZero,
+  enumeration,
 } from '@kbn/securitysolution-io-ts-types';
 
 /**
@@ -22,10 +23,12 @@ export enum AlertSuppressionMissingFieldsStrategy {
 }
 
 export type AlertSuppressionMissingFields = t.TypeOf<typeof AlertSuppressionMissingFields>;
-export const AlertSuppressionMissingFields = t.union([
-  t.literal('doNotSuppress'),
-  t.literal('suppress'),
-]);
+export const AlertSuppressionMissingFields = enumeration(
+  'AlertSuppressionMissingFields',
+  AlertSuppressionMissingFieldsStrategy
+);
+export const DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY =
+  AlertSuppressionMissingFieldsStrategy.Suppress;
 
 export const AlertSuppressionGroupBy = LimitedSizeArray({
   codec: t.string,
