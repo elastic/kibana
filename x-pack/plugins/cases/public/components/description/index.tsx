@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { css } from '@emotion/react';
 import {
@@ -67,25 +67,12 @@ export const Description = forwardRef<DescriptionMarkdownRefObject, DescriptionP
   ({ caseData, onUpdateField }, ref) => {
     const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
     const [isEditable, setIsEditable] = useState<boolean>(false);
-    const [fieldValue, setFieldValue] = useState({ content: caseData.description });
 
     const descriptionRef = useRef(null);
     const { euiTheme } = useEuiTheme();
     const { appId } = useCasesContext();
 
     const { clearDraftComment, draftComment, hasIncomingLensState } = useLensDraftComment();
-
-    const setComment = useCallback(
-      (newComment) => {
-        setFieldValue({ content: newComment });
-      },
-      [setFieldValue]
-    );
-
-    useImperativeHandle(ref, () => ({
-      setComment,
-      editor: descriptionRef.current,
-    }));
 
     const hasDraftComment = (applicationId = '', caseId: string, commentId: string): boolean => {
       const draftStorageKey = getMarkdownEditorStorageKey(applicationId, caseId, commentId);
@@ -102,7 +89,6 @@ export const Description = forwardRef<DescriptionMarkdownRefObject, DescriptionP
       (content: string) => {
         onUpdateField({ key: DESCRIPTION_ID, value: content });
         setIsEditable(false);
-        setFieldValue({ content });
       },
       [onUpdateField, setIsEditable]
     );
@@ -127,7 +113,6 @@ export const Description = forwardRef<DescriptionMarkdownRefObject, DescriptionP
         onChangeEditable={handleOnChangeEditable}
         onSaveContent={handleOnSave}
         editorRef={descriptionRef}
-        fieldValue={fieldValue}
         fieldName="content"
         formSchema={schema}
       />

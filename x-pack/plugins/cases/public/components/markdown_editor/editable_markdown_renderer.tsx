@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle } from 'react';
 
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -14,8 +14,10 @@ import { removeItemFromSessionStorage } from '../utils';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { getMarkdownEditorStorageKey } from './utils';
 import { EditableMarkdownFooter } from './editable_markdown_footer';
-import type { UserActionMarkdownRefObject } from '../user_actions/markdown_form';
 
+export interface EditableMarkdownRefObject {
+  setComment: (newComment: string) => void;
+}
 interface EditableMarkdownRendererProps {
   content: string;
   id: string;
@@ -23,75 +25,80 @@ interface EditableMarkdownRendererProps {
   fieldName: string;
   onChangeEditable: (id: string) => void;
   onSaveContent: (content: string) => void;
-  editorRef: React.MutableRefObject<undefined | null | UserActionMarkdownRefObject>;
-  fieldValue: { content: string };
+  editorRef: React.MutableRefObject<undefined | null | EditableMarkdownRefObject>;
   formSchema: FormSchema<{ content: string }> | undefined;
 }
 
-const EditableMarkDownRenderer = ({
-  id,
-  content,
-  caseId,
-  fieldName,
-  onChangeEditable,
-  onSaveContent,
-  editorRef,
-  fieldValue,
-  formSchema,
-}: EditableMarkdownRendererProps) => {
-  const { appId } = useCasesContext();
-  const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
-  const initialState = { content };
+const EditableMarkDownRenderer = forwardRef<
+  EditableMarkdownRefObject,
+  EditableMarkdownRendererProps
+>(
+  (
+    { id, content, caseId, fieldName, onChangeEditable, onSaveContent, editorRef, formSchema },
+    ref
+  ) => {
+    const { appId } = useCasesContext();
+    const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
+    const initialState = { content };
 
-  const { form } = useForm({
-    defaultValue: initialState,
-    options: { stripEmptyFields: false },
-    schema: formSchema,
-  });
-  const { submit, setFieldValue } = form;
+    const { form } = useForm({
+      defaultValue: initialState,
+      options: { stripEmptyFields: false },
+      schema: formSchema,
+    });
+    const { submit, setFieldValue } = form;
 
-  if (fieldValue?.content !== content) {
-    setFieldValue(fieldName, fieldValue.content);
+    const setComment = useCallback(
+      (newComment) => {
+        setFieldValue(fieldName, newComment);
+      },
+      [setFieldValue, fieldName]
+    );
+
+    useImperativeHandle(ref, () => ({
+      setComment,
+      editor: editorRef.current,
+    }));
+
+    const handleCancelAction = useCallback(() => {
+      onChangeEditable(id);
+      removeItemFromSessionStorage(draftStorageKey);
+    }, [id, onChangeEditable, draftStorageKey]);
+
+    const handleSaveAction = useCallback(async () => {
+      const { isValid, data } = await submit();
+
+      if (isValid && data.content !== content) {
+        onSaveContent(data.content);
+      }
+      onChangeEditable(id);
+      removeItemFromSessionStorage(draftStorageKey);
+    }, [content, id, onChangeEditable, onSaveContent, submit, draftStorageKey]);
+
+    return (
+      <Form form={form} data-test-subj="editable-markdown-form">
+        <UseField
+          path={fieldName}
+          component={MarkdownEditorForm}
+          componentProps={{
+            ref: editorRef,
+            'aria-label': 'Cases markdown editor',
+            value: content,
+            id,
+            draftStorageKey,
+            bottomRightContent: (
+              <EditableMarkdownFooter
+                handleSaveAction={handleSaveAction}
+                handleCancelAction={handleCancelAction}
+              />
+            ),
+            initialValue: content,
+          }}
+        />
+      </Form>
+    );
   }
-
-  const handleCancelAction = useCallback(() => {
-    onChangeEditable(id);
-    removeItemFromSessionStorage(draftStorageKey);
-  }, [id, onChangeEditable, draftStorageKey]);
-
-  const handleSaveAction = useCallback(async () => {
-    const { isValid, data } = await submit();
-
-    if (isValid && data.content !== content) {
-      onSaveContent(data.content);
-    }
-    onChangeEditable(id);
-    removeItemFromSessionStorage(draftStorageKey);
-  }, [content, id, onChangeEditable, onSaveContent, submit, draftStorageKey]);
-
-  return (
-    <Form form={form} data-test-subj="editable-markdown-form">
-      <UseField
-        path={fieldName}
-        component={MarkdownEditorForm}
-        componentProps={{
-          ref: editorRef,
-          'aria-label': 'Cases markdown editor',
-          value: content,
-          id,
-          draftStorageKey,
-          bottomRightContent: (
-            <EditableMarkdownFooter
-              handleSaveAction={handleSaveAction}
-              handleCancelAction={handleCancelAction}
-            />
-          ),
-          initialValue: content,
-        }}
-      />
-    </Form>
-  );
-};
+);
 
 EditableMarkDownRenderer.displayName = 'EditableMarkDownRenderer';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, useRef } from 'react';
 
 import { schema } from './schema';
 import { ScrollableMarkdown, EditableMarkdown } from '../markdown_editor';
@@ -30,20 +30,6 @@ const UserActionMarkdownComponent = forwardRef<
   const editorRef = useRef();
   const fieldName = 'content';
 
-  const [fieldValue, setFieldValue] = useState({ content });
-
-  const setComment = useCallback(
-    (newComment) => {
-      setFieldValue({ content: newComment });
-    },
-    [setFieldValue]
-  );
-
-  useImperativeHandle(ref, () => ({
-    setComment,
-    editor: editorRef.current,
-  }));
-
   return isEditable ? (
     <EditableMarkdown
       id={id}
@@ -52,7 +38,6 @@ const UserActionMarkdownComponent = forwardRef<
       onChangeEditable={onChangeEditable}
       onSaveContent={onSaveContent}
       editorRef={editorRef}
-      fieldValue={fieldValue}
       fieldName={fieldName}
       formSchema={schema}
     />

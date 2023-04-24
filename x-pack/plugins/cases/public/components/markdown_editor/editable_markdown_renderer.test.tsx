@@ -36,7 +36,6 @@ const defaultProps = {
   onChangeEditable,
   onSaveContent,
   fieldName: 'content',
-  fieldValue: { content },
   formSchema: schema,
   editorRef,
 };
