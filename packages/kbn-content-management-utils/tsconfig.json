@@ -18,5 +18,6 @@
   "kbn_references": [
     "@kbn/content-management-plugin",
     "@kbn/config-schema",
+    "@kbn/core-saved-objects-api-server",
   ]
 }

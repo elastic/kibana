@@ -69,7 +69,7 @@ const createAlertsEsQuery = ({
   const alertStatusFilter = createAlertStatusFilter(status);
 
   const dateFilter = createDateFilter(dateRange);
-  const hostsFilter = createHostsFilter(hostNodes);
+  const hostsFilter = createHostsFilter(hostNodes.map((p) => p.name));
 
   const filters = [alertStatusFilter, dateFilter, hostsFilter].filter(Boolean) as Filter[];
 
