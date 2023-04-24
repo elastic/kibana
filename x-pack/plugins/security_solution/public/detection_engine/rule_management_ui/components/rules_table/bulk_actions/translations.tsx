@@ -71,21 +71,6 @@ export const bulkAddRuleActions = {
     }
   ),
 
-  THROTTLE_LABEL: i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.throttleLabel',
-    {
-      defaultMessage: 'Actions frequency',
-    }
-  ),
-
-  THROTTLE_HELP_TEXT: i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.throttleHelpText',
-    {
-      defaultMessage:
-        'Select when automated actions should be performed if a rule evaluates as true.',
-    }
-  ),
-
   RULE_VARIABLES_DETAIL: i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.ruleVariablesDetail',
     {

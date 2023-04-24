@@ -9,7 +9,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useIntersectedOnce } from '../../../../../hooks/use_intersection_once';

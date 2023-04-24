@@ -35,6 +35,7 @@ import type {
   ActionsStepRule,
 } from './types';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 
 describe('rule helpers', () => {
   moment.suppressDeprecationWarnings = true;
@@ -146,7 +147,6 @@ describe('rule helpers', () => {
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {
         enabled: true,
-        throttle: 'no_actions',
         actions: [],
         responseActions: undefined,
       };
@@ -410,16 +410,22 @@ describe('rule helpers', () => {
 
   describe('getActionsStepsData', () => {
     test('returns expected ActionsStepRule rule object', () => {
+      const actions: RuleAlertAction[] = [
+        {
+          id: 'id',
+          group: 'group',
+          params: {},
+          action_type_id: 'action_type_id',
+          frequency: {
+            summary: true,
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
+          },
+        },
+      ];
       const mockedRule = {
         ...mockRule('test-id'),
-        actions: [
-          {
-            id: 'id',
-            group: 'group',
-            params: {},
-            action_type_id: 'action_type_id',
-          },
-        ],
+        actions,
       };
       const result: ActionsStepRule = getActionsStepsData(mockedRule);
       const expected = {
@@ -429,11 +435,15 @@ describe('rule helpers', () => {
             group: 'group',
             params: {},
             actionTypeId: 'action_type_id',
+            frequency: {
+              summary: true,
+              throttle: null,
+              notifyWhen: 'onActiveAlert',
+            },
           },
         ],
         responseActions: undefined,
         enabled: mockedRule.enabled,
-        throttle: 'no_actions',
       };
 
       expect(result).toEqual(expected);

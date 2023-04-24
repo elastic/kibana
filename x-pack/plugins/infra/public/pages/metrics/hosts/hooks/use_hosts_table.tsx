@@ -8,8 +8,10 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TimeRange } from '@kbn/es-query';
-
+import createContainer from 'constate';
+import { isEqual } from 'lodash';
+import { CriteriaWithPagination } from '@elastic/eui';
+import { isNumber } from 'lodash/fp';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { HostsTableEntryTitle } from '../components/hosts_table_entry_title';
@@ -19,6 +21,9 @@ import {
   InfraAssetMetricType,
 } from '../../../../../common/http_api';
 import { useHostFlyoutOpen } from './use_host_flyout_open_url_state';
+import { Sorting, useHostsTableProperties } from './use_hosts_table_url_state';
+import { useHostsViewContext } from './use_hosts_view';
+import { useUnifiedSearchContext } from './use_unified_search';
 
 /**
  * Columns and items types
@@ -37,10 +42,6 @@ export type HostNodeRow = HostMetadata &
   HostMetrics & {
     name: string;
   };
-
-interface HostTableParams {
-  time: TimeRange;
-}
 
 /**
  * Helper functions
@@ -78,6 +79,35 @@ const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
     };
   });
 };
+
+const isTitleColumn = (cell: any): cell is HostNodeRow['title'] => {
+  return typeof cell === 'object' && cell && 'name' in cell;
+};
+
+const sortValues = (aValue: any, bValue: any, { direction }: Sorting) => {
+  if (typeof aValue === 'string' && typeof bValue === 'string') {
+    return direction === 'desc' ? bValue.localeCompare(aValue) : aValue.localeCompare(bValue);
+  }
+
+  if (isNumber(aValue) && isNumber(bValue)) {
+    return direction === 'desc' ? bValue - aValue : aValue - bValue;
+  }
+
+  return 1;
+};
+
+const sortTableData =
+  ({ direction, field }: Sorting) =>
+  (a: HostNodeRow, b: HostNodeRow) => {
+    const aValue = a[field as keyof HostNodeRow];
+    const bValue = b[field as keyof HostNodeRow];
+
+    if (isTitleColumn(aValue) && isTitleColumn(bValue)) {
+      return sortValues(aValue.name, bValue.name, { direction, field });
+    }
+
+    return sortValues(aValue, bValue, { direction, field });
+  };
 
 /**
  * Columns translations
@@ -133,14 +163,17 @@ const toggleDialogActionLabel = i18n.translate(
 /**
  * Build a table columns and items starting from the snapshot nodes.
  */
-export const useHostsTable = (nodes: InfraAssetMetricsItem[], { time }: HostTableParams) => {
+export const useHostsTable = () => {
+  const { hostNodes } = useHostsViewContext();
+  const { searchCriteria } = useUnifiedSearchContext();
+  const [{ pagination, sorting }, setProperties] = useHostsTableProperties();
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
 
-  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
+  const [hostFlyoutOpen, setHostFlyoutOpen, setFlyoutClosed] = useHostFlyoutOpen();
 
-  const closeFlyout = () => setHostFlyoutOpen({ clickedItemId: '' });
+  const closeFlyout = () => setFlyoutClosed();
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
@@ -152,11 +185,37 @@ export const useHostsTable = (nodes: InfraAssetMetricsItem[], { time }: HostTabl
     [telemetry]
   );
 
-  const items = useMemo(() => buildItemsList(nodes), [nodes]);
+  const onTableChange = useCallback(
+    ({ page, sort }: CriteriaWithPagination<HostNodeRow>) => {
+      const { index: pageIndex, size: pageSize } = page;
+      const { field, direction } = sort ?? {};
+
+      const currentSorting = { field: field as keyof HostNodeRow, direction };
+      const currentPagination = { pageIndex, pageSize };
+
+      if (!isEqual(sorting, currentSorting)) {
+        setProperties({ sorting: currentSorting });
+      } else if (!isEqual(pagination, currentPagination)) {
+        setProperties({ pagination: currentPagination });
+      }
+    },
+    [setProperties, pagination, sorting]
+  );
+
+  const items = useMemo(() => buildItemsList(hostNodes), [hostNodes]);
   const clickedItem = useMemo(
     () => items.find(({ id }) => id === hostFlyoutOpen.clickedItemId),
     [hostFlyoutOpen.clickedItemId, items]
   );
+
+  const currentPage = useMemo(() => {
+    const { pageSize = 0, pageIndex = 0 } = pagination;
+
+    const endIndex = (pageIndex + 1) * pageSize;
+    const startIndex = pageIndex * pageSize;
+
+    return items.sort(sortTableData(sorting)).slice(startIndex, endIndex);
+  }, [items, pagination, sorting]);
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [
@@ -179,7 +238,7 @@ export const useHostsTable = (nodes: InfraAssetMetricsItem[], { time }: HostTabl
                 clickedItemId: id,
               });
               if (id === hostFlyoutOpen.clickedItemId) {
-                setHostFlyoutOpen({ clickedItemId: '' });
+                setFlyoutClosed();
               } else {
                 setHostFlyoutOpen({ clickedItemId: id });
               }
@@ -196,7 +255,7 @@ export const useHostsTable = (nodes: InfraAssetMetricsItem[], { time }: HostTabl
         render: (title: HostNodeRow['title']) => (
           <HostsTableEntryTitle
             title={title}
-            time={time}
+            time={searchCriteria.dateRange}
             onClick={() => reportHostEntryClick(title)}
           />
         ),
@@ -257,14 +316,27 @@ export const useHostsTable = (nodes: InfraAssetMetricsItem[], { time }: HostTabl
         align: 'right',
       },
     ],
-    [hostFlyoutOpen.clickedItemId, reportHostEntryClick, setHostFlyoutOpen, time]
+    [
+      hostFlyoutOpen.clickedItemId,
+      reportHostEntryClick,
+      searchCriteria.dateRange,
+      setFlyoutClosed,
+      setHostFlyoutOpen,
+    ]
   );
 
   return {
     columns,
-    items,
     clickedItem,
-    isFlyoutOpen: !!hostFlyoutOpen.clickedItemId,
+    currentPage,
     closeFlyout,
+    items,
+    isFlyoutOpen: !!hostFlyoutOpen.clickedItemId,
+    onTableChange,
+    pagination,
+    sorting,
   };
 };
+
+export const HostsTable = createContainer(useHostsTable);
+export const [HostsTableProvider, useHostsTableContext] = HostsTable;
