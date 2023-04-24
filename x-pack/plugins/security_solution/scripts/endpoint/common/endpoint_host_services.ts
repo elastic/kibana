@@ -26,6 +26,8 @@ export interface CreateAndEnrollEndpointHostOptions
   agentPolicyId: string;
   /** version of the Agent to install. Defaults to stack version */
   version?: string;
+  /** If `version` should be exact, or if this is `true`, then the closest version will be used */
+  useClosestVersionMatch?: boolean;
   /** The name for the host. Will also be the name of the VM */
   hostname?: string;
 }
@@ -47,6 +49,7 @@ export const createAndEnrollEndpointHost = async ({
   memory,
   hostname,
   version = kibanaPackageJson.version,
+  useClosestVersionMatch = false,
 }: CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse> => {
   const [vm, agentDownloadUrl, fleetServerUrl, enrollmentToken] = await Promise.all([
     createMultipassVm({
@@ -56,12 +59,14 @@ export const createAndEnrollEndpointHost = async ({
       memory,
     }),
 
-    getAgentDownloadUrl(version, true, log),
+    getAgentDownloadUrl(version, useClosestVersionMatch, log),
 
     fetchFleetServerUrl(kbnClient),
 
     fetchAgentPolicyEnrollmentKey(kbnClient, agentPolicyId),
   ]);
+
+  log.verbose(await execa('multipass', ['info', vm.vmName]));
 
   // Some validations before we proceed
   assert(agentDownloadUrl, 'Missing agent download URL');
@@ -157,6 +162,8 @@ const enrollHostWithFleet = async ({
 }: EnrollHostWithFleetOptions): Promise<{ agentId: string }> => {
   const agentDownloadedFile = agentDownloadUrl.substring(agentDownloadUrl.lastIndexOf('/') + 1);
   const vmDirName = agentDownloadedFile.replace(/\.tar\.gz$/, '');
+
+  log.verbose(`downloading and installing agent on host`);
 
   await execa.command(
     `multipass exec ${vmName} -- curl -L ${agentDownloadUrl} -o ${agentDownloadedFile}`

@@ -195,7 +195,12 @@ export const dataLoadersForRealEndpoints = (
       options: Omit<CreateAndEnrollEndpointHostOptions, 'log' | 'kbnClient'>
     ): Promise<CreateAndEnrollEndpointHostResponse> => {
       const { kbnClient, log } = await stackServicesPromise;
-      return createAndEnrollEndpointHost({ ...options, log, kbnClient }).then((newHost) => {
+      return createAndEnrollEndpointHost({
+        useClosestVersionMatch: true,
+        ...options,
+        log,
+        kbnClient,
+      }).then((newHost) => {
         return waitForEndpointToStreamData(kbnClient, newHost.agentId, 120000).then(() => {
           return newHost;
         });
