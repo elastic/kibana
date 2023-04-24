@@ -40,8 +40,8 @@
  * Shifting the rendered panels offscreen prevents panel reloading on minimize
  */
 .dshDashboardGrid__item--hidden {
-  position: absolute; 
-  top: -9999px; 
+  position: absolute;
+  top: -9999px;
   left: -9999px;
 }
 

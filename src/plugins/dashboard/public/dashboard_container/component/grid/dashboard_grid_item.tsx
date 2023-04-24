@@ -68,8 +68,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       printViewport__vis: container.getInput().viewMode === ViewMode.PRINT,
     });
 
-    useEffect(() => {
-      let panelElement;
+    useLayoutEffect(() => {
       if (typeof ref !== 'function' && ref?.current) {
         if (scrollToPanelId === id) {
           container.scrollToPanel(ref.current);
