@@ -99,7 +99,7 @@ describe('FileService', () => {
     return file;
   }
   afterEach(async () => {
-    await fileService.bulkDelete({ ids: disposables.map(d => d.id) });
+    await fileService.bulkDelete({ ids: disposables.map((d) => d.id) });
     const { files } = await fileService.find({ kind: [fileKind] });
     expect(files.length).toBe(0);
     disposables = [];
@@ -250,11 +250,13 @@ describe('FileService', () => {
   });
 
   it('deletes multiple files using the bulk method', async () => {
-    const promises = Array.from({ length: 15 }, (v, i) => fileService.create({ fileKind, name: 'test ' + i }));
+    const promises = Array.from({ length: 15 }, (v, i) =>
+      fileService.create({ fileKind, name: 'test ' + i })
+    );
     const files = await Promise.all(promises);
     const result = await fileService.find({ kind: [fileKind] });
     expect(result.files.length).toBe(15);
-    await fileService.bulkDelete({ ids: files.map(file => file.id) });
+    await fileService.bulkDelete({ ids: files.map((file) => file.id) });
     expect(await fileService.find({ kind: [fileKind] })).toEqual({ files: [], total: 0 });
   });
 

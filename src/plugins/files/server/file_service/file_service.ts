@@ -49,7 +49,7 @@ export interface FileServiceStart {
    *
    * @param args - delete files args
    */
-  bulkDelete(args: BulkDeleteFilesArgs): Promise<PromiseSettledResult<void>[]>;
+  bulkDelete(args: BulkDeleteFilesArgs): Promise<Array<PromiseSettledResult<void>>>;
 
   /**
    * Get a file by ID. Will throw if file cannot be found.

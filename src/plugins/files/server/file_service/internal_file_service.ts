@@ -69,7 +69,9 @@ export class InternalFileService {
     await file.delete();
   }
 
-  public async bulkDeleteFiles({ ids }: BulkDeleteFilesArgs): Promise<PromiseSettledResult<void>[]> {
+  public async bulkDeleteFiles({
+    ids,
+  }: BulkDeleteFilesArgs): Promise<Array<PromiseSettledResult<void>>> {
     const promises = ids.map((id) => bulkDeleteConcurrency(() => this.deleteFile({ id })));
     const result = await Promise.allSettled(promises);
     return result;
