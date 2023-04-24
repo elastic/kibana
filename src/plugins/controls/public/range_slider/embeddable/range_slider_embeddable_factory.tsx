@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import deepEqual from 'fast-deep-equal';
 
-import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 
 import {
   createRangeSliderExtract,
@@ -45,7 +45,7 @@ export class RangeSliderEmbeddableFactory
   public isEditable = () => Promise.resolve(true);
 
   public async create(initialInput: RangeSliderEmbeddableInput, parent?: IContainer) {
-    const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
+    const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
     const { RangeSliderEmbeddable } = await import('./range_slider_embeddable');
 
     return Promise.resolve(

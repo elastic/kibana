@@ -875,7 +875,7 @@
               "\nPosition of the legend relative to the chart"
             ],
             "signature": [
-              "\"right\" | \"left\" | \"top\" | \"bottom\""
+              "\"top\" | \"left\" | \"right\" | \"bottom\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -923,7 +923,7 @@
               "\nHorizontal Alignment of the legend when it is set inside chart"
             ],
             "signature": [
-              "\"right\" | \"left\" | undefined"
+              "\"left\" | \"right\" | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -1867,7 +1867,7 @@
             "label": "overrides",
             "description": [],
             "signature": [
-              "(Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; title?: string | undefined; style?: ",
+              "(Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; style?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -1879,7 +1879,7 @@
               "RecursivePartial",
               "<Omit<",
               "AxisStyle",
-              ", \"gridLine\">> | undefined>; gridLine?: ",
+              ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -2106,7 +2106,7 @@
         "label": "AllowedXYOverrides",
         "description": [],
         "signature": [
-          "{ axisX?: { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; title?: string | undefined; style?: ",
+          "{ axisX?: { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2118,7 +2118,7 @@
           "RecursivePartial",
           "<Omit<",
           "AxisStyle",
-          ", \"gridLine\">> | undefined>; gridLine?: ",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2140,7 +2140,7 @@
           "YDomainRange",
           " | undefined>; position?: ",
           "Position",
-          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; showGridLines?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisLeft?: { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; title?: string | undefined; style?: ",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; showGridLines?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisLeft?: { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2152,7 +2152,7 @@
           "RecursivePartial",
           "<Omit<",
           "AxisStyle",
-          ", \"gridLine\">> | undefined>; gridLine?: ",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2174,7 +2174,7 @@
           "YDomainRange",
           " | undefined>; position?: ",
           "Position",
-          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; showGridLines?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisRight?: { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; title?: string | undefined; style?: ",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; integersOnly?: boolean | undefined; tickFormat?: \"ignore\" | undefined; showGridLines?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisRight?: { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2186,7 +2186,7 @@
           "RecursivePartial",
           "<Omit<",
           "AxisStyle",
-          ", \"gridLine\">> | undefined>; gridLine?: ",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2875,7 +2875,7 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\""
+          "\"left\" | \"right\" | \"above\" | \"below\" | \"auto\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
