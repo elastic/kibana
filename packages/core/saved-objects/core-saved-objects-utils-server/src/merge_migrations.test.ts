@@ -12,7 +12,58 @@ import type {
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { mergeSavedObjectMigrationMaps } from './merge_migration_maps';
+import { mergeSavedObjectMigrations, mergeSavedObjectMigrationMaps } from './merge_migrations';
+
+describe('mergeSavedObjectMigrations', () => {
+  test('merges migration parameters with a migration function', () => {
+    expect(mergeSavedObjectMigrations({ deferred: true, transform: jest.fn() }, jest.fn())).toEqual(
+      {
+        deferred: false,
+        transform: expect.any(Function),
+      }
+    );
+  });
+
+  test('returns a function on merging two functions', () => {
+    expect(mergeSavedObjectMigrations(jest.fn(), jest.fn())).toBeInstanceOf(Function);
+  });
+
+  test('merges two deferred migrations', () => {
+    expect(
+      mergeSavedObjectMigrations(
+        { deferred: true, transform: jest.fn() },
+        { deferred: true, transform: jest.fn() }
+      )
+    ).toEqual({
+      deferred: true,
+      transform: expect.any(Function),
+    });
+  });
+
+  test('merges two non-deferred migrations', () => {
+    expect(
+      mergeSavedObjectMigrations(
+        { deferred: false, transform: jest.fn() },
+        { deferred: false, transform: jest.fn() }
+      )
+    ).toEqual({
+      deferred: false,
+      transform: expect.any(Function),
+    });
+  });
+
+  test('merges deferred and non-deferred migrations', () => {
+    expect(
+      mergeSavedObjectMigrations(
+        { deferred: true, transform: jest.fn() },
+        { deferred: false, transform: jest.fn() }
+      )
+    ).toEqual({
+      deferred: false,
+      transform: expect.any(Function),
+    });
+  });
+});
 
 describe('mergeSavedObjectMigrationMaps', () => {
   test('correctly merges two saved object migration maps', () => {
@@ -75,59 +126,5 @@ describe('mergeSavedObjectMigrationMaps', () => {
       )
     ).toHaveProperty('attributes.counter', 9);
     expect(context.log.info).toHaveBeenCalledTimes(4);
-  });
-
-  test('merges migration parameters with a migration function', () => {
-    expect(
-      mergeSavedObjectMigrationMaps(
-        { '1.0.0': { deferred: true, transform: jest.fn() } },
-        { '1.0.0': jest.fn() }
-      )
-    ).toHaveProperty(['1.0.0'], {
-      deferred: false,
-      transform: expect.any(Function),
-    });
-  });
-
-  test('returns a function on merging two functions', () => {
-    expect(
-      mergeSavedObjectMigrationMaps({ '1.0.0': jest.fn() }, { '1.0.0': jest.fn() })
-    ).toHaveProperty(['1.0.0'], expect.any(Function));
-  });
-
-  test('merges two deferred migrations', () => {
-    expect(
-      mergeSavedObjectMigrationMaps(
-        { '1.0.0': { deferred: true, transform: jest.fn() } },
-        { '1.0.0': { deferred: true, transform: jest.fn() } }
-      )
-    ).toHaveProperty(['1.0.0'], {
-      deferred: true,
-      transform: expect.any(Function),
-    });
-  });
-
-  test('merges two non-deferred migrations', () => {
-    expect(
-      mergeSavedObjectMigrationMaps(
-        { '1.0.0': { deferred: false, transform: jest.fn() } },
-        { '1.0.0': { deferred: false, transform: jest.fn() } }
-      )
-    ).toHaveProperty(['1.0.0'], {
-      deferred: false,
-      transform: expect.any(Function),
-    });
-  });
-
-  test('merges deferred and non-deferred migrations', () => {
-    expect(
-      mergeSavedObjectMigrationMaps(
-        { '1.0.0': { deferred: true, transform: jest.fn() } },
-        { '1.0.0': { deferred: false, transform: jest.fn() } }
-      )
-    ).toHaveProperty(['1.0.0'], {
-      deferred: false,
-      transform: expect.any(Function),
-    });
   });
 });
