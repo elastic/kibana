@@ -166,67 +166,65 @@ function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfi
         />
       }
     >
-      <EuiFlexGroup responsive={false}>
-        <EuiFlexItem>
-          <FormRow
-            name="data.userSettings.darkMode"
-            label={
-              <FormLabel for="data.userSettings.darkMode">
-                <FormattedMessage
-                  id="xpack.security.accountManagement.userProfile.userSettings.theme"
-                  defaultMessage="Theme mode"
-                />
-              </FormLabel>
-            }
-            fullWidth
-          >
-            <EuiButtonGroup
-              legend={i18n.translate(
-                'xpack.security.accountManagement.userProfile.userSettings.themeGroupDescription',
-                {
-                  defaultMessage: 'Kibana Theme',
-                }
-              )}
-              buttonSize="m"
-              data-test-subj="darkModeButton"
-              idSelected={formik.values.data.userSettings.darkMode}
-              options={[
-                {
-                  id: 'dark',
-                  label: (
-                    <FormattedMessage
-                      id="xpack.security.accountManagement.userProfile.darkModeButton"
-                      defaultMessage="Dark"
-                    />
-                  ),
-                  iconType: 'moon',
-                },
-                {
-                  id: 'light',
-                  label: (
-                    <FormattedMessage
-                      id="xpack.security.accountManagement.userProfile.lightModeButton"
-                      defaultMessage="Light"
-                    />
-                  ),
-                  iconType: 'sun',
-                },
-                {
-                  id: '',
-                  label: (
-                    <FormattedMessage
-                      id="xpack.security.accountManagement.userProfile.defaultModeButton"
-                      defaultMessage="Default"
-                    />
-                  ),
-                },
-              ]}
-              onChange={(id: string) => formik.setFieldValue('data.userSettings.darkMode', id)}
-              isFullWidth
-            />
-          </FormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFlexItem>
+        <FormRow
+          name="data.userSettings.darkMode"
+          label={
+            <FormLabel for="data.userSettings.darkMode">
+              <FormattedMessage
+                id="xpack.security.accountManagement.userProfile.userSettings.theme"
+                defaultMessage="Theme mode"
+              />
+            </FormLabel>
+          }
+          fullWidth
+        >
+          <EuiButtonGroup
+            legend={i18n.translate(
+              'xpack.security.accountManagement.userProfile.userSettings.themeGroupDescription',
+              {
+                defaultMessage: 'Kibana Theme',
+              }
+            )}
+            buttonSize="m"
+            data-test-subj="darkModeButton"
+            idSelected={formik.values.data.userSettings.darkMode}
+            options={[
+              {
+                id: '',
+                label: (
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.userProfile.defaultModeButton"
+                    defaultMessage="Default"
+                  />
+                ),
+              },
+              {
+                id: 'light',
+                label: (
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.userProfile.lightModeButton"
+                    defaultMessage="Light"
+                  />
+                ),
+                iconType: 'sun',
+              },
+              {
+                id: 'dark',
+                label: (
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.userProfile.darkModeButton"
+                    defaultMessage="Dark"
+                  />
+                ),
+                iconType: 'moon',
+              },
+            ]}
+            onChange={(id: string) => formik.setFieldValue('data.userSettings.darkMode', id)}
+            isFullWidth
+          />
+        </FormRow>
+      </EuiFlexItem>
     </EuiDescribedFormGroup>
   );
 }
@@ -657,12 +655,12 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
             >
               <Form aria-labelledby={titleId}>
                 <UserDetailsEditor user={user} />
-                {isCloudUser ? null : <UserSettingsEditor formik={formik} />}
                 {isCloudUser ? null : <UserAvatarEditor user={user} formik={formik} />}
                 <UserPasswordEditor
                   user={user}
                   onShowPasswordForm={() => setShowChangePasswordForm(true)}
                 />
+                {isCloudUser ? null : <UserSettingsEditor formik={formik} />}
               </Form>
             </EuiPageTemplate>
           </Breadcrumb>
