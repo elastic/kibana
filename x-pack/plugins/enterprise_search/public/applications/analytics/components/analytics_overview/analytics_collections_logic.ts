@@ -75,8 +75,8 @@ export const AnalyticsCollectionsLogic = kea<
   selectors: ({ selectors }) => ({
     analyticsCollections: [() => [selectors.data], (data) => data || []],
     hasNoAnalyticsCollections: [
-      () => [selectors.data, selectors.searchQuery],
-      (data, searchQuery) => data?.length === 0 && !searchQuery,
+      () => [selectors.analyticsCollections, selectors.searchQuery],
+      (analyticsCollections, searchQuery) => analyticsCollections.length === 0 && !searchQuery,
     ],
     isFetching: [
       () => [selectors.status, selectors.isSearchRequest],
