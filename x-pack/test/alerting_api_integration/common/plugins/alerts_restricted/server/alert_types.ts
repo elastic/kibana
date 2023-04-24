@@ -7,6 +7,7 @@
 
 import { CoreSetup } from '@kbn/core/server';
 import { RuleType } from '@kbn/alerting-plugin/server';
+import { schema } from '@kbn/config-schema';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 
 export function defineAlertTypes(
@@ -25,6 +26,9 @@ export function defineAlertTypes(
     async executor() {
       return { state: {} };
     },
+    validate: {
+      params: schema.any(),
+    },
   };
   const noopUnrestrictedAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.unrestricted-noop',
@@ -36,6 +40,9 @@ export function defineAlertTypes(
     isExportable: true,
     async executor() {
       return { state: {} };
+    },
+    validate: {
+      params: schema.any(),
     },
   };
   alerting.registerType(noopRestrictedAlertType);
