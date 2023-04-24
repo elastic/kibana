@@ -22,6 +22,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isValidTimeZone, TIMEZONE_OPTIONS } from '../../../../common/time_zone_utils';
 import { AggName } from '../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../common/types/common';
 
@@ -109,6 +111,15 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     isPivotGroupByConfigWithUiSupport(defaultData) ? defaultData.field : ''
   );
   const [interval, setInterval] = useState(getDefaultInterval(defaultData));
+
+  // Should default to time zone that user sets in json editor first
+  const [timeZone, setTimeZone] = useState(
+    isPopulatedObject<string, string>(defaultData, ['time_zone']) &&
+      isValidTimeZone(defaultData.time_zone)
+      ? defaultData.time_zone
+      : undefined
+  );
+
   const [missingBucket, setMissingBucket] = useState(
     isPivotGroupByConfigWithUiSupport(defaultData) && defaultData.missing_bucket
   );
@@ -122,6 +133,10 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
       updatedItem.interval = interval;
     } else if (isGroupByDateHistogram(updatedItem) && interval !== undefined) {
       updatedItem.calendar_interval = interval;
+
+      if (isValidTimeZone(timeZone)) {
+        updatedItem.time_zone = timeZone;
+      }
     }
 
     // Casting to PivotGroupByConfig because TS would otherwise complain about the
@@ -173,6 +188,8 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   if (formValid && (isGroupByDateHistogram(defaultData) || isGroupByHistogram(defaultData))) {
     formValid = isIntervalValid(interval, defaultData.agg);
   }
+
+  const timeZoneValid = isGroupByDateHistogram(defaultData) && isValidTimeZone(timeZone);
 
   return (
     <EuiForm style={{ width: '300px' }}>
@@ -263,6 +280,31 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           </>
         </EuiFormRow>
       )}
+      {isGroupByDateHistogram(defaultData) && timeZone ? (
+        <EuiFormRow
+          error={
+            !timeZoneValid && [
+              i18n.translate('xpack.transform.groupBy.popoverForm.timeZoneError', {
+                defaultMessage: 'Invalid time zone.',
+              }),
+            ]
+          }
+          isInvalid={!timeZoneValid}
+          label={i18n.translate('xpack.transform.groupBy.popoverForm.timeZoneLabel', {
+            defaultMessage: 'Time zone',
+          })}
+        >
+          <EuiSelect
+            options={TIMEZONE_OPTIONS}
+            onChange={(e) => setTimeZone(e.target.value)}
+            value={timeZone}
+            aria-label={i18n.translate('xpack.transform.groupBy.popoverForm.timeZoneAriaLabel', {
+              defaultMessage: 'Time zone',
+            })}
+          />
+        </EuiFormRow>
+      ) : null}
+
       {!isUnsupportedAgg && (
         <EuiFormRow
           helpText={

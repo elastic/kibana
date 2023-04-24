@@ -19,6 +19,7 @@ interface Props {
 export const GroupByLabelSummary: React.FC<Props> = ({ item, optionsDataId }) => {
   let interval: string | undefined;
 
+  // @todo: revisit this part in UI
   if (isGroupByDateHistogram(item)) {
     interval = item.calendar_interval;
   } else if (isGroupByHistogram(item)) {
