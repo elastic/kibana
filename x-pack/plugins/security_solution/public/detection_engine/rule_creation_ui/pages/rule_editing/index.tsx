@@ -301,12 +301,13 @@ const EditRulePageComponent: FC = () => {
           <>
             <EuiSpacer />
             <StepPanel loading={loading}>
-              {actionsStep.data != null && (
+              {actionsStep.data != null && scheduleStep.data != null && (
                 <StepRuleActions
                   isReadOnlyView={false}
                   isLoading={isLoading}
                   isUpdateView
                   defaultValues={actionsStep.data}
+                  ruleScheduleInterval={scheduleStep.data.interval}
                   setForm={setFormHook}
                   actionMessageParams={actionMessageParams}
                   ruleType={rule?.type}

@@ -6,9 +6,9 @@
  */
 
 import moment from 'moment';
+import { getTimeTypeValue } from '../../../../../common/utils/time_type_value';
 
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
-import { getTimeTypeValue } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
 
 export const usePreviewInvocationCount = ({
   timeframeOptions,

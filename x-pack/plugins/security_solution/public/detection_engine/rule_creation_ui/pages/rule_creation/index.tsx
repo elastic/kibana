@@ -558,6 +558,7 @@ const CreateRulePageComponent: React.FC = () => {
                           <StepRuleActions
                             addPadding={true}
                             defaultValues={stepsData.current[RuleStep.ruleActions].data}
+                            ruleScheduleInterval={scheduleRuleData.interval}
                             isReadOnlyView={activeStep !== RuleStep.ruleActions}
                             isLoading={isLoading || loading || isStartingJobs}
                             setForm={setFormHook}

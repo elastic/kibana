@@ -8,7 +8,6 @@
 /* eslint-disable complexity */
 
 import { has, isEmpty } from 'lodash/fp';
-import type { Unit } from '@kbn/datemath';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
 import omit from 'lodash/omit';
@@ -25,6 +24,7 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { getTimeTypeValue } from '../../../../../common/utils/time_type_value';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
   transformAlertToRuleAction,
@@ -49,26 +49,6 @@ import {
 } from '../../../../detections/pages/detection_engine/rules/types';
 import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
 import { stepActionsDefaultValue } from '../../../../detections/components/rules/step_rule_actions';
-
-export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
-  const timeObj: { unit: Unit; value: number } = {
-    unit: 'ms',
-    value: 0,
-  };
-  const filterTimeVal = time.match(/\d+/g);
-  const filterTimeType = time.match(/[a-zA-Z]+/g);
-  if (!isEmpty(filterTimeVal) && filterTimeVal != null && !isNaN(Number(filterTimeVal[0]))) {
-    timeObj.value = Number(filterTimeVal[0]);
-  }
-  if (
-    !isEmpty(filterTimeType) &&
-    filterTimeType != null &&
-    ['s', 'm', 'h'].includes(filterTimeType[0])
-  ) {
-    timeObj.unit = filterTimeType[0] as Unit;
-  }
-  return timeObj;
-};
 
 export const stepIsValid = <T extends RuleStepsFormData[keyof RuleStepsFormData]>(
   formData?: T

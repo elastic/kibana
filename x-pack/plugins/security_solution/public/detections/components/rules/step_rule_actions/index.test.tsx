@@ -45,6 +45,7 @@ describe('StepRuleActions', () => {
   it('renders correctly', () => {
     const wrapper = shallow(
       <StepRuleActions
+        ruleScheduleInterval={'5m'}
         actionMessageParams={actionMessageParams}
         isReadOnlyView={false}
         isLoading={false}

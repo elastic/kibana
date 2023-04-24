@@ -40,6 +40,7 @@ interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
   actionMessageParams: ActionVariables;
   ruleType?: Type;
+  ruleScheduleInterval: string;
 }
 
 export const stepActionsDefaultValue: ActionsStepRule = {
@@ -77,6 +78,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   setForm,
   actionMessageParams,
   ruleType,
+  ruleScheduleInterval,
 }) => {
   const {
     services: {
@@ -145,11 +147,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
           component={RuleActionsField}
           componentProps={{
             messageVariables: actionMessageParams,
+            ruleScheduleInterval,
           }}
         />
       </>
     ),
-    [actionMessageParams]
+    [actionMessageParams, ruleScheduleInterval]
   );
   const displayResponseActionsOptions = useMemo(() => {
     if (isQueryRule(ruleType)) {

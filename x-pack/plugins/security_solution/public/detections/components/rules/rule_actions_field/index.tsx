@@ -23,6 +23,7 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getTimeTypeValue } from '../../../../../common/utils/time_type_value';
 import { NOTIFICATION_DEFAULT_FREQUENCY } from '../../../../../common/constants';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormContext } from '../../../../shared_imports';
@@ -77,6 +78,7 @@ const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
 interface Props {
   field: FieldHook;
   messageVariables: ActionVariables;
+  ruleScheduleInterval?: string;
 }
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
@@ -110,7 +112,11 @@ const ContainerActions = styled.div.attrs(
     )}
 `;
 
-export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) => {
+export const RuleActionsField: React.FC<Props> = ({
+  field,
+  messageVariables,
+  ruleScheduleInterval,
+}) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const form = useFormContext();
   const { isSubmitted, isSubmitting, isValid } = form;
@@ -137,6 +143,14 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
       }, []),
     [actions]
   );
+
+  const minimumThrottleInterval = useMemo<[number, string] | undefined>(() => {
+    if (ruleScheduleInterval != null) {
+      const { unit: intervalUnit, value: intervalValue } = getTimeTypeValue(ruleScheduleInterval);
+      return [intervalValue, intervalUnit];
+    }
+    return ruleScheduleInterval;
+  }, [ruleScheduleInterval]);
 
   const setActionIdByIndex = useCallback(
     (id: string, index: number) => {
@@ -244,16 +258,18 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
         defaultRuleFrequency: NOTIFICATION_DEFAULT_FREQUENCY,
         showActionAlertsFilter: true,
+        minimumThrottleInterval,
       }),
     [
-      actions,
       getActionForm,
+      actions,
       messageVariables,
-      setActionFrequency,
       setActionIdByIndex,
-      setActionParamsProperty,
       setAlertActionsProperty,
+      setActionParamsProperty,
+      setActionFrequency,
       setActionAlertsFilterProperty,
+      minimumThrottleInterval,
     ]
   );
 
