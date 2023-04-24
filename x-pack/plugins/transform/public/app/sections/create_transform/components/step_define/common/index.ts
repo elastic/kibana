@@ -13,4 +13,4 @@ export { getDefaultAggregationConfig } from './get_default_aggregation_config';
 export { getDefaultGroupByConfig } from './get_default_group_by_config';
 export { getDefaultStepDefineState } from './get_default_step_define_state';
 export { getPivotDropdownOptions } from './get_pivot_dropdown_options';
-export type { ErrorMessage, Field, StepDefineExposedState } from './types';
+export type { Field, StepDefineExposedState } from './types';
