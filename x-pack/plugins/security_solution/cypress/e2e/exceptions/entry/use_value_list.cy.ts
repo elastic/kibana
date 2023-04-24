@@ -72,7 +72,7 @@ describe('Use Value list in exception entry', () => {
     esArchiverUnload('exceptions');
   });
 
-  it('Should value list in exception entry', () => {
+  it('Should use value list in exception entry, and validate deleting value list prompt', () => {
     const ITEM_NAME = 'Exception item with value list';
     const ITEM_FIELD = 'agent.name';
 

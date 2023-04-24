@@ -39,6 +39,10 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineIndicesLogic } from './engine_indices_logic';
 
+const pageTitle = i18n.translate('xpack.enterpriseSearch.content.engine.indices.pageTitle', {
+  defaultMessage: 'Indices',
+});
+
 export const EngineIndices: React.FC = () => {
   const subduedBackground = useEuiBackgroundColor('subdued');
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
@@ -60,7 +64,7 @@ export const EngineIndices: React.FC = () => {
     description: i18n.translate(
       'xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.title',
       {
-        defaultMessage: 'Remove this index from engine',
+        defaultMessage: 'Remove this index from search application',
       }
     ),
     icon: 'minusInCircle',
@@ -174,13 +178,11 @@ export const EngineIndices: React.FC = () => {
   ];
   return (
     <EnterpriseSearchEnginesPageTemplate
-      pageChrome={[engineName]}
+      pageChrome={[engineName, pageTitle]}
       pageViewTelemetry={EngineViewTabs.INDICES}
       isLoading={isLoadingEngine}
       pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.content.engine.indices.pageTitle', {
-          defaultMessage: 'Indices',
-        }),
+        pageTitle,
         rightSideItems: [
           <EuiButton
             data-telemetry-id="entSearchContent-engines-indices-addNewIndices"
@@ -213,7 +215,7 @@ export const EngineIndices: React.FC = () => {
                   'xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.description',
                   {
                     defaultMessage:
-                      'Some data might be unreachable from this engine. Check for any pending operations or errors on affected indices, or remove those that should no longer be used by this engine.',
+                      'Some data might be unreachable from this search application. Check for any pending operations or errors on affected indices, or remove those that should no longer be used by this search application.',
                   }
                 )}
               </p>
@@ -257,7 +259,7 @@ export const EngineIndices: React.FC = () => {
             }}
             title={i18n.translate(
               'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.title',
-              { defaultMessage: 'Remove this index from the engine' }
+              { defaultMessage: 'Remove this index from the Search Application' }
             )}
             buttonColor="danger"
             cancelButtonText={CANCEL_BUTTON_LABEL}
@@ -276,7 +278,7 @@ export const EngineIndices: React.FC = () => {
                   'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.description',
                   {
                     defaultMessage:
-                      "This won't delete the index. You may add it back to this engine at a later time.",
+                      "This won't delete the index. You may add it back to this search application at a later time.",
                   }
                 )}
               </p>

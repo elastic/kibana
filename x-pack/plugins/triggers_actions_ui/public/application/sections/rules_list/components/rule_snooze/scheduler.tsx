@@ -9,6 +9,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
 import { v4 as uuidv4 } from 'uuid';
 import {
   EuiDatePicker,
@@ -47,7 +48,7 @@ export interface ComponentOpts extends PanelOpts {
   hasTitle: boolean;
 }
 
-const TIMEZONE_OPTIONS = moment.tz?.names().map((n) => ({ label: n })) ?? [{ label: 'UTC' }];
+const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((n) => ({ label: n })) ?? [{ label: 'UTC' }];
 
 const useDefaultTimzezone = () => {
   const kibanaTz: string = useUiSetting('dateFormat:tz');
@@ -329,8 +330,8 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       <EuiSpacer size="m" />
       <EuiSwitch
         compressed
-        label={i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.reucrringSwitch', {
-          defaultMessage: 'Make recurring',
+        label={i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.repeatSwitch', {
+          defaultMessage: 'Repeat',
         })}
         onChange={() => setIsRecurring(!isRecurring)}
         checked={isRecurring}

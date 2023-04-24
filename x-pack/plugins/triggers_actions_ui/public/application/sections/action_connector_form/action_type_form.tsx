@@ -30,7 +30,12 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
-import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
+import {
+  ActionVariable,
+  RuleActionAlertsFilterProperty,
+  RuleActionParam,
+  RuleNotifyWhenType,
+} from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
@@ -45,6 +50,7 @@ import {
   ActionVariables,
   ActionTypeRegistryContract,
   ActionConnectorMode,
+  NotifyWhenSelectOptions,
 } from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
@@ -54,6 +60,8 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
 import { ActionNotifyWhen } from './action_notify_when';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
+import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
+import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -64,6 +72,11 @@ export type ActionTypeFormProps = {
   onDeleteAction: () => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionAlertsFilterProperty: (
+    key: string,
+    value: RuleActionAlertsFilterProperty,
+    index: number
+  ) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -72,6 +85,9 @@ export type ActionTypeFormProps = {
   hideNotifyWhen?: boolean;
   hasSummary?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
+  notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
+  defaultNotifyWhenValue?: RuleNotifyWhenType;
+  showActionAlertsFilter?: boolean;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -99,6 +115,7 @@ export const ActionTypeForm = ({
   onDeleteAction,
   setActionParamsProperty,
   setActionFrequencyProperty,
+  setActionAlertsFilterProperty,
   actionTypesIndex,
   connectors,
   defaultActionGroupId,
@@ -113,6 +130,9 @@ export const ActionTypeForm = ({
   defaultSummaryMessage,
   hasSummary,
   minimumThrottleInterval,
+  notifyWhenSelectOptions,
+  defaultNotifyWhenValue,
+  showActionAlertsFilter,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -143,6 +163,7 @@ export const ActionTypeForm = ({
   const [warning, setWarning] = useState<string | null>(null);
 
   const [useDefaultMessage, setUseDefaultMessage] = useState(false);
+
   const isSummaryAction = actionItem.frequency?.summary;
 
   const getDefaultParams = async () => {
@@ -280,6 +301,8 @@ export const ActionTypeForm = ({
       )}
       showMinimumThrottleWarning={showMinimumThrottleWarning}
       showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
+      notifyWhenSelectOptions={notifyWhenSelectOptions}
+      defaultNotifyWhenValue={defaultNotifyWhenValue}
     />
   );
 
@@ -377,6 +400,20 @@ export const ActionTypeForm = ({
                 setActionGroupIdByIndex(group, index);
                 setActionGroup(group);
               }}
+            />
+          </>
+        )}
+        {showActionAlertsFilter && (
+          <>
+            {!hideNotifyWhen && <EuiSpacer size="xl" />}
+            <ActionAlertsFilterQuery
+              state={actionItem.alertsFilter?.query}
+              onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
+            />
+            <EuiSpacer size="s" />
+            <ActionAlertsFilterTimeframe
+              state={actionItem.alertsFilter?.timeframe}
+              onChange={(timeframe) => setActionAlertsFilterProperty('timeframe', timeframe, index)}
             />
           </>
         )}

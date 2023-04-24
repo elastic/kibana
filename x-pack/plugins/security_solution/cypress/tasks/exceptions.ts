@@ -34,7 +34,23 @@ import {
   EXCEPTION_ITEM_COMMENTS_CONTAINER,
   EXCEPTION_ITEM_COMMENT_COPY_BTN,
   VALUES_MATCH_INCLUDED_INPUT,
+  EXCEPTION_ITEM_VIEWER_CONTAINER,
 } from '../screens/exceptions';
+
+export const assertNumberOfExceptionItemsExists = (numberOfItems: number) => {
+  cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', numberOfItems);
+};
+
+export const expectToContainItem = (container: string, itemName: string) => {
+  cy.log(`Expecting exception items table to contain '${itemName}'`);
+  cy.get(container).should('include.text', itemName);
+};
+
+export const assertExceptionItemsExists = (container: string, itemNames: string[]) => {
+  for (const itemName of itemNames) {
+    expectToContainItem(container, itemName);
+  }
+};
 
 export const addExceptionEntryFieldValueOfItemX = (
   field: string,

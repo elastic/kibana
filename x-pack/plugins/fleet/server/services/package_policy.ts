@@ -6,7 +6,7 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { omit, partition, isEqual } from 'lodash';
+import { omit, partition, isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
@@ -23,9 +23,11 @@ import { safeLoad } from 'js-yaml';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { type AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import pMap from 'p-map';
+
+import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
   packageToPackagePolicy,
@@ -128,6 +130,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options: {
+      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
@@ -144,6 +147,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Ensure an ID is provided, so we can include it in the audit logs below
     if (!options.id) {
       options.id = SavedObjectsUtils.generateId();
+    }
+
+    let authorizationHeader = options.authorizationHeader;
+
+    if (!authorizationHeader && request) {
+      authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     }
 
     auditLoggingService.writeCustomSoAuditLog({
@@ -200,6 +209,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           pkgName: enrichedPackagePolicy.package.name,
           pkgVersion: enrichedPackagePolicy.package.version,
           force: options?.force,
+          authorizationHeader,
         });
       }
 
@@ -1606,6 +1616,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options?: {
+      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
@@ -1738,11 +1749,24 @@ async function _compilePackageStreams(
 }
 
 // temporary export to enable testing pending refactor https://github.com/elastic/kibana/issues/112386
+// TODO: Move this logic into `package_policies_to_agent_permissions.ts` since this is not a package policy concern
+// and is based entirely on the package contents
 export function _applyIndexPrivileges(
   packageDataStream: RegistryDataStream,
   stream: PackagePolicyInputStream
 ): PackagePolicyInputStream {
-  const streamOut = { ...stream };
+  const streamOut = cloneDeep(stream);
+
+  if (packageDataStream?.elasticsearch?.dynamic_dataset) {
+    streamOut.data_stream.elasticsearch = streamOut.data_stream.elasticsearch ?? {};
+    streamOut.data_stream.elasticsearch.dynamic_dataset =
+      packageDataStream.elasticsearch.dynamic_dataset;
+  }
+  if (packageDataStream?.elasticsearch?.dynamic_namespace) {
+    streamOut.data_stream.elasticsearch = streamOut.data_stream.elasticsearch ?? {};
+    streamOut.data_stream.elasticsearch.dynamic_namespace =
+      packageDataStream.elasticsearch.dynamic_namespace;
+  }
 
   const indexPrivileges = packageDataStream?.elasticsearch?.privileges?.indices;
 
@@ -1763,10 +1787,9 @@ export function _applyIndexPrivileges(
   }
 
   if (valid.length) {
-    stream.data_stream.elasticsearch = {
-      privileges: {
-        indices: valid,
-      },
+    streamOut.data_stream.elasticsearch = streamOut.data_stream.elasticsearch ?? {};
+    streamOut.data_stream.elasticsearch.privileges = {
+      indices: valid,
     };
   }
 

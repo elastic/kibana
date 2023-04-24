@@ -37,6 +37,7 @@ import type {
 import {
   CommentType,
   getCaseCommentsUrl,
+  getCasesDeleteFileAttachmentsUrl,
   getCaseDetailsUrl,
   getCaseDetailsMetricsUrl,
   getCasePushUrl,
@@ -399,6 +400,22 @@ export const createAttachments = async (
     }
   );
   return convertCaseToCamelCase(decodeCaseResponse(response));
+};
+
+export const deleteFileAttachments = async ({
+  caseId,
+  fileIds,
+  signal,
+}: {
+  caseId: string;
+  fileIds: string[];
+  signal: AbortSignal;
+}): Promise<void> => {
+  await KibanaServices.get().http.fetch(getCasesDeleteFileAttachmentsUrl(caseId), {
+    method: 'POST',
+    body: JSON.stringify({ ids: fileIds }),
+    signal,
+  });
 };
 
 export const getFeatureIds = async (

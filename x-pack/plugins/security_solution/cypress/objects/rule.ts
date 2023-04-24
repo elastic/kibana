@@ -578,7 +578,6 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
     language: 'kuery',
     index: getIndexPatterns(),
     query,
-    throttle: 'no_actions',
     actions: [],
   };
 

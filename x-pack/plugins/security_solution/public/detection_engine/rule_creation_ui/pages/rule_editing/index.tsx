@@ -101,6 +101,7 @@ const EditRulePageComponent: FC = () => {
   const { data: rule, isLoading: ruleLoading } = useRule(ruleId);
   const loading = ruleLoading || userInfoLoading || listsConfigLoading;
 
+  console.log(rule);
   const { isSavedQueryLoading, savedQueryBar, savedQuery } = useGetSavedQuery(rule?.saved_id, {
     ruleType: rule?.type,
     onError: noop,
@@ -342,6 +343,7 @@ const EditRulePageComponent: FC = () => {
   const { startTransaction } = useStartTransaction();
 
   const onSubmit = useCallback(async () => {
+    debugger;
     const activeStepData = await formHooks.current[activeStep]();
     if (activeStepData?.data != null) {
       setStepData(activeStep, activeStepData.data, activeStepData.isValid);
