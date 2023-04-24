@@ -140,6 +140,20 @@ describe('FileService', () => {
     expect(myFile?.id).toMatch(id);
   });
 
+  it('retrieves a file using the bulk method', async () => {
+    const { id } = await createDisposableFile({ fileKind, name: 'test' });
+    const [myFile] = await fileService.bulkGetById({ ids: [id] });
+    expect(myFile?.id).toMatch(id);
+  });
+
+  it('retrieves multiple files using the bulk method', async () => {
+    const file1 = await createDisposableFile({ fileKind, name: 'test' });
+    const file2 = await createDisposableFile({ fileKind, name: 'test' });
+    const [myFile1, myFile2] = await fileService.bulkGetById({ ids: [file1.id, file2.id] });
+    expect(myFile1?.id).toMatch(file1.id);
+    expect(myFile2?.id).toMatch(file2.id);
+  });
+
   it('lists files', async () => {
     await Promise.all([
       createDisposableFile({ fileKind, name: 'test-1' }),
