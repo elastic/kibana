@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { indexThresholdRuleName } from '.';
+import { metricThresholdRuleName } from '.';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const actions = getService('actions');
@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const emailConnectorName = 'Email connector 1';
   const ruleName = 'kibana sites - high egress';
 
-  describe('index threshold rule', function () {
+  describe('index and metric threshold rule', function () {
     let emailConnectorId: string;
     before(async () => {
       ({ id: emailConnectorId } = await actions.api.createConnector({
@@ -176,10 +176,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('example index threshold rule conditions and actions', async () => {
+    it('example metric threshold rule conditions and actions', async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.setValue('ruleSearchField', indexThresholdRuleName);
+      await testSubjects.setValue('ruleSearchField', metricThresholdRuleName + '\n');
       const actionPanel = await testSubjects.find('collapsedItemActions');
       await actionPanel.click();
       const editRuleMenu = await testSubjects.find('editRule');

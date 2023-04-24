@@ -8,6 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export const indexThresholdRuleName = 'kibana sites - low bytes';
+export const metricThresholdRuleName = 'network metric packets';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -15,7 +16,8 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const rules = getService('rules');
 
   describe('stack alerting', function () {
-    let ruleId: string;
+    let itRuleId: string;
+    let mtRuleId: string;
     let serverLogConnectorId: string;
     before(async () => {
       await browser.setWindowSize(1920, 1080);
@@ -25,7 +27,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
         secrets: {},
         connectorTypeId: '.server-log',
       }));
-      ({ id: ruleId } = await rules.api.createRule({
+      ({ id: itRuleId } = await rules.api.createRule({
         consumer: 'alerts',
         name: indexThresholdRuleName,
         notifyWhen: 'onActionGroupChange',
@@ -55,10 +57,44 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
           },
         ],
       }));
+      ({ id: mtRuleId } = await rules.api.createRule({
+        consumer: 'infrastructure',
+        name: metricThresholdRuleName,
+        notifyWhen: 'onActionGroupChange',
+        params: {
+          criteria: [
+            {
+              aggType: 'max',
+              comparator: '>',
+              threshold: [0],
+              timeSize: 3,
+              timeUnit: 's',
+              metric: 'network.packets',
+            },
+          ],
+          sourceId: 'default',
+          alertOnNoData: false,
+          alertOnGroupDisappear: false,
+          groupBy: ['network.name'],
+        },
+        ruleTypeId: 'metrics.alert.threshold',
+        schedule: { interval: '1m' },
+        actions: [
+          {
+            group: 'metrics.threshold.fired',
+            id: serverLogConnectorId,
+            params: {
+              level: 'info',
+              message: 'Test Metric Threshold rule',
+            },
+          },
+        ],
+      }));
     });
 
     after(async () => {
-      await rules.api.deleteRule(ruleId);
+      await rules.api.deleteRule(itRuleId);
+      await rules.api.deleteRule(mtRuleId);
       await rules.api.deleteAllRules();
       await actions.api.deleteConnector(serverLogConnectorId);
       await actions.api.deleteAllConnectors();
