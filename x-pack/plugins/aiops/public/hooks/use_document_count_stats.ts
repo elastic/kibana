@@ -12,10 +12,10 @@ import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 
 import { RANDOM_SAMPLER_SEED } from '../../common/constants';
 
-import { extractErrorProperties } from '../application/utils/error_utils';
 import {
   DocumentCountStats,
   getDocumentCountStatsRequest,

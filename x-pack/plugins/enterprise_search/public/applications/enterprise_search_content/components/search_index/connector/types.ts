@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-export interface NativeConnector {
-  docsUrl: string;
+export interface ConnectorDefinition {
+  docsUrl?: string;
   externalAuthDocsUrl?: string;
   externalDocsUrl: string;
+  icon: string;
+  isBeta: boolean;
+  isNative: boolean;
   name: string;
   serviceType: string;
 }

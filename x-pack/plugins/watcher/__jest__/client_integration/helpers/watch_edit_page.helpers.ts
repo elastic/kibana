@@ -56,5 +56,6 @@ export type TestSubjects =
   | 'jsonWatchForm'
   | 'nameInput'
   | 'pageTitle'
+  | 'jsonEditor'
   | 'thresholdWatchForm'
   | 'watchTimeFieldSelect';

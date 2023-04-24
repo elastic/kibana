@@ -56,6 +56,7 @@ describe('createRuleRoute', () => {
           query: {
             kql: 'name:test',
             dsl: '{"must": {"term": { "name": "test" }}}',
+            filters: [],
           },
           timeframe: {
             days: [1],
@@ -92,7 +93,7 @@ describe('createRuleRoute', () => {
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
         alerts_filter: {
-          query: { kql: mockedAlert.actions[0].alertsFilter!.query!.kql },
+          query: { kql: mockedAlert.actions[0].alertsFilter!.query!.kql, filters: [] },
           timeframe: mockedAlert.actions[0].alertsFilter?.timeframe!,
         },
       },
@@ -167,6 +168,7 @@ describe('createRuleRoute', () => {
               Object {
                 "alertsFilter": Object {
                   "query": Object {
+                    "filters": Array [],
                     "kql": "name:test",
                   },
                   "timeframe": Object {
@@ -263,6 +265,7 @@ describe('createRuleRoute', () => {
               Object {
                 "alertsFilter": Object {
                   "query": Object {
+                    "filters": Array [],
                     "kql": "name:test",
                   },
                   "timeframe": Object {
@@ -360,6 +363,7 @@ describe('createRuleRoute', () => {
               Object {
                 "alertsFilter": Object {
                   "query": Object {
+                    "filters": Array [],
                     "kql": "name:test",
                   },
                   "timeframe": Object {
@@ -457,6 +461,7 @@ describe('createRuleRoute', () => {
               Object {
                 "alertsFilter": Object {
                   "query": Object {
+                    "filters": Array [],
                     "kql": "name:test",
                   },
                   "timeframe": Object {

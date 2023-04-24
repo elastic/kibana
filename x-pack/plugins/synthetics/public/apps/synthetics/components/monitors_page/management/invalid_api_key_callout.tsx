@@ -34,7 +34,7 @@ export const InvalidApiKeyCalloutCallout = () => {
             {CALLOUT_MANAGEMENT_CONTACT_ADMIN}{' '}
             <EuiLink
               data-test-subj="syntheticsInvalidApiKeyCalloutCalloutLink"
-              href="#"
+              href="https://www.elastic.co/guide/en/observability/current/synthetics-get-started-ui.html#uptime-set-up-prereq"
               target="_blank"
             >
               {LEARN_MORE_LABEL}
@@ -68,9 +68,7 @@ const CALLOUT_MANAGEMENT_CONTACT_ADMIN = i18n.translate(
 const CALLOUT_MANAGEMENT_DESCRIPTION = i18n.translate(
   'xpack.synthetics.monitorManagement.callout.description.invalidKey',
   {
-    defaultMessage:
-      `Monitor Management is currently disabled. To run your monitors in one of Elastic's global managed testing locations,` +
-      'you need to re-enable monitor management.',
+    defaultMessage: `Monitor Management is currently disabled. To run your monitors in one of Elastic's global managed testing locations, you need to re-enable monitor management.`,
   }
 );
 

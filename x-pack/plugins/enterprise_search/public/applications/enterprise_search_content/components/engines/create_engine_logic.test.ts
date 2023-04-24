@@ -8,9 +8,11 @@
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { Status } from '../../../../../common/types/api';
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 
+import { KibanaLogic } from '../../../shared/kibana';
 import { CreateEngineApiLogic } from '../../api/engines/create_engine_api_logic';
+
+import { ENGINES_PATH } from '../../routes';
 
 import { CreateEngineLogic, CreateEngineLogicValues } from './create_engine_logic';
 
@@ -27,7 +29,7 @@ const DEFAULT_VALUES: CreateEngineLogicValues = {
 
 const VALID_ENGINE_NAME = 'unit-test-001';
 const INVALID_ENGINE_NAME = 'TEST';
-const VALID_INDICES_DATA = [{ name: 'search-index-01' }] as ElasticsearchIndexWithIngestion[];
+const VALID_INDICES_DATA = ['search-index-01'];
 
 describe('CreateEngineLogic', () => {
   const { mount: apiLogicMount } = new LogicMounter(CreateEngineApiLogic);
@@ -59,16 +61,17 @@ describe('CreateEngineLogic', () => {
         indices: ['search-index-01'],
       });
     });
-    it('engineCreated is handled', () => {
+    it('engineCreated is handled and is navigated to Search application list page', () => {
       jest.spyOn(CreateEngineLogic.actions, 'fetchEngines');
-      jest.spyOn(CreateEngineLogic.actions, 'closeEngineCreate');
-
+      jest
+        .spyOn(KibanaLogic.values, 'navigateToUrl')
+        .mockImplementationOnce(() => Promise.resolve());
       CreateEngineApiLogic.actions.apiSuccess({
         result: 'created',
       });
+      expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith(ENGINES_PATH);
 
       expect(CreateEngineLogic.actions.fetchEngines).toHaveBeenCalledTimes(1);
-      expect(CreateEngineLogic.actions.closeEngineCreate).toHaveBeenCalledTimes(1);
     });
   });
   describe('selectors', () => {
@@ -114,7 +117,7 @@ describe('CreateEngineLogic', () => {
       it('returns true while create request in progress', () => {
         CreateEngineApiLogic.actions.makeRequest({
           engineName: VALID_ENGINE_NAME,
-          indices: [VALID_INDICES_DATA[0].name],
+          indices: [VALID_INDICES_DATA[0]],
         });
 
         expect(CreateEngineLogic.values.formDisabled).toEqual(true);

@@ -9,22 +9,17 @@
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPopoverTitle, EuiIconTip } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
-import { optionsListReducers } from '../options_list_reducers';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 export const OptionsListPopoverTitle = () => {
-  // Redux embeddable container Context
-  const { useEmbeddableSelector: select } = useReduxEmbeddableContext<
-    OptionsListReduxState,
-    typeof optionsListReducers
-  >();
+  const optionsList = useOptionsList();
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const allowExpensiveQueries = select((state) => state.componentState.allowExpensiveQueries);
-  const title = select((state) => state.explicitInput.title);
+  const allowExpensiveQueries = optionsList.select(
+    (state) => state.componentState.allowExpensiveQueries
+  );
+  const title = optionsList.select((state) => state.explicitInput.title);
 
   return (
     <EuiPopoverTitle paddingSize="s">
