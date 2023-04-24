@@ -7,6 +7,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { RewriteRequestCase } from '@kbn/actions-plugin/common';
+import type { AggregationsCompositeAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   RuleAggregationFormattedResult,
   RuleTagsAggregationFormattedResult,
@@ -33,8 +34,12 @@ export const rewriteBodyRes: RewriteRequestCase<RuleAggregationFormattedResult> 
 
 export const rewriteTagsBodyRes: RewriteRequestCase<RuleTagsAggregationFormattedResult> = ({
   rule_tags: ruleTags,
+  after_key: afterKey,
+  ...rest
 }: any) => ({
+  ...rest,
   ruleTags,
+  afterKey,
 });
 
 export interface LoadRuleAggregationsProps {
@@ -46,4 +51,11 @@ export interface LoadRuleAggregationsProps {
   ruleLastRunOutcomesFilter?: string[];
   ruleStatusesFilter?: RuleStatus[];
   tagsFilter?: string[];
+}
+
+export interface LoadRuleTagsProps {
+  http: HttpSetup;
+  searchText?: string;
+  filter?: string;
+  after?: AggregationsCompositeAggregation['after'];
 }

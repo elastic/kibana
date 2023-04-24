@@ -5,26 +5,37 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { loadRuleTags } from '../lib/rule_api/aggregate';
 import { useKibana } from '../../common/lib/kibana';
+import { LoadRuleTagsProps } from '../lib/rule_api';
 
 interface UseLoadTagsQueryProps {
   enabled: boolean;
   refresh?: Date;
+  filter?: LoadRuleTagsProps['filter'];
+  searchText?: LoadRuleTagsProps['searchText'];
 }
 
+const EMPTY_TAGS: string[] = [];
+
 export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
-  const { enabled, refresh } = props;
+  const { enabled, refresh, searchText, filter } = props;
 
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
 
-  const queryFn = () => {
-    return loadRuleTags({ http });
+  const queryFn = ({ pageParam: after }: { pageParam?: LoadRuleTagsProps['after'] }) => {
+    return loadRuleTags({
+      http,
+      searchText,
+      filter,
+      ...(after ? { after } : {}),
+    });
   };
 
   const onErrorFn = () => {
@@ -35,21 +46,37 @@ export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
     );
   };
 
-  const { refetch, data } = useQuery({
+  const { refetch, data, fetchNextPage, isLoading, isFetching } = useInfiniteQuery({
     queryKey: [
       'loadRuleTags',
+      searchText,
+      filter,
       {
-        refresh: refresh?.toDateString(),
+        refresh: refresh?.toISOString(),
       },
     ],
     queryFn,
     onError: onErrorFn,
     enabled,
+    getNextPageParam: (lastPage) => lastPage.afterKey,
     refetchOnWindowFocus: false,
   });
 
+  const tags = useMemo(() => {
+    return (
+      data?.pages.reduce<string[]>((result, current) => {
+        return [...result, ...current.ruleTags];
+      }, []) || EMPTY_TAGS
+    );
+  }, [data]);
+
+  console.info('data', data);
+
   return {
-    tags: data?.ruleTags ?? [],
-    loadTags: refetch,
+    tags,
+    afterKey: data?.pages[data.pages.length - 1].afterKey,
+    refetch,
+    isLoading: isLoading || isFetching,
+    fetchNextPage,
   };
 }

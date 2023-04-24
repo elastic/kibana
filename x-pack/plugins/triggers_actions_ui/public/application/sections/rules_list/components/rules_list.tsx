@@ -88,7 +88,6 @@ import { useLoadActionTypesQuery } from '../../../hooks/use_load_action_types_qu
 import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggregations_query';
 import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
-import { useLoadTagsQuery } from '../../../hooks/use_load_tags_query';
 import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
 
 import {
@@ -228,6 +227,8 @@ export const RulesList = ({
   const [isCloningRule, setIsCloningRule] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const [localRefresh, setLocalRefresh] = useState<Date>(new Date());
+
   // Fetch config
   const { config } = useLoadConfigQuery();
   // Fetch rule types
@@ -274,12 +275,6 @@ export const RulesList = ({
       refresh,
     });
 
-  // Fetch tags
-  const { tags, loadTags } = useLoadTagsQuery({
-    enabled: isRuleStatusFilterEnabled && canLoadRules,
-    refresh,
-  });
-
   const { showSpinner, showRulesList, showNoAuthPrompt, showCreateFirstRulePrompt } = useUiState({
     authorizedToCreateAnyRules,
     filters,
@@ -307,15 +302,13 @@ export const RulesList = ({
     if (!ruleTypesState || !hasAnyAuthorizedRuleType) {
       return;
     }
+    setLocalRefresh(new Date());
     await loadRules();
     await loadRuleAggregations();
-    if (isRuleStatusFilterEnabled) {
-      await loadTags();
-    }
   }, [
     loadRules,
-    loadTags,
     loadRuleAggregations,
+    setLocalRefresh,
     isRuleStatusFilterEnabled,
     hasAnyAuthorizedRuleType,
     ruleTypesState,
@@ -822,7 +815,8 @@ export const RulesList = ({
                   setInputText={setInputText}
                   showActionFilter={showActionFilter}
                   showErrors={showErrors}
-                  tags={tags}
+                  canLoadRules={canLoadRules}
+                  refresh={refresh || localRefresh}
                   updateFilters={updateFilters}
                   onClearSelection={onClearSelection}
                   onRefreshRules={refreshRules}

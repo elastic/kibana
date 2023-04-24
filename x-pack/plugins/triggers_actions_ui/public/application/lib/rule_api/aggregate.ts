@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from '@kbn/core/public';
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import {
   RuleAggregationFormattedResult,
@@ -12,16 +11,29 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { mapFiltersToKql } from './map_filters_to_kql';
-import { LoadRuleAggregationsProps, rewriteBodyRes, rewriteTagsBodyRes } from './aggregate_helpers';
+import { mapFiltersToKueryNode } from './map_filters_to_kuery_node';
+import { LoadRuleAggregationsProps, LoadRuleTagsProps, rewriteBodyRes, rewriteTagsBodyRes } from './aggregate_helpers';
 
 // TODO: https://github.com/elastic/kibana/issues/131682
 export async function loadRuleTags({
   http,
-}: {
-  http: HttpSetup;
-}): Promise<RuleTagsAggregationFormattedResult> {
+  searchText,
+  filter,
+  after,
+}: LoadRuleTagsProps): Promise<RuleTagsAggregationFormattedResult> {
+  const filtersKueryNode = mapFiltersToKueryNode({
+    tagsFilter: filter ? [`${filter}*`] : [],
+  });
   const res = await http.get<AsApiContract<RuleTagsAggregationFormattedResult>>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`
+    `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_tags`,
+    {
+      query: {
+        search: searchText,
+        after: after ? JSON.stringify(after) : undefined,
+        ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
+        max_tags: 100,
+      }
+    }
   );
   return rewriteTagsBodyRes(res);
 }

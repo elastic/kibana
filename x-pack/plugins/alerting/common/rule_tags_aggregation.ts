@@ -19,10 +19,16 @@ export type RuleTagsAggregationOptions = Pick<AggregateOptions, 'filter' | 'sear
 
 export interface RuleTagsAggregationFormattedResult {
   ruleTags: string[];
+  afterKey?: {
+    tags: string;
+  };
 }
 
 export interface RuleTagsAggregationResult {
   tags: {
+    after_key?: {
+      tags: string;
+    },
     buckets: Array<{
       key: {
         tags: string;
@@ -72,5 +78,6 @@ export const formatRuleTagsAggregationResult = (
   const tagsBuckets = aggregations.tags.buckets || [];
   return {
     ruleTags: tagsBuckets.map((bucket) => bucket.key.tags),
+    ...(aggregations.tags.after_key ? { afterKey: aggregations.tags.after_key } : {}),
   };
 };

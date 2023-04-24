@@ -40,10 +40,12 @@ const rewriteQueryReq: RewriteRequestCase<RuleTagsAggregationOptions> = ({
 
 const rewriteBodyRes: RewriteResponseCase<RuleTagsAggregationFormattedResult> = ({
   ruleTags,
+  afterKey,
   ...rest
 }) => ({
   ...rest,
   rule_tags: ruleTags,
+  ...(afterKey ? { after_key: afterKey } : {}),
 });
 
 export const getRuleTagsRoute = (
@@ -65,7 +67,7 @@ export const getRuleTagsRoute = (
         const aggregateResult = await rulesClient.aggregate<RuleTagsAggregationResult>({
           options: {
             ...options,
-            defaultSearchOperator: 'AND',
+            defaultSearchOperator: 'OR',
             searchFields: ['tags'],
           },
           aggs: getRuleTagsAggregation({
