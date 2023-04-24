@@ -72,7 +72,6 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       let panelElement;
       if (typeof ref !== 'function' && ref?.current) {
         if (scrollToPanelId === id) {
-          console.log('scrolling useeffect');
           container.scrollToPanel(ref.current);
         }
         if (highlightPanelId === id) {
