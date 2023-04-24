@@ -13,11 +13,13 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { FilterStateStore } from '@kbn/es-query';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useUrlState } from '../../../../utils/use_url_state';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
 } from '../../../../hooks/use_kibana_timefilter_time';
+import { DEFAULT_HOST_LIMIT, LOCAL_STORAGE_HOST_LIMIT_KEY } from '../constants';
 
 const DEFAULT_QUERY = {
   language: 'kuery',
@@ -32,6 +34,7 @@ const INITIAL_HOSTS_STATE: HostsState = {
   filters: [],
   panelFilters: [],
   dateRange: INITIAL_DATE_RANGE,
+  limit: DEFAULT_HOST_LIMIT,
 };
 
 const reducer = (prevState: HostsState, params: HostsSearchPayload) => {
@@ -45,9 +48,17 @@ const reducer = (prevState: HostsState, params: HostsSearchPayload) => {
 
 export const useHostsUrlState = (): [HostsState, HostsStateUpdater] => {
   const [getTime] = useKibanaTimefilterTime(INITIAL_DATE_RANGE);
+  const [localStorageHostLimit, setLocalStorageHostLimit] = useLocalStorage<number>(
+    LOCAL_STORAGE_HOST_LIMIT_KEY,
+    INITIAL_HOSTS_STATE.limit
+  );
 
   const [urlState, setUrlState] = useUrlState<HostsState>({
-    defaultState: { ...INITIAL_HOSTS_STATE, dateRange: getTime() },
+    defaultState: {
+      ...INITIAL_HOSTS_STATE,
+      dateRange: getTime(),
+      limit: localStorageHostLimit ?? INITIAL_HOSTS_STATE.limit,
+    },
     decodeUrlState,
     encodeUrlState,
     urlStateKey: '_a',
@@ -57,6 +68,9 @@ export const useHostsUrlState = (): [HostsState, HostsStateUpdater] => {
   const [search, setSearch] = useReducer(reducer, urlState);
   if (!deepEqual(search, urlState)) {
     setUrlState(search);
+    if (localStorageHostLimit !== search.limit) {
+      setLocalStorageHostLimit(search.limit);
+    }
   }
 
   useSyncKibanaTimeFilterTime(INITIAL_DATE_RANGE, urlState.dateRange, (dateRange) =>
@@ -110,6 +124,7 @@ const HostsStateRT = rt.type({
   panelFilters: HostsFiltersRT,
   query: HostsQueryStateRT,
   dateRange: StringDateRangeRT,
+  limit: rt.number,
 });
 
 export type HostsState = rt.TypeOf<typeof HostsStateRT>;
@@ -118,6 +133,7 @@ export type HostsSearchPayload = Partial<HostsState>;
 
 export type HostsStateUpdater = (params: HostsSearchPayload) => void;
 
+export type StringDateRange = rt.TypeOf<typeof StringDateRangeRT>;
 export interface StringDateRangeTimestamp {
   from: number;
   to: number;
