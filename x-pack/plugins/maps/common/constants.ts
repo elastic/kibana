@@ -188,10 +188,6 @@ export const GEOCENTROID_AGG_NAME = 'gridCentroid';
 export const TOP_TERM_PERCENTAGE_SUFFIX = '__percentage';
 export const DEFAULT_PERCENTILE = 50;
 
-export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabel', {
-  defaultMessage: 'count',
-});
-
 export const COUNT_PROP_NAME = 'doc_count';
 
 export enum STYLE_TYPE {
@@ -339,6 +335,11 @@ export enum WIZARD_ID {
   MVT_VECTOR = 'mvtVector',
   WMS_LAYER = 'wmsLayer',
   TMS_LAYER = 'tmsLayer',
+}
+
+export enum MASK_OPERATOR {
+  ABOVE = 'ABOVE',
+  BELOW = 'BELOW',
 }
 
 // Maplibre does not provide any feedback when rendering is complete.
