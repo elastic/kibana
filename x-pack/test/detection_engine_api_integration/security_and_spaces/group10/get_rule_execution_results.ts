@@ -72,7 +72,10 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return execution events for a rule that has executed successfully', async () => {
-      const rule = getRuleForSignalTesting(['auditbeat-*']);
+      const rule = {
+        ...getRuleForSignalTesting(['auditbeat-*']),
+        query: 'process.executable: "/usr/bin/sudo"',
+      };
       const { id } = await createRule(supertest, log, rule);
       await waitForRuleSuccess({ supertest, log, id });
       await waitForEventLogExecuteComplete(es, log, id);
