@@ -104,7 +104,7 @@ describe('Timeline notes tab', () => {
   it('should be able to delete a note', () => {
     const deleteNoteContent = 'delete me';
     addNotesToTimeline(deleteNoteContent);
-    cy.get(DELETE_NOTE).click();
+    cy.get(DELETE_NOTE).last().click();
     cy.get(MODAL_CONFIRMATION_BTN).click();
     cy.get(NOTE_DESCRIPTION).last().should('not.have.text', deleteNoteContent);
   });
