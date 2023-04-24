@@ -84,7 +84,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       waitForRulesTableToBeLoaded();
     });
     it('should notify user about prebuilt rules package available for installation', () => {
-      cy.wait(5000)
+      cy.wait(5000);
       cy.get(UPDATE_PREBUILT_RULES_CALLOUT).should('be.visible');
     });
   });
