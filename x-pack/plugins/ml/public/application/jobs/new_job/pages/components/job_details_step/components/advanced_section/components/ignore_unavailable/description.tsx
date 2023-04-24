@@ -8,7 +8,7 @@
 import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { EuiCode, EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 export const Description: FC = memo(({ children }) => {
   const title = i18n.translate(
@@ -23,7 +23,14 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.ignoreUnavailable.description"
-          defaultMessage="If switched off, the request returns an error if it targets a missing or closed index."
+          defaultMessage="Sets the Elasticsearch {ignoreUnavailable} option on all searches done by the datafeed."
+          values={{
+            ignoreUnavailable: (
+              <EuiCode language="JSON" transparentBackground={true}>
+                ignore_unavailable
+              </EuiCode>
+            ),
+          }}
         />
       }
     >
