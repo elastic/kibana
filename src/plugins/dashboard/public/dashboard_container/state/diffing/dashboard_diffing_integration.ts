@@ -7,7 +7,7 @@
  */
 import { omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
-import { debounceTime, Observable, Subject, switchMap } from 'rxjs';
+import { debounceTime, Observable, startWith, Subject, switchMap } from 'rxjs';
 
 import { DashboardContainerInput } from '../../../../common';
 import type { DashboardDiffFunctions } from './dashboard_diffing_functions';
@@ -90,6 +90,7 @@ export function startDiffingDashboardState(
   this.subscriptions.add(
     checkForUnsavedChangesSubject$
       .pipe(
+        startWith(null),
         debounceTime(CHANGE_CHECK_DEBOUNCE),
         switchMap(() => {
           return new Observable((observer) => {
