@@ -17,6 +17,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiPanel,
+  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -48,6 +49,12 @@ export const ConnectorConfigurationForm = () => {
     {}
   );
 
+  const filteredConfigView = localConfigView.filter(
+    (configEntry) =>
+      configEntry.ui_restrictions.length <= 0 &&
+      dependenciesSatisfied(configEntry.depends_on, dependencyLookup)
+  );
+
   return (
     <EuiForm
       onSubmit={(event) => {
@@ -56,17 +63,16 @@ export const ConnectorConfigurationForm = () => {
       }}
       component="form"
     >
-      {localConfigView.map((configEntry) => {
+      {filteredConfigView.map((configEntry, index) => {
         const {
           default_value: defaultValue,
           depends_on: dependencies,
           key,
           display,
           label,
+          sensitive,
           tooltip,
         } = configEntry;
-        // toggle label goes next to the element, not in the row
-        const hasDependencies = dependencies.length > 0;
         const helpText = defaultValue
           ? i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.config.defaultValue',
@@ -76,26 +82,41 @@ export const ConnectorConfigurationForm = () => {
               }
             )
           : '';
+        // toggle and sensitive textarea labels go next to the element, not in the row
         const rowLabel =
-          display !== DisplayType.TOGGLE ? (
+          display === DisplayType.TOGGLE || (display === DisplayType.TEXTAREA && sensitive) ? (
+            <></>
+          ) : (
             <EuiToolTip content={tooltip}>
               <p>{label}</p>
             </EuiToolTip>
-          ) : (
-            <></>
           );
 
-        return hasDependencies ? (
-          dependenciesSatisfied(dependencies, dependencyLookup) ? (
-            <EuiPanel color="subdued" borderRadius="none">
-              <EuiFormRow label={rowLabel} key={key} helpText={helpText}>
-                <ConnectorConfigurationField configEntry={configEntry} />
-              </EuiFormRow>
-            </EuiPanel>
-          ) : (
-            <></>
-          )
-        ) : (
+        if (dependencies.length > 0) {
+          // dynamic spacing without CSS
+          const previousField = filteredConfigView[index - 1];
+          const nextField = filteredConfigView[index + 1];
+
+          const topSpacing =
+            !previousField || previousField.depends_on.length <= 0 ? <EuiSpacer size="m" /> : <></>;
+
+          const bottomSpacing =
+            !nextField || nextField.depends_on.length <= 0 ? <EuiSpacer size="m" /> : <></>;
+
+          return (
+            <>
+              {topSpacing}
+              <EuiPanel color="subdued" borderRadius="none">
+                <EuiFormRow label={rowLabel} key={key} helpText={helpText}>
+                  <ConnectorConfigurationField configEntry={configEntry} />
+                </EuiFormRow>
+              </EuiPanel>
+              {bottomSpacing}
+            </>
+          );
+        }
+
+        return (
           <EuiFormRow label={rowLabel} key={key} helpText={helpText}>
             <ConnectorConfigurationField configEntry={configEntry} />
           </EuiFormRow>
