@@ -33,7 +33,7 @@ const mockSource = {
   },
 } as unknown as IVectorSource;
 
-const leftJoin = new InnerJoin(
+const iso2LeftJoin = new InnerJoin(
   {
     leftField: 'iso2',
     right: rightSource,
@@ -100,7 +100,7 @@ describe('joinPropertiesToFeature', () => {
     const propertiesMap = new Map();
     propertiesMap.set('CN', { [COUNT_PROPERTY_NAME]: 61 });
 
-    leftJoin.joinPropertiesToFeature(feature, propertiesMap);
+    iso2LeftJoin.joinPropertiesToFeature(feature, propertiesMap);
     expect(feature.properties).toEqual({
       iso2: 'CN',
       [COUNT_PROPERTY_NAME]: 61,
@@ -117,14 +117,14 @@ describe('joinPropertiesToFeature', () => {
     } as unknown as Feature;
     const propertiesMap = new Map();
 
-    leftJoin.joinPropertiesToFeature(feature, propertiesMap);
+    iso2LeftJoin.joinPropertiesToFeature(feature, propertiesMap);
     expect(feature.properties).toEqual({
       iso2: 'CN',
     });
   });
 
   test('Should coerce to string before joining', () => {
-    const leftJoin = new InnerJoin(
+    const zipCodeLeftJoin = new InnerJoin(
       {
         leftField: 'zipcode',
         right: rightSource,
@@ -140,7 +140,7 @@ describe('joinPropertiesToFeature', () => {
     const propertiesMap = new Map();
     propertiesMap.set('40204', { [COUNT_PROPERTY_NAME]: 61 });
 
-    leftJoin.joinPropertiesToFeature(feature, propertiesMap);
+    zipCodeLeftJoin.joinPropertiesToFeature(feature, propertiesMap);
     expect(feature.properties).toEqual({
       zipcode: 40204,
       [COUNT_PROPERTY_NAME]: 61,
@@ -157,14 +157,14 @@ describe('joinPropertiesToFeature', () => {
     const propertiesMap = new Map();
     propertiesMap.set('40204', { [COUNT_PROPERTY_NAME]: 61 });
 
-    leftJoin.joinPropertiesToFeature(feature, propertiesMap);
+    iso2LeftJoin.joinPropertiesToFeature(feature, propertiesMap);
     expect(feature.properties).toEqual({
       zipcode: 40204,
     });
   });
 
   test('Should handle falsy values', () => {
-    const leftJoin = new InnerJoin(
+    const codeLeftJoin = new InnerJoin(
       {
         leftField: 'code',
         right: rightSource,
@@ -180,7 +180,7 @@ describe('joinPropertiesToFeature', () => {
     const propertiesMap = new Map();
     propertiesMap.set('0', { [COUNT_PROPERTY_NAME]: 61 });
 
-    leftJoin.joinPropertiesToFeature(feature, propertiesMap);
+    codeLeftJoin.joinPropertiesToFeature(feature, propertiesMap);
     expect(feature.properties).toEqual({
       code: 0,
       [COUNT_PROPERTY_NAME]: 61,
