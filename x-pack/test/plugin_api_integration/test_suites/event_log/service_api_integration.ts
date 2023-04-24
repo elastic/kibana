@@ -163,6 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
                   execution_gap_duration_s: 3000,
                 },
               },
+              revision: 0,
             },
           },
           alerting: {

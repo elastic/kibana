@@ -8,13 +8,16 @@ import React from 'react';
 
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import { EuiIcon, EuiPanel } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
-import { EuiI18n } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiI18n,
+  EuiToolTip,
+} from '@elastic/eui';
 import styled from 'styled-components';
-import { EuiToolTip } from '@elastic/eui';
 import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';

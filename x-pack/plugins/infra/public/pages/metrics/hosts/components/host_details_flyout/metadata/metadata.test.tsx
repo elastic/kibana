@@ -32,42 +32,12 @@ const metadataProps: TabProps = {
       name: 'host-1',
       cloudProvider: 'gcp',
     },
-    rx: {
-      name: 'rx',
-      value: 0,
-      max: 0,
-      avg: 0,
-    },
-    tx: {
-      name: 'tx',
-      value: 0,
-      max: 0,
-      avg: 0,
-    },
-    memory: {
-      name: 'memory',
-      value: 0.5445920331099282,
-      max: 0.5445920331099282,
-      avg: 0.5445920331099282,
-    },
-    cpu: {
-      name: 'cpu',
-      value: 0.2000718443867342,
-      max: 0.2000718443867342,
-      avg: 0.2000718443867342,
-    },
-    diskLatency: {
-      name: 'diskLatency',
-      value: null,
-      max: 0,
-      avg: 0,
-    },
-    memoryTotal: {
-      name: 'memoryTotal',
-      value: 16777216,
-      max: 16777216,
-      avg: 16777216,
-    },
+    rx: 0,
+    tx: 0,
+    memory: 0.5445920331099282,
+    cpu: 0.2000718443867342,
+    diskLatency: 0,
+    memoryTotal: 16777216,
   },
 };
 
