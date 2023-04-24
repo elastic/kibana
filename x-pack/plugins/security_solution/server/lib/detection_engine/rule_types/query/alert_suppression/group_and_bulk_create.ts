@@ -164,7 +164,7 @@ export const groupAndBulkCreate = async ({
         from: tuple.from,
       });
 
-      // if we don not suppress alerts ofr docs with missing values, we will create aggregation for null missing buckets
+      // if we do not suppress alerts for docs with missing values, we will create aggregation for null missing buckets
       const suppressOnMissingFields =
         (runOpts.completeRule.ruleParams.alertSuppression?.missingFieldsStrategy ??
           DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
@@ -207,7 +207,7 @@ export const groupAndBulkCreate = async ({
 
       const buckets = eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;
 
-      // we can create only as many unsuppressed as total number does not exceeds maxSignals
+      // we can create only as many unsuppressed alerts, as total number of alerts(suppressed and unsuppressed) does not exceeds maxSignals
       const maxUnsuppressedCount = tuple.maxSignals - buckets.length;
       if (suppressOnMissingFields === false && maxUnsuppressedCount > 0) {
         const unsuppressedResult = await bulkCreateUnsuppressedAlerts({
@@ -264,7 +264,7 @@ export const groupAndBulkCreate = async ({
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
         runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
       } else {
-        const bulkCreateResult = await runOpts.bulkCreate([...wrappedAlerts]);
+        const bulkCreateResult = await runOpts.bulkCreate(wrappedAlerts);
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
         runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
       }
