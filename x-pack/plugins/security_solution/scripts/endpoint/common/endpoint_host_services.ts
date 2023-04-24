@@ -10,6 +10,11 @@ import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import assert from 'assert';
+import { mkdir, unlink } from 'fs/promises';
+import { join } from 'path';
+import fs from 'fs';
+import { finished } from 'stream/promises';
+import nodeFetch from 'node-fetch';
 import {
   fetchAgentPolicyEnrollmentKey,
   fetchFleetServerUrl,
@@ -17,6 +22,7 @@ import {
   unEnrollFleetAgent,
   waitForHostToEnroll,
 } from './fleet_services';
+import { SettingsStorage } from './settings_storage';
 
 export interface CreateAndEnrollEndpointHostOptions
   extends Pick<CreateMultipassVmOptions, 'disk' | 'cpus' | 'memory'> {
@@ -26,10 +32,12 @@ export interface CreateAndEnrollEndpointHostOptions
   agentPolicyId: string;
   /** version of the Agent to install. Defaults to stack version */
   version?: string;
-  /** If `version` should be exact, or if this is `true`, then the closest version will be used */
-  useClosestVersionMatch?: boolean;
   /** The name for the host. Will also be the name of the VM */
   hostname?: string;
+  /** If `version` should be exact, or if this is `true`, then the closest version will be used. Defaults to `false` */
+  useClosestVersionMatch?: boolean;
+  /** If the local cache of agent downloads should be used. Defaults to `true` */
+  useCache?: boolean;
 }
 
 export interface CreateAndEnrollEndpointHostResponse {
@@ -50,8 +58,11 @@ export const createAndEnrollEndpointHost = async ({
   hostname,
   version = kibanaPackageJson.version,
   useClosestVersionMatch = false,
+  useCache = true,
 }: CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse> => {
-  const [vm, agentDownloadUrl, fleetServerUrl, enrollmentToken] = await Promise.all([
+  let cacheCleanupPromise = Promise.resolve();
+
+  const [vm, agentDownload, fleetServerUrl, enrollmentToken] = await Promise.all([
     createMultipassVm({
       vmName: hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`,
       disk,
@@ -59,7 +70,25 @@ export const createAndEnrollEndpointHost = async ({
       memory,
     }),
 
-    getAgentDownloadUrl(version, useClosestVersionMatch, log),
+    getAgentDownloadUrl(version, useClosestVersionMatch, log).then<{
+      url: string;
+      cache?: DownloadedAgentInfo;
+    }>((url) => {
+      if (useCache) {
+        const agentDownloadClient = new AgentDownloadStorage();
+
+        cacheCleanupPromise = agentDownloadClient.cleanupDownloads();
+
+        return agentDownloadClient.downloadAndStore(url).then((cache) => {
+          return {
+            url,
+            cache,
+          };
+        });
+      }
+
+      return { url };
+    }),
 
     fetchFleetServerUrl(kbnClient),
 
@@ -69,7 +98,7 @@ export const createAndEnrollEndpointHost = async ({
   log.verbose(await execa('multipass', ['info', vm.vmName]));
 
   // Some validations before we proceed
-  assert(agentDownloadUrl, 'Missing agent download URL');
+  assert(agentDownload.url, 'Missing agent download URL');
   assert(fleetServerUrl, 'Fleet server URL not set');
   assert(enrollmentToken, `No enrollment token for agent policy id [${agentPolicyId}]`);
 
@@ -81,10 +110,13 @@ export const createAndEnrollEndpointHost = async ({
     kbnClient,
     log,
     fleetServerUrl,
-    agentDownloadUrl,
+    agentDownloadUrl: agentDownload.url,
+    cachedAgentDownload: agentDownload.cache,
     enrollmentToken,
     vmName: vm.vmName,
   });
+
+  await cacheCleanupPromise;
 
   return {
     hostname: vm.vmName,
@@ -148,6 +180,7 @@ interface EnrollHostWithFleetOptions {
   log: ToolingLog;
   vmName: string;
   agentDownloadUrl: string;
+  cachedAgentDownload?: DownloadedAgentInfo;
   fleetServerUrl: string;
   enrollmentToken: string;
 }
@@ -158,18 +191,35 @@ const enrollHostWithFleet = async ({
   vmName,
   fleetServerUrl,
   agentDownloadUrl,
+  cachedAgentDownload,
   enrollmentToken,
 }: EnrollHostWithFleetOptions): Promise<{ agentId: string }> => {
   const agentDownloadedFile = agentDownloadUrl.substring(agentDownloadUrl.lastIndexOf('/') + 1);
   const vmDirName = agentDownloadedFile.replace(/\.tar\.gz$/, '');
 
-  log.verbose(`downloading and installing agent on host`);
+  if (cachedAgentDownload) {
+    log.verbose(
+      `Installing agent on host using cached download from [${cachedAgentDownload.fullFilePath}]`
+    );
 
-  await execa.command(
-    `multipass exec ${vmName} -- curl -L ${agentDownloadUrl} -o ${agentDownloadedFile}`
-  );
-  await execa.command(`multipass exec ${vmName} -- tar -zxf ${agentDownloadedFile}`);
-  await execa.command(`multipass exec ${vmName} -- rm -f ${agentDownloadedFile}`);
+    // mount local folder on VM
+    await execa.command(
+      `multipass mount ${cachedAgentDownload.directory} ${vmName}:~/_agent_downloads`
+    );
+    await execa.command(
+      `multipass exec ${vmName} -- tar -zxf _agent_downloads/${cachedAgentDownload.filename}`
+    );
+    await execa.command(`multipass unmount ${vmName}:~/_agent_downloads`);
+  } else {
+    log.verbose(`downloading and installing agent from URL [${agentDownloadUrl}]`);
+
+    // download into VM
+    await execa.command(
+      `multipass exec ${vmName} -- curl -L ${agentDownloadUrl} -o ${agentDownloadedFile}`
+    );
+    await execa.command(`multipass exec ${vmName} -- tar -zxf ${agentDownloadedFile}`);
+    await execa.command(`multipass exec ${vmName} -- rm -f ${agentDownloadedFile}`);
+  }
 
   const agentInstallArguments = [
     'exec',
@@ -208,5 +258,90 @@ const enrollHostWithFleet = async ({
 
   return {
     agentId: agent.id,
+  };
+};
+
+interface DownloadedAgentInfo {
+  filename: string;
+  directory: string;
+  fullFilePath: string;
+}
+
+class AgentDownloadStorage extends SettingsStorage {
+  private downloadsFolderExists = false;
+  private readonly downloadsDirName = 'agent_download_storage';
+
+  constructor() {
+    super('agent_download_storage_settings.json');
+  }
+
+  protected async ensureExists(): Promise<void> {
+    await super.ensureExists();
+
+    if (!this.downloadsFolderExists) {
+      await mkdir(this.buildPath(this.downloadsDirName), { recursive: true });
+      this.downloadsFolderExists = true;
+    }
+  }
+
+  public getPathsForUrl(agentDownloadUrl: string): DownloadedAgentInfo {
+    const filename = agentDownloadUrl.replace(/^https?:\/\//gi, '').replace(/\//g, '#');
+    const directory = this.buildPath(join(this.downloadsDirName));
+    const fullFilePath = this.buildPath(join(this.downloadsDirName, filename));
+
+    return {
+      filename,
+      directory,
+      fullFilePath,
+    };
+  }
+
+  public async downloadAndStore(agentDownloadUrl: string): Promise<DownloadedAgentInfo> {
+    // TODO: should we add "retry" attempts to file downloads?
+
+    await this.ensureExists();
+
+    const newDownloadInfo = this.getPathsForUrl(agentDownloadUrl);
+
+    // If download is already present on disk, then just return that info. No need to re-download it
+    if (fs.existsSync(newDownloadInfo.fullFilePath)) {
+      return newDownloadInfo;
+    }
+
+    try {
+      const outputStream = fs.createWriteStream(newDownloadInfo.fullFilePath);
+      const { body } = await nodeFetch(agentDownloadUrl);
+
+      await finished(body.pipe(outputStream));
+    } catch (e) {
+      // Try to clean up download case it failed halfway through
+      await unlink(newDownloadInfo.fullFilePath);
+
+      throw e;
+    }
+
+    return newDownloadInfo;
+  }
+
+  public async cleanupDownloads(): Promise<void> {
+    // FIXME:PT implement
+    //
+    // Read all files from downloads directory
+    //
+    // delete any `snapshot` downloads that are older than [x] amount of days old
+    //
+    // Delete any files that is older than [xx] amount of days
+  }
+}
+
+export const downloadAgent = async (
+  agentDownloadUrl: string
+): Promise<DownloadedAgentInfo & { url: string }> => {
+  const agentDownloadClient = new AgentDownloadStorage();
+  const downloadedAgent = await agentDownloadClient.downloadAndStore(agentDownloadUrl);
+
+  return {
+    url: agentDownloadUrl,
+    ...downloadedAgent,
   };
 };
