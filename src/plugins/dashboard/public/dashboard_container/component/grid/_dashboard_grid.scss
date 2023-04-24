@@ -37,7 +37,7 @@
 
 /**
  * When a single panel is expanded, all the other panels moved offscreen.
- * Shifting the rendered panels offscreen prevents panel reloading on minimize
+ * Shifting the rendered panels offscreen prevents a quick flash when redrawing the panels on minimize
  */
 .dshDashboardGrid__item--hidden {
   position: absolute;

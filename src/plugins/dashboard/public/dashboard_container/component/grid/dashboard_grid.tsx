@@ -42,6 +42,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
     if (expandedPanelId) {
       setAnimatePanelTransforms(false);
     } else {
+      // delaying enabling CSS transforms to the next tick prevents a panel slide animation on minimize
       setTimeout(() => setAnimatePanelTransforms(true), 0);
     }
   }, [expandedPanelId]);
