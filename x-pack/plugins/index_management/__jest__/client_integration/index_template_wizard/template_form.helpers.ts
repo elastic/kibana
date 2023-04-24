@@ -221,7 +221,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
     if (settings) {
       find('settingsEditor').getDOMNode().setAttribute('data-currentvalue', settings);
-      find('settingsEditor').simulate('change', settings);
+      find('settingsEditor').simulate('change');
     }
 
     await act(async () => {
@@ -254,7 +254,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
     if (aliases) {
       find('aliasesEditor').getDOMNode().setAttribute('data-currentvalue', aliases);
-      find('aliasesEditor').simulate('change', aliases);
+      find('aliasesEditor').simulate('change');
     }
 
     await act(async () => {

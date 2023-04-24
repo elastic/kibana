@@ -70,7 +70,7 @@ export const getFormActions = (testBed: TestBed) => {
 
     if (settingsValue) {
       find('settingsEditor').getDOMNode().setAttribute('data-currentvalue', settingsValue);
-      find('settingsEditor').simulate('change', settingsValue);
+      find('settingsEditor').simulate('change');
     }
 
     await act(async () => {
@@ -123,7 +123,7 @@ export const getFormActions = (testBed: TestBed) => {
 
     if (aliasesValue) {
       find('aliasesEditor').getDOMNode().setAttribute('data-currentvalue', aliasesValue);
-      find('aliasesEditor').simulate('change', aliasesValue);
+      find('aliasesEditor').simulate('change');
     }
 
     await act(async () => {
