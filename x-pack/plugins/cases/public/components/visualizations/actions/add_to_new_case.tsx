@@ -12,8 +12,9 @@ import type { Embeddable } from '@kbn/lens-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
-import { EuiThemeProvider } from '@elastic/eui';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { CommentType } from '../../../../common';
 import { isLensEmbeddable } from './utils';
 import { KibanaContextProvider, KibanaServices } from '../../../common/lib/kibana';
@@ -21,8 +22,8 @@ import { KibanaContextProvider, KibanaServices } from '../../../common/lib/kiban
 import { getUICapabilities } from '../../../client/helpers/capabilities';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 import type { CasesContextProps } from '../../cases_context';
-import CasesProvider from '../../cases_context';
 import { OWNER_INFO } from '../../../../common/constants';
+import { getCasesContextLazy } from '../../../client/ui/get_cases_context';
 
 export const ACTION_ID = 'embeddable_addToNewCase';
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
@@ -38,7 +39,7 @@ export const createAddToNewCaseLensAction = ({
   uiSettings: IUiSettingsClient;
   getCreateCaseFlyoutProps: CasesContextProps;
 }) => {
-  const { application: applicationService } = KibanaServices.get();
+  const { application: applicationService, notifications, theme } = KibanaServices.get();
   let currentAppId: string | undefined;
   applicationService?.currentAppId$.subscribe((appId) => {
     currentAppId = appId;
@@ -82,6 +83,9 @@ export const createAddToNewCaseLensAction = ({
       ];
 
       const Flyout = () => {
+        const getCasesContext = getCasesContextLazy(getCreateCaseFlyoutProps);
+        const CasesContext = getCasesContext();
+
         const FlyoutChildren = () => {
           const createCaseFlyout = useCasesAddToNewCaseFlyout({
             toastContent: i18n.translate(
@@ -93,23 +97,18 @@ export const createAddToNewCaseLensAction = ({
           });
 
           createCaseFlyout.open({ attachments });
+          return null;
         };
 
         return (
-          <CasesProvider
-            value={{
-              ...getCreateCaseFlyoutProps,
-              owner: Object.values(OWNER_INFO)
-                .map((i) => i.appId)
-                .filter((id) => id === currentAppId),
-              permissions: casesCapabilities,
-              // basePath: basePath ?? DEFAULT_BASE_PATH,
-              // features: features ?? {},
-              // releasePhase: releasePhase ?? 'ga',
-            }}
+          <CasesContext
+            owner={Object.values(OWNER_INFO)
+              .map((i) => i.appId)
+              .filter((id) => id === currentAppId)}
+            permissions={casesCapabilities}
           >
-            {FlyoutChildren}
-          </CasesProvider>
+            <FlyoutChildren />
+          </CasesContext>
         );
       };
 
@@ -122,10 +121,17 @@ export const createAddToNewCaseLensAction = ({
         <KibanaContextProvider
           services={{
             appName: APP_NAME,
-            ...applicationService,
+            application: applicationService,
+            notifications,
+            theme,
+            uiSettings,
           }}
         >
-          <EuiThemeProvider darkMode={uiSettings.get(DEFAULT_DARK_MODE)}>{Flyout}</EuiThemeProvider>
+          <KibanaThemeProvider theme$={theme.theme$}>
+            <EuiThemeProvider darkMode={uiSettings.get(DEFAULT_DARK_MODE)}>
+              <Flyout />
+            </EuiThemeProvider>
+          </KibanaThemeProvider>
         </KibanaContextProvider>
       );
       ReactDOM.render(element, node);

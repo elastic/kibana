@@ -60,12 +60,12 @@ export class CasesUiPlugin
   }
 
   private async registerActions(core: CoreStart, plugins: CasesPluginStart) {
-    const { registerActions } = await this.lazyActions();
+    const { registerActions: registerLoadedActions } = await this.lazyActions();
     const getCreateCaseFlyoutProps = {
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
     };
-    registerActions(core, plugins, getCreateCaseFlyoutProps);
+    registerLoadedActions(core, plugins, getCreateCaseFlyoutProps);
   }
 
   public async setup(core: CoreSetup, plugins: CasesPluginSetup): Promise<CasesUiSetup> {
