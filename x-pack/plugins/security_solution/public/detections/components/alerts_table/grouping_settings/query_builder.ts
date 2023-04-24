@@ -57,6 +57,7 @@ export const getAlertsGroupingQuery = ({
     ],
     runtimeMappings,
     size: pageSize,
+    // sort: [{ unitsCount: { order: 'desc' } }],
     to,
   });
 

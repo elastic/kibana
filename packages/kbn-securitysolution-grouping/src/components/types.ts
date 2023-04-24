@@ -14,6 +14,7 @@ export interface GenericBuckets {
 }
 
 export const NONE_GROUP_KEY = 'none';
+export const NONE_GROUP_LABEL = '-';
 
 export type RawBucket<T> = GenericBuckets & T;
 
@@ -23,6 +24,7 @@ export interface RootAggregation<T> {
   groupByFields?: {
     buckets?: Array<RawBucket<T>>;
   };
+  nullGrouping?: RawBucket<T>;
   groupsCount?: {
     value?: number | null;
   };

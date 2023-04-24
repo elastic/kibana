@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { firstNonNullValue } from '../../helpers';
 import type { RawBucket } from '../types';
-import { createGroupFilter } from './helpers';
+import { createGroupFilter, getNullGroupFilter } from './helpers';
 
 interface GroupPanelProps<T> {
   customAccordionButtonClassName?: string;
@@ -22,6 +22,7 @@ interface GroupPanelProps<T> {
   groupPanelRenderer?: JSX.Element;
   groupingLevel?: number;
   isLoading: boolean;
+  isNullGroup?: boolean;
   onGroupClose: () => void;
   onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket<T>) => void;
   renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
@@ -49,6 +50,7 @@ const GroupPanelComponent = <T,>({
   groupPanelRenderer,
   groupingLevel = 0,
   isLoading,
+  isNullGroup = false,
   onGroupClose,
   onToggleGroup,
   renderChildComponent,
@@ -68,8 +70,11 @@ const GroupPanelComponent = <T,>({
   const groupFieldValue = useMemo(() => firstNonNullValue(groupBucket.key), [groupBucket.key]);
 
   const groupFilters = useMemo(
-    () => createGroupFilter(selectedGroup, groupFieldValue),
-    [groupFieldValue, selectedGroup]
+    () =>
+      isNullGroup
+        ? getNullGroupFilter(selectedGroup)
+        : createGroupFilter(selectedGroup, groupFieldValue),
+    [groupFieldValue, isNullGroup, selectedGroup]
   );
 
   const onToggle = useCallback(
