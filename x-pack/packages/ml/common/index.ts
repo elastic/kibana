@@ -19,6 +19,7 @@ export type {
 
 export {
   isMlKibanaUrlConfigWithTimeRange,
+  type MlBaseUrlConfig,
   type MlCustomUrlAnomalyRecordDoc,
   type MlKibanaUrlConfig,
   type MlUrlConfig,
