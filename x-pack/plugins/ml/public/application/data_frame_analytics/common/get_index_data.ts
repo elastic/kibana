@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { extractErrorMessage } from '../../../../common/util/errors';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { EsSorting, UseDataGridReturnType, getProcessedFields } from '../../components/data_grid';
 import { ml } from '../../services/ml_api_service';

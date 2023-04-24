@@ -23,8 +23,8 @@ import type {
   BucketsWithMaxOnCase,
   AttachmentStats,
   FileAttachmentStats,
-  FileAttachmentAggregationResult,
-  FileAttachmentAverageSize,
+  FileAttachmentAggregationResults,
+  FileAttachmentAggsResult,
   AttachmentFrameworkAggsResult,
 } from '../types';
 import { buildFilter } from '../../client/utils';
@@ -170,7 +170,7 @@ export const getSolutionValues = ({
 }: {
   caseAggregations?: CaseAggregationResult;
   attachmentAggregations?: AttachmentAggregationResult;
-  filesAggregations?: FileAttachmentAggregationResult;
+  filesAggregations?: FileAttachmentAggregationResults;
   owner: Owner;
 }): SolutionTelemetry => {
   const aggregationsBuckets = getAggregationsBuckets({
@@ -223,13 +223,15 @@ export const getAttachmentsFrameworkStats = ({
   totalCasesForOwner,
 }: {
   attachmentAggregations?: AttachmentFrameworkAggsResult;
-  filesAggregations?: FileAttachmentAverageSize;
+  filesAggregations?: FileAttachmentAggsResult;
   totalCasesForOwner: number;
 }): AttachmentFramework => {
   if (!attachmentAggregations) {
     return emptyAttachmentFramework();
   }
-  const averageFileSize = filesAggregations?.averageSize;
+
+  const averageFileSize = getAverageFileSize(filesAggregations);
+  const topMimeTypes = filesAggregations?.topMimeTypes;
 
   return {
     attachmentFramework: {
@@ -245,9 +247,18 @@ export const getAttachmentsFrameworkStats = ({
         registryResults: attachmentAggregations.externalReferenceTypes,
         averageFileSize,
         totalCasesForOwner,
+        topMimeTypes,
       }),
     },
   };
+};
+
+const getAverageFileSize = (filesAggregations?: FileAttachmentAggsResult) => {
+  if (filesAggregations?.averageSize?.value == null) {
+    return 0;
+  }
+
+  return Math.round(filesAggregations.averageSize.value);
 };
 
 const getAttachmentRegistryStats = (
@@ -272,8 +283,8 @@ const getAttachmentRegistryStats = (
   return stats;
 };
 
-const calculateTypePerCaseAverage = (typeDocCount: number, totalCases: number) => {
-  if (totalCases === 0) {
+const calculateTypePerCaseAverage = (typeDocCount: number | undefined, totalCases: number) => {
+  if (typeDocCount == null || totalCases === 0) {
     return 0;
   }
 
@@ -284,22 +295,27 @@ const getFileAttachmentStats = ({
   registryResults,
   averageFileSize,
   totalCasesForOwner,
+  topMimeTypes,
 }: {
   registryResults: BucketsWithMaxOnCase;
   averageFileSize?: number;
   totalCasesForOwner: number;
+  topMimeTypes?: Buckets<string>;
 }): FileAttachmentStats => {
   const fileBucket = registryResults.buckets.find((bucket) => bucket.key === FILE_ATTACHMENT_TYPE);
 
-  if (!fileBucket || averageFileSize == null) {
-    return emptyFileAttachment();
-  }
+  const mimeTypes =
+    topMimeTypes?.buckets.map((mimeType) => ({
+      count: mimeType.doc_count,
+      name: mimeType.key,
+    })) ?? [];
 
   return {
-    averageSize: averageFileSize,
-    average: calculateTypePerCaseAverage(fileBucket.doc_count, totalCasesForOwner),
-    maxOnACase: fileBucket.references.cases.max.value,
-    total: fileBucket.doc_count,
+    averageSize: averageFileSize ?? 0,
+    average: calculateTypePerCaseAverage(fileBucket?.doc_count, totalCasesForOwner),
+    maxOnACase: fileBucket?.references.cases.max.value ?? 0,
+    total: fileBucket?.doc_count ?? 0,
+    topMimeTypes: mimeTypes,
   };
 };
 
@@ -332,4 +348,5 @@ const emptyFileAttachment = (): FileAttachmentStats => ({
   averageSize: 0,
   maxOnACase: 0,
   total: 0,
+  topMimeTypes: [],
 });

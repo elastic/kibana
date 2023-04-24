@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import {
+  IntervalSchedule,
   parseDuration,
   RuleAction,
   RuleNotifyWhenTypeValues,
@@ -98,4 +99,33 @@ export const getSummaryActionsFromTaskState = ({
       return newObj;
     }
   }, {});
+};
+
+export const getSummaryActionTimeBounds = (
+  action: RuleAction,
+  ruleSchedule: IntervalSchedule,
+  previousStartedAt: Date | null
+): { start?: number; end?: number } => {
+  if (!isSummaryAction(action)) {
+    return { start: undefined, end: undefined };
+  }
+  let startDate: Date;
+  const now = Date.now();
+
+  if (isActionOnInterval(action)) {
+    // If action is throttled, set time bounds using throttle interval
+    const throttleMills = parseDuration(action.frequency!.throttle!);
+    startDate = new Date(now - throttleMills);
+  } else {
+    // If action is not throttled, set time bounds to previousStartedAt - now
+    // If previousStartedAt is null, use the rule schedule interval
+    if (previousStartedAt) {
+      startDate = previousStartedAt;
+    } else {
+      const scheduleMillis = parseDuration(ruleSchedule.interval);
+      startDate = new Date(now - scheduleMillis);
+    }
+  }
+
+  return { start: startDate.valueOf(), end: now.valueOf() };
 };

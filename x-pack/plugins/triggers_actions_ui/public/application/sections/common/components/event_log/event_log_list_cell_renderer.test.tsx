@@ -111,6 +111,16 @@ describe('rule_event_log_list_cell_renderer', () => {
     expect(wrapper.find(EuiIcon).props().color).toEqual('gray');
   });
 
+  it('renders maintenance window correctly', () => {
+    const wrapper = shallow(
+      <EventLogListCellRenderer
+        columnId="maintenance_window_ids"
+        value={['test-id-1', 'test-id-2']}
+      />
+    );
+    expect(wrapper.text()).toEqual('test-id-1, test-id-2');
+  });
+
   it('links to rules on the correct space', () => {
     const wrapper1 = shallow(
       <EventLogListCellRenderer

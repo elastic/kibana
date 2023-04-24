@@ -72,8 +72,8 @@ const defaultProps = {
   getSuggestionForField: () => undefined,
   lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
   toggleFullscreen: jest.fn(),
-  getUserMessages: () => [],
-  addUserMessages: () => () => {},
+  getUserMessages: jest.fn(() => []),
+  addUserMessages: jest.fn(() => () => {}),
 };
 
 const toExpr = (
@@ -728,13 +728,14 @@ describe('workspace_panel', () => {
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
+        getUserMessages={getUserMessages}
         datasourceMap={{
           testDatasource: mockDatasource,
         }}
-        getUserMessages={getUserMessages}
       />
     );
     instance = mounted.instance;
+    instance.update();
 
     // EuiFlexItem duplicates internally the attribute, so we need to filter only the most inner one here
     expect(instance.find('[data-test-subj="workspace-more-errors-button"]').last().text()).toEqual(
@@ -752,11 +753,12 @@ describe('workspace_panel', () => {
     // but not yet applied their changes
 
     let userMessages = [] as UserMessage[];
+    const getUserMessageFn = jest.fn(() => userMessages);
 
     const mounted = await mountWithProvider(
       <WorkspacePanel
         {...defaultProps}
-        getUserMessages={() => userMessages}
+        getUserMessages={getUserMessageFn}
         datasourceMap={{
           testDatasource: mockDatasource,
         }}
