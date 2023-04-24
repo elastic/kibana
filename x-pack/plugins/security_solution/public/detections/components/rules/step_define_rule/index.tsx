@@ -47,6 +47,7 @@ import {
   RuleStep,
   DataSourceType,
   GroupByOptions,
+  SuppressionMissingFieldsOptions,
 } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import type { QueryBarDefineRuleProps } from '../query_bar';
@@ -89,10 +90,7 @@ import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils'
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 import { GroupByFields } from '../group_by_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
-import {
-  minimumLicenseForSuppression,
-  AlertSuppressionMissingFieldsStrategy,
-} from '../../../../../common/detection_engine/rule_schema';
+import { minimumLicenseForSuppression } from '../../../../../common/detection_engine/rule_schema';
 import { DurationInput } from '../duration_input';
 
 const CommonUseField = getUseField({ component: Field });
@@ -577,11 +575,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         idSelected={suppressionMissingFields.value}
         options={[
           {
-            id: AlertSuppressionMissingFieldsStrategy.Suppress,
+            id: SuppressionMissingFieldsOptions.Suppress,
             label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS_OPTION,
           },
           {
-            id: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+            id: SuppressionMissingFieldsOptions.DoNotSuppress,
             label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION,
           },
         ]}

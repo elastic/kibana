@@ -36,7 +36,6 @@ import type {
   RequiredFieldArray,
   Threshold,
 } from '../../../../../common/detection_engine/rule_schema';
-import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/detection_engine/rule_schema';
 
 import * as i18n from './translations';
 import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
@@ -46,7 +45,10 @@ import type {
   AboutStepSeverity,
   Duration,
 } from '../../../pages/detection_engine/rules/types';
-import { GroupByOptions } from '../../../pages/detection_engine/rules/types';
+import {
+  GroupByOptions,
+  SuppressionMissingFieldsOptions,
+} from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
 import { TechnicalPreviewBadge } from './technical_preview_badge';
@@ -566,7 +568,7 @@ export const buildAlertSuppressionWindowDescription = (
 
 export const buildAlertSuppressionMissingFieldsDescription = (
   label: string,
-  value: AlertSuppressionMissingFieldsStrategy,
+  value: SuppressionMissingFieldsOptions,
   license: LicenseService
 ): ListItems[] => {
   if (isEmpty(value)) {
@@ -574,7 +576,7 @@ export const buildAlertSuppressionMissingFieldsDescription = (
   }
 
   const description =
-    value === AlertSuppressionMissingFieldsStrategy.Suppress
+    value === SuppressionMissingFieldsOptions.Suppress
       ? i18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
       : i18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 
