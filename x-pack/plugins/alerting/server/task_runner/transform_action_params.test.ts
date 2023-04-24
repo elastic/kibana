@@ -182,10 +182,10 @@ describe('transformActionParams', () => {
       flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
-    Object {
-      "message": "Value \\"1\\" exists",
-    }
-  `);
+          Object {
+            "message": "Value \\"1\\" exists",
+          }
+      `);
   });
 
   test('alertName is passed to templates', () => {
@@ -212,10 +212,10 @@ describe('transformActionParams', () => {
       flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
-    Object {
-      "message": "Value \\"alert-name\\" exists",
-    }
-  `);
+          Object {
+            "message": "Value \\"alert-name\\" exists",
+          }
+      `);
   });
 
   test('tags is passed to templates', () => {
@@ -242,10 +242,10 @@ describe('transformActionParams', () => {
       flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
-    Object {
-      "message": "Value \\"tag-A,tag-B\\" exists",
-    }
-  `);
+          Object {
+            "message": "Value \\"tag-A,tag-B\\" exists",
+          }
+      `);
   });
 
   test('undefined tags is passed to templates', () => {
@@ -271,10 +271,10 @@ describe('transformActionParams', () => {
       flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
-    Object {
-      "message": "Value \\"\\" is undefined and renders as empty string",
-    }
-  `);
+          Object {
+            "message": "Value \\"\\" is undefined and renders as empty string",
+          }
+      `);
   });
 
   test('empty tags is passed to templates', () => {
@@ -301,10 +301,10 @@ describe('transformActionParams', () => {
       flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
-    Object {
-      "message": "Value \\"\\" is an empty array and renders as empty string",
-    }
-  `);
+          Object {
+            "message": "Value \\"\\" is an empty array and renders as empty string",
+          }
+      `);
   });
 
   test('spaceId is passed to templates', () => {
@@ -331,10 +331,10 @@ describe('transformActionParams', () => {
       flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
-    Object {
-      "message": "Value \\"spaceId-A\\" exists",
-    }
-  `);
+          Object {
+            "message": "Value \\"spaceId-A\\" exists",
+          }
+      `);
   });
 
   test('alertInstanceId is passed to templates', () => {
@@ -361,10 +361,10 @@ describe('transformActionParams', () => {
       flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
-    Object {
-      "message": "Value \\"2\\" exists",
-    }
-  `);
+          Object {
+            "message": "Value \\"2\\" exists",
+          }
+      `);
   });
 
   test('alertActionGroup is passed to templates', () => {
@@ -391,10 +391,10 @@ describe('transformActionParams', () => {
       flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
-    Object {
-      "message": "Value \\"action-group\\" exists",
-    }
-  `);
+          Object {
+            "message": "Value \\"action-group\\" exists",
+          }
+      `);
   });
 
   test('alertActionGroupName is passed to templates', () => {
@@ -421,10 +421,10 @@ describe('transformActionParams', () => {
       flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
-    Object {
-      "message": "Value \\"Action Group\\" exists",
-    }
-  `);
+          Object {
+            "message": "Value \\"Action Group\\" exists",
+          }
+      `);
   });
 
   test('rule variables are passed to templates', () => {
@@ -451,10 +451,10 @@ describe('transformActionParams', () => {
       flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
-    Object {
-      "message": "Value \\"1\\", \\"alert-name\\", \\"spaceId-A\\" and \\"tag-A,tag-B\\" exist",
-    }
-  `);
+          Object {
+            "message": "Value \\"1\\", \\"alert-name\\", \\"spaceId-A\\" and \\"tag-A,tag-B\\" exist",
+          }
+      `);
   });
 
   test('rule alert variables are passed to templates', () => {
@@ -482,10 +482,10 @@ describe('transformActionParams', () => {
       flapping: false,
     });
     expect(result).toMatchInlineSnapshot(`
-    Object {
-      "message": "Value \\"2\\", \\"action-group\\", \\"uuid-1\\" and \\"Action Group\\" exist",
-    }
-  `);
+          Object {
+            "message": "Value \\"2\\", \\"action-group\\", \\"uuid-1\\" and \\"Action Group\\" exist",
+          }
+      `);
   });
 
   test('date is passed to templates', () => {
@@ -613,10 +613,10 @@ describe('transformActionParams', () => {
       flapping: true,
     });
     expect(result).toMatchInlineSnapshot(`
-    Object {
-      "message": "Value \\"true\\" exists",
-    }
-  `);
+          Object {
+            "message": "Value \\"true\\" exists",
+          }
+      `);
   });
 });
 
@@ -665,9 +665,9 @@ describe('transformSummaryActionParams', () => {
 
     const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
-        Object {
-          "message": "Value \\"{\\"@timestamp\\":\\"2022-12-07T15:38:43.472Z\\",\\"event\\":{\\"kind\\":\\"signal\\",\\"action\\":\\"active\\"},\\"kibana\\":{\\"version\\":\\"8.7.0\\",\\"space_ids\\":[\\"default\\"],\\"alert\\":{\\"instance\\":{\\"id\\":\\"*\\"},\\"uuid\\":\\"2d3e8fe5-3e8b-4361-916e-9eaab0bf2084\\",\\"status\\":\\"active\\",\\"workflow_status\\":\\"open\\",\\"reason\\":\\"system.cpu is 90% in the last 1 min for all hosts. Alert when > 50%.\\",\\"time_range\\":{\\"gte\\":\\"2022-01-01T12:00:00.000Z\\"},\\"start\\":\\"2022-12-07T15:23:13.488Z\\",\\"duration\\":{\\"us\\":100000},\\"flapping\\":false,\\"rule\\":{\\"category\\":\\"Metric threshold\\",\\"consumer\\":\\"alerts\\",\\"execution\\":{\\"uuid\\":\\"c35db7cc-5bf7-46ea-b43f-b251613a5b72\\"},\\"name\\":\\"test-rule\\",\\"producer\\":\\"infrastructure\\",\\"rule_type_id\\":\\"metrics.alert.threshold\\",\\"uuid\\":\\"0de91960-7643-11ed-b719-bb9db8582cb6\\",\\"tags\\":[]}}}}\\", \\"http://ruleurl\\" and \\"{\\"foo\\":\\"bar\\",\\"foo_bar\\":true,\\"name\\":\\"test-rule\\",\\"id\\":\\"1\\"}\\" exist",
-        }
+      Object {
+        "message": "Value \\"{\\"@timestamp\\":\\"2022-12-07T15:38:43.472Z\\",\\"event\\":{\\"kind\\":\\"signal\\",\\"action\\":\\"active\\"},\\"kibana\\":{\\"version\\":\\"8.7.0\\",\\"space_ids\\":[\\"default\\"],\\"alert\\":{\\"instance\\":{\\"id\\":\\"*\\"},\\"uuid\\":\\"2d3e8fe5-3e8b-4361-916e-9eaab0bf2084\\",\\"status\\":\\"active\\",\\"workflow_status\\":\\"open\\",\\"reason\\":\\"system.cpu is 90% in the last 1 min for all hosts. Alert when > 50%.\\",\\"time_range\\":{\\"gte\\":\\"2022-01-01T12:00:00.000Z\\"},\\"start\\":\\"2022-12-07T15:23:13.488Z\\",\\"duration\\":{\\"us\\":100000},\\"flapping\\":false,\\"rule\\":{\\"category\\":\\"Metric threshold\\",\\"consumer\\":\\"alerts\\",\\"execution\\":{\\"uuid\\":\\"c35db7cc-5bf7-46ea-b43f-b251613a5b72\\"},\\"name\\":\\"test-rule\\",\\"producer\\":\\"infrastructure\\",\\"revision\\":0,\\"rule_type_id\\":\\"metrics.alert.threshold\\",\\"uuid\\":\\"0de91960-7643-11ed-b719-bb9db8582cb6\\",\\"tags\\":[]}}}}\\", \\"http://ruleurl\\" and \\"{\\"foo\\":\\"bar\\",\\"foo_bar\\":true,\\"name\\":\\"test-rule\\",\\"id\\":\\"1\\"}\\" exist",
+      }
     `);
   });
 

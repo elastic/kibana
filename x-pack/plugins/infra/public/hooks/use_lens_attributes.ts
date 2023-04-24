@@ -74,11 +74,7 @@ export const useLensAttributes = ({
     return visualizationAttributes;
   }, [dataView, formulaAPI, options, type, visualizationType]);
 
-  const injectFilters = (data: {
-    timeRange: TimeRange;
-    filters: Filter[];
-    query: Query;
-  }): LensAttributes | null => {
+  const injectFilters = (data: { filters: Filter[]; query: Query }): LensAttributes | null => {
     if (!attributes) {
       return null;
     }
@@ -121,7 +117,7 @@ export const useLensAttributes = ({
           return true;
         },
         async execute(_context: ActionExecutionContext): Promise<void> {
-          const injectedAttributes = injectFilters({ timeRange, filters, query });
+          const injectedAttributes = injectFilters({ filters, query });
           if (injectedAttributes) {
             navigateToPrefilledEditor(
               {
