@@ -42,6 +42,9 @@ export {
   ML__INCREMENTAL_ID,
 } from './src/fields';
 
+export { getNumTopClasses } from './src/get_num_top_classes';
+export { getNumTopFeatureImportanceValues } from './src/get_num_top_feature_importance_values';
+
 export {
   isDataFrameAnalyticsConfigs,
   type AnalysisConfig,

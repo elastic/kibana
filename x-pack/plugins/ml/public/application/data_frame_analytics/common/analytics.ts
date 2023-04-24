@@ -26,12 +26,8 @@ import {
   RegressionAnalysis,
 } from '../../../../common/types/data_frame_analytics';
 import {
-  isOutlierAnalysis,
   isRegressionAnalysis,
   isClassificationAnalysis,
-  getPredictionFieldName,
-  getDependentVar,
-  getPredictedFieldName,
 } from '../../../../common/util/analytics_utils';
 
 export { getAnalysisType } from '../../../../common/util/analytics_utils';
@@ -158,26 +154,6 @@ export const getTrainingPercent = (
     trainingPercent = analysis.classification.training_percent;
   }
   return trainingPercent;
-};
-
-export const getNumTopFeatureImportanceValues = (
-  analysis: AnalysisConfig
-):
-  | RegressionAnalysis['regression']['num_top_feature_importance_values']
-  | ClassificationAnalysis['classification']['num_top_feature_importance_values'] => {
-  let numTopFeatureImportanceValues;
-  if (
-    isRegressionAnalysis(analysis) &&
-    analysis.regression.num_top_feature_importance_values !== undefined
-  ) {
-    numTopFeatureImportanceValues = analysis.regression.num_top_feature_importance_values;
-  } else if (
-    isClassificationAnalysis(analysis) &&
-    analysis.classification.num_top_feature_importance_values !== undefined
-  ) {
-    numTopFeatureImportanceValues = analysis.classification.num_top_feature_importance_values;
-  }
-  return numTopFeatureImportanceValues;
 };
 
 export const isResultsSearchBoolQuery = (arg: any): arg is ResultsSearchBoolQuery => {
@@ -500,14 +476,4 @@ export const loadDocsCount = async ({
       success: false,
     };
   }
-};
-
-export {
-  isOutlierAnalysis,
-  isRegressionAnalysis,
-  isClassificationAnalysis,
-  getPredictionFieldName,
-  getDependentVar,
-  getPredictedFieldName,
-  ANALYSIS_CONFIG_TYPE,
 };
