@@ -7,11 +7,13 @@
 
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { of } from 'rxjs';
+import { parseDeploymentIdFromDeploymentUrl } from './parse_deployment_id_from_deployment_url';
 
 export interface CloudDeploymentMetadata {
   id?: string;
   trial_end_date?: string;
   is_elastic_staff_owned?: boolean;
+  deployment_url?: string;
 }
 
 export function registerCloudDeploymentMetadataAnalyticsContext(
@@ -29,11 +31,20 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
 
   analytics.registerContextProvider({
     name: 'Cloud Deployment Metadata',
-    context$: of({ cloudId, cloudTrialEndDate, cloudIsElasticStaffOwned }),
+    context$: of({
+      cloudId,
+      deploymentId: parseDeploymentIdFromDeploymentUrl(cloudMetadata.deployment_url),
+      cloudTrialEndDate,
+      cloudIsElasticStaffOwned,
+    }),
     schema: {
       cloudId: {
         type: 'keyword',
-        _meta: { description: 'The Cloud Deployment ID' },
+        _meta: { description: 'The Cloud ID' },
+      },
+      deploymentId: {
+        type: 'keyword',
+        _meta: { description: 'The Deployment ID', optional: true },
       },
       cloudTrialEndDate: {
         type: 'date',

@@ -132,7 +132,7 @@
             "label": "position",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"top\" | \"bottom\""
+              "\"top\" | \"left\" | \"right\" | \"bottom\""
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false,
