@@ -304,6 +304,9 @@ export const AnalyticsCollectionExploreTableLogic = kea<
   listeners: ({ actions, values }) => {
     const fetchItems = () => {
       if (values.selectedTable === null || !(values.selectedTable in tablesParams)) {
+        actions.setItems([]);
+        actions.setTotalItemsCount(0);
+
         return;
       }
 
