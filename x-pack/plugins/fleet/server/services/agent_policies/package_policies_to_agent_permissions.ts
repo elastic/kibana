@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE } from '../../../common/constants';
+
 import { getNormalizedDataStreams } from '../../../common/services';
 
 import type {
@@ -16,7 +18,6 @@ import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../../constants';
 
 import type { PackagePolicy } from '../../types';
 import { pkgToPkgKey } from '../epm/registry';
-import { FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE } from "@kbn/fleet-plugin/common/constants";
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
@@ -55,7 +56,7 @@ export async function storedPackagePoliciesToAgentPermissions(
 
       // Special handling for Universal Profiling packages, as it does not use data streams _only_,
       // but also indices that do not adhere to the convention.
-      if (pkg.name===FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE) {
+      if (pkg.name === FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE) {
         return Promise.resolve(universalProfilingPermissions(packagePolicy.id));
       }
 
