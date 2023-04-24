@@ -17,7 +17,7 @@ export function getLogsKPIConfig(configProps: ConfigProps): SeriesConfig {
     defaultSeriesType: 'bar',
     seriesTypes: [],
     xAxisColumn: {
-      label: i18n.translate('xpack.exploratoryView.exploratoryView.logs.logRateXAxisLabel', {
+      label: i18n.translate('xpack.exploratoryView.logs.logRateXAxisLabel', {
         defaultMessage: 'Timestamp',
       }),
       dataType: 'date',
@@ -28,7 +28,7 @@ export function getLogsKPIConfig(configProps: ConfigProps): SeriesConfig {
     },
     yAxisColumns: [
       {
-        label: i18n.translate('xpack.exploratoryView.exploratoryView.logs.logRateYAxisLabel', {
+        label: i18n.translate('xpack.exploratoryView.logs.logRateYAxisLabel', {
           defaultMessage: 'Log rate per minute',
         }),
         dataType: 'number',

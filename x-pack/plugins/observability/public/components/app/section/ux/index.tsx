@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import { AllSeries } from '@kbn/exploratory-view-plugin/public';
+import { SERVICE_NAME, TRANSACTION_DURATION } from '@kbn/observability-shared-plugin/common';
 import { UX_APP } from '../../../../context/constants';
 import { ObservabilityPublicPluginsStart } from '../../../..';
 import { SectionContainer } from '..';
@@ -17,12 +18,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import CoreVitals from '../../../shared/core_web_vitals';
-import { getExploratoryViewEmbeddable } from '../../../shared/exploratory_view/embeddable';
-import { AllSeries } from '../../../shared/exploratory_view/hooks/use_series_storage';
-import {
-  SERVICE_NAME,
-  TRANSACTION_DURATION,
-} from '../../../shared/exploratory_view/configurations/constants/elasticsearch_fieldnames';
+
 import type { BucketSize } from '../../../../pages/overview/helpers/calculate_bucket_size';
 interface Props {
   bucketSize: BucketSize;
@@ -31,14 +27,13 @@ interface Props {
 export function UXSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
   const { services } = useKibana<ObservabilityPublicPluginsStart>();
+
+  const { ExploratoryViewEmbeddable } = services.exploratoryView;
+
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
   const uxHasDataResponse = hasDataMap.ux;
   const serviceName = uxHasDataResponse?.serviceName as string;
-
-  const ExploratoryViewEmbeddable = getExploratoryViewEmbeddable(
-    services as ObservabilityPublicPluginsStart & CoreStart
-  );
 
   const seriesList: AllSeries = [
     {

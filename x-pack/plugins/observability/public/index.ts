@@ -52,8 +52,6 @@ export {
   FieldValueSuggestions,
   FieldValueSelection,
   FilterValueLabel,
-  SelectableUrlList,
-  ExploratoryView,
   DatePicker,
   LoadWhenInView,
   ObservabilityAlertSearchBar,
