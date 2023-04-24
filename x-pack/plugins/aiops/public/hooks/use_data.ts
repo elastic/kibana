@@ -18,7 +18,7 @@ import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { PLUGIN_ID } from '../../common';
 
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
-import type { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_app_state';
+import type { AiOpsIndexBasedAppState } from '../application/utils/url_state';
 import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
 import type { GroupTableItem } from '../components/spike_analysis_table/types';
 

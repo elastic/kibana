@@ -52,6 +52,7 @@ export const transactionErrorRateParamsSchema = schema.object({
   windowUnit: schema.string(),
   threshold: schema.number(),
   transactionType: schema.maybe(schema.string()),
+  transactionName: schema.maybe(schema.string()),
   serviceName: schema.maybe(schema.string()),
   environment: schema.string(),
 });
