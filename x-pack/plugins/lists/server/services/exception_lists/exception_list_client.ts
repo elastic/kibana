@@ -317,17 +317,20 @@ export class ExceptionListClient {
 
   /**
    * Create the Trusted Apps Agnostic list if it does not yet exist (`null` is returned if it does exist)
-   * @param options.listId the "list_id" of the exception list
+   * @param options.list the "list" to be duplicated
    * @param options.namespaceType saved object namespace (single | agnostic)
+   * @param options.includeExpiredExceptions include or exclude expired TTL exception items
    * @returns The exception list schema or null if it does not exist
    */
   public duplicateExceptionListAndItems = async ({
-    listId,
+    list,
     namespaceType,
+    includeExpiredExceptions,
   }: DuplicateExceptionListOptions): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient, user } = this;
     return duplicateExceptionListAndItems({
-      listId,
+      includeExpiredExceptions,
+      list,
       namespaceType,
       savedObjectsClient,
       user,
@@ -1051,6 +1054,7 @@ export class ExceptionListClient {
    * @param options.listId the "list_id" of an exception list
    * @param options.id the "id" of an exception list
    * @param options.namespaceType saved object namespace (single | agnostic)
+   * @param options.includeExpiredExceptions include or exclude expired TTL exception items
    * @returns the ndjson of the list and items to export or null if none exists
    */
   public exportExceptionListAndItems = async ({
