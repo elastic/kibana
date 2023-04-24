@@ -66,13 +66,12 @@ export function AddLayerButton({
         position="bottom"
       >
         <EuiButton
+          size="s"
           fullWidth
           data-test-subj="lnsLayerAddButton"
           aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
             defaultMessage: 'Add layer',
           })}
-          fill
-          color="text"
           onClick={() => onAddLayerClick(supportedLayers[0].type)}
           iconType="layers"
         >
@@ -89,13 +88,12 @@ export function AddLayerButton({
       data-test-subj="lnsConfigPanel__addLayerPopover"
       button={
         <EuiButton
+          size="s"
           fullWidth
           data-test-subj="lnsLayerAddButton"
           aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
             defaultMessage: 'Add layer',
           })}
-          fill
-          color="text"
           onClick={() => toggleLayersChoice(!showLayersChoice)}
           iconType="layers"
         >

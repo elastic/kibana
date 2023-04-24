@@ -35,7 +35,7 @@ export function StyleSettings({ layer, updateStyleDescriptor, updateCustomIcons 
               <h5>
                 <FormattedMessage
                   id="xpack.maps.layerPanel.styleSettingsTitle"
-                  defaultMessage="Layer Style"
+                  defaultMessage="Layer style"
                 />
               </h5>
             </EuiTitle>
