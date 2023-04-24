@@ -10,7 +10,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { useFetchActiveMaintenanceWindows } from './use_fetch_active_maintenance_windows';
 import * as i18n from './translations';
 
-export const MaintenanceWindowCallout = () => {
+export function MaintenanceWindowCallout(): JSX.Element | null {
   const { data } = useFetchActiveMaintenanceWindows();
   const activeMaintenanceWindows = data || [];
 
@@ -23,4 +23,4 @@ export const MaintenanceWindowCallout = () => {
   }
 
   return null;
-};
+}
