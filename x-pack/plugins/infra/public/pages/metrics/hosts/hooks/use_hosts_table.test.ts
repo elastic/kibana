@@ -8,67 +8,91 @@
 import { useHostsTable } from './use_hosts_table';
 import { renderHook } from '@testing-library/react-hooks';
 import { SnapshotNode } from '../../../../../common/http_api';
+import * as useUnifiedSearchHooks from './use_unified_search';
+import * as useHostsViewHooks from './use_hosts_view';
+
+jest.mock('./use_unified_search');
+jest.mock('./use_hosts_view');
+
+const mockUseUnifiedSearchContext =
+  useUnifiedSearchHooks.useUnifiedSearchContext as jest.MockedFunction<
+    typeof useUnifiedSearchHooks.useUnifiedSearchContext
+  >;
+const mockUseHostsViewContext = useHostsViewHooks.useHostsViewContext as jest.MockedFunction<
+  typeof useHostsViewHooks.useHostsViewContext
+>;
+
+const mockHostNode: SnapshotNode[] = [
+  {
+    metrics: [
+      {
+        name: 'rx',
+        avg: 252456.92916666667,
+      },
+      {
+        name: 'tx',
+        avg: 252758.425,
+      },
+      {
+        name: 'memory',
+        avg: 0.94525,
+      },
+      {
+        name: 'cpu',
+        value: 0.6353277777777777,
+      },
+      {
+        name: 'memoryTotal',
+        avg: 34359.738368,
+      },
+    ],
+    path: [{ value: 'host-0', label: 'host-0', os: null, cloudProvider: 'aws' }],
+    name: 'host-0',
+  },
+  {
+    metrics: [
+      {
+        name: 'rx',
+        avg: 95.86339715321859,
+      },
+      {
+        name: 'tx',
+        avg: 110.38566859563191,
+      },
+      {
+        name: 'memory',
+        avg: 0.5400000214576721,
+      },
+      {
+        name: 'cpu',
+        value: 0.8647805555555556,
+      },
+      {
+        name: 'memoryTotal',
+        avg: 9.194304,
+      },
+    ],
+    path: [
+      { value: 'host-1', label: 'host-1' },
+      { value: 'host-1', label: 'host-1', ip: '243.86.94.22', os: 'macOS' },
+    ],
+    name: 'host-1',
+  },
+];
 
 describe('useHostTable hook', () => {
-  it('it should map the nodes returned from the snapshot api to a format matching eui table items', () => {
-    const nodes: SnapshotNode[] = [
-      {
-        metrics: [
-          {
-            name: 'rx',
-            avg: 252456.92916666667,
-          },
-          {
-            name: 'tx',
-            avg: 252758.425,
-          },
-          {
-            name: 'memory',
-            avg: 0.94525,
-          },
-          {
-            name: 'cpu',
-            value: 0.6353277777777777,
-          },
-          {
-            name: 'memoryTotal',
-            avg: 34359.738368,
-          },
-        ],
-        path: [{ value: 'host-0', label: 'host-0', os: null, cloudProvider: 'aws' }],
-        name: 'host-0',
+  beforeAll(() => {
+    mockUseUnifiedSearchContext.mockReturnValue({
+      searchCriteria: {
+        dateRange: { from: 'now-15m', to: 'now' },
       },
-      {
-        metrics: [
-          {
-            name: 'rx',
-            avg: 95.86339715321859,
-          },
-          {
-            name: 'tx',
-            avg: 110.38566859563191,
-          },
-          {
-            name: 'memory',
-            avg: 0.5400000214576721,
-          },
-          {
-            name: 'cpu',
-            value: 0.8647805555555556,
-          },
-          {
-            name: 'memoryTotal',
-            avg: 9.194304,
-          },
-        ],
-        path: [
-          { value: 'host-1', label: 'host-1' },
-          { value: 'host-1', label: 'host-1', ip: '243.86.94.22', os: 'macOS' },
-        ],
-        name: 'host-1',
-      },
-    ];
+    } as ReturnType<typeof useUnifiedSearchHooks.useUnifiedSearchContext>);
 
+    mockUseHostsViewContext.mockReturnValue({
+      hostNodes: mockHostNode,
+    } as ReturnType<typeof useHostsViewHooks.useHostsViewContext>);
+  });
+  it('it should map the nodes returned from the snapshot api to a format matching eui table items', () => {
     const expected = [
       {
         name: 'host-0',
@@ -102,8 +126,7 @@ describe('useHostTable hook', () => {
       },
     ];
 
-    const time = { from: 'now-15m', to: 'now', interval: '>=1m' };
-    const { result } = renderHook(() => useHostsTable({ nodes, tableParams: { time } }));
+    const { result } = renderHook(() => useHostsTable());
 
     expect(result.current.items).toStrictEqual(expected);
   });

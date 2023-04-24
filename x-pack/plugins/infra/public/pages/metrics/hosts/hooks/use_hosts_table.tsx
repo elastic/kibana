@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TimeRange } from '@kbn/es-query';
 import createContainer from 'constate';
 import { isEqual } from 'lodash';
 import { CriteriaWithPagination } from '@elastic/eui';
@@ -23,6 +22,8 @@ import type {
 } from '../../../../../common/http_api';
 import { useHostFlyoutOpen } from './use_host_flyout_open_url_state';
 import { Sorting, useHostsTableProperties } from './use_hosts_table_url_state';
+import { useHostsViewContext } from './use_hosts_view';
+import { useUnifiedSearchContext } from './use_unified_search';
 
 /**
  * Columns and items types
@@ -40,10 +41,6 @@ export interface HostNodeRow extends HostMetrics {
   title: { name: string; cloudProvider?: CloudProvider | null };
   name: string;
   id: string;
-}
-
-interface HostTableParams {
-  time: TimeRange;
 }
 
 /**
@@ -153,13 +150,9 @@ const toggleDialogActionLabel = i18n.translate(
 /**
  * Build a table columns and items starting from the snapshot nodes.
  */
-export const useHostsTable = ({
-  nodes,
-  tableParams: { time },
-}: {
-  nodes: SnapshotNode[];
-  tableParams: HostTableParams;
-}) => {
+export const useHostsTable = () => {
+  const { hostNodes } = useHostsViewContext();
+  const { searchCriteria } = useUnifiedSearchContext();
   const [{ pagination, sorting }, setProperties] = useHostsTableProperties();
   const {
     services: { telemetry },
@@ -195,7 +188,7 @@ export const useHostsTable = ({
     [setProperties, pagination, sorting]
   );
 
-  const items = useMemo(() => buildItemsList(nodes), [nodes]);
+  const items = useMemo(() => buildItemsList(hostNodes), [hostNodes]);
   const clickedItem = useMemo(
     () => items.find(({ id }) => id === hostFlyoutOpen.clickedItemId),
     [hostFlyoutOpen.clickedItemId, items]
@@ -248,7 +241,7 @@ export const useHostsTable = ({
         render: (title: HostNodeRow['title']) => (
           <HostsTableEntryTitle
             title={title}
-            time={time}
+            time={searchCriteria.dateRange}
             onClick={() => reportHostEntryClick(title)}
           />
         ),
@@ -309,7 +302,12 @@ export const useHostsTable = ({
         align: 'right',
       },
     ],
-    [hostFlyoutOpen.clickedItemId, reportHostEntryClick, setHostFlyoutOpen, time]
+    [
+      hostFlyoutOpen.clickedItemId,
+      setHostFlyoutOpen,
+      searchCriteria.dateRange,
+      reportHostEntryClick,
+    ]
   );
 
   return {

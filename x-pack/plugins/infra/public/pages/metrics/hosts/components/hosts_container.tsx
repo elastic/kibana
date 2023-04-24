@@ -15,7 +15,8 @@ import { HostsTable } from './hosts_table';
 import { KPIGrid } from './kpis/kpi_grid';
 import { Tabs } from './tabs/tabs';
 import { AlertsQueryProvider } from '../hooks/use_alerts_query';
-import { PageProviders } from './page_providers';
+import { HostsViewProvider } from '../hooks/use_hosts_view';
+import { HostsTableProvider } from '../hooks/use_hosts_table';
 
 export const HostContainer = () => {
   const { dataView, loading, hasError } = useMetricsDataViewContext();
@@ -37,21 +38,23 @@ export const HostContainer = () => {
     <>
       <UnifiedSearchBar />
       <EuiSpacer />
-      <PageProviders>
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={false}>
-            <KPIGrid />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <HostsTable />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AlertsQueryProvider>
-              <Tabs />
-            </AlertsQueryProvider>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </PageProviders>
+      <HostsViewProvider>
+        <HostsTableProvider>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <KPIGrid />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <HostsTable />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <AlertsQueryProvider>
+                <Tabs />
+              </AlertsQueryProvider>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </HostsTableProvider>
+      </HostsViewProvider>
     </>
   );
 };
