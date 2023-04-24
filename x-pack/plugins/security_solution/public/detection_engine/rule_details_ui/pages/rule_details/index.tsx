@@ -343,6 +343,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       setDataViewOptions(dataViewIdIndexPatternMap);
     };
     fetchDV();
+    // if this array is not empty the data.dataViews dependency
+    // causes the jest tests for this file to re-render the
+    // step_define_rule component infinitely for some reason.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
