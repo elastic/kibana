@@ -184,6 +184,7 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
       <EuiPanel hasShadow={false}>
         <RulesListNotifyBadge
           snoozeSettings={rule}
+          loading={!rule}
           disabled={!isEditable}
           onRuleChanged={requestRefresh}
           snoozeRule={onSnoozeRule}

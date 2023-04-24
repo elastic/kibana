@@ -18,6 +18,11 @@ export interface RulesListNotifyBadgeProps {
    */
   snoozeSettings: RuleSnoozeSettings | undefined;
   /**
+   * Displays the component in the loading state. If isLoading = false and snoozeSettings aren't set
+   * the component is shown in disabled state.
+   */
+  loading?: boolean;
+  /**
    * Whether the component is disabled or not, string give a disabled reason displayed as a tooltip
    */
   disabled?: boolean | string;
@@ -30,5 +35,5 @@ export interface RulesListNotifyBadgeProps {
 
 export type RulesListNotifyBadgePropsWithApi = Pick<
   RulesListNotifyBadgeProps,
-  'snoozeSettings' | 'disabled' | 'onRuleChanged' | 'showOnHover' | 'showTooltipInline'
+  'snoozeSettings' | 'loading' | 'disabled' | 'onRuleChanged' | 'showOnHover' | 'showTooltipInline'
 >;

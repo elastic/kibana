@@ -32,6 +32,7 @@ import { RulesListNotifyBadgeProps } from './types';
 
 export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = ({
   snoozeSettings,
+  loading = false,
   disabled = false,
   onRuleChanged,
   snoozeRule,
@@ -39,11 +40,12 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   showOnHover = false,
   showTooltipInline = false,
 }) => {
-  const [loading, setLoading] = useState(false);
+  const [requestInFlight, setRequestInFlightLoading] = useState(false);
+  const isLoading = loading || requestInFlight;
+  const isDisabled = !!disabled || !snoozeSettings;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), [setIsPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
-  const isLoading = loading || !snoozeSettings;
   const isSnoozedUntil = snoozeSettings?.isSnoozedUntil;
   const muteAll = snoozeSettings?.muteAll ?? false;
   const isSnoozedIndefinitely = muteAll;
@@ -125,7 +127,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       <EuiButton
         size="s"
         isLoading={isLoading}
-        disabled={isLoading || !!disabled}
+        disabled={isLoading || isDisabled}
         data-test-subj="rulesListNotifyBadge-snoozed"
         aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
         minWidth={85}
@@ -136,7 +138,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
       </EuiButton>
     );
-  }, [formattedSnoozeText, isLoading, disabled, openPopover]);
+  }, [formattedSnoozeText, isLoading, isDisabled, openPopover]);
 
   const scheduledSnoozeButton = useMemo(() => {
     // TODO: Implement scheduled snooze button
@@ -144,7 +146,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       <EuiButton
         size="s"
         isLoading={isLoading}
-        disabled={isLoading || !!disabled}
+        disabled={isLoading || isDisabled}
         data-test-subj="rulesListNotifyBadge-scheduled"
         minWidth={85}
         iconType="calendar"
@@ -155,7 +157,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
       </EuiButton>
     );
-  }, [formattedSnoozeText, isLoading, disabled, openPopover]);
+  }, [formattedSnoozeText, isLoading, isDisabled, openPopover]);
 
   const unsnoozedButton = useMemo(() => {
     // This show on hover is needed because we need style sheets to achieve the
@@ -166,7 +168,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       <EuiButtonIcon
         size="s"
         isLoading={isLoading}
-        disabled={isLoading || !!disabled}
+        disabled={isLoading || isDisabled}
         display={isLoading ? 'base' : 'empty'}
         data-test-subj="rulesListNotifyBadge-unsnoozed"
         aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
@@ -175,14 +177,14 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         onClick={openPopover}
       />
     );
-  }, [isPopoverOpen, isLoading, disabled, showOnHover, openPopover]);
+  }, [isPopoverOpen, isLoading, isDisabled, showOnHover, openPopover]);
 
   const indefiniteSnoozeButton = useMemo(() => {
     return (
       <EuiButtonIcon
         size="s"
         isLoading={isLoading}
-        disabled={isLoading || !!disabled}
+        disabled={isLoading || isDisabled}
         display="base"
         data-test-subj="rulesListNotifyBadge-snoozedIndefinitely"
         aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
@@ -191,7 +193,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         onClick={openPopover}
       />
     );
-  }, [isLoading, disabled, openPopover]);
+  }, [isLoading, isDisabled, openPopover]);
 
   const button = useMemo(() => {
     if (isScheduled) {
@@ -228,7 +230,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   const onApplySnooze = useCallback(
     async (schedule: SnoozeSchedule) => {
       try {
-        setLoading(true);
+        setRequestInFlightLoading(true);
         closePopover();
         await snoozeRule(schedule);
         await onRuleChanged();
@@ -236,16 +238,16 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       } catch (e) {
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
       } finally {
-        setLoading(false);
+        setRequestInFlightLoading(false);
       }
     },
-    [setLoading, snoozeRule, onRuleChanged, toasts, closePopover]
+    [setRequestInFlightLoading, snoozeRule, onRuleChanged, toasts, closePopover]
   );
 
   const onApplyUnsnooze = useCallback(
     async (scheduleIds?: string[]) => {
       try {
-        setLoading(true);
+        setRequestInFlightLoading(true);
         closePopover();
         await unsnoozeRule(scheduleIds);
         await onRuleChanged();
@@ -253,16 +255,16 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       } catch (e) {
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
       } finally {
-        setLoading(false);
+        setRequestInFlightLoading(false);
       }
     },
-    [setLoading, unsnoozeRule, onRuleChanged, toasts, closePopover]
+    [setRequestInFlightLoading, unsnoozeRule, onRuleChanged, toasts, closePopover]
   );
 
   const popover = (
     <EuiPopover
       data-test-subj="rulesListNotifyBadge"
-      isOpen={isPopoverOpen && !disabled}
+      isOpen={isPopoverOpen && !isDisabled}
       closePopover={closePopover}
       button={buttonWithToolTip}
       anchorPosition="rightCenter"

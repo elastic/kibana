@@ -15,7 +15,7 @@ import { RulesListNotifyBadgePropsWithApi } from './types';
 
 export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
   RulesListNotifyBadgePropsWithApi
-> = ({ snoozeSettings, disabled, showTooltipInline, showOnHover, onRuleChanged }) => {
+> = ({ snoozeSettings, loading, disabled, showTooltipInline, showOnHover, onRuleChanged }) => {
   const { http } = useKibana().services;
 
   const onSnoozeRule = useCallback(
@@ -37,6 +37,7 @@ export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
   return (
     <RulesListNotifyBadge
       snoozeSettings={snoozeSettings}
+      loading={loading}
       disabled={disabled}
       onRuleChanged={onRuleChanged}
       snoozeRule={onSnoozeRule}
