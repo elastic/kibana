@@ -7,7 +7,7 @@
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { Redirect, Router, Switch } from 'react-router-dom';
+import { Router, Switch } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Route } from '@kbn/shared-ux-router';
 import { CoreStart } from '@kbn/core/public';
@@ -18,6 +18,7 @@ import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AlertingPluginStart } from '../plugin';
 import { paths } from '../config';
+import { useLicense } from '../hooks/use_license';
 
 const MaintenanceWindowsLazy: React.FC = React.lazy(() => import('../pages/maintenance_windows'));
 const MaintenanceWindowsCreateLazy: React.FC = React.lazy(
@@ -28,27 +29,39 @@ const MaintenanceWindowsEditLazy: React.FC = React.lazy(
 );
 
 const App = React.memo(() => {
+  const { isAtLeastPlatinum } = useLicense();
+  const hasLicense = isAtLeastPlatinum();
+
   return (
-    <>
-      <Switch>
-        <Route path="/" exact>
-          <Suspense fallback={<EuiLoadingSpinner />}>
-            <MaintenanceWindowsLazy />
-          </Suspense>
-        </Route>
-        <Route path={paths.alerting.maintenanceWindowsCreate} exact>
+    <Switch>
+      {hasLicense ? (
+        <Route
+          key={paths.alerting.maintenanceWindowsCreate}
+          path={paths.alerting.maintenanceWindowsCreate}
+          exact
+        >
           <Suspense fallback={<EuiLoadingSpinner />}>
             <MaintenanceWindowsCreateLazy />
           </Suspense>
         </Route>
-        <Route path={paths.alerting.maintenanceWindowsEdit} exact>
+      ) : null}
+      {hasLicense ? (
+        <Route
+          key={paths.alerting.maintenanceWindowsEdit}
+          path={paths.alerting.maintenanceWindowsEdit}
+          exact
+        >
           <Suspense fallback={<EuiLoadingSpinner />}>
             <MaintenanceWindowsEditLazy />
           </Suspense>
         </Route>
-        <Redirect from={'/edit'} to="/" />
-      </Switch>
-    </>
+      ) : null}
+      <Route>
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <MaintenanceWindowsLazy />
+        </Suspense>
+      </Route>
+    </Switch>
   );
 });
 App.displayName = 'App';

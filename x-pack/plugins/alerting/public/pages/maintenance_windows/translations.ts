@@ -472,3 +472,24 @@ export const EXPERIMENTAL_DESCRIPTION = i18n.translate(
 export const UPCOMING = i18n.translate('xpack.alerting.maintenanceWindows.upcoming', {
   defaultMessage: 'Upcoming',
 });
+
+export const UPGRADE_TO_PLATINUM = i18n.translate(
+  'xpack.alerting.maintenanceWindows.callout.updateToPlatinumTitle',
+  {
+    defaultMessage: 'Upgrade to an appropriate license',
+  }
+);
+
+export const LINK_APPROPRIATE_LICENSE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.callout.appropriateLicense',
+  {
+    defaultMessage: 'appropriate license',
+  }
+);
+
+export const LINK_CLOUD_DEPLOYMENT = i18n.translate(
+  'xpack.alerting.maintenanceWindows.callout.cloudDeploymentLink',
+  {
+    defaultMessage: 'cloud deployment',
+  }
+);
