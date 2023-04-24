@@ -25,6 +25,7 @@ import {
   EuiDescribedFormGroup,
   EuiLink,
   EuiFieldText,
+  EuiSelect,
 } from '@elastic/eui';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { Observable } from 'rxjs';
@@ -43,6 +44,8 @@ interface DeploymentSetupProps {
   config: ThreadingParams;
   onConfigChange: (config: ThreadingParams) => void;
   errors: Partial<Record<keyof ThreadingParams, object>>;
+  isUpdate?: boolean;
+  deploymentsParams?: Record<string, ThreadingParams>;
 }
 
 export interface ThreadingParams {
@@ -57,7 +60,13 @@ const THREADS_MAX_EXPONENT = 4;
 /**
  * Form for setting threading params.
  */
-export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChange, errors }) => {
+export const DeploymentSetup: FC<DeploymentSetupProps> = ({
+  config,
+  onConfigChange,
+  errors,
+  isUpdate,
+  deploymentsParams,
+}) => {
   const numOfAllocation = config.numOfAllocations;
   const threadsPerAllocations = config.threadsPerAllocations;
 
@@ -113,14 +122,33 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChan
             />
           }
         >
-          <EuiFieldText
-            isInvalid={!!errors.deploymentId}
-            value={config.deploymentId ?? ''}
-            onChange={(e) => {
-              onConfigChange({ ...config, deploymentId: e.target.value });
-            }}
-            data-test-subj={'mlModelsStartDeploymentModalDeploymentId'}
-          />
+          {!isUpdate ? (
+            <EuiFieldText
+              isInvalid={!!errors.deploymentId}
+              value={config.deploymentId ?? ''}
+              onChange={(e) => {
+                onConfigChange({ ...config, deploymentId: e.target.value });
+              }}
+              data-test-subj={'mlModelsStartDeploymentModalDeploymentId'}
+            />
+          ) : (
+            <EuiSelect
+              fullWidth
+              options={Object.keys(deploymentsParams!).map((v) => {
+                return { text: v, value: v };
+              })}
+              value={config.deploymentId}
+              onChange={(e) => {
+                const update = e.target.value;
+                onConfigChange({
+                  ...config,
+                  deploymentId: update,
+                  numOfAllocations: deploymentsParams![update].numOfAllocations,
+                });
+              }}
+              data-test-subj={'mlModelsStartDeploymentModalDeploymentSelectId'}
+            />
+          )}
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -309,6 +337,8 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
   startModelDeploymentDocUrl,
   initialParams,
 }) => {
+  const isUpdate = !!initialParams;
+
   const [config, setConfig] = useState<ThreadingParams>(
     initialParams ?? {
       numOfAllocations: 1,
@@ -318,15 +348,16 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
     }
   );
 
-  const isUpdate = initialParams !== undefined;
-
   const deploymentIdValidator = useMemo(() => {
+    if (isUpdate) {
+      return () => null;
+    }
     return dictionaryValidator([
       ...model.deployment_ids,
       // check for deployment with the default ID
       ...(model.deployment_ids.includes(model.model_id) ? [''] : []),
     ]);
-  }, [model.deployment_ids, model.model_id]);
+  }, [model.deployment_ids, model.model_id, isUpdate]);
 
   const numOfAllocationsValidator = composeValidators(
     requiredValidator(),
@@ -380,7 +411,16 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
         />
         <EuiSpacer size={'m'} />
 
-        <DeploymentSetup config={config} onConfigChange={setConfig} errors={errors} />
+        <DeploymentSetup
+          config={config}
+          onConfigChange={setConfig}
+          errors={errors}
+          isUpdate={isUpdate}
+          deploymentsParams={model.stats?.deployment_stats.reduce((acc, curr) => {
+            acc[curr.deployment_id] = { numOfAllocations: curr.number_of_allocations };
+            return acc;
+          }, {} as Record<string, ThreadingParams>)}
+        />
 
         <EuiSpacer size={'m'} />
       </EuiModalBody>

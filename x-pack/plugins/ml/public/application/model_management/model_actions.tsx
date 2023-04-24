@@ -213,16 +213,21 @@ export function useModelActions({
           !isLoading &&
           !!item.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTED),
         onClick: async (item) => {
-          const threadingParams = await getUserInputModelDeploymentParams(item, {
-            numOfAllocations: item.stats?.deployment_stats?.number_of_allocations!,
+          const deploymentToUpdate = item.deployment_ids[0];
+
+          const deploymentParams = await getUserInputModelDeploymentParams(item, {
+            deploymentId: deploymentToUpdate,
+            numOfAllocations: item.stats!.deployment_stats.find(
+              (v) => v.deployment_id === deploymentToUpdate
+            )!.number_of_allocations,
           });
 
-          if (!threadingParams) return;
+          if (!deploymentParams) return;
 
           try {
             onLoading(true);
-            await trainedModelsApiService.updateModelDeployment(item.model_id, {
-              number_of_allocations: threadingParams.numOfAllocations,
+            await trainedModelsApiService.updateModelDeployment(deploymentParams.deploymentId!, {
+              number_of_allocations: deploymentParams.numOfAllocations,
             });
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccess', {
