@@ -320,10 +320,13 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 
   const isUpdate = initialParams !== undefined;
 
-  const deploymentIdValidator = useMemo(
-    () => dictionaryValidator(model.deployment_ids),
-    [model.deployment_ids]
-  );
+  const deploymentIdValidator = useMemo(() => {
+    return dictionaryValidator([
+      ...model.deployment_ids,
+      // check for deployment with the default ID
+      ...(model.deployment_ids.includes(model.model_id) ? [''] : []),
+    ]);
+  }, [model.deployment_ids, model.model_id]);
 
   const numOfAllocationsValidator = composeValidators(
     requiredValidator(),
