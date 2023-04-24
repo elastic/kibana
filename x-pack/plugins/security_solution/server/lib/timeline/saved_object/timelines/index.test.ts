@@ -12,12 +12,14 @@ import {
   convertStringToBase64,
   getExistingPrepackagedTimelines,
   getAllTimeline,
+  getDraftTimeline,
   resolveTimelineOrNull,
   updatePartialSavedTimeline,
 } from '.';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { getNotesByTimelineId } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId } from '../pinned_events';
+import { TimelineType } from '../../../../../common/types/timeline';
 import type {
   AllTimelinesResponse,
   ResolvedTimelineWithOutcomeSavedObject,
@@ -417,6 +419,47 @@ describe('saved_object', () => {
       )) as SavedObjectsUpdateResponse<SavedTimeline>;
 
       expect(resp.attributes.savedQueryId).toBeNull();
+    });
+  });
+
+  describe('get draft timelines', () => {
+    let mockFindSavedObject: jest.Mock;
+    let mockRequest: FrameworkRequest;
+
+    beforeEach(() => {
+      mockFindSavedObject = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+      mockRequest = {
+        user: {
+          username: 'username',
+        },
+        context: {
+          core: {
+            savedObjects: {
+              client: {
+                find: mockFindSavedObject,
+              },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+    });
+
+    afterEach(() => {
+      mockFindSavedObject.mockClear();
+      (getNotesByTimelineId as jest.Mock).mockClear();
+      (getAllPinnedEventsByTimelineId as jest.Mock).mockClear();
+    });
+
+    test('should get draft filtered by current user', async () => {
+      await getDraftTimeline(mockRequest, TimelineType.default);
+      expect(mockFindSavedObject).toBeCalledWith({
+        filter:
+          'not siem-ui-timeline.attributes.timelineType: template and siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.updatedBy: username and siem-ui-timeline.attributes.createdBy: username',
+        sortField: 'created',
+        sortOrder: 'desc',
+        perPage: 1,
+        type: 'siem-ui-timeline',
+      });
     });
   });
 });

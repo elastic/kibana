@@ -287,7 +287,7 @@ export const getDraftTimeline = async (
   timelineType: TimelineTypeLiteralWithNull
 ): Promise<ResponseTimelines> => {
   const filter = combineFilters([
-    getTimelineTypeFilter(timelineType ?? null, TimelineStatus.active),
+    getTimelineTypeFilter(timelineType ?? null, TimelineStatus.draft),
     getTimelinesCreatedAndUpdatedByCurrentUser({ request }),
   ]);
   const options: SavedObjectsFindOptions = {
