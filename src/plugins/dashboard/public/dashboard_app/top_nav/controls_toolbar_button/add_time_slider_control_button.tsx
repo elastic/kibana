@@ -14,6 +14,7 @@ import {
   getAddTimeSliderControlButtonTitle,
   getOnlyOneTimeSliderControlMsg,
 } from '../../_dashboard_app_strings';
+import { useDashboardAPI } from '../../dashboard_app';
 
 interface Props {
   closePopover: () => void;
@@ -22,7 +23,7 @@ interface Props {
 
 export const AddTimeSliderControlButton = ({ closePopover, controlGroup, ...rest }: Props) => {
   const [hasTimeSliderControl, setHasTimeSliderControl] = useState(false);
-  const { embeddableInstance: dashboardContainer } = useDashboardContainerContext();
+  const dashboard = useDashboardAPI();
 
   useEffect(() => {
     const subscription = controlGroup.getInput$().subscribe(() => {
@@ -46,7 +47,7 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroup, ...rest
       icon="plusInCircle"
       onClick={async () => {
         await controlGroup.addTimeSliderControl();
-        dashboardContainer.scrollToTop();
+        dashboard.scrollToTop();
         closePopover();
       }}
       data-test-subj="controls-create-timeslider-button"
