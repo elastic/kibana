@@ -12,7 +12,8 @@ import type { PackagePolicy, RegistryDataStream } from '../../types';
 import type { DataStreamMeta } from './package_policies_to_agent_permissions';
 import {
   getDataStreamPrivileges,
-  storedPackagePoliciesToAgentPermissions, UNIVERSAL_PROFILING_PERMISSIONS,
+  storedPackagePoliciesToAgentPermissions,
+  UNIVERSAL_PROFILING_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
 
 const packageInfoCache = new Map();
@@ -144,7 +145,7 @@ packageInfoCache.set('profiler_symbolizer-8.8.0-preview', {
   version: '8.8.0-preview',
   license: 'basic',
   description:
-      ' Fleet-wide, whole-system, continuous profiling with zero instrumentation. Symbolize native frames.',
+    ' Fleet-wide, whole-system, continuous profiling with zero instrumentation. Symbolize native frames.',
   type: 'integration',
   release: 'beta',
   categories: ['monitoring', 'elastic_stack'],
@@ -439,8 +440,8 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     ];
 
     const permissions = await storedPackagePoliciesToAgentPermissions(
-        packageInfoCache,
-        packagePolicies
+      packageInfoCache,
+      packagePolicies
     );
 
     expect(permissions).toMatchObject({
@@ -448,7 +449,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         indices: [
           {
             names: ['profiling-*'],
-            privileges: UNIVERSAL_PROFILING_PERMISSIONS
+            privileges: UNIVERSAL_PROFILING_PERMISSIONS,
           },
         ],
       },
