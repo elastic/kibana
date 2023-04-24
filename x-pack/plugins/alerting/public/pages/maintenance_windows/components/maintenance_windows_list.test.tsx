@@ -93,7 +93,9 @@ describe('MaintenanceWindowsList', () => {
   });
 
   test('it renders', () => {
-    const result = appMockRenderer.render(<MaintenanceWindowsList loading={false} items={items} />);
+    const result = appMockRenderer.render(
+      <MaintenanceWindowsList refreshData={() => {}} loading={false} items={items} />
+    );
 
     expect(result.getAllByTestId('list-item')).toHaveLength(items.length);
 

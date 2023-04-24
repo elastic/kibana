@@ -11,19 +11,20 @@
 
 import { get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
+import { lastValueFrom } from 'rxjs';
+
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { asyncForEach } from '@kbn/std';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import { lastValueFrom } from 'rxjs';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
 import { EntityField, getEntityFieldList } from '../../../common/util/anomaly_utils';
 import { getDataViewIdFromName } from '../util/index_utils';
-import { extractErrorMessage } from '../../../common/util/errors';
 import { ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import {
   isSourceDataChartableForDetector,
