@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MlPutTrainedModelRequest } from '@elastic/elasticsearch/lib/api/types';
 import { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
 
@@ -83,12 +84,14 @@ export const startMlModelDeployment = async (
   }
 
   // we're not downloaded yet - let's initiate that...
-  await mlClient.putTrainedModel({
+  const putRequest: MlPutTrainedModelRequest = {
+    inference_config: {},
     input: {
       field_names: ['text_field'],
     },
     model_id: modelName,
-  });
+  };
+  await mlClient.putTrainedModel(putRequest);
 
   // and sync our objects
   await syncSavedObjectsFactory(clusterClient, savedObjectService).syncSavedObjects(false);

@@ -8,11 +8,10 @@
 export enum MlModelDeploymentState {
   NotDeployed = '',
   Downloading = 'downloading',
-  Downloaded = 'is_fully_downloaded',
+  Downloaded = 'fully_downloaded',
   Starting = 'starting',
   Started = 'started',
   FullyAllocated = 'fully_allocated',
-  Error = 'error',
 }
 
 export interface MlModelDeploymentStatus {

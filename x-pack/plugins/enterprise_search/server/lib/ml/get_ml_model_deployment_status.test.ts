@@ -8,6 +8,7 @@
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { MlModelDeploymentState } from '../../../common/types/ml';
+import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { getMlModelDeploymentStatus } from './get_ml_model_deployment_status';
 
@@ -35,6 +36,32 @@ describe('getMlModelDeploymentStatus', () => {
 
     mockTrainedModelsProvider.getTrainedModels.mockImplementation(() =>
       Promise.resolve(mockGetReturn)
+    );
+
+    const deployedStatus = await getMlModelDeploymentStatus(
+      'mockModelName',
+      mockTrainedModelsProvider as unknown as MlTrainedModels
+    );
+
+    expect(deployedStatus.deploymentState).toEqual(MlModelDeploymentState.NotDeployed);
+    expect(deployedStatus.modelId).toEqual('mockModelName');
+  });
+
+  it('should return not deployed status if no model is found when getTrainedModels has a 404', async () => {
+    const mockErrorRejection: ElasticsearchResponseError = {
+      meta: {
+        body: {
+          error: {
+            type: 'resource_not_found_exception',
+          },
+        },
+        statusCode: 404,
+      },
+      name: 'ResponseError',
+    };
+
+    mockTrainedModelsProvider.getTrainedModels.mockImplementation(() =>
+      Promise.reject(mockErrorRejection)
     );
 
     const deployedStatus = await getMlModelDeploymentStatus(
