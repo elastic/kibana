@@ -49,9 +49,10 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { TelemetryLogic } from '../../../../shared/telemetry';
 import {
   EngineViewTabs,
-  ENGINE_TAB_PATH,
   SearchApplicationConnectTabs,
+  SearchApplicationContentTabs,
   SEARCH_APPLICATION_CONNECT_PATH,
+  SEARCH_APPLICATION_CONTENT_PATH,
 } from '../../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../../layout/engines_page_template';
 
@@ -164,9 +165,9 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             icon="tableDensityExpanded"
             onClick={() =>
               navigateToUrl(
-                generateEncodedPath(ENGINE_TAB_PATH, {
+                generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
+                  contentTabId: SearchApplicationContentTabs.INDICES,
                   engineName,
-                  tabId: EngineViewTabs.INDICES,
                 })
               )
             }
@@ -183,9 +184,9 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             icon="kqlField"
             onClick={() =>
               navigateToUrl(
-                generateEncodedPath(ENGINE_TAB_PATH, {
+                generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
+                  contentTabId: SearchApplicationContentTabs.SCHEMA,
                   engineName,
-                  tabId: EngineViewTabs.SCHEMA,
                 })
               )
             }
