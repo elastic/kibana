@@ -12,6 +12,7 @@ import moment from 'moment';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -50,12 +51,18 @@ const ALERT_START_ANNOTATION_ID = 'alert_start_annotation';
 const ALERT_TIME_RANGE_ANNOTATION_ID = 'alert_time_range_annotation';
 
 interface AppSectionProps {
-  rule: MetricThresholdRule;
   alert: MetricThresholdAlert;
+  rule: MetricThresholdRule;
+  ruleLink: string;
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
 
-export function AlertDetailsAppSection({ alert, rule, setAlertSummaryFields }: AppSectionProps) {
+export function AlertDetailsAppSection({
+  alert,
+  rule,
+  ruleLink,
+  setAlertSummaryFields,
+}: AppSectionProps) {
   const { uiSettings, charts } = useKibanaContextForPlugin().services;
   const { source, createDerivedIndexPattern } = useSourceContext();
   const { euiTheme } = useEuiTheme();
@@ -92,10 +99,14 @@ export function AlertDetailsAppSection({ alert, rule, setAlertSummaryFields }: A
         label: i18n.translate('xpack.infra.metrics.alertDetailsAppSection.summaryField.rule', {
           defaultMessage: 'Rule',
         }),
-        value: rule.name,
+        value: (
+          <EuiLink data-test-subj="alertDetailsAppSectionRuleLink" href={ruleLink}>
+            {rule.name}
+          </EuiLink>
+        ),
       },
     ]);
-  }, [alert, rule, setAlertSummaryFields]);
+  }, [alert, rule, ruleLink, setAlertSummaryFields]);
 
   return !!rule.params.criteria ? (
     <EuiFlexGroup direction="column" data-test-subj="metricThresholdAppSection">
