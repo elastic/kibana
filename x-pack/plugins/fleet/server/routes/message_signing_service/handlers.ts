@@ -9,7 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import type { FleetRequestHandler } from '../../types';
 
-import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 import { appContextService } from '../../services';
 import type { RotateKeyPairSchema } from '../../types/rest_spec/message_signing_service';
 
@@ -35,14 +35,6 @@ export const rotateKeyPairHandler: FleetRequestHandler<
       },
     });
   } catch (error) {
-    if (error instanceof AgentPolicyNotFoundError) {
-      return response.notFound({
-        body: {
-          message: error.message,
-        },
-      });
-    }
-
     return defaultFleetErrorHandler({ error, response });
   }
 };
