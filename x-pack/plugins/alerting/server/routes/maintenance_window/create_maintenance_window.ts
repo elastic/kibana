@@ -15,18 +15,13 @@ import {
   rewriteMaintenanceWindowRes,
 } from '../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../types';
-import { MaintenanceWindowSOProperties, MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../common';
+import { MaintenanceWindowCreateBody, MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../common';
 
 const bodySchema = schema.object({
   title: schema.string(),
   duration: schema.number(),
   r_rule: rRuleSchema,
 });
-
-type MaintenanceWindowCreateBody = Omit<
-  MaintenanceWindowSOProperties,
-  'events' | 'expirationDate' | 'enabled' | 'archived'
->;
 
 export const rewriteQueryReq: RewriteRequestCase<MaintenanceWindowCreateBody> = ({
   r_rule: rRule,

@@ -8,6 +8,8 @@
 import React from 'react';
 import { render, waitFor, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MaintenanceWindowStatus } from '@kbn/alerting-plugin/common';
+import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { MaintenanceWindowCallout } from './maintenance_window_callout';
@@ -20,24 +22,24 @@ jest.mock('./api', () => ({
   fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
 }));
 
-const RUNNING_MAINTENANCE_WINDOW_1 = {
+const RUNNING_MAINTENANCE_WINDOW_1: Partial<MaintenanceWindow> = {
   title: 'Maintenance window 1',
   id: '63057284-ac31-42ba-fe22-adfe9732e5ae',
-  status: 'running',
+  status: MaintenanceWindowStatus.Running,
   events: [{ gte: '2023-04-20T16:27:30.753Z', lte: '2023-04-20T16:57:30.753Z' }],
 };
 
-const RUNNING_MAINTENANCE_WINDOW_2 = {
+const RUNNING_MAINTENANCE_WINDOW_2: Partial<MaintenanceWindow> = {
   title: 'Maintenance window 2',
   id: '45894340-df98-11ed-ac81-bfcb4982b4fd',
-  status: 'running',
+  status: MaintenanceWindowStatus.Running,
   events: [{ gte: '2023-04-20T16:47:42.871Z', lte: '2023-04-20T17:11:32.192Z' }],
 };
 
-const UPCOMING_MAINTENANCE_WINDOW = {
+const UPCOMING_MAINTENANCE_WINDOW: Partial<MaintenanceWindow> = {
   title: 'Upcoming maintenance window',
   id: '5eafe070-e030-11ed-ac81-bfcb4982b4fd',
-  status: 'upcoming',
+  status: MaintenanceWindowStatus.Upcoming,
   events: [
     { gte: '2023-04-21T10:36:14.028Z', lte: '2023-04-21T10:37:00.000Z' },
     { gte: '2023-04-28T10:36:14.028Z', lte: '2023-04-28T10:37:00.000Z' },

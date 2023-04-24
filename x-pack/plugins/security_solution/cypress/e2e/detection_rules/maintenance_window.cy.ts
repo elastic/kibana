@@ -6,6 +6,8 @@
  */
 
 import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
+import type { MaintenanceWindowCreateBody } from '@kbn/alerting-plugin/common';
+import type { AsApiContract } from '@kbn/alerting-plugin/server/routes/lib';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
@@ -17,21 +19,23 @@ describe('Maintenance window callout on Rule Management page', () => {
     cleanKibana();
     login();
 
+    const body: AsApiContract<MaintenanceWindowCreateBody> = {
+      title: 'My maintenance window',
+      duration: 60000, // 1 minute
+      r_rule: {
+        dtstart: new Date().toISOString(),
+        tzid: 'Europe/Amsterdam',
+        freq: 0,
+        count: 1,
+      },
+    };
+
     // Create a test maintenance window
     cy.request({
       method: 'POST',
       url: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window`,
       headers: { 'kbn-xsrf': 'cypress-creds' },
-      body: {
-        title: 'My maintenance window',
-        duration: 60000, // 1 minute
-        r_rule: {
-          dtstart: new Date().toISOString(),
-          tzid: 'Europe/Amsterdam',
-          freq: 0,
-          count: 1,
-        },
-      },
+      body,
     }).then((response) => {
       maintenanceWindowId = response.body.id;
     });
