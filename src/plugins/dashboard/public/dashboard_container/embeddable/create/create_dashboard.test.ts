@@ -7,8 +7,10 @@
  */
 
 import {
+  ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
+  ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples';
 import {
@@ -287,7 +289,7 @@ test('searchSessionId is updated prior to child embeddable parent subscription e
       getSearchSessionIdFromURL: () => undefined,
       removeSessionIdFromUrl: () => {},
       createSessionRestorationDataProvider: () => {},
-    },
+    } as unknown as DashboardCreationOptions['searchSessionSettings'],
   });
   const embeddable = await dashboard.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -307,7 +309,7 @@ test('searchSessionId is updated prior to child embeddable parent subscription e
   });
 
   const embeddableInput = embeddable.getInput();
-  expect(embeddableInput.timeRange).toEqual({
+  expect((embeddableInput as any).timeRange).toEqual({
     to: 'now',
     from: 'now-7d',
   });
