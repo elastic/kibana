@@ -8,7 +8,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
-import { RuleDetailsSnoozeSettings } from '../../../../detection_engine/rule_details_ui/pages/rule_details/components/rule_details_snooze_settings';
+import { RuleSnoozeBadge } from '../../../../detection_engine/components/rule_snooze_badge';
 import * as i18n from './translations';
 
 interface RuleSnoozeSectionProps {
@@ -28,7 +28,7 @@ export function RuleSnoozeSection({ id }: RuleSnoozeSectionProps): JSX.Element {
         `}
       >
         <EuiFlexItem grow={false}>
-          <RuleDetailsSnoozeSettings id={id} />
+          <RuleSnoozeBadge id={id} showTooltipInline />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">

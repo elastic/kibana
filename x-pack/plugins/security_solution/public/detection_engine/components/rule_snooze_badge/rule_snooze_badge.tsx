@@ -7,30 +7,26 @@
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { useUserData } from '../../detections/components/user_info';
-import { hasUserCRUDPermission } from '../../common/utils/privileges';
-import { useKibana } from '../../common/lib/kibana';
-import type { RuleSnoozeSettings } from '../rule_management/logic';
-import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../rule_management/api/hooks/use_fetch_rules_snooze_settings';
+import { useUserData } from '../../../detections/components/user_info';
+import { hasUserCRUDPermission } from '../../../common/utils/privileges';
+import { useKibana } from '../../../common/lib/kibana';
+import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
+import { useRuleSnoozeSettings } from './use_rule_snooze_settings';
 
 interface RuleSnoozeBadgeProps {
   /**
-   * Rule's snooze settings, when set to `undefined` considered as a loading state
+   * Rule's SO id (not ruleId)
    */
-  snoozeSettings: RuleSnoozeSettings | undefined;
-  /**
-   * It should represent a user readable error message happened during data snooze settings fetching
-   */
-  error?: string;
+  id: string;
   showTooltipInline?: boolean;
 }
 
 export function RuleSnoozeBadge({
-  snoozeSettings,
-  error,
+  id,
   showTooltipInline = false,
 }: RuleSnoozeBadgeProps): JSX.Element {
   const RulesListNotifyBadge = useKibana().services.triggersActionsUi.getRulesListNotifyBadge;
+  const { snoozeSettings, error } = useRuleSnoozeSettings(id);
   const [{ canUserCRUD }] = useUserData();
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
