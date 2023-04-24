@@ -67,7 +67,7 @@ const hostsEntryClickedEvent: InfraTelemetryEvent = {
 };
 
 const hostFlyoutRemoveFilter: InfraTelemetryEvent = {
-  eventType: InfraTelemetryEventTypes.HOST_FLYOUT_REMOVE_FILTER,
+  eventType: InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_REMOVED,
   schema: {
     field_name: {
       type: 'keyword',
@@ -79,7 +79,7 @@ const hostFlyoutRemoveFilter: InfraTelemetryEvent = {
   },
 };
 const hostFlyoutAddFilter: InfraTelemetryEvent = {
-  eventType: InfraTelemetryEventTypes.HOST_FLYOUT_ADD_FILTER,
+  eventType: InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_ADDED,
   schema: {
     field_name: {
       type: 'keyword',

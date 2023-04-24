@@ -31,16 +31,18 @@ export class TelemetryClient implements ITelemetryClient {
     });
   };
 
-  public reportHostFlyoutRemoveFilter = ({
+  public reportHostFlyoutFilterRemoved = ({
     field_name: fieldName,
   }: HostFlyoutFilterActionParams) => {
-    this.analytics.reportEvent(InfraTelemetryEventTypes.HOST_FLYOUT_REMOVE_FILTER, {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_REMOVED, {
       field_name: fieldName,
     });
   };
 
-  public reportHostFlyoutAddFilter = ({ field_name: fieldName }: HostFlyoutFilterActionParams) => {
-    this.analytics.reportEvent(InfraTelemetryEventTypes.HOST_FLYOUT_ADD_FILTER, {
+  public reportHostFlyoutFilterAdded = ({
+    field_name: fieldName,
+  }: HostFlyoutFilterActionParams) => {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_ADDED, {
       field_name: fieldName,
     });
   };

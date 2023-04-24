@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { buildMetadataFilter } from './build_metadata_filter';
@@ -41,24 +41,6 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
     },
   } = useKibanaContextForPlugin();
 
-  const reportHostFlyoutAddFilter = useCallback(
-    ({ fieldName }) => {
-      telemetry.reportHostFlyoutAddFilter({
-        field_name: fieldName,
-      });
-    },
-    [telemetry]
-  );
-
-  const reportHostFlyoutRemoveFilter = useCallback(
-    ({ fieldName }) => {
-      telemetry.reportHostFlyoutAddFilter({
-        field_name: fieldName,
-      });
-    },
-    [telemetry]
-  );
-
   const existingFilter = useMemo(
     () => searchCriteria.filters.find((filter) => filter.meta.key === item.name),
     [item.name, searchCriteria.filters]
@@ -72,7 +54,9 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
       negate: false,
     });
     if (newFilter) {
-      reportHostFlyoutAddFilter({ fieldName: item.name });
+      telemetry.reportHostFlyoutFilterAdded({
+        field_name: item.name,
+      });
       filterManagerService.addFilters(newFilter);
       toastsService.addSuccess({
         title: filterAddedToastTitle,
@@ -105,7 +89,9 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
               }
             )}
             onClick={() => {
-              reportHostFlyoutRemoveFilter({ fieldName: existingFilter.meta.key! });
+              telemetry.reportHostFlyoutFilterRemoved({
+                field_name: existingFilter.meta.key!,
+              });
               filterManagerService.removeFilter(existingFilter);
             }}
           />
