@@ -12,7 +12,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { buildTimeRangeFilter } from '../../utils/build_events_query';
 import type { RuleServices, RunOpts, SearchAfterAndBulkCreateReturnType } from '../../types';
-import { addToSearchAfterReturn, getUnprocessedExceptionsWarnings } from '../../utils/utils';
+import {
+  addToSearchAfterReturn,
+  getUnprocessedExceptionsWarnings,
+  mergeReturns,
+} from '../../utils/utils';
 import type { SuppressionBucket } from './wrap_suppressed_alerts';
 import { wrapSuppressedAlerts } from './wrap_suppressed_alerts';
 import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation';
@@ -23,7 +27,8 @@ import type { UnifiedQueryRuleParams } from '../../../rule_schema';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
 import { AlertSuppressionMissingFieldsStrategy } from '../../../../../../common/detection_engine/rule_schema';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';
-import { getUnsuppressedAlerts } from './get_unsuppressed_alerts';
+import { bulkCreateUnsuppressedAlerts } from './bulk_create_unsuppressed_alerts';
+import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
 export interface BucketHistory {
   key: Record<string, string | number | null>;
@@ -38,6 +43,7 @@ export interface GroupAndBulkCreateParams {
   buildReasonMessage: BuildReasonMessage;
   bucketHistory?: BucketHistory[];
   groupByFields: string[];
+  eventsTelemetry: ITelemetryEventsSender | undefined;
 }
 
 export interface GroupAndBulkCreateReturnType extends SearchAfterAndBulkCreateReturnType {
@@ -115,6 +121,7 @@ export const groupAndBulkCreate = async ({
   buildReasonMessage,
   bucketHistory,
   groupByFields,
+  eventsTelemetry,
 }: GroupAndBulkCreateParams): Promise<GroupAndBulkCreateReturnType> => {
   return withSecuritySpan('groupAndBulkCreate', async () => {
     const tuple = runOpts.tuple;
@@ -124,7 +131,7 @@ export const groupAndBulkCreate = async ({
       fromDate: tuple.from.toDate(),
     });
 
-    const toReturn: GroupAndBulkCreateReturnType = {
+    let toReturn: GroupAndBulkCreateReturnType = {
       success: true,
       warning: false,
       searchAfterTimes: [],
@@ -200,19 +207,24 @@ export const groupAndBulkCreate = async ({
 
       const buckets = eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;
 
-      if (buckets.length === 0 && suppressOnMissingFields === true) {
-        return toReturn;
+      // we can create only as many unsuppressed as total number does not exceeds maxSignals
+      const maxUnsuppressedCount = tuple.maxSignals - buckets.length;
+      if (suppressOnMissingFields === false && maxUnsuppressedCount > 0) {
+        const unsuppressedResult = await bulkCreateUnsuppressedAlerts({
+          groupByFields,
+          size: maxUnsuppressedCount,
+          runOpts,
+          buildReasonMessage,
+          eventsTelemetry,
+          filter,
+          services,
+        });
+        toReturn = { ...toReturn, ...mergeReturns([toReturn, unsuppressedResult]) };
       }
 
-      const unsuppressedAlerts = await getUnsuppressedAlerts({
-        groupByFields,
-        size: tuple.maxSignals - buckets.length,
-        searchParams: { ...eventsSearchParams, aggregations: undefined },
-        runOpts,
-        toReturn,
-        buildReasonMessage,
-        suppressOnMissingFields,
-      });
+      if (buckets.length === 0) {
+        return toReturn;
+      }
 
       const suppressionBuckets: SuppressionBucket[] = buckets.map((bucket) => ({
         event: bucket.topHits.hits.hits[0],
@@ -250,20 +262,12 @@ export const groupAndBulkCreate = async ({
           alertTimestampOverride: runOpts.alertTimestampOverride,
         });
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
-
-        if (unsuppressedAlerts.length > 0) {
-          const bulkCreateUnsuppressedResult = await runOpts.bulkCreate(unsuppressedAlerts);
-          addToSearchAfterReturn({ current: toReturn, next: bulkCreateUnsuppressedResult });
-        }
+        runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
       } else {
-        const bulkCreateResult = await runOpts.bulkCreate([
-          ...wrappedAlerts,
-          ...unsuppressedAlerts,
-        ]);
+        const bulkCreateResult = await runOpts.bulkCreate([...wrappedAlerts]);
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
+        runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
       }
-
-      runOpts.ruleExecutionLogger.debug(`created ${toReturn.createdSignalsCount} signals`);
 
       const newBucketHistory: BucketHistory[] = buckets.map((bucket) => {
         return {
