@@ -21,6 +21,7 @@ import { AutoRefreshButton } from './components/auto_refresh_button';
 import { paths } from '../../config/paths';
 import type { ObservabilityAppServices } from '../../application/types';
 import { HeaderTitle } from './components/header_title';
+import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 
 export function SlosPage() {
   const {
@@ -69,7 +70,7 @@ export function SlosPage() {
         rightSideItems: [
           <EuiButton
             color="primary"
-            data-test-subj="slosPage-createNewSloButton"
+            data-test-subj="slosPageCreateNewSloButton"
             disabled={!hasWriteCapabilities}
             fill
             onClick={handleClickCreateSlo}
@@ -82,6 +83,7 @@ export function SlosPage() {
             isAutoRefreshing={isAutoRefreshing}
             onClick={handleToggleAutoRefresh}
           />,
+          <FeedbackButton />,
         ],
         bottomBorder: false,
       }}

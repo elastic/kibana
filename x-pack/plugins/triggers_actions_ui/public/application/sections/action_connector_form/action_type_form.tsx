@@ -61,6 +61,7 @@ import { ConnectorsSelection } from './connectors_selection';
 import { ActionNotifyWhen } from './action_notify_when';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
+import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -405,8 +406,13 @@ export const ActionTypeForm = ({
         {showActionAlertsFilter && (
           <>
             {!hideNotifyWhen && <EuiSpacer size="xl" />}
+            <ActionAlertsFilterQuery
+              state={actionItem.alertsFilter?.query}
+              onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
+            />
+            <EuiSpacer size="s" />
             <ActionAlertsFilterTimeframe
-              state={actionItem.alertsFilter?.timeframe ?? null}
+              state={actionItem.alertsFilter?.timeframe}
               onChange={(timeframe) => setActionAlertsFilterProperty('timeframe', timeframe, index)}
             />
           </>
