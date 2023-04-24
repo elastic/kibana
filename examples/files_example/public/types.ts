@@ -28,10 +28,6 @@ export interface FileClients {
   unscoped: FilesClient<MyImageMetadata>;
   // Example file kind
   example: ScopedFilesClient<MyImageMetadata>;
-  // Example file kind not listed in the management UI
-  exampleNotListed: ScopedFilesClient<MyImageMetadata>;
-  // Example file kind not deletable in the management UI
-  exampleNotDeletable: ScopedFilesClient<MyImageMetadata>;
 }
 
 export interface AppPluginStartDependencies {

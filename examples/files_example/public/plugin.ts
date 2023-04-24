@@ -8,14 +8,7 @@
 
 import { AppNavLinkStatus } from '@kbn/core-application-browser';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import {
-  PLUGIN_ID,
-  PLUGIN_NAME,
-  exampleFileKind,
-  MyImageMetadata,
-  exampleFileKindNotListedInMangementUI,
-  exampleFileKindNotDeletableInMangementUI,
-} from '../common';
+import { PLUGIN_ID, PLUGIN_NAME, exampleFileKind, MyImageMetadata } from '../common';
 import { FilesExamplePluginsStart, FilesExamplePluginsSetup } from './types';
 
 export class FilesExamplePlugin
@@ -28,25 +21,6 @@ export class FilesExamplePlugin
     files.registerFileKind({
       id: exampleFileKind.id,
       allowedMimeTypes: exampleFileKind.allowedMimeTypes,
-    });
-    files.registerFileKind({
-      id: exampleFileKindNotListedInMangementUI.id,
-      allowedMimeTypes: exampleFileKindNotListedInMangementUI.allowedMimeTypes,
-      managementUiActions: {
-        list: {
-          enabled: false,
-        },
-      },
-    });
-    files.registerFileKind({
-      id: exampleFileKindNotDeletableInMangementUI.id,
-      allowedMimeTypes: exampleFileKindNotDeletableInMangementUI.allowedMimeTypes,
-      managementUiActions: {
-        delete: {
-          enabled: false,
-          reason: 'This file is too cool to be deleted.',
-        },
-      },
     });
 
     developerExamples.register({
@@ -71,12 +45,6 @@ export class FilesExamplePlugin
             files: {
               unscoped: deps.files.filesClientFactory.asUnscoped<MyImageMetadata>(),
               example: deps.files.filesClientFactory.asScoped<MyImageMetadata>(exampleFileKind.id),
-              exampleNotListed: deps.files.filesClientFactory.asScoped<MyImageMetadata>(
-                exampleFileKindNotListedInMangementUI.id
-              ),
-              exampleNotDeletable: deps.files.filesClientFactory.asScoped<MyImageMetadata>(
-                exampleFileKindNotDeletableInMangementUI.id
-              ),
             },
           },
           params
