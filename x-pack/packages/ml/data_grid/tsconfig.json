@@ -28,5 +28,7 @@
     "@kbn/i18n-react",
     "@kbn/ml-is-populated-object",
     "@kbn/ml-date-picker",
+    "@kbn/field-formats-plugin",
+    "@kbn/ml-common",
   ]
 }

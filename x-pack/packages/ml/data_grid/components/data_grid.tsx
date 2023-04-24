@@ -29,6 +29,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreSetup } from '@kbn/core/public';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-anomaly-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   type DataFrameAnalysisConfigType,
@@ -40,15 +41,13 @@ import {
   INDEX_STATUS,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_histograms';
-
 import {
   euiDataGridStyle,
   euiDataGridToolbarSettings,
   getFeatureImportance,
   getTopClasses,
-} from './common';
-import { UseIndexDataReturnType } from './types';
+} from '../lib/common';
+import { UseIndexDataReturnType } from '../lib/types';
 import { DecisionPathPopover } from '../../data_frame_analytics/pages/analytics_exploration/components/feature_importance/decision_path_popover';
 
 // TODO Fix row hovering + bar highlighting

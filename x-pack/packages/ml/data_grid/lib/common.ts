@@ -6,9 +6,9 @@
  */
 
 import moment from 'moment-timezone';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useMemo } from 'react';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -38,7 +38,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import { DataGridItem, IndexPagination, RenderCellValue } from './types';
+import type { DataGridItem, IndexPagination, RenderCellValue } from './types';
 
 export const INIT_MAX_COLUMNS = 10;
 export const COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD = 10000;

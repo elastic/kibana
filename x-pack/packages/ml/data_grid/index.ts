@@ -17,9 +17,9 @@ export {
   useRenderCellValue,
   getProcessedFields,
   INIT_MAX_COLUMNS,
-} from './src/common';
+} from './lib/common';
 
-export { DataGrid } from './src/data_grid';
+export { DataGrid } from './components/data_grid';
 
 export {
   isNumericChartData,
@@ -32,7 +32,7 @@ export {
   type OrdinalChartData,
   type OrdinalDataItem,
   type UnsupportedChartData,
-} from './src/field_histograms';
+} from './lib/field_histograms';
 
 export type {
   DataGridItem,
@@ -41,8 +41,8 @@ export type {
   RowCountRelation,
   UseDataGridReturnType,
   UseIndexDataReturnType,
-} from './src/types';
+} from './lib/types';
 
-export { getFieldType } from './src/use_column_chart';
+export { getFieldType } from './hooks/use_column_chart';
 
-export { useDataGrid } from './src/use_data_grid';
+export { useDataGrid } from './hooks/use_data_grid';

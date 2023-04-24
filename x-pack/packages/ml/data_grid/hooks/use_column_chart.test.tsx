@@ -19,7 +19,7 @@ import {
   NumericChartData,
   OrdinalChartData,
   UnsupportedChartData,
-} from '../../../../common/types/field_histograms';
+} from '../lib/field_histograms';
 
 import { getFieldType, getLegendText, getXScaleType, useColumnChart } from './use_column_chart';
 
