@@ -7,13 +7,22 @@
 
 import { useCallback, useState } from 'react';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../lib/telemetry';
+import { useKibana } from '../../../lib/kibana';
+import {
+  METRIC_TYPE,
+  ML_JOB_TELEMETRY_STATUS,
+  TELEMETRY_EVENT,
+  track,
+} from '../../../lib/telemetry';
+
 import { setupMlJob, startDatafeeds, stopDatafeeds } from '../api';
 import type { SecurityJob } from '../types';
 import * as i18n from './translations';
 
 // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
 export const useEnableDataFeed = () => {
+  const { telemetry } = useKibana().services;
+
   const { addError } = useAppToasts();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -31,9 +40,22 @@ export const useEnableDataFeed = () => {
             groups: job.groups,
           });
           setIsLoading(false);
+          telemetry.reportMLJobUpdate({
+            jobId: job.id,
+            isElasticJob: job.isElasticJob,
+            moduleId: job.moduleId,
+            status: ML_JOB_TELEMETRY_STATUS.moduleInstalled,
+          });
         } catch (error) {
           addError(error, { title: i18n.CREATE_JOB_FAILURE });
           setIsLoading(false);
+          telemetry.reportMLJobUpdate({
+            jobId: job.id,
+            isElasticJob: job.isElasticJob,
+            moduleId: job.moduleId,
+            status: ML_JOB_TELEMETRY_STATUS.installationError,
+            errorMessage: `${i18n.CREATE_JOB_FAILURE} - ${error.message}`,
+          });
           return;
         }
       }
@@ -47,21 +69,43 @@ export const useEnableDataFeed = () => {
         const startTime = Math.max(latestTimestampMs, maxStartTime);
         try {
           await startDatafeeds({ datafeedIds: [`datafeed-${job.id}`], start: startTime });
+          telemetry.reportMLJobUpdate({
+            jobId: job.id,
+            isElasticJob: job.isElasticJob,
+            status: ML_JOB_TELEMETRY_STATUS.started,
+          });
         } catch (error) {
           track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
           addError(error, { title: i18n.START_JOB_FAILURE });
+          telemetry.reportMLJobUpdate({
+            jobId: job.id,
+            isElasticJob: job.isElasticJob,
+            status: ML_JOB_TELEMETRY_STATUS.startError,
+            errorMessage: `${i18n.START_JOB_FAILURE} - ${error.message}`,
+          });
         }
       } else {
         try {
           await stopDatafeeds({ datafeedIds: [`datafeed-${job.id}`] });
+          telemetry.reportMLJobUpdate({
+            jobId: job.id,
+            isElasticJob: job.isElasticJob,
+            status: ML_JOB_TELEMETRY_STATUS.stopped,
+          });
         } catch (error) {
           track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
           addError(error, { title: i18n.STOP_JOB_FAILURE });
+          telemetry.reportMLJobUpdate({
+            jobId: job.id,
+            isElasticJob: job.isElasticJob,
+            status: ML_JOB_TELEMETRY_STATUS.stopError,
+            errorMessage: `${i18n.STOP_JOB_FAILURE} - ${error.message}`,
+          });
         }
       }
       setIsLoading(false);
     },
-    [addError]
+    [addError, telemetry]
   );
 
   return { enableDatafeed, isLoading };

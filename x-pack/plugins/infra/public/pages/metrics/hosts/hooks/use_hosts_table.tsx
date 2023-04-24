@@ -50,8 +50,8 @@ const formatMetric = (type: SnapshotMetricInput['type'], value: number | undefin
 };
 
 const buildItemsList = (nodes: SnapshotNode[]) => {
-  return nodes.map(({ metrics, path, name }, index) => ({
-    id: `${name}-${index}`,
+  return nodes.map(({ metrics, path, name }) => ({
+    id: `${name}-${path.at(-1)?.os ?? '-'}`,
     name,
     os: path.at(-1)?.os ?? '-',
     ip: path.at(-1)?.ip ?? '',
@@ -125,9 +125,9 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
     services: { telemetry },
   } = useKibanaContextForPlugin();
 
-  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
+  const [hostFlyoutOpen, setHostFlyoutOpen, setFlyoutClosed] = useHostFlyoutOpen();
 
-  const closeFlyout = () => setHostFlyoutOpen({ clickedItemId: '' });
+  const closeFlyout = () => setFlyoutClosed();
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
@@ -166,7 +166,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
                 clickedItemId: id,
               });
               if (id === hostFlyoutOpen.clickedItemId) {
-                setHostFlyoutOpen({ clickedItemId: '' });
+                setFlyoutClosed();
               } else {
                 setHostFlyoutOpen({ clickedItemId: id });
               }
@@ -244,7 +244,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         align: 'right',
       },
     ],
-    [hostFlyoutOpen.clickedItemId, reportHostEntryClick, setHostFlyoutOpen, time]
+    [hostFlyoutOpen.clickedItemId, reportHostEntryClick, setFlyoutClosed, setHostFlyoutOpen, time]
   );
 
   return {

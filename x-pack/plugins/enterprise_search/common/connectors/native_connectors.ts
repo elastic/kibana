@@ -7,13 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { FeatureName, NativeConnector } from '../types/connectors';
+import { DisplayType, FeatureName, NativeConnector } from '../types/connectors';
 
 export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | undefined> = {
   mongodb: {
     configuration: {
       host: {
-        display: 'textbox',
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.hostLabel',
           {
@@ -22,11 +24,16 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 1,
+        required: true,
         sensitive: false,
+        tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       user: {
-        display: 'textbox',
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.usernameLabel',
           {
@@ -35,11 +42,16 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 2,
+        required: true,
         sensitive: false,
+        tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       password: {
-        display: 'textbox',
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.passwordLabel',
           {
@@ -48,11 +60,16 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 3,
+        required: true,
         sensitive: true,
+        tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       database: {
-        display: 'textbox',
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.databaseLabel',
           {
@@ -61,11 +78,16 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 4,
+        required: true,
         sensitive: false,
+        tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       collection: {
-        display: 'textbox',
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.collectionLabel',
           {
@@ -74,11 +96,16 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 5,
+        required: true,
         sensitive: false,
+        tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       direct_connection: {
-        display: 'toggle',
+        default_value: true,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.directConnectionLabel',
           {
@@ -87,7 +114,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 6,
+        required: true,
         sensitive: false,
+        tooltip: '',
+        ui_restrictions: [],
         value: true,
       },
     },
@@ -107,7 +137,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
   mysql: {
     configuration: {
       host: {
-        display: 'textbox',
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.hostLabel',
           {
@@ -116,11 +148,16 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 1,
+        required: true,
         sensitive: false,
+        tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       port: {
-        display: 'numeric',
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.portLabel',
           {
@@ -129,11 +166,16 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 2,
+        required: true,
         sensitive: false,
+        tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       user: {
-        display: 'textbox',
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.usernameLabel',
           {
@@ -142,11 +184,16 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 3,
+        required: false,
         sensitive: false,
+        tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       password: {
-        display: 'textbox',
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.passwordLabel',
           {
@@ -155,11 +202,16 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 4,
+        required: false,
         sensitive: true,
+        tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       database: {
-        display: 'textbox',
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTBOX,
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.databaseLabel',
           {
@@ -168,11 +220,16 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 5,
+        required: true,
         sensitive: false,
+        tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       tables: {
-        display: 'textarea',
+        default_value: '',
+        depends_on: [],
+        display: DisplayType.TEXTAREA,
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.tablesLabel',
           {
@@ -181,11 +238,16 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 6,
+        required: true,
         sensitive: false,
+        tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       ssl_enabled: {
-        display: 'toggle',
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslEnabledLabel',
           {
@@ -194,11 +256,16 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 7,
+        required: true,
         sensitive: false,
+        tooltip: '',
+        ui_restrictions: [],
         value: false,
       },
       ssl_ca: {
-        display: 'textbox',
+        default_value: '',
+        depends_on: [{ field: 'ssl_enabled', value: true }],
+        display: DisplayType.TEXTBOX,
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslCertificateLabel',
           {
@@ -207,7 +274,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 8,
+        required: true,
         sensitive: false,
+        tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
     },

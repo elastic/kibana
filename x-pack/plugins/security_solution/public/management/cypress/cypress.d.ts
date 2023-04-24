@@ -12,8 +12,11 @@
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
 import type { DeleteAllEndpointDataResponse } from '../../../scripts/endpoint/common/delete_all_endpoint_data';
 import type { IndexedEndpointPolicyResponse } from '../../../common/endpoint/data_loaders/index_endpoint_policy_response';
-import type { HostPolicyResponse } from '../../../common/endpoint/types';
-import type { IndexEndpointHostsCyTaskOptions } from './types';
+import type {
+  HostPolicyResponse,
+  LogsEndpointActionResponse,
+} from '../../../common/endpoint/types';
+import type { IndexEndpointHostsCyTaskOptions, HostActionResponse } from './types';
 import type {
   DeleteIndexedFleetEndpointPoliciesResponse,
   IndexedFleetEndpointPolicyResponse,
@@ -130,6 +133,12 @@ declare global {
         arg: IndexedEndpointPolicyResponse,
         options?: Partial<Loggable & Timeoutable>
       ): Chainable<null>;
+
+      task(
+        name: 'sendHostActionResponse',
+        arg: HostActionResponse,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<LogsEndpointActionResponse>;
 
       task(
         name: 'deleteAllEndpointData',

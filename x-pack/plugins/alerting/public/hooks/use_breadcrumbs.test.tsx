@@ -71,4 +71,19 @@ describe('useBreadcrumbs', () => {
       { text: 'Create' },
     ]);
   });
+
+  test('set edit maintenance windows breadcrumbs', () => {
+    renderHook(() => useBreadcrumbs(AlertingDeepLinkId.maintenanceWindowsEdit), {
+      wrapper: appMockRenderer.AppWrapper,
+    });
+    expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
+      { href: '/test', onClick: expect.any(Function), text: 'Stack Management' },
+      {
+        href: AlertingDeepLinkId.maintenanceWindows,
+        onClick: expect.any(Function),
+        text: 'Maintenance Windows',
+      },
+      { text: 'Edit' },
+    ]);
+  });
 });
