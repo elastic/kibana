@@ -32,6 +32,7 @@ import {
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { getCombinedRuntimeMappings, DataGrid } from '@kbn/ml-data-grid';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   EuiComboBoxWithFieldStats,
@@ -40,7 +41,6 @@ import {
 import { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../../../../contexts/ml';
-import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
 
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
@@ -57,7 +57,6 @@ import { ContinueButton } from '../continue_button';
 import { JobType } from './job_type';
 import { SupportedFieldsMessage } from './supported_fields_message';
 import { AnalysisFieldsTable } from './analysis_fields_table';
-import { DataGrid } from '../../../../../components/data_grid';
 import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
