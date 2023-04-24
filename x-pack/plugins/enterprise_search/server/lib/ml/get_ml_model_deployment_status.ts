@@ -12,7 +12,7 @@ import {
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';
-import { isNotFoundException, isResourceNotFoundException } from '../../utils/identify_exceptions';
+import { isResourceNotFoundException } from '../../utils/identify_exceptions';
 
 export const getMlModelDeploymentStatus = async (
   modelName: string,
