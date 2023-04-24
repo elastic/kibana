@@ -86,11 +86,7 @@ export async function replacePanel(
     };
   }
 
-  await this.updateInput({
-    panels,
-    lastReloadRequestTime: new Date().getTime(),
-  });
-
+  await this.updateInput({ panels });
   return panelId;
 }
 

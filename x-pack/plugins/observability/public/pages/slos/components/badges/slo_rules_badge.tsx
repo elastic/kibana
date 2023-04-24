@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+
 import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 
 export interface Props {
@@ -26,16 +27,9 @@ export function SloRulesBadge({ rules, onClick }: Props) {
       })}
       display="block"
     >
-      <EuiBadge
-        color=""
-        css={{ cursor: 'pointer' }}
-        onClick={onClick}
-        onClickAriaLabel={i18n.translate('xpack.observability.slo.slo.rulesBadge.label', {
-          defaultMessage: 'Create new rule',
-        })}
-      >
-        <EuiIcon color="danger" type="warning" />
-      </EuiBadge>
+      <span onClick={onClick} onKeyDown={onClick}>
+        <EuiBadge isDisabled color="default" iconType="alert" css={{ cursor: 'pointer' }} />
+      </span>
     </EuiToolTip>
   );
 }
