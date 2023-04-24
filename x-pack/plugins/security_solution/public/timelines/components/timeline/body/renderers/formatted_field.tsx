@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
 
+import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
@@ -40,7 +41,6 @@ import {
 import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
-import { AgentStatuses } from './agent_statuses';
 import { UserName } from './user_name';
 
 // simple black-list to prevent dragging and dropping fields such as message name
@@ -240,14 +240,9 @@ const FormattedFieldValueComponent: React.FC<{
     );
   } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
     return (
-      <AgentStatuses
-        contextId={contextId}
-        eventId={eventId}
-        fieldName={fieldName}
-        fieldType={fieldType}
-        isAggregatable={isAggregatable}
-        isDraggable={isDraggable}
-        value={typeof value === 'string' ? value : ''}
+      <EndpointAgentStatusById
+        endpointAgentId={String(value ?? '')}
+        data-test-subj="endpointHostAgentStatus"
       />
     );
   } else if (

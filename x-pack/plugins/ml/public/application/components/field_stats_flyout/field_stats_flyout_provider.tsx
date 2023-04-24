@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, type FC } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
@@ -13,19 +13,12 @@ import type { FieldStatsProps } from '@kbn/unified-field-list-plugin/public';
 import { MLJobWizardFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 import { FieldStatsFlyout } from './field_stats_flyout';
 
-export const FieldStatsFlyoutProvider = ({
-  dataView,
-  fieldStatsServices,
-  timeRangeMs,
-  dslQuery,
-  children,
-}: {
+export const FieldStatsFlyoutProvider: FC<{
   dataView: DataView;
   fieldStatsServices: FieldStatsServices;
   timeRangeMs?: TimeRangeMs;
   dslQuery?: FieldStatsProps['dslQuery'];
-  children: React.ReactElement;
-}) => {
+}> = ({ dataView, fieldStatsServices, timeRangeMs, dslQuery, children }) => {
   const [isFieldStatsFlyoutVisible, setFieldStatsIsFlyoutVisible] = useState(false);
   const [fieldName, setFieldName] = useState<string | undefined>();
   const [fieldValue, setFieldValue] = useState<string | number | undefined>();

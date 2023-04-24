@@ -7,6 +7,7 @@
 
 import {
   AppMountParameters,
+  AppNavLinkStatus,
   AppUpdater,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -136,54 +137,73 @@ export class Plugin implements InfraClientPluginClass {
       new LogStreamEmbeddableFactoryDefinition(core.getStartServices)
     );
 
-    core.application.register({
-      id: 'logs',
-      title: i18n.translate('xpack.infra.logs.pluginTitle', {
-        defaultMessage: 'Logs',
-      }),
-      euiIconType: 'logoObservability',
-      order: 8100,
-      appRoute: '/app/logs',
-      // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/logs/page_content.tsx
-      deepLinks: [
-        {
-          id: 'stream',
-          title: i18n.translate('xpack.infra.logs.index.streamTabTitle', {
-            defaultMessage: 'Stream',
-          }),
-          path: '/stream',
-        },
-        {
-          id: 'anomalies',
-          title: i18n.translate('xpack.infra.logs.index.anomaliesTabTitle', {
-            defaultMessage: 'Anomalies',
-          }),
-          path: '/anomalies',
-        },
-        {
-          id: 'log-categories',
-          title: i18n.translate('xpack.infra.logs.index.logCategoriesBetaBadgeTitle', {
-            defaultMessage: 'Categories',
-          }),
-          path: '/log-categories',
-        },
-        {
-          id: 'settings',
-          title: i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
-            defaultMessage: 'Settings',
-          }),
-          path: '/settings',
-        },
-      ],
-      category: DEFAULT_APP_CATEGORIES.observability,
-      mount: async (params: AppMountParameters) => {
-        // mount callback should not use setup dependencies, get start dependencies instead
-        const [coreStart, pluginsStart, pluginStart] = await core.getStartServices();
-        const { renderApp } = await import('./apps/logs_app');
+    if (this.config.logs.app_target === 'discover') {
+      core.application.register({
+        id: 'logs-to-discover',
+        title: '',
+        navLinkStatus: AppNavLinkStatus.hidden,
+        appRoute: '/app/logs',
+        mount: async (params: AppMountParameters) => {
+          // mount callback should not use setup dependencies, get start dependencies instead
+          const [coreStart, plugins, pluginStart] = await core.getStartServices();
 
-        return renderApp(coreStart, pluginsStart, pluginStart, params);
-      },
-    });
+          const { renderApp } = await import('./apps/discover_app');
+
+          return renderApp(coreStart, plugins, pluginStart, params);
+        },
+      });
+    }
+
+    if (this.config.logs.app_target === 'logs-ui') {
+      core.application.register({
+        id: 'logs',
+        title: i18n.translate('xpack.infra.logs.pluginTitle', {
+          defaultMessage: 'Logs',
+        }),
+        euiIconType: 'logoObservability',
+        order: 8100,
+        appRoute: '/app/logs',
+        // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/logs/page_content.tsx
+        deepLinks: [
+          {
+            id: 'stream',
+            title: i18n.translate('xpack.infra.logs.index.streamTabTitle', {
+              defaultMessage: 'Stream',
+            }),
+            path: '/stream',
+          },
+          {
+            id: 'anomalies',
+            title: i18n.translate('xpack.infra.logs.index.anomaliesTabTitle', {
+              defaultMessage: 'Anomalies',
+            }),
+            path: '/anomalies',
+          },
+          {
+            id: 'log-categories',
+            title: i18n.translate('xpack.infra.logs.index.logCategoriesBetaBadgeTitle', {
+              defaultMessage: 'Categories',
+            }),
+            path: '/log-categories',
+          },
+          {
+            id: 'settings',
+            title: i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
+              defaultMessage: 'Settings',
+            }),
+            path: '/settings',
+          },
+        ],
+        category: DEFAULT_APP_CATEGORIES.observability,
+        mount: async (params: AppMountParameters) => {
+          // mount callback should not use setup dependencies, get start dependencies instead
+          const [coreStart, plugins, pluginStart] = await core.getStartServices();
+
+          const { renderApp } = await import('./apps/logs_app');
+          return renderApp(coreStart, plugins, pluginStart, params);
+        },
+      });
+    }
 
     // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/metrics/index.tsx
     const infraDeepLinks = [

@@ -576,7 +576,7 @@
         "label": "cleanFiltersForSerialize",
         "description": [],
         "signature": [
-          "(filters: ",
+          "(filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -584,7 +584,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]) => ",
+          "[] | undefined) => ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -594,7 +594,7 @@
           },
           "[]"
         ],
-        "path": "src/plugins/presentation_util/public/redux_embeddables/clean_redux_embeddable_state.ts",
+        "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/clean_redux_embeddable_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -613,12 +613,12 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]"
+              "[] | undefined"
             ],
-            "path": "src/plugins/presentation_util/public/redux_embeddables/clean_redux_embeddable_state.ts",
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/clean_redux_embeddable_state.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -932,10 +932,10 @@
       },
       {
         "parentPluginId": "presentationUtil",
-        "id": "def-public.lazyLoadReduxEmbeddablePackage",
+        "id": "def-public.lazyLoadReduxToolsPackage",
         "type": "Function",
         "tags": [],
-        "label": "lazyLoadReduxEmbeddablePackage",
+        "label": "lazyLoadReduxToolsPackage",
         "description": [],
         "signature": [
           "() => Promise<",
@@ -943,12 +943,12 @@
             "pluginId": "presentationUtil",
             "scope": "public",
             "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.ReduxEmbeddablePackage",
-            "text": "ReduxEmbeddablePackage"
+            "section": "def-public.ReduxToolsPackage",
+            "text": "ReduxToolsPackage"
           },
           ">"
         ],
-        "path": "src/plugins/presentation_util/public/redux_embeddables/index.ts",
+        "path": "src/plugins/presentation_util/public/redux_tools/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1081,95 +1081,6 @@
       },
       {
         "parentPluginId": "presentationUtil",
-        "id": "def-public.useReduxEmbeddableContext",
-        "type": "Function",
-        "tags": [],
-        "label": "useReduxEmbeddableContext",
-        "description": [
-          "\nA typed use context hook for embeddables that are not containers. it @returns an\nReduxEmbeddableContextServices object typed to the generic inputTypes and ReducerTypes you pass in.\nNote that the reducer type is optional, but will be required to correctly infer the keys and payload\ntypes of your reducers. use `typeof MyReducers` here to retain them."
-        ],
-        "signature": [
-          "<ReduxEmbeddableStateType extends ",
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.ReduxEmbeddableState",
-            "text": "ReduxEmbeddableState"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", unknown> = ",
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.ReduxEmbeddableState",
-            "text": "ReduxEmbeddableState"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", unknown>, ReducerType extends ",
-          "EmbeddableReducers",
-          "<ReduxEmbeddableStateType> = ",
-          "EmbeddableReducers",
-          "<ReduxEmbeddableStateType>, EmbeddableType extends ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.Embeddable",
-            "text": "Embeddable"
-          },
-          "<any, any, any> = ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.Embeddable",
-            "text": "Embeddable"
-          },
-          "<ReduxEmbeddableStateType[\"explicitInput\"], ReduxEmbeddableStateType[\"output\"], any>>() => ",
-          "ReduxEmbeddableContext",
-          "<ReduxEmbeddableStateType, ReducerType, EmbeddableType>"
-        ],
-        "path": "src/plugins/presentation_util/public/redux_embeddables/use_redux_embeddable_context.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
         "id": "def-public.withSuspense",
         "type": "Function",
         "tags": [],
@@ -1241,7 +1152,7 @@
             "section": "def-public.ExpressionInputProps",
             "text": "ExpressionInputProps"
           },
-          " extends Pick<React.HTMLAttributes<HTMLDivElement>, \"style\" | \"className\">"
+          " extends Pick<React.HTMLAttributes<HTMLDivElement>, \"className\" | \"style\">"
         ],
         "path": "src/plugins/presentation_util/public/components/types.ts",
         "deprecated": false,
@@ -1913,23 +1824,504 @@
       },
       {
         "parentPluginId": "presentationUtil",
-        "id": "def-public.ReduxEmbeddablePackage",
+        "id": "def-public.ReduxEmbeddableState",
         "type": "Interface",
         "tags": [],
-        "label": "ReduxEmbeddablePackage",
+        "label": "ReduxEmbeddableState",
         "description": [
-          "\nThe package type is lazily exported from presentation_util and should contain all methods needed to use the redux embeddable tools."
+          "\nThe Embeddable Redux store should contain Input, Output and State. Input is serialized and used to create the embeddable,\nOutput is used as a communication layer for state that the Embeddable creates, and State is used to store ephemeral state which needs\nto be communicated between an embeddable and its inner React components."
         ],
-        "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ReduxEmbeddableState",
+            "text": "ReduxEmbeddableState"
+          },
+          "<InputType, OutputType, StateType>"
+        ],
+        "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "presentationUtil",
-            "id": "def-public.ReduxEmbeddablePackage.createTools",
+            "id": "def-public.ReduxEmbeddableState.explicitInput",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "explicitInput",
+            "description": [],
+            "signature": [
+              "InputType"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableState.output",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "output",
+            "description": [],
+            "signature": [
+              "OutputType"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableState.componentState",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "componentState",
+            "description": [],
+            "signature": [
+              "StateType"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ReduxEmbeddableTools",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReduxEmbeddableTools",
+        "description": [
+          "\nThe return type from createReduxEmbeddableTools. Contains tools to get state, select state for react components,\nset state, and react to state changes."
+        ],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ReduxEmbeddableTools",
+            "text": "ReduxEmbeddableTools"
+          },
+          "<ReduxEmbeddableStateType, ReducerType>"
+        ],
+        "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.cleanup",
             "type": "Function",
             "tags": [],
-            "label": "createTools",
+            "label": "cleanup",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.store",
+            "type": "Object",
+            "tags": [],
+            "label": "store",
+            "description": [],
+            "signature": [
+              "EnhancedStore",
+              "<ReduxEmbeddableStateType, ",
+              "AnyAction",
+              ", Middlewares<ReduxEmbeddableStateType>>"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.select",
+            "type": "Function",
+            "tags": [],
+            "label": "select",
+            "description": [],
+            "signature": [
+              "<Selected extends unknown>(selector: (state: ReduxEmbeddableStateType) => Selected, equalityFn?: ((previous: Selected, next: Selected) => boolean) | undefined) => Selected"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxEmbeddableTools.select.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "(state: ReduxStateType) => Selected"
+                ],
+                "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "presentationUtil",
+                    "id": "def-public.ReduxEmbeddableTools.select.$1.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "state",
+                    "description": [],
+                    "signature": [
+                      "ReduxStateType"
+                    ],
+                    "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxEmbeddableTools.select.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "equalityFn",
+                "description": [],
+                "signature": [
+                  "((previous: Selected, next: Selected) => boolean) | undefined"
+                ],
+                "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.getState",
+            "type": "Function",
+            "tags": [],
+            "label": "getState",
+            "description": [],
+            "signature": [
+              "() => ReduxEmbeddableStateType"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.dispatch",
+            "type": "Object",
+            "tags": [],
+            "label": "dispatch",
+            "description": [],
+            "signature": [
+              "{ [ReducerKey in keyof ReducerType]: (payload: Parameters<ReducerType[ReducerKey]>[1][\"payload\"]) => void; }"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxEmbeddableTools.onStateChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onStateChange",
+            "description": [],
+            "signature": [
+              "(listener: () => void) => ",
+              "Unsubscribe"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxEmbeddableTools.onStateChange.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "listener",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "node_modules/redux/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": []
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ReduxTools",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReduxTools",
+        "description": [
+          "\nThe return type from createReduxTools. Contains tools to get state, select state for react components,\nset state, and react to state changes."
+        ],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.ReduxTools",
+            "text": "ReduxTools"
+          },
+          "<ReduxStateType, ReducerType>"
+        ],
+        "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxTools.store",
+            "type": "Object",
+            "tags": [],
+            "label": "store",
+            "description": [],
+            "signature": [
+              "EnhancedStore",
+              "<ReduxStateType, ",
+              "AnyAction",
+              ", Middlewares<ReduxStateType>>"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxTools.select",
+            "type": "Function",
+            "tags": [],
+            "label": "select",
+            "description": [],
+            "signature": [
+              "<Selected extends unknown>(selector: (state: ReduxStateType) => Selected, equalityFn?: ((previous: Selected, next: Selected) => boolean) | undefined) => Selected"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxTools.select.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "(state: ReduxStateType) => Selected"
+                ],
+                "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "presentationUtil",
+                    "id": "def-public.ReduxTools.select.$1.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "state",
+                    "description": [],
+                    "signature": [
+                      "ReduxStateType"
+                    ],
+                    "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxTools.select.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "equalityFn",
+                "description": [],
+                "signature": [
+                  "((previous: Selected, next: Selected) => boolean) | undefined"
+                ],
+                "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxTools.getState",
+            "type": "Function",
+            "tags": [],
+            "label": "getState",
+            "description": [],
+            "signature": [
+              "() => ReduxStateType"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxTools.onStateChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onStateChange",
+            "description": [],
+            "signature": [
+              "(listener: () => void) => ",
+              "Unsubscribe"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxTools.onStateChange.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "listener",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "node_modules/redux/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": []
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxTools.dispatch",
+            "type": "Object",
+            "tags": [],
+            "label": "dispatch",
+            "description": [],
+            "signature": [
+              "{ [ReducerKey in keyof ReducerType]: (payload: Parameters<ReducerType[ReducerKey]>[1][\"payload\"]) => void; }"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.ReduxToolsPackage",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReduxToolsPackage",
+        "description": [
+          "\nThe package type is lazily exported from presentation_util and should contain all methods needed to use the redux embeddable tools."
+        ],
+        "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxToolsPackage.createReduxTools",
+            "type": "Function",
+            "tags": [],
+            "label": "createReduxTools",
+            "description": [],
+            "signature": [
+              "<ReduxStateType extends unknown, ReducerType extends ",
+              "ReduxToolsReducers",
+              "<ReduxStateType> = ",
+              "ReduxToolsReducers",
+              "<ReduxStateType>>({ reducers, additionalMiddleware, initialState, }: { additionalMiddleware?: ",
+              "Middleware",
+              "<",
+              "AnyAction",
+              ", any, ",
+              "Dispatch",
+              "<",
+              "AnyAction",
+              ">>[] | undefined; initialState: ReduxStateType; reducers: ReducerType; }) => ",
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.ReduxTools",
+                "text": "ReduxTools"
+              },
+              "<ReduxStateType, ReducerType>"
+            ],
+            "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "presentationUtil",
+                "id": "def-public.ReduxToolsPackage.createReduxTools.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ additionalMiddleware?: ",
+                  "Middleware",
+                  "<",
+                  "AnyAction",
+                  ", any, ",
+                  "Dispatch",
+                  "<",
+                  "AnyAction",
+                  ">>[] | undefined; initialState: ReduxStateType; reducers: ReducerType; }"
+                ],
+                "path": "src/plugins/presentation_util/public/redux_tools/create_redux_tools.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.ReduxToolsPackage.createReduxEmbeddableTools",
+            "type": "Function",
+            "tags": [],
+            "label": "createReduxEmbeddableTools",
             "description": [],
             "signature": [
               "<ReduxEmbeddableStateType extends ",
@@ -1981,9 +2373,9 @@
                 "text": "EmbeddableOutput"
               },
               ", unknown>, ReducerType extends ",
-              "EmbeddableReducers",
+              "ReduxToolsReducers",
               "<ReduxEmbeddableStateType> = ",
-              "EmbeddableReducers",
+              "ReduxToolsReducers",
               "<ReduxEmbeddableStateType>>({ reducers, embeddable, syncSettings, additionalMiddleware, initialComponentState, }: { embeddable: ",
               {
                 "pluginId": "embeddable",
@@ -2036,14 +2428,14 @@
               },
               "<ReduxEmbeddableStateType, ReducerType>"
             ],
-            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
+            "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "presentationUtil",
-                "id": "def-public.ReduxEmbeddablePackage.createTools.$1",
+                "id": "def-public.ReduxToolsPackage.createReduxEmbeddableTools.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -2093,270 +2485,11 @@
                   },
                   ", unknown>> | undefined; reducers: ReducerType; }"
                 ],
-                "path": "src/plugins/presentation_util/public/redux_embeddables/create_redux_embeddable_tools.tsx",
+                "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/create_redux_embeddable_tools.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
-        "id": "def-public.ReduxEmbeddableState",
-        "type": "Interface",
-        "tags": [],
-        "label": "ReduxEmbeddableState",
-        "description": [
-          "\nThe Embeddable Redux store should contain Input, Output and State. Input is serialized and used to create the embeddable,\nOutput is used as a communication layer for state that the Embeddable creates, and State is used to store ephemeral state which needs\nto be communicated between an embeddable and its inner React components."
-        ],
-        "signature": [
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.ReduxEmbeddableState",
-            "text": "ReduxEmbeddableState"
-          },
-          "<InputType, OutputType, StateType>"
-        ],
-        "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ReduxEmbeddableState.explicitInput",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "explicitInput",
-            "description": [],
-            "signature": [
-              "InputType"
-            ],
-            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ReduxEmbeddableState.output",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "output",
-            "description": [],
-            "signature": [
-              "OutputType"
-            ],
-            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ReduxEmbeddableState.componentState",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "componentState",
-            "description": [],
-            "signature": [
-              "StateType"
-            ],
-            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
-        "id": "def-public.ReduxEmbeddableTools",
-        "type": "Interface",
-        "tags": [],
-        "label": "ReduxEmbeddableTools",
-        "description": [
-          "\nThe return type from setupReduxEmbeddable. Contains a wrapper which comes with the store provider and provides the context to react components,\nbut also returns the context object to allow the embeddable class to interact with the redux store."
-        ],
-        "signature": [
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.ReduxEmbeddableTools",
-            "text": "ReduxEmbeddableTools"
-          },
-          "<ReduxEmbeddableStateType, ReducerType>"
-        ],
-        "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ReduxEmbeddableTools.cleanup",
-            "type": "Function",
-            "tags": [],
-            "label": "cleanup",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ReduxEmbeddableTools.Wrapper",
-            "type": "Function",
-            "tags": [],
-            "label": "Wrapper",
-            "description": [],
-            "signature": [
-              "React.FunctionComponent<{ children?: React.ReactNode; }>"
-            ],
-            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-public.ReduxEmbeddableTools.Wrapper.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "P & { children?: React.ReactNode; }"
-                ],
-                "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-public.ReduxEmbeddableTools.Wrapper.$2",
-                "type": "Any",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ReduxEmbeddableTools.dispatch",
-            "type": "Function",
-            "tags": [],
-            "label": "dispatch",
-            "description": [],
-            "signature": [
-              "Dispatch",
-              "<",
-              "AnyAction",
-              ">"
-            ],
-            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-public.ReduxEmbeddableTools.dispatch.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "action",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "path": "node_modules/redux/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ReduxEmbeddableTools.getState",
-            "type": "Function",
-            "tags": [],
-            "label": "getState",
-            "description": [],
-            "signature": [
-              "() => ReduxEmbeddableStateType"
-            ],
-            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ReduxEmbeddableTools.onStateChange",
-            "type": "Function",
-            "tags": [],
-            "label": "onStateChange",
-            "description": [],
-            "signature": [
-              "(listener: () => void) => ",
-              "Unsubscribe"
-            ],
-            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "presentationUtil",
-                "id": "def-public.ReduxEmbeddableTools.onStateChange.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "listener",
-                "description": [],
-                "signature": [
-                  "() => void"
-                ],
-                "path": "node_modules/redux/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": []
-              }
-            ]
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.ReduxEmbeddableTools.actions",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "actions",
-            "description": [],
-            "signature": [
-              "{ [Property in keyof ReducerType]: ",
-              "ActionCreatorWithPayload",
-              "<Parameters<ReducerType[Property]>[1][\"payload\"], string>; } & { updateEmbeddableReduxInput: ",
-              "ActionCreatorWithPayload",
-              "<Partial<ReduxEmbeddableStateType[\"explicitInput\"]>, string>; updateEmbeddableReduxOutput: ",
-              "ActionCreatorWithPayload",
-              "<Partial<ReduxEmbeddableStateType[\"output\"]>, string>; }"
-            ],
-            "path": "src/plugins/presentation_util/public/redux_embeddables/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
