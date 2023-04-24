@@ -15,7 +15,7 @@ export function MaintenanceWindowCallout(): JSX.Element | null {
   const { data } = useFetchActiveMaintenanceWindows();
   const activeMaintenanceWindows = data || [];
 
-  if (activeMaintenanceWindows.find(({ status }) => status === MaintenanceWindowStatus.Running)) {
+  if (activeMaintenanceWindows.some(({ status }) => status === MaintenanceWindowStatus.Running)) {
     return (
       <EuiCallOut title={i18n.MAINTENANCE_WINDOW_RUNNING} color="warning" iconType="iInCircle">
         {i18n.MAINTENANCE_WINDOW_RUNNING_DESCRIPTION}
