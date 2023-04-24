@@ -108,7 +108,7 @@ export class ReportingCore {
 
     this.getContract = () => ({
       usesUiCapabilities: () => syncConfig.roles.enabled === false,
-      registerExportType: (exportType) => this.exportTypesRegistry.register(exportType),
+      registerExportType: () => this.exportTypesRegistry.register(),
     });
 
     this.executing = new Set();
@@ -286,7 +286,6 @@ export class ReportingCore {
 
   /**
    * License registry
-   * @returns
    */
   public async getLicenseInfo() {
     const { license$ } = (await this.getPluginStartDeps()).licensing;
