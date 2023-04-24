@@ -14,7 +14,7 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_ENTERPRISE,
 } from '@kbn/reporting-plugin/common/constants';
-import { ExportTypeDefinition } from '@kbn/reporting-plugin/server/types';
+import { ExportTypeDefinition } from '../types';
 import { ImmediateExecuteFn, runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
 

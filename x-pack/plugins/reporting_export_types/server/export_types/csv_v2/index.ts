@@ -18,7 +18,8 @@ import {
   JobParamsCsvFromSavedObject,
   TaskPayloadCsvFromSavedObject,
 } from '@kbn/reporting-plugin/common/types';
-import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '@kbn/reporting-plugin/server/types';
+import { CreateJobFn, RunTaskFn } from '@kbn/reporting-plugin/server/types';
+import { ExportTypeDefinition } from '../types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 

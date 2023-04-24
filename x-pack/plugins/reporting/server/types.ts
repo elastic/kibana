@@ -30,11 +30,11 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Writable } from 'stream';
 import type { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
-import { ExportTypesRegistry } from '@kbn/reporting-export-types/server';
 import type { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '../common/types';
 import type { ReportingConfigType } from './config';
 import type { ReportingCore } from './core';
 import type { ReportTaskParams } from './lib/tasks';
+import { ExportTypesRegistry } from './lib';
 
 /**
  * Plugin Setup Contract
@@ -84,20 +84,6 @@ export type RunTaskFnFactory<RunTaskFnType> = (
   reporting: ReportingCore,
   logger: Logger
 ) => RunTaskFnType;
-
-export interface ExportTypeDefinition<
-  CreateJobFnType = CreateJobFn | null,
-  RunTaskFnType = RunTaskFn
-> {
-  id: string;
-  name: string;
-  jobType: string;
-  jobContentEncoding?: string;
-  jobContentExtension: string;
-  createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase
-  runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
-  validLicenses: string[];
-}
 
 export interface ReportingSetupDeps {
   features: FeaturesPluginSetup;
