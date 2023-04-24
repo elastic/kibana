@@ -64,7 +64,9 @@ export const isKeyEqual = (
   }
 
   if (diffingFunction?.prototype?.name === 'AsyncFunction') {
-    throw new Error(`The function for key "${key}" is async, must use isKeyEqualAsync for asynchronous functions`);
+    throw new Error(
+      `The function for key "${key}" is async, must use isKeyEqualAsync for asynchronous functions`
+    );
   }
   return diffingFunction(propsAsNever);
 };
