@@ -12,15 +12,16 @@ import {
   type ControlGroupInput,
 } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, Filter, Query, TimeRange } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { Subscription } from 'rxjs';
-import { useControlPanels } from '../hooks/use_control_panels_url_state';
+import { skipWhile, Subscription } from 'rxjs';
+import { useControlPanels } from '../../hooks/use_control_panels_url_state';
 
 interface Props {
   dataView: DataView | undefined;
   timeRange: TimeRange;
   filters: Filter[];
+  selectedOptions: Filter[];
   query: Query;
   onFiltersChange: (filters: Filter[]) => void;
 }
@@ -29,6 +30,7 @@ export const ControlsContent: React.FC<Props> = ({
   dataView,
   filters,
   query,
+  selectedOptions,
   timeRange,
   onFiltersChange,
 }) => {
@@ -55,15 +57,21 @@ export const ControlsContent: React.FC<Props> = ({
   const loadCompleteHandler = useCallback(
     (controlGroup: ControlGroupAPI) => {
       if (!controlGroup) return;
-      inputSubscription.current = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
-        onFiltersChange(newFilters);
-      });
+      inputSubscription.current = controlGroup.onFiltersPublished$
+        .pipe(
+          skipWhile((newFilters) =>
+            compareFilters(selectedOptions, newFilters, COMPARE_ALL_OPTIONS)
+          )
+        )
+        .subscribe((newFilters) => {
+          onFiltersChange(newFilters);
+        });
 
       filterSubscription.current = controlGroup
         .getInput$()
         .subscribe(({ panels }) => setControlPanels(panels));
     },
-    [onFiltersChange, setControlPanels]
+    [onFiltersChange, setControlPanels, selectedOptions]
   );
 
   useEffect(() => {

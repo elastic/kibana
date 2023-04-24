@@ -50,6 +50,7 @@
     "@kbn/ml-route-utils",
     "@kbn/unified-field-list-plugin",
     "@kbn/ml-random-sampler-utils",
+    "@kbn/utility-types",
     "@kbn/ml-error-utils",
   ],
   "exclude": [
