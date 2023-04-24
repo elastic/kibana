@@ -17,6 +17,8 @@ describe('APM deep links', () => {
     cy.contains('APM / Service groups');
     cy.contains('APM / Traces');
     cy.contains('APM / Service Map');
+    cy.contains('APM / Dependencies');
+    cy.contains('APM / Settings');
 
     // navigates to home page
     // Force click because welcome screen changes
@@ -43,5 +45,15 @@ describe('APM deep links', () => {
     // navigates to service maps
     cy.contains('APM / Service Map').click({ force: true });
     cy.url().should('include', '/apm/service-map');
+
+    cy.getByTestSubj('nav-search-input').type('APM');
+    // navigates to dependencies page
+    cy.contains('APM / Dependencies').click({ force: true });
+    cy.url().should('include', '/apm/dependencies/inventory');
+
+    cy.getByTestSubj('nav-search-input').type('APM');
+    // navigates to settings page
+    cy.contains('APM / Settings').click({ force: true });
+    cy.url().should('include', '/apm/settings/general-settings');
   });
 });
