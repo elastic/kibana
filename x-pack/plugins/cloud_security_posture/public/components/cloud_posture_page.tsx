@@ -92,7 +92,7 @@ export const CspNoDataPage = ({
   );
 };
 
-const defaultLoadingRenderer = () => (
+export const defaultLoadingRenderer = () => (
   <CspLoadingState data-test-subj={LOADING_STATE_TEST_SUBJECT}>
     <FormattedMessage
       id="xpack.csp.cloudPosturePage.loadingDescription"
@@ -134,7 +134,7 @@ const defaultErrorRenderer = (error: unknown) => (
   </FullSizeCenteredPage>
 );
 
-const defaultNoDataRenderer = () => (
+export const defaultNoDataRenderer = () => (
   <FullSizeCenteredPage>
     <NoDataPage
       data-test-subj={DEFAULT_NO_DATA_TEST_SUBJECT}

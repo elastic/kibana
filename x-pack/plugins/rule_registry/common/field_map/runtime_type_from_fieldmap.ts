@@ -77,7 +77,7 @@ type CastSingle<T extends t.Type<any>> = t.Type<
 >;
 
 const createCastArrayRt = <T extends t.Type<any>>(type: T): CastArray<T> => {
-  const union = t.union([type, t.array(type)]);
+  const union = t.union([type, t.array(t.union([type, t.nullType]))]);
 
   return new t.Type('castArray', union.is, union.validate, (a) => (Array.isArray(a) ? a : [a]));
 };

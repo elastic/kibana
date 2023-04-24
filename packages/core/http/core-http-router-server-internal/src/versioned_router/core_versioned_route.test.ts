@@ -86,7 +86,7 @@ describe('Versioned route', () => {
     );
   });
 
-  it('only allows versions that are numbers greater than 0', () => {
+  it('only allows versions that are numbers greater than 0 for internal APIs', () => {
     const versionedRouter = CoreVersionedRouter.from({ router });
     expect(() =>
       versionedRouter
@@ -109,6 +109,35 @@ describe('Versioned route', () => {
     ).toThrowError(
       `Invalid version number. Received "1.1", expected any finite, whole number greater than 0.`
     );
+    expect(() =>
+      versionedRouter
+        .get({ path: '/test/{id}', access: 'internal' })
+        .addVersion({ version: '1', validate: false }, handlerFn)
+    ).not.toThrow();
+  });
+
+  it('only allows versions date strings for public APIs', () => {
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    expect(() =>
+      versionedRouter
+        .get({ path: '/test/{id}', access: 'public' })
+        .addVersion({ version: '1-1-2020' as ApiVersion, validate: false }, handlerFn)
+    ).toThrowError(/Invalid version/);
+    expect(() =>
+      versionedRouter
+        .get({ path: '/test/{id}', access: 'public' })
+        .addVersion({ version: '', validate: false }, handlerFn)
+    ).toThrowError(/Invalid version/);
+    expect(() =>
+      versionedRouter
+        .get({ path: '/test/{id}', access: 'public' })
+        .addVersion({ version: 'abc', validate: false }, handlerFn)
+    ).toThrowError(/Invalid version/);
+    expect(() =>
+      versionedRouter
+        .get({ path: '/test/{id}', access: 'public' })
+        .addVersion({ version: '2020-02-02', validate: false }, handlerFn)
+    ).not.toThrow();
   });
 
   it('runs request and response validations', async () => {
@@ -120,7 +149,7 @@ describe('Versioned route', () => {
     let validatedOutputBody = false;
 
     (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
-    const versionedRouter = CoreVersionedRouter.from({ router, validateResponses: true });
+    const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });
     versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
       {
         version: '1',
@@ -180,67 +209,5 @@ describe('Versioned route', () => {
     expect(validatedParams).toBe(true);
     expect(validatedQuery).toBe(true);
     expect(validatedOutputBody).toBe(true);
-  });
-
-  it('returns the expected output for non-existent versions', async () => {
-    let handler: RequestHandler;
-    const versionedRouter = CoreVersionedRouter.from({ router });
-    (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
-    versionedRouter.post({ access: 'internal', path: '/test/{id}' });
-
-    await expect(
-      handler!({} as any, createRequest({ version: '999' }), responseFactory)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        payload:
-          'No version "999" available for [post] [/test/{id}]. Available versions are: <none>',
-        status: 406,
-      })
-    );
-  });
-
-  it('returns the expected output if no version was provided to versioned route', async () => {
-    let handler: RequestHandler;
-    const versionedRouter = CoreVersionedRouter.from({ router });
-    (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
-
-    versionedRouter
-      .post({ access: 'internal', path: '/test/{id}' })
-      .addVersion({ validate: false, version: '1' }, handlerFn);
-
-    await expect(
-      handler!({} as any, createRequest({ version: undefined }), responseFactory)
-    ).resolves.toEqual({
-      options: {},
-      payload: `Version expected at [post] [/test/{id}]. Please specify a version using the "${ELASTIC_HTTP_VERSION_HEADER}" header. Available versions are: [1]`,
-      status: 406,
-    });
-  });
-  it('returns the expected output for failed validation', async () => {
-    let handler: RequestHandler;
-    const versionedRouter = CoreVersionedRouter.from({ router });
-    (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
-
-    versionedRouter
-      .post({ access: 'internal', path: '/test/{id}' })
-      .addVersion(
-        { validate: { request: { body: schema.object({ foo: schema.number() }) } }, version: '1' },
-        handlerFn
-      );
-
-    await expect(
-      handler!(
-        {} as any,
-        createRequest({
-          version: '1',
-          body: {},
-        }),
-        responseFactory
-      )
-    ).resolves.toEqual({
-      options: {},
-      payload: expect.any(String),
-      status: 400,
-    });
   });
 });

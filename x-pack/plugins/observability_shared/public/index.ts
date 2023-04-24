@@ -19,8 +19,15 @@ export type {
 
 export type { NavigationEntry } from './components/page_template/page_template';
 
+export { useObservabilityTourContext } from './components/tour';
+
 export const plugin = () => {
   return new ObservabilitySharedPlugin();
 };
 
-export { observabilityFeatureId, casesFeatureId, sloFeatureId } from '../common';
+export {
+  observabilityFeatureId,
+  observabilityAppId,
+  casesFeatureId,
+  sloFeatureId,
+} from '../common';
