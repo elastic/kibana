@@ -19,6 +19,10 @@ import { dataViewMock } from '../../../__mocks__/data_view';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import { DiscoverMainProvider } from '../services/discover_state_provider';
+import React from 'react';
+import { DiscoverAppState } from '../services/discover_app_state_container';
+import { DiscoverStateContainer } from '../services/discover_state';
 
 function getHookProps(
   query: AggregateQuery | Query | undefined,
@@ -58,12 +62,42 @@ const msgComplete = {
   query,
 };
 
+const getDataViewsService = () => {
+  const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
+  dataViewsCreateMock.mockImplementation(() => ({
+    ...dataViewMock,
+  }));
+  return {
+    ...discoverServiceMock.dataViews,
+    create: dataViewsCreateMock,
+  };
+};
+
+const getHookContext = (stateContainer: DiscoverStateContainer) => {
+  return ({ children }: { children: JSX.Element }) => (
+    <DiscoverMainProvider value={stateContainer}>{children}</DiscoverMainProvider>
+  );
+};
+const renderHookWithContext = (
+  useDataViewsService: boolean = false,
+  appState?: DiscoverAppState
+) => {
+  const props = getHookProps(query, useDataViewsService ? getDataViewsService() : undefined);
+  if (appState) {
+    props.stateContainer.appState.getState = jest.fn(() => {
+      return appState;
+    });
+  }
+
+  renderHook(() => useTextBasedQueryLanguage(props), {
+    wrapper: getHookContext(props.stateContainer),
+  });
+  return props;
+};
+
 describe('useTextBasedQueryLanguage', () => {
   test('a text based query should change state when loading and finished', async () => {
-    const props = getHookProps(query);
-    const { replaceUrlState, stateContainer } = props;
-
-    renderHook(() => useTextBasedQueryLanguage(props));
+    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     expect(replaceUrlState).toHaveBeenCalledWith({ index: 'the-data-view-id' });
@@ -81,12 +115,8 @@ describe('useTextBasedQueryLanguage', () => {
     });
   });
   test('changing a text based query with different result columns should change state when loading and finished', async () => {
-    const props = getHookProps(query);
-    const { stateContainer, replaceUrlState } = props;
+    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
-
-    renderHook(() => useTextBasedQueryLanguage(props));
-
     stateContainer.dataState.data$.documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
     replaceUrlState.mockReset();
@@ -113,11 +143,9 @@ describe('useTextBasedQueryLanguage', () => {
     });
   });
   test('only changing a text based query with same result columns should not change columns', async () => {
-    const props = getHookProps(query);
-    const { replaceUrlState, stateContainer } = props;
-    const documents$ = stateContainer.dataState.data$.documents$;
+    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
 
-    renderHook(() => useTextBasedQueryLanguage(props));
+    const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
@@ -158,11 +186,8 @@ describe('useTextBasedQueryLanguage', () => {
     });
   });
   test('if its not a text based query coming along, it should be ignored', async () => {
-    const props = getHookProps(query);
-    const { replaceUrlState, stateContainer } = props;
+    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
-
-    renderHook(() => useTextBasedQueryLanguage(props));
 
     documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
@@ -202,14 +227,12 @@ describe('useTextBasedQueryLanguage', () => {
   });
 
   test('it should not overwrite existing state columns on initial fetch', async () => {
-    const props = getHookProps(query);
-    props.stateContainer.appState.getState = jest.fn(() => {
-      return { columns: ['field1'], index: 'the-data-view-id' };
+    const { replaceUrlState, stateContainer } = renderHookWithContext(false, {
+      columns: ['field1'],
+      index: 'the-data-view-id',
     });
-    const { stateContainer, replaceUrlState } = props;
     const documents$ = stateContainer.dataState.data$.documents$;
 
-    renderHook(() => useTextBasedQueryLanguage(props));
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.COMPLETE,
@@ -242,14 +265,12 @@ describe('useTextBasedQueryLanguage', () => {
   });
 
   test('it should not overwrite state column when successfully fetching after an error fetch', async () => {
-    const props = getHookProps(query);
-    props.stateContainer.appState.getState = jest.fn(() => {
-      return { columns: [], index: 'the-data-view-id' };
+    const { replaceUrlState, stateContainer } = renderHookWithContext(false, {
+      columns: [],
+      index: 'the-data-view-id',
     });
-    const { stateContainer, replaceUrlState } = props;
     const documents$ = stateContainer.dataState.data$.documents$;
 
-    renderHook(() => useTextBasedQueryLanguage(props));
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.LOADING,
@@ -269,7 +290,7 @@ describe('useTextBasedQueryLanguage', () => {
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    props.stateContainer.appState.getState = jest.fn(() => {
+    stateContainer.appState.getState = jest.fn(() => {
       return { columns: ['field1', 'field2'], index: 'the-data-view-id' };
     });
     replaceUrlState.mockReset();
@@ -323,7 +344,7 @@ describe('useTextBasedQueryLanguage', () => {
     const { stateContainer, replaceUrlState } = props;
     const documents$ = stateContainer.dataState.data$.documents$;
 
-    renderHook(() => useTextBasedQueryLanguage(props));
+    renderHook(() => useTextBasedQueryLanguage(props), { wrapper: getHookContext(stateContainer) });
 
     documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));

@@ -263,11 +263,11 @@ export function DiscoverLayout({
         tabIndex={-1}
         ref={savedSearchTitle}
       >
-        {stateContainer.savedSearchState.getTitle()
+        {savedSearch.title
           ? i18n.translate('discover.pageTitleWithSavedSearch', {
               defaultMessage: 'Discover - {savedSearchTitle}',
               values: {
-                savedSearchTitle: stateContainer.savedSearchState.getTitle(),
+                savedSearchTitle: savedSearch.title,
               },
             })
           : i18n.translate('discover.pageTitleWithoutSavedSearch', {

@@ -14,6 +14,7 @@ import {
 } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { useSavedSearchInitial } from '../services/discover_state_provider';
 import type { DiscoverStateContainer } from '../services/discover_state';
 import { FetchStatus } from '../../types';
 
@@ -34,7 +35,7 @@ export function useTextBasedQueryLanguage({
     columns: [],
     query: undefined,
   });
-  const savedSearch = stateContainer.savedSearchState.getInitial$().getValue();
+  const savedSearch = useSavedSearchInitial();
 
   const cleanup = useCallback(() => {
     if (prev.current.query) {

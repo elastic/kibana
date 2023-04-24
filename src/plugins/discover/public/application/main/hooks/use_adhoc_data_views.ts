@@ -8,6 +8,8 @@
 
 import { useCallback, useEffect } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { useAppStateSelector } from '../services/discover_app_state_container';
+import { useInternalStateSelector } from '../services/discover_internal_state_container';
 import { isPlainRecord } from '../utils/get_raw_record_type';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
@@ -20,9 +22,9 @@ export const useAdHocDataViews = ({
   stateContainer: DiscoverStateContainer;
   trackUiMetric?: (metricType: string, eventName: string | string[], count?: number) => void;
 }) => {
-  const query = stateContainer.appState.getState().query;
+  const query = useAppStateSelector((state) => state.query);
+  const dataView = useInternalStateSelector((state) => state.dataView);
   const isTextBasedMode = isPlainRecord(query);
-  const dataView = stateContainer.internalState.getState().dataView;
 
   useEffect(() => {
     if (dataView && !dataView.isPersisted()) {
