@@ -74,7 +74,7 @@ export const visitRuleAlerts = (ruleName: string) => {
   cy.visit('/app/security/rules');
   cy.contains(ruleName).click();
 };
-export const checkFlyoutEndpointIsolation = () => {
+export const checkFlyoutEndpointIsolation = (): void => {
   cy.getByTestSubj('event-field-agent.status').then(($status) => {
     if ($status.find('[title="Isolated"]').length > 0) {
       cy.contains('Release host').click();
@@ -90,7 +90,7 @@ export const checkFlyoutEndpointIsolation = () => {
   });
 };
 
-export const toggleRuleOffAndOn = (ruleName: string) => {
+export const toggleRuleOffAndOn = (ruleName: string): void => {
   cy.visit('/app/security/rules');
   cy.wait(2000);
   cy.contains(ruleName)
@@ -104,7 +104,7 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
     });
 };
 
-export const filterOutEndpoints = (endpointHostname: string) => {
+export const filterOutEndpoints = (endpointHostname: string): void => {
   cy.getByTestSubj('filters-global-container').within(() => {
     cy.getByTestSubj('queryInput').click().type(`host.hostname : "${endpointHostname}"`);
     cy.getByTestSubj('querySubmitButton').click();
@@ -124,12 +124,12 @@ export const createAgentPolicyTask = (
   }).then(cb);
 };
 
-export const filterOutIsolatedHosts = () => {
+export const filterOutIsolatedHosts = (): void => {
   cy.getByTestSubj('adminSearchBar').click().type('united.endpoint.Endpoint.state.isolation: true');
   cy.getByTestSubj('querySubmitButton').click();
 };
 
-export const checkEndpointListForIsolatedHosts = (expectIsolated = true) => {
+export const checkEndpointListForIsolatedHosts = (expectIsolated = true): void => {
   const chainer = expectIsolated ? 'contain.text' : 'not.contain.text';
   cy.getByTestSubj('endpointListTable').within(() => {
     cy.get('tbody tr').each(($tr) => {
