@@ -10,11 +10,10 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { basicCase } from '../../containers/mock';
-import { userProfilesMap } from '../../containers/user_profiles/api.mock';
 
 import { Description } from '.';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, noCreateCasesPermissions, TestProviders } from '../../common/mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -24,10 +23,10 @@ const defaultProps = {
   caseData: {
     ...basicCase,
   },
-  userProfiles: userProfilesMap,
+  isLoadingDescription: false,
 };
 
-describe('Description ', () => {
+describe('Description', () => {
   const onUpdateField = jest.fn();
   let appMockRender: AppMockRenderer;
 
@@ -108,5 +107,16 @@ describe('Description ', () => {
       expect(onUpdateField).not.toHaveBeenCalled();
       expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
     });
+  });
+
+  it('should hide the edit button when the user does not have create permissions', () => {
+    appMockRender.render(
+      <TestProviders permissions={noCreateCasesPermissions()}>
+        <Description {...defaultProps} onUpdateField={onUpdateField} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
+    expect(screen.queryByTestId('description-edit-icon')).not.toBeInTheDocument();
   });
 });

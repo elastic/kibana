@@ -13,7 +13,7 @@ import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import { UserActionCopyLink } from '../copy_link';
-import { MarkdownRenderer, ContentWrapper } from '../../markdown_editor';
+import { ScrollableMarkdown } from '../../markdown_editor';
 import { HostIsolationCommentEvent } from './host_isolation_event';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 
@@ -54,9 +54,7 @@ export const createActionAttachmentUserActionBuilder = ({
         timelineAvatar: comment.actions.type === 'isolate' ? 'lock' : 'lockOpen',
         actions: <UserActionCopyLink id={comment.id} />,
         children: comment.comment.trim().length > 0 && (
-          <ContentWrapper data-test-subj="scrollable-markdown">
-            <MarkdownRenderer>{comment.comment}</MarkdownRenderer>
-          </ContentWrapper>
+          <ScrollableMarkdown content={comment.comment} />
         ),
       },
     ];
