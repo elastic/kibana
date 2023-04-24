@@ -63,7 +63,11 @@ const Body = styled(EuiFlexItem)`
   `}
 `;
 
-const getDraftDescription = (applicationId = '', caseId: string, commentId: string): string | null => {
+const getDraftDescription = (
+  applicationId = '',
+  caseId: string,
+  commentId: string
+): string | null => {
   const draftStorageKey = getMarkdownEditorStorageKey(applicationId, caseId, commentId);
 
   return sessionStorage.getItem(draftStorageKey);
@@ -178,9 +182,7 @@ export const Description = ({
             <ScrollableMarkdown content={caseData.description} />
           </Body>
         ) : null}
-        {draftDescription &&
-        draftDescription !== caseData.description &&
-        !isLoadingDescription ? (
+        {draftDescription && draftDescription !== caseData.description && !isLoadingDescription ? (
           <DescriptionFooter>
             <EuiText color="subdued" size="xs" data-test-subj="description-unsaved-draft">
               {i18n.UNSAVED_DRAFT_DESCRIPTION}
