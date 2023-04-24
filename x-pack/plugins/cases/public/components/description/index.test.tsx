@@ -120,7 +120,7 @@ describe('Description', () => {
     expect(screen.queryByTestId('description-edit-icon')).not.toBeInTheDocument();
   });
 
-  describe('existing storage key', () => {
+  describe('draft message', () => {
     const draftStorageKey = `cases.testAppId.basic-case-id.description.markdownEditor`;
 
     beforeEach(() => {
@@ -137,6 +137,17 @@ describe('Description', () => {
       appMockRender.render(
         <Description {...defaultProps} onUpdateField={onUpdateField} isLoadingDescription={true} />
       );
+
+      expect(screen.queryByTestId('description-unsaved-draft')).not.toBeInTheDocument();
+    });
+
+    it('should not show unsaved draft message when description and storage value are same', async () => {
+      const props = {
+        ...defaultProps,
+        caseData: { ...defaultProps.caseData, description: 'value set in storage' },
+      };
+
+      appMockRender.render(<Description {...props} onUpdateField={onUpdateField} />);
 
       expect(screen.queryByTestId('description-unsaved-draft')).not.toBeInTheDocument();
     });

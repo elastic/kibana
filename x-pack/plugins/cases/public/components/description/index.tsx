@@ -63,10 +63,10 @@ const Body = styled(EuiFlexItem)`
   `}
 `;
 
-const hasDraftComment = (applicationId = '', caseId: string, commentId: string): boolean => {
+const getDraftDescription = (applicationId = '', caseId: string, commentId: string): string | null => {
   const draftStorageKey = getMarkdownEditorStorageKey(applicationId, caseId, commentId);
 
-  return Boolean(sessionStorage.getItem(draftStorageKey));
+  return sessionStorage.getItem(draftStorageKey);
 };
 
 export const Description = ({
@@ -81,12 +81,16 @@ export const Description = ({
   const { euiTheme } = useEuiTheme();
   const { appId, permissions } = useCasesContext();
 
-  const { clearDraftComment, draftComment, hasIncomingLensState } = useLensDraftComment();
+  const {
+    clearDraftComment: clearLensDraftComment,
+    draftComment: lensDraftComment,
+    hasIncomingLensState,
+  } = useLensDraftComment();
 
   const handleOnChangeEditable = useCallback(() => {
-    clearDraftComment();
+    clearLensDraftComment();
     setIsEditable(false);
-  }, [setIsEditable, clearDraftComment]);
+  }, [setIsEditable, clearLensDraftComment]);
 
   const handleOnSave = useCallback(
     (content: string) => {
@@ -98,10 +102,12 @@ export const Description = ({
 
   const toggleCollapse = () => setIsCollapsed((oldValue: boolean) => !oldValue);
 
+  const draftDescription = getDraftDescription(appId, caseData.id, DESCRIPTION_ID);
+
   if (
     hasIncomingLensState &&
-    draftComment !== null &&
-    draftComment?.commentId === DESCRIPTION_ID &&
+    lensDraftComment !== null &&
+    lensDraftComment?.commentId === DESCRIPTION_ID &&
     !isEditable
   ) {
     setIsEditable(true);
@@ -172,7 +178,9 @@ export const Description = ({
             <ScrollableMarkdown content={caseData.description} />
           </Body>
         ) : null}
-        {hasDraftComment(appId, caseData.id, DESCRIPTION_ID) && !isLoadingDescription ? (
+        {draftDescription &&
+        draftDescription !== caseData.description &&
+        !isLoadingDescription ? (
           <DescriptionFooter>
             <EuiText color="subdued" size="xs" data-test-subj="description-unsaved-draft">
               {i18n.UNSAVED_DRAFT_DESCRIPTION}
