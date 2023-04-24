@@ -7,7 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { get, isEmpty } from 'lodash';
-import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { CombinedSummarizedAlerts } from '../types';
 import {
   AlertInstanceMeta,
@@ -276,10 +276,6 @@ export class Alert<
       return false;
     }
 
-    return !summarizedAlerts.all.data.some(
-      (alert) =>
-        get(alert, ALERT_INSTANCE_ID) === this.getId() ||
-        get(alert, ALERT_RULE_UUID) === this.getId()
-    );
+    return !summarizedAlerts.all.data.some((alert) => get(alert, ALERT_UUID) === this.getUuid());
   }
 }
