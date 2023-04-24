@@ -240,6 +240,7 @@ describe('CM services getTransforms()', () => {
             'delete.out.result',
             'search.in.options',
             'search.out.result',
+            'mSearch.out.result',
           ].sort()
         );
       });

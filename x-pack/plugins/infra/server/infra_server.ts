@@ -8,6 +8,7 @@
 import { InfraBackendLibs } from './lib/infra_types';
 import { initGetHostsAnomaliesRoute, initGetK8sAnomaliesRoute } from './routes/infra_ml';
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
+import { initInventoryViewRoutes } from './routes/inventory_views';
 import { initIpToHostName } from './routes/ip_to_hostname';
 import { initGetLogAlertsChartPreviewDataRoute } from './routes/log_alerts';
 import {
@@ -35,6 +36,7 @@ import { initNodeDetailsRoute } from './routes/node_details';
 import { initOverviewRoute } from './routes/overview';
 import { initProcessListRoute } from './routes/process_list';
 import { initSnapshotRoute } from './routes/snapshot';
+import { initInfraMetricsRoute } from './routes/infra';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   initIpToHostName(libs);
@@ -60,7 +62,9 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initMetricsAPIRoute(libs);
   initMetadataRoute(libs);
   initInventoryMetaRoute(libs);
+  initInventoryViewRoutes(libs);
   initGetLogAlertsChartPreviewDataRoute(libs);
   initProcessListRoute(libs);
   initOverviewRoute(libs);
+  initInfraMetricsRoute(libs);
 };
