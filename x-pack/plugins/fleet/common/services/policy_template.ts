@@ -28,6 +28,17 @@ const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   show_user: true,
 };
 
+export function packageHasNoPolicyTemplates(packageInfo: PackageInfo): boolean {
+  return (
+    !packageInfo.policy_templates ||
+    packageInfo.policy_templates.length === 0 ||
+    !packageInfo.policy_templates.find(
+      (policyTemplate) =>
+        isInputOnlyPolicyTemplate(policyTemplate) ||
+        (policyTemplate.inputs && policyTemplate.inputs.length > 0)
+    )
+  );
+}
 export function isInputOnlyPolicyTemplate(
   policyTemplate: RegistryPolicyTemplate
 ): policyTemplate is RegistryPolicyInputOnlyTemplate {

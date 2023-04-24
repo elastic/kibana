@@ -11,6 +11,8 @@ import type { BulkResponse, DeleteResponse } from '@elastic/elasticsearch/lib/ap
 import { keyBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
+import { packageHasNoPolicyTemplates } from '../../common/services/policy_template';
+
 import type {
   NewPackagePolicy,
   PackagePolicyConfigRecordEntry,
@@ -21,7 +23,6 @@ import {
   doesPackageHaveIntegrations,
   getNormalizedDataStreams,
   getNormalizedInputs,
-  isInputOnlyPolicyTemplate,
 } from '../../common/services';
 
 import type {
@@ -139,12 +140,26 @@ export function extractSecretVarsFromPackagePolicy(
   packagePolicy: PackagePolicy | NewPackagePolicy,
   packageInfo: PackageInfo
 ): SecretPath[] {
-  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
+  const packageLevelVarPaths = _extractPackageLevelSecretPaths(packagePolicy, packageInfo);
+
+  if (!packageInfo?.policy_templates?.length || packageHasNoPolicyTemplates(packageInfo)) {
+    return packageLevelVarPaths;
+  }
+
+  const inputSecretPaths = _extractInputSecretPaths(packagePolicy, packageInfo);
+
+  return [...packageLevelVarPaths, ...inputSecretPaths];
+}
+
+function _extractPackageLevelSecretPaths(
+  packagePolicy: NewPackagePolicy,
+  packageInfo: PackageInfo
+): SecretPath[] {
   const packageSecretVars = packageInfo.vars?.filter(isVarSecret) || [];
   const packageSecretVarsByName = keyBy(packageSecretVars, 'name');
   const packageVars = Object.entries(packagePolicy.vars || {});
 
-  const packageLevelVarPaths = packageVars.reduce((vars, [name, configEntry], i) => {
+  return packageVars.reduce((vars, [name, configEntry], i) => {
     if (packageSecretVarsByName[name]) {
       vars.push({
         value: configEntry,
@@ -153,18 +168,15 @@ export function extractSecretVarsFromPackagePolicy(
     }
     return vars;
   }, [] as SecretPath[]);
+}
 
-  if (
-    !packageInfo.policy_templates?.length ||
-    !packageInfo.policy_templates.find(
-      (policyTemplate) =>
-        isInputOnlyPolicyTemplate(policyTemplate) ||
-        (policyTemplate.inputs && policyTemplate.inputs.length > 0)
-    )
-  ) {
-    return packageLevelVarPaths;
-  }
+function _extractInputSecretPaths(
+  packagePolicy: NewPackagePolicy,
+  packageInfo: PackageInfo
+): SecretPath[] {
+  if (!packageInfo?.policy_templates?.length) return [];
 
+  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
   const inputSecretVarDefsByPolicyTemplateAndType = packageInfo.policy_templates.reduce<
     Record<string, Record<string, RegistryVarsEntry>>
   >((varDefs, policyTemplate) => {
@@ -198,7 +210,8 @@ export function extractSecretVarsFromPackagePolicy(
     }
     return varDefs;
   }, {});
-  const allInputVarPaths = packagePolicy.inputs.flatMap((input, inputIndex) => {
+
+  return packagePolicy.inputs.flatMap((input, inputIndex) => {
     if (!input.vars && !input.streams) {
       return [];
     }
@@ -235,6 +248,4 @@ export function extractSecretVarsFromPackagePolicy(
 
     return currentInputVarPaths;
   });
-
-  return [...packageLevelVarPaths, ...allInputVarPaths];
 }
