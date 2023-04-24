@@ -21,8 +21,8 @@ export async function importDashboards(
   // docs are not seen as automatically up-to-date.
   const docs = objects
     .filter((item) => !exclude.includes(item.type))
-    // filter out any document version, if present
-    .map(({ version, ...doc }) => ({
+    // filter out any document version and managed, if present
+    .map(({ version, managed, ...doc }) => ({
       ...doc,
       ...(!doc.migrationVersion && !doc.typeMigrationVersion ? { typeMigrationVersion: '' } : {}),
     }));

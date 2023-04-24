@@ -522,4 +522,21 @@ describe('validateAndConvertAggregations', () => {
       '"[aggName.cardinality.field] Invalid attribute path: alert.alert.actions.group"'
     );
   });
+
+  it('allows aggregations for root fields', () => {
+    const aggregations: AggsMap = {
+      types: {
+        terms: {
+          field: 'type',
+        },
+      },
+    };
+    expect(validateAndConvertAggregations(['foo'], aggregations, mockMappings)).toEqual({
+      types: {
+        terms: {
+          field: 'type',
+        },
+      },
+    });
+  });
 });

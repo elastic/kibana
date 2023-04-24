@@ -13,6 +13,12 @@ import { IESAggField } from '../../fields/agg';
 export interface IESAggSource extends IESSource {
   getAggKey(aggType: AGG_TYPE, fieldName: string): string;
   getAggLabel(aggType: AGG_TYPE, fieldLabel: string): Promise<string>;
+
+  /*
+   * Returns human readable name describing buckets, like "clusters" or "grids"
+   */
+  getBucketsName(): string;
+
   getMetricFields(): IESAggField[];
   getMetricFieldForName(fieldName: string): IESAggField | null;
   getValueAggsDsl(indexPattern: DataView): { [key: string]: unknown };

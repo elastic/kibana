@@ -19,23 +19,18 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
-import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';
-import { useDashboardContainerContext } from '../../dashboard_container_context';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { useDashboardPerformanceTracker } from './use_dashboard_performance_tracker';
-import { getPanelLayoutsAreEqual } from '../../embeddable/integrations/diff_state/dashboard_diffing_utils';
+import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
+import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 
 export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
-  const {
-    useEmbeddableSelector: select,
-    actions: { setPanels },
-    useEmbeddableDispatch,
-  } = useDashboardContainerContext();
-  const dispatch = useEmbeddableDispatch();
-  const panels = select((state) => state.explicitInput.panels);
-  const viewMode = select((state) => state.explicitInput.viewMode);
-  const useMargins = select((state) => state.explicitInput.useMargins);
-  const expandedPanelId = select((state) => state.componentState.expandedPanelId);
+  const dashboard = useDashboardContainer();
+  const panels = dashboard.select((state) => state.explicitInput.panels);
+  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
+  const useMargins = dashboard.select((state) => state.explicitInput.useMargins);
+  const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
 
   // turn off panel transform animations for the first 500ms so that the dashboard doesn't animate on its first render.
   const [animatePanelTransforms, setAnimatePanelTransforms] = useState(false);
@@ -93,10 +88,10 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
         {} as { [key: string]: DashboardPanelState }
       );
       if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
-        dispatch(setPanels(updatedPanels));
+        dashboard.dispatch.setPanels(updatedPanels);
       }
     },
-    [dispatch, panels, setPanels]
+    [dashboard, panels]
   );
 
   const classes = classNames({

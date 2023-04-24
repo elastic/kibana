@@ -14,8 +14,6 @@ import {
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSuperSelect,
-  EuiText,
   EuiLink,
   EuiTextArea,
   EuiSelectProps,
@@ -27,10 +25,13 @@ import {
   EuiCheckboxProps,
   EuiTextAreaProps,
   EuiButtonGroupProps,
-  EuiSuperSelectProps,
   EuiHighlight,
   EuiBadge,
 } from '@elastic/eui';
+import {
+  PROFILE_OPTIONS,
+  ThrottlingConfigFieldProps,
+} from '../fields/throttling/throttling_config_field';
 import {
   FieldText,
   FieldNumber,
@@ -53,6 +54,7 @@ import {
   ResponseBodyIndexField,
   ResponseBodyIndexFieldProps,
   ControlledFieldProp,
+  ThrottlingWrapper,
 } from './field_wrappers';
 import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../hooks/use_monitor_name';
@@ -67,8 +69,9 @@ import {
   VerificationMode,
   FieldMap,
   FormLocation,
+  ThrottlingConfig,
 } from '../types';
-import { AlertConfigKey, DEFAULT_BROWSER_ADVANCED_FIELDS } from '../constants';
+import { AlertConfigKey, ALLOWED_SCHEDULES_IN_MINUTES } from '../constants';
 import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
 
@@ -90,16 +93,10 @@ const getScheduleContent = (value: number) => {
   }
 };
 
-const getScheduleConfig = (schedules: number[]) => {
-  return schedules.map((value) => ({
-    value: `${value}`,
-    text: getScheduleContent(value),
-  }));
-};
-
-const BROWSER_SCHEDULES = getScheduleConfig([3, 5, 10, 15, 30, 60, 120, 240]);
-
-const LIGHTWEIGHT_SCHEDULES = getScheduleConfig([1, 3, 5, 10, 15, 30, 60]);
+const SCHEDULES = ALLOWED_SCHEDULES_IN_MINUTES.map((value) => ({
+  value,
+  text: getScheduleContent(parseInt(value, 10)),
+}));
 
 export const MONITOR_TYPE_CONFIG = {
   [FormMonitorType.MULTISTEP]: {
@@ -121,7 +118,7 @@ export const MONITOR_TYPE_CONFIG = {
     ),
     link: '#',
     icon: 'videoPlayer',
-    beta: true,
+    beta: false,
   },
   [FormMonitorType.SINGLE]: {
     id: 'syntheticsMonitorTypeSingle',
@@ -145,7 +142,7 @@ export const MONITOR_TYPE_CONFIG = {
     ),
     link: '#',
     icon: 'videoPlayer',
-    beta: true,
+    beta: false,
   },
   [FormMonitorType.HTTP]: {
     id: 'syntheticsMonitorTypeHTTP',
@@ -378,12 +375,10 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'How often do you want to run this test? Higher frequencies will increase your total cost.',
     }),
-    dependencies: [ConfigKey.MONITOR_TYPE],
-    props: ({ dependencies }): EuiSelectProps => {
-      const [monitorType] = dependencies;
+    props: (): EuiSelectProps => {
       return {
         'data-test-subj': 'syntheticsMonitorConfigSchedule',
-        options: monitorType === DataStream.BROWSER ? BROWSER_SCHEDULES : LIGHTWEIGHT_SCHEDULES,
+        options: SCHEDULES,
         disabled: readOnly,
       };
     },
@@ -899,7 +894,27 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       isEditFlow: isEdit,
     }),
     validation: () => ({
-      validate: (value) => Boolean(value.script),
+      validate: (value) => {
+        // return false if script contains import or require statement
+        if (
+          value.script?.includes('import ') ||
+          value.script?.includes('require(') ||
+          value.script?.includes('journey(')
+        ) {
+          return i18n.translate('xpack.synthetics.monitorConfig.monitorScript.invalid', {
+            defaultMessage:
+              'Monitor script is invalid. Inline scripts cannot be full journey scripts, they may only contain step definitions.',
+          });
+        }
+        // should contain at least one step
+        if (value.script && !value.script?.includes('step(')) {
+          return i18n.translate('xpack.synthetics.monitorConfig.monitorScript.invalid.oneStep', {
+            defaultMessage:
+              'Monitor script is invalid. Inline scripts must contain at least one step definition.',
+          });
+        }
+        return Boolean(value.script);
+      },
     }),
     error: i18n.translate('xpack.synthetics.monitorConfig.monitorScript.error', {
       defaultMessage: 'Monitor script is required',
@@ -1094,12 +1109,12 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     label: i18n.translate('xpack.synthetics.monitorConfig.textAssertion.label', {
       defaultMessage: 'Text assertion',
     }),
-    required: true,
+    required: false,
     helpText: i18n.translate('xpack.synthetics.monitorConfig.textAssertion.helpText', {
       defaultMessage: 'Consider the page loaded when the specified text is rendered.',
     }),
     validation: () => ({
-      required: true,
+      required: false,
     }),
     props: (): EuiFieldTextProps => ({
       readOnly,
@@ -1107,41 +1122,23 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   },
   [ConfigKey.THROTTLING_CONFIG]: {
     fieldKey: ConfigKey.THROTTLING_CONFIG,
-    component: EuiSuperSelect,
+    component: ThrottlingWrapper,
     label: i18n.translate('xpack.synthetics.monitorConfig.throttling.label', {
       defaultMessage: 'Connection profile',
     }),
     required: true,
     controlled: true,
     helpText: i18n.translate('xpack.synthetics.monitorConfig.throttling.helpText', {
-      defaultMessage:
-        'Simulate network throttling (download, upload, latency). More options will be added in a future version.',
+      defaultMessage: 'Simulate network throttling (download, upload, latency).',
     }),
-    props: (): EuiSuperSelectProps<string> => ({
-      options: [
-        {
-          value: DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.THROTTLING_CONFIG],
-          inputDisplay: (
-            <EuiFlexGroup alignItems="baseline" gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  {i18n.translate('xpack.synthetics.monitorConfig.throttling.options.default', {
-                    defaultMessage: 'Default',
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {'(5 Mbps, 3 Mbps, 20 ms)'}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-        },
-      ],
-      readOnly,
-      disabled: true, // currently disabled through 1.0 until we define connection profiles
-    }),
+    props: ({ formState }): Partial<ThrottlingConfigFieldProps> => {
+      return {
+        options: PROFILE_OPTIONS,
+        readOnly,
+        disabled: false,
+        initialValue: formState.defaultValues?.[ConfigKey.THROTTLING_CONFIG] as ThrottlingConfig,
+      };
+    },
     validation: () => ({
       required: true,
     }),

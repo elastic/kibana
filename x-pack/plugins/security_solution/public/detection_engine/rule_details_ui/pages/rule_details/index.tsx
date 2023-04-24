@@ -33,10 +33,16 @@ import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
+import {
+  tableDefaults,
+  dataTableActions,
+  dataTableSelectors,
+  FILTER_OPEN,
+  TableId,
+} from '@kbn/securitysolution-data-table';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
-import { FILTER_OPEN, TableId } from '../../../../../common/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -48,8 +54,6 @@ import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { tableDefaults } from '../../../../common/store/data_table/defaults';
-import { dataTableActions, dataTableSelectors } from '../../../../common/store/data_table';
 import {
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
@@ -136,6 +140,7 @@ import { EditRuleSettingButtonLink } from '../../../../detections/pages/detectio
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
+import { RuleDetailsSnoozeSettings } from './components/rule_details_snooze_settings';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -535,23 +540,30 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const lastExecutionMessage = lastExecution?.message ?? '';
 
   const ruleStatusInfo = useMemo(() => {
-    return ruleLoading ? (
-      <EuiFlexItem>
-        <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
-      </EuiFlexItem>
-    ) : (
-      <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
-        <EuiButtonIcon
-          data-test-subj="refreshButton"
-          color="primary"
-          onClick={refreshRule}
-          iconType="refresh"
-          aria-label={ruleI18n.REFRESH}
-          isDisabled={!isExistingRule}
-        />
-      </RuleStatus>
+    return (
+      <>
+        {ruleLoading ? (
+          <EuiFlexItem>
+            <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
+          </EuiFlexItem>
+        ) : (
+          <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
+            <EuiButtonIcon
+              data-test-subj="refreshButton"
+              color="primary"
+              onClick={refreshRule}
+              iconType="refresh"
+              aria-label={ruleI18n.REFRESH}
+              isDisabled={!isExistingRule}
+            />
+          </RuleStatus>
+        )}
+        <EuiFlexItem grow={false}>
+          <RuleDetailsSnoozeSettings id={ruleId} />
+        </EuiFlexItem>
+      </>
     );
-  }, [lastExecutionStatus, lastExecutionDate, ruleLoading, isExistingRule, refreshRule]);
+  }, [ruleId, lastExecutionStatus, lastExecutionDate, ruleLoading, isExistingRule, refreshRule]);
 
   const ruleError = useMemo(() => {
     return ruleLoading ? (
@@ -840,7 +852,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </Display>
                     {ruleId != null && (
                       <GroupedAlertsTable
-                        currentAlertStatusFilterValue={filterGroup}
+                        currentAlertStatusFilterValue={[filterGroup]}
                         defaultFilters={alertMergedFilters}
                         from={from}
                         globalFilters={filters}
@@ -891,7 +903,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           </SecuritySolutionPageWrapper>
         </RuleDetailsContextProvider>
       </StyledFullHeightContainer>
-      <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />
+      <SpyRoute
+        pageName={SecurityPageName.rules}
+        state={{ ruleName: rule?.name, isExistingRule }}
+      />
     </>
   );
 };

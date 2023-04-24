@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
+import { migrateLegacyActions } from '../lib';
 
 export async function deleteRule(context: RulesClientContext, { id }: { id: string }) {
   return await retryIfConflicts(
@@ -23,6 +25,7 @@ export async function deleteRule(context: RulesClientContext, { id }: { id: stri
 async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }) {
   let taskIdToRemove: string | undefined | null;
   let apiKeyToInvalidate: string | null = null;
+  let apiKeyCreatedByUser: boolean | undefined | null = false;
   let attributes: RawRule;
 
   try {
@@ -31,6 +34,7 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
         namespace: context.namespace,
       });
     apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
+    apiKeyCreatedByUser = decryptedAlert.attributes.apiKeyCreatedByUser;
     taskIdToRemove = decryptedAlert.attributes.scheduledTaskId;
     attributes = decryptedAlert.attributes;
   } catch (e) {
@@ -62,6 +66,11 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
     throw error;
   }
 
+  // migrate legacy actions only for SIEM rules
+  if (attributes.consumer === AlertConsumers.SIEM) {
+    await migrateLegacyActions(context, { ruleId: id, attributes, skipActionsValidation: true });
+  }
+
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.DELETE,
@@ -73,7 +82,7 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
 
   await Promise.all([
     taskIdToRemove ? context.taskManager.removeIfExists(taskIdToRemove) : null,
-    apiKeyToInvalidate
+    apiKeyToInvalidate && !apiKeyCreatedByUser
       ? bulkMarkApiKeysForInvalidation(
           { apiKeys: [apiKeyToInvalidate] },
           context.logger,

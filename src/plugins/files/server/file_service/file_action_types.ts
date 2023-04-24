@@ -83,6 +83,10 @@ export interface FindFileArgs extends Pagination {
    */
   kind?: string[];
   /**
+   * File kind(s) to exclude from search, see {@link FileKind}.
+   */
+  kindToExclude?: string[];
+  /**
    * File name(s).
    */
   name?: string[];
@@ -105,5 +109,5 @@ export interface FindFileArgs extends Pagination {
   /**
    * File metadata values. These values are governed by the consumer.
    */
-  meta?: Record<string, string>;
+  meta?: Record<string, string | string[]>;
 }

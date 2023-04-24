@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type { HttpApiTagOperation, Owner } from './types';
-
 export const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MiB
-
-export const constructFilesHttpOperationTag = (owner: Owner, operation: HttpApiTagOperation) => {
-  return `${owner}FilesCases${operation}`;
-};
-
-export const constructFileKindIdByOwner = (owner: Owner) => `${owner}FilesCases`;
+export const MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024; // 10 MiB
+export const MAX_FILES_PER_CASE = 100;
+export const MAX_DELETE_FILES = 50;

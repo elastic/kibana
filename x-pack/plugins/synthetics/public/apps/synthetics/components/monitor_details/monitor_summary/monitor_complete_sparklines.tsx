@@ -18,9 +18,9 @@ interface Props {
   to: string;
 }
 export const MonitorCompleteSparklines = (props: Props) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const monitorId = useMonitorQueryId();
   const selectedLocation = useSelectedLocation();
