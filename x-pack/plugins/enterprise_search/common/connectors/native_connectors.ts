@@ -27,6 +27,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       user: {
@@ -44,6 +45,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       password: {
@@ -61,6 +63,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: true,
         tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       database: {
@@ -78,6 +81,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       collection: {
@@ -95,6 +99,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       direct_connection: {
@@ -112,6 +117,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        ui_restrictions: [],
         value: true,
       },
     },
@@ -145,6 +151,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       port: {
@@ -162,6 +169,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       user: {
@@ -179,6 +187,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: false,
         sensitive: false,
         tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       password: {
@@ -196,6 +205,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: false,
         sensitive: true,
         tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       database: {
@@ -213,6 +223,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       tables: {
@@ -230,6 +241,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
       ssl_enabled: {
@@ -247,6 +259,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        ui_restrictions: [],
         value: false,
       },
       ssl_ca: {
@@ -264,6 +277,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        ui_restrictions: [],
         value: '',
       },
     },
