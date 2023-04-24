@@ -156,7 +156,7 @@ describe('MaintenanceWindowCallout', () => {
     jest.restoreAllMocks();
   });
 
-  it('MW callout should be visible if currently there is at least one "running" maintenance window', async () => {
+  it('should be visible if currently there is at least one "running" maintenance window', async () => {
     (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
 
     const { findByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
@@ -164,7 +164,7 @@ describe('MaintenanceWindowCallout', () => {
     expect(await findByText('A maintenance window is currently running')).toBeInTheDocument();
   });
 
-  it('A single MW callout should be visible if currently there are multiple "running" maintenance windows', async () => {
+  it('single callout should be visible if currently there are multiple "running" maintenance windows', async () => {
     (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([
       RUNNING_MAINTENANCE_WINDOW_1,
       RUNNING_MAINTENANCE_WINDOW_2,
@@ -175,7 +175,7 @@ describe('MaintenanceWindowCallout', () => {
     expect(await findAllByText('A maintenance window is currently running')).toHaveLength(1);
   });
 
-  it('MW callout should NOT be visible if currently there are no active (running or upcoming) maintenance windows', async () => {
+  it('should NOT be visible if currently there are no active (running or upcoming) maintenance windows', async () => {
     (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([]);
 
     const { container } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
@@ -183,7 +183,7 @@ describe('MaintenanceWindowCallout', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('MW callout should NOT be visible if currently there are no "running" maintenance windows', async () => {
+  it('should NOT be visible if currently there are no "running" maintenance windows', async () => {
     (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([UPCOMING_MAINTENANCE_WINDOW]);
 
     const { container } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
@@ -191,7 +191,7 @@ describe('MaintenanceWindowCallout', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('User should see an error toast if there was an error while fetching maintenance windows', async () => {
+  it('should see an error toast if there was an error while fetching maintenance windows', async () => {
     const createReactQueryWrapper = () => {
       const queryClient = new QueryClient({
         defaultOptions: {
