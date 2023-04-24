@@ -204,14 +204,11 @@ export const CaseViewActivity = ({
       ? [caseUsers.reporter]
       : [convertToCaseUserWithProfileInfo(caseData.createdBy)];
 
-  const isLoadingDescription = isLoading && loadingKey === 'description';
-
   return (
     <>
       <EuiFlexItem grow={6}>
         <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
         <Description
-          isLoadingDescription={isLoadingDescription}
           caseData={caseData}
           userProfiles={userProfiles}
           onUpdateField={onUpdateField}

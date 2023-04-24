@@ -612,7 +612,7 @@ describe('CaseViewPage', () => {
         expect(await description.findByText(caseData.description)).toBeInTheDocument();
       });
 
-      it('should display description isLoading', async () => {
+      it('should display description when case is loading', async () => {
         useUpdateCaseMock.mockImplementation(() => ({
           ...defaultUpdateCaseState,
           isLoading: true,
@@ -622,8 +622,7 @@ describe('CaseViewPage', () => {
         appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
         await waitFor(() => {
-          expect(screen.getByTestId('description-loading')).toBeInTheDocument();
-          expect(screen.queryByTestId('description')).not.toBeInTheDocument();
+          expect(screen.getByTestId('description')).toBeInTheDocument();
         });
       });
 

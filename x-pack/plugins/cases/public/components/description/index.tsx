@@ -13,7 +13,6 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -36,7 +35,6 @@ export interface DescriptionMarkdownRefObject {
 export interface DescriptionProps {
   caseData: Case;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
-  isLoadingDescription: boolean;
   userProfiles: Map<string, UserProfileWithAvatar>;
 }
 
@@ -55,8 +53,6 @@ const Header = styled(EuiFlexGroup)`
   ${({ theme }) => `
     display: flex;
     padding: ${theme.eui.euiSizeS};
-    border-radius: 6px;
-    background: #f1f4fa;
   `}
 `;
 
@@ -68,7 +64,7 @@ const Body = styled(EuiFlexItem)`
 `;
 
 export const Description = forwardRef<DescriptionMarkdownRefObject, DescriptionProps>(
-  ({ caseData, isLoadingDescription, onUpdateField }, ref) => {
+  ({ caseData, onUpdateField }, ref) => {
     const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
     const [isEditable, setIsEditable] = useState<boolean>(false);
     const [fieldValue, setFieldValue] = useState({ content: caseData.description });
@@ -122,16 +118,6 @@ export const Description = forwardRef<DescriptionMarkdownRefObject, DescriptionP
       setIsEditable(true);
     }
 
-    if (isLoadingDescription) {
-      return (
-        <EuiFlexGroup justifyContent="center" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner data-test-subj="description-loading" size="l" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-
     return isEditable ? (
       <EditableMarkdown
         id="description"
@@ -155,9 +141,15 @@ export const Description = forwardRef<DescriptionMarkdownRefObject, DescriptionP
                 ? {
                     css: css`
                       border-bottom: ${euiTheme.border.thin};
+                      border-radius: none;
                     `,
                   }
-                : {})}
+                : {
+                    css: css`
+                      background: ${euiTheme.colors.lightestShade};
+                      border-radius: 6px;
+                    `,
+                  })}
             >
               <EuiFlexItem>
                 <EuiText data-test-subj="description-title" size="s">

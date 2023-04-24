@@ -21,7 +21,6 @@ jest.mock('../../common/navigation/hooks');
 
 const defaultProps = {
   appId: 'testAppId',
-  isLoadingDescription: false,
   caseData: {
     ...basicCase,
   },
@@ -42,16 +41,6 @@ describe('Description ', () => {
 
     expect(screen.getByTestId('description')).toBeInTheDocument();
     expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
-  });
-
-  it('renders loading state correctly', async () => {
-    appMockRender.render(
-      <Description {...defaultProps} isLoadingDescription={true} onUpdateField={onUpdateField} />
-    );
-
-    expect(screen.getByTestId('description-loading')).toBeInTheDocument();
-    expect(screen.queryByTestId('description')).not.toBeInTheDocument();
-    expect(screen.queryByText('Security banana Issue')).not.toBeInTheDocument();
   });
 
   it('hides and shows the description correctly when collapse button clicked', async () => {
