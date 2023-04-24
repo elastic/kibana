@@ -58,9 +58,10 @@ export function SloEditForm({ slo }: Props) {
   const history = useHistory();
   const { search } = useLocation();
 
-  const { data: rules, isLoading } = useFetchRulesForSlo({
+  const { data: rules, isInitialLoading } = useFetchRulesForSlo({
     sloIds: slo?.id ? [slo.id] : undefined,
   });
+
   const urlStateStorage = createKbnUrlStateStorage({
     history,
     useHash: false,
@@ -221,7 +222,7 @@ export function SloEditForm({ slo }: Props) {
             <EuiCheckbox
               id="createNewRuleCheckbox"
               checked={isCreateRuleCheckboxChecked}
-              disabled={isLoading}
+              disabled={isInitialLoading}
               data-test-subj="createNewRuleCheckbox"
               label={
                 <>
