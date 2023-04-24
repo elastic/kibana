@@ -66,6 +66,7 @@ export class MetricsExpression extends Component<Props, State> {
         metrics={this.props.metrics}
         onChange={this.props.onChange}
         allowMultipleMetrics={true}
+        isJoin={true}
       />
     );
   };
