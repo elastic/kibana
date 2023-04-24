@@ -66,6 +66,7 @@ export interface ConfigEntry {
   required: boolean;
   sensitive: boolean;
   tooltip: string;
+  ui_restrictions: string[];
   value: string | number | boolean | null;
 }
 
@@ -245,6 +246,8 @@ export const ConnectorConfigurationLogic = kea<
             required,
             sensitive,
             tooltip,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            ui_restrictions,
             value,
           }
         ) => ({
@@ -259,6 +262,7 @@ export const ConnectorConfigurationLogic = kea<
             required,
             sensitive,
             tooltip,
+            ui_restrictions,
             value,
           },
         }),
