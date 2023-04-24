@@ -105,6 +105,14 @@ describe('MaintenanceWindowCallout', () => {
             retry: false,
           },
         },
+        logger: {
+          // Turn network error logging off, so we don't log the failed request to the console
+          error: () => {},
+          // eslint-disable-next-line no-console
+          log: console.log,
+          // eslint-disable-next-line no-console
+          warn: console.warn,
+        },
       });
       const wrapper: React.FC = ({ children }) => (
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -120,7 +128,7 @@ describe('MaintenanceWindowCallout', () => {
     await waitFor(() => {
       expect(appToastsMock.addError).toHaveBeenCalledTimes(1);
       expect(appToastsMock.addError).toHaveBeenCalledWith(mockError, {
-        title: 'Failed to check if maintenance window is running',
+        title: 'Failed to check if any maintenance window is currently running',
         toastMessage: "Notification actions won't run while a maintenance window is running.",
       });
     });
