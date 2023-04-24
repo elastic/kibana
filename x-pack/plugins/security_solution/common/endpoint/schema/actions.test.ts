@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
 import {
   EndpointActionListRequestSchema,
   NoParametersRequestSchema,
@@ -185,7 +186,7 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it.each(['isolate', 'unisolate', 'kill-process', 'suspend-process', 'running-processes'])(
+    it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
       'should work with commands query params with %s action',
       (command) => {
         expect(() => {

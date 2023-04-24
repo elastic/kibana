@@ -89,9 +89,16 @@ export class ESGeoLineSource extends AbstractESAggSource {
     this._descriptor = sourceDescriptor;
   }
 
+  getBucketsName() {
+    return i18n.translate('xpack.maps.source.esGeoLine.bucketsName', {
+      defaultMessage: 'tracks',
+    });
+  }
+
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
     return (
       <UpdateSourceEditor
+        bucketsName={this.getBucketsName()}
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}

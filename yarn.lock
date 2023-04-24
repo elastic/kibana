@@ -4545,6 +4545,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-error-utils@link:x-pack/packages/ml/error_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-is-defined@link:x-pack/packages/ml/is_defined":
   version "0.0.0"
   uid ""
@@ -5454,6 +5458,10 @@
   uid ""
 
 "@kbn/url-forwarding-plugin@link:src/plugins/url_forwarding":
+  version "0.0.0"
+  uid ""
+
+"@kbn/url-state@link:packages/kbn-url-state":
   version "0.0.0"
   uid ""
 
@@ -10050,10 +10058,10 @@ ajv@^6.1.0, ajv@^6.10.0, ajv@^6.10.2, ajv@^6.11.0, ajv@^6.12.2, ajv@^6.12.4, ajv
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-ajv@^8.0.0, ajv@^8.0.1, ajv@^8.11.0, ajv@^8.8.0:
-  version "8.11.0"
-  resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.11.0.tgz#977e91dd96ca669f54a11e23e378e33b884a565f"
-  integrity sha512-wGgprdCvMalC0BztXvitD2hC04YffAvtsUn93JbGXYLAtCUO4xd17mCCZQxUOItiBwZvJScWo8NIvQMQ71rdpg==
+ajv@^8.0.0, ajv@^8.0.1, ajv@^8.12.0, ajv@^8.8.0:
+  version "8.12.0"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.12.0.tgz#d1a0527323e22f53562c567c00991577dfbe19d1"
+  integrity sha512-sRu1kpcO9yLtYxBKvqfTeh9KzZEwO3STyX1HT+4CaDzC6HpTGYhIhPIzj9XuKU7KYDwnaeh5hcOwjy1QuJzBPA==
   dependencies:
     fast-deep-equal "^3.1.1"
     json-schema-traverse "^1.0.0"

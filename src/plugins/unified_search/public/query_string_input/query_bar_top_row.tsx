@@ -120,6 +120,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   isScreenshotMode?: boolean;
   onTextLangQuerySubmit: (query?: Query | AggregateQuery) => void;
   onTextLangQueryChange: (query: AggregateQuery) => void;
+  submitOnBlur?: boolean;
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -556,6 +557,7 @@ export const QueryBarTopRow = React.memo(
                 size={props.suggestionsSize}
                 isDisabled={props.isDisabled}
                 appName={appName}
+                submitOnBlur={props.submitOnBlur}
                 deps={{
                   unifiedSearch,
                   data,

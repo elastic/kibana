@@ -29,10 +29,12 @@ import { getFieldByNameFactory } from '../pure_helpers';
 import { generateId } from '../../../id_generator';
 import { createMockedFullReference, createMockedManagedReference } from './mocks';
 import {
+  CounterRateIndexPatternColumn,
   FiltersIndexPatternColumn,
   FormulaIndexPatternColumn,
   GenericIndexPatternColumn,
   MathIndexPatternColumn,
+  MaxIndexPatternColumn,
   MovingAverageIndexPatternColumn,
   OperationDefinition,
 } from './definitions';
@@ -1355,6 +1357,47 @@ describe('state_helpers', () => {
             shouldResetLabel: undefined,
           }).columns.col1
         ).toEqual(expect.objectContaining({ label: 'Average of bytes' }));
+      });
+
+      it('should update default label when referenced column gets a field change', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1'],
+              columns: {
+                col1: {
+                  label: 'MyDefaultLabel',
+                  dataType: 'number',
+                  operationType: 'counter_rate',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  references: ['col2'],
+                  timeScale: 's',
+                  timeShift: '',
+                  filter: undefined,
+                  params: undefined,
+                } as CounterRateIndexPatternColumn,
+                col2: {
+                  label: 'Max of bytes',
+                  dataType: 'number',
+                  operationType: 'max',
+                  scale: 'ratio',
+                  sourceField: indexPattern.fields[2].displayName,
+                } as MaxIndexPatternColumn,
+              },
+            },
+            indexPattern,
+            columnId: 'col2',
+            op: 'max',
+            field: indexPattern.fields[3],
+            visualizationGroups: [],
+          }).columns.col1
+        ).toEqual(
+          expect.objectContaining({
+            label: 'Counter rate of memory per second',
+          })
+        );
       });
     });
 

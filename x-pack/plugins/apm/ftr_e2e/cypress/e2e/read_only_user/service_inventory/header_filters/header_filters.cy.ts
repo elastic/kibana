@@ -45,7 +45,7 @@ describe('Service inventory - header filters', () => {
       cy.contains('Services');
       cy.contains('opbeans-node');
       cy.contains('service 1');
-      cy.getByTestSubj('headerFilterKuerybar')
+      cy.getByTestSubj('apmUnifiedSearchBar')
         .type(`service.name: "${specialServiceName}"`)
         .type('{enter}');
       cy.contains('service 1');
