@@ -34,7 +34,10 @@ export const initGetMetricsExplorerViewRoute = ({
       const metricsExplorerViewsClient = metricsExplorerViews.getScopedClient(request);
 
       try {
-        const metricsExplorerView = await metricsExplorerViewsClient.get(params.metricsExplorerViewId, query);
+        const metricsExplorerView = await metricsExplorerViewsClient.get(
+          params.metricsExplorerViewId,
+          query
+        );
 
         return response.ok({
           body: metricsExplorerViewResponsePayloadRT.encode({ data: metricsExplorerView }),
