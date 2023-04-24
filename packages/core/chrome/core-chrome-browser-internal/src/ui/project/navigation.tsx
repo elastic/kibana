@@ -19,7 +19,7 @@ const SIZE_CLOSED = 40;
 
 const buttonCSS = css`
   margin-left: -32px;
-  margin-top: 27px;
+  margin-top: 12px;
   position: fixed;
   z-index: 1000;
 `;
@@ -42,10 +42,10 @@ export const ProjectNavigation: React.FC = ({ children }) => {
   }, [isOpen, setIsOpen]);
 
   const collabsibleNavCSS = css`
-    borderInlineEndWidth: 1,
+    border-inline-end-width: 1,
     background: ${euiTheme.colors.darkestShade},
-    display: 'flex',
-    flexDirection: 'row',
+    display: flex,
+    flex-direction: row,
   `;
 
   return (

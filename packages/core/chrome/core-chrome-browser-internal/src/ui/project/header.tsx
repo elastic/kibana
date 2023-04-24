@@ -81,7 +81,9 @@ export const ProjectHeader = ({
         </EuiHeaderSection>
       </EuiHeader>
       <Router history={application.history}>
-        <ProjectNavigation>To be implemented</ProjectNavigation>
+        <ProjectNavigation>
+          <span />
+        </ProjectNavigation>
       </Router>
     </>
   );
