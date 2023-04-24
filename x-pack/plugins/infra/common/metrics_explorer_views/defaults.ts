@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { NonEmptyString } from '@kbn/io-ts-utils';
 import type { MetricsExplorerViewAttributes } from './types';
 
-export const staticMetricsExplorerViewId = 'static';
+export const staticMetricsExplorerViewId = '0';
 
 export const staticMetricsExplorerViewAttributes: MetricsExplorerViewAttributes = {
   name: i18n.translate('xpack.infra.savedView.defaultViewNameHosts', {
