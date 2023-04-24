@@ -24,6 +24,7 @@ describe('analyticsEventsExistLogic', () => {
   const DEFAULT_VALUES = {
     data: undefined,
     hasEvents: false,
+    isLoading: false,
     status: Status.IDLE,
   };
 
@@ -39,6 +40,7 @@ describe('analyticsEventsExistLogic', () => {
         ...DEFAULT_VALUES,
         data: { exists: indexName },
         hasEvents: true,
+        isLoading: true,
         status: Status.SUCCESS,
       });
     });
