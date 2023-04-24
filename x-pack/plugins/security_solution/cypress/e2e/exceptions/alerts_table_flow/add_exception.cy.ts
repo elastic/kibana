@@ -15,7 +15,7 @@ import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../..
 import { EXCEPTIONS_URL } from '../../../urls/navigation';
 import {
   deleteExceptionListWithRuleReferenceByListId,
-  deleteExceptionListWithoutRuleReference,
+  deleteExceptionListWithoutRuleReferenceByListId,
   exportExceptionList,
   searchForExceptionList,
   waitForExceptionsTableToBeLoaded,
@@ -153,7 +153,7 @@ describe('Exceptions Table', () => {
     // just checking number of lists shown
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
 
-    deleteExceptionListWithoutRuleReference();
+    deleteExceptionListWithoutRuleReferenceByListId(getExceptionList1().list_id);
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
