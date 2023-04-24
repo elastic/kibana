@@ -206,7 +206,7 @@ function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfi
                   label: (
                     <FormattedMessage
                       id="xpack.security.accountManagement.userProfile.lightModeButton"
-                      defaultMessage="Light Mode"
+                      defaultMessage="Light"
                     />
                   ),
                   iconType: 'sun',
