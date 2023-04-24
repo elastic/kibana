@@ -11,7 +11,6 @@ import {
   LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
   RULES_MANAGEMENT_TABLE,
   RULES_ROW,
-  UPDATE_PREBUILT_RULES_CALLOUT,
   UPDATE_PREBUILT_RULES_CALLOUT_BUTTON,
 } from '../../screens/alerts_detection_rules';
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
