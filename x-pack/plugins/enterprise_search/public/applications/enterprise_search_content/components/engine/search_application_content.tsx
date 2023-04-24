@@ -10,13 +10,14 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import {
+  ENGINE_PATH,
   SEARCH_APPLICATION_CONTENT_PATH,
   EngineViewTabs,
   SearchApplicationContentTabs,
@@ -102,6 +103,22 @@ export const SearchApplicationContent = () => {
       pageViewTelemetry={EngineViewTabs.CONTENT}
       isLoading={isLoadingEngine}
       pageHeader={{
+        breadcrumbs: [
+          {
+            color: 'primary',
+            onClick: () =>
+              KibanaLogic.values.navigateToUrl(
+                generateEncodedPath(ENGINE_PATH, {
+                  engineName,
+                })
+              ),
+            text: (
+              <>
+                <EuiIcon size="s" type="arrowLeft" /> {engineName}
+              </>
+            ),
+          },
+        ],
         pageTitle,
         rightSideItems: [
           <EuiButton
