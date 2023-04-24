@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { Aggregation, METRIC_AGG_TYPE } from '../types/fields';
+import { type Aggregation, METRIC_AGG_TYPE } from './fields';
 
+/**
+ * Enum for ML job aggregations.
+ * @export
+ * @enum {number}
+ */
 export enum ML_JOB_AGGREGATION {
   // count
   COUNT = 'count',
@@ -58,6 +63,10 @@ export enum ML_JOB_AGGREGATION {
   LAT_LONG = 'lat_long',
 }
 
+/**
+ * Custom enum for sparse data aggregations.
+ * @type {readonly [ML_JOB_AGGREGATION.NON_ZERO_COUNT, ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT, ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT, ML_JOB_AGGREGATION.NON_NULL_SUM, ML_JOB_AGGREGATION.HIGH_NON_NULL_SUM, ML_JOB_AGGREGATION.LOW_NON_NULL_SUM]}
+ */
 export const SPARSE_DATA_AGGREGATIONS = [
   ML_JOB_AGGREGATION.NON_ZERO_COUNT,
   ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT,
@@ -65,8 +74,13 @@ export const SPARSE_DATA_AGGREGATIONS = [
   ML_JOB_AGGREGATION.NON_NULL_SUM,
   ML_JOB_AGGREGATION.HIGH_NON_NULL_SUM,
   ML_JOB_AGGREGATION.LOW_NON_NULL_SUM,
-];
+] as const;
 
+/**
+ * Enum for Kibana aggregations.
+ * @export
+ * @enum {number}
+ */
 export enum KIBANA_AGGREGATION {
   COUNT = 'count',
   AVG = 'avg',
@@ -77,6 +91,11 @@ export enum KIBANA_AGGREGATION {
   CARDINALITY = 'cardinality',
 }
 
+/**
+ * Enum for ES aggregatins.
+ * @export
+ * @enum {number}
+ */
 export enum ES_AGGREGATION {
   COUNT = 'count',
   AVG = 'avg',
@@ -87,8 +106,11 @@ export enum ES_AGGREGATION {
   CARDINALITY = 'cardinality',
 }
 
-// aggregation object missing id, title and fields and has null for kibana and dsl aggregation names.
-// this is used as the basis for the ML only aggregations
+/**
+ * Aggregation object missing id, title and fields and has null for kibana and dsl aggregation names.
+ * This is used as the basis for the ML only aggregations.
+ * @returns {Omit<Aggregation, 'id' | 'title' | 'fields'>}
+ */
 function getBasicMlOnlyAggregation(): Omit<Aggregation, 'id' | 'title' | 'fields'> {
   return {
     kibanaName: null,
@@ -101,9 +123,12 @@ function getBasicMlOnlyAggregation(): Omit<Aggregation, 'id' | 'title' | 'fields
   };
 }
 
-// list of aggregations only support by ML and which don't have an equivalent ES aggregation
-// note, not all aggs have a field list. Some aggs cannot be used with a field.
-export const mlOnlyAggregations: Aggregation[] = [
+/**
+ * List of aggregations only support by ML and which don't have an equivalent ES aggregation.
+ * Note, not all aggs have a field list. Some aggs cannot be used with a field.
+ * @type {Aggregation[]}
+ */
+export const mlJobAggregationsWithoutEsEquivalent: Aggregation[] = [
   {
     id: ML_JOB_AGGREGATION.NON_ZERO_COUNT,
     title: 'Non zero count',
@@ -219,7 +244,11 @@ export const mlOnlyAggregations: Aggregation[] = [
   },
 ];
 
-export const aggregations: Aggregation[] = [
+/**
+ * ML job aggregation definitions.
+ * @type {Aggregation[]}
+ */
+export const mlJobAggregations: Aggregation[] = [
   {
     id: ML_JOB_AGGREGATION.COUNT,
     title: 'Count',

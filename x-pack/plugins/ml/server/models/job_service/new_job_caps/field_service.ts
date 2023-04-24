@@ -15,8 +15,8 @@ import {
   type Field,
   type NewJobCaps,
   type RollupFields,
-  aggregations,
-  mlOnlyAggregations,
+  mlJobAggregations,
+  mlJobAggregationsWithoutEsEquivalent,
 } from '@kbn/ml-anomaly-utils';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
 import { rollupServiceProvider } from './rollup';
@@ -149,7 +149,7 @@ class FieldsService {
       }
     }
 
-    const aggs = cloneDeep([...aggregations, ...mlOnlyAggregations]);
+    const aggs = cloneDeep([...mlJobAggregations, ...mlJobAggregationsWithoutEsEquivalent]);
     const fields: Field[] = await this.createFields(includeNested);
 
     return combineFieldsAndAggs(fields, aggs, rollupFields);

@@ -17,8 +17,8 @@ import {
   type MlUrlConfig,
   type RuntimeMappings,
   ML_JOB_AGGREGATION,
-  aggregations,
-  mlOnlyAggregations,
+  mlJobAggregations,
+  mlJobAggregationsWithoutEsEquivalent,
 } from '@kbn/ml-anomaly-utils';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
@@ -805,7 +805,7 @@ export class JobCreator {
           } as Field)
       );
 
-      const aggs = cloneDeep([...aggregations, ...mlOnlyAggregations]);
+      const aggs = cloneDeep([...mlJobAggregations, ...mlJobAggregationsWithoutEsEquivalent]);
       this._runtimeFields = combineFieldsAndAggs(tempRuntimeFields, aggs, {}).fields;
     }
   }

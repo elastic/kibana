@@ -10,8 +10,8 @@ export { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 export { ML_SEVERITY_COLORS } from './severity_colors';
 
 export {
-  aggregations,
-  mlOnlyAggregations,
+  mlJobAggregations,
+  mlJobAggregationsWithoutEsEquivalent,
   ES_AGGREGATION,
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
