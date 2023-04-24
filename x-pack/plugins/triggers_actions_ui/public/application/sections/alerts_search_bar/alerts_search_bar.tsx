@@ -19,9 +19,16 @@ export function AlertsSearchBar({
   appName,
   featureIds,
   query,
+  filters,
   onQueryChange,
+  onFiltersUpdated,
   rangeFrom,
   rangeTo,
+  showFilterBar = false,
+  showDatePicker = true,
+  showSubmitButton = true,
+  placeholder = SEARCH_BAR_PLACEHOLDER,
+  submitOnBlur = false,
 }: AlertsSearchBarProps) {
   const {
     unifiedSearch: {
@@ -52,14 +59,20 @@ export function AlertsSearchBar({
     <SearchBar
       appName={appName}
       indexPatterns={loading || error ? NO_INDEX_PATTERNS : [dataView!]}
-      placeholder={SEARCH_BAR_PLACEHOLDER}
+      placeholder={placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
+      filters={filters}
       dateRangeFrom={rangeFrom}
       dateRangeTo={rangeTo}
       displayStyle="inPage"
-      showFilterBar={false}
+      showFilterBar={showFilterBar}
       onQuerySubmit={onQuerySubmit}
+      onFiltersUpdated={onFiltersUpdated}
       onRefresh={onRefresh}
+      showDatePicker={showDatePicker}
+      showSubmitButton={showSubmitButton}
+      submitOnBlur={submitOnBlur}
+      onQueryChange={onQuerySubmit}
     />
   );
 }
