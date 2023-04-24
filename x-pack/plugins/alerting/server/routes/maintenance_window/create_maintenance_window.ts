@@ -14,7 +14,10 @@ import {
   RewriteRequestCase,
   rewriteMaintenanceWindowRes,
 } from '../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../types';
+import {
+  AlertingRequestHandlerContext,
+  INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
+} from '../../types';
 import { MaintenanceWindowCreateBody, MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../common';
 
 const bodySchema = schema.object({
@@ -37,7 +40,7 @@ export const createMaintenanceWindowRoute = (
 ) => {
   router.post(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window`,
+      path: INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
       validate: {
         body: bodySchema,
       },

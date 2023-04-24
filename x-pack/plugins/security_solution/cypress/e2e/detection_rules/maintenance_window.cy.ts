@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
+import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '@kbn/alerting-plugin/common';
 import type { MaintenanceWindowCreateBody } from '@kbn/alerting-plugin/common';
 import type { AsApiContract } from '@kbn/alerting-plugin/server/routes/lib';
 import { cleanKibana } from '../../tasks/common';
@@ -33,7 +33,7 @@ describe('Maintenance window callout on Rule Management page', () => {
     // Create a test maintenance window
     cy.request({
       method: 'POST',
-      url: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window`,
+      url: INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
       headers: { 'kbn-xsrf': 'cypress-creds' },
       body,
     }).then((response) => {
@@ -45,7 +45,7 @@ describe('Maintenance window callout on Rule Management page', () => {
     // Delete a test maintenance window
     cy.request({
       method: 'DELETE',
-      url: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/${maintenanceWindowId}`,
+      url: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/${maintenanceWindowId}`,
       headers: { 'kbn-xsrf': 'cypress-creds' },
     });
   });
