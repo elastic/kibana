@@ -83,11 +83,11 @@ import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_infere
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
 import { getMlModelDeploymentStatus } from '../../lib/ml/get_ml_model_deployment_status';
 import { startMlModelDeployment } from '../../lib/ml/start_ml_model_deployment';
+import { startMlModelDownload } from '../../lib/ml/start_ml_model_download';
 import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
 import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { registerIndexRoutes } from './indices';
-import { startMlModelDownload } from '../../lib/ml/start_ml_model_download';
 
 describe('Enterprise Search Managed Indices', () => {
   let mockRouter: MockRouter;
