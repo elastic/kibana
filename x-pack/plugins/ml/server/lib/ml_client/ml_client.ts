@@ -500,7 +500,6 @@ export function getMlClient(
       });
     },
     async stopTrainedModelDeployment(...p: Parameters<MlClient['stopTrainedModelDeployment']>) {
-      await modelIdsCheck(p);
       return mlClient.stopTrainedModelDeployment(...p);
     },
     async inferTrainedModel(...p: Parameters<MlClient['inferTrainedModel']>) {
