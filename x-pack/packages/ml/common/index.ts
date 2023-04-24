@@ -6,8 +6,8 @@
  */
 
 export {
-  aggregations,
-  mlOnlyAggregations,
+  mlJobAggregations,
+  mlJobAggregationsWithoutEsEquivalent,
   ES_AGGREGATION,
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,

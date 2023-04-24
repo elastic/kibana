@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * Custom enum for ML job field types
+ * @type {{ readonly BOOLEAN: "boolean"; readonly DATE: "date"; readonly GEO_POINT: "geo_point"; readonly GEO_SHAPE: "geo_shape"; readonly IP: "ip"; readonly KEYWORD: "keyword"; readonly NUMBER: "number"; readonly TEXT: "text"; readonly UNKNOWN: "unknown"; }}
+ */
 export const ML_JOB_FIELD_TYPES = {
   BOOLEAN: 'boolean',
   DATE: 'date',
@@ -17,6 +21,10 @@ export const ML_JOB_FIELD_TYPES = {
   UNKNOWN: 'unknown',
 } as const;
 
+/**
+ * MLCATEGORY
+ * @type {"mlcategory"}
+ */
 export const MLCATEGORY = 'mlcategory';
 
 /**
@@ -30,5 +38,8 @@ export const DOC_COUNT = 'doc_count';
  */
 export const _DOC_COUNT = '_doc_count';
 
-// List of system fields we don't want to display.
+/**
+ * List of system fields we don't want to display.
+ * @type {string[]}
+ */
 export const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
