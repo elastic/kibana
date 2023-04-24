@@ -86,8 +86,7 @@ export async function renderApp(
       mapEmbeddableInput = {
         savedObjectId: routeProps.match.params.savedMapId,
       } as MapByReferenceInput;
-    }
-    if (valueInput) {
+    } else if (valueInput) {
       mapEmbeddableInput = valueInput as MapByValueInput;
     }
 
