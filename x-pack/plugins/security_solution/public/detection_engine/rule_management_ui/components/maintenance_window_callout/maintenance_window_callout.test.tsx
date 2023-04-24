@@ -69,7 +69,7 @@ describe('MaintenanceWindowCallout', () => {
     expect(await findByText('A maintenance window is currently running')).toBeInTheDocument();
   });
 
-  it('single callout should be visible if currently there are multiple "running" maintenance windows', async () => {
+  it('should be visible if currently there are multiple "running" maintenance windows', async () => {
     (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([
       RUNNING_MAINTENANCE_WINDOW_1,
       RUNNING_MAINTENANCE_WINDOW_2,
