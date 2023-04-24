@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { RuleSnoozeSettings } from '../../rule_management/logic';
-import { useFetchRulesSnoozeSettings } from '../../rule_management/api/hooks/use_fetch_rules_snooze_settings';
-import { useRulesTableContextOptional } from '../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
+import type { RuleSnoozeSettings } from '../../logic';
+import { useFetchRulesSnoozeSettings } from '../../api/hooks/use_fetch_rules_snooze_settings';
+import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import * as i18n from './translations';
 
 interface UseRuleSnoozeSettingsResult {

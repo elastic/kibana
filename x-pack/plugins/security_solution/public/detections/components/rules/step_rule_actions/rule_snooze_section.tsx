@@ -8,7 +8,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
-import { RuleSnoozeBadge } from '../../../../detection_engine/components/rule_snooze_badge';
+import { RuleSnoozeBadge } from '../../../../detection_engine/rule_management/components/rule_snooze_badge';
 import * as i18n from './translations';
 
 interface RuleSnoozeSectionProps {
