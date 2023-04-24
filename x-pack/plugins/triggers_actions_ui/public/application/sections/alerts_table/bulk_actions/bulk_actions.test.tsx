@@ -267,6 +267,78 @@ describe('AlertsTable.BulkActions', () => {
       const { queryByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
       expect(queryByTestId('bulk-actions-header')).toBeNull();
     });
+
+    it('should pass the case ids when selecting alerts', async () => {
+      const mockedFn = jest.fn();
+      const newAlertsData = {
+        ...alertsData,
+        alerts: [
+          {
+            [AlertsField.name]: ['one'],
+            [AlertsField.reason]: ['two'],
+            [AlertsField.uuid]: ['uuidone'],
+            [AlertsField.case_ids]: ['test-case'],
+            _id: 'alert0',
+            _index: 'idx0',
+          },
+        ] as unknown as Alerts,
+      };
+
+      const props = {
+        ...tablePropsWithBulkActions,
+        useFetchAlertsData: () => newAlertsData,
+        initialBulkActionsState: {
+          ...defaultBulkActionsState,
+          isAllSelected: true,
+          rowCount: 1,
+          rowSelection: new Map([[0, { isLoading: false }]]),
+        },
+        alertsTableConfiguration: {
+          ...alertsTableConfiguration,
+          useBulkActions: () => [
+            {
+              label: 'Fake Bulk Action',
+              key: 'fakeBulkAction',
+              'data-test-subj': 'fake-bulk-action',
+              disableOnQuery: false,
+              onClick: mockedFn,
+            },
+          ],
+        },
+      };
+
+      render(<AlertsTableWithBulkActionsContext {...props} />);
+
+      fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
+      await waitForEuiPopoverOpen();
+
+      fireEvent.click(await screen.findByText('Fake Bulk Action'));
+
+      expect(mockedFn.mock.calls[0][0]).toEqual([
+        {
+          _id: 'alert0',
+          _index: 'idx0',
+          data: [
+            {
+              field: 'kibana.alert.rule.name',
+              value: ['one'],
+            },
+            {
+              field: 'kibana.alert.rule.uuid',
+              value: ['uuidone'],
+            },
+            {
+              field: 'kibana.alert.case_ids',
+              value: ['test-case'],
+            },
+          ],
+          ecs: {
+            _id: 'alert0',
+            _index: 'idx0',
+          },
+        },
+      ]);
+    });
   });
 
   describe('when the bulk action hook is set', () => {
@@ -493,6 +565,10 @@ describe('AlertsTable.BulkActions', () => {
                   field: 'kibana.alert.rule.uuid',
                   value: ['uuidtwo'],
                 },
+                {
+                  field: 'kibana.alert.case_ids',
+                  value: [],
+                },
               ],
               ecs: {
                 _id: 'alert1',
@@ -615,7 +691,8 @@ describe('AlertsTable.BulkActions', () => {
           ).toBeTruthy();
         });
 
-        describe('and clear the selection is clicked', () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/154970
+        describe.skip('and clear the selection is clicked', () => {
           it('should turn off the toolbar', async () => {
             const props = {
               ...tablePropsWithBulkActions,

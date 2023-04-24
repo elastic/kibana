@@ -205,15 +205,15 @@
             "section": "def-common.ObjectMigrationDefinition",
             "text": "ObjectMigrationDefinition"
           },
-          ") => ",
+          ") => { up: <I = UpIn, O = UpOut>(obj: I, to?: number | \"latest\", { validate }?: { validate?: boolean | undefined; }) => { error: Error; value: null; } | { value: O; error: null; }; down: <I = DownIn, O = DownOut>(obj: I, from?: number | \"latest\", { validate }?: { validate?: boolean | undefined; }) => { error: Error; value: null; } | { value: any; error: null; }; validate: (value: unknown, version?: number) => ",
           {
-            "pluginId": "@kbn/object-versioning",
+            "pluginId": "@kbn/config-schema",
             "scope": "common",
-            "docId": "kibKbnObjectVersioningPluginApi",
-            "section": "def-common.ObjectTransforms",
-            "text": "ObjectTransforms"
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ValidationError",
+            "text": "ValidationError"
           },
-          "<UpIn, UpOut, DownIn, DownOut>"
+          " | null; }"
         ],
         "path": "packages/kbn-object-versioning/lib/object_transform.ts",
         "deprecated": false,
@@ -309,7 +309,7 @@
             "label": "up",
             "description": [],
             "signature": [
-              "(obj: UpIn, version?: number | \"latest\" | undefined, options?: { validate?: boolean | undefined; } | undefined) => ",
+              "<I = UpIn, O = UpOut>(obj: I, version?: number | \"latest\" | undefined, options?: { validate?: boolean | undefined; } | undefined) => ",
               {
                 "pluginId": "@kbn/object-versioning",
                 "scope": "common",
@@ -317,7 +317,7 @@
                 "section": "def-common.TransformReturn",
                 "text": "TransformReturn"
               },
-              "<UpOut>"
+              "<O>"
             ],
             "path": "packages/kbn-object-versioning/lib/types.ts",
             "deprecated": false,
@@ -331,7 +331,7 @@
                 "label": "obj",
                 "description": [],
                 "signature": [
-                  "UpIn"
+                  "I"
                 ],
                 "path": "packages/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,
@@ -393,7 +393,7 @@
             "label": "down",
             "description": [],
             "signature": [
-              "(obj: DownIn, version?: number | \"latest\" | undefined, options?: { validate?: boolean | undefined; } | undefined) => ",
+              "<I = DownIn, O = DownOut>(obj: DownIn, version?: number | \"latest\" | undefined, options?: { validate?: boolean | undefined; } | undefined) => ",
               {
                 "pluginId": "@kbn/object-versioning",
                 "scope": "common",
@@ -401,7 +401,7 @@
                 "section": "def-common.TransformReturn",
                 "text": "TransformReturn"
               },
-              "<DownOut>"
+              "<O>"
             ],
             "path": "packages/kbn-object-versioning/lib/types.ts",
             "deprecated": false,
@@ -768,6 +768,28 @@
             "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/object-versioning",
+            "id": "def-common.ServicesDefinition.mSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "mSearch",
+            "description": [],
+            "signature": [
+              "{ out?: { result?: ",
+              {
+                "pluginId": "@kbn/object-versioning",
+                "scope": "common",
+                "docId": "kibKbnObjectVersioningPluginApi",
+                "section": "def-common.VersionableObject",
+                "text": "VersionableObject"
+              },
+              "<any, any, any, any> | undefined; } | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -799,7 +821,7 @@
                 "section": "def-common.ObjectTransforms",
                 "text": "ObjectTransforms"
               },
-              "<unknown, unknown, unknown, unknown>; }; out: { result: ",
+              "<any, any, any, any>; }; out: { result: ",
               {
                 "pluginId": "@kbn/object-versioning",
                 "scope": "common",
@@ -807,7 +829,7 @@
                 "section": "def-common.ObjectTransforms",
                 "text": "ObjectTransforms"
               },
-              "<unknown, unknown, unknown, unknown>; }; }"
+              "<any, any, any, any>; }; }"
             ],
             "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
@@ -829,7 +851,7 @@
                 "section": "def-common.ObjectTransforms",
                 "text": "ObjectTransforms"
               },
-              "<unknown, unknown, unknown, unknown>; }; out: { result: ",
+              "<any, any, any, any>; }; out: { result: ",
               {
                 "pluginId": "@kbn/object-versioning",
                 "scope": "common",
@@ -837,7 +859,7 @@
                 "section": "def-common.ObjectTransforms",
                 "text": "ObjectTransforms"
               },
-              "<unknown, unknown, unknown, unknown>; }; }"
+              "<any, any, any, any>; }; }"
             ],
             "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
@@ -859,7 +881,7 @@
                 "section": "def-common.ObjectTransforms",
                 "text": "ObjectTransforms"
               },
-              "<unknown, unknown, unknown, unknown>; options: ",
+              "<any, any, any, any>; options: ",
               {
                 "pluginId": "@kbn/object-versioning",
                 "scope": "common",
@@ -867,7 +889,7 @@
                 "section": "def-common.ObjectTransforms",
                 "text": "ObjectTransforms"
               },
-              "<unknown, unknown, unknown, unknown>; }; out: { result: ",
+              "<any, any, any, any>; }; out: { result: ",
               {
                 "pluginId": "@kbn/object-versioning",
                 "scope": "common",
@@ -875,7 +897,7 @@
                 "section": "def-common.ObjectTransforms",
                 "text": "ObjectTransforms"
               },
-              "<unknown, unknown, unknown, unknown>; }; }"
+              "<any, any, any, any>; }; }"
             ],
             "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
@@ -897,7 +919,7 @@
                 "section": "def-common.ObjectTransforms",
                 "text": "ObjectTransforms"
               },
-              "<unknown, unknown, unknown, unknown>; options: ",
+              "<any, any, any, any>; options: ",
               {
                 "pluginId": "@kbn/object-versioning",
                 "scope": "common",
@@ -905,7 +927,7 @@
                 "section": "def-common.ObjectTransforms",
                 "text": "ObjectTransforms"
               },
-              "<unknown, unknown, unknown, unknown>; }; out: { result: ",
+              "<any, any, any, any>; }; out: { result: ",
               {
                 "pluginId": "@kbn/object-versioning",
                 "scope": "common",
@@ -913,7 +935,7 @@
                 "section": "def-common.ObjectTransforms",
                 "text": "ObjectTransforms"
               },
-              "<unknown, unknown, unknown, unknown>; }; }"
+              "<any, any, any, any>; }; }"
             ],
             "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
@@ -935,7 +957,7 @@
                 "section": "def-common.ObjectTransforms",
                 "text": "ObjectTransforms"
               },
-              "<unknown, unknown, unknown, unknown>; }; out: { result: ",
+              "<any, any, any, any>; }; out: { result: ",
               {
                 "pluginId": "@kbn/object-versioning",
                 "scope": "common",
@@ -943,7 +965,7 @@
                 "section": "def-common.ObjectTransforms",
                 "text": "ObjectTransforms"
               },
-              "<unknown, unknown, unknown, unknown>; }; }"
+              "<any, any, any, any>; }; }"
             ],
             "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,
@@ -965,7 +987,7 @@
                 "section": "def-common.ObjectTransforms",
                 "text": "ObjectTransforms"
               },
-              "<unknown, unknown, unknown, unknown>; }; out: { result: ",
+              "<any, any, any, any>; }; out: { result: ",
               {
                 "pluginId": "@kbn/object-versioning",
                 "scope": "common",
@@ -973,7 +995,29 @@
                 "section": "def-common.ObjectTransforms",
                 "text": "ObjectTransforms"
               },
-              "<unknown, unknown, unknown, unknown>; }; }"
+              "<any, any, any, any>; }; }"
+            ],
+            "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/object-versioning",
+            "id": "def-common.ServiceTransforms.mSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "mSearch",
+            "description": [],
+            "signature": [
+              "{ out: { result: ",
+              {
+                "pluginId": "@kbn/object-versioning",
+                "scope": "common",
+                "docId": "kibKbnObjectVersioningPluginApi",
+                "section": "def-common.ObjectTransforms",
+                "text": "ObjectTransforms"
+              },
+              "<any, any, any, any>; }; }"
             ],
             "path": "packages/kbn-object-versioning/lib/content_management_types.ts",
             "deprecated": false,

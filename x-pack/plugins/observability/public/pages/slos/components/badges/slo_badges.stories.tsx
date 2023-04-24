@@ -15,7 +15,7 @@ import { SloBadges as Component, Props } from './slo_badges';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/Badges/SloBadges',
+  title: 'app/SLO/Badges/SloBadges',
   decorators: [KibanaReactStorybookDecorator],
 };
 
@@ -27,6 +27,7 @@ const Template: ComponentStory<typeof Component> = (props: Props) => (
 
 const defaultProps = {
   slo: buildForecastedSlo(),
+  rules: [],
 };
 
 export const SloBadges = Template.bind({});

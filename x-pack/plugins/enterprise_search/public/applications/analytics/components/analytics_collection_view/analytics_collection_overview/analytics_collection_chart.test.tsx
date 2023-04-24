@@ -35,12 +35,9 @@ describe('AnalyticsCollectionChart', () => {
     from: moment().subtract(7, 'days').toISOString(),
     to: moment().toISOString(),
   };
-  const mockedDataViewQuery = 'mockedDataViewQuery';
 
   const defaultProps = {
     data: {},
-    dataViewQuery: mockedDataViewQuery,
-    id: 'mockedId',
     isLoading: false,
     selectedChart: FilterBy.Searches,
     setSelectedChart: jest.fn(),
