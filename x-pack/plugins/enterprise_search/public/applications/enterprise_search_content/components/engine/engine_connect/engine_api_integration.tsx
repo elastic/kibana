@@ -12,23 +12,24 @@ import { useValues } from 'kea';
 import { EuiCodeBlock, EuiSpacer, EuiText, EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
-
+import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { EngineViewLogic } from '../engine_view_logic';
 
 import { EngineApiLogic } from './engine_api_logic';
 
-const SearchUISnippet = (enterpriseSearchUrl: string, engineName: string, apiKey: string) => `
+import { elasticsearchUrl } from './search_application_api';
+
+const SearchUISnippet = (esUrl: string, engineName: string, apiKey: string) => `6
 import EnginesAPIConnector from "@elastic/search-ui-engines-connector";
 
 const connector = new EnginesAPIConnector({
-  host: "${enterpriseSearchUrl}",
+  host: "${esUrl}",
   engineName: "${engineName}",
   apiKey: "${apiKey || '<YOUR_API_KEY>'}"
 });`;
 
-const cURLSnippet = (enterpriseSearchUrl: string, engineName: string, apiKey: string) => `
-curl --location --request GET '${enterpriseSearchUrl}/api/engines/${engineName}/_search' \\
+const cURLSnippet = (esUrl: string, engineName: string, apiKey: string) => `
+curl --location --request GET '${esUrl}/${engineName}/_search' \\
 --header 'Authorization: apiKey ${apiKey || '<YOUR_API_KEY>'}' \\
 --header 'Content-Type: application/json' \\
 --data-raw '{
@@ -47,19 +48,19 @@ interface Tab {
 export const EngineApiIntegrationStage: React.FC = () => {
   const [selectedTab, setSelectedTab] = React.useState<TabId>('curl');
   const { engineName } = useValues(EngineViewLogic);
-  const enterpriseSearchUrl = getEnterpriseSearchUrl();
   const { apiKey } = useValues(EngineApiLogic);
+  const cloudContext = useCloudDetails();
 
   const Tabs: Record<TabId, Tab> = {
     curl: {
-      code: cURLSnippet(enterpriseSearchUrl, engineName, apiKey),
+      code: cURLSnippet(elasticsearchUrl(cloudContext), engineName, apiKey),
       language: 'bash',
       title: i18n.translate('xpack.enterpriseSearch.content.engine.api.step3.curlTitle', {
         defaultMessage: 'cURL',
       }),
     },
     searchui: {
-      code: SearchUISnippet(enterpriseSearchUrl, engineName, apiKey),
+      code: SearchUISnippet(elasticsearchUrl(cloudContext), engineName, apiKey),
       language: 'javascript',
       title: i18n.translate('xpack.enterpriseSearch.content.engine.api.step3.searchUITitle', {
         defaultMessage: 'Search UI',
