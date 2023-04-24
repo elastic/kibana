@@ -102,7 +102,7 @@ export function formatErrorCountReason({
   groupByFields: Record<string, string>;
 }) {
   return i18n.translate('xpack.apm.alertTypes.errorCount.reason', {
-    defaultMessage: `Error count is {measured} in the last {interval}{group}. Alert when > {threshold}.`,
+    defaultMessage: `Error count is {measured} in the last {interval} for {group}. Alert when > {threshold}.`,
     values: {
       threshold,
       measured,
@@ -138,7 +138,7 @@ export function formatTransactionDurationReason({
     aggregationTypeFormatted = aggregationTypeFormatted + '.';
 
   return i18n.translate('xpack.apm.alertTypes.transactionDuration.reason', {
-    defaultMessage: `{aggregationType} latency is {measured} in the last {interval}{group}. Alert when > {threshold}.`,
+    defaultMessage: `{aggregationType} latency is {measured} in the last {interval} for {group}. Alert when > {threshold}.`,
     values: {
       threshold: asDuration(threshold),
       measured: asDuration(measured),
@@ -168,7 +168,7 @@ export function formatTransactionErrorRateReason({
   groupByFields: Record<string, string>;
 }) {
   return i18n.translate('xpack.apm.alertTypes.transactionErrorRate.reason', {
-    defaultMessage: `Failed transactions is {measured} in the last {interval}{group}. Alert when > {threshold}.`,
+    defaultMessage: `Failed transactions is {measured} in the last {interval} for {group}. Alert when > {threshold}.`,
     values: {
       threshold: asPercent(threshold, 100),
       measured: asPercent(measured, 100),
