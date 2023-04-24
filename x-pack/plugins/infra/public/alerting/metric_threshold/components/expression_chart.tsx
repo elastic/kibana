@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useRef } from 'react';
 import {
   Axis,
   Chart,
@@ -17,6 +17,7 @@ import {
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
 import { first, last } from 'lodash';
 
@@ -66,7 +67,7 @@ export const ExpressionChart: React.FC<Props> = ({
   timeRange,
   annotations,
 }) => {
-  const { uiSettings } = useKibanaContextForPlugin().services;
+  const { uiSettings, charts } = useKibanaContextForPlugin().services;
 
   const { isLoading, data } = useMetricsExplorerChartData(
     expression,
@@ -76,6 +77,11 @@ export const ExpressionChart: React.FC<Props> = ({
     groupBy,
     timeRange
   );
+
+  const chartRef = useRef(null);
+  const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
+    isDateHistogram: true,
+  });
 
   if (isLoading) {
     return <LoadingState />;
@@ -141,7 +147,7 @@ export const ExpressionChart: React.FC<Props> = ({
   return (
     <>
       <ChartContainer>
-        <Chart>
+        <Chart ref={chartRef}>
           <MetricExplorerSeriesChart
             type={chartType}
             metric={metric}
@@ -184,7 +190,14 @@ export const ExpressionChart: React.FC<Props> = ({
             tickFormat={createFormatterForMetric(metric)}
             domain={domain}
           />
-          <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
+          <Settings
+            onPointerUpdate={handleCursorUpdate}
+            tooltip={tooltipProps}
+            externalPointerEvents={{
+              tooltip: { visible: true },
+            }}
+            theme={getChartTheme(isDarkMode)}
+          />
         </Chart>
       </ChartContainer>
       <div style={{ textAlign: 'center' }}>
