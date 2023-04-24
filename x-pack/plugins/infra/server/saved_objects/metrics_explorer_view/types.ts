@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import { isoToEpochRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt, nonEmptyStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { metricsExplorerViewAttributesRT } from '../../../common/metrics_explorer_views';
+
+export const metricsExplorerViewSavedObjectAttributesRT = rt.intersection([
+  rt.strict({
+    name: nonEmptyStringRt,
+  }),
+  rt.UnknownRecord,
+]);
 
 export const metricsExplorerViewSavedObjectRT = rt.intersection([
   rt.type({
     id: rt.string,
-    attributes: metricsExplorerViewAttributesRT,
+    attributes: metricsExplorerViewSavedObjectAttributesRT,
   }),
   rt.partial({
     version: rt.string,

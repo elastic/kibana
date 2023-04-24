@@ -63,4 +63,4 @@ export const inventoryViewResponsePayloadRT = rt.type({
   data: inventoryViewResponseRT,
 });
 
-export type GetInventoryViewResponsePayload = rt.TypeOf<typeof inventoryViewResponsePayloadRT>;
+export type InventoryViewResponsePayload = rt.TypeOf<typeof inventoryViewResponsePayloadRT>;
