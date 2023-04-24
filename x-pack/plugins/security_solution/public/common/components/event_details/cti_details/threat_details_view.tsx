@@ -76,8 +76,18 @@ const ThreatDetailsViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
   showInvestigationTimeEnrichments: boolean;
   loading: boolean;
+  /**
+   * Slot to render something before the beforeHeader
+   */
+  before?: React.ReactNode;
   children?: React.ReactNode;
-}> = ({ enrichments, showInvestigationTimeEnrichments, loading, children }) => {
+}> = ({
+  enrichments,
+  before = <EuiSpacer size="m" />,
+  showInvestigationTimeEnrichments,
+  loading,
+  children,
+}) => {
   const {
     [ENRICHMENT_TYPES.IndicatorMatchRule]: indicatorMatches,
     [ENRICHMENT_TYPES.InvestigationTime]: threatIntelEnrichments,
@@ -86,7 +96,7 @@ const ThreatDetailsViewComponent: React.FC<{
 
   return (
     <>
-      <EuiSpacer size="m" />
+      {before}
       <EnrichmentSection
         dataTestSubj="threat-match-detected"
         enrichments={indicatorMatches}
