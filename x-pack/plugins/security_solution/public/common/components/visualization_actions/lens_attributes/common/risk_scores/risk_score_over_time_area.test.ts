@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import type { XYState } from '../../../../../../../../lens/public';
+import type { XYState } from '@kbn/lens-plugin/public';
 import { wrapper } from '../../../mocks';
 
 import { useLensAttributes } from '../../../use_lens_attributes';
