@@ -26,9 +26,7 @@ export interface VisualizeFieldContext {
 export interface CategorizeFieldContext {
   field: DataViewField;
   dataView: DataView;
-  contextualFields?: string[];
   originatingApp?: string;
-  query?: AggregateQuery;
 }
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
