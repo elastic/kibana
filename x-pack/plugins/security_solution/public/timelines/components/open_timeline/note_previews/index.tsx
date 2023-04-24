@@ -87,11 +87,11 @@ const DeleteNoteConfirm = React.memo<{
 }>(({ closeModal, confirmModal }) => {
   return (
     <EuiConfirmModal
-      title="Delete timeline note?"
+      title={i18n.DELETE_NOTE_CONFIRM}
       onCancel={closeModal}
       onConfirm={confirmModal}
-      cancelButtonText="Keep note"
-      confirmButtonText="Delete note"
+      cancelButtonText={i18n.CANCEL_DELETE_NOTE}
+      confirmButtonText={i18n.DELETE_NOTE}
       buttonColor="danger"
       defaultFocusedButton="confirm"
     />
@@ -118,7 +118,7 @@ function useDeleteNote(noteId: string | null | undefined) {
 
   const onError = useCallback(
     (err) => {
-      addError(err, { title: 'Error deleting note (be sure to intl me)' });
+      addError(err, { title: i18n.DELETE_NOTE_ERROR(err) });
     },
     [addError]
   );
@@ -158,25 +158,22 @@ const DeleteNoteButton = React.memo<{ noteId?: string | null; timelineId?: strin
 
     useDeleteNote(noteToDelete);
 
-    if (noteId == null) {
-      return null;
-    } else {
-      return (
-        <>
-          <EuiButtonIcon
-            title={i18n.DELETE_NOTE}
-            aria-label={i18n.DELETE_NOTE}
-            data-test-subj={'delete-note'}
-            color="text"
-            iconType="trash"
-            onClick={handleOpenDeleteModal}
-          />
-          {confirmingNoteId != null && (
-            <DeleteNoteConfirm closeModal={handleCancelDelete} confirmModal={handleConfirmDelete} />
-          )}
-        </>
-      );
-    }
+    return (
+      <>
+        <EuiButtonIcon
+          title={i18n.DELETE_NOTE}
+          aria-label={i18n.DELETE_NOTE}
+          data-test-subj={'delete-note'}
+          color="text"
+          iconType="trash"
+          onClick={handleOpenDeleteModal}
+          disabled={noteId == null}
+        />
+        {confirmingNoteId != null && (
+          <DeleteNoteConfirm closeModal={handleCancelDelete} confirmModal={handleConfirmDelete} />
+        )}
+      </>
+    );
   }
 );
 
