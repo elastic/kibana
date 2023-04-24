@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isFunction } from 'lodash';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import type { RegisterExtensions } from '../plugin';
 import { createExtensionRegistry, DiscoverExtensionId, DiscoverExtensionRegistry } from '.';
 import type { DiscoverStateContainer } from '../application/main/services/discover_state';
@@ -24,23 +25,25 @@ export const useDiscoverExtensionRegistry = ({
   registerExtensions: RegisterExtensions[];
   stateContainer: DiscoverStateContainer;
 }) => {
-  const cleanupExtensions = useRef<Array<() => void>>([]);
+  const [extensionRegistry, setExtensionRegistry] = useState<DiscoverExtensionRegistry>();
 
-  const [extensionRegistry] = useState(() => {
+  useEffectOnce(() => {
     const extensions = createExtensionRegistry();
+    const registrations = registerExtensions.map((register) =>
+      Promise.resolve(register({ extensions, stateContainer }))
+    );
+    const initialize = () => Promise.all(registrations).then((result) => result.filter(isFunction));
 
-    cleanupExtensions.current = registerExtensions
-      .map((register) => register({ extensions, stateContainer }))
-      .filter(isFunction);
+    initialize().then(() => {
+      setExtensionRegistry(extensions);
+    });
 
-    return extensions;
-  });
-
-  useEffect(() => {
     return () => {
-      cleanupExtensions.current.forEach((cleanup) => cleanup());
+      initialize().then((cleanups) => {
+        cleanups.forEach((cleanup) => cleanup());
+      });
     };
-  }, []);
+  });
 
   return extensionRegistry;
 };
