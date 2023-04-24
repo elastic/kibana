@@ -17,7 +17,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
-import { parseStreamApiResponse } from './add_monitor_project_legacy';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('GetProjectMonitors', function () {
@@ -76,14 +75,12 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       try {
-        await parseStreamApiResponse(
-          projectMonitorEndpoint,
-          JSON.stringify({
-            ...projectMonitors,
-            project,
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send({
             monitors,
-          })
-        );
+          });
 
         const firstPageResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
