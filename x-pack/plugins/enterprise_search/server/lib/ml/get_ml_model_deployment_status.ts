@@ -44,7 +44,7 @@ export const getMlModelDeploymentStatus = async (
       return getDefaultStatusReturn(MlModelDeploymentState.Downloading, modelName);
     }
   } catch (error) {
-    if (!isResourceNotFoundException(error) && !isNotFoundException(error)) {
+    if (!isResourceNotFoundException(error)) {
       throw error;
     }
     // not found? return a default
