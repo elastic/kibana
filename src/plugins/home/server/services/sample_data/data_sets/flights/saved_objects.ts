@@ -19,6 +19,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     coreMigrationVersion: '8.8.0',
     typeMigrationVersion: '7.9.3',
+    managed: false,
     attributes: {
       title: i18n.translate('home.sampleData.flightsSpec.flightLogTitle', {
         defaultMessage: '[Flights] Flight Log',
@@ -78,6 +79,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     coreMigrationVersion: '8.8.0',
     typeMigrationVersion: '7.14.0',
+    managed: false,
     attributes: {
       title: i18n.translate('home.sampleData.flightsSpec.departuresCountMapTitle', {
         defaultMessage: '[Flights] Departures Count Map',
@@ -290,5 +292,6 @@ export const getSavedObjects = (): SavedObject[] => [
     ],
     coreMigrationVersion: '8.8.0',
     typeMigrationVersion: '8.7.0',
+    managed: false,
   },
 ];
