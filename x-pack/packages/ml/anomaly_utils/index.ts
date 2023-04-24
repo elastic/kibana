@@ -50,6 +50,8 @@ export {
   type MlUrlConfig,
 } from './custom_urls';
 
+export { formatHumanReadableDateTimeSeconds, timeFormatter } from './date_utils';
+
 export {
   ML_DETECTOR_RULE_ACTION,
   ML_DETECTOR_RULE_APPLIES_TO,
@@ -57,6 +59,14 @@ export {
   ML_DETECTOR_RULE_FILTER_TYPE,
   ML_DETECTOR_RULE_OPERATOR,
 } from './detector_rule';
+
+export {
+  isMultiBucketAggregate,
+  type InfluencersFilterQuery,
+  ES_CLIENT_TOTAL_HITS_RELATION,
+} from './es_client';
+
+export { DEFAULT_SAMPLER_SHARD_SIZE } from './field_histograms';
 
 export { type MlJobFieldType, DOC_COUNT, MLCATEGORY, OMIT_FIELDS, _DOC_COUNT } from './field_types';
 
@@ -78,6 +88,8 @@ export { getFormattedSeverityScore } from './get_formatted_severity_score';
 export { getSeverity } from './get_severity';
 export { getSeverityColor } from './get_severity_color';
 export { getSeverityType } from './get_severity_type';
+
+export { isRuntimeField, isRuntimeMappings } from './runtime_field_utils';
 
 export type {
   MlEntityFieldType,

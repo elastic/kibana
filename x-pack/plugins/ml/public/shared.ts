@@ -12,7 +12,6 @@ export * from '../common/types/modules';
 export * from '../common/types/audit_message';
 
 export * from '../common/util/validators';
-export * from '../common/util/date_utils';
 
 export * from './application/formatters/metric_change_description';
 export * from './application/components/field_stats_flyout';

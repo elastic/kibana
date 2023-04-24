@@ -19,6 +19,8 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import {
   aggregationTypeTransform,
+  isRuntimeMappings,
+  type InfluencersFilterQuery,
   type MlEntityField,
   type MlRecordForInfluencer,
   ES_AGGREGATION,
@@ -28,8 +30,6 @@ import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { findAggField } from '../../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
-import { InfluencersFilterQuery } from '../../../../common/types/es_client';
-import { isRuntimeMappings } from '../../../../common';
 import { MlApiServices } from '../ml_api_service';
 import { CriteriaField } from '.';
 

@@ -440,10 +440,6 @@ export interface MlAnomaliesTableRecordExtended extends MlAnomaliesTableRecord {
 
 /**
  * Union type for partitiion field types.
-<<<<<<< HEAD:x-pack/packages/ml/anomaly_utils/types.ts
-=======
- * @date 24/04/2023 - 07:52:42
->>>>>>> 7b103b40035 (jsdoc):x-pack/packages/ml/common/types/anomalies.ts
  *
  * @export
  * @typedef {MlPartitionFieldsType}

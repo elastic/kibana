@@ -16,6 +16,8 @@ import {
   aggregationTypeTransform,
   getEntityFieldList,
   isMultiBucketAnomaly,
+  isRuntimeMappings,
+  type InfluencersFilterQuery,
   type MlAnomalyRecordDoc,
   type MlEntityField,
   type MlRecordForInfluencer,
@@ -25,7 +27,6 @@ import {
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import type { MlClient } from '../../lib/ml_client';
-import { isRuntimeMappings } from '../../../common';
 import type {
   MetricData,
   ModelPlotOutput,
@@ -46,7 +47,6 @@ import {
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
 import { CriteriaField } from './results_service';
-import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import type { CombinedJob, Datafeed } from '../../shared';
 import { parseInterval } from '../../../common/util/parse_interval';
 

@@ -10,7 +10,7 @@
 import dateMath from '@kbn/datemath';
 import { formatDate } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import { TIME_FORMAT } from '../constants/time_format';
+import { TIME_FORMAT } from './time_format';
 
 export function formatHumanReadableDate(ts: number) {
   return formatDate(ts, 'MMMM Do YYYY');

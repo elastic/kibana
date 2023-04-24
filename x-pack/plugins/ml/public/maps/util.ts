@@ -18,8 +18,11 @@ import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@k
 import type { ESSearchResponse } from '@kbn/es-types';
 import { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '@kbn/maps-plugin/common';
-import { type MLAnomalyDoc, ML_SEVERITY_COLOR_RAMP } from '@kbn/ml-anomaly-utils';
-import { formatHumanReadableDateTimeSeconds } from '../../common/util/date_utils';
+import {
+  formatHumanReadableDateTimeSeconds,
+  type MLAnomalyDoc,
+  ML_SEVERITY_COLOR_RAMP,
+} from '@kbn/ml-anomaly-utils';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import { SEARCH_QUERY_LANGUAGE } from '../../common/constants/search';
 import { tabColor } from '../../common/util/group_color_utils';

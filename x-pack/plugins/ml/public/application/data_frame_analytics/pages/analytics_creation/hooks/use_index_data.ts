@@ -12,14 +12,15 @@ import { EuiDataGridColumn } from '@elastic/eui';
 
 import { CoreSetup } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { RuntimeMappings } from '@kbn/ml-anomaly-utils';
+import {
+  isRuntimeMappings,
+  type RuntimeMappings,
+  DEFAULT_SAMPLER_SHARD_SIZE,
+} from '@kbn/ml-anomaly-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
-
-import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
-import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
 
 import {
   getFieldType,
@@ -33,8 +34,10 @@ import {
   UseIndexDataReturnType,
   getProcessedFields,
   getCombinedRuntimeMappings,
-} from '../../../../components/data_grid';
+} from '@kbn/ml-data-grid';
+
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
+
 import { ml } from '../../../../services/ml_api_service';
 
 type IndexSearchResponse = estypes.SearchResponse;

@@ -9,13 +9,14 @@
 
 import { useMemo } from 'react';
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
-import type { MlEntityField } from '@kbn/ml-anomaly-utils';
-
 import {
+  MlEntityField,
+  type InfluencersFilterQuery,
   type MlAnomalyRecordDoc,
   ML_JOB_ID,
   ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
+
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
   GetStoppedPartitionResult,
@@ -23,7 +24,6 @@ import type {
 } from '../../../../common/types/results';
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import type { PartitionFieldsConfig } from '../../../../common/types/storage';
-import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import type { ExplorerChartsData } from '../../../../common/types/results';
 
 import { useMlKibana } from '../../contexts/kibana';

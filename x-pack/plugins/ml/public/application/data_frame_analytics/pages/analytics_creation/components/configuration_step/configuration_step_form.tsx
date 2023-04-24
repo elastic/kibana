@@ -21,7 +21,11 @@ import { debounce, cloneDeep } from 'lodash';
 import { Query } from '@kbn/data-plugin/common/query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
-import { type RuntimeMappings as RuntimeMappingsType } from '@kbn/ml-anomaly-utils';
+import {
+  isRuntimeMappings,
+  isRuntimeField,
+  type RuntimeMappings as RuntimeMappingsType,
+} from '@kbn/ml-anomaly-utils';
 import {
   type FieldSelectionItem,
   ANALYSIS_CONFIG_TYPE,
@@ -39,10 +43,6 @@ import { useMlContext } from '../../../../../contexts/ml';
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
 
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
-import {
-  isRuntimeMappings,
-  isRuntimeField,
-} from '../../../../../../../common/util/runtime_field_utils';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { Messages } from '../shared';
 import {

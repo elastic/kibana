@@ -8,11 +8,11 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-export function isMultiBucketAggregate(
+export const isMultiBucketAggregate = <TBucket = unknown>(
   arg: unknown
-): arg is estypes.AggregationsMultiBucketAggregateBase {
+): arg is estypes.AggregationsMultiBucketAggregateBase<TBucket> => {
   return isPopulatedObject(arg, ['buckets']);
-}
+};
 
 export const ES_CLIENT_TOTAL_HITS_RELATION: Record<
   Uppercase<estypes.SearchTotalHitsRelation>,

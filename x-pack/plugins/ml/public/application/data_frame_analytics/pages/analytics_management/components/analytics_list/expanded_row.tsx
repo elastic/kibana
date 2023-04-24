@@ -13,7 +13,7 @@ import { EuiProgress, EuiTabbedContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getAnalysisType } from '@kbn/ml-data-frame-analytics-utils';
 
-import { formatHumanReadableDateTimeSeconds } from '../../../../../../../common/util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-anomaly-utils';
 
 import { DataFrameAnalyticsListRow } from './common';
 import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';

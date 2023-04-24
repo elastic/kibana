@@ -15,16 +15,16 @@ import { getFlattenedObject } from '@kbn/std';
 
 import { difference } from 'lodash';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import {
+  formatHumanReadableDateTimeSeconds,
+  ES_CLIENT_TOTAL_HITS_RELATION,
+} from '@kbn/ml-anomaly-utils';
 import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
+import type { RenderCellValue, UseIndexDataReturnType } from '@kbn/ml-data-grid';
 
 import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
 import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';
 
-import {
-  RenderCellValue,
-  UseIndexDataReturnType,
-  ES_CLIENT_TOTAL_HITS_RELATION,
-} from '../../shared_imports';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies } from '../app_dependencies';
@@ -110,7 +110,6 @@ export const useTransformConfigData = (
   const {
     ml: {
       getDataGridSchemaFromESFieldType,
-      formatHumanReadableDateTimeSeconds,
       multiColumnSortFactory,
       getNestedOrEscapedVal,
       useDataGrid,

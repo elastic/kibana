@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuntimeMappings } from '@kbn/ml-anomaly-utils';
+import { isRuntimeMappings, type RuntimeMappings } from '@kbn/ml-anomaly-utils';
 import {
   getAnalysisType,
   isClassificationAnalysis,
@@ -19,7 +19,6 @@ import {
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
-import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
 
 import { defaultSearchQuery } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';

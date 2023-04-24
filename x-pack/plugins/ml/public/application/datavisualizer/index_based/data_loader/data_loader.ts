@@ -9,10 +9,13 @@ import { CoreSetup } from '@kbn/core/public';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-import { type RuntimeMappings, OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
+import {
+  type RuntimeMappings,
+  DEFAULT_SAMPLER_SHARD_SIZE,
+  OMIT_FIELDS,
+} from '@kbn/ml-anomaly-utils';
 import { SavedSearchQuery } from '../../../contexts/ml';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
-import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../common/constants/field_histograms';
 
 import { ml } from '../../../services/ml_api_service';
 import { FieldHistogramRequestConfig } from '../common/request';

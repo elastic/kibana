@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { isRuntimeField } from '../../../common/util/runtime_field_utils';
+import { isRuntimeField } from '@kbn/ml-anomaly-utils';
 
 export const runtimeMappingsSchema = schema.object(
   {},
