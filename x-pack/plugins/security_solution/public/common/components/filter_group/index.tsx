@@ -256,7 +256,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
           title: item.title,
           selectedOptions: item.selectedOptions ?? [],
           existsSelected: item.existsSelected ?? false,
-          exclude: item.existsSelected,
+          exclude: item.exclude,
         })),
       ];
     }

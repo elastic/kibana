@@ -573,4 +573,98 @@ describe(' Filter Group Component ', () => {
       });
     });
   });
+
+  describe('Restore from local storage', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+    it('should restore from localstorage when one of the value is exists and exclude is false', async () => {
+      const savedData = {
+        ...initialInputData,
+        panels: {
+          ...initialInputData.panels,
+          '2': {
+            ...initialInputData.panels['2'],
+            explicitInput: {
+              ...initialInputData.panels['2'].explicitInput,
+              existsSelected: true,
+              exclude: false,
+            },
+          },
+        },
+      };
+
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(savedData));
+
+      render(<TestComponent />);
+
+      await waitFor(() => {
+        expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(5);
+        expect(controlGroupMock.addOptionsListControl.mock.calls[2][1]).toMatchObject(
+          expect.objectContaining({
+            existsSelected: true,
+            exclude: false,
+          })
+        );
+      });
+    });
+    it('should restore from localstorage when one of the value has both exists and exclude true', async () => {
+      const savedData = {
+        ...initialInputData,
+        panels: {
+          ...initialInputData.panels,
+          '2': {
+            ...initialInputData.panels['2'],
+            explicitInput: {
+              ...initialInputData.panels['2'].explicitInput,
+              existsSelected: true,
+              exclude: true,
+            },
+          },
+        },
+      };
+
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(savedData));
+
+      render(<TestComponent />);
+
+      await waitFor(() => {
+        expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(5);
+        expect(controlGroupMock.addOptionsListControl.mock.calls[2][1]).toMatchObject(
+          expect.objectContaining({
+            existsSelected: true,
+            exclude: true,
+          })
+        );
+      });
+    });
+    it('should restore from localstorage when some value has selected options', async () => {
+      const savedData = {
+        ...initialInputData,
+        panels: {
+          ...initialInputData.panels,
+          '2': {
+            ...initialInputData.panels['2'],
+            explicitInput: {
+              ...initialInputData.panels['2'].explicitInput,
+              selectedOptions: ['abc'],
+            },
+          },
+        },
+      };
+
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(savedData));
+
+      render(<TestComponent />);
+
+      await waitFor(() => {
+        expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(5);
+        expect(controlGroupMock.addOptionsListControl.mock.calls[2][1]).toMatchObject(
+          expect.objectContaining({
+            selectedOptions: ['abc'],
+          })
+        );
+      });
+    });
+  });
 });
