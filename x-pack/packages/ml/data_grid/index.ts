@@ -18,9 +18,22 @@ export {
   getProcessedFields,
   INIT_MAX_COLUMNS,
 } from './src/common';
-export { getFieldType } from './src/use_column_chart';
-export { useDataGrid } from './src/use_data_grid';
+
 export { DataGrid } from './src/data_grid';
+
+export {
+  isNumericChartData,
+  isOrdinalChartData,
+  isUnsupportedChartData,
+  type ChartData,
+  type ChartDataItem,
+  type NumericChartData,
+  type NumericDataItem,
+  type OrdinalChartData,
+  type OrdinalDataItem,
+  type UnsupportedChartData,
+} from './src/field_histograms';
+
 export type {
   DataGridItem,
   EsSorting,
@@ -29,3 +42,7 @@ export type {
   UseDataGridReturnType,
   UseIndexDataReturnType,
 } from './src/types';
+
+export { getFieldType } from './src/use_column_chart';
+
+export { useDataGrid } from './src/use_data_grid';
