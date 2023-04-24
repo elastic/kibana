@@ -32,12 +32,19 @@ export function RuleSnoozeBadge({
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
   const isLoading = !snoozeSettings;
-  const rule = useMemo(() => {
-    return {
-      ...snoozeSettings,
+  const rule = useMemo(
+    () => ({
+      id: snoozeSettings?.id ?? '',
+      muteAll: snoozeSettings?.muteAll ?? false,
+      activeSnoozes: snoozeSettings?.activeSnoozes ?? [],
+      isSnoozedUntil: snoozeSettings?.isSnoozedUntil
+        ? new Date(snoozeSettings.isSnoozedUntil)
+        : undefined,
+      snoozeSchedule: snoozeSettings?.snoozeSchedule,
       isEditable: hasCRUDPermissions,
-    };
-  }, [snoozeSettings, hasCRUDPermissions]);
+    }),
+    [snoozeSettings, hasCRUDPermissions]
+  );
 
   if (error) {
     return (
