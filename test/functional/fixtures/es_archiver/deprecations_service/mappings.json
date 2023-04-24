@@ -82,6 +82,7 @@
             "upgrade-assistant-reindex-operation",
             "uptime-dynamic-settings",
             "uptime-synthetics-api-key",
+            "url",
             "usage-counters",
             "workplace_search_telemetry"
           ],
@@ -145,7 +146,6 @@
             "search",
             "search-session",
             "search-telemetry",
-            "url",
             "visualization"
           ]
         }

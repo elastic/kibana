@@ -13,7 +13,6 @@
     "@kbn/i18n-react",
     "@kbn/config-schema",
     "@kbn/core-custom-branding-browser",
-    "@kbn/core-saved-objects-server",
   ],
   "exclude": [
     "target/**/*",
