@@ -223,6 +223,20 @@ export function buildCustomUrlFromSettings(settings: CustomUrlSettings): Promise
   }
 }
 
+function getUrlRangeFromSettings(settings: CustomUrlSettings) {
+  let customStart;
+  let customEnd;
+
+  if (settings.customTimeRange && settings.customTimeRange.start && settings.customTimeRange.end) {
+    customStart = settings.customTimeRange.start.toISOString();
+    customEnd = settings.customTimeRange.end.toISOString();
+  }
+  return {
+    from: customStart ?? '$earliest$',
+    to: customEnd ?? '$latest$',
+  };
+}
+
 async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promise<UrlConfig> {
   // Get the complete list of attributes for the selected dashboard (query, filters).
   const { dashboardId, queryFieldNames } = settings.kibanaSettings ?? {};
@@ -254,19 +268,14 @@ async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promi
   }
 
   const dashboard = getDashboard();
-  let customStart;
-  let customEnd;
 
-  if (settings.customTimeRange && settings.customTimeRange.start && settings.customTimeRange.end) {
-    customStart = settings.customTimeRange.start.toISOString();
-    customEnd = settings.customTimeRange.end.toISOString();
-  }
+  const { from, to } = getUrlRangeFromSettings(settings);
 
   const location = await dashboard?.locator?.getLocation({
     dashboardId,
     timeRange: {
-      from: customStart ?? '$earliest$',
-      to: customEnd ?? '$latest$',
+      from,
+      to,
       mode: 'absolute',
     },
     filters,
@@ -308,18 +317,12 @@ function buildDiscoverUrlFromSettings(settings: CustomUrlSettings) {
   // Add time settings to the global state URL parameter with $earliest$ and
   // $latest$ tokens which get substituted for times around the time of the
   // anomaly on which the URL will be run against.
-  let customStart;
-  let customEnd;
-
-  if (settings.customTimeRange && settings.customTimeRange.start && settings.customTimeRange.end) {
-    customStart = settings.customTimeRange.start.toISOString();
-    customEnd = settings.customTimeRange.end.toISOString();
-  }
+  const { from, to } = getUrlRangeFromSettings(settings);
 
   const _g = rison.encode({
     time: {
-      from: customStart ?? '$earliest$',
-      to: customEnd ?? '$latest$',
+      from,
+      to,
       mode: 'absolute',
     },
   });

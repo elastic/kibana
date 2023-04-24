@@ -33,8 +33,7 @@ export const CustomTimeRangePicker: FC<CustomUrlTimeRangePickerProps> = ({
   onCustomTimeRangeChange,
   customTimeRange,
 }) => {
-  const [showCustomTimeRangeSelector, setShowCustomTimeRangeSelectorked1] =
-    useState<boolean>(false);
+  const [showCustomTimeRangeSelector, setShowCustomTimeRangeSelector] = useState<boolean>(false);
   const {
     services: {
       data: {
@@ -45,14 +44,12 @@ export const CustomTimeRangePicker: FC<CustomUrlTimeRangePickerProps> = ({
     },
   } = useMlKibana();
 
-  const onCustomTimeRangeSwitchChange = (e: {
-    target: { checked: React.SetStateAction<boolean> };
-  }) => {
-    if (e.target.checked === false) {
+  const onCustomTimeRangeSwitchChange = (checked: boolean) => {
+    if (checked === false) {
       // Clear the custom time range so it isn't persisted
       onCustomTimeRangeChange(undefined);
     }
-    setShowCustomTimeRangeSelectorked1(e.target.checked);
+    setShowCustomTimeRangeSelector(checked);
   };
 
   // If the custom time range is not set, default to the timefilter settings
@@ -106,7 +103,7 @@ export const CustomTimeRangePicker: FC<CustomUrlTimeRangePickerProps> = ({
                 />
               }
               checked={showCustomTimeRangeSelector}
-              onChange={onCustomTimeRangeSwitchChange}
+              onChange={(e) => onCustomTimeRangeSwitchChange(e.target.checked)}
               compressed
             />
           </EuiFormRow>

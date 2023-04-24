@@ -30,7 +30,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { CustomUrlSettings, isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
 import { type DataFrameAnalyticsConfig } from '../../../../../common/types/data_frame_analytics';
-import { Job } from '../../../../../common/types/anomaly_detection_jobs';
+import { type Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 import { TIME_RANGE_TYPE, TimeRangeType, URL_TYPE } from './constants';
 import { UrlConfig } from '../../../../../common/types/custom_urls';
