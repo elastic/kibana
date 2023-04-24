@@ -9,6 +9,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
+import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
 import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
@@ -29,9 +30,10 @@ import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createEditModeActionDefinition } from '@kbn/embeddable-plugin/public/lib/test_samples';
 
-import { buildMockDashboard, getSampleDashboardPanel } from '../../mocks';
+import { buildMockDashboard, getSampleDashboardInput, getSampleDashboardPanel } from '../../mocks';
 import { pluginServices } from '../../services/plugin_services';
 import { ApplicationStart } from '@kbn/core-application-browser';
+import { DashboardContainer } from './dashboard_container';
 
 const theme = coreMock.createStart().theme;
 let application: ApplicationStart | undefined;
@@ -167,6 +169,20 @@ test('Container view mode change propagates to new children', async () => {
   container.updateInput({ viewMode: ViewMode.EDIT });
 
   expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
+});
+
+test('searchSessionId propagates to children', async () => {
+  const searchSessionId1 = 'searchSessionId1';
+  const container = new DashboardContainer(getSampleDashboardInput(), mockedReduxEmbeddablePackage, searchSessionId1);
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Bob',
+  });
+
+  expect(embeddable.getInput().searchSessionId).toBe(searchSessionId1);
 });
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
