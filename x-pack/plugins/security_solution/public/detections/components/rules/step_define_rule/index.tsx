@@ -90,7 +90,7 @@ import { GroupByFields } from '../group_by_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
 import {
   minimumLicenseForSuppression,
-  AlertSuppressionMissingFieldsStrategy,
+  // AlertSuppressionMissingFieldsStrategy,
 } from '../../../../../common/detection_engine/rule_schema';
 import { DurationInput } from '../duration_input';
 
@@ -576,11 +576,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         idSelected={suppressionMissingFields.value}
         options={[
           {
-            id: AlertSuppressionMissingFieldsStrategy.Suppress,
+            //   id: AlertSuppressionMissingFieldsStrategy.Suppress,
+            id: 'suppress',
             label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS_OPTION,
           },
           {
-            id: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+            // id: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+            id: 'doNotSuppress',
             label: i18n.ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION,
           },
         ]}

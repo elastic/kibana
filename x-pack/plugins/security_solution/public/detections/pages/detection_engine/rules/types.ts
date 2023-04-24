@@ -33,7 +33,6 @@ import type {
   RuleNameOverride,
   SetupGuide,
   TimestampOverride,
-  AlertSuppressionMissingFieldsStrategy,
 } from '../../../../../common/detection_engine/rule_schema';
 import type { SortOrder } from '../../../../../common/detection_engine/schemas/common';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -177,7 +176,7 @@ export interface DefineStepRule {
   groupByFields: string[];
   groupByRadioSelection: GroupByOptions;
   groupByDuration: Duration;
-  suppressionMissingFields?: AlertSuppressionMissingFieldsStrategy;
+  suppressionMissingFields?: 'doNotSuppress' | 'suppress';
 }
 
 export interface Duration {
