@@ -8,7 +8,7 @@
 import { LogicMounter } from '../../../../__mocks__/kea_logic';
 import { connectorIndex } from '../../../__mocks__/view_index.mock';
 
-import { ConnectorStatus } from '../../../../../../common/types/connectors';
+import { ConnectorStatus, DisplayType } from '../../../../../../common/types/connectors';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 import { CachedFetchIndexApiLogic } from '../../../api/index/cached_fetch_index_api_logic';
@@ -50,58 +50,298 @@ describe('ConnectorConfigurationLogic', () => {
     it('should set config and isEditing on apiSuccess', () => {
       ConnectorConfigurationLogic.actions.setIsEditing(true);
       ConnectorConfigurationApiLogic.actions.apiSuccess({
-        configuration: { foo: { label: 'newBar', value: 'oldBar' } },
+        configuration: {
+          foo: {
+            default_value: '',
+            depends_on: [],
+            display: DisplayType.TEXTBOX,
+            label: 'newBar',
+            options: [],
+            order: 1,
+            required: false,
+            sensitive: false,
+            tooltip: '',
+            ui_restrictions: [],
+            value: 'oldBar',
+          },
+        },
         indexName: 'indexName',
       });
       expect(ConnectorConfigurationLogic.values).toEqual({
         ...DEFAULT_VALUES,
-        configState: { foo: { label: 'newBar', value: 'oldBar' } },
-        configView: [{ isPasswordField: false, key: 'foo', label: 'newBar', value: 'oldBar' }],
+        configState: {
+          foo: {
+            default_value: '',
+            depends_on: [],
+            display: DisplayType.TEXTBOX,
+            label: 'newBar',
+            options: [],
+            order: 1,
+            required: false,
+            sensitive: false,
+            tooltip: '',
+            ui_restrictions: [],
+            value: 'oldBar',
+          },
+        },
+        configView: [
+          {
+            default_value: '',
+            depends_on: [],
+            display: DisplayType.TEXTBOX,
+            key: 'foo',
+            label: 'newBar',
+            options: [],
+            order: 1,
+            required: false,
+            sensitive: false,
+            tooltip: '',
+            ui_restrictions: [],
+            value: 'oldBar',
+          },
+        ],
       });
     });
     it('should set config on setConfigState', () => {
       ConnectorConfigurationLogic.actions.setConfigState({
-        foo: { label: 'thirdBar', value: 'fourthBar' },
+        foo: {
+          default_value: '',
+          depends_on: [],
+          display: DisplayType.TEXTBOX,
+          label: 'thirdBar',
+          options: [],
+          order: 1,
+          required: false,
+          sensitive: false,
+          tooltip: '',
+          ui_restrictions: [],
+          value: 'fourthBar',
+        },
       });
       expect(ConnectorConfigurationLogic.values).toEqual({
         ...DEFAULT_VALUES,
-        configState: { foo: { label: 'thirdBar', value: 'fourthBar' } },
-        configView: [{ isPasswordField: false, key: 'foo', label: 'thirdBar', value: 'fourthBar' }],
+        configState: {
+          foo: {
+            default_value: '',
+            depends_on: [],
+            display: DisplayType.TEXTBOX,
+            label: 'thirdBar',
+            options: [],
+            order: 1,
+            required: false,
+            sensitive: false,
+            tooltip: '',
+            ui_restrictions: [],
+            value: 'fourthBar',
+          },
+        },
+        configView: [
+          {
+            default_value: '',
+            depends_on: [],
+            display: DisplayType.TEXTBOX,
+            key: 'foo',
+            label: 'thirdBar',
+            options: [],
+            order: 1,
+            required: false,
+            sensitive: false,
+            tooltip: '',
+            ui_restrictions: [],
+            value: 'fourthBar',
+          },
+        ],
       });
     });
     describe('setLocalConfigEntry', () => {
       it('should set local config entry and sort keys', () => {
         ConnectorConfigurationLogic.actions.setConfigState({
-          bar: { label: 'foo', value: 'foofoo' },
-          password: { label: 'thirdBar', value: 'fourthBar' },
+          bar: {
+            default_value: '',
+            depends_on: [],
+            display: DisplayType.TEXTBOX,
+            label: 'foo',
+            options: [],
+            order: 1,
+            required: false,
+            sensitive: false,
+            tooltip: '',
+            ui_restrictions: [],
+            value: 'foofoo',
+          },
+          password: {
+            default_value: '',
+            depends_on: [],
+            display: DisplayType.TEXTBOX,
+            label: 'thirdBar',
+            options: [],
+            order: 2,
+            required: false,
+            sensitive: true,
+            tooltip: '',
+            ui_restrictions: [],
+            value: 'fourthBar',
+          },
         });
         ConnectorConfigurationLogic.actions.setLocalConfigState({
-          bar: { label: 'foo', value: 'foofoo' },
-          password: { label: 'thirdBar', value: 'fourthBar' },
+          bar: {
+            default_value: '',
+            depends_on: [],
+            display: DisplayType.TEXTBOX,
+            label: 'foo',
+            options: [],
+            order: 1,
+            required: false,
+            sensitive: false,
+            tooltip: '',
+            ui_restrictions: [],
+            value: 'foofoo',
+          },
+          password: {
+            default_value: '',
+            depends_on: [],
+            display: DisplayType.TEXTBOX,
+            label: 'thirdBar',
+            options: [],
+            order: 2,
+            required: false,
+            sensitive: true,
+            tooltip: '',
+            ui_restrictions: [],
+            value: 'fourthBar',
+          },
         });
         ConnectorConfigurationLogic.actions.setLocalConfigEntry({
-          isPasswordField: false,
+          default_value: '',
+          depends_on: [],
+          display: DisplayType.TEXTBOX,
           key: 'bar',
           label: 'foo',
+          options: [],
+          order: 1,
+          required: false,
+          sensitive: false,
+          tooltip: '',
+          ui_restrictions: [],
           value: 'fafa',
         });
         expect(ConnectorConfigurationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           configState: {
-            bar: { label: 'foo', value: 'foofoo' },
-            password: { label: 'thirdBar', value: 'fourthBar' },
+            bar: {
+              default_value: '',
+              depends_on: [],
+              display: DisplayType.TEXTBOX,
+              label: 'foo',
+              options: [],
+              order: 1,
+              required: false,
+              sensitive: false,
+              tooltip: '',
+              ui_restrictions: [],
+              value: 'foofoo',
+            },
+            password: {
+              default_value: '',
+              depends_on: [],
+              display: DisplayType.TEXTBOX,
+              label: 'thirdBar',
+              options: [],
+              order: 2,
+              required: false,
+              sensitive: true,
+              tooltip: '',
+              ui_restrictions: [],
+              value: 'fourthBar',
+            },
           },
           configView: [
-            { isPasswordField: false, key: 'bar', label: 'foo', value: 'foofoo' },
-            { isPasswordField: true, key: 'password', label: 'thirdBar', value: 'fourthBar' },
+            {
+              default_value: '',
+              depends_on: [],
+              display: DisplayType.TEXTBOX,
+              key: 'bar',
+              label: 'foo',
+              options: [],
+              order: 1,
+              required: false,
+              sensitive: false,
+              tooltip: '',
+              ui_restrictions: [],
+              value: 'foofoo',
+            },
+            {
+              default_value: '',
+              depends_on: [],
+              display: DisplayType.TEXTBOX,
+              key: 'password',
+              label: 'thirdBar',
+              options: [],
+              order: 2,
+              required: false,
+              sensitive: true,
+              tooltip: '',
+              ui_restrictions: [],
+              value: 'fourthBar',
+            },
           ],
           localConfigState: {
-            bar: { label: 'foo', value: 'fafa' },
-            password: { label: 'thirdBar', value: 'fourthBar' },
+            bar: {
+              default_value: '',
+              depends_on: [],
+              display: DisplayType.TEXTBOX,
+              label: 'foo',
+              options: [],
+              order: 1,
+              required: false,
+              sensitive: false,
+              tooltip: '',
+              ui_restrictions: [],
+              value: 'fafa',
+            },
+            password: {
+              default_value: '',
+              depends_on: [],
+              display: DisplayType.TEXTBOX,
+              label: 'thirdBar',
+              options: [],
+              order: 2,
+              required: false,
+              sensitive: true,
+              tooltip: '',
+              ui_restrictions: [],
+              value: 'fourthBar',
+            },
           },
           localConfigView: [
-            { isPasswordField: false, key: 'bar', label: 'foo', value: 'fafa' },
-            { isPasswordField: true, key: 'password', label: 'thirdBar', value: 'fourthBar' },
+            {
+              default_value: '',
+              depends_on: [],
+              display: DisplayType.TEXTBOX,
+              key: 'bar',
+              label: 'foo',
+              options: [],
+              order: 1,
+              required: false,
+              sensitive: false,
+              tooltip: '',
+              ui_restrictions: [],
+              value: 'fafa',
+            },
+            {
+              default_value: '',
+              depends_on: [],
+              display: DisplayType.TEXTBOX,
+              key: 'password',
+              label: 'thirdBar',
+              options: [],
+              order: 2,
+              required: false,
+              sensitive: true,
+              tooltip: '',
+              ui_restrictions: [],
+              value: 'fourthBar',
+            },
           ],
         });
       });
@@ -112,7 +352,22 @@ describe('ConnectorConfigurationLogic', () => {
         expect(ConnectorConfigurationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           configState: connectorIndex.connector.configuration,
-          configView: [{ isPasswordField: false, key: 'foo', label: 'bar', value: 'barbar' }],
+          configView: [
+            {
+              default_value: '',
+              depends_on: [],
+              display: DisplayType.TEXTBOX,
+              key: 'foo',
+              label: 'bar',
+              options: [],
+              order: 1,
+              required: false,
+              sensitive: false,
+              tooltip: '',
+              ui_restrictions: [],
+              value: 'barbar',
+            },
+          ],
           index: connectorIndex,
         });
       });
@@ -134,14 +389,44 @@ describe('ConnectorConfigurationLogic', () => {
         expect(ConnectorConfigurationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           configState: connectorIndex.connector.configuration,
-          configView: [{ isPasswordField: false, key: 'foo', label: 'bar', value: 'barbar' }],
+          configView: [
+            {
+              default_value: '',
+              depends_on: [],
+              display: DisplayType.TEXTBOX,
+              key: 'foo',
+              label: 'bar',
+              options: [],
+              order: 1,
+              required: false,
+              sensitive: false,
+              tooltip: '',
+              ui_restrictions: [],
+              value: 'barbar',
+            },
+          ],
           index: {
             ...connectorIndex,
             connector: { ...connectorIndex.connector, status: ConnectorStatus.NEEDS_CONFIGURATION },
           },
           isEditing: true,
           localConfigState: connectorIndex.connector.configuration,
-          localConfigView: [{ isPasswordField: false, key: 'foo', label: 'bar', value: 'barbar' }],
+          localConfigView: [
+            {
+              default_value: '',
+              depends_on: [],
+              display: DisplayType.TEXTBOX,
+              key: 'foo',
+              label: 'bar',
+              options: [],
+              order: 1,
+              required: false,
+              sensitive: false,
+              tooltip: '',
+              ui_restrictions: [],
+              value: 'barbar',
+            },
+          ],
           shouldStartInEditMode: true,
         });
       });
@@ -151,7 +436,19 @@ describe('ConnectorConfigurationLogic', () => {
         ConnectorConfigurationLogic.actions.makeRequest = jest.fn();
         ConnectorConfigurationLogic.actions.fetchIndexApiSuccess(connectorIndex);
         ConnectorConfigurationLogic.actions.setLocalConfigState({
-          foo: { label: 'bar', value: 'Barbara' },
+          foo: {
+            default_value: '',
+            depends_on: [],
+            display: DisplayType.TEXTBOX,
+            label: 'bar',
+            options: [],
+            order: 1,
+            required: false,
+            sensitive: true,
+            tooltip: '',
+            ui_restrictions: [],
+            value: 'Barbara',
+          },
         });
         ConnectorConfigurationLogic.actions.saveConfig();
         expect(ConnectorConfigurationLogic.actions.makeRequest).toHaveBeenCalledWith({

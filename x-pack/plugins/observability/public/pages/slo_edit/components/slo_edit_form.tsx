@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import {
   EuiButton,
   EuiCheckbox,
@@ -17,7 +17,8 @@ import {
   EuiSteps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { CreateSLOInput, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
@@ -53,7 +54,17 @@ export function SloEditForm({ slo }: Props) {
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
 
+  const history = useHistory();
   const { search } = useLocation();
+
+  const urlStateStorage = createKbnUrlStateStorage({
+    history,
+    useHash: false,
+    useHashQuery: false,
+  });
+
+  const urlParams = urlStateStorage.get<CreateSLOInput>('_a');
+
   const searchParams = new URLSearchParams(search);
 
   const isEditMode = slo !== undefined;
@@ -66,7 +77,7 @@ export function SloEditForm({ slo }: Props) {
   }
 
   const methods = useForm({
-    defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
+    defaultValues: { ...SLO_EDIT_FORM_DEFAULT_VALUES, ...urlParams },
     values: transformSloResponseToCreateSloInput(slo),
     mode: 'all',
   });

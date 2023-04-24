@@ -51,6 +51,7 @@ const DEFAULT_VALUES = {
   ingestionStatus: IngestionStatus.CONNECTED,
   isCanceling: false,
   isConnectorIndex: false,
+  isHiddenIndex: false,
   isInitialLoading: false,
   isSyncing: false,
   isWaitingForSync: false,

@@ -28,7 +28,7 @@ export const DeleteEngineModal: React.FC<DeleteEngineModalProps> = ({ engineName
   return (
     <EuiConfirmModal
       title={i18n.translate('xpack.enterpriseSearch.content.engineList.deleteEngineModal.title', {
-        defaultMessage: 'Permanently delete this engine?',
+        defaultMessage: 'Permanently delete this search application?',
       })}
       onCancel={onClose}
       onConfirm={() => {
@@ -42,7 +42,7 @@ export const DeleteEngineModal: React.FC<DeleteEngineModalProps> = ({ engineName
       confirmButtonText={i18n.translate(
         'xpack.enterpriseSearch.content.engineList.deleteEngineModal.confirmButton.title',
         {
-          defaultMessage: 'Yes, delete this engine ',
+          defaultMessage: 'Yes, delete this search application',
         }
       )}
       buttonColor="danger"
@@ -53,7 +53,7 @@ export const DeleteEngineModal: React.FC<DeleteEngineModalProps> = ({ engineName
           'xpack.enterpriseSearch.content.engineList.deleteEngineModal.delete.description',
           {
             defaultMessage:
-              'Deleting your engine is not a reversible action. Your indices will not be affected. ',
+              'Deleting your search application is not a reversible action. Your indices will not be affected. ',
           }
         )}
       </p>

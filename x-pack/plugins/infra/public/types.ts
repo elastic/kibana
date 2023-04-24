@@ -27,12 +27,17 @@ import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
 // import type { OsqueryPluginStart } from '../../osquery/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { type TypedLensByValueInput, LensPublicStart } from '@kbn/lens-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -65,6 +70,7 @@ export interface InfraClientStartExports {
 export interface InfraClientSetupDeps {
   home?: HomePublicPluginSetup;
   observability: ObservabilityPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   ml: MlPluginSetup;
@@ -78,10 +84,12 @@ export interface InfraClientStartDeps {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  discover: DiscoverStart;
   embeddable?: EmbeddableStart;
   lens: LensPublicStart;
   ml: MlPluginStart;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   osquery?: unknown; // OsqueryPluginStart;
   share: SharePluginStart;
   spaces: SpacesPluginStart;
@@ -108,12 +116,6 @@ export interface InfraHttpError extends IHttpFetchError {
     statusCode: number;
     message?: string;
   };
-}
-
-export type LensAttributes = TypedLensByValueInput['attributes'];
-
-export interface LensOptions {
-  breakdownSize: number;
 }
 
 export interface ExecutionTimeRange {
