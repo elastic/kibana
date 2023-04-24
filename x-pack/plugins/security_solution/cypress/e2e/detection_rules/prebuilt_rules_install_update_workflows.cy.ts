@@ -103,7 +103,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     });
   });
 
-  describe.only('Update of prebuilt rules', () => {
+  describe('Update of prebuilt rules', () => {
     const RULE_ID = '111147bb-b27a-47ec-8b62-ef1a5d342e19';
     const RULE_1 = createRuleAssetSavedObject({
       name: 'Outdated rule',
