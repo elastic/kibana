@@ -24,7 +24,10 @@ export const LogsTabContent = () => {
   const { from, to } = useMemo(() => getDateRangeAsTimestamp(), [getDateRangeAsTimestamp]);
   const { hostNodes, loading } = useHostsViewContext();
 
-  const hostsFilterQuery = useMemo(() => createHostsFilter(hostNodes), [hostNodes]);
+  const hostsFilterQuery = useMemo(
+    () => createHostsFilter(hostNodes.map((p) => p.name)),
+    [hostNodes]
+  );
 
   const logsLinkToStreamQuery = useMemo(() => {
     const hostsFilterQueryParam = createHostsFilterQueryParam(hostNodes);

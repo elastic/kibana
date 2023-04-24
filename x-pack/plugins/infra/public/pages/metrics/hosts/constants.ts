@@ -13,6 +13,9 @@ export const ALERT_STATUS_ALL = 'all';
 export const TIMESTAMP_FIELD = '@timestamp';
 export const DATA_VIEW_PREFIX = 'infra_metrics';
 
+export const DEFAULT_PAGE_SIZE = 10;
+export const LOCAL_STORAGE_PAGE_SIZE_KEY = 'hostsView:pageSizeSelection';
+
 export const ALL_ALERTS: AlertStatusFilter = {
   status: ALERT_STATUS_ALL,
   label: i18n.translate('xpack.infra.hostsViewPage.tabs.alerts.alertStatusFilter.showAll', {
