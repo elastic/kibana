@@ -8,6 +8,8 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type * as H from 'history';
+import { createBrowserHistory } from 'history';
 
 import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
@@ -59,13 +61,13 @@ export class CasesUiPlugin
     );
   }
 
-  private async registerActions(core: CoreStart, plugins: CasesPluginStart) {
+  private async registerActions(core: CoreStart, plugins: CasesPluginStart, history: H.History) {
     const { registerActions: registerLoadedActions } = await this.lazyActions();
     const getCreateCaseFlyoutProps = {
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
     };
-    registerLoadedActions(core, plugins, getCreateCaseFlyoutProps);
+    registerLoadedActions(core, plugins, getCreateCaseFlyoutProps, history);
   }
 
   public async setup(core: CoreSetup, plugins: CasesPluginSetup): Promise<CasesUiSetup> {
@@ -76,7 +78,6 @@ export class CasesUiPlugin
 
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     registerCaseFileKinds(config.files, plugins.files);
-
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
         id: APP_ID,
@@ -145,7 +146,7 @@ export class CasesUiPlugin
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
     });
 
-    this.registerActions(core, plugins);
+    this.registerActions(core, plugins, createBrowserHistory());
 
     return {
       api: createClientAPI({ http: core.http }),

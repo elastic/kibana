@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
 import type { Embeddable } from '@kbn/lens-plugin/public';
@@ -82,7 +82,10 @@ export const createAddToNewCaseLensAction = ({
         },
       ];
 
-      const Flyout = () => {
+      const node = document.createElement('div');
+      document.body.appendChild(node);
+
+      const DashboardViewAddToCaseFlyout = () => {
         const getCasesContext = getCasesContextLazy(getCreateCaseFlyoutProps);
         const CasesContext = getCasesContext();
 
@@ -94,6 +97,10 @@ export const createAddToNewCaseLensAction = ({
                 defaultMessage: 'Successfully added visualization to the case',
               }
             ),
+            onClose: () => {
+              unmountComponentAtNode(node);
+              document.body.removeChild(node);
+            },
           });
 
           createCaseFlyout.open({ attachments });
@@ -112,10 +119,7 @@ export const createAddToNewCaseLensAction = ({
         );
       };
 
-      Flyout.displayName = 'Flyout';
-
-      const node = document.createElement('div');
-      document.body.appendChild(node);
+      DashboardViewAddToCaseFlyout.displayName = 'DashboardViewAddToCaseFlyout';
 
       const element = (
         <KibanaContextProvider
@@ -129,13 +133,12 @@ export const createAddToNewCaseLensAction = ({
         >
           <KibanaThemeProvider theme$={theme.theme$}>
             <EuiThemeProvider darkMode={uiSettings.get(DEFAULT_DARK_MODE)}>
-              <Flyout />
+              <DashboardViewAddToCaseFlyout />
             </EuiThemeProvider>
           </KibanaThemeProvider>
         </KibanaContextProvider>
       );
       ReactDOM.render(element, node);
-      console.log('add to new case');
     },
   });
 };
