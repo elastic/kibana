@@ -87,7 +87,7 @@ jest.mock('react-router-dom', () => {
 });
 
 // RuleDetailsSnoozeSettings is an isolated component and not essential for existing tests
-jest.mock('../../../components/rule_snooze_badge', () => ({
+jest.mock('../../../rule_management/components/rule_snooze_badge', () => ({
   RuleSnoozeBadge: () => <></>,
 }));
 
