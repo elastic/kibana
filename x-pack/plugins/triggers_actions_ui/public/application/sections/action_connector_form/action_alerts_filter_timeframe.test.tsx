@@ -17,7 +17,7 @@ jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
 }));
 
 describe('action_alerts_filter_timeframe', () => {
-  async function setup(timeframe: AlertsFilterTimeframe | null) {
+  async function setup(timeframe?: AlertsFilterTimeframe) {
     const wrapper = mountWithIntl(
       <ActionAlertsFilterTimeframe state={timeframe} onChange={() => {}} />
     );
@@ -32,7 +32,7 @@ describe('action_alerts_filter_timeframe', () => {
   }
 
   it('renders an unchecked switch when passed a null timeframe', async () => {
-    const wrapper = await setup(null);
+    const wrapper = await setup();
 
     const alertsFilterTimeframeToggle = wrapper.find(
       '[data-test-subj="alertsFilterTimeframeToggle"]'
