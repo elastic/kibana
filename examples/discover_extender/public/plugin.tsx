@@ -8,9 +8,7 @@
 
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiContextMenu,
-  EuiDataGridCellValueElementProps,
   EuiPopover,
   EuiScreenReaderOnly,
   EuiWrappingPopover,
@@ -39,7 +37,7 @@ export class DiscoverExtenderPlugin implements Plugin {
       isOptionsOpen = false;
     };
 
-    discover.registerExtensions(({ extensions, stateContainer }) => {
+    discover.registerExtensions(async ({ extensions, stateContainer }) => {
       extensions.set({
         id: 'top_nav',
         defaultMenu: {
@@ -196,55 +194,7 @@ export class DiscoverExtenderPlugin implements Plugin {
         ),
       });
 
-      const MoreMenuCell = ({ setCellProps }: EuiDataGridCellValueElementProps) => {
-        const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-        const togglePopover = () => setIsPopoverOpen((open) => !open);
-        const closePopover = () => setIsPopoverOpen(false);
-
-        useEffect(() => {
-          setCellProps({
-            style: {
-              padding: 0,
-            },
-          });
-        }, [setCellProps]);
-
-        return (
-          <EuiPopover
-            button={
-              <EuiButtonIcon color="text" iconType="boxesHorizontal" onClick={togglePopover} />
-            }
-            isOpen={isPopoverOpen}
-            anchorPosition="rightCenter"
-            panelPaddingSize="none"
-            closePopover={closePopover}
-          >
-            <EuiContextMenu
-              size="s"
-              initialPanelId={0}
-              panels={[
-                {
-                  id: 0,
-                  items: [
-                    {
-                      name: 'Show host details',
-                      onClick: () => alert('Show host details clicked'),
-                    },
-                    {
-                      name: 'Create rule',
-                      onClick: () => alert('Create rule clicked'),
-                    },
-                    {
-                      name: 'Create SLO',
-                      onClick: () => alert('Create SLO clicked'),
-                    },
-                  ],
-                },
-              ]}
-            />
-          </EuiPopover>
-        );
-      };
+      const { MoreMenuCell } = await import('./more_menu_cell');
 
       extensions.set({
         id: 'data_grid',
@@ -266,6 +216,7 @@ export class DiscoverExtenderPlugin implements Plugin {
       });
 
       return () => {
+        // eslint-disable-next-line no-console
         console.log('Cleaning up Discover extensions');
       };
     });
