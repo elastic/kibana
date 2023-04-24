@@ -12,8 +12,11 @@ import { parseSearchString } from './helpers';
 const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 
 export interface LogsLocatorParams extends SerializableRecord {
+  /** Defines log position */
   time: number;
+  /** Defines from timestamp, defaults to one hour before time property */
   from?: number;
+  /** Defines to timestamp, defaults to one hour after time property */
   to?: number;
   filter?: string;
   logViewId?: string;
