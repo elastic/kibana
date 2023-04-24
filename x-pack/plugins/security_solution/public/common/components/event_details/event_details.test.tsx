@@ -255,9 +255,7 @@ describe('EventDetails', () => {
       ) as ReactWrapper;
       await waitFor(() => wrapper.update());
 
-      expect(alertsWrapper.find('[data-test-subj="osqueryViewTab"]').exists()).toEqual(
-        true
-      );
+      expect(alertsWrapper.find('[data-test-subj="osqueryViewTab"]').exists()).toEqual(true);
     });
   });
 });
