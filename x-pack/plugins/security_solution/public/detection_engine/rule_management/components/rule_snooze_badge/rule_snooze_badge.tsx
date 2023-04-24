@@ -7,6 +7,7 @@
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import type { RuleObjectId } from '../../../../../common/detection_engine/rule_schema';
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -17,16 +18,16 @@ interface RuleSnoozeBadgeProps {
   /**
    * Rule's SO id (not ruleId)
    */
-  id: string;
+  ruleId: RuleObjectId;
   showTooltipInline?: boolean;
 }
 
 export function RuleSnoozeBadge({
-  id,
+  ruleId,
   showTooltipInline = false,
 }: RuleSnoozeBadgeProps): JSX.Element {
   const RulesListNotifyBadge = useKibana().services.triggersActionsUi.getRulesListNotifyBadge;
-  const { snoozeSettings, error } = useRuleSnoozeSettings(id);
+  const { snoozeSettings, error } = useRuleSnoozeSettings(ruleId);
   const [{ canUserCRUD }] = useUserData();
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();

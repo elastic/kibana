@@ -8,14 +8,15 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import type { RuleObjectId } from '../../../../../common/detection_engine/rule_schema';
 import { RuleSnoozeBadge } from '../../../../detection_engine/rule_management/components/rule_snooze_badge';
 import * as i18n from './translations';
 
 interface RuleSnoozeSectionProps {
-  id: string; // Rule SO's id (not ruleId)
+  ruleId: RuleObjectId; // Rule SO's id (not ruleId)
 }
 
-export function RuleSnoozeSection({ id }: RuleSnoozeSectionProps): JSX.Element {
+export function RuleSnoozeSection({ ruleId }: RuleSnoozeSectionProps): JSX.Element {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -28,7 +29,7 @@ export function RuleSnoozeSection({ id }: RuleSnoozeSectionProps): JSX.Element {
         `}
       >
         <EuiFlexItem grow={false}>
-          <RuleSnoozeBadge id={id} showTooltipInline />
+          <RuleSnoozeBadge ruleId={ruleId} showTooltipInline />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">
