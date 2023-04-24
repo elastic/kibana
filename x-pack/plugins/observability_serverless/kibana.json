@@ -1,0 +1,15 @@
+{
+    "id": "observabilityServerless",
+    "version": "1.0.0",
+    "kibanaVersion": "kibana",
+    "owner": {
+      "name": "Observability",
+      "githubTeam": ""
+    },
+    "description": "Serverless functionality",
+    "server": true,
+    "ui": false,
+    "requiredPlugins": ["navigation"],
+    "optionalPlugins": []
+  }
+  
