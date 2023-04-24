@@ -36,7 +36,6 @@ import type {
   RequiredFieldArray,
   Threshold,
 } from '../../../../../common/detection_engine/rule_schema';
-import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/detection_engine/rule_schema';
 
 import * as i18n from './translations';
 import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
@@ -566,7 +565,7 @@ export const buildAlertSuppressionWindowDescription = (
 
 export const buildAlertSuppressionMissingFieldsDescription = (
   label: string,
-  value: AlertSuppressionMissingFieldsStrategy,
+  value: 'suppress' | 'doNotSuppress',
   license: LicenseService
 ): ListItems[] => {
   if (isEmpty(value)) {
@@ -574,7 +573,7 @@ export const buildAlertSuppressionMissingFieldsDescription = (
   }
 
   const description =
-    value === AlertSuppressionMissingFieldsStrategy.Suppress
+    value === 'suppress'
       ? i18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
       : i18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 
