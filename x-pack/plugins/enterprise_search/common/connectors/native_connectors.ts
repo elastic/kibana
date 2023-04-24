@@ -295,7 +295,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslCertificateLabel',
           {
-            defaultMessage: 'SSL enabled',
+            defaultMessage: 'SSL certificate',
           }
         ),
         options: [],
