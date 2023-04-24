@@ -6,3 +6,4 @@
  */
 
 export * from './inventory_views/v1';
+export * from './metrics_explorer_views/v1';
