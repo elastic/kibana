@@ -22,6 +22,7 @@ import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_s
 import { UserDetailsLink } from '../../../../common/components/links';
 import { UsersTableType } from '../../store/model';
 import { ENTITY_RISK_CLASSIFICATION } from '../../../components/risk_score/translations';
+import { CELL_ACTIONS_TELEMETRY } from '../../../components/risk_score/constants';
 
 export const getUserRiskScoreColumns = ({
   dispatchSeverityUpdate,
@@ -40,7 +41,7 @@ export const getUserRiskScoreColumns = ({
         return (
           <SecurityCellActions
             key={id}
-            mode={CellActionsMode.HOVER}
+            mode={CellActionsMode.HOVER_DOWN}
             visibleCellActions={5}
             showActionTooltips
             triggerId={SecurityCellActionsTrigger.DEFAULT}
@@ -49,6 +50,9 @@ export const getUserRiskScoreColumns = ({
               value: userName,
               type: 'keyword',
               aggregatable: true,
+            }}
+            metadata={{
+              telemetry: CELL_ACTIONS_TELEMETRY,
             }}
           >
             <UserDetailsLink userName={userName} userTab={UsersTableType.risk} />

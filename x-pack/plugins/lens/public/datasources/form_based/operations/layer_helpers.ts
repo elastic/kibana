@@ -836,12 +836,16 @@ export function replaceColumn({
       { ...layer, columns: { ...layer.columns, [columnId]: newColumn } },
       columnId
     );
-    return adjustColumnReferencesForChangedColumn(
-      {
-        ...newLayer,
-        columnOrder: getColumnOrder(newLayer),
-      },
-      columnId
+
+    return updateDefaultLabels(
+      adjustColumnReferencesForChangedColumn(
+        {
+          ...newLayer,
+          columnOrder: getColumnOrder(newLayer),
+        },
+        columnId
+      ),
+      indexPattern
     );
   } else if (operationDefinition.input === 'managedReference') {
     // Just changing a param in a formula column should trigger
