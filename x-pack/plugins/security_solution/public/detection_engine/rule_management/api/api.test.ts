@@ -791,6 +791,9 @@ describe('Detections Rules API', () => {
   describe('fetchRulesSnoozeSettings', () => {
     beforeEach(() => {
       fetchMock.mockClear();
+      fetchMock.mockResolvedValue({
+        data: [],
+      });
     });
 
     test('requests snooze settings of multiple rules by their IDs', () => {
@@ -835,6 +838,39 @@ describe('Detections Rules API', () => {
           }),
         })
       );
+    });
+
+    test('returns mapped data', async () => {
+      fetchMock.mockResolvedValue({
+        data: [
+          {
+            id: '1',
+            mute_all: false,
+          },
+          {
+            id: '1',
+            mute_all: false,
+            active_snoozes: [],
+            is_snoozed_until: '2023-04-24T19:31:46.765Z',
+          },
+        ],
+      });
+
+      const result = await fetchRulesSnoozeSettings({ ids: ['id1'] });
+
+      expect(result).toEqual([
+        {
+          id: '1',
+          muteAll: false,
+          activeSnoozes: [],
+        },
+        {
+          id: '1',
+          muteAll: false,
+          activeSnoozes: [],
+          isSnoozedUntil: new Date('2023-04-24T19:31:46.765Z'),
+        },
+      ]);
     });
   });
 });

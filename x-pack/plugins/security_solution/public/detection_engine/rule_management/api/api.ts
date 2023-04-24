@@ -57,7 +57,8 @@ import type {
   PrePackagedRulesStatusResponse,
   PreviewRulesProps,
   Rule,
-  RulesSnoozeSettingsResponse,
+  RuleSnoozeSettings,
+  RulesSnoozeSettingsBatchResponse,
   UpdateRulesProps,
 } from '../logic/types';
 import { convertRulesFilterToKQL } from '../logic/utils';
@@ -197,8 +198,8 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
 export const fetchRulesSnoozeSettings = async ({
   ids,
   signal,
-}: FetchRuleSnoozingProps): Promise<RulesSnoozeSettingsResponse> =>
-  KibanaServices.get().http.fetch<RulesSnoozeSettingsResponse>(
+}: FetchRuleSnoozingProps): Promise<RuleSnoozeSettings[]> => {
+  const response = await KibanaServices.get().http.fetch<RulesSnoozeSettingsBatchResponse>(
     INTERNAL_ALERTING_API_FIND_RULES_PATH,
     {
       method: 'GET',
@@ -210,6 +211,15 @@ export const fetchRulesSnoozeSettings = async ({
       signal,
     }
   );
+
+  return response.data?.map((x) => ({
+    id: x?.id ?? '',
+    muteAll: x?.mute_all ?? false,
+    activeSnoozes: x?.active_snoozes ?? [],
+    isSnoozedUntil: x?.is_snoozed_until ? new Date(x.is_snoozed_until) : undefined,
+    snoozeSchedule: x?.snooze_schedule,
+  }));
+};
 
 export interface BulkActionSummary {
   failed: number;

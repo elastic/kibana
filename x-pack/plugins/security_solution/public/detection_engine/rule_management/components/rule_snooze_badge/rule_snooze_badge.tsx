@@ -34,13 +34,7 @@ export function RuleSnoozeBadge({
   const isLoading = !snoozeSettings;
   const rule = useMemo(() => {
     return {
-      id: snoozeSettings?.id ?? '',
-      muteAll: snoozeSettings?.mute_all ?? false,
-      activeSnoozes: snoozeSettings?.active_snoozes ?? [],
-      isSnoozedUntil: snoozeSettings?.is_snoozed_until
-        ? new Date(snoozeSettings.is_snoozed_until)
-        : undefined,
-      snoozeSchedule: snoozeSettings?.snooze_schedule,
+      ...snoozeSettings,
       isEditable: hasCRUDPermissions,
     };
   }, [snoozeSettings, hasCRUDPermissions]);
