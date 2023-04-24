@@ -35,8 +35,10 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getSchema } from './get_schema';
 import * as I18n from './translations';
 import { APP_UI_ID } from '../../../../../common/constants';
+import { RuleSnoozeSection } from './rule_snooze_section';
 
 interface StepRuleActionsProps extends RuleStepProps {
+  id?: string; // Rule SO's id (not ruleId)
   defaultValues?: ActionsStepRule | null;
   actionMessageParams: ActionVariables;
   ruleType?: Type;
@@ -68,6 +70,7 @@ const DisplayActionsHeader = () => {
 };
 
 const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
+  id,
   addPadding = false,
   defaultValues,
   isReadOnlyView,
@@ -166,9 +169,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     return application.capabilities.actions.show ? (
       <>
         <DisplayActionsHeader />
+        {id && <RuleSnoozeSection id={id} />}
         {displayActionsOptions}
         {responseActionsEnabled && displayResponseActionsOptions}
-
         <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
         <UseField path="enabled" component={GhostFormField} />
       </>
@@ -178,6 +181,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       </>
     );
   }, [
+    id,
     application.capabilities.actions.show,
     displayActionsOptions,
     displayResponseActionsOptions,
