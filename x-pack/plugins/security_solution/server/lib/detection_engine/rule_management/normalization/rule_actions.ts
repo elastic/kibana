@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import type { RuleActionFrequency, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
 
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -13,6 +13,38 @@ import {
 } from '../../../../../common/constants';
 
 import type { RuleAlertType } from '../../rule_schema';
+
+export const transformToFrequency = (throttle: string | null | undefined): RuleActionFrequency => {
+  return {
+    summary: true,
+    notifyWhen: transformToNotifyWhen(throttle) ?? 'onActiveAlert',
+    throttle: transformToAlertThrottle(throttle),
+  };
+};
+
+interface ActionWithFrequency {
+  frequency?: RuleActionFrequency;
+}
+
+/**
+ * The action level `frequency` attribute should always take precedence over the rule level `throttle`
+ * Frequency's default value is `{ summary: true, throttle: null, notifyWhen: 'onActiveAlert' }`
+ *
+ * The transformation follows the next rules:
+ * - Both rule level `throttle` and all actions have `frequency` are set: we will ignore rule level `throttle`
+ * - Rule level `throttle` set and actions don't have `frequency` set: we will transform rule level `throttle` in action level `frequency`
+ * - All actions have `frequency` set: do nothing
+ * - Neither of them is set: we will set action level `frequency` to default value
+ * - Rule level `throttle` and some of the actions have `frequency` set: we will transform rule level `throttle` and set it to actions without the frequency attribute
+ * - Only some actions have `frequency` set and there is no rule level `throttle`: we will set default `frequency` to actions without frequency attribute
+ */
+export const transformToActionFrequency = <T extends ActionWithFrequency>(
+  actions: T[],
+  throttle: string | null | undefined
+): T[] => {
+  const defaultFrequency = transformToFrequency(throttle);
+  return actions.map((action) => ({ ...action, frequency: action.frequency ?? defaultFrequency }));
+};
 
 /**
  * Given a throttle from a "security_solution" rule this will transform it into an "alerting" notifyWhen

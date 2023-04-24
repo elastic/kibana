@@ -16,6 +16,11 @@ import {
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiSpacer,
+  EuiCode,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
 } from '@elastic/eui';
 
 import useObservable from 'react-use/lib/useObservable';
@@ -30,6 +35,7 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
   const { guidedOnboardingApi } = guidedOnboarding;
 
   const [isTourStepOpen, setIsTourStepOpen] = useState<boolean>(false);
+  const [indexName, setIndexName] = useState('test1234');
 
   const isTourActive = useObservable(
     guidedOnboardingApi!.isGuideStepActive$('testGuide', 'step1'),
@@ -59,30 +65,59 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
               Test guide, step 1, a EUI tour will be displayed, pointing to the button below."
             />
           </p>
+          <p>
+            <FormattedMessage
+              id="guidedOnboardingExample.guidesSelection.stepOne.dynamicParamsExplanation"
+              defaultMessage="There is also an input field to provide a dynamic parameter {indexName} for step 4."
+              values={{
+                indexName: <EuiCode language="javascript">indexName</EuiCode>,
+              }}
+            />
+          </p>
         </EuiText>
         <EuiSpacer />
-        <EuiTourStep
-          content={
-            <EuiText>
-              <p>Click this button to complete step 1.</p>
-            </EuiText>
-          }
-          isStepOpen={isTourStepOpen}
-          minWidth={300}
-          onFinish={() => setIsTourStepOpen(false)}
-          step={1}
-          stepsTotal={1}
-          title="Step 1"
-          anchorPosition="rightUp"
-        >
-          <EuiButton
-            onClick={async () => {
-              await guidedOnboardingApi?.completeGuideStep('testGuide', 'step1');
-            }}
-          >
-            Complete step 1
-          </EuiButton>
-        </EuiTourStep>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="guidedOnboardingExample.guidesSelection.stepOne.indexNameInputLabel"
+                  defaultMessage="indexName"
+                />
+              }
+            >
+              <EuiFieldText value={indexName} onChange={(e) => setIndexName(e.target.value)} />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiTourStep
+                content={
+                  <EuiText>
+                    <p>Click this button to complete step 1.</p>
+                  </EuiText>
+                }
+                isStepOpen={isTourStepOpen}
+                minWidth={300}
+                onFinish={() => setIsTourStepOpen(false)}
+                step={1}
+                stepsTotal={1}
+                title="Step 1"
+                anchorPosition="rightUp"
+              >
+                <EuiButton
+                  onClick={async () => {
+                    await guidedOnboardingApi?.completeGuideStep('testGuide', 'step1', {
+                      indexName,
+                    });
+                  }}
+                >
+                  Complete step 1
+                </EuiButton>
+              </EuiTourStep>
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPageContentBody>
     </>
   );
