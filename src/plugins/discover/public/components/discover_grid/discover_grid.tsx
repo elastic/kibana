@@ -612,7 +612,7 @@ export const DiscoverGrid = ({
           <p className="dscDiscoverGrid__footer" data-test-subj="discoverTableFooter">
             <FormattedMessage
               id="discover.gridSampleSize.limitDescription"
-              defaultMessage="You're viewing the first {sampleSize} documents that match your search."
+              defaultMessage="Search results are limited to {sampleSize} documents. Add more search terms to narrow your search."
               values={{
                 sampleSize,
               }}
