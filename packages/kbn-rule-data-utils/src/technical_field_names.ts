@@ -85,6 +85,7 @@ const EVENT_MODULE = 'event.module' as const;
 const ALERT_BUILDING_BLOCK_TYPE = `${ALERT_NAMESPACE}.building_block_type` as const;
 const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as const;
 const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
+const ALERT_EVALUATION_VALUES = `${ALERT_NAMESPACE}.evaluation.values` as const;
 
 // Fields pertaining to the rule associated with the alert
 const ALERT_RULE_EXCEPTIONS_LIST = `${ALERT_RULE_NAMESPACE}.exceptions_list` as const;
@@ -125,6 +126,7 @@ const fields = {
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_EVALUATION_VALUES,
   ALERT_FLAPPING,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_INSTANCE_ID,
@@ -192,6 +194,7 @@ export {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_EVALUATION_VALUES,
   ALERT_RULE_EXCEPTIONS_LIST,
   ALERT_RULE_NAMESPACE_FIELD,
   ALERT_THREAT_FRAMEWORK,

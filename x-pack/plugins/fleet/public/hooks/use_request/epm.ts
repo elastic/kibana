@@ -224,6 +224,18 @@ export const sendRemovePackage = (pkgName: string, pkgVersion: string, force: bo
   });
 };
 
+export const sendRequestReauthorizeTransforms = (
+  pkgName: string,
+  pkgVersion: string,
+  transforms: Array<{ transformId: string }>
+) => {
+  return sendRequest<InstallPackageResponse, FleetErrorResponse>({
+    path: epmRouteService.getReauthorizeTransformsPath(pkgName, pkgVersion),
+    method: 'post',
+    body: { transforms },
+  });
+};
+
 interface UpdatePackageArgs {
   pkgName: string;
   pkgVersion: string;
