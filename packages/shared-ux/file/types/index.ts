@@ -255,9 +255,11 @@ export interface FileKindBrowser extends FileKindBase {
    *
    */
   managementUiActions?: {
+    /** Allow files to be listed in management UI */
     list?: {
       enabled: boolean;
     };
+    /** Allow files to be deleted in management UI */
     delete?: {
       enabled: boolean;
       /** If delete is not enabled in management UI, specify the reason (will appear in a tooltip). */
