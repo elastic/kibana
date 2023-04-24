@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './inventory_view';
-export * from './log_view';
-export * from './metrics_explorer_view';
+export {
+  metricsExplorerViewSavedObjectName,
+  metricsExplorerViewSavedObjectType,
+} from './metrics_explorer_view_saved_object';
+export { metricsExplorerViewSavedObjectRT } from './types';

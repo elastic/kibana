@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-export * from './inventory_view';
-export * from './log_view';
-export * from './metrics_explorer_view';
+import type { IInventoryViewsClient } from './types';
+
+export const createInventoryViewsClientMock = (): jest.Mocked<IInventoryViewsClient> => ({
+  delete: jest.fn(),
+  find: jest.fn(),
+  get: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+});

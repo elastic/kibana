@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './inventory_view';
-export * from './log_view';
-export * from './metrics_explorer_view';
+export * from './common';
+export * from './get_inventory_view';
+export * from './find_inventory_view';
+export * from './create_inventory_view';
+export * from './update_inventory_view';
