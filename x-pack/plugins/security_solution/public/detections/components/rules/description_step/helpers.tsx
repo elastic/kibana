@@ -45,15 +45,12 @@ import type {
   AboutStepSeverity,
   Duration,
 } from '../../../pages/detection_engine/rules/types';
-import {
-  GroupByOptions,
-  SuppressionMissingFieldsOptions,
-} from '../../../pages/detection_engine/rules/types';
+import { GroupByOptions } from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
 import { TechnicalPreviewBadge } from './technical_preview_badge';
 import type { LicenseService } from '../../../../../common/license';
-
+import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/detection_engine/rule_schema';
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
   overflow-y: hidden;
@@ -568,7 +565,7 @@ export const buildAlertSuppressionWindowDescription = (
 
 export const buildAlertSuppressionMissingFieldsDescription = (
   label: string,
-  value: SuppressionMissingFieldsOptions,
+  value: AlertSuppressionMissingFieldsStrategy,
   license: LicenseService
 ): ListItems[] => {
   if (isEmpty(value)) {
@@ -576,7 +573,7 @@ export const buildAlertSuppressionMissingFieldsDescription = (
   }
 
   const description =
-    value === SuppressionMissingFieldsOptions.Suppress
+    value === AlertSuppressionMissingFieldsStrategy.Suppress
       ? i18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
       : i18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 

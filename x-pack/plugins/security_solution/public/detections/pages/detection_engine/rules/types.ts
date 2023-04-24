@@ -33,6 +33,7 @@ import type {
   RuleNameOverride,
   SetupGuide,
   TimestampOverride,
+  AlertSuppressionMissingFields,
 } from '../../../../../common/detection_engine/rule_schema';
 import type { SortOrder } from '../../../../../common/detection_engine/schemas/common';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -148,11 +149,6 @@ export enum GroupByOptions {
   PerTimePeriod = 'per-time-period',
 }
 
-export enum SuppressionMissingFieldsOptions {
-  DoNotSuppress = 'doNotSuppress',
-  Suppress = 'suppress',
-}
-
 /**
  * add / update data source types to show XOR relationship between 'index' and 'dataViewId' fields
  * Maybe something with io-ts?
@@ -181,7 +177,7 @@ export interface DefineStepRule {
   groupByFields: string[];
   groupByRadioSelection: GroupByOptions;
   groupByDuration: Duration;
-  suppressionMissingFields?: SuppressionMissingFieldsOptions;
+  suppressionMissingFields?: AlertSuppressionMissingFields;
 }
 
 export interface Duration {
