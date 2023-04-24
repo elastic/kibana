@@ -8,7 +8,6 @@
 import { debounce } from 'lodash';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import { lastValueFrom } from 'rxjs';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -17,12 +16,13 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { useDataSearch } from '../../../../../../../hooks/use_data_search';
 import {
   isEsSearchResponseWithAggregations,
   isMultiBucketAggregate,
 } from '../../../../../../../../../common/api_schemas/type_guards';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
-import { useAppDependencies, useToastNotifications } from '../../../../../../../app_dependencies';
+import { useToastNotifications } from '../../../../../../../app_dependencies';
 
 import { FilterAggConfigTerm } from '../types';
 
@@ -35,15 +35,38 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   selectedField,
 }) => {
   const { dataView, runtimeMappings } = useContext(CreateTransformWizardContext);
+  const dataSearch = useDataSearch();
   const toastNotifications = useToastNotifications();
-  const { data } = useAppDependencies();
 
   const [options, setOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchValue, setSearchValue] = useState('');
 
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const fetchOptions = useCallback(
-    debounce(async (searchValue: string) => {
+  const onSearchChange = (newSearchValue: string) => {
+    setSearchValue(newSearchValue);
+  };
+
+  const updateConfig = useCallback(
+    (update) => {
+      onChange({
+        config: {
+          ...config,
+          ...update,
+        },
+      });
+    },
+    [config, onChange]
+  );
+
+  useEffect(() => {
+    const abortController = new AbortController();
+
+    const fetchOptions = debounce(async () => {
+      if (selectedField === undefined) return;
+
+      setIsLoading(true);
+      setOptions([]);
+
       const esSearchRequest = {
         index: dataView!.title,
         body: {
@@ -67,11 +90,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
         },
       };
 
-      const { rawResponse: response } = await lastValueFrom(
-        data.search.search({
-          params: esSearchRequest,
-        })
-      );
+      const response = await dataSearch(esSearchRequest, abortController.signal);
 
       setIsLoading(false);
 
@@ -97,42 +116,21 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
             .buckets as estypes.AggregationsSignificantLongTermsBucket[]
         ).map((value) => ({ label: value.key + '' }))
       );
-    }, 600),
-    [selectedField]
-  );
+    }, 600);
 
-  const onSearchChange = useCallback(
-    async (searchValue) => {
-      if (selectedField === undefined) return;
+    fetchOptions();
 
-      setIsLoading(true);
-      setOptions([]);
-
-      await fetchOptions(searchValue);
-    },
-    [fetchOptions, selectedField]
-  );
-
-  const updateConfig = useCallback(
-    (update) => {
-      onChange({
-        config: {
-          ...config,
-          ...update,
-        },
-      });
-    },
-    [config, onChange]
-  );
+    return () => {
+      // make sure the ongoing request is canceled
+      fetchOptions.cancel();
+      abortController.abort();
+    };
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [selectedField]);
 
   useEffect(() => {
     // Simulate initial load.
     onSearchChange('');
-    return () => {
-      // make sure the ongoing request is canceled
-      fetchOptions.cancel();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useUpdateEffect(() => {
