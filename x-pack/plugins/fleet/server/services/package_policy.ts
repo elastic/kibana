@@ -108,6 +108,7 @@ import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
 import type { PackagePolicyClient, PackagePolicyService } from './package_policy_service';
 import { installAssetsForInputPackagePolicy } from './epm/packages/install';
 import { auditLoggingService } from './audit_logging';
+import { extractAndWriteSecrets } from './secrets';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -163,7 +164,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const logger = appContextService.getLogger();
 
-    const enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
+    let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
       packagePolicy,
       soClient,
@@ -240,6 +241,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
       validatePackagePolicyOrThrow(enrichedPackagePolicy, pkgInfo);
 
+      const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
+      if (secretsStorageEnabled) {
+        const packagePolicyWithSecretRefs = await extractAndWriteSecrets({
+          packagePolicy: enrichedPackagePolicy,
+          packageInfo: pkgInfo,
+          esClient,
+        });
+
+        enrichedPackagePolicy = packagePolicyWithSecretRefs;
+      }
       inputs = await _compilePackagePolicyInputs(pkgInfo, enrichedPackagePolicy.vars || {}, inputs);
 
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;

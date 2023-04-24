@@ -13,3 +13,8 @@ export interface Secret {
 export interface SecretElasticDoc {
   value: string;
 }
+
+export interface SecretReference {
+  id: string;
+  isSecretRef: boolean;
+}

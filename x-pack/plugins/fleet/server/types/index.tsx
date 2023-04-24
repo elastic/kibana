@@ -93,6 +93,7 @@ export type {
   ExperimentalDataStreamFeature,
   Secret,
   SecretElasticDoc,
+  SecretReference,
 } from '../../common/types';
 export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
 export { dataTypes } from '../../common/constants';
