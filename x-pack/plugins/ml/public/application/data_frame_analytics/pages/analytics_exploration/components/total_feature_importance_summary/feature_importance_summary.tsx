@@ -25,7 +25,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as euiVars } from '@kbn/ui-theme';
 import {
+  getAnalysisType,
+  isClassificationAnalysis,
   isClassificationTotalFeatureImportance,
+  isRegressionAnalysis,
   isRegressionTotalFeatureImportance,
   type DataFrameAnalyticsConfig,
   type TotalFeatureImportance,
@@ -37,8 +40,6 @@ import {
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 import { ExpandableSection } from '../expandable_section';
-import { getAnalysisType } from '../../../../common';
-import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
 
 const { euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;

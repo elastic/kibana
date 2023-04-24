@@ -12,12 +12,12 @@ import type {
   DeleteDataFrameAnalyticsWithIndexStatus,
   UpdateDataFrameAnalyticsConfig,
   DataFrameAnalyticsConfig,
+  DataFrameAnalyticsStats,
 } from '@kbn/ml-data-frame-analytics';
 
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 import { basePath } from '.';
-import type { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import type { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
 import type { DeepPartial } from '../../../../common/types/common';
 import type { NewJobCapsResponse } from '../../../../common/types/fields';

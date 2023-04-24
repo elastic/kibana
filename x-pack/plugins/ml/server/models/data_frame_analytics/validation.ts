@@ -10,11 +10,14 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
+  getAnalysisType,
+  getDependentVar,
+  isRegressionAnalysis,
+  isClassificationAnalysis,
   ANALYSIS_CONFIG_TYPE,
   type AnalysisConfig,
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics';
-import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
   ALL_CATEGORIES,
   FRACTION_EMPTY_LIMIT,
@@ -25,11 +28,6 @@ import {
   TRAINING_DOCS_UPPER,
   VALIDATION_STATUS,
 } from '../../../common/constants/validation';
-import {
-  getDependentVar,
-  isRegressionAnalysis,
-  isClassificationAnalysis,
-} from '../../../common/util/analytics_utils';
 
 interface MissingAgg {
   [key: string]: {

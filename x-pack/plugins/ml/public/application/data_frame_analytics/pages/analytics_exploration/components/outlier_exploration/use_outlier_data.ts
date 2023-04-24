@@ -15,6 +15,7 @@ import {
   ML__ID_COPY,
   ML__INCREMENTAL_ID,
   DEFAULT_RESULTS_FIELD,
+  FEATURE_INFLUENCE,
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics';
 
@@ -35,7 +36,6 @@ import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { getIndexData, getIndexFields } from '../../../../common';
-import { FEATURE_INFLUENCE } from '../../../../common/constants';
 
 import { getFeatureCount, getOutlierScoreFieldName } from './common';
 import { useExplorationDataGrid } from '../exploration_results_table/use_exploration_data_grid';

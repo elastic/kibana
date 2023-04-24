@@ -21,6 +21,13 @@ import { debounce, cloneDeep } from 'lodash';
 import { Query } from '@kbn/data-plugin/common/query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import {
+  type FieldSelectionItem,
+  ANALYSIS_CONFIG_TYPE,
+  TRAINING_PERCENT_MIN,
+  TRAINING_PERCENT_MAX,
+} from '@kbn/ml-data-frame-analytics';
+
 import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   EuiComboBoxWithFieldStats,
@@ -29,16 +36,9 @@ import {
 import { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../../../../contexts/ml';
-import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
 
-import {
-  ANALYSIS_CONFIG_TYPE,
-  TRAINING_PERCENT_MIN,
-  TRAINING_PERCENT_MAX,
-} from '../../../../common/analytics';
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
 import { RuntimeMappings as RuntimeMappingsType } from '../../../../../../../common/types/fields';
-import { FieldSelectionItem } from '../../../../../../../common/types/data_frame_analytics';
 import {
   isRuntimeMappings,
   isRuntimeField,

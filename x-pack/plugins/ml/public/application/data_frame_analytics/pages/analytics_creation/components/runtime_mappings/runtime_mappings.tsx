@@ -24,7 +24,6 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useMlContext } from '../../../../../contexts/ml';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
 import { RuntimeMappingsEditor } from './runtime_mappings_editor';
 import { isRuntimeMappings } from '../../../../../../../common';
 import { SwitchModal } from './switch_modal';

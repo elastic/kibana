@@ -11,10 +11,12 @@ import { i18n } from '@kbn/i18n';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import type {
-  DataFrameAnalyticsConfig,
-  DataFrameTaskStateType,
-  TotalFeatureImportance,
+import {
+  isClassificationAnalysis,
+  isRegressionAnalysis,
+  type DataFrameAnalyticsConfig,
+  type DataFrameTaskStateType,
+  type TotalFeatureImportance,
 } from '@kbn/ml-data-frame-analytics';
 
 import { getDataViewIdFromName } from '../../util/index_utils';
@@ -25,10 +27,6 @@ import { useMlContext } from '../../contexts/ml';
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { getToastNotificationService } from '../../services/toast_notification_service';
-import {
-  isClassificationAnalysis,
-  isRegressionAnalysis,
-} from '../../../../common/util/analytics_utils';
 import { getDestinationIndex } from './get_destination_index';
 
 export const useResultsViewConfig = (jobId: string) => {

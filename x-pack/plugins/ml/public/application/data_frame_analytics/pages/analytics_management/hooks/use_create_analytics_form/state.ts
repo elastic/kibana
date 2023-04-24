@@ -6,6 +6,8 @@
  */
 
 import {
+  getAnalysisType,
+  isClassificationAnalysis,
   ANALYSIS_CONFIG_TYPE,
   type DataFrameAnalyticsMeta,
   type DataFrameAnalyticsConfig,
@@ -19,9 +21,9 @@ import { checkPermission } from '../../../../../capabilities/check_capabilities'
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
 
-import { defaultSearchQuery, getAnalysisType } from '../../../../common/analytics';
+import { defaultSearchQuery } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
-import { isClassificationAnalysis } from '../../../../../../../common/util/analytics_utils';
+
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
   outlier_detection = '50mb',

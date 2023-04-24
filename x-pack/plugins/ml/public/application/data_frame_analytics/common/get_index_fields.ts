@@ -7,9 +7,11 @@
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
+import {
+  getDefaultFieldsFromJobCaps,
+  DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-
-import { getDefaultFieldsFromJobCaps, DataFrameAnalyticsConfig } from '.';
 
 export interface FieldTypes {
   [key: string]: ES_FIELD_TYPES;

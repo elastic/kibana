@@ -21,9 +21,10 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  DataFrameAnalyticsConfig,
-  DataFrameTaskStateType,
+import {
+  getDependentVar,
+  type DataFrameAnalyticsConfig,
+  type DataFrameTaskStateType,
 } from '@kbn/ml-data-frame-analytics';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -34,7 +35,6 @@ import { VegaChartLoading } from '../../../../../components/vega_chart/vega_char
 import { useCurrentEuiTheme } from '../../../../../components/color_range_legend';
 
 import { ErrorCallout } from '../error_callout';
-import { getDependentVar } from '../../../../common';
 import { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section';

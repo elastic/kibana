@@ -7,23 +7,15 @@
 
 export type { IndexPattern, RegressionEvaluateResponse, Eval, SearchQuery } from './analytics';
 export {
-  getAnalysisType,
-  getDependentVar,
-  getPredictionFieldName,
   getDefaultTrainingFilterQuery,
-  isOutlierAnalysis,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
   REFRESH_ANALYTICS_LIST_STATE,
-  OUTLIER_ANALYSIS_METHOD,
   getValuesFromResponse,
   loadEvalData,
   loadDocsCount,
-  getPredictedFieldName,
-  INDEX_STATUS,
   SEARCH_SIZE,
   defaultSearchQuery,
-  ANALYSIS_CONFIG_TYPE,
 } from './analytics';
 
 export { getIndexData } from './get_index_data';

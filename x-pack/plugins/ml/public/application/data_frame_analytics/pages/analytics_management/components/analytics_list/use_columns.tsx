@@ -20,8 +20,11 @@ import {
   EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import type { DataFrameAnalyticsId, DataFrameAnalyticsStats } from '@kbn/ml-data-frame-analytics';
-import { getAnalysisType } from '../../../../common';
+import {
+  getAnalysisType,
+  type DataFrameAnalyticsId,
+  type DataFrameAnalyticsStats,
+} from '@kbn/ml-data-frame-analytics';
 import {
   getDataFrameAnalyticsProgressPhase,
   isDataFrameAnalyticsFailed,

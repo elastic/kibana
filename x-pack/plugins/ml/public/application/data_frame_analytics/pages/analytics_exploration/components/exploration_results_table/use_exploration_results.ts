@@ -14,9 +14,15 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
+  getPredictionFieldName,
+  getDefaultPredictionFieldName,
+  isClassificationAnalysis,
+  isRegressionAnalysis,
   sortExplorationResultsFields,
   DEFAULT_RESULTS_FIELD,
+  FEATURE_IMPORTANCE,
   ML__ID_COPY,
+  TOP_CLASSES,
   type DataFrameAnalyticsConfig,
   type FeatureImportanceBaseline,
 } from '@kbn/ml-data-frame-analytics';
@@ -33,13 +39,6 @@ import {
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import { getIndexData, getIndexFields } from '../../../../common';
-import {
-  getPredictionFieldName,
-  getDefaultPredictionFieldName,
-  isClassificationAnalysis,
-} from '../../../../../../../common/util/analytics_utils';
-import { FEATURE_IMPORTANCE, TOP_CLASSES } from '../../../../common/constants';
-import { isRegressionAnalysis } from '../../../../common/analytics';
 import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
 import { useExplorationDataGrid } from './use_exploration_data_grid';
 

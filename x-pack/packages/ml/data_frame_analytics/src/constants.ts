@@ -40,3 +40,42 @@ export const FEATURE_IMPORTANCE = 'feature_importance';
 export const FEATURE_INFLUENCE = 'feature_influence';
 export const TOP_CLASSES = 'top_classes';
 export const OUTLIER_SCORE = 'outlier_score';
+
+export enum ANALYSIS_ADVANCED_FIELDS {
+  ALPHA = 'alpha',
+  ETA = 'eta',
+  ETA_GROWTH_RATE_PER_TREE = 'eta_growth_rate_per_tree',
+  DOWNSAMPLE_FACTOR = 'downsample_factor',
+  FEATURE_BAG_FRACTION = 'feature_bag_fraction',
+  FEATURE_INFLUENCE_THRESHOLD = 'feature_influence_threshold',
+  GAMMA = 'gamma',
+  LAMBDA = 'lambda',
+  MAX_TREES = 'max_trees',
+  MAX_OPTIMIZATION_ROUNDS_PER_HYPERPARAMETER = 'max_optimization_rounds_per_hyperparameter',
+  METHOD = 'method',
+  N_NEIGHBORS = 'n_neighbors',
+  NUM_TOP_CLASSES = 'num_top_classes',
+  NUM_TOP_FEATURE_IMPORTANCE_VALUES = 'num_top_feature_importance_values',
+  OUTLIER_FRACTION = 'outlier_fraction',
+  RANDOMIZE_SEED = 'randomize_seed',
+  SOFT_TREE_DEPTH_LIMIT = 'soft_tree_depth_limit',
+  SOFT_TREE_DEPTH_TOLERANCE = 'soft_tree_depth_tolerance',
+}
+
+export enum OUTLIER_ANALYSIS_METHOD {
+  LOF = 'lof',
+  LDOF = 'ldof',
+  DISTANCE_KTH_NN = 'distance_kth_nn',
+  DISTANCE_KNN = 'distance_knn',
+}
+
+export const NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN = 0;
+export const TRAINING_PERCENT_MIN = 1;
+export const TRAINING_PERCENT_MAX = 100;
+
+export enum INDEX_STATUS {
+  UNUSED,
+  LOADING,
+  LOADED,
+  ERROR,
+}

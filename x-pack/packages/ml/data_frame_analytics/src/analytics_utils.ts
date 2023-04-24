@@ -94,3 +94,21 @@ export const getAnalysisType = (
 
   return 'unknown';
 };
+
+export const getTrainingPercent = (
+  analysis: AnalysisConfig
+):
+  | RegressionAnalysis['regression']['training_percent']
+  | ClassificationAnalysis['classification']['training_percent']
+  | undefined => {
+  let trainingPercent;
+
+  if (isRegressionAnalysis(analysis)) {
+    trainingPercent = analysis.regression.training_percent;
+  }
+
+  if (isClassificationAnalysis(analysis)) {
+    trainingPercent = analysis.classification.training_percent;
+  }
+  return trainingPercent;
+};

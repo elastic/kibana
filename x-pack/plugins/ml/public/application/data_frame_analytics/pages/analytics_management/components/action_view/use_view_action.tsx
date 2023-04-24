@@ -7,9 +7,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 
-import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics';
+import { getAnalysisType, type DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics';
 
-import { getAnalysisType } from '../../../../common/analytics';
 import { useMlLocator, useNavigateToPath } from '../../../../../contexts/kibana';
 
 import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
