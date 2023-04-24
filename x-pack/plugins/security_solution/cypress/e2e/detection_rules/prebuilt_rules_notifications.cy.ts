@@ -46,6 +46,13 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     );
   });
 
+  it('should not show any notifications for installation or update of prebuilt rules, if there are none', () => {
+    waitForRulesTableToBeLoaded();
+    cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
+    cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('not.exist');
+    cy.get(UPDATE_PREBUILT_RULES_CALLOUT).should('not.exist');
+  });
+
   it('should notify user about prebuilt rules package available for installation', () => {
     waitForRulesTableToBeLoaded();
     cy.get(LOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('be.visible');
@@ -54,6 +61,8 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
   describe('Rule installation notification when rules already installed', () => {
     beforeEach(() => {
       installAvailableRules();
+      // Create new rule asset with a different rule_id as the one that was
+      // installed before in order to trigger the installation process
       createNewRuleAsset(
         '.kibana',
         createRuleAssetSavedObject({
@@ -72,6 +81,8 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
   describe('Rule update notification', () => {
     beforeEach(() => {
       installAvailableRules();
+      // Create new rule asset with the same rule_id as the one that was installed
+      // but with a higher version, in order to trigger the update process
       createNewRuleAsset(
         '.kibana',
         createRuleAssetSavedObject({
