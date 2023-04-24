@@ -139,3 +139,7 @@ export const checkEndpointListForIsolatedHosts = (expectIsolated = true): void =
     });
   });
 };
+
+export const checkEndpointListForOnlyUnIsolatedHosts = () =>
+  checkEndpointListForIsolatedHosts(false);
+export const checkEndpointListForOnlyIsolatedHosts = () => checkEndpointListForIsolatedHosts(true);

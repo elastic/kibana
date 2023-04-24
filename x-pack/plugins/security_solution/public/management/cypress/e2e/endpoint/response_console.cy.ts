@@ -20,7 +20,11 @@ import {
   getEndpointIntegrationVersion,
   reassignAgentPolicy,
 } from '../../tasks/fleet';
-import { checkEndpointListForIsolatedHosts, createAgentPolicyTask } from '../../tasks/isolate';
+import {
+  checkEndpointListForOnlyIsolatedHosts,
+  checkEndpointListForOnlyUnIsolatedHosts,
+  createAgentPolicyTask,
+} from '../../tasks/isolate';
 import { login } from '../../tasks/login';
 import { ENDPOINT_VM_NAME } from '../../tasks/common';
 
@@ -58,22 +62,23 @@ describe('Response console', () => {
 
     it('should isolate host from response console', () => {
       waitForEndpointListPageToBeLoaded(endpointHostname);
-      checkEndpointListForIsolatedHosts(false);
+      checkEndpointListForOnlyUnIsolatedHosts();
       openResponseConsoleFromEndpointList();
       performCommandInputChecks('isolate');
       submitCommand();
       waitForCommandToBeExecuted();
+      checkEndpointListForOnlyIsolatedHosts();
     });
 
     it('should release host from response console', () => {
       waitForEndpointListPageToBeLoaded(endpointHostname);
-      checkEndpointListForIsolatedHosts(true);
+      checkEndpointListForOnlyIsolatedHosts();
       openResponseConsoleFromEndpointList();
       performCommandInputChecks('release');
       submitCommand();
       waitForCommandToBeExecuted();
       waitForEndpointListPageToBeLoaded(endpointHostname);
-      checkEndpointListForIsolatedHosts(false);
+      checkEndpointListForOnlyUnIsolatedHosts();
     });
   });
 
