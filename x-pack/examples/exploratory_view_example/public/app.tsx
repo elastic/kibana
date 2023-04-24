@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { AllSeries } from '@kbn/observability-plugin/public';
+import { AllSeries } from '@kbn/exploratory-view-plugin/public';
 import { StartDependencies } from './plugin';
 
 export const App = (props: {

@@ -15,9 +15,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RECORDS_FIELD, useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
+import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
 import { selectOverviewStatus } from '../../../../state/overview_status';
 import { AlertsLink } from '../../../common/links/view_alerts';
 import { useRefreshedRange, useGetUrlParams } from '../../../../hooks';
