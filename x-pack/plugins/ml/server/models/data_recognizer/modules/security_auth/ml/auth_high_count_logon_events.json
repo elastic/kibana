@@ -1,20 +1,16 @@
 {
   "description": "Security: Authentication - Looks for an unusually large spike in successful authentication events. This can be due to password spraying, user enumeration, or brute force activity.",
-  "groups": [
-    "security",
-    "authentication"
-  ],
+  "groups": ["security", "authentication"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "high count of logon events",
+        "detector_description": "Detects high count of logon events.",
         "function": "high_non_zero_count",
         "detector_index": 0
       }
     ],
-    "influencers": [],
-    "model_prune_window": "30d"
+    "influencers": ["source.ip", "winlog.event_data.LogonType", "user.name", "host.name"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -25,6 +21,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-auth",
-    "security_app_display_name": "Spike in Logon Events"
+    "security_app_display_name": "Spike in Logon Events",
+    "managed": true,
+    "job_revision": 4
   }
 }

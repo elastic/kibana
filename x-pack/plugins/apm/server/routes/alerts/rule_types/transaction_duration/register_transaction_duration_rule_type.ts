@@ -148,9 +148,15 @@ export function registerTransactionDurationRuleType({
                 ...getDocumentTypeFilterForTransactions(
                   searchAggregatedTransactions
                 ),
-                ...termQuery(SERVICE_NAME, ruleParams.serviceName),
-                ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType),
-                ...termQuery(TRANSACTION_NAME, ruleParams.transactionName),
+                ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                  queryEmptyString: false,
+                }),
+                ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
+                  queryEmptyString: false,
+                }),
+                ...termQuery(TRANSACTION_NAME, ruleParams.transactionName, {
+                  queryEmptyString: false,
+                }),
                 ...environmentQuery(ruleParams.environment),
               ] as QueryDslQueryContainer[],
             },
