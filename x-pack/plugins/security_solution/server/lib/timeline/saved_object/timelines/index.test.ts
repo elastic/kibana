@@ -92,8 +92,8 @@ describe('saved_object', () => {
     });
 
     test('should send correct options if countsOnly is true', async () => {
-      const contsOnly = true;
-      await getExistingPrepackagedTimelines(mockRequest, contsOnly);
+      const countsOnly = true;
+      await getExistingPrepackagedTimelines(mockRequest, countsOnly);
       expect(mockFindSavedObject).toBeCalledWith({
         filter:
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
@@ -104,8 +104,8 @@ describe('saved_object', () => {
     });
 
     test('should send correct options if countsOnly is false', async () => {
-      const contsOnly = false;
-      await getExistingPrepackagedTimelines(mockRequest, contsOnly);
+      const countsOnly = false;
+      await getExistingPrepackagedTimelines(mockRequest, countsOnly);
       expect(mockFindSavedObject).toBeCalledWith({
         filter:
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
@@ -114,12 +114,12 @@ describe('saved_object', () => {
     });
 
     test('should send correct options if pageInfo is given', async () => {
-      const contsOnly = false;
+      const countsOnly = false;
       const pageInfo = {
         pageSize: 10,
         pageIndex: 1,
       };
-      await getExistingPrepackagedTimelines(mockRequest, contsOnly, pageInfo);
+      await getExistingPrepackagedTimelines(mockRequest, countsOnly, pageInfo);
       expect(mockFindSavedObject).toBeCalledWith({
         filter:
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
