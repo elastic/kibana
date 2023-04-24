@@ -6,7 +6,10 @@
  */
 
 import type { Feature } from 'geojson';
-import type { ESTermSourceDescriptor, JoinSourceDescriptor } from '../../../common/descriptor_types';
+import type {
+  ESTermSourceDescriptor,
+  JoinSourceDescriptor,
+} from '../../../common/descriptor_types';
 import type { IVectorSource } from '../sources/vector_source';
 import type { IField } from '../fields/field';
 import { createJoinSource, InnerJoin } from './inner_join';
@@ -149,7 +152,7 @@ describe('joinPropertiesToFeature', () => {
 
   test('Should handle undefined values', () => {
     const feature = {
-      //this feature does not have the iso2 field
+      // this feature does not have the iso2 field
       properties: {
         zipcode: 40204,
       },
