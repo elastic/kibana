@@ -21,7 +21,7 @@ describe('FetchAnalyticsCollectionsApiLogic', () => {
     it('calls the analytics collections list api', async () => {
       const promise = Promise.resolve([{ name: 'result' }]);
       http.get.mockReturnValue(promise);
-      const result = fetchAnalyticsCollections();
+      const result = fetchAnalyticsCollections({});
       await nextTick();
       expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/analytics/collections');
       await expect(result).resolves.toEqual([{ name: 'result' }]);

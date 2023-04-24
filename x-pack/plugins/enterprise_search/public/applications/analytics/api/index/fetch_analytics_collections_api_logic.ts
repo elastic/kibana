@@ -13,7 +13,7 @@ import { HttpLogic } from '../../../shared/http';
 export type FetchAnalyticsCollectionsApiLogicResponse = AnalyticsCollection[];
 
 interface FetchAnalyticsCollectionsApiLogicArgs {
-  query: string;
+  query?: string;
 }
 
 export const fetchAnalyticsCollections = async ({
