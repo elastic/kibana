@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { takeLatest, takeLeading } from 'redux-saga/effects';
+import { takeLeading } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
 import {
   getSyntheticsEnablement,
   getSyntheticsEnablementSuccess,
   getSyntheticsEnablementFailure,
-  disableSynthetics,
-  disableSyntheticsSuccess,
-  disableSyntheticsFailure,
 } from './actions';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { fetchGetSyntheticsEnablement, fetchDisableSynthetics } from './api';
+import { fetchGetSyntheticsEnablement } from './api';
 
 export function* fetchSyntheticsEnablementEffect() {
   yield takeLeading(
@@ -28,10 +25,6 @@ export function* fetchSyntheticsEnablementEffect() {
       undefined,
       failureMessage
     )
-  );
-  yield takeLatest(
-    disableSynthetics,
-    fetchEffectFactory(fetchDisableSynthetics, disableSyntheticsSuccess, disableSyntheticsFailure)
   );
 }
 

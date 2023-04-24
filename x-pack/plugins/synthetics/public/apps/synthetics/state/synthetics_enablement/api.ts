@@ -20,7 +20,3 @@ export const fetchGetSyntheticsEnablement =
       MonitorManagementEnablementResultCodec
     );
   };
-
-export const fetchDisableSynthetics = async (): Promise<{}> => {
-  return await apiService.delete(API_URLS.SYNTHETICS_ENABLEMENT);
-};
