@@ -63,6 +63,12 @@ const Body = styled(EuiFlexItem)`
   `}
 `;
 
+const hasDraftComment = (applicationId = '', caseId: string, commentId: string): boolean => {
+  const draftStorageKey = getMarkdownEditorStorageKey(applicationId, caseId, commentId);
+
+  return Boolean(sessionStorage.getItem(draftStorageKey));
+};
+
 export const Description = ({
   caseData,
   onUpdateField,
@@ -76,12 +82,6 @@ export const Description = ({
   const { appId, permissions } = useCasesContext();
 
   const { clearDraftComment, draftComment, hasIncomingLensState } = useLensDraftComment();
-
-  const hasDraftComment = (applicationId = '', caseId: string, commentId: string): boolean => {
-    const draftStorageKey = getMarkdownEditorStorageKey(applicationId, caseId, commentId);
-
-    return Boolean(sessionStorage.getItem(draftStorageKey));
-  };
 
   const handleOnChangeEditable = useCallback(() => {
     clearDraftComment();
@@ -154,9 +154,7 @@ export const Description = ({
                     onClick={() => setIsEditable(true)}
                     data-test-subj="description-edit-icon"
                   />
-                ) : (
-                  ''
-                )}
+                ) : null}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon

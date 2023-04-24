@@ -119,4 +119,26 @@ describe('Description', () => {
     expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
     expect(screen.queryByTestId('description-edit-icon')).not.toBeInTheDocument();
   });
+
+  describe('existing storage key', () => {
+    const draftStorageKey = `cases.testAppId.basic-case-id.description.markdownEditor`;
+
+    beforeEach(() => {
+      sessionStorage.setItem(draftStorageKey, 'value set in storage');
+    });
+
+    it('should show unsaved draft message correctly', async () => {
+      appMockRender.render(<Description {...defaultProps} onUpdateField={onUpdateField} />);
+
+      expect(screen.getByTestId('description-unsaved-draft')).toBeInTheDocument();
+    });
+
+    it('should not show unsaved draft message when loading', async () => {
+      appMockRender.render(
+        <Description {...defaultProps} onUpdateField={onUpdateField} isLoadingDescription={true} />
+      );
+
+      expect(screen.queryByTestId('description-unsaved-draft')).not.toBeInTheDocument();
+    });
+  });
 });
