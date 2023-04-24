@@ -34,7 +34,7 @@ export const AnalyticsCollectionNoEventsCallout: React.FC<
   const { hasEvents } = useValues(AnalyticsCollectionNoEventsCalloutLogic);
 
   useEffect(() => {
-    analyticsEventsExist(analyticsCollection.name);
+    analyticsEventsExist(analyticsCollection.events_datastream);
   }, []);
 
   return hasEvents ? null : (

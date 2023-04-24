@@ -33,13 +33,13 @@ describe('analyticsEventsExistLogic', () => {
 
   describe('selectors', () => {
     it('updates when apiSuccess listener triggered', () => {
-      AnalyticsCollectionNoEventsCalloutLogic.actions.apiSuccess({ exist: indexName });
+      AnalyticsCollectionNoEventsCalloutLogic.actions.apiSuccess({ exists: indexName });
 
       expect(AnalyticsCollectionNoEventsCalloutLogic.values).toEqual({
         ...DEFAULT_VALUES,
+        data: { exists: indexName },
         hasEvents: true,
         status: Status.SUCCESS,
-        data: { exist: indexName },
       });
     });
   });

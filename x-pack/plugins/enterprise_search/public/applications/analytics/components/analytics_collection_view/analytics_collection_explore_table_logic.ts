@@ -80,7 +80,7 @@ const tablesParams: {
     ) =>
       getBaseSearchTemplate(
         aggregationFieldName,
-        { search, timeRange },
+        { search, timeRange, eventType: 'search' },
         {
           searches: {
             terms: {
@@ -122,7 +122,7 @@ const tablesParams: {
     ) =>
       getBaseSearchTemplate(
         aggregationFieldName,
-        { search, timeRange },
+        { search, timeRange, eventType: 'search' },
         {
           formula: {
             aggs: {
@@ -169,7 +169,7 @@ const tablesParams: {
     ) =>
       getBaseSearchTemplate(
         aggregationFieldName,
-        { search, timeRange },
+        { search, timeRange, eventType: 'search_click' },
         {
           formula: {
             aggs: {
@@ -216,7 +216,7 @@ const tablesParams: {
     ) =>
       getBaseSearchTemplate(
         aggregationFieldName,
-        { search, timeRange },
+        { search, timeRange, eventType: 'page_view' },
         {
           formula: {
             aggs: {

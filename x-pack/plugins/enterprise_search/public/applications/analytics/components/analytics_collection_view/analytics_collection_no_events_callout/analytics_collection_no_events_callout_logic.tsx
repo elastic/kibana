@@ -40,8 +40,8 @@ export const AnalyticsCollectionNoEventsCalloutLogic = kea<
       actions.makeRequest({ indexName });
     },
   }),
-  path: ['enterprise_search', 'analytics', 'events_exist'],
+  path: ['enterprise_search', 'analytics', 'collection', 'events_exist'],
   selectors: ({ selectors }) => ({
-    hasEvents: [() => [selectors.data], (data) => data?.exist === true],
+    hasEvents: [() => [selectors.data], (data) => data?.exists === true],
   }),
 });
