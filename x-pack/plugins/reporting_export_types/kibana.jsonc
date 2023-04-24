@@ -5,7 +5,7 @@
   "plugin": {
     "id": "reportingExportTypes",
     "server": true,
-    "browser": true,
+    "browser": false,
     "configPath": ["xpack"],
     "requiredPlugins": [],
     "optionalPlugins": [],
