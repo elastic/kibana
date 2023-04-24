@@ -196,7 +196,7 @@ function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfi
                   label: (
                     <FormattedMessage
                       id="xpack.security.accountManagement.userProfile.darkModeButton"
-                      defaultMessage="Dark Mode"
+                      defaultMessage="Dark"
                     />
                   ),
                   iconType: 'moon',
