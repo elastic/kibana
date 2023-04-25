@@ -17,6 +17,11 @@ const buildFileKind = (config: FilesConfig, owner: Owner): FileKindBrowser => {
     id: constructFileKindIdByOwner(owner),
     allowedMimeTypes: config.allowedMimeTypes,
     maxSizeBytes: config.maxSize ?? MAX_FILE_SIZE,
+    managementUiActions: {
+      delete: {
+        enabled: false,
+      },
+    },
   };
 };
 
