@@ -230,12 +230,11 @@ export const groupAndBulkCreate = async ({
         return toReturn;
       }
 
-      if (buckets.length > tuple.maxSignals) {
-        if (toReturn.warningMessages.includes(getMaxSignalsWarning())) {
-          toReturn.warningMessages = uniq(toReturn.warningMessages);
-        } else {
-          toReturn.warningMessages.push(getMaxSignalsWarning());
-        }
+      if (
+        buckets.length > tuple.maxSignals &&
+        !toReturn.warningMessages.includes(getMaxSignalsWarning()) // If the unsuppressed result didn't already hit max signals, we add the warning here
+      ) {
+        toReturn.warningMessages.push(getMaxSignalsWarning());
       }
 
       const suppressionBuckets: SuppressionBucket[] = buckets.map((bucket) => ({
