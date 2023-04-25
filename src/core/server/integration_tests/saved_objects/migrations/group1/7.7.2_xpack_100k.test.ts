@@ -8,9 +8,6 @@
 
 import path from 'path';
 import { unlink } from 'fs/promises';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { Env } from '@kbn/config';
-import { getEnvOptions } from '@kbn/config-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
@@ -19,8 +16,8 @@ import {
   createRootWithCorePlugins,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 
-const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const logFilePath = path.join(__dirname, '7.7.2_xpack_100k.log');
 
 async function removeLogFile() {
@@ -105,8 +102,6 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   };
 
-  const migratedIndex = `.kibana_${kibanaVersion}_001`;
-
   beforeAll(async () => {
     await removeLogFile();
     await startServers({
@@ -121,7 +116,7 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
 
   it('copies all the document of the previous index to the new one', async () => {
     const migratedIndexResponse = await esClient.count({
-      index: migratedIndex,
+      index: ALL_SAVED_OBJECT_INDICES,
     });
     const oldIndexResponse = await esClient.count({
       index: '.kibana_1',

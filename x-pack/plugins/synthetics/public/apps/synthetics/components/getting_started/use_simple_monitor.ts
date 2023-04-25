@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
@@ -20,7 +20,11 @@ import {
   ServiceLocationErrors,
   SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
-import { MONITOR_SUCCESS_LABEL, SimpleFormData } from './simple_monitor_form';
+import {
+  MONITOR_SUCCESS_LABEL,
+  MONITOR_FAILURE_LABEL,
+  SimpleFormData,
+} from './simple_monitor_form';
 import { kibanaService } from '../../../../utils/kibana_service';
 
 export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData }) => {
@@ -31,7 +35,7 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
 
   const { refreshApp } = useSyntheticsRefreshContext();
 
-  const { data, loading } = useFetcher(() => {
+  const { data, loading, status } = useFetcher(() => {
     if (!monitorData) {
       return new Promise<undefined>((resolve) => resolve(undefined));
     }
@@ -62,7 +66,12 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
       );
     }
 
-    if (!loading && newMonitor?.id) {
+    if (!loading && status === FETCH_STATUS.FAILURE) {
+      kibanaService.toasts.addDanger({
+        title: MONITOR_FAILURE_LABEL,
+        toastLifeTimeMs: 3000,
+      });
+    } else if (!loading && newMonitor?.id) {
       kibanaService.toasts.addSuccess({
         title: MONITOR_SUCCESS_LABEL,
         toastLifeTimeMs: 3000,
@@ -71,7 +80,7 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
       dispatch(cleanMonitorListState());
       application?.navigateToApp('synthetics', { path: 'monitors' });
     }
-  }, [application, data, dispatch, loading, refreshApp, serviceLocations]);
+  }, [application, data, status, dispatch, loading, refreshApp, serviceLocations]);
 
   return { data: data as SyntheticsMonitorWithId, loading };
 };

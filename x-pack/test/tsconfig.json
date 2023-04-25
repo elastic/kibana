@@ -122,5 +122,6 @@
     "@kbn/securitysolution-io-ts-alerting-types",
     "@kbn/alerting-state-types",
     "@kbn/assetManager-plugin",
+    "@kbn/field-formats-plugin",
   ]
 }

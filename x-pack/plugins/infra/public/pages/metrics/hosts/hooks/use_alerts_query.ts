@@ -9,7 +9,7 @@ import createContainer from 'constate';
 import { getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { BoolQuery, buildEsQuery, Filter } from '@kbn/es-query';
-import { SnapshotNode } from '../../../../../common/http_api';
+import { InfraAssetMetricsItem } from '../../../../../common/http_api';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { HostsState } from './use_unified_search_url_state';
 import { useHostsViewContext } from './use_hosts_view';
@@ -63,7 +63,7 @@ const createAlertsEsQuery = ({
   status,
 }: {
   dateRange: HostsState['dateRange'];
-  hostNodes: SnapshotNode[];
+  hostNodes: InfraAssetMetricsItem[];
   status?: AlertStatus;
 }): AlertsEsQuery => {
   const alertStatusFilter = createAlertStatusFilter(status);
