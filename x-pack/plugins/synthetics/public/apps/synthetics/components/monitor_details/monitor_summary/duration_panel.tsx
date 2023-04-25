@@ -42,7 +42,7 @@ export const DurationPanel = (props: DurationPanelProps) => {
       attributes={[
         {
           time: props,
-          name: AVG_DURATION_LABEL,
+          name: MEDIAN_DURATION_LABEL,
           dataType: 'synthetics',
           selectedMetricField: 'monitor_duration',
           reportDefinitions: {
@@ -55,7 +55,7 @@ export const DurationPanel = (props: DurationPanelProps) => {
   );
 };
 
-export const AVG_DURATION_LABEL = i18n.translate(
+export const MEDIAN_DURATION_LABEL = i18n.translate(
   'xpack.synthetics.monitorDetails.summary.medianDuration',
   {
     defaultMessage: 'Median duration',
