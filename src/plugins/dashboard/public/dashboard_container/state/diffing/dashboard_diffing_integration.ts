@@ -176,7 +176,8 @@ export function getShouldRefresh(
     if (input[key] === undefined && lastInput[key] === undefined) {
       continue;
     }
-    if (!isKeyEqual(
+    if (
+      !isKeyEqual(
         key,
         {
           container: this,
