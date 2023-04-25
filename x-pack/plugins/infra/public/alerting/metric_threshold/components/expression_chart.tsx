@@ -49,23 +49,25 @@ import { CUSTOM_EQUATION } from '../i18n_strings';
 interface Props {
   expression: MetricExpression;
   derivedIndexPattern: DataViewBase;
-  source?: MetricsSourceConfiguration;
+  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
+  chartType?: MetricsExplorerChartType;
   filterQuery?: string;
   groupBy?: string | string[];
-  chartType?: MetricsExplorerChartType;
+  hideTitle?: boolean;
+  source?: MetricsSourceConfiguration;
   timeRange?: TimeRange;
-  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
 }
 
 export const ExpressionChart: React.FC<Props> = ({
   expression,
   derivedIndexPattern,
-  source,
+  annotations,
+  chartType = MetricsExplorerChartType.bar,
   filterQuery,
   groupBy,
-  chartType = MetricsExplorerChartType.bar,
+  hideTitle = false,
+  source,
   timeRange,
-  annotations,
 }) => {
   const { uiSettings, charts } = useKibanaContextForPlugin().services;
 
@@ -200,25 +202,27 @@ export const ExpressionChart: React.FC<Props> = ({
           />
         </Chart>
       </ChartContainer>
-      <div style={{ textAlign: 'center' }}>
-        {series.id !== 'ALL' ? (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.infra.metrics.alerts.dataTimeRangeLabelWithGrouping"
-              defaultMessage="Last {lookback} {timeLabel} of data for {id}"
-              values={{ id: series.id, timeLabel, lookback: timeSize! * 20 }}
-            />
-          </EuiText>
-        ) : (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.infra.metrics.alerts.dataTimeRangeLabel"
-              defaultMessage="Last {lookback} {timeLabel}"
-              values={{ timeLabel, lookback: timeSize! * 20 }}
-            />
-          </EuiText>
-        )}
-      </div>
+      {!hideTitle && (
+        <div style={{ textAlign: 'center' }}>
+          {series.id !== 'ALL' ? (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.infra.metrics.alerts.dataTimeRangeLabelWithGrouping"
+                defaultMessage="Last {lookback} {timeLabel} of data for {id}"
+                values={{ id: series.id, timeLabel, lookback: timeSize! * 20 }}
+              />
+            </EuiText>
+          ) : (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.infra.metrics.alerts.dataTimeRangeLabel"
+                defaultMessage="Last {lookback} {timeLabel}"
+                values={{ timeLabel, lookback: timeSize! * 20 }}
+              />
+            </EuiText>
+          )}
+        </div>
+      )}
     </>
   );
 };

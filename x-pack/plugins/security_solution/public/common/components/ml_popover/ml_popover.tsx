@@ -59,14 +59,22 @@ export const MlPopover = React.memo(() => {
   } = useSecurityJobs();
 
   const docLinks = useKibana().services.docLinks;
-  const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
+  const {
+    enableDatafeed,
+    disableDatafeed,
+    isLoading: isLoadingEnableDataFeed,
+  } = useEnableDataFeed();
   const handleJobStateChange = useCallback(
     async (job: SecurityJob, latestTimestampMs: number, enable: boolean) => {
-      const result = await enableDatafeed(job, latestTimestampMs, enable);
+      if (enable) {
+        await enableDatafeed(job, latestTimestampMs);
+      } else {
+        await disableDatafeed(job);
+      }
+
       refreshJobs();
-      return result;
     },
-    [refreshJobs, enableDatafeed]
+    [refreshJobs, enableDatafeed, disableDatafeed]
   );
 
   const filteredJobs = filterJobs({
