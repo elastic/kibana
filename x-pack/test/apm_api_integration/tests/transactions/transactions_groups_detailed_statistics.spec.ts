@@ -12,7 +12,7 @@ import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregati
 import { asPercent } from '@kbn/apm-plugin/common/utils/formatters';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { ApmDocumentType, ApmTransactionDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -42,7 +42,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       offset?: string;
       transactionNames?: string;
       latencyAggregationType?: LatencyAggregationType;
-      numBuckets?: number;
+      bucketSizeInSeconds?: number;
+      documentType?: ApmTransactionDocumentType;
+      rollupInterval?: RollupInterval;
+      useDurationSummary?: boolean;
     };
   }) {
     const response = await apmApiClient.readUser({
