@@ -6,8 +6,7 @@
  */
 
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type * as H from 'history';
 
 import type { CasesPluginStart } from '../../../types';
