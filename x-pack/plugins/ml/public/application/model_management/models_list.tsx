@@ -275,6 +275,13 @@ export const ModelsList: FC<Props> = ({
       }));
   }, [items]);
 
+  const modelAndDeploymentIds = useMemo(
+    () => [
+      ...new Set([...items.flatMap((v) => v.deployment_ids), ...items.map((i) => i.model_id)]),
+    ],
+    [items]
+  );
+
   /**
    * Table actions
    */
@@ -284,6 +291,7 @@ export const ModelsList: FC<Props> = ({
     onTestAction: setModelToTest,
     onModelsDeleteRequest: setModelIdsToDelete,
     onLoading: setIsLoading,
+    modelAndDeploymentIds,
   });
 
   const toggleDetails = async (item: ModelItem) => {

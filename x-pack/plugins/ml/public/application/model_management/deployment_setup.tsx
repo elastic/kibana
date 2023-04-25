@@ -331,6 +331,7 @@ interface StartDeploymentModalProps {
   onConfigChange: (config: ThreadingParams) => void;
   onClose: () => void;
   initialParams?: ThreadingParams;
+  modelAndDeploymentIds?: string[];
 }
 
 /**
@@ -342,6 +343,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
   onClose,
   startModelDeploymentDocUrl,
   initialParams,
+  modelAndDeploymentIds,
 }) => {
   const isUpdate = !!initialParams;
 
@@ -358,12 +360,17 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
     if (isUpdate) {
       return () => null;
     }
+
+    const otherModelAndDeploymentIds = [...(modelAndDeploymentIds ?? [])];
+    otherModelAndDeploymentIds.splice(otherModelAndDeploymentIds?.indexOf(model.model_id), 1);
+
     return dictionaryValidator([
       ...model.deployment_ids,
+      ...otherModelAndDeploymentIds,
       // check for deployment with the default ID
       ...(model.deployment_ids.includes(model.model_id) ? [''] : []),
     ]);
-  }, [model.deployment_ids, model.model_id, isUpdate]);
+  }, [modelAndDeploymentIds, model.deployment_ids, model.model_id, isUpdate]);
 
   const numOfAllocationsValidator = composeValidators(
     requiredValidator(),
@@ -488,7 +495,11 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
  */
 export const getUserInputModelDeploymentParamsProvider =
   (overlays: OverlayStart, theme$: Observable<CoreTheme>, startModelDeploymentDocUrl: string) =>
-  (model: ModelItem, initialParams?: ThreadingParams): Promise<ThreadingParams | void> => {
+  (
+    model: ModelItem,
+    initialParams?: ThreadingParams,
+    deploymentIds?: string[]
+  ): Promise<ThreadingParams | void> => {
     return new Promise(async (resolve) => {
       try {
         const modalSession = overlays.openModal(
@@ -497,6 +508,7 @@ export const getUserInputModelDeploymentParamsProvider =
               <StartUpdateDeploymentModal
                 startModelDeploymentDocUrl={startModelDeploymentDocUrl}
                 initialParams={initialParams}
+                modelAndDeploymentIds={deploymentIds}
                 model={model}
                 onConfigChange={(config) => {
                   modalSession.close();

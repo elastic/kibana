@@ -11,9 +11,9 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import {
+  BUILT_IN_MODEL_TAG,
   DEPLOYMENT_STATE,
   TRAINED_MODEL_TYPE,
-  BUILT_IN_MODEL_TAG,
 } from '@kbn/ml-trained-models-utils';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
@@ -32,12 +32,14 @@ export function useModelActions({
   onLoading,
   isLoading,
   fetchModels,
+  modelAndDeploymentIds,
 }: {
   isLoading: boolean;
   onTestAction: (model: ModelItem) => void;
   onModelsDeleteRequest: (modelsIds: string[]) => void;
   onLoading: (isLoading: boolean) => void;
   fetchModels: () => void;
+  modelAndDeploymentIds: string[];
 }): Array<Action<ModelItem>> {
   const {
     services: {
@@ -156,7 +158,11 @@ export function useModelActions({
         },
         available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
         onClick: async (item) => {
-          const modelDeploymentParams = await getUserInputModelDeploymentParams(item);
+          const modelDeploymentParams = await getUserInputModelDeploymentParams(
+            item,
+            undefined,
+            modelAndDeploymentIds
+          );
 
           if (!modelDeploymentParams) return;
 
@@ -368,23 +374,24 @@ export function useModelActions({
       },
     ],
     [
-      canDeleteTrainedModels,
-      canStartStopTrainedModels,
-      canTestTrainedModels,
-      displayErrorToast,
-      displaySuccessToast,
-      getUserConfirmation,
-      getUserInputModelDeploymentParams,
-      isBuiltInModel,
-      navigateToPath,
-      navigateToUrl,
-      onTestAction,
-      trainedModelsApiService,
       urlLocator,
-      onModelsDeleteRequest,
-      onLoading,
-      fetchModels,
+      navigateToUrl,
+      navigateToPath,
+      canStartStopTrainedModels,
       isLoading,
+      getUserInputModelDeploymentParams,
+      modelAndDeploymentIds,
+      onLoading,
+      trainedModelsApiService,
+      displaySuccessToast,
+      fetchModels,
+      displayErrorToast,
+      getUserConfirmation,
+      onModelsDeleteRequest,
+      canDeleteTrainedModels,
+      isBuiltInModel,
+      onTestAction,
+      canTestTrainedModels,
     ]
   );
 }
