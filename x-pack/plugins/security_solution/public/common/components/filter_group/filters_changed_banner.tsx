@@ -31,12 +31,12 @@ export const FiltersChangedBanner: FC<FiltersChangesBanner> = ({
         <EuiCallOut
           data-test-subj={TEST_IDS.FILTERS_CHANGED_BANNER}
           title={FILTER_GROUP_BANNER_TITLE}
-          iconType={'iInCircle'}
+          iconType="iInCircle"
         >
           <p>{FILTER_GROUP_BANNER_MESSAGE}</p>
           <EuiButton
             data-test-subj="filter-group__save"
-            color={'primary'}
+            color="primary"
             onClick={saveChangesHandler}
           >
             {SAVE_CHANGES}

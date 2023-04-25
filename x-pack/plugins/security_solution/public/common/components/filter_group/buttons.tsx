@@ -34,7 +34,7 @@ export const AddControl: FC<AddControlProps> = ({ onClick, ...rest }) => {
         data-test-subj={TEST_IDS.ADD_CONTROL}
         onClick={onClick}
         {...rest}
-        iconType={'plusInCircle'}
+        iconType="plusInCircle"
       />
     </EuiToolTip>
   );
@@ -60,8 +60,8 @@ export const SaveControls: FC<SaveControlsProps> = ({ onClick }) => {
           size="s"
           iconSize="m"
           display="base"
-          color={'primary'}
-          iconType={'save'}
+          color="primary"
+          iconType="save"
           data-test-subj={TEST_IDS.SAVE_CONTROL}
           onClick={onClick}
           onFocus={openPendingChangesPopover}
@@ -72,7 +72,7 @@ export const SaveControls: FC<SaveControlsProps> = ({ onClick }) => {
         />
       }
       isOpen={pendingChangesPopoverOpen}
-      anchorPosition={'upCenter'}
+      anchorPosition="upCenter"
       panelPaddingSize="none"
       closePopover={closePendingChangesPopover}
       panelProps={{

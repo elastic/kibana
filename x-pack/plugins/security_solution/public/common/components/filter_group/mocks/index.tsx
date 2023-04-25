@@ -26,7 +26,7 @@ import { getControlGroupMock } from './control_group';
  *  <TestProviders>
  *    <FilterGroup
  *      chainingSystem="NONE"
- *      dataViewId={''}
+ *      dataViewId=""
  *      initialControls={[]}
  *      onFilterChange={onFilterchangeMock}
  *      onInit={onInitMock}

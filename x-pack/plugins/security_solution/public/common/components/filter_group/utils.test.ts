@@ -6,8 +6,8 @@
  */
 
 import type { ControlGroupInput } from '@kbn/controls-plugin/common';
-import { getFilterItemObjListFromControlInput } from '../utils';
-import { initialInputData } from './mock.data';
+import { getFilterItemObjListFromControlInput } from './utils';
+import { initialInputData } from './mocks/data';
 
 describe('utils', () => {
   describe('getFilterItemObjListFromControlOutput', () => {

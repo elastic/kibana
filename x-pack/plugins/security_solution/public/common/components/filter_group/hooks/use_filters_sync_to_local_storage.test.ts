@@ -7,7 +7,7 @@
 
 import type { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { renderHook } from '@testing-library/react-hooks';
-import { useControlGroupSyncToLocalStorage } from '../use_control_group_sync_to_local_storage';
+import { useControlGroupSyncToLocalStorage } from './use_control_group_sync_to_local_storage';
 
 const TEST_STORAGE_KEY = 'test_key';
 const DEFAULT_STORED_VALUE = {

@@ -5,43 +5,50 @@
  * 2.0.
  */
 
-import { FilterGroup } from '..';
+import { FilterGroup } from '.';
 import type { ComponentProps, FC } from 'react';
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../../common/constants';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
-} from '../../../mock';
+} from '../../mock';
 import type {
   ControlGroupOutput,
   ControlGroupInput,
   ControlGroupContainer,
 } from '@kbn/controls-plugin/public';
-import { initialInputData, sampleOutputData } from './mock.data';
-import { createStore } from '../../../store';
-import { useGetInitialUrlParamValue } from '../../../utils/global_query_string/helpers';
-import { TEST_IDS } from '../constants';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
+import { initialInputData, sampleOutputData } from './mocks/data';
+import { createStore } from '../../store';
+import { useGetInitialUrlParamValue } from '../../utils/global_query_string/helpers';
+import { TEST_IDS } from './constants';
 import {
   controlGroupFilterInputMock$,
   controlGroupFilterOutputMock$,
   getControlGroupMock,
-} from '../mocks/control_group';
-import { getMockedControlGroupRenderer } from '../mocks/control_group_renderer';
-import { URL_PARAM_ARRAY_EXCEPTION_MSG } from '../translations';
+} from './mocks/control_group';
+import { getMockedControlGroupRenderer } from './mocks/control_group_renderer';
+import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
 
-jest.mock('../../../utils/global_query_string/helpers', () => {
+jest.mock('../../utils/global_query_string/helpers', () => {
   return {
-    ...jest.requireActual('../../../utils/global_query_string/helpers'),
+    ...jest.requireActual('../../utils/global_query_string/helpers'),
     useGetInitialUrlParamValue: jest.fn().mockImplementation(() => () => null),
   };
 });
 
-jest.mock('../../../hooks/use_space_id', () => {
+jest.mock('../../utils/global_query_string', () => {
+  return {
+    ...jest.requireActual('../../utils/global_query_string'),
+  };
+});
+
+jest.mock('../../hooks/use_space_id', () => {
   return {
     useSpaceId: jest.fn(() => 'test_space_id'),
   };
@@ -52,8 +59,10 @@ const LOCAL_STORAGE_KEY = 'securitySolution.test_space_id.pageFilters';
 const controlGroupMock = getControlGroupMock();
 
 const updateControlGroupInputMock = (newInput: ControlGroupInput) => {
-  controlGroupFilterInputMock$.next(newInput);
-  controlGroupMock.getInput.mockReturnValue(newInput);
+  act(() => {
+    controlGroupFilterInputMock$.next(newInput);
+    controlGroupMock.getInput.mockReturnValue(newInput);
+  });
 };
 
 const updateControlGroupOutputMock = (newOutput: ControlGroupOutput) => {
@@ -73,12 +82,6 @@ jest.mock('@kbn/controls-plugin/public/control_group/external_api/control_group_
     _esModule: true,
     // @ts-expect-error
     ControlGroupRenderer: fR((props, ref) => <MockedControlGroupRenderer {...props} ref={ref} />),
-  };
-});
-
-jest.mock('../../../utils/global_query_string', () => {
-  return {
-    ...jest.requireActual('../../../utils/global_query_string'),
   };
 });
 
@@ -113,6 +116,10 @@ const openContextMenu = async () => {
 };
 
 describe(' Filter Group Component ', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.localStorage.clear();
+  });
   describe('Basic Functions ', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -214,6 +221,79 @@ describe(' Filter Group Component ', () => {
       await waitFor(() => {
         expect(controlGroupMock.openAddDataControlFlyout.mock.calls.length).toBe(1);
       });
+    });
+
+    it('should call controlGroupTransform which returns object WITHOUT placeholder when type != OPTION_LIST_CONTROL on opening Flyout', async () => {
+      const returnValueWatcher = jest.fn();
+      controlGroupMock.openAddDataControlFlyout.mockImplementationOnce((fn) => {
+        if (fn) {
+          const returnValue = fn({}, 'NOT_OPTIONS_LIST_CONTROL');
+          returnValueWatcher(returnValue);
+        }
+      });
+
+      render(<TestComponent />);
+      // delete some panels
+      const newInputData = {
+        ...initialInputData,
+        panels: {
+          '0': initialInputData.panels['0'],
+        },
+      } as ControlGroupInput;
+
+      updateControlGroupInputMock(newInputData);
+      await openContextMenu();
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
+      await waitFor(() => {
+        // add button should be enabled now
+        expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).not.toBeDisabled();
+      });
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.ADD_CONTROL));
+
+      expect(returnValueWatcher.mock.calls[0][0]).not.toMatchObject(
+        expect.objectContaining({
+          placeholder: '',
+        })
+      );
+    });
+
+    it('should call controlGroupTransform which returns object WITH correct placeholder value when type = OPTION_LIST_CONTROL on opening Flyout', async () => {
+      const returnValueWatcher = jest.fn();
+      controlGroupMock.openAddDataControlFlyout.mockImplementationOnce((fn) => {
+        if (fn) {
+          const returnValue = fn({}, OPTIONS_LIST_CONTROL);
+          returnValueWatcher(returnValue);
+        }
+      });
+
+      render(<TestComponent />);
+      // delete some panels
+      const newInputData = {
+        ...initialInputData,
+        panels: {
+          '0': initialInputData.panels['0'],
+        },
+      } as ControlGroupInput;
+
+      updateControlGroupInputMock(newInputData);
+
+      await openContextMenu();
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
+      await waitFor(() => {
+        // add button should be enabled now
+        expect(screen.getByTestId(TEST_IDS.ADD_CONTROL)).not.toBeDisabled();
+      });
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.ADD_CONTROL));
+
+      expect(returnValueWatcher.mock.calls[0][0]).toMatchObject(
+        expect.objectContaining({
+          placeholder: '',
+        })
+      );
     });
 
     it('should save controls successfully', async () => {
@@ -402,7 +482,7 @@ describe(' Filter Group Component ', () => {
         })
       );
 
-      // should create only one control
+      // should create one control
       //
       render(<TestComponent />);
       expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(1);
@@ -445,22 +525,19 @@ describe(' Filter Group Component ', () => {
   });
 
   describe('Filter Changed Banner', () => {
-    beforeAll(() => {
-      (useGetInitialUrlParamValue as jest.Mock).mockImplementation(() => {
-        return () => [
-          {
-            fieldName: 'abc',
-          },
-        ];
-      });
-    });
-
     beforeEach(() => {
       jest.clearAllMocks();
       global.localStorage.clear();
     });
 
     it('should show banner if url filter and stored filters are not same', async () => {
+      (useGetInitialUrlParamValue as jest.Mock).mockImplementationOnce(() => {
+        return () => [
+          {
+            fieldName: 'abc',
+          },
+        ];
+      });
       global.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialInputData));
 
       render(<TestComponent />);
@@ -471,6 +548,13 @@ describe(' Filter Group Component ', () => {
     });
 
     it('should use url filters if url and stored filters are not same', async () => {
+      (useGetInitialUrlParamValue as jest.Mock).mockImplementationOnce(() => {
+        return () => [
+          {
+            fieldName: 'abc',
+          },
+        ];
+      });
       global.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialInputData));
       render(<TestComponent />);
       updateControlGroupInputMock(initialInputData as ControlGroupInput);
@@ -497,13 +581,13 @@ describe(' Filter Group Component ', () => {
     });
 
     it('should ignore url params if there is an error in using them', async () => {
-      (useGetInitialUrlParamValue as jest.Mock).mockImplementation(() => {
+      (useGetInitialUrlParamValue as jest.Mock).mockImplementationOnce(() => {
         return () => ({
           fieldName: 'abc',
         });
       });
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(jest.fn());
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementationOnce(jest.fn());
 
       render(<TestComponent />);
 
@@ -516,6 +600,7 @@ describe(' Filter Group Component ', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       jest.useFakeTimers();
+      global.localStorage.clear();
     });
     it('should call onFilterChange when new filters have been published', async () => {
       render(<TestComponent />);
@@ -577,6 +662,7 @@ describe(' Filter Group Component ', () => {
   describe('Restore from local storage', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      global.localStorage.clear();
     });
     it('should restore from localstorage when one of the value is exists and exclude is false', async () => {
       const savedData = {
