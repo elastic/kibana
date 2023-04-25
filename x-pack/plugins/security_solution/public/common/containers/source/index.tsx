@@ -190,7 +190,8 @@ export const useFetchIndex = (
     return () => {
       abortCtrl.current.abort();
     };
-  }, [indexFieldsSearch, indexNames, previousIndexesName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexNames, previousIndexesName]);
 
   return [state.loading, state];
 };
