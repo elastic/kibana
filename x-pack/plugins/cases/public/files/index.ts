@@ -20,6 +20,7 @@ const buildFileKind = (config: FilesConfig, owner: Owner): FileKindBrowser => {
     managementUiActions: {
       delete: {
         enabled: false,
+        reason: 'This File is managed by Cases.',
       },
     },
   };
