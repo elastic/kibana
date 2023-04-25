@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function ExplainLogRateSpikesAnalysisGroupsTableProvider({
   getService,
 }: FtrProviderContext) {
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
+  const browser = getService('browser');
 
   return new (class AnalysisTable {
     public async assertSpikeAnalysisTableExists() {
@@ -54,6 +59,51 @@ export function ExplainLogRateSpikesAnalysisGroupsTableProvider({
       }
 
       return rows;
+    }
+
+    public rowSelector(rowId: string, subSelector?: string) {
+      const row = `~aiopsSpikeAnalysisGroupsTable > ~row-${rowId}`;
+      return !subSelector ? row : `${row} > ${subSelector}`;
+    }
+
+    public async ensureActionsMenuOpen(rowId: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.ensureActionsMenuClosed();
+
+        if (!(await find.existsByCssSelector('.euiContextMenuPanel', 1000))) {
+          await testSubjects.click(this.rowSelector(rowId, 'euiCollapsedItemActionsButton'));
+          expect(await find.existsByCssSelector('.euiContextMenuPanel', 1000)).to.eql(
+            true,
+            'Actions popover should exist'
+          );
+        }
+      });
+    }
+
+    public async ensureActionsMenuClosed() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        expect(await find.existsByCssSelector('.euiContextMenuPanel', 1000)).to.eql(
+          false,
+          'Actions popover should not exist'
+        );
+      });
+    }
+
+    public async assertRowActions(rowId: string) {
+      await this.ensureActionsMenuOpen(rowId);
+
+      await testSubjects.existOrFail('aiopsTableActionButtonCopyToClipboard enabled');
+      await testSubjects.existOrFail('aiopsTableActionButtonDiscover enabled');
+      await testSubjects.existOrFail('aiopsTableActionButtonLogPatternAnalysis enabled');
+
+      await this.ensureActionsMenuClosed();
+    }
+
+    public async clickRowAction(rowId: string, action: string) {
+      await this.ensureActionsMenuOpen(rowId);
+      await testSubjects.click(`aiopsTableActionButton${action} enabled`);
+      await testSubjects.missingOrFail(`aiopsTableActionButton${action} enabled`);
     }
   })();
 }

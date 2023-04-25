@@ -56,7 +56,8 @@
         }
       },
       "response": {
-        "include_body": "always"
+        "include_body": "always",
+        "include_body_max_bytes": 900
       },
       "tags": "tag2,tag2",
       "response.include_headers": false,
@@ -69,7 +70,8 @@
             "Saved",
             "saved"
           ]
-        }
+        },
+        "json": [{"description":"check status","expression":"foo.bar == \"myValue\""}]
       },
       "hash": "ekrjelkjrelkjre",
       "ssl.verification_mode": "strict"

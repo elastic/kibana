@@ -13,8 +13,7 @@ import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import { UserActionCopyLink } from '../copy_link';
-import { MarkdownRenderer } from '../../markdown_editor';
-import { ContentWrapper } from '../markdown_form';
+import { ScrollableMarkdown } from '../../markdown_editor';
 import { HostIsolationCommentEvent } from './host_isolation_event';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 
@@ -34,6 +33,7 @@ export const createActionAttachmentUserActionBuilder = ({
   // TODO: Fix this manually. Issue #123375
   // eslint-disable-next-line react/display-name
   build: () => {
+    const actionIconName = comment.actions.type === 'isolate' ? 'lock' : 'lockOpen';
     return [
       {
         username: (
@@ -52,12 +52,11 @@ export const createActionAttachmentUserActionBuilder = ({
         ),
         'data-test-subj': 'endpoint-action',
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-        timelineAvatar: comment.actions.type === 'isolate' ? 'lock' : 'lockOpen',
+        timelineAvatar: actionIconName,
+        timelineAvatarAriaLabel: actionIconName,
         actions: <UserActionCopyLink id={comment.id} />,
         children: comment.comment.trim().length > 0 && (
-          <ContentWrapper data-test-subj="user-action-markdown">
-            <MarkdownRenderer>{comment.comment}</MarkdownRenderer>
-          </ContentWrapper>
+          <ScrollableMarkdown content={comment.comment} />
         ),
       },
     ];
