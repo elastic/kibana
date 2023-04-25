@@ -14,6 +14,7 @@ import type { SearchRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { InfraServerPluginStartDeps } from './lib/adapters/framework';
+import { InventoryViewsServiceStart } from './services/inventory_views';
 import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views/types';
 
 export type { InfraConfig } from '../common/plugin_config_types';
@@ -30,6 +31,7 @@ export interface InfraPluginSetup {
 }
 
 export interface InfraPluginStart {
+  inventoryViews: InventoryViewsServiceStart;
   logViews: LogViewsServiceStart;
   getMetricIndices: (
     savedObjectsClient: SavedObjectsClientContract,

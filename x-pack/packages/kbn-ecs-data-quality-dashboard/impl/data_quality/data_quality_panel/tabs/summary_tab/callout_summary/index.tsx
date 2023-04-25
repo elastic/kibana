@@ -6,14 +6,12 @@
  */
 
 import { copyToClipboard, EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import numeral from '@elastic/numeral';
 import React, { useCallback, useMemo } from 'react';
 
 import { MissingTimestampCallout } from '../../callouts/missing_timestamp_callout';
 import { IncompatibleCallout } from '../../callouts/incompatible_callout';
 import { showMissingTimestampCallout } from '../../helpers';
 import { getMarkdownComments } from '../helpers';
-import { EMPTY_STAT } from '../../../../helpers';
 import { showInvalidCallout } from '../../incompatible_tab/helpers';
 import { CopyToClipboardButton } from '../../styles';
 import * as i18n from '../../../index_properties/translations';
@@ -23,52 +21,55 @@ import type { IlmPhase, PartitionedFieldMetadata } from '../../../../types';
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
   addToNewCaseDisabled: boolean;
-  defaultNumberFormat: string;
   docsCount: number;
+  formatBytes: (value: number | undefined) => string;
+  formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
   onAddToNewCase: (markdownComment: string[]) => void;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   pattern: string;
   patternDocsCount: number;
+  sizeInBytes: number | undefined;
 }
 
 const CalloutSummaryComponent: React.FC<Props> = ({
   addSuccessToast,
   addToNewCaseDisabled,
-  defaultNumberFormat,
   docsCount,
+  formatBytes,
+  formatNumber,
   ilmPhase,
   indexName,
   onAddToNewCase,
   partitionedFieldMetadata,
   pattern,
   patternDocsCount,
+  sizeInBytes,
 }) => {
-  const formatNumber = useCallback(
-    (value: number | undefined): string =>
-      value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT,
-    [defaultNumberFormat]
-  );
   const markdownComments: string[] = useMemo(
     () =>
       getMarkdownComments({
         docsCount,
+        formatBytes,
         formatNumber,
         ilmPhase,
         indexName,
         partitionedFieldMetadata,
         pattern,
         patternDocsCount,
+        sizeInBytes,
       }),
     [
       docsCount,
+      formatBytes,
       formatNumber,
       ilmPhase,
       indexName,
       partitionedFieldMetadata,
       pattern,
       patternDocsCount,
+      sizeInBytes,
     ]
   );
 

@@ -34,8 +34,8 @@ export {
   type FieldPopoverProps,
   FieldPopoverHeader,
   type FieldPopoverHeaderProps,
-  FieldPopoverVisualize,
-  type FieldPopoverVisualizeProps,
+  FieldPopoverFooter,
+  type FieldPopoverFooterProps,
 } from './components/field_popover';
 export {
   FieldVisualizeButton,

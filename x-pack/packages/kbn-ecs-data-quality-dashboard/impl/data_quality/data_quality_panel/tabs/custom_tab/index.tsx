@@ -13,13 +13,11 @@ import {
   EuiEmptyPrompt,
   EuiSpacer,
 } from '@elastic/eui';
-import numeral from '@elastic/numeral';
 import React, { useCallback, useMemo } from 'react';
 
 import { CustomCallout } from '../callouts/custom_callout';
 import { CompareFieldsTable } from '../../../compare_fields_table';
 import { getCustomTableColumns } from '../../../compare_fields_table/helpers';
-import { EMPTY_STAT } from '../../../helpers';
 import { EmptyPromptBody } from '../../index_properties/empty_prompt_body';
 import { EmptyPromptTitle } from '../../index_properties/empty_prompt_title';
 import { getAllCustomMarkdownComments, showCustomCallout } from './helpers';
@@ -29,39 +27,49 @@ import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
-  defaultNumberFormat: string;
   docsCount: number;
+  formatBytes: (value: number | undefined) => string;
+  formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   patternDocsCount: number;
+  sizeInBytes: number | undefined;
 }
 
 const CustomTabComponent: React.FC<Props> = ({
   addSuccessToast,
-  defaultNumberFormat,
   docsCount,
+  formatBytes,
+  formatNumber,
   ilmPhase,
   indexName,
   partitionedFieldMetadata,
   patternDocsCount,
+  sizeInBytes,
 }) => {
-  const formatNumber = useCallback(
-    (value: number | undefined): string =>
-      value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT,
-    [defaultNumberFormat]
-  );
   const markdownComments: string[] = useMemo(
     () =>
       getAllCustomMarkdownComments({
         docsCount,
+        formatBytes,
         formatNumber,
         ilmPhase,
         indexName,
         partitionedFieldMetadata,
         patternDocsCount,
+        sizeInBytes,
       }),
-    [docsCount, formatNumber, ilmPhase, indexName, partitionedFieldMetadata, patternDocsCount]
+    [
+      docsCount,
+      formatBytes,
+      formatNumber,
+      ilmPhase,
+      indexName,
+      partitionedFieldMetadata,
+      patternDocsCount,
+      sizeInBytes,
+    ]
   );
 
   const body = useMemo(() => <EmptyPromptBody body={i18n.CUSTOM_EMPTY} />, []);

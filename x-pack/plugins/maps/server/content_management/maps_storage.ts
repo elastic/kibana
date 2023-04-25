@@ -28,10 +28,10 @@ import type {
   MapGetOut,
   MapCreateIn,
   MapCreateOut,
-  CreateOptions,
+  MapCreateOptions,
   MapUpdateIn,
   MapUpdateOut,
-  UpdateOptions,
+  MapUpdateOptions,
   MapDeleteOut,
   MapSearchOptions,
   MapSearchOut,
@@ -140,7 +140,7 @@ export class MapsStorage
   async create(
     ctx: StorageContext,
     data: MapCreateIn['data'],
-    options: CreateOptions
+    options: MapCreateOptions
   ): Promise<MapCreateOut> {
     const {
       utils: { getTransforms },
@@ -157,8 +157,8 @@ export class MapsStorage
     }
 
     const { value: optionsToLatest, error: optionsError } = transforms.create.in.options.up<
-      CreateOptions,
-      CreateOptions
+      MapCreateOptions,
+      MapCreateOptions
     >(options);
     if (optionsError) {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
@@ -191,7 +191,7 @@ export class MapsStorage
     ctx: StorageContext,
     id: string,
     data: MapUpdateIn['data'],
-    options: UpdateOptions
+    options: MapUpdateOptions
   ): Promise<MapUpdateOut> {
     const {
       utils: { getTransforms },
@@ -208,8 +208,8 @@ export class MapsStorage
     }
 
     const { value: optionsToLatest, error: optionsError } = transforms.update.in.options.up<
-      CreateOptions,
-      CreateOptions
+      MapCreateOptions,
+      MapCreateOptions
     >(options);
     if (optionsError) {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);

@@ -11,6 +11,7 @@ import { catchError, tap } from 'rxjs/operators';
 import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
 import { Logger } from '@kbn/core/server';
+import { LicenseGetLicenseInformation } from '@elastic/elasticsearch/lib/api/types';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { MonitorFields, PublicLocations, ServiceLocationErrors } from '../../common/runtime_types';
@@ -27,7 +28,7 @@ export interface ServiceData {
   };
   endpoint?: 'monitors' | 'runOnce' | 'sync';
   isEdit?: boolean;
-  licenseLevel: string;
+  license: LicenseGetLicenseInformation;
 }
 
 export class ServiceAPIClient {
@@ -142,7 +143,7 @@ export class ServiceAPIClient {
 
   async callAPI(
     method: 'POST' | 'PUT' | 'DELETE',
-    { monitors: allMonitors, output, endpoint, isEdit, licenseLevel }: ServiceData
+    { monitors: allMonitors, output, endpoint, isEdit, license }: ServiceData
   ) {
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
@@ -159,7 +160,7 @@ export class ServiceAPIClient {
       );
       if (locMonitors.length > 0) {
         const promise = this.callServiceEndpoint(
-          { monitors: locMonitors, isEdit, endpoint, output, licenseLevel },
+          { monitors: locMonitors, isEdit, endpoint, output, license },
           method,
           url
         );
@@ -200,7 +201,7 @@ export class ServiceAPIClient {
   }
 
   async callServiceEndpoint(
-    { monitors, output, endpoint = 'monitors', isEdit, licenseLevel }: ServiceData,
+    { monitors, output, endpoint = 'monitors', isEdit, license }: ServiceData,
     method: 'POST' | 'PUT' | 'DELETE',
     baseUrl: string
   ) {
@@ -233,7 +234,10 @@ export class ServiceAPIClient {
           output,
           stack_version: this.stackVersion,
           is_edit: isEdit,
-          license_level: licenseLevel,
+          license_level: license.type,
+          license_issued_to: license.issued_to,
+          deployment_id: this.server.cloud?.deploymentId,
+          cloud_id: this.server.cloud?.cloudId,
         },
         headers: authHeader,
         httpsAgent: this.getHttpsAgent(baseUrl),

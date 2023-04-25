@@ -6,11 +6,21 @@
  */
 
 import { DARK_THEME } from '@elastic/charts';
+import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../mock/test_providers';
+import { EMPTY_STAT } from '../../helpers';
+import { TestProviders } from '../../mock/test_providers/test_providers';
 import { Pattern } from '.';
+
+const defaultBytesFormat = '0,0.[0]b';
+const formatBytes = (value: number | undefined) =>
+  value != null ? numeral(value).format(defaultBytesFormat) : EMPTY_STAT;
+
+const defaultNumberFormat = '0,0.[000]';
+const formatNumber = (value: number | undefined) =>
+  value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT;
 
 jest.mock('../../use_stats', () => ({
   useStats: jest.fn(() => ({
@@ -31,12 +41,15 @@ jest.mock('../../use_ilm_explain', () => ({
 const defaultProps = {
   addSuccessToast: jest.fn(),
   canUserCreateAndReadCases: jest.fn(),
-  defaultNumberFormat: '0,0.[000]',
+  formatBytes,
+  formatNumber,
   getGroupByFieldsOnClick: jest.fn(),
   ilmPhases: ['hot', 'warm', 'unmanaged'],
   indexNames: undefined,
   openCreateCaseFlyout: jest.fn(),
   patternRollup: undefined,
+  selectedIndex: null,
+  setSelectedIndex: jest.fn(),
   theme: DARK_THEME,
   updatePatternIndexNames: jest.fn(),
   updatePatternRollup: jest.fn(),

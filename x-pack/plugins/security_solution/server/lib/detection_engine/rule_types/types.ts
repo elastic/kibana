@@ -100,6 +100,7 @@ export interface RunOpts<TParams extends RuleParams> {
   alertTimestampOverride: Date | undefined;
   alertWithSuppression: SuppressedAlertService;
   refreshOnIndexingAlerts: RefreshTypes;
+  publicBaseUrl: string | undefined;
 }
 
 export type SecurityAlertType<
@@ -129,6 +130,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
   logger: Logger;
   config: ConfigType;
+  publicBaseUrl: string | undefined;
   ruleDataClient: IRuleDataClient;
   ruleExecutionLoggerFactory: IRuleExecutionLogService['createClientForExecutors'];
   version: string;
