@@ -32284,7 +32284,6 @@
     "xpack.sessionView.metadataDetailsTab.cloud": "云",
     "xpack.sessionView.metadataDetailsTab.container": "容器",
     "xpack.sessionView.metadataDetailsTab.host": "主机 OS",
-    "xpack.sessionView.metadataDetailsTab.metadata": "元数据",
     "xpack.sessionView.metadataDetailsTab.orchestrator": "Orchestrator",
     "xpack.sessionView.networkTooltip": "网络告警",
     "xpack.sessionView.output": "输出",
