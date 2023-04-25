@@ -13,12 +13,9 @@ export const metricValueFormatter = (value: number | null, metric: string = '') 
     defaultMessage: '[NO DATA]',
   });
 
-  let formatter;
-  if (metric.endsWith('.pct')) {
-    formatter = createFormatter('percent');
-  } else {
-    formatter = createFormatter('highPrecision');
-  }
+  const formatter = metric.endsWith('.pct')
+    ? createFormatter('percent')
+    : createFormatter('highPrecision');
 
-  return value !== null && value !== undefined ? formatter(value) : noDataValue;
+  return value == null ? noDataValue : formatter(value);
 };
