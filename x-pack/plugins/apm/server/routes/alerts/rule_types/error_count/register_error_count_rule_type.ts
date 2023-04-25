@@ -130,7 +130,7 @@ export function registerErrorCountRuleType({
             aggs: {
               error_counts: {
                 multi_terms: {
-                  terms: [...getGroupByTerms(allGroupbyFields)],
+                  terms: getGroupByTerms(allGroupbyFields),
                   size: 1000,
                   order: { _count: 'desc' as const },
                 },
