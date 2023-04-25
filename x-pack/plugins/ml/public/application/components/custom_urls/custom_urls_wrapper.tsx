@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, FC } from 'react';
-import { DataView } from '@kbn/data-views-plugin/public';
+import React, { FC } from 'react';
 import { useMlKibana } from '../../contexts/kibana';
 import { Job } from '../../../../common/types/anomaly_detection_jobs';
 import { UrlConfig } from '../../../../common/types/custom_urls';
-import { getDataViewIdFromName } from '../../util/index_utils';
-import {
-  isDataFrameAnalyticsConfigs,
-  type DataFrameAnalyticsConfig,
-} from '../../../../common/types/data_frame_analytics';
+import { type DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 import { CustomUrls } from './custom_urls';
 
 export interface CustomUrlsWrapperProps {
@@ -25,12 +20,9 @@ export interface CustomUrlsWrapperProps {
 }
 
 export const CustomUrlsWrapper: FC<CustomUrlsWrapperProps> = (props) => {
-  const [dataView, setDataView] = useState<DataView | undefined>();
-
   const {
     services: {
       data: {
-        dataViews,
         query: {
           timefilter: { timefilter },
         },
@@ -38,40 +30,5 @@ export const CustomUrlsWrapper: FC<CustomUrlsWrapperProps> = (props) => {
     },
   } = useMlKibana();
 
-  useEffect(() => {
-    let active = true;
-
-    async function loadDataView() {
-      if (isDataFrameAnalyticsConfigs(props.job)) {
-        const destIndex = props.job.dest.index;
-        const sourceIndex = props.job.source.index[0];
-        let dataViewIdSource: string | null;
-        let dataViewIdDest: string | null;
-        let dv: DataView | undefined;
-
-        try {
-          dataViewIdSource = await getDataViewIdFromName(sourceIndex);
-          dataViewIdDest = await getDataViewIdFromName(destIndex);
-          dv = await dataViews.get(dataViewIdDest ?? dataViewIdSource ?? '');
-
-          if (dv === undefined) {
-            dv = await dataViews.get(dataViewIdSource ?? '');
-          }
-          if (!active) return;
-          setDataView(dv);
-        } catch (e) {
-          dv = undefined;
-        }
-
-        return dv;
-      }
-    }
-
-    loadDataView();
-    return () => {
-      active = false;
-    };
-  }, [dataViews, props.job]);
-
-  return <CustomUrls {...props} dataView={dataView} currentTimeFilter={timefilter.getTime()} />;
+  return <CustomUrls {...props} currentTimeFilter={timefilter.getTime()} />;
 };

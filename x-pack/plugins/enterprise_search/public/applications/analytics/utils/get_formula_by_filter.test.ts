@@ -10,12 +10,14 @@ import { FilterBy, getFormulaByFilter } from './get_formula_by_filter';
 describe('getFormulaByFilter', () => {
   test('should return the correct formula for Searches filter without shift', () => {
     const formula = getFormulaByFilter(FilterBy.Searches);
-    expect(formula).toBe('count(search.query)');
+    expect(formula).toBe("count(search.query, kql='event.action: search')");
   });
 
   test('should return the correct formula for NoResults filter with shift', () => {
     const formula = getFormulaByFilter(FilterBy.NoResults, '1d');
-    expect(formula).toBe("count(kql='search.results.total_results : 0', shift='1d')");
+    expect(formula).toBe(
+      "count(kql='search.results.total_results : 0 and event.action: search', shift='1d')"
+    );
   });
 
   test('should return the correct formula for Clicks filter without shift', () => {

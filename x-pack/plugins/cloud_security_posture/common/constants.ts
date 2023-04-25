@@ -75,6 +75,7 @@ export const CLOUDBEAT_VULN_MGMT_AZURE = 'cloudbeat/vuln_mgmt_azure';
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';
 export const VULN_MGMT_POLICY_TEMPLATE = 'vuln_mgmt';
+export const CNVM_POLICY_TEMPLATE = 'cnvm';
 export const SUPPORTED_POLICY_TEMPLATES = [
   KSPM_POLICY_TEMPLATE,
   CSPM_POLICY_TEMPLATE,

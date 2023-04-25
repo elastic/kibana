@@ -10,9 +10,9 @@ import React from 'react';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { DashboardSettings } from '../../component/settings/settings_flyout';
-import { DashboardContainer } from '../dashboard_container';
 import { pluginServices } from '../../../services/plugin_services';
+import { DashboardSettings } from '../../component/settings/settings_flyout';
+import { DashboardContainer, DashboardContainerContext } from '../dashboard_container';
 
 export function showSettings(this: DashboardContainer) {
   const {
@@ -22,26 +22,20 @@ export function showSettings(this: DashboardContainer) {
     overlays,
   } = pluginServices.getServices();
 
-  const {
-    dispatch,
-    Wrapper: DashboardReduxWrapper,
-    actions: { setHasOverlays },
-  } = this.getReduxEmbeddableTools();
-
   // TODO Move this action into DashboardContainer.openOverlay
-  dispatch(setHasOverlays(true));
+  this.dispatch.setHasOverlays(true);
 
   this.openOverlay(
     overlays.openFlyout(
       toMountPoint(
-        <DashboardReduxWrapper>
+        <DashboardContainerContext.Provider value={this}>
           <DashboardSettings
             onClose={() => {
-              dispatch(setHasOverlays(false));
+              this.dispatch.setHasOverlays(false);
               this.clearOverlays();
             }}
           />
-        </DashboardReduxWrapper>,
+        </DashboardContainerContext.Provider>,
         { theme$ }
       ),
       {
@@ -49,7 +43,7 @@ export function showSettings(this: DashboardContainer) {
         'data-test-subj': 'dashboardSettingsFlyout',
         onClose: (flyout) => {
           this.clearOverlays();
-          dispatch(setHasOverlays(false));
+          this.dispatch.setHasOverlays(false);
           flyout.close();
         },
       }

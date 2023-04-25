@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { repeat } from 'lodash/fp';
-
 import {
   ERRORS_MAY_OCCUR,
   ERRORS_CALLOUT_SUMMARY,
@@ -44,6 +42,7 @@ import {
   INDICES,
   INDICES_CHECKED,
   RESULT,
+  SIZE,
 } from '../../summary_table/translations';
 import { DATA_QUALITY_TITLE } from '../../../translations';
 
@@ -65,11 +64,11 @@ export const escape = (content: string | undefined): string | undefined =>
 export const escapePreserveNewlines = (content: string | undefined): string | undefined =>
   content != null ? content.replaceAll('|', '\\|') : content;
 
-export const getHeaderSeparator = (headerLength: number): string => repeat(headerLength + 2, '-');
+export const getHeaderSeparator = (headerText: string): string => '-'.repeat(headerText.length + 2); // 2 extra, for the spaces on both sides of the column name
 
 export const getMarkdownTableHeader = (headerNames: string[]) => `
 | ${headerNames.map((name) => `${escape(name)} | `).join('')}
-|${headerNames.map((name) => `${getHeaderSeparator(name.length)}|`).join('')}`;
+|${headerNames.map((name) => `${getHeaderSeparator(name)}|`).join('')}`;
 
 export const getCodeFormattedValue = (value: string | undefined) =>
   `\`${escape(value ?? EMPTY_PLACEHOLDER)}\``;
@@ -84,21 +83,7 @@ export const getIndexInvalidValues = (indexInvalidValues: UnallowedValueCount[])
     ? getCodeFormattedValue(undefined)
     : indexInvalidValues
         .map(({ fieldName, count }) => `${getCodeFormattedValue(escape(fieldName))} (${count})`)
-        .join(',\n');
-
-export const getCommonMarkdownTableRows = (
-  enrichedFieldMetadata: EnrichedFieldMetadata[]
-): string =>
-  enrichedFieldMetadata
-    .map(
-      (x) =>
-        `| ${escape(x.indexFieldName)} | ${getCodeFormattedValue(x.type)} | ${getCodeFormattedValue(
-          x.indexFieldType
-        )}  | ${getAllowedValues(x.allowed_values)} | ${getIndexInvalidValues(
-          x.indexInvalidValues
-        )} | ${escape(x.description ?? EMPTY_PLACEHOLDER)} |`
-    )
-    .join('\n');
+        .join(', '); // newlines are instead joined with spaces
 
 export const getCustomMarkdownTableRows = (
   enrichedFieldMetadata: EnrichedFieldMetadata[]
@@ -207,19 +192,7 @@ ${getMarkdownTableRows(enrichedFieldMetadata)}
 `
     : '';
 
-export const getSummaryMarkdownComment = ({
-  ecsFieldReferenceUrl,
-  ecsReferenceUrl,
-  incompatible,
-  indexName,
-  mappingUrl,
-}: {
-  ecsFieldReferenceUrl: string;
-  ecsReferenceUrl: string;
-  incompatible: number | undefined;
-  indexName: string;
-  mappingUrl: string;
-}): string =>
+export const getSummaryMarkdownComment = (indexName: string) =>
   `### ${escape(indexName)}
 `;
 
@@ -244,23 +217,31 @@ export const getResultEmoji = (incompatible: number | undefined): string => {
 };
 
 export const getSummaryTableMarkdownHeader = (): string =>
-  `| ${RESULT} | ${INDEX} | ${DOCS} | ${INCOMPATIBLE_FIELDS} | ${ILM_PHASE} |
-|--------|-------|------|---------------------|-----------|`;
+  `| ${RESULT} | ${INDEX} | ${DOCS} | ${INCOMPATIBLE_FIELDS} | ${ILM_PHASE} | ${SIZE} |
+|${getHeaderSeparator(RESULT)}|${getHeaderSeparator(INDEX)}|${getHeaderSeparator(
+    DOCS
+  )}|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|${getHeaderSeparator(
+    ILM_PHASE
+  )}|${getHeaderSeparator(SIZE)}|`;
 
 export const getSummaryTableMarkdownRow = ({
   docsCount,
+  formatBytes,
   formatNumber,
   ilmPhase,
   incompatible,
   indexName,
   patternDocsCount,
+  sizeInBytes,
 }: {
   docsCount: number;
+  formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   incompatible: number | undefined;
   indexName: string;
   patternDocsCount: number;
+  sizeInBytes: number | undefined;
 }): string =>
   `| ${getResultEmoji(incompatible)} | ${escape(indexName)} | ${formatNumber(
     docsCount
@@ -268,77 +249,95 @@ export const getSummaryTableMarkdownRow = ({
     docsCount,
     patternDocsCount,
   })}) | ${incompatible ?? EMPTY_PLACEHOLDER} | ${
-    ilmPhase != null ? getCodeFormattedValue(ilmPhase) : ''
-  } |
+    ilmPhase != null ? getCodeFormattedValue(ilmPhase) : EMPTY_PLACEHOLDER
+  } | ${formatBytes(sizeInBytes)} |
 `;
 
 export const getSummaryTableMarkdownComment = ({
   docsCount,
+  formatBytes,
   formatNumber,
   ilmPhase,
   indexName,
   partitionedFieldMetadata,
   patternDocsCount,
+  sizeInBytes,
 }: {
   docsCount: number;
+  formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   patternDocsCount: number;
+  sizeInBytes: number | undefined;
 }): string =>
   `${getSummaryTableMarkdownHeader()}
 ${getSummaryTableMarkdownRow({
   docsCount,
+  formatBytes,
   formatNumber,
   ilmPhase,
   indexName,
   incompatible: partitionedFieldMetadata.incompatible.length,
   patternDocsCount,
+  sizeInBytes,
 })}
 `;
 
 export const getStatsRollupMarkdownComment = ({
   docsCount,
+  formatBytes,
   formatNumber,
   incompatible,
   indices,
   indicesChecked,
+  sizeInBytes,
 }: {
   docsCount: number;
+  formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   incompatible: number | undefined;
   indices: number | undefined;
   indicesChecked: number | undefined;
+  sizeInBytes: number | undefined;
 }): string =>
-  `| ${INCOMPATIBLE_FIELDS} | ${INDICES_CHECKED} | ${INDICES} | ${DOCS} |
-|---------------------|-----------------|---------|------|
+  `| ${INCOMPATIBLE_FIELDS} | ${INDICES_CHECKED} | ${INDICES} | ${SIZE} | ${DOCS} |
+|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|${getHeaderSeparator(
+    INDICES_CHECKED
+  )}|${getHeaderSeparator(INDICES)}|${getHeaderSeparator(SIZE)}|${getHeaderSeparator(DOCS)}|
 | ${incompatible ?? EMPTY_STAT} | ${indicesChecked ?? EMPTY_STAT} | ${
     indices ?? EMPTY_STAT
-  } | ${formatNumber(docsCount)} |
+  } | ${formatBytes(sizeInBytes)} | ${formatNumber(docsCount)} |
 `;
 
 export const getDataQualitySummaryMarkdownComment = ({
+  formatBytes,
   formatNumber,
   totalDocsCount,
   totalIncompatible,
   totalIndices,
   totalIndicesChecked,
+  sizeInBytes,
 }: {
+  formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   totalDocsCount: number | undefined;
   totalIncompatible: number | undefined;
   totalIndices: number | undefined;
   totalIndicesChecked: number | undefined;
+  sizeInBytes: number | undefined;
 }): string =>
   `# ${DATA_QUALITY_TITLE}
 
 ${getStatsRollupMarkdownComment({
   docsCount: totalDocsCount ?? 0,
+  formatBytes,
   formatNumber,
   incompatible: totalIncompatible,
   indices: totalIndices,
   indicesChecked: totalIndicesChecked,
+  sizeInBytes,
 })}
 `;
 
@@ -355,13 +354,17 @@ export const getIlmExplainPhaseCountsMarkdownComment = ({
     unmanaged > 0 ? getCodeFormattedValue(`${UNMANAGED}(${unmanaged})`) : '',
     cold > 0 ? getCodeFormattedValue(`${COLD}(${cold})`) : '',
     frozen > 0 ? getCodeFormattedValue(`${FROZEN}(${frozen})`) : '',
-  ].join(' ');
+  ]
+    .filter((x) => x !== '') // prevents extra whitespace
+    .join(' ');
 
 export const getPatternSummaryMarkdownComment = ({
+  formatBytes,
   formatNumber,
   patternRollup,
   patternRollup: { docsCount, indices, ilmExplainPhaseCounts, pattern, results },
 }: {
+  formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   patternRollup: PatternRollup;
 }): string =>
@@ -374,9 +377,11 @@ ${
 
 ${getStatsRollupMarkdownComment({
   docsCount: docsCount ?? 0,
+  formatBytes,
   formatNumber,
   incompatible: getTotalPatternIncompatible(results),
   indices,
   indicesChecked: getTotalPatternIndicesChecked(patternRollup),
+  sizeInBytes: patternRollup.sizeInBytes,
 })}
 `;

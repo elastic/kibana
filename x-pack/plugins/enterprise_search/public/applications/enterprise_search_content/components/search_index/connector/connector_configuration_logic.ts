@@ -12,6 +12,7 @@ import {
   ConnectorStatus,
   Dependency,
   DependencyLookup,
+  DisplayType,
   SelectOption,
 } from '../../../../../../common/types/connectors';
 import { isNotNullish } from '../../../../../../common/utils/is_not_nullish';
@@ -55,25 +56,33 @@ interface ConnectorConfigurationValues {
 }
 
 export interface ConfigEntry {
+  default_value: string | number | boolean | null;
   depends_on: Dependency[];
-  display: string;
+  display: DisplayType;
   key: string;
   label: string;
   options: SelectOption[];
   order?: number;
   required: boolean;
   sensitive: boolean;
+  tooltip: string;
+  ui_restrictions: string[];
   value: string | number | boolean | null;
 }
 
 /**
  *
- * Sorts the connector configuration by specified order (if present)
+ * Sorts and filters the connector configuration
+ *
+ * Sorting is done by specified order (if present)
  * otherwise by alphabetic order of keys
  *
+ * Filtering is done on any fields with ui_restrictions
+ * or that have not had their dependencies met
+ *
  */
-function sortConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry[] {
-  return Object.keys(config)
+function sortAndFilterConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry[] {
+  const sortedConfig = Object.keys(config)
     .map(
       (key) =>
         ({
@@ -94,6 +103,20 @@ function sortConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry
       }
       return a.key.localeCompare(b.key);
     });
+
+  const dependencyLookup: DependencyLookup = sortedConfig.reduce(
+    (prev: Record<string, string | number | boolean | null>, configEntry: ConfigEntry) => ({
+      ...prev,
+      [configEntry.key]: configEntry.value,
+    }),
+    {}
+  );
+
+  return sortedConfig.filter(
+    (configEntry) =>
+      configEntry.ui_restrictions.length <= 0 &&
+      dependenciesSatisfied(configEntry.depends_on, dependencyLookup)
+  );
 }
 
 export function ensureStringType(value: string | number | boolean | null): string {
@@ -229,11 +252,38 @@ export const ConnectorConfigurationLogic = kea<
       {
         setLocalConfigEntry: (
           configState,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          { key, depends_on, display, label, options, order, required, sensitive, value }
+          {
+            key,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            default_value,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            depends_on,
+            display,
+            label,
+            options,
+            order,
+            required,
+            sensitive,
+            tooltip,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            ui_restrictions,
+            value,
+          }
         ) => ({
           ...configState,
-          [key]: { depends_on, display, label, options, order, required, sensitive, value },
+          [key]: {
+            default_value,
+            depends_on,
+            display,
+            label,
+            options,
+            order,
+            required,
+            sensitive,
+            tooltip,
+            ui_restrictions,
+            value,
+          },
         }),
         setLocalConfigState: (_, { configState }) => configState,
       },
@@ -249,11 +299,11 @@ export const ConnectorConfigurationLogic = kea<
   selectors: ({ selectors }) => ({
     configView: [
       () => [selectors.configState],
-      (configState: ConnectorConfiguration) => sortConnectorConfiguration(configState),
+      (configState: ConnectorConfiguration) => sortAndFilterConnectorConfiguration(configState),
     ],
     localConfigView: [
       () => [selectors.localConfigState],
-      (configState) => sortConnectorConfiguration(configState),
+      (configState) => sortAndFilterConnectorConfiguration(configState),
     ],
   }),
 });

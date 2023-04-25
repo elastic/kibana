@@ -131,6 +131,7 @@ export interface PluginSetupContract {
       RecoveryActionGroupId
     >
   ): void;
+
   getSecurityHealth: () => Promise<SecurityHealth>;
   getConfig: () => AlertingRulesConfig;
   frameworkAlerts: PublicFrameworkAlertsService;
@@ -219,7 +220,6 @@ export class AlertingPlugin {
     core: CoreSetup<AlertingPluginsStart, unknown>,
     plugins: AlertingPluginsSetup
   ): PluginSetupContract {
-    const kibanaIndex = core.savedObjects.getKibanaIndex();
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
@@ -284,13 +284,7 @@ export class AlertingPlugin {
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
       const eventLogIndex = this.eventLogService.getIndexPattern();
-      initializeAlertingTelemetry(
-        this.telemetryLogger,
-        core,
-        plugins.taskManager,
-        kibanaIndex,
-        eventLogIndex
-      );
+      initializeAlertingTelemetry(this.telemetryLogger, core, plugins.taskManager, eventLogIndex);
     }
 
     // Usage counter for telemetry
@@ -502,6 +496,10 @@ export class AlertingPlugin {
       return rulesSettingsClientFactory!.create(request);
     };
 
+    const getMaintenanceWindowClientWithRequest = (request: KibanaRequest) => {
+      return maintenanceWindowClientFactory!.create(request);
+    };
+
     taskRunnerFactory.initialize({
       logger,
       data: plugins.data,
@@ -528,6 +526,7 @@ export class AlertingPlugin {
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       usageCounter: this.usageCounter,
       getRulesSettingsClientWithRequest,
+      getMaintenanceWindowClientWithRequest,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {

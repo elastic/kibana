@@ -52,6 +52,14 @@ export function HeaderControl({ isLoading, slo }: Props) {
     setRuleFlyoutVisibility(true);
   };
 
+  const handleNavigateToRules = () => {
+    navigateToUrl(
+      basePath.prepend(
+        `${paths.observability.rules}?_a=(lastResponse:!(),search:%27%27,params:(sloId:%27${slo?.id}%27),status:!(),type:!())`
+      )
+    );
+  };
+
   const handleNavigateToApm = () => {
     if (
       slo?.indicator.type === 'sli.apm.transactionDuration' ||
@@ -121,9 +129,19 @@ export function HeaderControl({ isLoading, slo }: Props) {
               {i18n.translate(
                 'xpack.observability.slo.sloDetails.headerControl.createBurnRateRule',
                 {
-                  defaultMessage: 'Create alert rule',
+                  defaultMessage: 'Create new alert rule',
                 }
               )}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              key="manageRules"
+              disabled={!hasWriteCapabilities}
+              onClick={handleNavigateToRules}
+              data-test-subj="sloDetailsHeaderControlPopoverManageRules"
+            >
+              {i18n.translate('xpack.observability.slo.sloDetails.headerControl.manageRules', {
+                defaultMessage: 'Manage rules',
+              })}
             </EuiContextMenuItem>,
           ].concat(
             !!slo && isApmIndicatorType(slo.indicator.type)
@@ -145,6 +163,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
           )}
         />
       </EuiPopover>
+
       {!!slo && isRuleFlyoutVisible ? (
         <AddRuleFlyout
           consumer={sloFeatureId}
