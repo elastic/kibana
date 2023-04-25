@@ -26,17 +26,18 @@ node scripts/build \
   --docker-images \
   --docker-namespace="kibana-ci" \
   --docker-tag="git-$GIT_ABBREV_COMMIT" \
+  --skip-docker-ubuntu \
   --skip-docker-ubi \
   --skip-docker-cloud \
   --skip-docker-contexts
 
 echo "--- Tag images"
 docker rmi "$KIBANA_IMAGE"
-docker load < "target/kibana-$BASE_VERSION-docker-image.tar.gz"
+docker load < "target/kibana-serverless-$BASE_VERSION-docker-image.tar.gz"
 docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-amd64"
 
 docker rmi "$KIBANA_IMAGE"
-docker load < "target/kibana-$BASE_VERSION-docker-image-aarch64.tar.gz"
+docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.gz"
 docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
 
 echo "--- Push images"
