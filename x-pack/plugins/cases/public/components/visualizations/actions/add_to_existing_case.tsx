@@ -24,9 +24,8 @@ import { KibanaContextProvider, KibanaServices } from '../../../common/lib/kiban
 
 import { getUICapabilities } from '../../../client/helpers/capabilities';
 import type { CasesContextProps } from '../../cases_context';
-import CasesProvider, { CasesContext } from '../../cases_context';
+import CasesProvider from '../../cases_context';
 import { OWNER_INFO } from '../../../../common/constants';
-import { getCasesContextLazy } from '../../../client/ui/get_cases_context';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 
 export const ACTION_ID = 'embeddable_addToExistingCase';
