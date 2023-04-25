@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { firstNonNullValue } from '../../helpers';
@@ -23,20 +23,34 @@ interface GroupPanelProps<T> {
   groupingLevel?: number;
   isLoading: boolean;
   isNullGroup?: boolean;
+  nullGroupMessage: string;
   onGroupClose: () => void;
   onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket<T>) => void;
   renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
   selectedGroup: string;
 }
 
-const DefaultGroupPanelRenderer = ({ title }: { title: string }) => (
+const DefaultGroupPanelRenderer = ({
+  isNullGroup,
+  title,
+  nullGroupMessage,
+}: {
+  isNullGroup: boolean;
+  title: string;
+  nullGroupMessage: string;
+}) => (
   <div>
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiTitle size="xs" className="euiAccordionForm__title">
           <h4 className="eui-textTruncate">{title}</h4>
         </EuiTitle>
       </EuiFlexItem>
+      {isNullGroup && (
+        <EuiFlexItem grow={false}>
+          <EuiIconTip content={nullGroupMessage} position="right" />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   </div>
 );
@@ -55,6 +69,7 @@ const GroupPanelComponent = <T,>({
   onToggleGroup,
   renderChildComponent,
   selectedGroup,
+  nullGroupMessage,
 }: GroupPanelProps<T>) => {
   const lastForceState = useRef(forceState);
   useEffect(() => {
@@ -91,7 +106,13 @@ const GroupPanelComponent = <T,>({
       buttonClassName={customAccordionButtonClassName}
       buttonContent={
         <div data-test-subj="group-panel-toggle" className="groupingPanelRenderer">
-          {groupPanelRenderer ?? <DefaultGroupPanelRenderer title={groupFieldValue} />}
+          {groupPanelRenderer ?? (
+            <DefaultGroupPanelRenderer
+              title={groupFieldValue}
+              isNullGroup={isNullGroup}
+              nullGroupMessage={nullGroupMessage}
+            />
+          )}
         </div>
       }
       buttonElement="div"

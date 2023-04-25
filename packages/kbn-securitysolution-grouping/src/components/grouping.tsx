@@ -22,7 +22,7 @@ import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
 import { countCss, groupingContainerCss, groupingContainerCssLevel } from './styles';
-import { GROUPS_UNIT } from './translations';
+import { GROUPS_UNIT, NULL_GROUP } from './translations';
 import type { GroupingAggregation, GroupPanelRenderer } from './types';
 import { GroupStatsRenderer, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
@@ -96,11 +96,15 @@ const GroupingComponent = <T,>({
         const group = firstNonNullValue(groupBucket.key);
         const groupKey = `group-${groupNumber}-${group}`;
         const isNullGroup = groupBucket.nullGroup.doc_count > 0;
+        const nullGroupMessage = isNullGroup
+          ? NULL_GROUP(selectedGroup, unit(groupBucket.nullGroup.doc_count))
+          : '';
 
         return (
           <span key={groupKey}>
             <GroupPanel
               isNullGroup={isNullGroup}
+              nullGroupMessage={nullGroupMessage}
               onGroupClose={onGroupClose}
               extraAction={
                 <GroupStats
@@ -120,7 +124,8 @@ const GroupingComponent = <T,>({
               forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
               groupBucket={groupBucket}
               groupPanelRenderer={
-                groupPanelRenderer && groupPanelRenderer(selectedGroup, groupBucket)
+                groupPanelRenderer &&
+                groupPanelRenderer(selectedGroup, groupBucket, nullGroupMessage)
               }
               isLoading={isLoading}
               onToggleGroup={(isOpen) => {

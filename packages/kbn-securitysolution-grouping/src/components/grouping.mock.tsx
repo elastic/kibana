@@ -27,6 +27,7 @@ export const mockGroupingProps = {
           key: [rule1Name, rule1Desc],
           key_as_string: `${rule1Name}|${rule1Desc}`,
           doc_count: 1,
+          nullGroup: { doc_count: 0 },
           hostsCountAggregation: {
             value: 1,
           },
@@ -59,6 +60,7 @@ export const mockGroupingProps = {
           key: [rule2Name, rule2Desc],
           key_as_string: `${rule2Name}|${rule2Desc}`,
           doc_count: 1,
+          nullGroup: { doc_count: 0 },
           hostsCountAggregation: {
             value: 1,
           },

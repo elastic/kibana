@@ -188,6 +188,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           return getLevel(
             level + 1,
             selectedGroups[level + 1],
+            // stringify because if the filter is passed as an object, it will cause unnecessary re-rendering
             JSON.stringify([
               ...groupingFilters,
               ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),

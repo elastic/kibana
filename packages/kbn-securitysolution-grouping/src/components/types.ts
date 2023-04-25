@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
+// copied from common/search_strategy/common
 export interface GenericBuckets {
   key: string | string[];
   key_as_string?: string; // contains, for example, formatted dates
   doc_count: number;
 }
-export type MissingAggregation = Record<'nullGroup', GenericBuckets>;
+
 export const NONE_GROUP_KEY = 'none';
 
 export type RawBucket<T> = GenericBuckets & T;
+export type MissingAggregation = Record<'nullGroup', { doc_count: number }>;
 
 /** Defines the shape of the aggregation returned by Elasticsearch */
 // TODO: write developer docs for these fields
@@ -59,7 +61,8 @@ export type GroupStatsRenderer<T> = (
 
 export type GroupPanelRenderer<T> = (
   selectedGroup: string,
-  fieldBucket: RawBucket<T>
+  fieldBucket: RawBucket<T>,
+  nullGroupMessage: string
 ) => JSX.Element | undefined;
 
 export type OnGroupToggle = (params: {

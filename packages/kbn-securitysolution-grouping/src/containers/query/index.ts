@@ -76,6 +76,8 @@ export const getGroupingQuery = ({
             size,
           },
         },
+        // this agg will return a count when the bucket is of a missing field value
+        // this is so that we have a flag in the UI for the "missing" group
         nullGroup: {
           missing: {
             field: groupByFields[0],
