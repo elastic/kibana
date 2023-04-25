@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NO_DATA_LABEL = i18n.translate('ecsDataQualityDashboard.storageTreemap.noDataLabel', {
+export const NO_DATA_LABEL = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.storageTreemap.noDataLabel', {
   defaultMessage: 'No data to display',
 });
 
 export const NO_DATA_REASON_LABEL = (stackByField1: string) =>
-  i18n.translate('ecsDataQualityDashboard.storageTreemap.noDataReasonLabel', {
+  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.storageTreemap.noDataReasonLabel', {
     values: {
       stackByField1,
     },

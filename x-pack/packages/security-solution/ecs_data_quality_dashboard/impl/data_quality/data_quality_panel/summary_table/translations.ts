@@ -104,7 +104,7 @@ export const RESULT = i18n.translate(
   }
 );
 
-export const SIZE = i18n.translate('ecsDataQualityDashboard.summaryTable.sizeColumn', {
+export const SIZE = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.summaryTable.sizeColumn', {
   defaultMessage: 'Size',
 });
 

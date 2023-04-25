@@ -27,9 +27,3 @@ export const PATTERN_OR_INDEX_TOOLTIP = i18n.translate(
     defaultMessage: 'A pattern or specific index',
   }
 );
-
-export const PATTERN_DOCS_COUNT_TOOLTIP = (pattern: string) =>
-  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.patternDocsCountTooltip', {
-    values: { pattern },
-    defaultMessage: 'The total count from all indices matching: {pattern}',
-  });
