@@ -26,5 +26,8 @@
   "origin": "ui",
   "form_monitor_type": "icmp",
   "id": "",
-  "hash": ""
+  "hash": "",
+  "mode": "any",
+  "ipv4": true,
+  "ipv6": true
 }

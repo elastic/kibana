@@ -60,6 +60,7 @@ const ErrorsPopoverComponent: React.FC<Props> = ({ addSuccessToast, errorSummary
     () => (
       <EuiButtonEmpty
         aria-label={i18n.VIEW_ERRORS}
+        data-test-subj="viewErrors"
         disabled={errorSummary.length === 0}
         flush="both"
         onClick={onClick}
@@ -75,10 +76,11 @@ const ErrorsPopoverComponent: React.FC<Props> = ({ addSuccessToast, errorSummary
     <EuiPopover
       button={button}
       closePopover={closePopover}
+      data-test-subj="errorsPopover"
       isOpen={isPopoverOpen}
       panelPaddingSize="s"
     >
-      <CallOut color="danger" size="s" title={i18n.ERRORS}>
+      <CallOut color="danger" data-test-subj="callout" size="s" title={i18n.ERRORS}>
         <p>{i18n.ERRORS_CALLOUT_SUMMARY}</p>
 
         <p>{i18n.ERRORS_MAY_OCCUR}</p>
@@ -96,7 +98,13 @@ const ErrorsPopoverComponent: React.FC<Props> = ({ addSuccessToast, errorSummary
           </li>
         </ul>
 
-        <EuiButtonEmpty aria-label={i18n.COPY_TO_CLIPBOARD} flush="both" onClick={onCopy} size="xs">
+        <EuiButtonEmpty
+          aria-label={i18n.COPY_TO_CLIPBOARD}
+          data-test-subj="copyToClipboard"
+          flush="both"
+          onClick={onCopy}
+          size="xs"
+        >
           {i18n.COPY_TO_CLIPBOARD}
         </EuiButtonEmpty>
       </CallOut>

@@ -74,6 +74,10 @@ export const RESULT = i18n.translate('ecsDataQualityDashboard.summaryTable.resul
   defaultMessage: 'Result',
 });
 
+export const SIZE = i18n.translate('ecsDataQualityDashboard.summaryTable.sizeColumn', {
+  defaultMessage: 'Size',
+});
+
 export const THIS_INDEX_HAS_NOT_BEEN_CHECKED = i18n.translate(
   'ecsDataQualityDashboard.summaryTable.thisIndexHasNotBeenCheckedTooltip',
   {

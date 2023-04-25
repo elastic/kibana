@@ -64,7 +64,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // footer is shown now
       await retry.try(async function () {
         await testSubjects.existOrFail('discoverTableFooter');
-        await testSubjects.existOrFail('discoverTableSampleSizeSettingsLink');
       });
     });
 

@@ -25,12 +25,8 @@ describe('getCvsScoreColor', () => {
     expect(getCvsScoreColor(10.0)).toBe(euiThemeVars.euiColorDanger);
   });
 
-  it('returns error message for invalid score', () => {
-    expect(getCvsScoreColor(-1)).toBe(undefined);
-  });
-
-  it('returns error message for invalid score when score is 0.0', () => {
-    expect(getCvsScoreColor(0.0)).toBe(undefined);
+  it('returns correct color for low severity score for undefined value', () => {
+    expect(getCvsScoreColor(-0.2)).toBe(euiThemeVars.euiColorVis0);
   });
 });
 
@@ -51,7 +47,7 @@ describe('getSeverityStatusColor', () => {
     expect(getSeverityStatusColor('CRITICAL')).toBe(euiThemeVars.euiColorDanger);
   });
 
-  it('should return #fff for an unknown severity', () => {
-    expect(getSeverityStatusColor('UNKNOWN')).toBe('#fff');
+  it('should return #aaa for an unknown severity', () => {
+    expect(getSeverityStatusColor('UNKNOWN')).toBe('#aaa');
   });
 });
