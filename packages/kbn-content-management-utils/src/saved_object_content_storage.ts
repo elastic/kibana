@@ -63,6 +63,7 @@ function savedObjectToItem<Attributes extends object>(
     references,
     error,
     namespaces,
+    version,
   } = savedObject;
 
   return {
@@ -74,6 +75,7 @@ function savedObjectToItem<Attributes extends object>(
     references,
     error,
     namespaces,
+    version,
   };
 }
 

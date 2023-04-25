@@ -17,20 +17,7 @@ import {
   SavedObjectsClientCommonFindArgs,
 } from '../common/types';
 
-import type {
-  DataViewGetIn,
-  DataViewGetOut,
-  DataViewCreateIn,
-  DataViewCreateOut,
-  DataViewUpdateIn,
-  DataViewUpdateOut,
-  DataViewDeleteIn,
-  DataViewDeleteOut,
-  DataViewSearchIn,
-  DataViewSearchOut,
-  DataViewUpdateOptions,
-  DataViewCreateOptions,
-} from '../common/content_management';
+import type { DataViewCrudTypes } from '../common/content_management';
 
 import { DataViewSOType } from '../common/content_management';
 
@@ -46,7 +33,10 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   }
 
   async find(options: SavedObjectsClientCommonFindArgs) {
-    const results = await this.contentManagementClient.search<DataViewSearchIn, DataViewSearchOut>({
+    const results = await this.contentManagementClient.search<
+      DataViewCrudTypes['SearchIn'],
+      DataViewCrudTypes['SearchOut']
+    >({
       contentTypeId: DataViewSOType,
       query: {
         text: options.search,
@@ -60,9 +50,12 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   }
 
   async get(id: string) {
-    let response: DataViewGetOut;
+    let response: DataViewCrudTypes['GetOut'];
     try {
-      response = await this.contentManagementClient.get<DataViewGetIn, DataViewGetOut>({
+      response = await this.contentManagementClient.get<
+        DataViewCrudTypes['GetIn'],
+        DataViewCrudTypes['GetOut']
+      >({
         contentTypeId: DataViewSOType,
         id,
       });
@@ -77,6 +70,7 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     if (response.meta.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }
+
     return response.item;
   }
 
@@ -89,21 +83,29 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     return response.saved_object;
   }
 
-  async update(id: string, attributes: DataViewAttributes, options: DataViewUpdateOptions) {
-    const response = await this.contentManagementClient.update<DataViewUpdateIn, DataViewUpdateOut>(
-      {
-        contentTypeId: DataViewSOType,
-        id,
-        data: attributes,
-        options,
-      }
-    );
+  async update(
+    id: string,
+    attributes: DataViewAttributes,
+    options: DataViewCrudTypes['UpdateOptions']
+  ) {
+    const response = await this.contentManagementClient.update<
+      DataViewCrudTypes['UpdateIn'],
+      DataViewCrudTypes['UpdateOut']
+    >({
+      contentTypeId: DataViewSOType,
+      id,
+      data: attributes,
+      options,
+    });
 
     return response.item as SavedObject<DataViewAttributes>;
   }
 
-  async create(attributes: DataViewAttributes, options: DataViewCreateOptions) {
-    const result = await this.contentManagementClient.create<DataViewCreateIn, DataViewCreateOut>({
+  async create(attributes: DataViewAttributes, options: DataViewCrudTypes['CreateOptions']) {
+    const result = await this.contentManagementClient.create<
+      DataViewCrudTypes['CreateIn'],
+      DataViewCrudTypes['CreateOut']
+    >({
       contentTypeId: DataViewSOType,
       data: attributes,
       options,
@@ -113,7 +115,10 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   }
 
   async delete(id: string) {
-    await this.contentManagementClient.delete<DataViewDeleteIn, DataViewDeleteOut>({
+    await this.contentManagementClient.delete<
+      DataViewCrudTypes['DeleteIn'],
+      DataViewCrudTypes['DeleteOut']
+    >({
       contentTypeId: DataViewSOType,
       id,
     });

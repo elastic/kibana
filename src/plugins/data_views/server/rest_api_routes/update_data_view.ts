@@ -12,7 +12,11 @@ import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { DataViewsService, DataView } from '../../common/data_views';
 import { DataViewSpec } from '../../common/types';
 import { handleErrors } from './util/handle_errors';
-import { fieldSpecSchema, runtimeFieldSchema, serializedFieldFormatSchema } from './util/schemas';
+import {
+  fieldSpecSchema,
+  runtimeFieldSchema,
+  serializedFieldFormatSchema,
+} from '../../common/schemas';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import {
   SPECIFIC_DATA_VIEW_PATH,

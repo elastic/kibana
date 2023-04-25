@@ -6,25 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { LATEST_VERSION } from './constants';
-
-export type {
-  DataViewItem,
-  DataViewGetIn,
-  DataViewGetOut,
-  DataViewCreateIn,
-  DataViewCreateOut,
-  DataViewCreateOptions,
-  DataViewUpdateIn,
-  DataViewUpdateOut,
-  DataViewUpdateOptions,
-  DataViewDeleteIn,
-  DataViewDeleteOut,
-  DataViewSearchIn,
-  DataViewSearchOut,
-  DataViewSearchOptions,
-} from './types';
-
-export type { DataViewContentType } from './constants';
-
-export { DataViewSOType } from './constants';
+export * from './v1';
+export { cmServicesDefinition } from './cm_services';
