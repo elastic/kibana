@@ -35,7 +35,7 @@
             "section": "def-common.UserContentCommonSchema",
             "text": "UserContentCommonSchema"
           },
-          ">({ tableListTitle, tableListDescription, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, findItems, createItem, editItem, deleteItems, getDetailViewLink, onClickTitle, id: listingId, contentEditor, children, titleColumnName, additionalRightSideActions, withoutPageTemplateWrapper, }: ",
+          ">({ tableListTitle, tableListDescription, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, rowItemActions, findItems, createItem, editItem, deleteItems, getDetailViewLink, onClickTitle, id: listingId, contentEditor, children, titleColumnName, additionalRightSideActions, withoutPageTemplateWrapper, }: ",
           "Props",
           "<T>) => JSX.Element | null"
         ],
@@ -416,7 +416,23 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/content-management-table-list",
+        "id": "def-common.RowActions",
+        "type": "Type",
+        "tags": [],
+        "label": "RowActions",
+        "description": [],
+        "signature": [
+          "{ delete?: { enabled: boolean; reason?: string | undefined; } | undefined; }"
+        ],
+        "path": "packages/content-management/table_list/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

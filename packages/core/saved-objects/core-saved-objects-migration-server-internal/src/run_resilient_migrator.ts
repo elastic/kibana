@@ -15,12 +15,16 @@ import type {
   IndexMapping,
   SavedObjectsMigrationConfigType,
   MigrationResult,
+  IndexTypesMap,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { Defer } from './kibana_migrator_utils';
 import type { TransformRawDocs } from './types';
 import { next } from './next';
 import { model } from './model';
 import { createInitialState } from './initial_state';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
+import { cleanup } from './migrations_state_machine_cleanup';
+import type { State } from './state';
 
 /**
  * To avoid the Elasticsearch-js client aborting our requests before we
@@ -45,9 +49,13 @@ export async function runResilientMigrator({
   client,
   kibanaVersion,
   waitForMigrationCompletion,
+  mustRelocateDocuments,
+  indexTypesMap,
   targetMappings,
   logger,
   preMigrationScript,
+  readyToReindex,
+  doneReindexing,
   transformRawDocs,
   migrationVersionPerType,
   indexPrefix,
@@ -58,8 +66,12 @@ export async function runResilientMigrator({
   client: ElasticsearchClient;
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
+  mustRelocateDocuments: boolean;
+  indexTypesMap: IndexTypesMap;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
+  readyToReindex: Defer<any>;
+  doneReindexing: Defer<any>;
   logger: Logger;
   transformRawDocs: TransformRawDocs;
   migrationVersionPerType: SavedObjectsMigrationVersion;
@@ -71,6 +83,8 @@ export async function runResilientMigrator({
   const initialState = createInitialState({
     kibanaVersion,
     waitForMigrationCompletion,
+    mustRelocateDocuments,
+    indexTypesMap,
     targetMappings,
     preMigrationScript,
     migrationVersionPerType,
@@ -84,8 +98,12 @@ export async function runResilientMigrator({
   return migrationStateActionMachine({
     initialState,
     logger,
-    next: next(migrationClient, transformRawDocs),
+    next: next(migrationClient, transformRawDocs, readyToReindex, doneReindexing),
     model,
-    client: migrationClient,
+    abort: async (state?: State) => {
+      // At this point, we could reject this migrator's defers and unblock other migrators
+      // but we are going to throw and shutdown Kibana anyway, so there's no real point in it
+      await cleanup(client, state);
+    },
   });
 }

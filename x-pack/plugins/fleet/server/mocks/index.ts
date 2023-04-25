@@ -167,5 +167,7 @@ export function createMessageSigningServiceMock() {
     generateKeyPair: jest.fn(),
     sign: jest.fn(),
     getPublicKey: jest.fn(),
+    removeKeyPair: jest.fn(),
+    rotateKeyPair: jest.fn(),
   };
 }
