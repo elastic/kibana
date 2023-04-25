@@ -1291,7 +1291,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: (
       <FormattedMessage
         id="xpack.synthetics.monitorConfig.syntheticsArgs.mode.helpText"
-        defaultMessage="If mode is {any}, the monitor pings only one IP address for a hostname. If mode is {all}, the monitor pings all resolvable IPs for a hostname. The mode: {all} setting is useful if you are using a DNS-load balancer and want to ping every IP address for the specified hostname."
+        defaultMessage="If {any}, the monitor pings only one IP address for a hostname. If {all}, the monitor pings all resolvable IPs for a hostname. {all} is useful if you are using a DNS-load balancer and want to ping every IP address for the specified hostname."
         values={{
           all: <EuiCode>all</EuiCode>,
           any: <EuiCode>any</EuiCode>,
