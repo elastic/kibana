@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import type { DataViewListItem, DataView } from '@kbn/data-views-plugin/public';
 import { DataViewSelector } from '@kbn/unified-search-plugin/public';
+import type { DataViewListItemEnhanced } from '@kbn/unified-search-plugin/public/dataview_picker/dataview_list';
 import { useTriggerUiActionServices } from '../es_query/util';
 import { EsQueryRuleMetaData } from '../es_query/types';
 
@@ -32,11 +33,12 @@ export interface DataViewSelectPopoverProps {
   onChangeMetaData: (metadata: EsQueryRuleMetaData) => void;
 }
 
-const toDataViewListItem = (dataView: DataView): DataViewListItem => {
+const toDataViewListItem = (dataView: DataView): DataViewListItemEnhanced => {
   return {
     id: dataView.id!,
     title: dataView.title,
     name: dataView.name,
+    isAdhoc: !dataView.isPersisted(),
   };
 };
 
