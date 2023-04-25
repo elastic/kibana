@@ -228,7 +228,7 @@ const INVALID_SCHEDULE_ERROR = i18n.translate(
 const INVALID_SCHEDULE_DETAILS = (schedule: string) =>
   i18n.translate('xpack.synthetics.server.monitors.invalidScheduleDetails', {
     defaultMessage:
-      'Invalid schedule {schedule} minutes supplied to monitor configuration.Please use a supported monitor schedule.',
+      'Invalid schedule {schedule} minutes supplied to monitor configuration. Please use a supported monitor schedule.',
     values: {
       schedule,
     },
