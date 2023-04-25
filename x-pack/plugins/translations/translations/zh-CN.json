@@ -28491,8 +28491,6 @@
     "xpack.securitySolution.authz.mlUnavailable": "Machine Learning 插件不可用。请尝试启用插件。",
     "xpack.securitySolution.authz.userIsNotMlAdminMessage": "当前用户不是 Machine Learning 管理员。",
     "xpack.securitySolution.badge.readOnly.text": "只读",
-    "xpack.securitySolution.beatFields.errorSearchDescription": "获取 Beat 字段时发生错误",
-    "xpack.securitySolution.beatFields.failSearchDescription": "无法对 Beat 字段执行搜索",
     "xpack.securitySolution.blocklist.cardActionDeleteLabel": "删除阻止列表",
     "xpack.securitySolution.blocklist.cardActionEditLabel": "编辑阻止列表",
     "xpack.securitySolution.blocklist.conditions.header": "条件",
