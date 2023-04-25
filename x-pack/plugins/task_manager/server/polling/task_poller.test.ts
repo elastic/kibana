@@ -5,271 +5,259 @@
  * 2.0.
  */
 
+import sinon from 'sinon';
 import { of, BehaviorSubject } from 'rxjs';
 import { none } from 'fp-ts/lib/Option';
 import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
-import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { sleep, resolvable } from '../test_utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { asOk, asErr } from '../lib/result_type';
 
 describe('TaskPoller', () => {
-  beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
+  let clock: sinon.SinonFakeTimers;
 
-  test(
-    'intializes the poller with the provided interval',
-    fakeSchedulers(async (advance) => {
-      const pollInterval = 100;
-      const halfInterval = Math.floor(pollInterval / 2);
+  beforeEach(() => {
+    clock = sinon.useFakeTimers();
+  });
 
-      const work = jest.fn(async () => true);
-      createTaskPoller<void, boolean>({
-        initialPollInterval: pollInterval,
-        logger: loggingSystemMock.create().get(),
-        pollInterval$: of(pollInterval),
-        pollIntervalDelay$: of(0),
-        getCapacity: () => 1,
-        work,
-      }).start();
+  afterEach(() => clock.restore());
 
-      expect(work).toHaveBeenCalledTimes(1);
+  test('intializes the poller with the provided interval', async () => {
+    const pollInterval = 100;
+    const halfInterval = Math.floor(pollInterval / 2);
 
-      // `work` is async, we have to force a node `tick`
-      await sleep(0);
-      advance(halfInterval);
-      expect(work).toHaveBeenCalledTimes(1);
-      advance(halfInterval);
+    const work = jest.fn(async () => true);
+    createTaskPoller<void, boolean>({
+      initialPollInterval: pollInterval,
+      logger: loggingSystemMock.create().get(),
+      pollInterval$: of(pollInterval),
+      pollIntervalDelay$: of(0),
+      getCapacity: () => 1,
+      work,
+    }).start();
 
-      await sleep(0);
-      expect(work).toHaveBeenCalledTimes(2);
+    expect(work).toHaveBeenCalledTimes(1);
 
-      await sleep(0);
-      await sleep(0);
-      advance(pollInterval + 10);
-      await sleep(0);
-      expect(work).toHaveBeenCalledTimes(3);
-    })
-  );
+    // `work` is async, we have to force a node `tick`
+    await sleep(0);
+    clock.tick(halfInterval);
+    expect(work).toHaveBeenCalledTimes(1);
+    clock.tick(halfInterval);
 
-  test(
-    'poller adapts to pollInterval changes',
-    fakeSchedulers(async (advance) => {
-      const pollInterval = 100;
-      const pollInterval$ = new BehaviorSubject(pollInterval);
+    await sleep(0);
+    expect(work).toHaveBeenCalledTimes(2);
 
-      const work = jest.fn(async () => true);
-      createTaskPoller<void, boolean>({
-        initialPollInterval: pollInterval,
-        logger: loggingSystemMock.create().get(),
-        pollInterval$,
-        pollIntervalDelay$: of(0),
-        getCapacity: () => 1,
-        work,
-      }).start();
+    await sleep(0);
+    await sleep(0);
+    clock.tick(pollInterval + 10);
+    await sleep(0);
+    expect(work).toHaveBeenCalledTimes(3);
+  });
 
-      expect(work).toHaveBeenCalledTimes(1);
+  test('poller adapts to pollInterval changes', async () => {
+    const pollInterval = 100;
+    const pollInterval$ = new BehaviorSubject(pollInterval);
 
-      // `work` is async, we have to force a node `tick`
-      await sleep(0);
-      advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(2);
+    const work = jest.fn(async () => true);
+    createTaskPoller<void, boolean>({
+      initialPollInterval: pollInterval,
+      logger: loggingSystemMock.create().get(),
+      pollInterval$,
+      pollIntervalDelay$: of(0),
+      getCapacity: () => 1,
+      work,
+    }).start();
 
-      pollInterval$.next(pollInterval * 2);
+    expect(work).toHaveBeenCalledTimes(1);
 
-      // `work` is async, we have to force a node `tick`
-      await sleep(0);
-      advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(2);
-      advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(3);
+    // `work` is async, we have to force a node `tick`
+    await sleep(0);
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(2);
 
-      pollInterval$.next(pollInterval / 2);
+    pollInterval$.next(pollInterval * 2);
 
-      // `work` is async, we have to force a node `tick`
-      await sleep(0);
-      advance(pollInterval / 2);
-      expect(work).toHaveBeenCalledTimes(4);
-    })
-  );
+    // `work` is async, we have to force a node `tick`
+    await sleep(0);
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(2);
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(3);
 
-  test(
-    'filters interval polling on capacity',
-    fakeSchedulers(async (advance) => {
-      const pollInterval = 100;
+    pollInterval$.next(pollInterval / 2);
 
-      const work = jest.fn(async () => true);
+    // `work` is async, we have to force a node `tick`
+    await sleep(0);
+    clock.tick(pollInterval / 2);
+    expect(work).toHaveBeenCalledTimes(4);
+  });
 
-      let hasCapacity = true;
-      createTaskPoller<void, boolean>({
-        initialPollInterval: pollInterval,
-        logger: loggingSystemMock.create().get(),
-        pollInterval$: of(pollInterval),
-        pollIntervalDelay$: of(0),
-        work,
-        getCapacity: () => (hasCapacity ? 1 : 0),
-      }).start();
+  test('filters interval polling on capacity', async () => {
+    const pollInterval = 100;
 
-      expect(work).toHaveBeenCalledTimes(1);
+    const work = jest.fn(async () => true);
 
-      await sleep(0);
-      advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(2);
+    let hasCapacity = true;
+    createTaskPoller<void, boolean>({
+      initialPollInterval: pollInterval,
+      logger: loggingSystemMock.create().get(),
+      pollInterval$: of(pollInterval),
+      pollIntervalDelay$: of(0),
+      work,
+      getCapacity: () => (hasCapacity ? 1 : 0),
+    }).start();
 
-      await sleep(0);
-      advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(3);
+    expect(work).toHaveBeenCalledTimes(1);
 
-      hasCapacity = false;
+    await sleep(0);
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(2);
 
-      await sleep(0);
-      advance(pollInterval);
+    await sleep(0);
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(3);
 
-      await sleep(0);
-      advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(3);
+    hasCapacity = false;
 
-      await sleep(0);
-      advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(3);
+    await sleep(0);
+    clock.tick(pollInterval);
 
-      await sleep(0);
-      advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(3);
+    await sleep(0);
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(3);
 
-      hasCapacity = true;
+    await sleep(0);
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(3);
 
-      await sleep(0);
-      advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(4);
+    await sleep(0);
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(3);
 
-      await sleep(0);
-      advance(pollInterval);
-      expect(work).toHaveBeenCalledTimes(5);
-    })
-  );
+    hasCapacity = true;
 
-  test(
-    'waits for work to complete before emitting the next event',
-    fakeSchedulers(async (advance) => {
-      const pollInterval = 100;
+    await sleep(0);
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(4);
 
-      const worker = resolvable();
+    await sleep(0);
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(5);
+  });
 
-      const handler = jest.fn();
-      const poller = createTaskPoller<string, string[]>({
-        initialPollInterval: pollInterval,
-        logger: loggingSystemMock.create().get(),
-        pollInterval$: of(pollInterval),
-        pollIntervalDelay$: of(0),
-        work: async (...args) => {
-          await worker;
-          return args;
-        },
-        getCapacity: () => 5,
-      });
-      poller.events$.subscribe(handler);
-      poller.start();
+  test('waits for work to complete before emitting the next event', async () => {
+    const pollInterval = 100;
 
-      advance(pollInterval);
+    const worker = resolvable();
 
-      // work should now be in progress
+    const handler = jest.fn();
+    const poller = createTaskPoller<string, string[]>({
+      initialPollInterval: pollInterval,
+      logger: loggingSystemMock.create().get(),
+      pollInterval$: of(pollInterval),
+      pollIntervalDelay$: of(0),
+      work: async (...args) => {
+        await worker;
+        return args;
+      },
+      getCapacity: () => 5,
+    });
+    poller.events$.subscribe(handler);
+    poller.start();
 
-      advance(pollInterval);
-      await sleep(pollInterval);
+    clock.tick(pollInterval);
 
-      expect(handler).toHaveBeenCalledTimes(0);
+    // work should now be in progress
 
-      worker.resolve();
+    clock.tick(pollInterval);
+    await sleep(pollInterval);
 
-      advance(pollInterval);
-      await sleep(pollInterval);
+    expect(handler).toHaveBeenCalledTimes(0);
 
-      expect(handler).toHaveBeenCalledTimes(1);
+    worker.resolve();
 
-      advance(pollInterval);
+    clock.tick(pollInterval);
+    await sleep(pollInterval);
 
-      expect(handler).toHaveBeenCalledTimes(1);
-    })
-  );
+    expect(handler).toHaveBeenCalledTimes(1);
 
-  test(
-    'returns an error when polling for work fails',
-    fakeSchedulers(async (advance) => {
-      const pollInterval = 100;
+    clock.tick(pollInterval);
 
-      const handler = jest.fn();
-      const poller = createTaskPoller<string, string[]>({
-        initialPollInterval: pollInterval,
-        logger: loggingSystemMock.create().get(),
-        pollInterval$: of(pollInterval),
-        pollIntervalDelay$: of(0),
-        work: async (...args) => {
-          throw new Error('failed to work');
-        },
-        getCapacity: () => 5,
-      });
-      poller.events$.subscribe(handler);
-      poller.start();
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
 
-      advance(pollInterval);
-      await sleep(0);
+  test('returns an error when polling for work fails', async () => {
+    const pollInterval = 100;
 
-      const expectedError = new PollingError<string>(
-        'Failed to poll for work: Error: failed to work',
-        PollingErrorType.WorkError,
-        none
-      );
-      expect(handler).toHaveBeenCalledWith(asErr(expectedError));
-      expect(handler.mock.calls[0][0].error.type).toEqual(PollingErrorType.WorkError);
-    })
-  );
+    const handler = jest.fn();
+    const poller = createTaskPoller<string, string[]>({
+      initialPollInterval: pollInterval,
+      logger: loggingSystemMock.create().get(),
+      pollInterval$: of(pollInterval),
+      pollIntervalDelay$: of(0),
+      work: async (...args) => {
+        throw new Error('failed to work');
+      },
+      getCapacity: () => 5,
+    });
+    poller.events$.subscribe(handler);
+    poller.start();
 
-  test(
-    'continues polling after work fails',
-    fakeSchedulers(async (advance) => {
-      const pollInterval = 100;
+    clock.tick(pollInterval);
+    await sleep(0);
 
-      const handler = jest.fn();
-      let callCount = 0;
-      const work = jest.fn(async () => {
-        callCount++;
-        if (callCount === 2) {
-          throw new Error('failed to work');
-        }
-        return callCount;
-      });
-      const poller = createTaskPoller<string, number>({
-        initialPollInterval: pollInterval,
-        logger: loggingSystemMock.create().get(),
-        pollInterval$: of(pollInterval),
-        pollIntervalDelay$: of(0),
-        work,
-        getCapacity: () => 5,
-      });
-      poller.events$.subscribe(handler);
-      poller.start();
+    const expectedError = new PollingError<string>(
+      'Failed to poll for work: Error: failed to work',
+      PollingErrorType.WorkError,
+      none
+    );
+    expect(handler).toHaveBeenCalledWith(asErr(expectedError));
+    expect(handler.mock.calls[0][0].error.type).toEqual(PollingErrorType.WorkError);
+  });
 
-      advance(pollInterval);
-      await sleep(0);
+  test('continues polling after work fails', async () => {
+    const pollInterval = 100;
 
-      expect(handler).toHaveBeenCalledWith(asOk(1));
+    const handler = jest.fn();
+    let callCount = 0;
+    const work = jest.fn(async () => {
+      callCount++;
+      if (callCount === 2) {
+        throw new Error('failed to work');
+      }
+      return callCount;
+    });
+    const poller = createTaskPoller<string, number>({
+      initialPollInterval: pollInterval,
+      logger: loggingSystemMock.create().get(),
+      pollInterval$: of(pollInterval),
+      pollIntervalDelay$: of(0),
+      work,
+      getCapacity: () => 5,
+    });
+    poller.events$.subscribe(handler);
+    poller.start();
 
-      advance(pollInterval);
-      await sleep(0);
+    clock.tick(pollInterval);
+    await sleep(0);
 
-      const expectedError = new PollingError<string>(
-        'Failed to poll for work: Error: failed to work',
-        PollingErrorType.WorkError,
-        none
-      );
-      expect(handler).toHaveBeenCalledWith(asErr(expectedError));
-      expect(handler.mock.calls[1][0].error.type).toEqual(PollingErrorType.WorkError);
-      expect(handler).not.toHaveBeenCalledWith(asOk(2));
+    expect(handler).toHaveBeenCalledWith(asOk(1));
 
-      advance(pollInterval);
-      await sleep(0);
+    clock.tick(pollInterval);
+    await sleep(0);
 
-      expect(handler).toHaveBeenCalledWith(asOk(3));
-    })
-  );
+    const expectedError = new PollingError<string>(
+      'Failed to poll for work: Error: failed to work',
+      PollingErrorType.WorkError,
+      none
+    );
+    expect(handler).toHaveBeenCalledWith(asErr(expectedError));
+    expect(handler.mock.calls[1][0].error.type).toEqual(PollingErrorType.WorkError);
+    expect(handler).not.toHaveBeenCalledWith(asOk(2));
+
+    clock.tick(pollInterval);
+    await sleep(0);
+
+    expect(handler).toHaveBeenCalledWith(asOk(3));
+  });
 });
