@@ -56,6 +56,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "endpoint:user-artifact",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -270,6 +275,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "endpoint:user-artifact",
                       },
                     },
                     Object {
@@ -496,6 +506,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "endpoint:user-artifact",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -718,6 +733,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "endpoint:user-artifact",
                       },
                     },
                     Object {
@@ -996,6 +1016,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "endpoint:user-artifact",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -1221,6 +1246,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "endpoint:user-artifact",
                       },
                     },
                     Object {
