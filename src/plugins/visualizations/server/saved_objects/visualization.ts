@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
@@ -14,6 +15,7 @@ export const getVisualizationSavedObjectType = (
   getSearchSourceMigrations: () => MigrateFunctionsObject
 ): SavedObjectsType => ({
   name: 'visualization',
+  indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',

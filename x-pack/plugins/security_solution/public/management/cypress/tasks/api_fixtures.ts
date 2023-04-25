@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type {
-  RuleCreateProps,
-  RuleResponse,
-} from '../../../../common/detection_engine/rule_schema';
+import type { CaseResponse } from '@kbn/cases-plugin/common';
+import type { RuleResponse } from '../../../../common/detection_engine/rule_schema';
 import { request } from './common';
 
 export const generateRandomStringName = (length: number) =>
@@ -18,9 +16,10 @@ export const cleanupRule = (id: string) => {
   request({ method: 'DELETE', url: `/api/detection_engine/rules?id=${id}` });
 };
 
-export const loadRule = () =>
+export const loadRule = (includeResponseActions = true) =>
   request<RuleResponse>({
     method: 'POST',
+    url: `/api/detection_engine/rules`,
     body: {
       type: 'query',
       index: [
@@ -56,9 +55,35 @@ export const loadRule = () =>
       actions: [],
       enabled: true,
       throttle: 'no_actions',
-      response_actions: [
-        { params: { command: 'isolate', comment: 'Isolate host' }, action_type_id: '.endpoint' },
-      ],
-    } as RuleCreateProps,
-    url: `/api/detection_engine/rules`,
+      ...(includeResponseActions
+        ? {
+            response_actions: [
+              {
+                params: { command: 'isolate', comment: 'Isolate host' },
+                action_type_id: '.endpoint',
+              },
+            ],
+          }
+        : {}),
+    },
   }).then((response) => response.body);
+
+export const loadCase = (owner: string) =>
+  request<CaseResponse>({
+    method: 'POST',
+    url: '/api/cases',
+    body: {
+      title: `Test ${owner} case ${generateRandomStringName(1)[0]}`,
+      tags: [],
+      severity: 'low',
+      description: 'Test security case',
+      assignees: [],
+      connector: { id: 'none', name: 'none', type: '.none', fields: null },
+      settings: { syncAlerts: true },
+      owner,
+    },
+  }).then((response) => response.body);
+
+export const cleanupCase = (id: string) => {
+  request({ method: 'DELETE', url: '/api/cases', qs: { ids: JSON.stringify([id]) } });
+};
