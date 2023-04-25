@@ -193,6 +193,7 @@ export interface ProcessEvent {
     kind?: EventKind;
     category?: string | string[];
     action?: EventAction | EventAction[];
+    type?: string | string[];
     id?: string;
   };
   file?: {

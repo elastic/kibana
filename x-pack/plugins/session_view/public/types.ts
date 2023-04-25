@@ -139,6 +139,7 @@ export interface DetailPanelCloud {
   };
   project: {
     id: string;
+    name: string;
   };
   provider: string;
   region: string;
