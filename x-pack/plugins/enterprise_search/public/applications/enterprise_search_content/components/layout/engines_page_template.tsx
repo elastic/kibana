@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useEuiBackgroundColor } from '@elastic/eui';
 import React from 'react';
+
+import { useEuiBackgroundColor } from '@elastic/eui';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { SetEnterpriseSearchEnginesChrome } from '../../../shared/kibana_chrome';

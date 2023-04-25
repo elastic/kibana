@@ -69,7 +69,6 @@ export const EngineConnect: React.FC = () => {
         isLoading={isLoadingEngine}
         pageHeader={{
           bottomBorder: false,
-          // css: { 'background-color': color },
           pageTitle,
           rightSideItems: [],
         }}
