@@ -451,7 +451,10 @@ export class HeadlessChromiumDriver {
 
   public async getVersion() {
     const client = this.page._client();
-    return await client.send('Browser.getVersion');
+    const response = await client.send('Browser.getVersion');
+    const { product, revision, userAgent, jsVersion, protocolVersion } = response;
+    const version = `product:"${product}" rev:"${revision}" ua:"${userAgent}" jsVersion:"${jsVersion}" protocolVersion:"${protocolVersion}"`;
+    return version;
   }
 
   private async launchDebugger() {
