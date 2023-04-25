@@ -7,7 +7,7 @@
 
 import { useHostsTable } from './use_hosts_table';
 import { renderHook } from '@testing-library/react-hooks';
-import { SnapshotNode } from '../../../../../common/http_api';
+import { InfraAssetMetricsItem } from '../../../../../common/http_api';
 import * as useUnifiedSearchHooks from './use_unified_search';
 import * as useHostsViewHooks from './use_hosts_view';
 
@@ -22,20 +22,20 @@ const mockUseHostsViewContext = useHostsViewHooks.useHostsViewContext as jest.Mo
   typeof useHostsViewHooks.useHostsViewContext
 >;
 
-const mockHostNode: SnapshotNode[] = [
+const mockHostNode: InfraAssetMetricsItem[] = [
   {
     metrics: [
       {
         name: 'rx',
-        avg: 252456.92916666667,
+        value: 252456.92916666667,
       },
       {
         name: 'tx',
-        avg: 252758.425,
+        value: 252758.425,
       },
       {
         name: 'memory',
-        avg: 0.94525,
+        value: 0.94525,
       },
       {
         name: 'cpu',
@@ -43,25 +43,28 @@ const mockHostNode: SnapshotNode[] = [
       },
       {
         name: 'memoryTotal',
-        avg: 34359.738368,
+        value: 34359.738368,
       },
     ],
-    path: [{ value: 'host-0', label: 'host-0', os: null, cloudProvider: 'aws' }],
+    metadata: [
+      { name: 'host.os.name', value: null },
+      { name: 'cloud.provider', value: 'aws' },
+    ],
     name: 'host-0',
   },
   {
     metrics: [
       {
         name: 'rx',
-        avg: 95.86339715321859,
+        value: 95.86339715321859,
       },
       {
         name: 'tx',
-        avg: 110.38566859563191,
+        value: 110.38566859563191,
       },
       {
         name: 'memory',
-        avg: 0.5400000214576721,
+        value: 0.5400000214576721,
       },
       {
         name: 'cpu',
@@ -69,12 +72,12 @@ const mockHostNode: SnapshotNode[] = [
       },
       {
         name: 'memoryTotal',
-        avg: 9.194304,
+        value: 9.194304,
       },
     ],
-    path: [
-      { value: 'host-1', label: 'host-1' },
-      { value: 'host-1', label: 'host-1', ip: '243.86.94.22', os: 'macOS' },
+    metadata: [
+      { name: 'host.os.name', value: 'macOS' },
+      { name: 'host.ip', value: '243.86.94.22' },
     ],
     name: 'host-1',
   },

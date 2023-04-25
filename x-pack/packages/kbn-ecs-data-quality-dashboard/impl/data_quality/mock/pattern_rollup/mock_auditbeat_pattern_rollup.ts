@@ -45,10 +45,17 @@ export const auditbeatNoResults: PatternRollup = {
   indices: 3,
   pattern: 'auditbeat-*',
   results: undefined, // <-- no results
+  sizeInBytes: 18820446,
   stats: {
     '.ds-auditbeat-8.6.1-2023.02.07-000001': {
       uuid: 'YpxavlUVTw2x_E_QtADrpg',
       health: 'yellow',
+      primaries: {
+        store: {
+          size_in_bytes: 18791790,
+          reserved_in_bytes: 0,
+        },
+      },
       status: 'open',
       total: {
         docs: {
@@ -60,6 +67,12 @@ export const auditbeatNoResults: PatternRollup = {
     'auditbeat-custom-empty-index-1': {
       uuid: 'Iz5FJjsLQla34mD6kBAQBw',
       health: 'yellow',
+      primaries: {
+        store: {
+          size_in_bytes: 247,
+          reserved_in_bytes: 0,
+        },
+      },
       status: 'open',
       total: {
         docs: {
@@ -71,6 +84,12 @@ export const auditbeatNoResults: PatternRollup = {
     'auditbeat-custom-index-1': {
       uuid: 'xJvgb2QCQPSjlr7UnW8tFA',
       health: 'yellow',
+      primaries: {
+        store: {
+          size_in_bytes: 28409,
+          reserved_in_bytes: 0,
+        },
+      },
       status: 'open',
       total: {
         docs: {
@@ -152,10 +171,17 @@ export const auditbeatWithAllResults: PatternRollup = {
       pattern: 'auditbeat-*',
     },
   },
+  sizeInBytes: 18820446,
   stats: {
     '.ds-auditbeat-8.6.1-2023.02.07-000001': {
       uuid: 'YpxavlUVTw2x_E_QtADrpg',
       health: 'yellow',
+      primaries: {
+        store: {
+          size_in_bytes: 18791790,
+          reserved_in_bytes: 0,
+        },
+      },
       status: 'open',
       total: {
         docs: {
@@ -167,6 +193,12 @@ export const auditbeatWithAllResults: PatternRollup = {
     'auditbeat-custom-empty-index-1': {
       uuid: 'Iz5FJjsLQla34mD6kBAQBw',
       health: 'yellow',
+      primaries: {
+        store: {
+          size_in_bytes: 247,
+          reserved_in_bytes: 0,
+        },
+      },
       status: 'open',
       total: {
         docs: {
@@ -178,6 +210,12 @@ export const auditbeatWithAllResults: PatternRollup = {
     'auditbeat-custom-index-1': {
       uuid: 'xJvgb2QCQPSjlr7UnW8tFA',
       health: 'yellow',
+      primaries: {
+        store: {
+          size_in_bytes: 28409,
+          reserved_in_bytes: 0,
+        },
+      },
       status: 'open',
       total: {
         docs: {
