@@ -42,8 +42,8 @@ export const getAlertsGroupingQuery = ({
   getGroupingQuery({
     additionalFilters,
     from,
-    groupByFields: !isNoneGroup(selectedGroup) ? getGroupFields(selectedGroup) : [],
-    statsAggregations: !isNoneGroup(selectedGroup)
+    groupByFields: !isNoneGroup([selectedGroup]) ? getGroupFields(selectedGroup) : [],
+    statsAggregations: !isNoneGroup([selectedGroup])
       ? getAggregationsByGroupField(selectedGroup)
       : [],
     pageNumber: pageIndex * pageSize,
@@ -51,7 +51,7 @@ export const getAlertsGroupingQuery = ({
       {
         unitsCount: { value_count: { field: selectedGroup } },
       },
-      ...(!isNoneGroup(selectedGroup)
+      ...(!isNoneGroup([selectedGroup])
         ? [{ groupsCount: { cardinality: { field: selectedGroup } } }]
         : []),
     ],

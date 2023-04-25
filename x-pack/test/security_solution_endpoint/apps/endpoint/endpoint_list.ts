@@ -33,33 +33,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Actions',
     ],
     [
-      'Host-dpu1a2r2yi',
+      'Host-9qenwrl9ko',
       'x',
       'x',
       'Warning',
       'Linux',
-      '10.2.17.24, 10.56.215.200,10.254.196.130',
+      '10.56.228.101, 10.201.120.140,10.236.180.146',
       'x',
       'x',
       '',
     ],
-    [
-      'Host-rs9wp4o6l9',
-      'x',
-      'x',
-      'Success',
-      'Linux',
-      '10.138.79.131, 10.170.160.154',
-      'x',
-      'x',
-      '',
-    ],
+    ['Host-qw2bti801m', 'x', 'x', 'Failure', 'macOS', '10.244.59.227', 'x', 'x', ''],
     [
       'Host-u5jy6j0pwb',
       'x',
       'x',
       'Warning',
-      'Linux',
+      'macOS',
       '10.87.11.145, 10.117.106.109,10.242.136.97',
       'x',
       'x',
@@ -81,9 +71,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return tableData;
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/154917
-  // Failing: See https://github.com/elastic/kibana/issues/154916
-  describe.skip('endpoint list', function () {
+  describe('endpoint list', function () {
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     let indexedData: IndexedHostsAndAlertsResponse;
     describe('when initially navigating to page', () => {

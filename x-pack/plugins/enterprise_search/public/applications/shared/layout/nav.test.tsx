@@ -285,9 +285,9 @@ describe('useEnterpriseSearchEngineNav', () => {
       id: 'engineId',
       items: [
         {
-          href: `/app/enterprise_search/content/engines/${engineName}/overview`,
-          id: 'enterpriseSearchEngineOverview',
-          name: 'Overview',
+          href: `/app/enterprise_search/content/engines/${engineName}/preview`,
+          id: 'enterpriseSearchEnginePreview',
+          name: 'Preview',
         },
         {
           href: `/app/enterprise_search/content/engines/${engineName}/indices`,
@@ -300,14 +300,9 @@ describe('useEnterpriseSearchEngineNav', () => {
           name: 'Schema',
         },
         {
-          href: `/app/enterprise_search/content/engines/${engineName}/preview`,
-          id: 'enterpriseSearchEnginePreview',
-          name: 'Preview',
-        },
-        {
-          href: `/app/enterprise_search/content/engines/${engineName}/api`,
-          id: 'enterpriseSearchEngineAPI',
-          name: 'API',
+          href: `/app/enterprise_search/content/engines/${engineName}/connect`,
+          id: 'enterpriseSearchApplicationConnect',
+          name: 'Connect',
         },
       ],
       name: engineName,
