@@ -16,7 +16,6 @@ import { createSlackConnectorAndObjectRemover, getConnectorByName } from './util
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
-  const find = getService('find');
   const retry = getService('retry');
   const supertest = getService('supertest');
   const actions = getService('actions');
@@ -105,13 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         return response.body.data[0].id;
       };
 
-      const selectSlackConnectorInRuleAction = async ({
-        name,
-        connectorId,
-      }: {
-        name: string;
-        connectorId: string;
-      }) => {
+      const selectSlackConnectorInRuleAction = async ({ connectorId }: { connectorId: string }) => {
         await testSubjects.click('.slack-alerting-ActionTypeSelectOption'); // "Slack" in connector list
         await testSubjects.click('selectActionConnector-.slack-0');
         await testSubjects.click(`dropdown-connector-${connectorId}`);
@@ -141,7 +134,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const ruleName = await setupRule();
 
         await selectSlackConnectorInRuleAction({
-          name: webhookConnectorName,
           connectorId: webhookAction.id,
         });
         await testSubjects.click('saveRuleButton');
@@ -165,19 +157,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
       });
 
-      // it('should save web api type slack connectors', async () => {
-      //   // select the web api connector
-      //   // click on submit
-      //   // check that the rule with this name exists in the rule list
-      //   await testSubjects.click('saveRuleButton');
-      // });
-
-      it.only('should save webapi type slack connectors', async () => {
+      it('should save webapi type slack connectors', async () => {
         const ruleName = await setupRule();
 
-        console.log('webApiConnectorName:', webApiConnectorName);
         await selectSlackConnectorInRuleAction({
-          name: webApiConnectorName,
           connectorId: webApiAction.id,
         });
         await new Promise((resolve) => setTimeout(resolve, 100000));
