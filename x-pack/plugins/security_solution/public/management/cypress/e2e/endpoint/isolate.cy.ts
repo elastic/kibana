@@ -9,7 +9,8 @@ import type { Agent } from '@kbn/fleet-plugin/common';
 import { APP_CASES_PATH, APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/close_all_toasts';
 import {
-  checkEndpointListForIsolatedHosts,
+  checkEndpointListForOnlyIsolatedHosts,
+  checkEndpointListForOnlyUnIsolatedHosts,
   checkFlyoutEndpointIsolation,
   createAgentPolicyTask,
   filterOutEndpoints,
@@ -69,7 +70,7 @@ describe('Isolate command', () => {
     it('should allow filtering endpoint by Isolated status', () => {
       cy.visit(APP_ENDPOINTS_PATH);
       closeAllToasts();
-      checkEndpointListForIsolatedHosts(false);
+      checkEndpointListForOnlyUnIsolatedHosts();
 
       filterOutIsolatedHosts();
       cy.contains('No items found');
@@ -87,7 +88,7 @@ describe('Isolate command', () => {
       cy.getByTestSubj('rowHostStatus-actionStatuses').should('contain.text', 'Isolated');
       filterOutIsolatedHosts();
 
-      checkEndpointListForIsolatedHosts();
+      checkEndpointListForOnlyIsolatedHosts();
 
       cy.getByTestSubj('endpointTableRowActions').click();
       cy.getByTestSubj('unIsolateLink').click();
@@ -96,7 +97,7 @@ describe('Isolate command', () => {
       cy.getByTestSubj('euiFlyoutCloseButton').click();
       cy.getByTestSubj('adminSearchBar').click().type('{selectall}{backspace}');
       cy.getByTestSubj('querySubmitButton').click();
-      checkEndpointListForIsolatedHosts(false);
+      checkEndpointListForOnlyUnIsolatedHosts();
     });
   });
 
