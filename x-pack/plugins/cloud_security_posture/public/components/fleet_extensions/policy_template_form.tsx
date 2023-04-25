@@ -43,6 +43,7 @@ import {
   PolicyTemplateVarsForm,
 } from './policy_template_selectors';
 import { assert } from '../../../common/utils/helpers';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -97,6 +98,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       [onChange]
     );
 
+    const getSetupStatus = useCspSetupStatusApi();
+    const installedPackagePolicyCount = Object.entries(getSetupStatus?.data ?? {})?.find(
+      ([key, _value]) => key === integration
+    )?.[1]?.installedPackagePolicies;
+
+    const currentPackagePolicyCount =
+      typeof installedPackagePolicyCount === 'number' ? installedPackagePolicyCount + 1 : undefined;
     /**
      * - Updates policy inputs by user selection
      * - Updates hidden policy vars
@@ -140,7 +148,14 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading, input.policy_template, isEditPage]);
 
-    usePolicyTemplateInitialName({ isEditPage, isLoading, integration, newPolicy, updatePolicy });
+    usePolicyTemplateInitialName({
+      isEditPage,
+      isLoading,
+      integration,
+      newPolicy,
+      updatePolicy,
+      currentPackagePolicyCount,
+    });
 
     useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
 
@@ -180,7 +195,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     ];
 
     return (
-      <div>
+      <div data-test-subj={'test'}>
         {isEditPage && <EditScreenStepTitle />}
         {/* Defines the enabled policy template */}
         {!integration && (
@@ -228,19 +243,21 @@ const usePolicyTemplateInitialName = ({
   integration,
   newPolicy,
   updatePolicy,
+  currentPackagePolicyCount,
 }: {
   isEditPage: boolean;
   isLoading: boolean;
   integration: CloudSecurityPolicyTemplate | undefined;
   newPolicy: NewPackagePolicy;
+  currentPackagePolicyCount: number | undefined;
   updatePolicy: (policy: NewPackagePolicy) => void;
 }) => {
   useEffect(() => {
     if (!integration) return;
     if (isEditPage) return;
     if (isLoading) return;
-    const sequenceNumber = newPolicy.name.replace(/\D/g, '');
-    const sequenceSuffix = sequenceNumber ? `-${sequenceNumber}` : '';
+
+    const sequenceSuffix = currentPackagePolicyCount ? `-${currentPackagePolicyCount}` : '';
     const currentIntegrationName = `${integration}${sequenceSuffix}`;
     if (newPolicy.name === currentIntegrationName) {
       return;

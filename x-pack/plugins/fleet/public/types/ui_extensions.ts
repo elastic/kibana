@@ -35,6 +35,7 @@ export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
 ) & {
   validationResults?: PackagePolicyValidationResults;
   agentPolicy?: AgentPolicy;
+  currentPackagePolicyCount: number | undefined;
   packageInfo: PackageInfo;
 };
 
@@ -50,6 +51,7 @@ export interface PackagePolicyEditExtensionComponentProps {
   policy: PackagePolicy;
   /** The new (updated) integration policy that will be saved */
   newPolicy: NewPackagePolicy;
+  currentPackagePolicyCount: number | undefined;
   /**
    * A callback that should be executed anytime a change to the Integration Policy needs to
    * be reported back to the Fleet Policy Edit page.
@@ -74,6 +76,7 @@ export type PackagePolicyResponseExtensionComponent =
   ComponentType<PackagePolicyResponseExtensionComponentProps>;
 
 export interface PackagePolicyResponseExtensionComponentProps {
+  currentPackagePolicyCount: number | undefined;
   /** The current agent to retrieve response from */
   agent: Agent;
   /** A callback function to set the `needs attention` state */
