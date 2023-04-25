@@ -71,7 +71,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
             .concat(warnings)
             .join('\n');
 
-          const body = { success: Boolean(warnings.length), logs, help: [] };
+          const body = { success: warnings.length === 0, logs, help: [] };
 
           // NOTE: the screenshot could be returned as a string using `data:image/png;base64,` + results.buffer.toString('base64')
 
