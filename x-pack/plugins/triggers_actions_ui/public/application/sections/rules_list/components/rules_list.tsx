@@ -720,6 +720,10 @@ export const RulesList = ({
 
   return (
     <>
+      {showSearchBar && !isEmpty(filters.ruleParams) ? (
+        <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
+      ) : null}
+
       <RulesListPrompts
         showNoAuthPrompt={showNoAuthPrompt}
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}
@@ -802,10 +806,6 @@ export const RulesList = ({
           />
         )}
         <EuiSpacer size="xs" />
-
-        {showSearchBar && !isEmpty(filters.ruleParams) ? (
-          <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
-        ) : null}
 
         {showRulesList && (
           <>
