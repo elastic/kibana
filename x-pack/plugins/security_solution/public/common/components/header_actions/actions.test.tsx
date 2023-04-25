@@ -384,7 +384,7 @@ describe('Actions', () => {
         event: { kind: ['alert'] },
         agent: { type: ['endpoint'] },
         process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
-        _index: 'logs-endpoint.events.process*',
+        _index: '.ds-logs-endpoint.events.process-default',
       };
 
       const wrapper = mount(
@@ -402,7 +402,7 @@ describe('Actions', () => {
         event: { kind: ['alert'] },
         agent: { type: ['endpoint'] },
         process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
-        _index: 'logs-endpoint.events.process*',
+        _index: '.ds-logs-endpoint.events.process-default',
       };
 
       const wrapper = mount(
@@ -428,7 +428,7 @@ describe('Actions', () => {
         event: { kind: ['alert'] },
         agent: { type: ['endpoint'] },
         process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
-        _index: 'logs-endpoint.events.process*',
+        _index: '.ds-logs-endpoint.events.process-default',
       };
 
       const wrapper = mount(
