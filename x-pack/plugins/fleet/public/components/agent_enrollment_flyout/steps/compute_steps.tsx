@@ -156,6 +156,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
       InstallStandaloneAgentStep({
         installCommand: standaloneInstallCommands,
         isK8s,
+        isCSP,
       })
     );
 
@@ -163,6 +164,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   }, [
     kibanaVersion,
     isK8s,
+    isCSP,
     agentPolicy,
     selectedPolicy,
     agentPolicies,

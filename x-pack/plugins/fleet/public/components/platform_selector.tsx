@@ -145,18 +145,22 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="m" />
           </>
         )}
-        {platform === 'mac' && typeOfCSPIntegration === 'IS_CSP_CSPM' && (
-          <>
-            {placeHolderCallout}
-            <EuiSpacer size="m" />
-          </>
-        )}
-        {platform === 'kubernetes' && typeOfCSPIntegration === 'IS_CSP_CSPM' && (
-          <>
-            {placeHolderCallout}
-            <EuiSpacer size="m" />
-          </>
-        )}
+        {platform === 'mac' &&
+          (typeOfCSPIntegration === 'IS_CSP_CSPM' ||
+            typeOfCSPIntegration === 'IS_CSP_CNVM' ||
+            typeOfCSPIntegration === 'IS_CSP_KSPM') && (
+            <>
+              {placeHolderCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
+        {platform === 'kubernetes' &&
+          (typeOfCSPIntegration === 'IS_CSP_CSPM' || typeOfCSPIntegration === 'IS_CSP_CNVM') && (
+            <>
+              {placeHolderCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
         {platform === 'kubernetes' && !hasK8sIntegration && (
           <>
             {k8sCallout}
