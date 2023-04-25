@@ -952,6 +952,8 @@
       "@kbn/observability-alert-details/*": ["x-pack/packages/observability/alert_details/*"],
       "@kbn/observability-fixtures-plugin": ["x-pack/test/cases_api_integration/common/plugins/observability"],
       "@kbn/observability-fixtures-plugin/*": ["x-pack/test/cases_api_integration/common/plugins/observability/*"],
+      "@kbn/observability-onboarding-plugin": ["x-pack/plugins/observability_onboarding"],
+      "@kbn/observability-onboarding-plugin/*": ["x-pack/plugins/observability_onboarding/*"],
       "@kbn/observability-plugin": ["x-pack/plugins/observability"],
       "@kbn/observability-plugin/*": ["x-pack/plugins/observability/*"],
       "@kbn/observability-shared-plugin": ["x-pack/plugins/observability_shared"],
