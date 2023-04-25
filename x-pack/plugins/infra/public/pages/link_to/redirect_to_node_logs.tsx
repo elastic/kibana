@@ -42,8 +42,8 @@ export const RedirectToNodeLogs = ({
   const filter = getFilterFromLocation(location);
   const time = getTimeFromLocation(location);
 
-  const { data } = useFetcher(async () => {
-    return await services.locators.nodeLogsLocator.getLocation({
+  const { data } = useFetcher(() => {
+    return services.locators.nodeLogsLocator.getLocation({
       nodeId,
       nodeType,
       time,

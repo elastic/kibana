@@ -5,8 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { stringify } from 'querystring';
-import { encode } from '@kbn/rison';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,28 +22,19 @@ export const LogsLinkToStream = ({
   query,
 }: LogsLinkToStreamProps) => {
   const { services } = useKibanaContextForPlugin();
-  const { http } = services;
-
-  const queryString = new URLSearchParams(
-    stringify({
-      logPosition: encode({
-        start: new Date(startTimestamp),
-        end: new Date(endTimestamp),
-        streamLive: false,
-      }),
-      logFilter: encode({
-        kind: 'kuery',
-        expression: query,
-      }),
-    })
-  );
-
-  const viewInLogsUrl = http.basePath.prepend(`/app/logs/stream?${queryString}`);
+  const { locators } = services;
 
   return (
     <RedirectAppLinks coreStart={services}>
       <EuiButtonEmpty
-        href={viewInLogsUrl}
+        onClick={() =>
+          locators.logsLocator?.navigate({
+            time: endTimestamp,
+            from: startTimestamp,
+            to: endTimestamp,
+            filter: query,
+          })
+        }
         data-test-subj="hostsView-logs-link-to-stream-button"
         iconType="popout"
         flush="both"

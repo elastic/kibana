@@ -29,8 +29,8 @@ export const RedirectToLogs = ({ location, match }: RedirectToLogsProps) => {
   const filter = getFilterFromLocation(location);
   const time = getTimeFromLocation(location);
 
-  const { data } = useFetcher(async () => {
-    return await locators.logsLocator.getLocation({ time, filter, logViewId });
+  const { data } = useFetcher(() => {
+    return locators.logsLocator.getLocation({ time, filter, logViewId });
   }, []);
 
   if (!data) {
