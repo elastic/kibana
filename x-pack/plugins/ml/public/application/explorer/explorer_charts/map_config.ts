@@ -6,7 +6,7 @@
  */
 
 import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '@kbn/maps-plugin/common';
-import { SEVERITY_COLOR_RAMP } from '../../../../common';
+import { SEVERITY_COLOR_RAMP } from '@kbn/ml-anomaly-utils';
 import { AnomaliesTableData } from '../explorer_utils';
 
 const FEATURE = 'Feature';

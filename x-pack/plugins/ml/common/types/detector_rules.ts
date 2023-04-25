@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ACTION, FILTER_TYPE, APPLIES_TO, OPERATOR } from '../constants/detector_rule';
+import { ACTION, FILTER_TYPE, APPLIES_TO, OPERATOR } from '@kbn/ml-anomaly-utils';
 
 export interface DetectorRuleScope {
   [id: string]: {

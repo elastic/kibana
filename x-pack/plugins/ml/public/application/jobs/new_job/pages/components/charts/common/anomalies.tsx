@@ -7,8 +7,7 @@
 
 import React, { Fragment, FC } from 'react';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
-import { getSeverityColor } from '@kbn/ml-anomaly-utils';
-import { ANOMALY_THRESHOLD } from '../../../../../../../../common/constants/anomalies';
+import { getSeverityColor, ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import { Anomaly } from '../../../../common/results_loader';
 
 interface Props {

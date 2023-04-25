@@ -7,8 +7,8 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils';
 import { ALERT_PREVIEW_SAMPLE_SIZE } from '../../../common/constants/alerts';
-import { ANOMALY_RESULT_TYPE } from '../../../common/constants/anomalies';
 
 const jobsSelectionSchema = schema.object(
   {

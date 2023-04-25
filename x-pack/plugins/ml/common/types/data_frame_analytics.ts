@@ -10,8 +10,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { EsErrorBody } from '@kbn/ml-error-utils';
+import type { UrlConfig } from '@kbn/ml-anomaly-utils';
 import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
-import type { UrlConfig } from './custom_urls';
 
 export interface DeleteDataFrameAnalyticsWithIndexStatus {
   success: boolean;

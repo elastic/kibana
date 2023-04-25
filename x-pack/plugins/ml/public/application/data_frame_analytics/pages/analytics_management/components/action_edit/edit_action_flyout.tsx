@@ -28,6 +28,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import type { UrlConfig } from '@kbn/ml-anomaly-utils';
+
 import { useMlKibana, useMlApiContext } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
@@ -41,7 +43,6 @@ import {
   UpdateDataFrameAnalyticsConfig,
   type DataFrameAnalyticsConfig,
 } from '../../../../../../../common/types/data_frame_analytics';
-import type { UrlConfig } from '../../../../../../../common/types/custom_urls';
 
 import { EditAction } from './use_edit_action';
 import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../../components/custom_urls';

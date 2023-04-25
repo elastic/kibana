@@ -6,9 +6,9 @@
  */
 
 import React, { FC } from 'react';
+import type { UrlConfig } from '@kbn/ml-anomaly-utils';
 import { useMlKibana } from '../../contexts/kibana';
 import { Job } from '../../../../common/types/anomaly_detection_jobs';
-import { UrlConfig } from '../../../../common/types/custom_urls';
 import { type DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 import { CustomUrls } from './custom_urls';
 

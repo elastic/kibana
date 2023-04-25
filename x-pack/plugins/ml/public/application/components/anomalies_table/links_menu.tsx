@@ -22,7 +22,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
-import { isCategorizationAnomaly, isRuleSupported } from '@kbn/ml-anomaly-utils';
+import {
+  isCategorizationAnomaly,
+  isRuleSupported,
+  type CustomUrlAnomalyRecordDoc,
+  type KibanaUrlConfig,
+  type MlAnomaliesTableRecord,
+} from '@kbn/ml-anomaly-utils';
 import { mlJobService } from '../../services/job_service';
 import { getDataViewIdFromName } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
@@ -43,25 +49,20 @@ import {
   SourceIndicesWithGeoFields,
 } from '../../explorer/explorer_utils';
 import { checkPermission } from '../../capabilities/check_capabilities';
-import type {
-  CustomUrlAnomalyRecordDoc,
-  KibanaUrlConfig,
-} from '../../../../common/types/custom_urls';
 import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useMlKibana } from '../../contexts/kibana';
 // @ts-ignore
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
-import type { AnomaliesTableRecord } from '../../../../common/types/anomalies';
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
 import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
 interface LinksMenuProps {
-  anomaly: AnomaliesTableRecord;
+  anomaly: MlAnomaliesTableRecord;
   bounds: TimeRangeBounds;
   showMapsLink: boolean;
   showViewSeriesLink: boolean;
   isAggregatedData: boolean;
   interval: 'day' | 'hour' | 'second';
-  showRuleEditorFlyout: (anomaly: AnomaliesTableRecord) => void;
+  showRuleEditorFlyout: (anomaly: MlAnomaliesTableRecord) => void;
   onItemClick: () => void;
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
 }
@@ -83,7 +84,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     return mlJobService.getJob(props.anomaly.jobId);
   }, [props.anomaly.jobId]);
 
-  const getAnomaliesMapsLink = async (anomaly: AnomaliesTableRecord) => {
+  const getAnomaliesMapsLink = async (anomaly: MlAnomaliesTableRecord) => {
     const index = job.datafeed_config.indices[0];
     const dataViewId = await getDataViewIdFromName(index);
 
@@ -121,7 +122,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   };
 
   const getAnomalySourceMapsLink = async (
-    anomaly: AnomaliesTableRecord,
+    anomaly: MlAnomaliesTableRecord,
     sourceIndicesWithGeoFields: SourceIndicesWithGeoFields
   ) => {
     const index = job.datafeed_config.indices[0];

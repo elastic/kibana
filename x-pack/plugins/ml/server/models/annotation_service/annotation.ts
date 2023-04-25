@@ -10,8 +10,8 @@ import { each, get } from 'lodash';
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
-import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,

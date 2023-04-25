@@ -36,10 +36,13 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
-import { getFormattedSeverityScore } from '@kbn/ml-anomaly-utils';
+import {
+  getFormattedSeverityScore,
+  ANOMALY_THRESHOLD,
+  SEVERITY_COLORS,
+} from '@kbn/ml-anomaly-utils';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
-import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';

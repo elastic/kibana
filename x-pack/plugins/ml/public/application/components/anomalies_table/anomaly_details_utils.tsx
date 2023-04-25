@@ -24,7 +24,7 @@ import {
   showActualForFunction,
   showTypicalForFunction,
 } from '@kbn/ml-anomaly-utils';
-import { AnomaliesTableRecord, MLAnomalyDoc } from '../../../../common/types/anomalies';
+import type { MlAnomaliesTableRecord, MLAnomalyDoc } from '@kbn/ml-anomaly-utils';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { EntityCell, EntityCellFilter } from '../entity_cell';
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
@@ -66,7 +66,7 @@ export function getInfluencersItems(
 }
 
 export const DetailsItems: FC<{
-  anomaly: AnomaliesTableRecord;
+  anomaly: MlAnomaliesTableRecord;
   filter: EntityCellFilter;
   modelPlotEnabled: boolean;
 }> = ({ anomaly, filter, modelPlotEnabled }) => {
@@ -326,7 +326,7 @@ export const DetailsItems: FC<{
   );
 };
 
-export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = ({ anomaly }) => {
+export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> = ({ anomaly }) => {
   const {
     services: { docLinks },
   } = useMlKibana();

@@ -13,7 +13,7 @@ import he from 'he';
 
 import { escapeKuery } from '@kbn/es-query';
 import { isDefined } from '@kbn/ml-is-defined';
-import { CustomUrlAnomalyRecordDoc } from '../../../common/types/custom_urls';
+import type { CustomUrlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { DataGridItem } from '../components/data_grid';
 import { Detector } from '../../../common/types/anomaly_detection_jobs';
 

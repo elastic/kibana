@@ -18,6 +18,7 @@ import {
   isMultiBucketAnomaly,
   type EntityField,
 } from '@kbn/ml-anomaly-utils';
+import type { MlAnomalyRecordDoc, RecordForInfluencer } from '@kbn/ml-anomaly-utils';
 import type { MlClient } from '../../lib/ml_client';
 import { isRuntimeMappings } from '../../../common';
 import type {
@@ -41,7 +42,7 @@ import {
 } from '../../../common/util/job_utils';
 import { CriteriaField } from './results_service';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
-import { AnomalyRecordDoc, CombinedJob, Datafeed, RecordForInfluencer } from '../../shared';
+import type { CombinedJob, Datafeed } from '../../shared';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { _DOC_COUNT, DOC_COUNT } from '../../../common/constants/field_types';
@@ -1131,7 +1132,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
     function getChartDataForPointSearch(
       chartData: ChartPoint[],
-      record: AnomalyRecordDoc,
+      record: MlAnomalyRecordDoc,
       chartType: ChartType
     ) {
       if (

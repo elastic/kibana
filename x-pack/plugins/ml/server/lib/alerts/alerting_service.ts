@@ -16,14 +16,18 @@ import {
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { isDefined } from '@kbn/ml-is-defined';
-import { getEntityFieldName, getEntityFieldValue } from '@kbn/ml-anomaly-utils';
+import {
+  getEntityFieldName,
+  getEntityFieldValue,
+  type MlAnomalyRecordDoc,
+  type MlAnomalyResultType,
+  ANOMALY_RESULT_TYPE,
+} from '@kbn/ml-anomaly-utils';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
   MlAnomalyDetectionAlertPreviewRequest,
 } from '../../routes/schemas/alerting_schema';
-import { ANOMALY_RESULT_TYPE } from '../../../common/constants/anomalies';
-import { AnomalyRecordDoc, AnomalyResultType } from '../../../common/types/anomalies';
 import {
   AlertExecutionResult,
   InfluencerAnomalyAlertDoc,
@@ -52,7 +56,7 @@ type AggResultsResponse = { key?: number } & {
 };
 
 interface AnomalyESQueryParams {
-  resultType: AnomalyResultType;
+  resultType: MlAnomalyResultType;
   /** Appropriate score field for requested result type. */
   anomalyScoreField: string;
   anomalyScoreThreshold: number;
@@ -73,7 +77,7 @@ const TIME_RANGE_PADDING = 10;
 export function buildExplorerUrl(
   jobIds: string[],
   timeRange: { from: string; to: string; mode?: string },
-  type: AnomalyResultType,
+  type: MlAnomalyResultType,
   r?: AlertExecutionResult
 ): string {
   const isInfluencerResult = type === ANOMALY_RESULT_TYPE.INFLUENCER;
@@ -212,7 +216,7 @@ export function alertingServiceProvider(
     }
   );
 
-  const getAggResultsLabel = (resultType: AnomalyResultType) => {
+  const getAggResultsLabel = (resultType: MlAnomalyResultType) => {
     return {
       aggGroupLabel: `${resultType}_results` as PreviewResultsKeys,
       topHitsLabel: `top_${resultType}_hits` as TopHitsResultsKeys,
@@ -225,7 +229,7 @@ export function alertingServiceProvider(
    * @param severity
    */
   const getResultTypeAggRequest = (
-    resultType: AnomalyResultType,
+    resultType: MlAnomalyResultType,
     severity: number,
     useInitialScore?: boolean
   ) => {
@@ -361,15 +365,15 @@ export function alertingServiceProvider(
   /**
    * Provides a key for alert instance.
    */
-  const getAlertInstanceKey = (source: AnomalyRecordDoc): string => {
+  const getAlertInstanceKey = (source: MlAnomalyRecordDoc): string => {
     return source.job_id;
   };
 
-  const getScoreFields = (resultType: AnomalyResultType, useInitialScore?: boolean) => {
+  const getScoreFields = (resultType: MlAnomalyResultType, useInitialScore?: boolean) => {
     return `${useInitialScore ? 'initial_' : ''}${resultTypeScoreMapping[resultType]}`;
   };
 
-  const getRecordKey = (source: AnomalyRecordDoc): string => {
+  const getRecordKey = (source: MlAnomalyRecordDoc): string => {
     let alertInstanceKey = `${source.job_id}_${source.timestamp}`;
 
     const fieldName = getEntityFieldName(source);
@@ -387,7 +391,7 @@ export function alertingServiceProvider(
    * @param resultType
    */
   const getResultsFormatter = (
-    resultType: AnomalyResultType,
+    resultType: MlAnomalyResultType,
     useInitialScore: boolean = false,
     formatters: FieldFormatters
   ) => {

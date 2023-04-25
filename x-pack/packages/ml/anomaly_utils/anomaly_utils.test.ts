@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnomalyRecordDoc } from './types';
+import { MlAnomalyRecordDoc } from './types';
 
 import {
   aggregationTypeTransform,
@@ -22,7 +22,7 @@ import {
 } from './anomaly_utils';
 
 describe('ML - anomaly utils', () => {
-  const partitionEntityRecord: AnomalyRecordDoc = {
+  const partitionEntityRecord: MlAnomalyRecordDoc = {
     job_id: 'farequote',
     result_type: 'record',
     probability: 0.012818,
@@ -39,7 +39,7 @@ describe('ML - anomaly utils', () => {
     field_name: 'responsetime',
   };
 
-  const byEntityRecord: AnomalyRecordDoc = {
+  const byEntityRecord: MlAnomalyRecordDoc = {
     job_id: 'farequote',
     result_type: 'record',
     probability: 0.012818,
@@ -56,7 +56,7 @@ describe('ML - anomaly utils', () => {
     field_name: 'responsetime',
   };
 
-  const overEntityRecord: AnomalyRecordDoc = {
+  const overEntityRecord: MlAnomalyRecordDoc = {
     job_id: 'gallery',
     result_type: 'record',
     probability: 2.81806e-9,
@@ -74,7 +74,7 @@ describe('ML - anomaly utils', () => {
     over_field_value: '37.157.32.164',
   };
 
-  const noEntityRecord: AnomalyRecordDoc = {
+  const noEntityRecord: MlAnomalyRecordDoc = {
     job_id: 'farequote_no_by',
     result_type: 'record',
     probability: 0.0191711,
@@ -89,7 +89,7 @@ describe('ML - anomaly utils', () => {
     field_name: 'responsetime',
   };
 
-  const metricNoEntityRecord: AnomalyRecordDoc = {
+  const metricNoEntityRecord: MlAnomalyRecordDoc = {
     job_id: 'farequote_metric',
     result_type: 'record',
     probability: 0.030133495093182184,
@@ -113,7 +113,7 @@ describe('ML - anomaly utils', () => {
     airline: ['NKS'],
   };
 
-  const rareEntityRecord: AnomalyRecordDoc = {
+  const rareEntityRecord: MlAnomalyRecordDoc = {
     job_id: 'gallery',
     result_type: 'record',
     probability: 0.02277014211908481,
@@ -261,7 +261,7 @@ describe('ML - anomaly utils', () => {
   });
 
   describe('isMultiBucketAnomaly', () => {
-    const singleBucketAnomaly: AnomalyRecordDoc = {
+    const singleBucketAnomaly: MlAnomalyRecordDoc = {
       job_id: 'farequote_sb',
       result_type: 'record',
       probability: 0.0191711,
@@ -283,7 +283,7 @@ describe('ML - anomaly utils', () => {
       },
     };
 
-    const multiBucketAnomaly: AnomalyRecordDoc = {
+    const multiBucketAnomaly: MlAnomalyRecordDoc = {
       job_id: 'farequote_mb',
       result_type: 'record',
       probability: 0.0191711,
@@ -305,7 +305,7 @@ describe('ML - anomaly utils', () => {
       },
     };
 
-    const multiBucketAnomaly2: AnomalyRecordDoc = {
+    const multiBucketAnomaly2: MlAnomalyRecordDoc = {
       job_id: 'farequote_mb2',
       result_type: 'record',
       probability: 0.0191711,
@@ -326,7 +326,7 @@ describe('ML - anomaly utils', () => {
       },
     };
 
-    const noASEAnomaly: AnomalyRecordDoc = {
+    const noASEAnomaly: MlAnomalyRecordDoc = {
       job_id: 'farequote_ase',
       result_type: 'record',
       probability: 0.0191711,
@@ -341,7 +341,7 @@ describe('ML - anomaly utils', () => {
       field_name: 'responsetime',
     };
 
-    const noMBIAnomaly: AnomalyRecordDoc = {
+    const noMBIAnomaly: MlAnomalyRecordDoc = {
       job_id: 'farequote_sbi',
       result_type: 'record',
       probability: 0.0191711,
@@ -362,7 +362,7 @@ describe('ML - anomaly utils', () => {
       },
     };
 
-    const singleBucketAnomaly2: AnomalyRecordDoc = {
+    const singleBucketAnomaly2: MlAnomalyRecordDoc = {
       job_id: 'farequote_sb2',
       result_type: 'record',
       probability: 0.0191711,

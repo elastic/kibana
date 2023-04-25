@@ -18,8 +18,13 @@ import { asyncForEach } from '@kbn/std';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import {
+  getEntityFieldList,
+  type EntityField,
+  type Influencer,
+  type RecordForInfluencer,
+} from '@kbn/ml-anomaly-utils';
 
-import { EntityField, getEntityFieldList } from '@kbn/ml-anomaly-utils';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
@@ -49,8 +54,6 @@ import { MlResultsService } from '../services/results_service';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { TimeRangeBounds } from '../util/time_buckets';
 import { Annotations, AnnotationsTable } from '../../../common/types/annotations';
-import { Influencer } from '../../../common/types/anomalies';
-import { RecordForInfluencer } from '../services/results_service/results_service';
 
 export interface ExplorerJob {
   id: string;

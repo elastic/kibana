@@ -11,14 +11,18 @@ import { useMemo } from 'react';
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import type { EntityField } from '@kbn/ml-anomaly-utils';
 
-import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
+import {
+  type MlAnomalyRecordDoc,
+  MLAnomalyDoc,
+  JOB_ID,
+  PARTITION_FIELD_VALUE,
+} from '@kbn/ml-anomaly-utils';
 import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
 } from '../../../../common/types/results';
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import type { PartitionFieldsConfig } from '../../../../common/types/storage';
-import type { AnomalyRecordDoc, MLAnomalyDoc } from '../../../../common/types/anomalies';
 import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import type { ExplorerChartsData } from '../../../../common/types/results';
 
@@ -224,7 +228,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       interval,
       functionDescription,
     });
-    return httpService.http$<{ success: boolean; records: AnomalyRecordDoc[] }>({
+    return httpService.http$<{ success: boolean; records: MlAnomalyRecordDoc[] }>({
       path: `${basePath()}/results/anomaly_records`,
       method: 'POST',
       body,

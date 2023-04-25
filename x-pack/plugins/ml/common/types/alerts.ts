@@ -6,8 +6,7 @@
  */
 
 import type { RuleTypeParams, Rule } from '@kbn/alerting-plugin/common';
-import { AnomalyResultType } from './anomalies';
-import { ANOMALY_RESULT_TYPE } from '../constants/anomalies';
+import { type MlAnomalyResultType, ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils';
 
 export type PreviewResultsKeys = 'record_results' | 'bucket_results' | 'influencer_results';
 export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_influencer_hits';
@@ -34,7 +33,7 @@ export interface PreviewResponse {
 }
 
 interface BaseAnomalyAlertDoc {
-  result_type: AnomalyResultType;
+  result_type: MlAnomalyResultType;
   job_id: string;
   /**
    * Rounded score
@@ -94,7 +93,7 @@ export type MlAnomalyDetectionAlertParams = {
     groupIds?: string[];
   };
   severity: number;
-  resultType: AnomalyResultType;
+  resultType: MlAnomalyResultType;
   includeInterim: boolean;
   lookbackInterval: string | null | undefined;
   topNBuckets: number | null | undefined;

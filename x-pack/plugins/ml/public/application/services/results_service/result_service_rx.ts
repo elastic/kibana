@@ -17,7 +17,11 @@ import { map } from 'rxjs/operators';
 import { each, get } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import { aggregationTypeTransform, EntityField } from '@kbn/ml-anomaly-utils';
+import {
+  aggregationTypeTransform,
+  type EntityField,
+  type RecordForInfluencer,
+} from '@kbn/ml-anomaly-utils';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
@@ -27,7 +31,6 @@ import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import { isRuntimeMappings } from '../../../../common';
 import { MlApiServices } from '../ml_api_service';
-import { RecordForInfluencer } from './results_service';
 import { CriteriaField } from '.';
 
 export interface ResultResponse {

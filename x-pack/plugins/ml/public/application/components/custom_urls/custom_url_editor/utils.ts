@@ -16,12 +16,12 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { isFilterPinned, Filter } from '@kbn/es-query';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
+import type { KibanaUrlConfig, UrlConfig } from '@kbn/ml-anomaly-utils';
 import { DEFAULT_RESULTS_FIELD } from '../../../../../common/constants/data_frame_analytics';
 import {
   isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
 } from '../../../../../common/types/data_frame_analytics';
-import { KibanaUrlConfig } from '../../../../../common/types/custom_urls';
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
@@ -39,7 +39,6 @@ import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 import { getSavedObjectsClient, getDashboard } from '../../../util/dependency_cache';
 
-import { UrlConfig } from '../../../../../common/types/custom_urls';
 import {
   CombinedJob,
   Job,

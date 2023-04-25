@@ -24,8 +24,8 @@ import {
 } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { KibanaUrlConfig } from '@kbn/ml-anomaly-utils';
 
-import type { KibanaUrlConfig } from '../../../../../../../common/types/custom_urls';
 import type { DataGridItem } from '../../../../../components/data_grid';
 import {
   isClassificationAnalysis,

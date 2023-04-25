@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomUrlAnomalyRecordDoc } from '../../../common/types/custom_urls';
+import type { CustomUrlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import { Detector } from '../../../common/types/anomaly_detection_jobs';
 
 import {

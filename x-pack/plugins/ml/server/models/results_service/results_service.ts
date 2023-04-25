@@ -10,16 +10,18 @@ import { sortBy, slice, get, cloneDeep } from 'lodash';
 import moment from 'moment';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from '@kbn/core/server';
-import { showActualForFunction, showTypicalForFunction } from '@kbn/ml-anomaly-utils';
+import {
+  showActualForFunction,
+  showTypicalForFunction,
+  type MlAnomaliesTableRecord,
+  type MlAnomalyCategorizerStatsDoc,
+  type MlAnomalyRecordDoc,
+  JOB_ID,
+  PARTITION_FIELD_VALUE,
+} from '@kbn/ml-anomaly-utils';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
-import {
-  AnomaliesTableRecord,
-  AnomalyCategorizerStatsDoc,
-  AnomalyRecordDoc,
-} from '../../../common/types/anomalies';
-import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../common/constants/anomalies';
 import {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
@@ -51,7 +53,7 @@ interface Influencer {
  * Extracts typical and actual values from the anomaly record.
  * @param source
  */
-export function getTypicalAndActualValues(source: AnomalyRecordDoc) {
+export function getTypicalAndActualValues(source: MlAnomalyRecordDoc) {
   const result: { actual?: number[]; typical?: number[] } = {};
 
   const functionDescription = source.function_description || '';
@@ -219,7 +221,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     );
 
     const tableData: {
-      anomalies: AnomaliesTableRecord[];
+      anomalies: MlAnomaliesTableRecord[];
       interval: string;
       examplesByJobId?: { [key: string]: any };
     } = {
@@ -228,7 +230,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     };
 
     if ((body.hits.total as estypes.SearchTotalHits).value > 0) {
-      let records: AnomalyRecordDoc[] = [];
+      let records: MlAnomalyRecordDoc[] = [];
       body.hits.hits.forEach((hit: any) => {
         records.push(hit._source);
       });
@@ -510,7 +512,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         },
       });
     }
-    const body = await mlClient.anomalySearch<AnomalyCategorizerStatsDoc>(
+    const body = await mlClient.anomalySearch<MlAnomalyCategorizerStatsDoc>(
       {
         body: {
           query: {

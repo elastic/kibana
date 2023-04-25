@@ -15,7 +15,7 @@ import {
   EuiRange,
   EuiRangeProps,
 } from '@elastic/eui';
-import { ANOMALY_THRESHOLD } from '../../../../common';
+import { ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 
 export interface SeveritySelectorProps {
   value: number | undefined;

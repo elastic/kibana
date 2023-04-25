@@ -6,6 +6,13 @@
  */
 
 import {
+  MlAnomalyRecordDoc,
+  CustomUrlAnomalyRecordDoc,
+  KibanaUrlConfig,
+  UrlConfig,
+} from '@kbn/ml-anomaly-utils';
+
+import {
   replaceTokensInUrlValue,
   getUrlForRecord,
   isValidLabel,
@@ -13,15 +20,9 @@ import {
   openCustomUrlWindow,
   getQueryField,
 } from './custom_url_utils';
-import { AnomalyRecordDoc } from '../../../common/types/anomalies';
-import {
-  CustomUrlAnomalyRecordDoc,
-  KibanaUrlConfig,
-  UrlConfig,
-} from '../../../common/types/custom_urls';
 
 describe('ML - custom URL utils', () => {
-  const TEST_DOC: AnomalyRecordDoc = {
+  const TEST_DOC: MlAnomalyRecordDoc = {
     job_id: 'farequote',
     result_type: 'record',
     probability: 6.533287347648861e-45,
@@ -198,7 +199,7 @@ describe('ML - custom URL utils', () => {
     });
 
     test('replaces tokens outside of a query', () => {
-      const TEST_DOC_WITH_METHOD: AnomalyRecordDoc = {
+      const TEST_DOC_WITH_METHOD: MlAnomalyRecordDoc = {
         ...TEST_DOC,
         method: ['POST'],
       };
@@ -219,7 +220,7 @@ describe('ML - custom URL utils', () => {
     });
 
     test('truncates long queries', () => {
-      const TEST_DOC_WITH_METHOD: AnomalyRecordDoc = {
+      const TEST_DOC_WITH_METHOD: MlAnomalyRecordDoc = {
         ...TEST_DOC,
         influencers: [
           {

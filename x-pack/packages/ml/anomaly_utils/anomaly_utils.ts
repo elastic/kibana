@@ -12,7 +12,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from './constants';
-import type { AnomaliesTableRecord, AnomalyRecordDoc } from './types';
+import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from './types';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_rule';
 
 export interface SeverityType {
@@ -122,7 +122,7 @@ function getSeverityTypes() {
  * Returns whether the anomaly is in a categorization analysis.
  * @param anomaly Anomaly table record
  */
-export function isCategorizationAnomaly(anomaly: AnomaliesTableRecord): boolean {
+export function isCategorizationAnomaly(anomaly: MlAnomaliesTableRecord): boolean {
   return anomaly.entityName === 'mlcategory';
 }
 
@@ -226,7 +226,7 @@ export function getSeverityColor(normalizedScore: number): string {
  * for example in anomaly charts with a cross-shaped marker.
  * @param anomaly Anomaly table record
  */
-export function isMultiBucketAnomaly(anomaly: AnomalyRecordDoc): boolean {
+export function isMultiBucketAnomaly(anomaly: MlAnomalyRecordDoc): boolean {
   if (anomaly.anomaly_score_explanation === undefined) {
     return false;
   }
@@ -278,7 +278,7 @@ export function getAnomalyScoreExplanationImpactValue(score: number): number {
  * then partition_field, returning undefined if none of these fields are present.
  * @param record - anomaly record result for which to obtain the entity field name.
  */
-export function getEntityFieldName(record: AnomalyRecordDoc): string | undefined {
+export function getEntityFieldName(record: MlAnomalyRecordDoc): string | undefined {
   // Analyses with by and over fields, will have a top-level by_field_name, but
   // the by_field_value(s) will be in the nested causes array.
   if (record.by_field_name !== undefined && record.by_field_value !== undefined) {
@@ -300,7 +300,7 @@ export function getEntityFieldName(record: AnomalyRecordDoc): string | undefined
  * then partition_field, returning undefined if none of these fields are present.
  * @param record - anomaly record result for which to obtain the entity field value.
  */
-export function getEntityFieldValue(record: AnomalyRecordDoc): string | number | undefined {
+export function getEntityFieldValue(record: MlAnomalyRecordDoc): string | number | undefined {
   if (record.by_field_value !== undefined) {
     return record.by_field_value;
   }
@@ -319,7 +319,7 @@ export function getEntityFieldValue(record: AnomalyRecordDoc): string | number |
  * of objects in the form { fieldName: airline, fieldValue: AAL, fieldType: partition }
  * @param record - anomaly record result for which to obtain the entity field list.
  */
-export function getEntityFieldList(record: AnomalyRecordDoc): EntityField[] {
+export function getEntityFieldList(record: MlAnomalyRecordDoc): EntityField[] {
   const entityFields: EntityField[] = [];
   if (record.partition_field_name !== undefined) {
     entityFields.push({
@@ -375,7 +375,7 @@ export function showTypicalForFunction(functionDescription: string): boolean {
  * Returns whether a rule can be configured against the specified anomaly.
  * @param record - anomaly record result
  */
-export function isRuleSupported(record: AnomalyRecordDoc): boolean {
+export function isRuleSupported(record: MlAnomalyRecordDoc): boolean {
   // A rule can be configured with a numeric condition if the function supports it,
   // and/or with scope if there is a partitioning fields.
   return (

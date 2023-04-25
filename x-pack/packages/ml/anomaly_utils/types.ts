@@ -24,15 +24,15 @@ export interface Influencer {
   influencer_field_values: string[];
 }
 
-export type MLAnomalyDoc = AnomalyRecordDoc;
+export type MLAnomalyDoc = MlAnomalyRecordDoc;
 
-export type RecordForInfluencer = AnomalyRecordDoc;
+export type RecordForInfluencer = MlAnomalyRecordDoc;
 
 /**
  * Anomaly record document. Records contain the detailed analytical results.
  * They describe the anomalous activity that has been identified in the input data based on the detector configuration.
  */
-export interface AnomalyRecordDoc {
+export interface MlAnomalyRecordDoc {
   /**
    * Index signature to cover dynamic attributes added to the record depending on the fields being analyzed.
    * For example, if the job is analyzing hostname as a by field, then a field hostname is added to the result document.
@@ -238,7 +238,7 @@ export interface AnomalyRecordDoc {
 /**
  * Anomaly table record, representing the fields shown in the ML UI anomalies table.
  */
-export interface AnomaliesTableRecord {
+export interface MlAnomaliesTableRecord {
   /**
    * The start time of the interval for which the anomaly data in the table is being aggregated.
    * Anomalies in the table are commonly aggregated by day, hour, or at the bucket span of the job.
@@ -248,7 +248,7 @@ export interface AnomaliesTableRecord {
   /**
    * The source anomaly record document, containing the full source anomaly record fields.
    */
-  source: AnomalyRecordDoc;
+  source: MlAnomalyRecordDoc;
 
   /**
    * Unique identifier for the table row.
@@ -345,14 +345,14 @@ export interface AnomaliesTableRecord {
  * and rules length.
  * Used by the AnomaliesTable component
  */
-export interface AnomaliesTableRecordExtended extends AnomaliesTableRecord {
+export interface MlAnomaliesTableRecordExtended extends MlAnomaliesTableRecord {
   detector: string;
   rulesLength?: number;
 }
 
 export type PartitionFieldsType = typeof PARTITION_FIELDS[number];
 
-export interface AnomalyCategorizerStatsDoc {
+export interface MlAnomalyCategorizerStatsDoc {
   [key: string]: any;
   job_id: string;
   result_type: 'categorizer_stats';
@@ -374,4 +374,4 @@ export type EntityFieldType = 'partition_field' | 'over_field' | 'by_field';
 /**
  * The type of the anomaly result, such as bucket, influencer or record.
  */
-export type AnomalyResultType = typeof ANOMALY_RESULT_TYPE[keyof typeof ANOMALY_RESULT_TYPE];
+export type MlAnomalyResultType = typeof ANOMALY_RESULT_TYPE[keyof typeof ANOMALY_RESULT_TYPE];

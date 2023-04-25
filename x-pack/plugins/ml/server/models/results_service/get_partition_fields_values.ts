@@ -7,8 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
-import { PartitionFieldsType } from '../../../common/types/anomalies';
+import { type PartitionFieldsType, PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
 import { CriteriaField } from './results_service';
 import { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
 import type { MlClient } from '../../lib/ml_client';

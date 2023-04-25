@@ -11,14 +11,14 @@ import { get, flow } from 'lodash';
 import moment from 'moment';
 import rison, { type RisonValue } from '@kbn/rison';
 import { TimeRange } from '@kbn/es-query';
-import { parseInterval } from '../../../common/util/parse_interval';
-import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
-import {
+import type {
+  MlAnomalyRecordDoc,
   UrlConfig,
   KibanaUrlConfig,
   CustomUrlAnomalyRecordDoc,
-} from '../../../common/types/custom_urls';
-import { AnomalyRecordDoc } from '../../../common/types/anomalies';
+} from '@kbn/ml-anomaly-utils';
+import { parseInterval } from '../../../common/util/parse_interval';
+import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
 import type { DataGridItem } from '../components/data_grid';
 
 // Value of custom_url time_range property indicating drilldown time range is calculated automatically
@@ -51,7 +51,7 @@ export function replaceTokensInDFAUrlValue(
 export function replaceTokensInUrlValue(
   customUrlConfig: UrlConfig | KibanaUrlConfig,
   jobBucketSpanSecs: number,
-  doc: AnomalyRecordDoc | Record<string, unknown>,
+  doc: MlAnomalyRecordDoc | Record<string, unknown>,
   timeFieldName: 'timestamp' | string
 ) {
   // If urlValue contains $earliest$ and $latest$ tokens, add in times to the test doc.

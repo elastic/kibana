@@ -11,8 +11,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { EntityField } from '@kbn/ml-anomaly-utils';
-
+import type { EntityField, RecordForInfluencer } from '@kbn/ml-anomaly-utils';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { InfluencersFilterQuery } from '../../../common/types/es_client';
 import type { SeriesConfigWithMetadata } from '../../../common/types/results';
@@ -24,7 +23,6 @@ import { SWIM_LANE_LABEL_WIDTH } from '../explorer/swimlane_container';
 
 import type { MlApiServices } from './ml_api_service';
 import type { MlResultsService } from './results_service';
-import type { RecordForInfluencer } from './results_service/results_service';
 
 const MAX_CHARTS_PER_ROW = 4;
 const OPTIMAL_CHART_WIDTH = 550;

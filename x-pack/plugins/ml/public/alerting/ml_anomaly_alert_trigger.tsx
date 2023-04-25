@@ -11,6 +11,7 @@ import useMount from 'react-use/lib/useMount';
 import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
+import { ANOMALY_RESULT_TYPE, ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import { JobSelectorControl } from './job_selector';
 import { useMlKibana } from '../application/contexts/kibana';
 import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
@@ -19,12 +20,10 @@ import { SeverityControl } from '../application/components/severity_control';
 import { ResultTypeSelector } from './result_type_selector';
 import { alertingApiProvider } from '../application/services/ml_api_service/alerting';
 import { PreviewAlertCondition } from './preview_alert_condition';
-import { ANOMALY_THRESHOLD } from '../../common';
 import {
   MlAnomalyDetectionAlertAdvancedSettings,
   MlAnomalyDetectionAlertParams,
 } from '../../common/types/alerts';
-import { ANOMALY_RESULT_TYPE } from '../../common/constants/anomalies';
 import { InterimResultsControl } from './interim_results_control';
 import { ConfigValidator } from './config_validator';
 import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs';
