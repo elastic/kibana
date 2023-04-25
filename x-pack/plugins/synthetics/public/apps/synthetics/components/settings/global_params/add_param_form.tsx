@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext, useFormState } from 'react-hook-form';
-import { SyntheticsParam } from '../../../../../../common/runtime_types';
+import { SyntheticsParamSO } from '../../../../../../common/runtime_types';
 import { ListParamItem } from './params_list';
 
 export const AddParamForm = ({
@@ -25,8 +25,8 @@ export const AddParamForm = ({
   items: ListParamItem[];
   isEditingItem: ListParamItem | null;
 }) => {
-  const { register, control } = useFormContext<SyntheticsParam>();
-  const { errors } = useFormState<SyntheticsParam>();
+  const { register, control } = useFormContext<SyntheticsParamSO>();
+  const { errors } = useFormState<SyntheticsParamSO>();
 
   const tagsList = items.reduce((acc, item) => {
     const tags = item.tags || [];
@@ -119,9 +119,9 @@ export const AddParamForm = ({
               aria-label={NAMESPACES_LABEL}
               onChange={(e) => {
                 if (e.target.checked) {
-                  field.onChange(['*']);
+                  field.onChange(true);
                 } else {
-                  field.onChange([]);
+                  field.onChange(false);
                 }
               }}
               checked={(field.value ?? []).length > 0 && (field.value ?? [])[0] === '*'}

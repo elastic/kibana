@@ -25,7 +25,7 @@ import { useDispatch } from 'react-redux';
 import { apiService } from '../../../../../utils/api_service';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { ListParamItem } from './params_list';
-import { SyntheticsParam } from '../../../../../../common/runtime_types';
+import { SyntheticsParamSO } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { AddParamForm } from './add_param_form';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
@@ -74,15 +74,17 @@ export const AddParamFlyout = ({
     if (!paramData) {
       return;
     }
+    const { namespaces } = paramData;
+    const shareAcrossSpaces = namespaces?.includes('*');
     if (isEditingItem) {
-      return apiService.put(SYNTHETICS_API_URLS.PARAMS, { id, ...paramData });
+      return apiService.put(SYNTHETICS_API_URLS.PARAMS, { id, ...paramData, shareAcrossSpaces });
     }
-    return apiService.post(SYNTHETICS_API_URLS.PARAMS, paramData);
+    return apiService.post(SYNTHETICS_API_URLS.PARAMS, { ...paramData, shareAcrossSpaces });
   }, [paramData]);
 
   const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
 
-  const onSubmit = (formData: SyntheticsParam) => {
+  const onSubmit = (formData: SyntheticsParamSO) => {
     setParamData(formData);
   };
 
