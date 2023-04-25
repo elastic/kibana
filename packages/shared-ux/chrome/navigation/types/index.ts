@@ -20,7 +20,6 @@ export interface NavigationServices {
   loadingCount: number;
   navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
-  recentItems: RecentItem[];
   registerNavItemClick: NavItemClickFn;
 }
 

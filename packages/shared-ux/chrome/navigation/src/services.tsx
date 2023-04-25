@@ -43,7 +43,6 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
     loadingCount,
     navIsOpen,
     navigateToUrl,
-    recentItems: [], // currently not implemented: https://github.com/elastic/kibana/issues/154488
     registerNavItemClick,
   };
 
