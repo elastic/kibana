@@ -47,34 +47,30 @@ export const TableHeader: FC<Props> = ({
             ) : null}
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {selectedCategoriesCount > 0 ? (
-            <>
-              <EuiFlexGroup gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="s"
-                    onClick={() => openInDiscover(QUERY_MODE.INCLUDE)}
-                    iconType="plusInCircle"
-                    iconSide="left"
-                  >
-                    {labels.multiSelect.in}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="s"
-                    onClick={() => openInDiscover(QUERY_MODE.EXCLUDE)}
-                    iconType="minusInCircle"
-                    iconSide="left"
-                  >
-                    {labels.multiSelect.out}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          ) : null}
-        </EuiFlexItem>
+        {selectedCategoriesCount > 0 ? (
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                onClick={() => openInDiscover(QUERY_MODE.INCLUDE)}
+                iconType="plusInCircle"
+                iconSide="left"
+              >
+                {labels.multiSelect.in}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                onClick={() => openInDiscover(QUERY_MODE.EXCLUDE)}
+                iconType="minusInCircle"
+                iconSide="left"
+              >
+                {labels.multiSelect.out}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </>
+        ) : null}
       </EuiFlexGroup>
     </>
   );
