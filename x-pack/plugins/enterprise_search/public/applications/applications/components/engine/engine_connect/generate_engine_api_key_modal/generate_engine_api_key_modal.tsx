@@ -31,7 +31,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { GenerateEngineApiKeyLogic } from '../../../../api/generate_engine_api_key/generate_engine_api_key_logic';
+import { GenerateEngineApiKeyLogic } from '../../../../../enterprise_search_content/api/generate_engine_api_key/generate_engine_api_key_logic';
 
 import { GenerateApiKeyModalLogic } from './generate_engine_api_key_modal.logic';
 
