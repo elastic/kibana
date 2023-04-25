@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useState, useMemo } from 'react';
+import React, { type FC, useState, useMemo, useCallback } from 'react';
 import {
   EuiCallOut,
   EuiCheckboxGroup,
@@ -40,26 +40,33 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
     {}
   );
 
-  const options: EuiCheckboxGroupOption[] = model.deployment_ids.map((deploymentId) => {
-    return {
-      id: deploymentId,
-      label: deploymentId,
-    };
-  });
+  const options: EuiCheckboxGroupOption[] = useMemo(
+    () =>
+      model.deployment_ids.map((deploymentId) => {
+        return {
+          id: deploymentId,
+          label: deploymentId,
+        };
+      }),
+    [model.deployment_ids]
+  );
 
-  const onChange = (id: string) => {
+  const onChange = useCallback((id: string) => {
     setCheckboxIdToSelectedMap((prev) => {
       return {
         ...prev,
         [id]: !prev[id],
       };
     });
-  };
+  }, []);
 
-  const selectedDeploymentIds =
-    model.deployment_ids.length > 1
-      ? Object.keys(checkboxIdToSelectedMap).filter((id) => checkboxIdToSelectedMap[id])
-      : model.deployment_ids;
+  const selectedDeploymentIds = useMemo(
+    () =>
+      model.deployment_ids.length > 1
+        ? Object.keys(checkboxIdToSelectedMap).filter((id) => checkboxIdToSelectedMap[id])
+        : model.deployment_ids,
+    [model.deployment_ids, checkboxIdToSelectedMap]
+  );
 
   const deploymentPipelinesMap = useMemo(() => {
     if (!isPopulatedObject(model.pipelines)) return {};

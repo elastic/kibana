@@ -429,10 +429,13 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           onConfigChange={setConfig}
           errors={errors}
           isUpdate={isUpdate}
-          deploymentsParams={model.stats?.deployment_stats.reduce((acc, curr) => {
-            acc[curr.deployment_id] = { numOfAllocations: curr.number_of_allocations };
-            return acc;
-          }, {} as Record<string, ThreadingParams>)}
+          deploymentsParams={model.stats?.deployment_stats.reduce<Record<string, ThreadingParams>>(
+            (acc, curr) => {
+              acc[curr.deployment_id] = { numOfAllocations: curr.number_of_allocations };
+              return acc;
+            },
+            {}
+          )}
         />
 
         <EuiSpacer size={'m'} />
