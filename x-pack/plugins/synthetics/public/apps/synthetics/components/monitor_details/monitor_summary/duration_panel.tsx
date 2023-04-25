@@ -56,8 +56,8 @@ export const DurationPanel = (props: DurationPanelProps) => {
 };
 
 export const AVG_DURATION_LABEL = i18n.translate(
-  'xpack.synthetics.monitorDetails.summary.avgDuration',
+  'xpack.synthetics.monitorDetails.summary.medianDuration',
   {
-    defaultMessage: 'Avg. duration',
+    defaultMessage: 'Median duration',
   }
 );

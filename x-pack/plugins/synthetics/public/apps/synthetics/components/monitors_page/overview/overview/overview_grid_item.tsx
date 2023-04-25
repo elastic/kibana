@@ -32,12 +32,12 @@ export const OverviewGridItem = ({
 
   const { timestamp } = useStatusByLocationOverview(monitor.configId, locationName);
 
-  const { data, averageDuration } = useLast50DurationChart({
+  const { data, medianDuration } = useLast50DurationChart({
     locationId: monitor.location?.id,
     monitorId: monitor.id,
     timestamp,
   });
   return (
-    <MetricItem data={data} monitor={monitor} averageDuration={averageDuration} onClick={onClick} />
+    <MetricItem data={data} monitor={monitor} medianDuration={medianDuration} onClick={onClick} />
   );
 };

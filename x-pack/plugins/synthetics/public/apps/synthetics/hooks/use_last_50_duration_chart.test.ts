@@ -33,7 +33,7 @@ describe('useLast50DurationChart', () => {
       { wrapper: WrappedHelper }
     );
     expect(result.current).toEqual({
-      averageDuration: 4.5,
+      medianDuration: 5,
       data: [
         {
           x: 0,
@@ -132,7 +132,7 @@ describe('useLast50DurationChart', () => {
     ];
 
     expect(result.current).toEqual({
-      averageDuration: data.reduce((acc, datum) => (acc += datum.y), 0) / 9,
+      medianDuration: [...data].sort((a, b) => a.y - b.y)[Math.floor(data.length / 2)].y,
       data,
       loading: false,
     });

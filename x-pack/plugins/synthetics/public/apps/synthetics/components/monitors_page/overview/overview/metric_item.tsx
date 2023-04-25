@@ -46,13 +46,13 @@ export const getColor = (
 
 export const MetricItem = ({
   monitor,
-  averageDuration,
+  medianDuration,
   data,
   onClick,
 }: {
   monitor: MonitorOverviewItem;
   data: Array<{ x: number; y: number }>;
-  averageDuration: number;
+  medianDuration: number;
   onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
 }) => {
   const [isMouseOver, setIsMouseOver] = useState(false);
@@ -119,13 +119,13 @@ export const MetricItem = ({
                 {
                   title: monitor.name,
                   subtitle: locationName,
-                  value: averageDuration,
+                  value: medianDuration,
                   trendShape: MetricTrendShape.Area,
                   trend: data,
                   extra: (
                     <span>
-                      {i18n.translate('xpack.synthetics.overview.duration.label', {
-                        defaultMessage: 'Duration Avg.',
+                      {i18n.translate('xpack.synthetics.overview.median.label', {
+                        defaultMessage: 'Median duration',
                       })}
                     </span>
                   ),
