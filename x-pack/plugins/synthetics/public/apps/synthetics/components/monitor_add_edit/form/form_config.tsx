@@ -121,6 +121,7 @@ export const BROWSER_ADVANCED = (readOnly: boolean) => [
       }
     ),
     components: [
+      FIELD(readOnly)[ConfigKey.THROTTLING_CONFIG],
       FIELD(readOnly)[ConfigKey.IGNORE_HTTPS_ERRORS],
       FIELD(readOnly)[ConfigKey.SYNTHETICS_ARGS],
       FIELD(readOnly)[ConfigKey.PLAYWRIGHT_OPTIONS],
@@ -209,7 +210,6 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[ConfigKey.NAME],
       FIELD(readOnly)[ConfigKey.LOCATIONS],
       FIELD(readOnly)[`${ConfigKey.SCHEDULE}.number`],
-      FIELD(readOnly)[ConfigKey.THROTTLING_CONFIG],
       FIELD(readOnly)[ConfigKey.ENABLED],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
     ],
@@ -236,7 +236,6 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[ConfigKey.TEXT_ASSERTION],
       FIELD(readOnly)[ConfigKey.LOCATIONS],
       FIELD(readOnly)[`${ConfigKey.SCHEDULE}.number`],
-      FIELD(readOnly)[ConfigKey.THROTTLING_CONFIG],
       FIELD(readOnly)[ConfigKey.ENABLED],
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
     ],

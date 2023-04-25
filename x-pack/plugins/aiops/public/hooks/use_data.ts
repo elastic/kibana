@@ -8,14 +8,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
 
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 
+import { PLUGIN_ID } from '../../common';
+
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
-import type { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_app_state';
+import type { AiOpsIndexBasedAppState } from '../application/utils/url_state';
 import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
 import type { GroupTableItem } from '../components/spike_analysis_table/types';
 
@@ -33,16 +36,24 @@ export const useData = (
   }: { selectedDataView: DataView; selectedSavedSearch: SavedSearch | null },
   aiopsListState: AiOpsIndexBasedAppState,
   onUpdate: (params: Dictionary<unknown>) => void,
+  contextId: string,
   selectedSignificantTerm?: SignificantTerm,
   selectedGroup?: GroupTableItem | null,
   barTarget: number = DEFAULT_BAR_TARGET
 ) => {
   const {
+    executionContext,
     uiSettings,
     data: {
       query: { filterManager },
     },
   } = useAiopsAppContext();
+
+  useExecutionContext(executionContext, {
+    name: PLUGIN_ID,
+    type: 'application',
+    id: contextId,
+  });
 
   const [lastRefresh, setLastRefresh] = useState(0);
 
