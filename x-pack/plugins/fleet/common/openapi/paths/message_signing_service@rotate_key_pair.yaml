@@ -1,0 +1,24 @@
+post:
+  summary: Rotate key pair
+  tags:
+    - Message Signing Service
+  operationId: rotate-key-pair
+  parameters:
+    - schema:
+        type: boolean
+      in: query
+      name: acknowledge
+      required: true
+      description: When set to true, rotate key pair is done. If set to false or missing, it returns an error.
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    '400':
+      $ref: ../components/responses/error.yaml
