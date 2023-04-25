@@ -1,10 +1,4 @@
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '../../../../src/core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
 import { ReportingMocksPluginSetup, ReportingMocksPluginStart } from './types';
 import { defineRoutes } from './routes';

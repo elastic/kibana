@@ -1,4 +1,4 @@
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { ReportingMocksPlugin } from './plugin';
 
 //  This exports static code and TypeScript types,
