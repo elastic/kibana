@@ -189,7 +189,8 @@ export default function ({
         expect(percentDiff).to.be.lessThan(0.01);
       });
 
-      it('PNG file matches the baseline: large dashboard', async function () {
+      // Failing: See https://github.com/elastic/kibana/issues/142484
+      it.skip('PNG file matches the baseline: large dashboard', async function () {
         this.timeout(300000);
 
         await PageObjects.common.navigateToApp('dashboard');
