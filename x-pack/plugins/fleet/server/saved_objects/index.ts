@@ -197,6 +197,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           dynamic: false,
           properties: {},
         },
+        secret_references: { properties: { id: { type: 'keyword' } } },
         revision: { type: 'integer' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },

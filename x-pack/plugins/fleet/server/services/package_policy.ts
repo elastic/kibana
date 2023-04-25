@@ -63,6 +63,7 @@ import type {
   Installation,
   ExperimentalDataStreamFeature,
   DeletePackagePoliciesResponse,
+  PolicySecretReference,
 } from '../../common/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
@@ -163,7 +164,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     const logger = appContextService.getLogger();
-
+    let secretReferences: PolicySecretReference[] | undefined;
     let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
       packagePolicy,
@@ -243,13 +244,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
       if (secretsStorageEnabled) {
-        const packagePolicyWithSecretRefs = await extractAndWriteSecrets({
+        const secretsRes = await extractAndWriteSecrets({
           packagePolicy: enrichedPackagePolicy,
           packageInfo: pkgInfo,
           esClient,
         });
 
-        enrichedPackagePolicy = packagePolicyWithSecretRefs;
+        enrichedPackagePolicy = secretsRes.packagePolicy;
+        secretReferences = secretsRes.secret_references;
       }
       inputs = await _compilePackagePolicyInputs(pkgInfo, enrichedPackagePolicy.vars || {}, inputs);
 
@@ -277,6 +279,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           : {}),
         inputs,
         ...(elasticsearchPrivileges && { elasticsearch: { privileges: elasticsearchPrivileges } }),
+        secret_references: secretReferences,
         revision: 1,
         created_at: isoDate,
         created_by: options?.user?.username ?? 'system',

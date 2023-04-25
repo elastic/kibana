@@ -13,8 +13,12 @@ export interface Secret {
 export interface SecretElasticDoc {
   value: string;
 }
-
-export interface SecretReference {
+// this replaces a var value with a reference to a secret
+export interface VarSecretReference {
   id: string;
-  isSecretRef: boolean;
+  isSecretRef: true;
+}
+// this is used in the top level secret_refs array on package and agent policies
+export interface PolicySecretReference {
+  id: string;
 }

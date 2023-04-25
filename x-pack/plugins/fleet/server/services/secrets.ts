@@ -30,7 +30,8 @@ import type {
   PackagePolicy,
   RegistryVarsEntry,
   Secret,
-  SecretReference,
+  VarSecretReference,
+  PolicySecretReference,
 } from '../types';
 
 import { FleetError } from '../errors';
@@ -50,10 +51,12 @@ export async function createSecrets(opts: {
 }): Promise<Secret[]> {
   const { esClient, values } = opts;
   const logger = appContextService.getLogger();
-  const body = values.map((value) => ({
-    create: { _index: SECRETS_INDEX },
-    body: { value },
-  }));
+  const body = values.flatMap((value) => [
+    {
+      create: { _index: SECRETS_INDEX },
+    },
+    { value },
+  ]);
   let res: BulkResponse;
   try {
     res = await esClient.bulk({
@@ -61,13 +64,13 @@ export async function createSecrets(opts: {
       body,
     });
 
-    const itemsWithErrors = res.items.filter(({ index }) => index?.error);
+    const itemsWithErrors = res.items.filter(({ create }) => create?.error);
     if (itemsWithErrors.length) {
       throw new Error(JSON.stringify(itemsWithErrors));
     }
 
     return res.items.map((item, i) => ({
-      id: item.index!._id as string,
+      id: item.create!._id as string,
       value: values[i],
     }));
   } catch (e) {
@@ -102,12 +105,12 @@ export async function extractAndWriteSecrets(opts: {
   packagePolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
   esClient: ElasticsearchClient;
-}): Promise<NewPackagePolicy> {
+}): Promise<{ packagePolicy: NewPackagePolicy; secret_references: PolicySecretReference[] }> {
   const { packagePolicy, packageInfo, esClient } = opts;
   const secretPaths = extractSecretVarsFromPackagePolicy(packagePolicy, packageInfo);
 
   if (!secretPaths.length) {
-    return packagePolicy;
+    return { packagePolicy, secret_references: [] };
   }
 
   const secrets = await createSecrets({
@@ -118,13 +121,13 @@ export async function extractAndWriteSecrets(opts: {
   const policyWithSecretRefs = JSON.parse(JSON.stringify(packagePolicy));
 
   secretPaths.forEach((secretPath, i) => {
-    set(policyWithSecretRefs, secretPath.path, makeSecretRef(secrets[i].id));
+    set(policyWithSecretRefs, secretPath.path, makeVarSecretRef(secrets[i].id));
   });
 
-  return policyWithSecretRefs;
+  return { packagePolicy, secret_references: secrets.map(({ id }) => ({ id })) };
 }
 
-function makeSecretRef(id: string): SecretReference {
+function makeVarSecretRef(id: string): VarSecretReference {
   return { id, isSecretRef: true };
 }
 
