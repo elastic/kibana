@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiButton, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import React from 'react';
+import { EuiButton, EuiSpacer, EuiCallOut, EuiSkeletonText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { useGetSettings, useKibanaVersion, useStartServices } from '../../hooks';
+import { useGetSettings, useKibanaVersion } from '../../hooks';
 
 interface Props {
   enrollmentAPIKey?: string;
@@ -35,48 +35,62 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
   enrollmentAPIKey,
   cloudFormationTemplateUrl,
 }) => {
-  const [fleetServer, setFleetServer] = useState<string | ''>();
-  const [isError, setIsError] = useState<boolean>(false);
-
-  const core = useStartServices();
   const { data, isLoading } = useGetSettings();
-  const { notifications } = core;
 
   const kibanaVersion = useKibanaVersion();
 
-  // Sets Fleet Server Host as the first fleet server host available from the settings
-  // Shows an error if no fleet server host is available
-  useEffect(() => {
-    if (isLoading) return;
+  // Default fleet server host
+  const fleetServerHost = data?.item.fleet_server_hosts?.[0];
 
-    const fleetServerHosts = data?.item.fleet_server_hosts;
-    if (fleetServerHosts !== undefined && fleetServerHosts.length !== 0) {
-      setFleetServer(fleetServerHosts[0]);
-    } else {
-      setIsError(true);
-      notifications.toasts.addError(new Error('Fleet server host not found'), {
-        title: i18n.translate(
-          'xpack.fleet.agentEnrollment.cloudFormation.errorLoadingFleetServerHosts',
-          {
-            defaultMessage: 'Error while fetching Fleet Server hosts',
-          }
-        ),
-      });
-    }
-  }, [data?.item.fleet_server_hosts, isLoading, notifications.toasts]);
+  if (!isLoading && !fleetServerHost) {
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          title={i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.noFleetServer', {
+            defaultMessage: 'Fleet Server host not found',
+          })}
+          color="danger"
+          iconType="error"
+        />
+      </>
+    );
+  }
 
-  const cloudFormationUrl =
-    enrollmentAPIKey && fleetServer
-      ? createCloudFormationUrl(
-          cloudFormationTemplateUrl,
-          enrollmentAPIKey,
-          fleetServer,
-          kibanaVersion
-        )
-      : '';
+  if (!enrollmentAPIKey) {
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          title={i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.noApiKey', {
+            defaultMessage: 'Enrollment token not found',
+          })}
+          color="danger"
+          iconType="error"
+        />
+      </>
+    );
+  }
+
+  const cloudFormationUrl = createCloudFormationUrl(
+    cloudFormationTemplateUrl,
+    enrollmentAPIKey,
+    fleetServerHost || '',
+    kibanaVersion
+  );
 
   return (
-    <>
+    <EuiSkeletonText
+      lines={3}
+      size="m"
+      isLoading={isLoading}
+      contentAriaLabel={i18n.translate(
+        'xpack.fleet.agentEnrollment.cloudFormation.loadingAriaLabel',
+        {
+          defaultMessage: 'Loading CloudFormation instructions',
+        }
+      )}
+    >
       <EuiSpacer size="m" />
       <EuiCallOut
         title={i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.callout', {
@@ -88,8 +102,6 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
       />
       <EuiSpacer size="m" />
       <EuiButton
-        isLoading={isLoading}
-        isDisabled={isError || cloudFormationUrl === ''}
         color="primary"
         fill
         target="_blank"
@@ -102,6 +114,6 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
           defaultMessage="Launch CloudFormation"
         />
       </EuiButton>
-    </>
+    </EuiSkeletonText>
   );
 };
