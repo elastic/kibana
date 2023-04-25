@@ -248,6 +248,10 @@ describe('Entity Analytics Dashboard', () => {
       esArchiverLoad('network');
     });
 
+    after(() => {
+      esArchiverUnload('network');
+    });
+
     beforeEach(() => {
       visit(ENTITY_ANALYTICS_URL);
     });
