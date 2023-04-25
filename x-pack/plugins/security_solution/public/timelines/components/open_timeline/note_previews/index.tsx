@@ -19,7 +19,7 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 
 import type { TimelineResultNote } from '../types';
 import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
@@ -106,79 +106,67 @@ function useDeleteNote(noteId: string | null | undefined) {
   } = useKibana();
   const dispatch = useDispatch();
   const { addError } = useAppToasts();
-  const onSuccess = useCallback(() => {
-    if (noteId) {
-      dispatch(
-        appActions.deleteNote({
-          id: noteId,
-        })
-      );
-    }
-  }, [dispatch, noteId]);
 
-  const onError = useCallback(
-    (err) => {
-      addError(err, { title: i18n.DELETE_NOTE_ERROR(err) });
-    },
-    [addError]
-  );
-
-  return useQuery(
-    ['deleteNote'],
-    () => {
+  return useMutation({
+    mutationFn: (id: string | null | undefined) => {
       return http.fetch('/api/note', {
         method: 'DELETE',
-        body: JSON.stringify({ noteId }),
+        body: JSON.stringify({ noteId: id }),
       });
     },
-    {
-      enabled: !!noteId,
-      onSuccess,
-      onError,
-    }
-  );
+    onSuccess: () => {
+      if (noteId) {
+        dispatch(
+          appActions.deleteNote({
+            id: noteId,
+          })
+        );
+      }
+    },
+    onError: (err: string) => {
+      addError(err, { title: i18n.DELETE_NOTE_ERROR(err) });
+    },
+  });
 }
 
-const DeleteNoteButton = React.memo<{ noteId?: string | null; timelineId?: string | null }>(
-  ({ noteId, timelineId }) => {
-    const [noteToDelete, setNoteToDelete] = useState<string | null | undefined>(null);
-    const [confirmingNoteId, setConfirmingNoteId] = useState<string | null | undefined>(null);
-    const handleOpenDeleteModal = useCallback(async () => {
-      setConfirmingNoteId(noteId);
-    }, [noteId]);
+const DeleteNoteButton = React.memo<{ noteId?: string | null }>(({ noteId }) => {
+  const [confirmingNoteId, setConfirmingNoteId] = useState<string | null | undefined>(null);
+  const { mutate, isLoading } = useDeleteNote(noteId);
 
-    const handleCancelDelete = useCallback(() => {
-      setConfirmingNoteId(null);
-    }, []);
+  const handleOpenDeleteModal = useCallback(async () => {
+    setConfirmingNoteId(noteId);
+  }, [noteId]);
 
-    const handleConfirmDelete = useCallback(() => {
-      setNoteToDelete(confirmingNoteId);
-      setConfirmingNoteId(null);
-    }, [confirmingNoteId]);
+  const handleCancelDelete = useCallback(() => {
+    setConfirmingNoteId(null);
+  }, []);
 
-    const { isFetching } = useDeleteNote(noteToDelete);
-    const disableDelete = useMemo(() => {
-      return isFetching || noteId == null;
-    }, [isFetching, noteId]);
+  const handleConfirmDelete = useCallback(() => {
+    mutate(noteId);
+    setConfirmingNoteId(null);
+  }, [mutate, noteId]);
 
-    return (
-      <>
-        <EuiButtonIcon
-          title={i18n.DELETE_NOTE}
-          aria-label={i18n.DELETE_NOTE}
-          data-test-subj={'delete-note'}
-          color="text"
-          iconType="trash"
-          onClick={handleOpenDeleteModal}
-          disabled={disableDelete}
-        />
-        {confirmingNoteId != null && (
-          <DeleteNoteConfirm closeModal={handleCancelDelete} confirmModal={handleConfirmDelete} />
-        )}
-      </>
-    );
-  }
-);
+  const disableDelete = useMemo(() => {
+    return isLoading || noteId == null;
+  }, [isLoading, noteId]);
+
+  return (
+    <>
+      <EuiButtonIcon
+        title={i18n.DELETE_NOTE}
+        aria-label={i18n.DELETE_NOTE}
+        data-test-subj={'delete-note'}
+        color="text"
+        iconType="trash"
+        onClick={handleOpenDeleteModal}
+        disabled={disableDelete}
+      />
+      {confirmingNoteId != null && (
+        <DeleteNoteConfirm closeModal={handleCancelDelete} confirmModal={handleConfirmDelete} />
+      )}
+    </>
+  );
+});
 
 DeleteNoteButton.displayName = 'DeleteNoteButton';
 
@@ -193,7 +181,7 @@ const NoteActions = React.memo<{
       <DeleteNoteButton noteId={noteId} />
     </>
   ) : (
-    <DeleteNoteButton noteId={noteId} timelineId={timelineId} />
+    <DeleteNoteButton noteId={noteId} />
   );
 });
 
