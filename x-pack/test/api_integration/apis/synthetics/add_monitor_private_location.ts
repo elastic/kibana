@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertestAPI
-        .post('/api/fleet/epm/packages/synthetics/0.11.4')
+        .post('/api/fleet/epm/packages/synthetics/0.12.0')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -455,7 +455,7 @@ export default function ({ getService }: FtrProviderContext) {
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
 
-        expect(packagePolicy.package.version).eql('0.11.4');
+        expect(packagePolicy.package.version).eql('0.12.0');
 
         await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
         const policyResponseAfterUpgrade = await supertestAPI.get(
@@ -465,7 +465,7 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
-        expect(semver.gte(packagePolicyAfterUpgrade.package.version, '0.11.4')).eql(true);
+        expect(semver.gte(packagePolicyAfterUpgrade.package.version, '0.12.0')).eql(true);
       } finally {
         await supertestAPI
           .delete(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)

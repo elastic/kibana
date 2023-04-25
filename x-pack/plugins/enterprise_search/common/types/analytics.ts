@@ -11,7 +11,7 @@ export interface AnalyticsCollection {
 }
 
 export interface AnalyticsEventsExist {
-  exist: boolean;
+  exists: boolean;
 }
 
 export interface AnalyticsCollectionDataViewId {

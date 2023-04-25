@@ -9315,6 +9315,36 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/alerting/rules/maintenance_window/_active\""
+        ],
+        "path": "x-pack/plugins/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/alerting/rules/maintenance_window\""
+        ],
+        "path": "x-pack/plugins/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.INTERNAL_BASE_ALERTING_API_PATH",
         "type": "string",
         "tags": [],
@@ -9435,6 +9465,29 @@
             "text": "MaintenanceWindowStatus"
           },
           "; eventStartTime: string | null; eventEndTime: string | null; id: string; }"
+        ],
+        "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.MaintenanceWindowCreateBody",
+        "type": "Type",
+        "tags": [],
+        "label": "MaintenanceWindowCreateBody",
+        "description": [],
+        "signature": [
+          "{ title: string; duration: number; rRule: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RRuleParams",
+            "text": "RRuleParams"
+          },
+          "; }"
         ],
         "path": "x-pack/plugins/alerting/common/maintenance_window.ts",
         "deprecated": false,
