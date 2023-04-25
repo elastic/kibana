@@ -35,10 +35,8 @@ adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
 --
 xpack.actions.preconfigured:
   my-slack:
-    name: preconfigured-slack-connector-type
+    name: preconfigured-slack-webhook-connector-type
     actionTypeId: .slack
-    config:
-      type: 'webhook'
     secrets:
       webhookUrl: 'https://hooks.slack.com/services/xxxx/xxxx/xxxx' <1>
 --
@@ -49,10 +47,8 @@ xpack.actions.preconfigured:
 --
 xpack.actions.preconfigured:
   my-slack:
-    name: preconfigured-slack-connector-type
-    actionTypeId: .slack
-    config:
-      type: 'web_api'
+    name: preconfigured-slack-api-connector-type
+    actionTypeId: .slack_api
     secrets:
       token: 'xoxb-xxxx-xxxx-xxxx' <1>
 --
