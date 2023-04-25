@@ -330,7 +330,7 @@ export const ActionNotifyWhen = ({
                       prepend={i18n.translate(
                         'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.label',
                         {
-                          defaultMessage: 'Every',
+                          defaultMessage: 'Run action every',
                         }
                       )}
                       onChange={(e) => {
