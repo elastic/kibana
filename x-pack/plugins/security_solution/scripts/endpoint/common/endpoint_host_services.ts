@@ -10,11 +10,8 @@ import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import assert from 'assert';
-import { mkdir, unlink, readdir, stat } from 'fs/promises';
-import { join } from 'path';
-import fs from 'fs';
-import { finished } from 'stream/promises';
-import nodeFetch from 'node-fetch';
+import type { DownloadedAgentInfo } from './agent_downloads_service';
+import { cleanupDownloads, downloadAndStoreAgent } from './agent_downloads_service';
 import {
   fetchAgentPolicyEnrollmentKey,
   fetchFleetServerUrl,
@@ -22,7 +19,6 @@ import {
   unEnrollFleetAgent,
   waitForHostToEnroll,
 } from './fleet_services';
-import { SettingsStorage } from './settings_storage';
 
 export interface CreateAndEnrollEndpointHostOptions
   extends Pick<CreateMultipassVmOptions, 'disk' | 'cpus' | 'memory'> {
@@ -60,6 +56,10 @@ export const createAndEnrollEndpointHost = async ({
   useClosestVersionMatch = false,
   useCache = true,
 }: CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse> => {
+  let cacheCleanupPromise: ReturnType<typeof cleanupDownloads> = Promise.resolve({
+    deleted: [],
+  });
+
   const [vm, agentDownload, fleetServerUrl, enrollmentToken] = await Promise.all([
     createMultipassVm({
       vmName: hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`,
@@ -73,9 +73,9 @@ export const createAndEnrollEndpointHost = async ({
       cache?: DownloadedAgentInfo;
     }>((url) => {
       if (useCache) {
-        const agentDownloadClient = new AgentDownloadStorage();
+        cacheCleanupPromise = cleanupDownloads();
 
-        return agentDownloadClient.downloadAndStore(url).then((cache) => {
+        return downloadAndStoreAgent(url).then((cache) => {
           return {
             url,
             cache,
@@ -110,6 +110,16 @@ export const createAndEnrollEndpointHost = async ({
     cachedAgentDownload: agentDownload.cache,
     enrollmentToken,
     vmName: vm.vmName,
+  });
+
+  await cacheCleanupPromise.then((results) => {
+    if (results.deleted.length > 0) {
+      log.verbose(`Agent Downloads cache directory was cleaned up and the following ${
+        results.deleted.length
+      } were deleted:
+${results.deleted.join('\n')}
+`);
+    }
   });
 
   return {
@@ -252,107 +262,5 @@ const enrollHostWithFleet = async ({
 
   return {
     agentId: agent.id,
-  };
-};
-
-interface DownloadedAgentInfo {
-  filename: string;
-  directory: string;
-  fullFilePath: string;
-}
-
-class AgentDownloadStorage extends SettingsStorage {
-  private downloadsFolderExists = false;
-  private readonly downloadsDirName = 'agent_download_storage';
-  private readonly downloadsDirFullPath: string;
-
-  constructor() {
-    super('agent_download_storage_settings.json');
-
-    this.downloadsDirFullPath = this.buildPath(this.downloadsDirName);
-  }
-
-  protected async ensureExists(): Promise<void> {
-    await super.ensureExists();
-
-    if (!this.downloadsFolderExists) {
-      await mkdir(this.downloadsDirFullPath, { recursive: true });
-      this.downloadsFolderExists = true;
-    }
-  }
-
-  public getPathsForUrl(agentDownloadUrl: string): DownloadedAgentInfo {
-    const filename = agentDownloadUrl.replace(/^https?:\/\//gi, '').replace(/\//g, '#');
-    const directory = this.downloadsDirFullPath;
-    const fullFilePath = this.buildPath(join(this.downloadsDirName, filename));
-
-    return {
-      filename,
-      directory,
-      fullFilePath,
-    };
-  }
-
-  public async downloadAndStore(agentDownloadUrl: string): Promise<DownloadedAgentInfo> {
-    // TODO: should we add "retry" attempts to file downloads?
-
-    await this.ensureExists();
-
-    const newDownloadInfo = this.getPathsForUrl(agentDownloadUrl);
-
-    // If download is already present on disk, then just return that info. No need to re-download it
-    if (fs.existsSync(newDownloadInfo.fullFilePath)) {
-      return newDownloadInfo;
-    }
-
-    try {
-      const outputStream = fs.createWriteStream(newDownloadInfo.fullFilePath);
-      const { body } = await nodeFetch(agentDownloadUrl);
-
-      await finished(body.pipe(outputStream));
-    } catch (e) {
-      // Try to clean up download case it failed halfway through
-      await unlink(newDownloadInfo.fullFilePath);
-
-      throw e;
-    }
-
-    return newDownloadInfo;
-  }
-
-  public async cleanupDownloads(): Promise<string[]> {
-    const deletedFiles: string[] = [];
-    const deleteFilePromises: Array<Promise<unknown>> = [];
-    const maxAgeDate = new Date();
-
-    maxAgeDate.setMilliseconds(-1.728e8); // -2 days
-
-    const allFiles = await readdir(this.downloadsDirFullPath);
-
-    for (const fileName of allFiles) {
-      const filePath = join(this.downloadsDirFullPath, fileName);
-      const fileStats = await stat(filePath);
-
-      if (fileStats.isFile() && fileStats.birthtime < maxAgeDate) {
-        deleteFilePromises.push(unlink(filePath));
-        deletedFiles.push(filePath);
-      }
-    }
-
-    await Promise.allSettled(deleteFilePromises);
-
-    return deletedFiles;
-  }
-}
-
-export const downloadAgent = async (
-  agentDownloadUrl: string
-): Promise<DownloadedAgentInfo & { url: string }> => {
-  const agentDownloadClient = new AgentDownloadStorage();
-  const downloadedAgent = await agentDownloadClient.downloadAndStore(agentDownloadUrl);
-
-  return {
-    url: agentDownloadUrl,
-    ...downloadedAgent,
   };
 };
