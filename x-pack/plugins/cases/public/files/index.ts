@@ -7,10 +7,12 @@
 
 import type { FilesSetup } from '@kbn/files-plugin/public';
 import type { FileKindBrowser } from '@kbn/shared-ux-file-types';
-import { MAX_FILE_SIZE, OWNERS } from '../../common/constants';
+import { MAX_FILE_SIZE, OWNERS, getOwnerUIName } from '../../common/constants';
 import type { Owner } from '../../common/constants/types';
 import { constructFileKindIdByOwner } from '../../common/files';
 import type { CaseFileKinds, FilesConfig } from './types';
+
+import * as i18n from './translations';
 
 const buildFileKind = (config: FilesConfig, owner: Owner): FileKindBrowser => {
   return {
@@ -20,7 +22,7 @@ const buildFileKind = (config: FilesConfig, owner: Owner): FileKindBrowser => {
     managementUiActions: {
       delete: {
         enabled: false,
-        reason: 'File is managed by Cases',
+        reason: i18n.FILE_DELETE_REASON(getOwnerUIName(owner)),
       },
     },
   };
