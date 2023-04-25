@@ -78,7 +78,8 @@ export abstract class InferenceBase<TInferResponse> {
   constructor(
     protected readonly trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     protected readonly model: estypes.MlTrainedModelConfig,
-    protected readonly inputType: INPUT_TYPE
+    protected readonly inputType: INPUT_TYPE,
+    protected readonly deploymentId: string
   ) {
     this.modelInputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
     this.inputField$.next(this.modelInputField);
@@ -86,14 +87,6 @@ export abstract class InferenceBase<TInferResponse> {
 
   public destroy() {
     this.subscriptions$.unsubscribe();
-  }
-
-  public set deploymentId(deploymentId: string | null) {
-    this._deploymentId = deploymentId;
-  }
-
-  public get deploymentId(): string | null {
-    return this._deploymentId;
   }
 
   protected initialize(
