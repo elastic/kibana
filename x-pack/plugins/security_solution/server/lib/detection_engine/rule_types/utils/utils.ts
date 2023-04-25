@@ -955,5 +955,5 @@ export const getUnprocessedExceptionsWarnings = (
 };
 
 export const getMaxSignalsWarning = (): string => {
-  return `The max alerts circut breaker was hit but there might still be alerts this rule is missing`;
+  return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created.`;
 };
