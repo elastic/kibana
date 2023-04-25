@@ -156,7 +156,10 @@ const DeleteNoteButton = React.memo<{ noteId?: string | null; timelineId?: strin
       setConfirmingNoteId(null);
     }, [confirmingNoteId]);
 
-    useDeleteNote(noteToDelete);
+    const { isLoading } = useDeleteNote(noteToDelete);
+    const disableDelete = useMemo(() => {
+      return isLoading || noteId == null;
+    }, [isLoading, noteId]);
 
     return (
       <>
@@ -167,7 +170,7 @@ const DeleteNoteButton = React.memo<{ noteId?: string | null; timelineId?: strin
           color="text"
           iconType="trash"
           onClick={handleOpenDeleteModal}
-          disabled={noteId == null}
+          disabled={disableDelete}
         />
         {confirmingNoteId != null && (
           <DeleteNoteConfirm closeModal={handleCancelDelete} confirmModal={handleConfirmDelete} />
