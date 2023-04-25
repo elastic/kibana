@@ -12,15 +12,11 @@ import { MlClient } from '@kbn/ml-plugin/server/lib/ml_client';
 
 import { MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';
 
-import {
-  ElasticsearchResponseError,
-  isNotFoundException,
-  isResourceNotFoundException,
-} from '../../utils/identify_exceptions';
-
 import { getMlModelDeploymentStatus } from './get_ml_model_deployment_status';
-
-export const acceptableModelNames = ['.elser_model_1_SNAPSHOT'];
+import {
+  isNotFoundExceptionError,
+  throwIfNotAcceptableModelName,
+} from './ml_model_deployment_common';
 
 export const startMlModelDeployment = async (
   modelName: string,
@@ -33,15 +29,7 @@ export const startMlModelDeployment = async (
 
   // before anything else, check our model name
   // to ensure we only allow those names we want
-  if (!acceptableModelNames.includes(modelName)) {
-    const notFoundError: ElasticsearchResponseError = {
-      meta: {
-        statusCode: 404,
-      },
-      name: 'ResponseError',
-    };
-    throw notFoundError;
-  }
+  throwIfNotAcceptableModelName(modelName);
 
   try {
     // try and get the deployment status of the model first
@@ -56,7 +44,7 @@ export const startMlModelDeployment = async (
   } catch (error) {
     // don't rethrow the not found here - if it's not found there's
     // a good chance it's not started downloading yet
-    if (!isResourceNotFoundException(error) && !isNotFoundException(error)) {
+    if (!isNotFoundExceptionError(error)) {
       throw error;
     }
   }
