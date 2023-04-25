@@ -212,12 +212,14 @@ export const fetchRulesSnoozeSettings = async ({
     }
   );
 
-  return response.data?.map((x) => ({
-    id: x?.id ?? '',
-    muteAll: x?.mute_all ?? false,
-    activeSnoozes: x?.active_snoozes ?? [],
-    isSnoozedUntil: x?.is_snoozed_until ? new Date(x.is_snoozed_until) : undefined,
-    snoozeSchedule: x?.snooze_schedule,
+  return response.data?.map((snoozeSettings) => ({
+    id: snoozeSettings?.id ?? '',
+    muteAll: snoozeSettings?.mute_all ?? false,
+    activeSnoozes: snoozeSettings?.active_snoozes ?? [],
+    isSnoozedUntil: snoozeSettings?.is_snoozed_until
+      ? new Date(snoozeSettings.is_snoozed_until)
+      : undefined,
+    snoozeSchedule: snoozeSettings?.snooze_schedule,
   }));
 };
 
