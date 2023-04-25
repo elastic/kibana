@@ -34,6 +34,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('triggersActionsConnectors');
       });
 
+      it('should only show one slack connector', async () => {
+        if (await testSubjects.exists('createActionButton')) {
+          await testSubjects.click('createActionButton');
+        } else {
+          await testSubjects.click('createFirstActionButton');
+        }
+        await testSubjects.existOrFail('.slack-card');
+        const slackApiCardExists = await testSubjects.exists('.slack_api-card');
+        expect(slackApiCardExists).to.be(false);
+      });
+
       it('should create the webhook connector', async () => {
         const connectorName = generateUniqueKey();
         await actions.slack.createNewWebhook({
