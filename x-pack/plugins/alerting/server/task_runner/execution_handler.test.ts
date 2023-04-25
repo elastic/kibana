@@ -1366,7 +1366,7 @@ describe('Execution Handler', () => {
     getSummarizedAlertsMock.mockResolvedValue({
       new: {
         count: 1,
-        data: [{ ...mockAAD, kibana: { alert: { instance: { id: '1' } } } }],
+        data: [{ ...mockAAD, kibana: { alert: { uuid: '1' } } }],
       },
       ongoing: {
         count: 0,
