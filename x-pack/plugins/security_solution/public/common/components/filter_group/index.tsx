@@ -399,7 +399,9 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   };
 
   const addControlsHandler = useCallback(() => {
-    controlGroup?.openAddDataControlFlyout(newControlInputTranform);
+    controlGroup?.openAddDataControlFlyout({
+      controlInputTransform: newControlInputTranform,
+    });
   }, [controlGroup]);
 
   return (
