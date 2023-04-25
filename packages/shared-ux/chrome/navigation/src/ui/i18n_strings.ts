@@ -8,17 +8,23 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const getI18nStrings = () => {
-  const prefix = 'sharedUXPackages.chrome.sideNavigation';
-  return {
-    headerLogoAriaText: i18n.translate(`${prefix}.headerLogo.ariaText`, {
+export const getI18nStrings = () => ({
+  headerLogoAriaLabel: i18n.translate(
+    'sharedUXPackages.chrome.sideNavigation.headerLogo.ariaLabel',
+    {
       defaultMessage: 'Go to home page',
-    }),
-    linkToCloudProjects: i18n.translate(`${prefix}.linkToCloud.projects`, {
+    }
+  ),
+  linkToCloudProjects: i18n.translate(
+    'sharedUXPackages.chrome.sideNavigation.linkToCloud.projects',
+    {
       defaultMessage: 'My projects',
-    }),
-    linkToCloudDeployments: i18n.translate(`${prefix}.linkToCloud.deployments`, {
+    }
+  ),
+  linkToCloudDeployments: i18n.translate(
+    'sharedUXPackages.chrome.sideNavigation.linkToCloud.deployments',
+    {
       defaultMessage: 'My deployments',
-    }),
-  };
-};
+    }
+  ),
+});
