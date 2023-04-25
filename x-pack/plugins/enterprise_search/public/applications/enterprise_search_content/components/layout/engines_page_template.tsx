@@ -7,8 +7,6 @@
 
 import React from 'react';
 
-import { useEuiBackgroundColor } from '@elastic/eui';
-
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { SetEnterpriseSearchEnginesChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
@@ -23,11 +21,6 @@ export const EnterpriseSearchEnginesPageTemplate: React.FC<
   EnterpriseSearchEnginesPageTemplateProps
 > = ({ children, pageChrome, pageViewTelemetry, engineName, ...pageTemplateProps }) => {
   const navItems = useEnterpriseSearchEngineNav(engineName, pageTemplateProps.isEmptyState);
-
-  // pageTemplateProps.pageHeader = {
-  //   ...pageTemplateProps.pageHeader,
-  //   css: { 'background-color': color },
-  // };
   return (
     <EnterpriseSearchPageTemplateWrapper
       panelled
