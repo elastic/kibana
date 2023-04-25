@@ -53,6 +53,7 @@ import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-serve
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { MAIN_SAVED_OBJECT_INDEX, ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import { DEFAULT_INDEX_TYPES_MAP } from '@kbn/core-saved-objects-migration-server-internal/src/kibana_migrator_constants';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
@@ -373,6 +374,7 @@ export class SavedObjectsService
       kibanaVersion: this.kibanaVersion,
       soMigrationsConfig,
       kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
+      defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
       client,
       docLinks,
       waitForMigrationCompletion,

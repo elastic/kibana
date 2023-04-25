@@ -276,7 +276,9 @@ describe('split .kibana index into multiple system indices', () => {
 
       // .kibana_task_manager index exists and has no aliases => LEGACY_* migration path
       expect(logs).toMatch('[.kibana_task_manager] INIT -> LEGACY_SET_WRITE_BLOCK.');
-      // .kibana_task_manager migrator is NOT involved in relocation, must not sync
+      expect(logs).toMatch('[.kibana_task_manager] LEGACY_REINDEX_WAIT_FOR_TASK -> LEGACY_DELETE.');
+      expect(logs).toMatch('[.kibana_task_manager] CREATE_REINDEX_TEMP');
+      // .kibana_task_manager migrator is NOT involved in relocation, must not sync with others
       expect(logs).not.toMatch('[.kibana_task_manager] READY_TO_REINDEX_SYNC');
 
       // newer indices migrators did not exist, so they all have to reindex (create temp index + sync)
@@ -305,7 +307,6 @@ describe('split .kibana index into multiple system indices', () => {
       expect(logs).toMatch(
         '[.kibana] REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK.'
       );
-      expect(logs).toMatch('[.kibana_task_manager] LEGACY_REINDEX_WAIT_FOR_TASK -> LEGACY_DELETE.');
       expect(logs).toMatch(
         '[.kibana] REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_READ.'
       );
@@ -362,8 +363,11 @@ describe('split .kibana index into multiple system indices', () => {
         );
 
         expect(logs).toMatch(`[${index}] MARK_VERSION_INDEX_READY -> DONE.`);
-        expect(logs).toMatch(`[${index}] Migration completed`);
       });
+
+      ['.kibana', '.kibana_task_manager', '.kibana_so_ui', '.kibana_so_search'].forEach((index) =>
+        expect(logs).toMatch(`[${index}] Migration completed`)
+      );
     });
   });
 
