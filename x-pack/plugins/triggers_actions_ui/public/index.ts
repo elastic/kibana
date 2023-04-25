@@ -148,3 +148,5 @@ export const getNotifyWhenOptions = async () => {
   const { NOTIFY_WHEN_OPTIONS } = await import('./application/sections/rule_form/rule_notify_when');
   return NOTIFY_WHEN_OPTIONS;
 };
+
+export { transformRule } from './application/lib/rule_api/common_transformations';
