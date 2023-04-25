@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useEuiBackgroundColor } from '@elastic/eui';
 import React from 'react';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
@@ -19,11 +20,13 @@ export type EnterpriseSearchEnginesPageTemplateProps = PageTemplateProps & {
 
 export const EnterpriseSearchEnginesPageTemplate: React.FC<
   EnterpriseSearchEnginesPageTemplateProps
-> = ({ children, pageChrome, pageViewTelemetry, engineName, ...pageTemplateProps }) => {
+> = ({ children, pageChrome, pageViewTelemetry, engineName, color, ...pageTemplateProps }) => {
   const navItems = useEnterpriseSearchEngineNav(engineName, pageTemplateProps.isEmptyState);
+
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
+      // panelled
       solutionNav={{
         items: navItems,
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,

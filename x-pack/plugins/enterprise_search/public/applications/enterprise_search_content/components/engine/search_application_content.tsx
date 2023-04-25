@@ -78,6 +78,7 @@ export const SearchApplicationContent = () => {
         pageViewTelemetry={EngineViewTabs.CONTENT}
         isLoading={isLoadingEngine}
         pageHeader={{
+          bottomBorder: false,
           pageTitle,
           rightSideItems: [],
         }}
@@ -103,6 +104,7 @@ export const SearchApplicationContent = () => {
       pageViewTelemetry={EngineViewTabs.CONTENT}
       isLoading={isLoadingEngine}
       pageHeader={{
+        bottomBorder: false,
         breadcrumbs: [
           {
             color: 'primary',

@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiTextColor,
   EuiTitle,
+  useEuiBackgroundColor,
 } from '@elastic/eui';
 import {
   PagingInfo,
@@ -299,7 +300,7 @@ export const EngineSearchPreview: React.FC = () => {
       },
     };
   }, [http, engineName, resultFields, searchableFields]);
-
+  const color = useEuiBackgroundColor('subdued');
   if (!engineData) return null;
 
   return (
@@ -313,6 +314,8 @@ export const EngineSearchPreview: React.FC = () => {
       pageViewTelemetry={EngineViewTabs.PREVIEW}
       isLoading={isLoadingEngine}
       pageHeader={{
+        bottomBorder: false,
+        css: { 'background-color': color },
         pageTitle: (
           <FormattedMessage
             id="xpack.enterpriseSearch.content.engine.searchPreview.pageTitle"

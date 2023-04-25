@@ -68,6 +68,8 @@ export const EngineConnect: React.FC = () => {
         pageViewTelemetry={EngineViewTabs.CONNECT}
         isLoading={isLoadingEngine}
         pageHeader={{
+          bottomBorder: false,
+          // css: { 'background-color': color },
           pageTitle,
           rightSideItems: [],
         }}
@@ -84,6 +86,7 @@ export const EngineConnect: React.FC = () => {
       pageViewTelemetry={EngineViewTabs.CONNECT}
       isLoading={isLoadingEngine}
       pageHeader={{
+        bottomBorder: false,
         pageTitle,
         rightSideItems: [],
         tabs: [
