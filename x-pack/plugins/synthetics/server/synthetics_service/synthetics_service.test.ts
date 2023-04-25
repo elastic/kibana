@@ -100,7 +100,9 @@ describe('SyntheticsService', () => {
         status: LocationStatus.GA,
       };
     });
-    serverMock.config = { service: { devUrl: 'http://localhost' } };
+    serverMock.config = {
+      service: { devUrl: 'http://localhost', manifestUrl: 'https://test-manifest.com' },
+    };
     if (serverMock.savedObjectsClient) {
       serverMock.savedObjectsClient.find = jest.fn().mockResolvedValue({
         saved_objects: [

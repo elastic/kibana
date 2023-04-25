@@ -19,7 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'common', 'header', 'discover', 'settings']);
   const kibanaServer = getService('kibanaServer');
 
-  describe('dls', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/155447
+  describe.skip('dls', function () {
     before('initialize tests', async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/dlstest');

@@ -31,6 +31,7 @@ import {
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { ITermJoinSource } from '../term_join_source';
+import type { IESAggSource } from '../es_agg_source';
 import { IField } from '../../fields/field';
 import { mergeExecutionContext } from '../execution_context_utils';
 
@@ -52,7 +53,7 @@ export function extractPropertiesMap(rawEsData: any, countPropertyName: string):
   return propertiesMap;
 }
 
-export class ESTermSource extends AbstractESAggSource implements ITermJoinSource {
+export class ESTermSource extends AbstractESAggSource implements ITermJoinSource, IESAggSource {
   static type = SOURCE_TYPES.ES_TERM_SOURCE;
 
   static createDescriptor(descriptor: Partial<ESTermSourceDescriptor>): ESTermSourceDescriptor {
@@ -115,7 +116,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     }
     return aggType === AGG_TYPE.COUNT
       ? i18n.translate('xpack.maps.source.esJoin.countLabel', {
-          defaultMessage: `Count of {indexPatternLabel}`,
+          defaultMessage: `count of {indexPatternLabel}`,
           values: { indexPatternLabel },
         })
       : super.getAggLabel(aggType, fieldLabel);

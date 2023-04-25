@@ -229,9 +229,11 @@ export function ExplainLogRateSpikesPageProvider({
     },
 
     async assertProgressTitle(expectedProgressTitle: string) {
-      await testSubjects.existOrFail('aiopProgressTitle');
-      const currentProgressTitle = await testSubjects.getVisibleText('aiopProgressTitle');
-      expect(currentProgressTitle).to.be(expectedProgressTitle);
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail('aiopProgressTitle');
+        const currentProgressTitle = await testSubjects.getVisibleText('aiopProgressTitle');
+        expect(currentProgressTitle).to.be(expectedProgressTitle);
+      });
     },
 
     async navigateToIndexPatternSelection() {

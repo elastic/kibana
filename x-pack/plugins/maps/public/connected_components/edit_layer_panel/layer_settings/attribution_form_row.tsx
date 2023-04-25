@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { Attribution } from '../../../../common/descriptor_types';
 import { ILayer } from '../../../classes/layers/layer';
 import { AttributionPopover } from './attribution_popover';
+import { panelStrings } from '../../panel_strings';
 
 interface Props {
   layer: ILayer;
@@ -65,9 +65,7 @@ export function AttributionFormRow(props: Props) {
                       defaultMessage: 'Edit attribution',
                     }
                   )}
-                  popoverButtonLabel={i18n.translate('xpack.maps.attribution.editBtnLabel', {
-                    defaultMessage: 'Edit',
-                  })}
+                  popoverButtonLabel={panelStrings.edit}
                   label={layerDescriptor.attribution.label}
                   url={layerDescriptor.attribution.url}
                 />
@@ -83,10 +81,7 @@ export function AttributionFormRow(props: Props) {
                     defaultMessage: 'Clear attribution',
                   })}
                 >
-                  <FormattedMessage
-                    id="xpack.maps.attribution.clearBtnLabel"
-                    defaultMessage="Clear"
-                  />
+                  {panelStrings.clear}
                 </EuiButtonEmpty>
               </div>
             </div>

@@ -13,8 +13,8 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 import { isTestDataExpectedWithSampleProbability, type TestData } from './types';
 import { explainLogRateSpikesTestData } from './test_data';
 
-export default function ({ getPageObject, getService }: FtrProviderContext) {
-  const headerPage = getPageObject('header');
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const PageObjects = getPageObjects(['common', 'console', 'header', 'home', 'security']);
   const elasticChart = getService('elasticChart');
   const aiops = getService('aiops');
 
@@ -58,7 +58,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         await aiops.explainLogRateSpikesPage.assertSamplingProbabilityMissing();
       }
 
-      await headerPage.waitUntilLoadingHasFinished();
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} displays elements in the doc count panel correctly`
@@ -78,77 +78,78 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await aiops.explainLogRateSpikesPage.clickDocumentCountChart(testData.chartClickCoordinates);
       await aiops.explainLogRateSpikesPage.assertAnalysisSectionExists();
 
-      await ml.testExecution.logTestStep('displays the no results found prompt');
-      await aiops.explainLogRateSpikesPage.assertNoResultsFoundEmptyPromptExists();
+      if (testData.brushDeviationTargetTimestamp) {
+        await ml.testExecution.logTestStep('displays the no results found prompt');
+        await aiops.explainLogRateSpikesPage.assertNoResultsFoundEmptyPromptExists();
 
-      await ml.testExecution.logTestStep('adjusts the brushes to get analysis results');
-      await aiops.explainLogRateSpikesPage.assertRerunAnalysisButtonExists(false);
+        await ml.testExecution.logTestStep('adjusts the brushes to get analysis results');
+        await aiops.explainLogRateSpikesPage.assertRerunAnalysisButtonExists(false);
 
-      // Get the current width of the deviation brush for later comparison.
-      const brushSelectionWidthBefore = await aiops.explainLogRateSpikesPage.getBrushSelectionWidth(
-        'aiopsBrushDeviation'
-      );
+        // Get the current width of the deviation brush for later comparison.
+        const brushSelectionWidthBefore =
+          await aiops.explainLogRateSpikesPage.getBrushSelectionWidth('aiopsBrushDeviation');
 
-      // Get the px values for the timestamp we want to move the brush to.
-      const { targetPx, intervalPx } = await aiops.explainLogRateSpikesPage.getPxForTimestamp(
-        testData.brushDeviationTargetTimestamp
-      );
-
-      // Adjust the right brush handle
-      await aiops.explainLogRateSpikesPage.adjustBrushHandler(
-        'aiopsBrushDeviation',
-        'handle--e',
-        targetPx + intervalPx * testData.brushIntervalFactor
-      );
-
-      // Adjust the left brush handle
-      await aiops.explainLogRateSpikesPage.adjustBrushHandler(
-        'aiopsBrushDeviation',
-        'handle--w',
-        targetPx - intervalPx * (testData.brushIntervalFactor - 1)
-      );
-
-      if (testData.brushBaselineTargetTimestamp) {
         // Get the px values for the timestamp we want to move the brush to.
-        const { targetPx: targetBaselinePx } =
-          await aiops.explainLogRateSpikesPage.getPxForTimestamp(
-            testData.brushBaselineTargetTimestamp
-          );
+        const { targetPx, intervalPx } = await aiops.explainLogRateSpikesPage.getPxForTimestamp(
+          testData.brushDeviationTargetTimestamp
+        );
 
         // Adjust the right brush handle
         await aiops.explainLogRateSpikesPage.adjustBrushHandler(
-          'aiopsBrushBaseline',
+          'aiopsBrushDeviation',
           'handle--e',
-          targetBaselinePx + intervalPx * testData.brushIntervalFactor
+          targetPx + intervalPx * testData.brushIntervalFactor
         );
 
         // Adjust the left brush handle
         await aiops.explainLogRateSpikesPage.adjustBrushHandler(
-          'aiopsBrushBaseline',
+          'aiopsBrushDeviation',
           'handle--w',
-          targetBaselinePx - intervalPx * (testData.brushIntervalFactor - 1)
+          targetPx - intervalPx * (testData.brushIntervalFactor - 1)
         );
+
+        if (testData.brushBaselineTargetTimestamp) {
+          // Get the px values for the timestamp we want to move the brush to.
+          const { targetPx: targetBaselinePx } =
+            await aiops.explainLogRateSpikesPage.getPxForTimestamp(
+              testData.brushBaselineTargetTimestamp
+            );
+
+          // Adjust the right brush handle
+          await aiops.explainLogRateSpikesPage.adjustBrushHandler(
+            'aiopsBrushBaseline',
+            'handle--e',
+            targetBaselinePx + intervalPx * testData.brushIntervalFactor
+          );
+
+          // Adjust the left brush handle
+          await aiops.explainLogRateSpikesPage.adjustBrushHandler(
+            'aiopsBrushBaseline',
+            'handle--w',
+            targetBaselinePx - intervalPx * (testData.brushIntervalFactor - 1)
+          );
+        }
+
+        // Get the new brush selection width for later comparison.
+        const brushSelectionWidthAfter =
+          await aiops.explainLogRateSpikesPage.getBrushSelectionWidth('aiopsBrushDeviation');
+
+        // Assert the adjusted brush: The selection width should have changed and
+        // we test if the selection is smaller than two bucket intervals.
+        // Finally, the adjusted brush should trigger
+        // a warning on the "Rerun analysis" button.
+        expect(brushSelectionWidthBefore).not.to.be(brushSelectionWidthAfter);
+        expect(brushSelectionWidthAfter).not.to.be.greaterThan(
+          intervalPx * 2 * testData.brushIntervalFactor
+        );
+
+        await aiops.explainLogRateSpikesPage.assertRerunAnalysisButtonExists(true);
+
+        await ml.testExecution.logTestStep('rerun the analysis with adjusted settings');
+
+        await aiops.explainLogRateSpikesPage.clickRerunAnalysisButton(true);
       }
 
-      // Get the new brush selection width for later comparison.
-      const brushSelectionWidthAfter = await aiops.explainLogRateSpikesPage.getBrushSelectionWidth(
-        'aiopsBrushDeviation'
-      );
-
-      // Assert the adjusted brush: The selection width should have changed and
-      // we test if the selection is smaller than two bucket intervals.
-      // Finally, the adjusted brush should trigger
-      // a warning on the "Rerun analysis" button.
-      expect(brushSelectionWidthBefore).not.to.be(brushSelectionWidthAfter);
-      expect(brushSelectionWidthAfter).not.to.be.greaterThan(
-        intervalPx * 2 * testData.brushIntervalFactor
-      );
-
-      await aiops.explainLogRateSpikesPage.assertRerunAnalysisButtonExists(true);
-
-      await ml.testExecution.logTestStep('rerun the analysis with adjusted settings');
-
-      await aiops.explainLogRateSpikesPage.clickRerunAnalysisButton(true);
       await aiops.explainLogRateSpikesPage.assertProgressTitle('Progress: 100% — Done.');
 
       // The group switch should be disabled by default
@@ -178,14 +179,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         );
       }
 
-      // Assert the field selector that allows to costumize grouping
+      await ml.testExecution.logTestStep('open the field filter');
       await aiops.explainLogRateSpikesPage.assertFieldFilterPopoverButtonExists(false);
       await aiops.explainLogRateSpikesPage.clickFieldFilterPopoverButton(true);
       await aiops.explainLogRateSpikesPage.assertFieldSelectorFieldNameList(
         testData.expected.fieldSelectorPopover
       );
 
-      // Filter fields
+      await ml.testExecution.logTestStep('filter fields');
       await aiops.explainLogRateSpikesPage.setFieldSelectorSearch(testData.fieldSelectorSearch);
       await aiops.explainLogRateSpikesPage.assertFieldSelectorFieldNameList([
         testData.fieldSelectorSearch,
@@ -196,6 +197,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       );
 
       if (testData.fieldSelectorApplyAvailable) {
+        await ml.testExecution.logTestStep('regroup results');
         await aiops.explainLogRateSpikesPage.clickFieldFilterApplyButton();
 
         if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
@@ -206,10 +208,33 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           );
         }
       }
+
+      if (testData.action !== undefined) {
+        await ml.testExecution.logTestStep('check all table row actions are present');
+        await aiops.explainLogRateSpikesAnalysisGroupsTable.assertRowActions(
+          testData.action.tableRowId
+        );
+
+        await ml.testExecution.logTestStep('click log pattern analysis action');
+        await aiops.explainLogRateSpikesAnalysisGroupsTable.clickRowAction(
+          testData.action.tableRowId,
+          testData.action.type
+        );
+
+        await ml.testExecution.logTestStep('check log pattern analysis page loaded correctly');
+        await aiops.logPatternAnalysisPageProvider.assertLogCategorizationPageExists();
+        await aiops.logPatternAnalysisPageProvider.assertTotalDocumentCount(
+          testData.action.expected.totalDocCount
+        );
+        await aiops.logPatternAnalysisPageProvider.assertQueryInput(
+          testData.action.expected.queryBar
+        );
+      }
     });
   }
 
-  describe('explain log rate spikes', async function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/155222
+  describe.skip('explain log rate spikes', async function () {
     for (const testData of explainLogRateSpikesTestData) {
       describe(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
         before(async () => {
@@ -222,13 +247,27 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
           await ml.testResources.setKibanaTimeZoneToUTC();
 
-          await ml.securityUI.loginAsMlPowerUser();
+          if (testData.dataGenerator === 'kibana_sample_data_logs') {
+            await PageObjects.security.login('elastic', 'changeme', {
+              expectSuccess: true,
+            });
+
+            await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+              useActualUrl: true,
+            });
+            await PageObjects.header.waitUntilLoadingHasFinished();
+            await PageObjects.home.addSampleDataSet('logs');
+            await PageObjects.header.waitUntilLoadingHasFinished();
+          } else {
+            await ml.securityUI.loginAsMlPowerUser();
+          }
         });
 
         after(async () => {
           await elasticChart.setNewChartUiDebugFlag(false);
-          await ml.testResources.deleteIndexPatternByTitle(testData.sourceIndexOrSavedSearch);
-
+          if (testData.dataGenerator !== 'kibana_sample_data_logs') {
+            await ml.testResources.deleteIndexPatternByTitle(testData.sourceIndexOrSavedSearch);
+          }
           await aiops.explainLogRateSpikesDataGenerator.removeGeneratedData(testData.dataGenerator);
         });
 

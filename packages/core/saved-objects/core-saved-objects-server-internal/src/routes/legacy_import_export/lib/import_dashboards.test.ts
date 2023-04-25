@@ -26,7 +26,12 @@ describe('importDashboards(req)', () => {
         references: [],
         version: 'foo',
       },
-      { id: 'panel-01', type: 'visualization', attributes: { visState: '{}' }, references: [] },
+      {
+        id: 'panel-01',
+        type: 'visualization',
+        attributes: { visState: '{}' },
+        references: [],
+      },
     ];
   });
 

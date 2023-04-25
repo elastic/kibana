@@ -38,6 +38,7 @@ describe('getRuleAlertSummaryRoute', () => {
     status: 'OK',
     errorMessages: [],
     alerts: {},
+    revision: 0,
     executionDuration: {
       average: 1,
       valuesWithTimestamp: {

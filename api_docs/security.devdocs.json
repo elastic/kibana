@@ -514,6 +514,19 @@
           },
           {
             "parentPluginId": "security",
+            "id": "def-public.SecurityLicenseFeatures.allowRoleRemoteIndexPrivileges",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRoleRemoteIndexPrivileges",
+            "description": [
+              "\nIndicates whether we allow users to define remote index privileges in roles."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
             "id": "def-public.SecurityLicenseFeatures.allowRbac",
             "type": "boolean",
             "tags": [],
@@ -4148,7 +4161,9 @@
                 "section": "def-common.RoleIndexPrivilege",
                 "text": "RoleIndexPrivilege"
               },
-              "[]; run_as: string[]; }"
+              "[]; remote_indices?: ",
+              "RoleRemoteIndexPrivilege",
+              "[] | undefined; run_as: string[]; }"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
             "deprecated": false,
@@ -4616,6 +4631,19 @@
             "label": "allowRoleFieldLevelSecurity",
             "description": [
               "\nIndicates whether we allow users to define field level security in roles."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.allowRoleRemoteIndexPrivileges",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRoleRemoteIndexPrivileges",
+            "description": [
+              "\nIndicates whether we allow users to define remote index privileges in roles."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
             "deprecated": false,

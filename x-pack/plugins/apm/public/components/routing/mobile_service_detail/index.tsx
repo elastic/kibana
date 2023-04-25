@@ -33,7 +33,7 @@ export function page({
   tabKey: React.ComponentProps<typeof MobileServiceTemplate>['selectedTabKey'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: {
-    showKueryBar?: boolean;
+    showUnifiedSearchBar?: boolean;
     showTransactionTypeSelector?: boolean;
     showTimeComparison?: boolean;
     showMobileFilters?: boolean;
@@ -146,6 +146,7 @@ export const mobileServiceDetail = {
             osVersion: t.string,
             appVersion: t.string,
             netConnectionType: t.string,
+            mobileSelectedTab: t.string,
           }),
         }),
         children: {

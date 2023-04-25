@@ -1293,7 +1293,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             });
           });
 
-          const actionsToCheck = ['new-instance', 'active-instance', 'recovered-instance'];
+          const actionsToCheck = [
+            'new-instance',
+            'active-instance',
+            'recovered-instance',
+            'execute',
+          ];
 
           events.forEach((event) => {
             if (actionsToCheck.includes(event?.event?.action || '')) {
