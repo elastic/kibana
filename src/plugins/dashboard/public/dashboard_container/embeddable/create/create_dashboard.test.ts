@@ -262,7 +262,7 @@ test('creates a control group from the control group factory and waits for it to
  * 1) dashboard instance searchSessionId state
  * 2) child input on parent input changes
  *
- * Rxjs subscriptions are executioned in the order that they are created.
+ * Rxjs subscriptions are executed in the order that they are created.
  * This test ensures that searchSessionId update subscription is created before child input subscription
  * to ensure child input subscription includes updated searchSessionId.
  */
