@@ -20,7 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ActionConnector, ActionTypeId } from './types';
 import { DefaultEmail } from '../runtime_types';
 
-export const SLACK_ACTION_ID: ActionTypeId = '.slack';
+export const SLACK_WEBHOOK_ACTION_ID: ActionTypeId = '.slack';
 export const PAGER_DUTY_ACTION_ID: ActionTypeId = '.pagerduty';
 export const SERVER_LOG_ACTION_ID: ActionTypeId = '.server-log';
 export const INDEX_ACTION_ID: ActionTypeId = '.index';
@@ -98,7 +98,7 @@ export function populateAlertActions({
         recoveredAction.params = getWebhookActionParams(translations, true);
         actions.push(recoveredAction);
         break;
-      case SLACK_ACTION_ID:
+      case SLACK_WEBHOOK_ACTION_ID:
       case TEAMS_ACTION_ID:
         action.params = {
           message: translations.defaultActionMessage,
