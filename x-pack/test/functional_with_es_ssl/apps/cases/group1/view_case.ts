@@ -320,6 +320,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await editCommentTextArea.focus();
           await editCommentTextArea.type('Edited description');
 
+          await header.waitUntilLoadingHasFinished();
+
           await browser.refresh();
 
           await header.waitUntilLoadingHasFinished();
