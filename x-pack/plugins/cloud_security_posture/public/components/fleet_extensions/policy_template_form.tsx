@@ -115,7 +115,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       (key) => (validationResults?.vars || {})[key] !== null
     );
 
-    const [loading, setLoading] = useState(validationResultsNonNullFields.length > 0);
+    const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
 
     // delaying component rendering due to a race condition issue from Fleet
     // TODO: remove this workaround when the following issue is resolved:
@@ -124,25 +124,27 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // using validation?.vars to know if the newPolicy state was reset due to race condition
       if (validationResultsNonNullFields.length > 0) {
         // Forcing rerender to recover from the validation errors state
-        setLoading(true);
+        setIsLoading(true);
       }
-      setTimeout(() => setLoading(false), 200);
+      setTimeout(() => setIsLoading(false), 200);
     }, [validationResultsNonNullFields]);
 
     useEffect(() => {
       if (isEditPage) return;
-      if (loading) return;
+      if (isLoading) return;
       // Pick default input type for policy template.
       // Only 1 enabled input is supported when all inputs are initially enabled.
       // Required for mount only to ensure a single input type is selected
       // This will remove errors in validationResults.vars
       setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [loading, input.policy_template, isEditPage]);
+    }, [isLoading, input.policy_template, isEditPage]);
+
+    usePolicyTemplateInitialName({ isEditPage, isLoading, integration, newPolicy, updatePolicy });
 
     useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
 
-    if (loading) {
+    if (isLoading) {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
@@ -180,7 +182,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     return (
       <div>
         {isEditPage && <EditScreenStepTitle />}
-
         {/* Defines the enabled policy template */}
         {!integration && (
           <>
@@ -193,11 +194,9 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             <EuiSpacer size="l" />
           </>
         )}
-
         {/* Shows info on the active policy template */}
         <PolicyTemplateInfo postureType={input.policy_template} />
         <EuiSpacer size="l" />
-
         {/* Defines the single enabled input of the active policy template */}
         <PolicyTemplateInputSelector
           input={input}
@@ -205,7 +204,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           disabled={isEditPage}
         />
         <EuiSpacer size="l" />
-
         {/* Defines the name/description */}
         <IntegrationSettings
           fields={integrationFields}
@@ -223,6 +221,37 @@ CspPolicyTemplateForm.displayName = 'CspPolicyTemplateForm';
 
 // eslint-disable-next-line import/no-default-export
 export { CspPolicyTemplateForm as default };
+
+const usePolicyTemplateInitialName = ({
+  isEditPage,
+  isLoading,
+  integration,
+  newPolicy,
+  updatePolicy,
+}: {
+  isEditPage: boolean;
+  isLoading: boolean;
+  integration: CloudSecurityPolicyTemplate | undefined;
+  newPolicy: NewPackagePolicy;
+  updatePolicy: (policy: NewPackagePolicy) => void;
+}) => {
+  useEffect(() => {
+    if (!integration) return;
+    if (isEditPage) return;
+    if (isLoading) return;
+    const sequenceNumber = newPolicy.name.replace(/\D/g, '');
+    const sequenceSuffix = sequenceNumber ? `-${sequenceNumber}` : '';
+    const currentIntegrationName = `${integration}${sequenceSuffix}`;
+    if (newPolicy.name === currentIntegrationName) {
+      return;
+    }
+    updatePolicy({
+      ...newPolicy,
+      name: currentIntegrationName,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, integration, isEditPage]);
+};
 
 const useEnsureDefaultNamespace = ({
   newPolicy,

@@ -10,6 +10,7 @@ import type {
   IndicesGetMappingIndexMappingRecord,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { Direction } from '@elastic/eui';
 
 export interface Mappings {
   pattern: string;
@@ -113,6 +114,7 @@ export interface PatternRollup {
   indices: number | undefined;
   pattern: string;
   results: Record<string, DataQualityCheckResult> | undefined;
+  sizeInBytes: number | undefined;
   stats: Record<string, IndicesStatsIndicesStats> | null;
 }
 
@@ -139,6 +141,7 @@ export interface IndexToCheck {
 
 export type OnCheckCompleted = ({
   error,
+  formatBytes,
   formatNumber,
   indexName,
   partitionedFieldMetadata,
@@ -146,6 +149,7 @@ export type OnCheckCompleted = ({
   version,
 }: {
   error: string | null;
+  formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   indexName: string;
   partitionedFieldMetadata: PartitionedFieldMetadata | null;
@@ -156,5 +160,17 @@ export type OnCheckCompleted = ({
 export interface ErrorSummary {
   error: string;
   indexName: string | null;
+  pattern: string;
+}
+
+export interface SortConfig {
+  sort: {
+    direction: Direction;
+    field: string;
+  };
+}
+
+export interface SelectedIndex {
+  indexName: string;
   pattern: string;
 }

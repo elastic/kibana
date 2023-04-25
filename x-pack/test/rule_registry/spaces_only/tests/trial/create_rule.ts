@@ -46,20 +46,6 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
 
   describe('Rule Registry API', async () => {
     describe('with write permissions', () => {
-      it('does not bootstrap indices on plugin startup', async () => {
-        const { body: targetIndices } = await getAlertsTargetIndices(getService, obsOnly, SPACE_ID);
-        try {
-          const res = await es.indices.get({
-            index: targetIndices[0],
-            expand_wildcards: 'open',
-            allow_no_indices: true,
-          });
-          expect(res).to.be.empty();
-        } catch (exc) {
-          expect(exc.statusCode).to.eql(404);
-        }
-      });
-
       describe('when creating a rule', () => {
         let createResponse: {
           alert: Rule;

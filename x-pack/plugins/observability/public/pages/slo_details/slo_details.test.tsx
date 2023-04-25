@@ -18,6 +18,7 @@ import { buildSlo } from '../../data/slo/slo';
 import { paths } from '../../config/paths';
 import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
+import { useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
 import {
   HEALTHY_STEP_DOWN_ROLLING_SLO,
   historicalSummaryData,
@@ -33,6 +34,7 @@ jest.mock('react-router-dom', () => ({
 jest.mock('../../utils/kibana_react');
 jest.mock('../../hooks/use_breadcrumbs');
 jest.mock('../../hooks/use_license');
+jest.mock('../../hooks/slo/use_fetch_active_alerts');
 jest.mock('../../hooks/slo/use_fetch_slo_details');
 jest.mock('../../hooks/slo/use_fetch_historical_summary');
 jest.mock('../../hooks/slo/use_capabilities');
@@ -40,6 +42,7 @@ jest.mock('../../hooks/slo/use_capabilities');
 const useKibanaMock = useKibana as jest.Mock;
 const useParamsMock = useParams as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
+const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const useCapabilitiesMock = useCapabilities as jest.Mock;
@@ -51,7 +54,7 @@ const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       application: { navigateToUrl: mockNavigate },
-      charts: chartPluginMock.createSetupContract(),
+      charts: chartPluginMock.createStartContract(),
       http: {
         basePath: {
           prepend: mockBasePathPrepend,
@@ -82,6 +85,7 @@ describe('SLO Details Page', () => {
       isLoading: false,
       sloHistoricalSummaryResponse: historicalSummaryData,
     });
+    useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: {} });
   });
 
   describe('when the incorrect license is found', () => {
@@ -176,6 +180,24 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
     expect(screen.queryByTestId('sloDetailsHeaderControlPopoverCreateRule')).toBeTruthy();
+  });
+
+  it('renders the Overview tab by default', async () => {
+    const slo = buildSlo();
+    useParamsMock.mockReturnValue(slo.id);
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+    useFetchActiveAlertsMock.mockReturnValue({
+      isLoading: false,
+      data: { [slo.id]: { count: 2, ruleIds: ['rule-1', 'rule-2'] } },
+    });
+
+    render(<SloDetailsPage />);
+
+    expect(screen.queryByTestId('overviewTab')).toBeTruthy();
+    expect(screen.queryByTestId('overviewTab')?.getAttribute('aria-selected')).toBe('true');
+    expect(screen.queryByTestId('alertsTab')).toBeTruthy();
+    expect(screen.queryByTestId('alertsTab')?.getAttribute('aria-selected')).toBe('false');
   });
 
   describe('when an APM SLO is loaded', () => {

@@ -14,7 +14,7 @@ import {
 import {
   ConfigKey,
   DataStream,
-  Mode,
+  CodeEditorMode,
   MonitorFields,
   ResponseBodyIndexPolicy,
   ScheduleUnit,
@@ -32,18 +32,26 @@ const testHTTPConfig: Partial<MonitorFields> = {
   timeout: '16',
   name: 'Test',
   locations: [],
-  __ui: { is_tls_enabled: false, is_zip_url_tls_enabled: false },
+  __ui: { is_tls_enabled: false },
   urls: 'https://www.google.com',
   max_redirects: '0',
   password: '3z9SBOQWW5F0UrdqLVFqlF6z',
   proxy_url: '${proxyUrl}',
   'check.response.body.negative': [],
   'check.response.body.positive': [],
+  'check.response.json': [
+    {
+      description: 'test description',
+      expression: 'foo.bar == "myValue"',
+    },
+  ],
   'response.include_body': 'on_error' as ResponseBodyIndexPolicy,
-  'check.response.headers': {},
+  'check.response.headers': {
+    'test-header': 'test-value',
+  },
   'response.include_headers': true,
   'check.response.status': [],
-  'check.request.body': { type: 'text' as Mode, value: '' },
+  'check.request.body': { type: 'text' as CodeEditorMode, value: '' },
   'check.request.headers': {},
   'check.request.method': 'GET',
   'ssl.verification_mode': VerificationMode.NONE,
@@ -62,14 +70,8 @@ const testBrowserConfig: Partial<MonitorFields> = {
   locations: [],
   __ui: {
     script_source: { is_generated_script: false, file_name: '' },
-    is_zip_url_tls_enabled: false,
     is_tls_enabled: false,
   },
-  'source.zip_url.url': '',
-  'source.zip_url.username': '',
-  'source.zip_url.password': '',
-  'source.zip_url.folder': '',
-  'source.zip_url.proxy_url': '',
   'source.inline.script':
     "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",
   params: '{"a":"param"}',
@@ -79,11 +81,15 @@ const testBrowserConfig: Partial<MonitorFields> = {
   'filter_journeys.match': '',
   'filter_journeys.tags': ['dev'],
   ignore_https_errors: false,
-  'throttling.is_enabled': true,
-  'throttling.download_speed': '5',
-  'throttling.upload_speed': '3',
-  'throttling.latency': '20',
-  'throttling.config': '5d/3u/20l',
+  throttling: {
+    value: {
+      download: '5',
+      latency: '20',
+      upload: '3',
+    },
+    id: 'default',
+    label: 'default',
+  },
   project_id: 'test-project',
 };
 
@@ -101,6 +107,15 @@ describe('formatMonitorConfig', () => {
 
       expect(yamlConfig).toEqual({
         'check.request.method': 'GET',
+        'check.response.headers': {
+          'test-header': 'test-value',
+        },
+        'check.response.json': [
+          {
+            description: 'test description',
+            expression: 'foo.bar == "myValue"',
+          },
+        ],
         enabled: true,
         locations: [],
         max_redirects: '0',
@@ -131,6 +146,15 @@ describe('formatMonitorConfig', () => {
 
         expect(yamlConfig).toEqual({
           'check.request.method': 'GET',
+          'check.response.headers': {
+            'test-header': 'test-value',
+          },
+          'check.response.json': [
+            {
+              description: 'test description',
+              expression: 'foo.bar == "myValue"',
+            },
+          ],
           enabled: true,
           locations: [],
           max_redirects: '0',
@@ -209,12 +233,16 @@ describe('browser fields', () => {
   });
 
   it('excludes UI fields', () => {
-    testBrowserConfig['throttling.is_enabled'] = false;
-    testBrowserConfig['throttling.upload_speed'] = '3';
-
     const formattedConfig = formatMonitorConfigFields(
       Object.keys(testBrowserConfig) as ConfigKey[],
-      testBrowserConfig,
+      {
+        ...testBrowserConfig,
+        throttling: {
+          value: null,
+          label: 'no-throttling',
+          id: 'no-throttling',
+        },
+      },
       logger,
       { proxyUrl: 'https://www.google.com' }
     );
@@ -222,8 +250,6 @@ describe('browser fields', () => {
     const expected = {
       ...formattedConfig,
       throttling: false,
-      'throttling.is_enabled': undefined,
-      'throttling.upload_speed': undefined,
     };
 
     expect(formattedConfig).toEqual(expected);

@@ -20,8 +20,8 @@ import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plug
 import { parseSearchSourceJSON, injectSearchSourceReferences } from '@kbn/data-plugin/public';
 
 import {
-  DashboardContainerByValueInput,
   convertSavedPanelsToPanelMap,
+  DashboardContainerInput,
   DashboardAttributes,
   DashboardOptions,
   injectReferences,
@@ -47,7 +47,7 @@ export interface LoadDashboardFromSavedObjectReturn {
   dashboardFound: boolean;
   dashboardId?: string;
   resolveMeta?: Omit<ResolvedSimpleSavedObject, 'saved_object'>;
-  dashboardInput: DashboardContainerByValueInput;
+  dashboardInput: DashboardContainerInput;
 }
 
 export const loadDashboardStateFromSavedObject = async ({

@@ -20,9 +20,13 @@ import {
   VULN_MGMT_POLICY_TEMPLATE,
   CLOUDBEAT_VULN_MGMT_GCP,
   CLOUDBEAT_VULN_MGMT_AZURE,
+  CLOUDBEAT_AKS,
+  CLOUDBEAT_GKE,
 } from '../../common/constants';
 
 import eksLogo from '../assets/icons/cis_eks_logo.svg';
+import aksLogo from '../assets/icons/cis_aks_logo.svg';
+import gkeLogo from '../assets/icons/cis_gke_logo.svg';
 
 export const statusColors = {
   passed: euiThemeVars.euiColorVis0,
@@ -48,7 +52,7 @@ export interface CloudPostureIntegrationProps {
   name: string;
   shortName: string;
   options: Array<{
-    type: PostureInput;
+    type: PostureInput | typeof CLOUDBEAT_AKS | typeof CLOUDBEAT_GKE;
     name: string;
     benchmark: string;
     disabled?: boolean;
@@ -119,7 +123,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
       {
         type: CLOUDBEAT_VANILLA,
         name: i18n.translate('xpack.csp.kspmIntegration.vanillaOption.nameTitle', {
-          defaultMessage: 'Self-Managed/Vanilla Kubernetes',
+          defaultMessage: 'Self-Managed',
         }),
         benchmark: i18n.translate('xpack.csp.kspmIntegration.vanillaOption.benchmarkTitle', {
           defaultMessage: 'CIS Kubernetes',
@@ -129,12 +133,43 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
       {
         type: CLOUDBEAT_EKS,
         name: i18n.translate('xpack.csp.kspmIntegration.eksOption.nameTitle', {
-          defaultMessage: 'EKS (Elastic Kubernetes Service)',
+          defaultMessage: 'EKS',
         }),
         benchmark: i18n.translate('xpack.csp.kspmIntegration.eksOption.benchmarkTitle', {
           defaultMessage: 'CIS EKS',
         }),
         icon: eksLogo,
+        tooltip: i18n.translate('xpack.csp.kspmIntegration.eksOption.tooltipContent', {
+          defaultMessage: 'Elastic Kubernetes Service',
+        }),
+      },
+      {
+        type: CLOUDBEAT_AKS,
+        name: i18n.translate('xpack.csp.kspmIntegration.aksOption.nameTitle', {
+          defaultMessage: 'AKS',
+        }),
+        benchmark: i18n.translate('xpack.csp.kspmIntegration.aksOption.benchmarkTitle', {
+          defaultMessage: 'CIS AKS',
+        }),
+        disabled: true,
+        icon: aksLogo,
+        tooltip: i18n.translate('xpack.csp.kspmIntegration.aksOption.tooltipContent', {
+          defaultMessage: 'Azure Kubernetes Service - Coming soon',
+        }),
+      },
+      {
+        type: CLOUDBEAT_GKE,
+        name: i18n.translate('xpack.csp.kspmIntegration.gkeOption.nameTitle', {
+          defaultMessage: 'GKE',
+        }),
+        benchmark: i18n.translate('xpack.csp.kspmIntegration.gkeOption.benchmarkTitle', {
+          defaultMessage: 'CIS GKE',
+        }),
+        disabled: true,
+        icon: gkeLogo,
+        tooltip: i18n.translate('xpack.csp.kspmIntegration.gkeOption.tooltipContent', {
+          defaultMessage: 'Google Kubernetes Engine - Coming soon',
+        }),
       },
     ],
   },
@@ -178,3 +213,4 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
     ],
   },
 };
+export const FINDINGS_DOCS_URL = 'https://ela.st/findings';

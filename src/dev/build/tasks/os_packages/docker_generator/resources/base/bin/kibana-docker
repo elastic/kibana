@@ -205,6 +205,7 @@ kibana_vars=(
     xpack.actions.allowedHosts
     xpack.actions.customHostSettings
     xpack.actions.email.domain_allowlist
+    xpack.actions.enableFooterInEmail
     xpack.actions.enabledActionTypes
     xpack.actions.maxResponseContentLength
     xpack.actions.preconfigured
@@ -252,6 +253,8 @@ kibana_vars=(
     xpack.banners.placement
     xpack.banners.textColor
     xpack.banners.textContent
+    xpack.cases.files.allowedMimeTypes
+    xpack.cases.files.maxSize
     xpack.code.disk.thresholdEnabled
     xpack.code.disk.watermarkLow
     xpack.code.indexRepoFrequencyMs
@@ -411,6 +414,7 @@ kibana_vars=(
     xpack.task_manager.event_loop_delay.monitor
     xpack.task_manager.event_loop_delay.warn_threshold
     xpack.uptime.index
+    serverless
 )
 
 longopts=''

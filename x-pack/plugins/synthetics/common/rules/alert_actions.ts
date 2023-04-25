@@ -20,7 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ActionConnector, ActionTypeId } from './types';
 import { DefaultEmail } from '../runtime_types';
 
-export const SLACK_ACTION_ID: ActionTypeId = '.slack';
+export const SLACK_WEBHOOK_ACTION_ID: ActionTypeId = '.slack';
 export const PAGER_DUTY_ACTION_ID: ActionTypeId = '.pagerduty';
 export const SERVER_LOG_ACTION_ID: ActionTypeId = '.server-log';
 export const INDEX_ACTION_ID: ActionTypeId = '.index';
@@ -36,6 +36,7 @@ interface Translations {
   defaultActionMessage: string;
   defaultRecoveryMessage: string;
   defaultSubjectMessage: string;
+  defaultRecoverySubjectMessage: string;
 }
 
 export function populateAlertActions({
@@ -97,7 +98,7 @@ export function populateAlertActions({
         recoveredAction.params = getWebhookActionParams(translations, true);
         actions.push(recoveredAction);
         break;
-      case SLACK_ACTION_ID:
+      case SLACK_WEBHOOK_ACTION_ID:
       case TEAMS_ACTION_ID:
         action.params = {
           message: translations.defaultActionMessage,
@@ -107,6 +108,8 @@ export function populateAlertActions({
       case EMAIL_ACTION_ID:
         if (defaultEmail) {
           action.params = getEmailActionParams(translations, defaultEmail);
+          recoveredAction.params = getEmailActionParams(translations, defaultEmail, true);
+          actions.push(recoveredAction);
         }
         break;
       default:
@@ -270,13 +273,19 @@ function getJiraActionParams({ defaultActionMessage }: Translations): JiraAction
 }
 
 function getEmailActionParams(
-  { defaultActionMessage, defaultSubjectMessage }: Translations,
-  defaultEmail: DefaultEmail
+  {
+    defaultActionMessage,
+    defaultSubjectMessage,
+    defaultRecoverySubjectMessage,
+    defaultRecoveryMessage,
+  }: Translations,
+  defaultEmail: DefaultEmail,
+  isRecovery?: boolean
 ): EmailActionParams {
   return {
     to: defaultEmail.to,
-    subject: defaultSubjectMessage,
-    message: defaultActionMessage,
+    subject: isRecovery ? defaultRecoverySubjectMessage : defaultSubjectMessage,
+    message: isRecovery ? defaultRecoveryMessage : defaultActionMessage,
     cc: defaultEmail.cc ?? [],
     bcc: defaultEmail.bcc ?? [],
     kibanaFooterLink: {

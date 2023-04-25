@@ -101,7 +101,7 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
 
     async assertCaseDescription(expectedDescription: string) {
       const desc = await find.byCssSelector(
-        '[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]'
+        '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]'
       );
 
       const actualDescription = await desc.getVisibleText();

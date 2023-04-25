@@ -22,6 +22,7 @@ export function addFromLibrary(this: DashboardContainer) {
     embeddable: { getEmbeddableFactories, getEmbeddableFactory },
     http,
     savedObjectsManagement,
+    savedObjectsTagging,
   } = pluginServices.getServices();
 
   if (isErrorEmbeddable(this)) return;
@@ -30,7 +31,8 @@ export function addFromLibrary(this: DashboardContainer) {
       SavedObjectFinder: getSavedObjectFinder(
         uiSettings,
         http as HttpStart,
-        savedObjectsManagement
+        savedObjectsManagement,
+        savedObjectsTagging.api
       ),
       reportUiCounter: usageCollection.reportUiCounter,
       getAllFactories: getEmbeddableFactories,
@@ -39,6 +41,10 @@ export function addFromLibrary(this: DashboardContainer) {
       notifications,
       overlays,
       theme,
+      onAddPanel: (id: string) => {
+        this.setScrollToPanelId(id);
+        this.setHighlightPanelId(id);
+      },
     })
   );
 }

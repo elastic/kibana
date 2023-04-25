@@ -51,7 +51,7 @@ export const useListDetailsView = (exceptionListId: string) => {
   const { http, notifications } = services;
   const { navigateToApp } = services.application;
 
-  const { exportExceptionList, deleteExceptionList } = useApi(http);
+  const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
 
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
 
@@ -188,6 +188,35 @@ export const useListDetailsView = (exceptionListId: string) => {
       }
     },
     [list, exportExceptionList, handleErrorStatus, toasts]
+  );
+
+  const onDuplicateList = useCallback(
+    async (includeExpiredExceptions: boolean) => {
+      try {
+        if (!list) return;
+        await duplicateExceptionList({
+          listId: list.list_id,
+          includeExpiredExceptions,
+          namespaceType: list.namespace_type,
+          onError: (error: Error) => handleErrorStatus(error),
+          onSuccess: (newList: ExceptionListSchema) => {
+            toasts?.addSuccess(i18n.EXCEPTION_LIST_DUPLICATED_SUCCESSFULLY(list.name));
+            navigateToApp(APP_UI_ID, {
+              deepLinkId: SecurityPageName.exceptions,
+              path: `/details/${newList.list_id}`,
+            });
+          },
+        });
+      } catch (error) {
+        handleErrorStatus(
+          error,
+          undefined,
+          i18n.EXCEPTION_DUPLICATE_ERROR,
+          i18n.EXCEPTION_DUPLICATE_ERROR_DESCRIPTION
+        );
+      }
+    },
+    [list, duplicateExceptionList, handleErrorStatus, toasts, navigateToApp]
   );
 
   const handleOnDownload = useCallback(() => {
@@ -340,6 +369,9 @@ export const useListDetailsView = (exceptionListId: string) => {
             i18n.EXCEPTION_MANAGE_RULES_ERROR_DESCRIPTION
           );
           setShowManageButtonLoader(false);
+        })
+        .finally(() => {
+          initializeList();
         });
     } catch (err) {
       handleErrorStatus(err);
@@ -348,10 +380,11 @@ export const useListDetailsView = (exceptionListId: string) => {
     list,
     getRulesToAdd,
     getRulesToRemove,
-    exceptionListId,
     resetManageRulesAfterSaving,
-    handleErrorStatus,
+    exceptionListId,
     invalidateFetchRuleByIdQuery,
+    handleErrorStatus,
+    initializeList,
   ]);
   const onCancelManageRules = useCallback(() => {
     setShowManageRulesFlyout(false);
@@ -380,6 +413,7 @@ export const useListDetailsView = (exceptionListId: string) => {
     refreshExceptions,
     disableManageButton,
     handleDelete,
+    onDuplicateList,
     onEditListDetails,
     onExportList,
     onDeleteList,

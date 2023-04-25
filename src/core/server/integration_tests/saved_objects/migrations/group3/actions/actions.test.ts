@@ -93,7 +93,7 @@ describe('migration actions', () => {
     await bulkOverwriteTransformedDocuments({
       client,
       index: 'existing_index_with_docs',
-      operations: docs.map(createBulkIndexOperationTuple),
+      operations: docs.map((doc) => createBulkIndexOperationTuple(doc)),
       refresh: 'wait_for',
     })();
 
@@ -106,7 +106,7 @@ describe('migration actions', () => {
     await bulkOverwriteTransformedDocuments({
       client,
       index: 'existing_index_with_write_block',
-      operations: docs.map(createBulkIndexOperationTuple),
+      operations: docs.map((doc) => createBulkIndexOperationTuple(doc)),
       refresh: 'wait_for',
     })();
     await setWriteBlock({ client, index: 'existing_index_with_write_block' })();
@@ -307,7 +307,7 @@ describe('migration actions', () => {
       const res = (await bulkOverwriteTransformedDocuments({
         client,
         index: 'new_index_without_write_block',
-        operations: sourceDocs.map(createBulkIndexOperationTuple),
+        operations: sourceDocs.map((doc) => createBulkIndexOperationTuple(doc)),
         refresh: 'wait_for',
       })()) as Either.Left<unknown>;
 
@@ -706,9 +706,7 @@ describe('migration actions', () => {
 
   // Reindex doesn't return any errors on it's own, so we have to test
   // together with waitForReindexTask
-  //
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/154278
-  describe.skip('reindex & waitForReindexTask', () => {
+  describe('reindex & waitForReindexTask', () => {
     it('resolves right when reindex succeeds without reindex script', async () => {
       const res = (await reindex({
         client,
@@ -889,7 +887,7 @@ describe('migration actions', () => {
       await bulkOverwriteTransformedDocuments({
         client,
         index: 'reindex_target_4',
-        operations: sourceDocs.map(createBulkIndexOperationTuple),
+        operations: sourceDocs.map((doc) => createBulkIndexOperationTuple(doc)),
         refresh: 'wait_for',
       })();
 
@@ -1076,7 +1074,6 @@ describe('migration actions', () => {
         }
       `);
     });
-
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
       await waitForIndexStatus({
         client,
@@ -1448,7 +1445,7 @@ describe('migration actions', () => {
       await bulkOverwriteTransformedDocuments({
         client,
         index: 'existing_index_without_mappings',
-        operations: sourceDocs.map(createBulkIndexOperationTuple),
+        operations: sourceDocs.map((doc) => createBulkIndexOperationTuple(doc)),
         refresh: 'wait_for',
       })();
 
@@ -1898,7 +1895,7 @@ describe('migration actions', () => {
       const task = bulkOverwriteTransformedDocuments({
         client,
         index: 'existing_index_with_docs',
-        operations: newDocs.map(createBulkIndexOperationTuple),
+        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
         refresh: 'wait_for',
       });
 
@@ -1924,7 +1921,7 @@ describe('migration actions', () => {
         operations: [
           ...existingDocs,
           { _source: { title: 'doc 8' } } as unknown as SavedObjectsRawDoc,
-        ].map(createBulkIndexOperationTuple),
+        ].map((doc) => createBulkIndexOperationTuple(doc)),
         refresh: 'wait_for',
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -1944,7 +1941,7 @@ describe('migration actions', () => {
         bulkOverwriteTransformedDocuments({
           client,
           index: 'existing_index_with_write_block',
-          operations: newDocs.map(createBulkIndexOperationTuple),
+          operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
           refresh: 'wait_for',
         })()
       ).resolves.toMatchInlineSnapshot(`
@@ -1967,7 +1964,7 @@ describe('migration actions', () => {
       const task = bulkOverwriteTransformedDocuments({
         client,
         index: 'existing_index_with_docs',
-        operations: newDocs.map(createBulkIndexOperationTuple),
+        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {

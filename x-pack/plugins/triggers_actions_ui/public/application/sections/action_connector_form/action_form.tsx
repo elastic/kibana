@@ -19,7 +19,12 @@ import {
   EuiToolTip,
   EuiLink,
 } from '@elastic/eui';
-import { ActionGroup, RuleActionParam } from '@kbn/alerting-plugin/common';
+import {
+  ActionGroup,
+  RuleActionAlertsFilterProperty,
+  RuleActionFrequency,
+  RuleActionParam,
+} from '@kbn/alerting-plugin/common';
 import { betaBadgeProps } from './beta_badge_props';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
@@ -29,6 +34,7 @@ import {
   ActionConnector,
   ActionVariables,
   ActionTypeRegistryContract,
+  NotifyWhenSelectOptions,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ActionTypeForm } from './action_type_form';
@@ -56,6 +62,11 @@ export interface ActionAccordionFormProps {
   setActions: (actions: RuleAction[]) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionAlertsFilterProperty: (
+    key: string,
+    value: RuleActionAlertsFilterProperty,
+    index: number
+  ) => void;
   featureId: string;
   messageVariables?: ActionVariables;
   setHasActionsDisabled?: (value: boolean) => void;
@@ -68,6 +79,9 @@ export interface ActionAccordionFormProps {
   defaultSummaryMessage?: string;
   hasSummary?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
+  notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
+  defaultRuleFrequency?: RuleActionFrequency;
+  showActionAlertsFilter?: boolean;
 }
 
 interface ActiveActionConnectorState {
@@ -83,6 +97,7 @@ export const ActionForm = ({
   setActions,
   setActionParamsProperty,
   setActionFrequencyProperty,
+  setActionAlertsFilterProperty,
   featureId,
   messageVariables,
   actionGroups,
@@ -97,6 +112,9 @@ export const ActionForm = ({
   defaultSummaryMessage,
   hasSummary,
   minimumThrottleInterval,
+  notifyWhenSelectOptions,
+  defaultRuleFrequency = DEFAULT_FREQUENCY,
+  showActionAlertsFilter,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -210,7 +228,8 @@ export const ActionForm = ({
       return;
     }
     setIsAddActionPanelOpen(false);
-    const actionTypeConnectors = connectors.filter(
+    const allowGroupConnector = (actionTypeModel?.subtype ?? []).map((atm) => atm.id);
+    let actionTypeConnectors = connectors.filter(
       (field) => field.actionTypeId === actionTypeModel.id
     );
 
@@ -220,10 +239,25 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
-        frequency: DEFAULT_FREQUENCY,
+        frequency: defaultRuleFrequency,
       });
       setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
+    } else {
+      actionTypeConnectors = connectors.filter((field) =>
+        allowGroupConnector.includes(field.actionTypeId)
+      );
+      if (actionTypeConnectors.length > 0) {
+        actions.push({
+          id: '',
+          actionTypeId: actionTypeConnectors[0].actionTypeId,
+          group: defaultActionGroupId,
+          params: {},
+          frequency: DEFAULT_FREQUENCY,
+        });
+        setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
+      }
     }
+
     if (actionTypeConnectors.length === 0) {
       // if no connectors exists or all connectors is already assigned an action under current alert
       // set actionType as id to be able to create new connector within the alert form
@@ -232,7 +266,7 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
-        frequency: DEFAULT_FREQUENCY,
+        frequency: defaultRuleFrequency,
       });
       setActionIdByIndex(actions.length.toString(), actions.length - 1);
       setEmptyActionsIds([...emptyActionsIds, actions.length.toString()]);
@@ -245,7 +279,7 @@ export const ActionForm = ({
     const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
     actionTypeNodes = actionTypeRegistry
       .list()
-      .filter((item) => actionTypesIndex[item.id])
+      .filter((item) => actionTypesIndex[item.id] && !item.hideInUi)
       .filter((item) => !!item.actionParamsFields)
       .sort((a, b) =>
         actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id], preconfiguredConnectors)
@@ -360,6 +394,27 @@ export const ActionForm = ({
                 }}
                 onSelectConnector={(connectorId: string) => {
                   setActionIdByIndex(connectorId, index);
+                  const newConnector = connectors.find((connector) => connector.id === connectorId);
+                  if (newConnector && newConnector.actionTypeId) {
+                    const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
+                    if (actionTypeRegistered.convertParamsBetweenGroups) {
+                      const updatedActions = actions.map((_item: RuleAction, i: number) => {
+                        if (i === index) {
+                          return {
+                            ..._item,
+                            actionTypeId: newConnector.actionTypeId,
+                            id: connectorId,
+                            params:
+                              actionTypeRegistered.convertParamsBetweenGroups != null
+                                ? actionTypeRegistered.convertParamsBetweenGroups(_item.params)
+                                : {},
+                          };
+                        }
+                        return _item;
+                      });
+                      setActions(updatedActions);
+                    }
+                  }
                 }}
               />
             );
@@ -373,6 +428,7 @@ export const ActionForm = ({
               key={`action-form-action-at-${index}`}
               setActionParamsProperty={setActionParamsProperty}
               setActionFrequencyProperty={setActionFrequencyProperty}
+              setActionAlertsFilterProperty={setActionAlertsFilterProperty}
               actionTypesIndex={actionTypesIndex}
               connectors={connectors}
               defaultActionGroupId={defaultActionGroupId}
@@ -388,6 +444,31 @@ export const ActionForm = ({
               }}
               onConnectorSelected={(id: string) => {
                 setActionIdByIndex(id, index);
+                const newConnector = connectors.find((connector) => connector.id === id);
+                if (
+                  newConnector &&
+                  actionConnector &&
+                  newConnector.actionTypeId !== actionConnector.actionTypeId
+                ) {
+                  const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
+                  if (actionTypeRegistered.convertParamsBetweenGroups) {
+                    const updatedActions = actions.map((_item: RuleAction, i: number) => {
+                      if (i === index) {
+                        return {
+                          ..._item,
+                          actionTypeId: newConnector.actionTypeId,
+                          id,
+                          params:
+                            actionTypeRegistered.convertParamsBetweenGroups != null
+                              ? actionTypeRegistered.convertParamsBetweenGroups(_item.params)
+                              : {},
+                        };
+                      }
+                      return _item;
+                    });
+                    setActions(updatedActions);
+                  }
+                }
               }}
               actionTypeRegistry={actionTypeRegistry}
               onDeleteAction={() => {
@@ -402,6 +483,9 @@ export const ActionForm = ({
               defaultSummaryMessage={defaultSummaryMessage}
               hasSummary={hasSummary}
               minimumThrottleInterval={minimumThrottleInterval}
+              notifyWhenSelectOptions={notifyWhenSelectOptions}
+              defaultNotifyWhenValue={defaultRuleFrequency.notifyWhen}
+              showActionAlertsFilter={showActionAlertsFilter}
             />
           );
         })}

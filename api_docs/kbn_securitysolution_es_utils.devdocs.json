@@ -136,7 +136,7 @@
         "signature": [
           "(esClient: ",
           "ElasticsearchClient",
-          ", pattern: string, maxAttempts?: number) => Promise<boolean>"
+          ", pattern: string, specifyAlias?: boolean, maxAttempts?: number) => Promise<boolean>"
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
         "deprecated": false,
@@ -175,6 +175,21 @@
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
             "id": "def-common.deleteAllIndex.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "specifyAlias",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-common.deleteAllIndex.$4",
             "type": "number",
             "tags": [],
             "label": "maxAttempts",
@@ -607,7 +622,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+                  "default",
+                  "; monitoring: ",
                   "default",
                   "; count: { (this: That, params?: ",
                   "CountRequest",
@@ -1524,8 +1541,6 @@
                   " | undefined): Promise<",
                   "SearchTemplateResponse",
                   "<TDocument>>; }; searchableSnapshots: ",
-                  "default",
-                  "; security: ",
                   "default",
                   "; shutdown: ",
                   "default",
@@ -1851,7 +1866,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+                  "default",
+                  "; monitoring: ",
                   "default",
                   "; count: { (this: That, params?: ",
                   "CountRequest",
@@ -2768,8 +2785,6 @@
                   " | undefined): Promise<",
                   "SearchTemplateResponse",
                   "<TDocument>>; }; searchableSnapshots: ",
-                  "default",
-                  "; security: ",
                   "default",
                   "; shutdown: ",
                   "default",
