@@ -20,8 +20,8 @@ import {
 
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
 
+import { usePageUrlState } from '@kbn/ml-url-state';
 import { useData } from '../../hooks/use_data';
-import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
 import { CategoryTable } from './category_table';
@@ -31,6 +31,11 @@ import { createMergedEsQuery } from '../../application/utils/search_utils';
 import { SamplingMenu } from './sampling_menu';
 import { TechnicalPreviewBadge } from './technical_preview_badge';
 import { LoadingCategorization } from './loading_categorization';
+import {
+  type AiOpsPageUrlState,
+  getDefaultAiOpsListState,
+  isFullAiOpsListState,
+} from '../../application/utils/url_state';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
@@ -58,7 +63,10 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
 
   const mounted = useRef(false);
   const { runCategorizeRequest, cancelRequest, randomSampler } = useCategorizeRequest();
-  const [aiopsListState, setAiopsListState] = useState(restorableDefaults);
+  const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
+    'AIOPS_INDEX_VIEWER',
+    getDefaultAiOpsListState()
+  );
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSavedSearch /* , setSelectedSavedSearch*/] = useState(savedSearch);
   const [loading, setLoading] = useState(true);
@@ -229,7 +237,10 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           fieldSelected={selectedField !== null}
         />
 
-        {loading === false && data !== null && data.categories.length > 0 ? (
+        {loading === false &&
+        data !== null &&
+        data.categories.length > 0 &&
+        isFullAiOpsListState(aiopsListState) ? (
           <CategoryTable
             categories={data.categories}
             aiopsListState={aiopsListState}
