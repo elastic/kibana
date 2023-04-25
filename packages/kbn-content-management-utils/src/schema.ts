@@ -67,6 +67,7 @@ export const objectTypeToGetResultSchema = (soSchema: ObjectType<any>) =>
     { unknowns: 'forbid' }
   );
 
+// its recommended to create a subset of this schema for stricter validation
 export const createOptionsSchema = schema.object({
   id: schema.maybe(schema.string()),
   references: schema.maybe(referencesSchema),
@@ -78,6 +79,7 @@ export const createOptionsSchema = schema.object({
 
 export const schemaAndOr = schema.oneOf([schema.literal('AND'), schema.literal('OR')]);
 
+// its recommended to create a subset of this schema for stricter validation
 export const searchOptionsSchema = schema.object({
   page: schema.maybe(schema.number()),
   perPage: schema.maybe(schema.number()),
@@ -102,6 +104,7 @@ export const searchOptionsSchema = schema.object({
   ),
 });
 
+// its recommended to create a subset of this schema for stricter validation
 export const updateOptionsSchema = (attributesSchema: ObjectType<any>) =>
   schema.object({
     references: schema.maybe(referencesSchema),
