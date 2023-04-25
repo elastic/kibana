@@ -37,17 +37,13 @@ describe('<Reason />', () => {
       dataAsNestedObject: {},
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <RightPanelContext.Provider value={panelContextValue}>
         <Reason />
       </RightPanelContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should render null if dataAsNestedObject is null', () => {
@@ -55,17 +51,13 @@ describe('<Reason />', () => {
       dataFormattedForFieldBrowser: [],
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <RightPanelContext.Provider value={panelContextValue}>
         <Reason />
       </RightPanelContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
   it('should render null if renderer is null', () => {
     const panelContextValue = {
@@ -73,16 +65,12 @@ describe('<Reason />', () => {
       dataFormattedForFieldBrowser: [],
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <RightPanelContext.Provider value={panelContextValue}>
         <Reason />
       </RightPanelContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
 });

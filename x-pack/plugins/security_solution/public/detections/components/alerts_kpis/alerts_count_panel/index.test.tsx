@@ -12,7 +12,6 @@ import { AlertsCountPanel } from '.';
 
 import type { Status } from '../../../../../common/detection_engine/schemas/common';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
 import { TestProviders } from '../../../../common/mock';
 import { ChartContextMenu } from '../../../pages/detection_engine/chart_panels/chart_context_menu';
@@ -106,18 +105,6 @@ describe('AlertsCountPanel', () => {
       );
 
       expect(wrapper.find('[data-test-subj="alertsCountPanel"]').exists()).toBeTruthy();
-    });
-  });
-
-  it('invokes useGlobalTime() with false to prevent global queries from being deleted when the component unmounts', async () => {
-    await act(async () => {
-      mount(
-        <TestProviders>
-          <AlertsCountPanel {...defaultProps} />
-        </TestProviders>
-      );
-
-      expect(useGlobalTime).toBeCalledWith(false);
     });
   });
 

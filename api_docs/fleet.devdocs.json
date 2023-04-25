@@ -6315,7 +6315,9 @@
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
-              " | undefined; bumpRevision?: boolean | undefined; force?: boolean | undefined; skipEnsureInstalled?: boolean | undefined; skipUniqueNameVerification?: boolean | undefined; overwrite?: boolean | undefined; packageInfo?: ",
+              " | undefined; authorizationHeader?: ",
+              "HTTPAuthorizationHeader",
+              " | null | undefined; bumpRevision?: boolean | undefined; force?: boolean | undefined; skipEnsureInstalled?: boolean | undefined; skipUniqueNameVerification?: boolean | undefined; overwrite?: boolean | undefined; packageInfo?: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -6471,6 +6473,21 @@
                         "text": "AuthenticatedUser"
                       },
                       " | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyClient.create.$4.authorizationHeader",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "authorizationHeader",
+                    "description": [],
+                    "signature": [
+                      "HTTPAuthorizationHeader",
+                      " | null | undefined"
                     ],
                     "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
@@ -6650,7 +6667,9 @@
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
-              " | undefined; bumpRevision?: boolean | undefined; force?: true | undefined; } | undefined) => Promise<",
+              " | undefined; bumpRevision?: boolean | undefined; force?: true | undefined; authorizationHeader?: ",
+              "HTTPAuthorizationHeader",
+              " | null | undefined; } | undefined) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -6777,6 +6796,21 @@
                     "description": [],
                     "signature": [
                       "true | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackagePolicyClient.bulkCreate.$4.authorizationHeader",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "authorizationHeader",
+                    "description": [],
+                    "signature": [
+                      "HTTPAuthorizationHeader",
+                      " | null | undefined"
                     ],
                     "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
                     "deprecated": false,
@@ -9365,7 +9399,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "default",
+              "; monitoring: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -10286,8 +10322,6 @@
               " | undefined): Promise<",
               "SearchTemplateResponse",
               "<TDocument>>; }; searchableSnapshots: ",
-              "default",
-              "; security: ",
               "default",
               "; shutdown: ",
               "default",
@@ -10700,7 +10734,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "default",
+              "; monitoring: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -11621,8 +11657,6 @@
               " | undefined): Promise<",
               "SearchTemplateResponse",
               "<TDocument>>; }; searchableSnapshots: ",
-              "default",
-              "; security: ",
               "default",
               "; shutdown: ",
               "default",
@@ -12048,7 +12082,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "default",
+              "; monitoring: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -12969,8 +13005,6 @@
               " | undefined): Promise<",
               "SearchTemplateResponse",
               "<TDocument>>; }; searchableSnapshots: ",
-              "default",
-              "; security: ",
               "default",
               "; shutdown: ",
               "default",
@@ -13393,7 +13427,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "default",
+              "; monitoring: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -14314,8 +14350,6 @@
               " | undefined): Promise<",
               "SearchTemplateResponse",
               "<TDocument>>; }; searchableSnapshots: ",
-              "default",
-              "; security: ",
               "default",
               "; shutdown: ",
               "default",
@@ -14741,7 +14775,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "default",
+              "; monitoring: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -15662,8 +15698,6 @@
               " | undefined): Promise<",
               "SearchTemplateResponse",
               "<TDocument>>; }; searchableSnapshots: ",
-              "default",
-              "; security: ",
               "default",
               "; shutdown: ",
               "default",
@@ -22726,7 +22760,7 @@
             "section": "def-common.ElasticsearchAssetType",
             "text": "ElasticsearchAssetType"
           },
-          "; }"
+          "; deferred?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -23657,7 +23691,7 @@
         "label": "PackageSpecCategory",
         "description": [],
         "signature": [
-          "\"connector\" | \"monitoring\" | \"security\" | \"infrastructure\" | \"observability\" | \"cloud\" | \"custom\" | \"enterprise_search\" | \"analytics_engine\" | \"application_observability\" | \"app_search\" | \"auditd\" | \"authentication\" | \"aws\" | \"azure\" | \"big_data\" | \"cdn_security\" | \"config_management\" | \"connector_client\" | \"connector_package\" | \"containers\" | \"content_source\" | \"crawler\" | \"credential_management\" | \"crm\" | \"custom_logs\" | \"database_security\" | \"datastore\" | \"dns_security\" | \"edr_xdr\" | \"elasticsearch_sdk\" | \"elastic_stack\" | \"email_security\" | \"firewall_security\" | \"google_cloud\" | \"iam\" | \"ids_ips\" | \"java_observability\" | \"kubernetes\" | \"language_client\" | \"languages\" | \"load_balancer\" | \"message_queue\" | \"native_search\" | \"network\" | \"network_security\" | \"notification\" | \"os_system\" | \"process_manager\" | \"productivity\" | \"productivity_security\" | \"proxy_security\" | \"sdk_search\" | \"stream_processing\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"virtualization\" | \"vpn_security\" | \"vulnerability_management\" | \"web\" | \"web_application_firewall\" | \"websphere\" | \"workplace_search\""
+          "\"connector\" | \"security\" | \"monitoring\" | \"infrastructure\" | \"observability\" | \"cloud\" | \"custom\" | \"enterprise_search\" | \"analytics_engine\" | \"application_observability\" | \"app_search\" | \"auditd\" | \"authentication\" | \"aws\" | \"azure\" | \"big_data\" | \"cdn_security\" | \"config_management\" | \"connector_client\" | \"connector_package\" | \"containers\" | \"content_source\" | \"crawler\" | \"credential_management\" | \"crm\" | \"custom_logs\" | \"database_security\" | \"datastore\" | \"dns_security\" | \"edr_xdr\" | \"elasticsearch_sdk\" | \"elastic_stack\" | \"email_security\" | \"firewall_security\" | \"google_cloud\" | \"iam\" | \"ids_ips\" | \"java_observability\" | \"kubernetes\" | \"language_client\" | \"languages\" | \"load_balancer\" | \"message_queue\" | \"native_search\" | \"network\" | \"network_security\" | \"notification\" | \"os_system\" | \"process_manager\" | \"productivity\" | \"productivity_security\" | \"proxy_security\" | \"sdk_search\" | \"stream_processing\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"virtualization\" | \"vpn_security\" | \"vulnerability_management\" | \"web\" | \"web_application_firewall\" | \"websphere\" | \"workplace_search\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
         "deprecated": false,
@@ -23779,7 +23813,7 @@
         "label": "RegistrySearchResult",
         "description": [],
         "signature": [
-          "{ type?: \"input\" | \"integration\" | undefined; name: string; description: string; version: string; title: string; path: string; download: string; internal?: boolean | undefined; icons?: (",
+          "{ type?: \"input\" | \"integration\" | undefined; name: string; description: string; title: string; version: string; path: string; download: string; internal?: boolean | undefined; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -25470,6 +25504,17 @@
             "path": "x-pack/plugins/fleet/common/constants/routes.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS",
+            "type": "string",
+            "tags": [],
+            "label": "REAUTHORIZE_TRANSFORMS",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -25802,6 +25847,53 @@
               {
                 "parentPluginId": "fleet",
                 "id": "def-common.epmRouteService.getUpdatePath.$2",
+                "type": "string",
+                "tags": [],
+                "label": "pkgVersion",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.epmRouteService.getReauthorizeTransformsPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getReauthorizeTransformsPath",
+            "description": [],
+            "signature": [
+              "(pkgName: string, pkgVersion: string) => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.epmRouteService.getReauthorizeTransformsPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pkgName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.epmRouteService.getReauthorizeTransformsPath.$2",
                 "type": "string",
                 "tags": [],
                 "label": "pkgVersion",

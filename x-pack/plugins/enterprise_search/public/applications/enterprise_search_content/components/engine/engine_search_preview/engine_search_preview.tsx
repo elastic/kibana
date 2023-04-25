@@ -7,9 +7,23 @@
 
 import React, { useState, useMemo } from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiLink,
+  EuiPanel,
+  EuiPopover,
+  EuiSpacer,
+  EuiTextColor,
+  EuiTitle,
+} from '@elastic/eui';
 import {
   PagingInfo,
   Results,
@@ -24,18 +38,27 @@ import EnginesAPIConnector, {
   SearchResponse,
 } from '@elastic/search-ui-engines-connector';
 import { HttpSetup } from '@kbn/core-http-browser';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../shared/doc_links';
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { HttpLogic } from '../../../../shared/http';
-import { EngineViewTabs } from '../../../routes';
+import { KibanaLogic } from '../../../../shared/kibana';
+import { TelemetryLogic } from '../../../../shared/telemetry';
+import {
+  EngineViewTabs,
+  SearchApplicationConnectTabs,
+  SearchApplicationContentTabs,
+  SEARCH_APPLICATION_CONNECT_PATH,
+  SEARCH_APPLICATION_CONTENT_PATH,
+} from '../../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../../layout/engines_page_template';
 
 import { EngineIndicesLogic } from '../engine_indices_logic';
 import { EngineViewLogic } from '../engine_view_logic';
 
-import { APICallFlyout, APICallData } from './api_call_flyout';
 import { DocumentProvider } from './document_context';
 import { DocumentFlyout } from './document_flyout';
 import { EngineSearchPreviewLogic } from './engine_search_preview_logic';
@@ -53,8 +76,7 @@ import {
 class InternalEngineTransporter implements Transporter {
   constructor(
     private http: HttpSetup,
-    private engineName: string,
-    private setLastAPICall: (apiCallData: APICallData) => void
+    private engineName: string // uncomment and add setLastAPICall to constructor when view this API call is needed // private setLastAPICall?: (apiCallData: APICallData) => void
   ) {}
 
   async performRequest(request: SearchRequest) {
@@ -64,7 +86,7 @@ class InternalEngineTransporter implements Transporter {
       body: JSON.stringify(request),
     });
 
-    this.setLastAPICall({ request, response });
+    // this.setLastAPICall({ request, response }); Uncomment when view this API call is needed
 
     const withUniqueIds = {
       ...response,
@@ -87,20 +109,184 @@ class InternalEngineTransporter implements Transporter {
   }
 }
 
-const pageTitle = i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.pageTitle', {
-  defaultMessage: 'Search Preview',
-});
+interface ConfigurationPopOverProps {
+  engineName: string;
+  setCloseConfiguration: () => void;
+  showConfiguration: boolean;
+}
 
+const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
+  engineName,
+  showConfiguration,
+  setCloseConfiguration,
+}) => {
+  const { navigateToUrl } = useValues(KibanaLogic);
+  const { engineData } = useValues(EngineViewLogic);
+  const { openDeleteEngineModal } = useActions(EngineViewLogic);
+  const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
+  return (
+    <>
+      <EuiPopover
+        anchorPosition="downCenter"
+        isOpen={showConfiguration}
+        panelPaddingSize="none"
+        closePopover={setCloseConfiguration}
+        button={
+          <EuiButtonEmpty
+            color="primary"
+            iconType="arrowDown"
+            iconSide="right"
+            onClick={setCloseConfiguration}
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.buttonTitle',
+              {
+                defaultMessage: 'Configuration',
+              }
+            )}
+          </EuiButtonEmpty>
+        }
+      >
+        <EuiContextMenuPanel style={{ width: 300 }}>
+          <EuiPanel color="transparent" paddingSize="s">
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.engine.searchPreview.configuration.contentTitle',
+                  {
+                    defaultMessage: 'Content',
+                  }
+                )}
+              </p>
+            </EuiTitle>
+          </EuiPanel>
+          <EuiHorizontalRule margin="none" />
+
+          <EuiContextMenuItem
+            key="Indices"
+            icon="tableDensityExpanded"
+            onClick={() =>
+              navigateToUrl(
+                generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
+                  contentTabId: SearchApplicationContentTabs.INDICES,
+                  engineName,
+                })
+              )
+            }
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.Indices',
+              {
+                defaultMessage: 'Indices',
+              }
+            )}
+          </EuiContextMenuItem>
+          <EuiContextMenuItem
+            key="Schema"
+            icon="kqlField"
+            onClick={() =>
+              navigateToUrl(
+                generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
+                  contentTabId: SearchApplicationContentTabs.SCHEMA,
+                  engineName,
+                })
+              )
+            }
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.content.Schema',
+              {
+                defaultMessage: 'Schema',
+              }
+            )}
+          </EuiContextMenuItem>
+
+          <EuiPanel color="transparent" paddingSize="s">
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.engine.searchPreview.configuration.connectTitle',
+                  {
+                    defaultMessage: 'Connect',
+                  }
+                )}
+              </p>
+            </EuiTitle>
+          </EuiPanel>
+          <EuiHorizontalRule margin="none" />
+          <EuiContextMenuItem
+            key="Api"
+            icon="lock"
+            onClick={() =>
+              navigateToUrl(
+                generateEncodedPath(SEARCH_APPLICATION_CONNECT_PATH, {
+                  connectTabId: SearchApplicationConnectTabs.API,
+                  engineName,
+                })
+              )
+            }
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.connect.Api',
+              {
+                defaultMessage: 'API',
+              }
+            )}
+          </EuiContextMenuItem>
+
+          <EuiPanel color="transparent" paddingSize="s">
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.engine.searchPreview.configuration.settingsTitle',
+                  {
+                    defaultMessage: 'Settings',
+                  }
+                )}
+              </p>
+            </EuiTitle>
+          </EuiPanel>
+          <EuiHorizontalRule margin="none" />
+          <EuiContextMenuItem
+            key="delete"
+            icon={<EuiIcon type="trash" color="danger" />}
+            onClick={() => {
+              if (engineData) {
+                openDeleteEngineModal();
+                sendEnterpriseSearchTelemetry({
+                  action: 'clicked',
+                  metric: 'entSearchContent-engines-engineView-deleteEngine',
+                });
+              }
+            }}
+          >
+            <EuiTextColor color="danger">
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.engine.searchPreview.configuration.settings.delete',
+                  {
+                    defaultMessage: 'Delete this app',
+                  }
+                )}
+              </p>
+            </EuiTextColor>
+          </EuiContextMenuItem>
+        </EuiContextMenuPanel>
+      </EuiPopover>
+    </>
+  );
+};
 export const EngineSearchPreview: React.FC = () => {
   const { http } = useValues(HttpLogic);
-  const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);
-  const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null);
+  // const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);    Uncomment when view this API call is needed
+  const [showConfigurationPopover, setShowConfigurationPopover] = useState<boolean>(false);
+  // const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null); Uncomment when view this API call is needed
   const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
   const { resultFields, searchableFields, sortableFields } = useValues(EngineSearchPreviewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
-    const transporter = new InternalEngineTransporter(http, engineName, setLastAPICall);
+    const transporter = new InternalEngineTransporter(http, engineName);
     const connector = new EnginesAPIConnector(transporter);
 
     return {
@@ -112,27 +298,35 @@ export const EngineSearchPreview: React.FC = () => {
         search_fields: searchableFields,
       },
     };
-  }, [http, engineName, setLastAPICall, resultFields, searchableFields]);
+  }, [http, engineName, resultFields, searchableFields]);
 
   if (!engineData) return null;
 
   return (
     <EnterpriseSearchEnginesPageTemplate
-      pageChrome={[engineName, pageTitle]}
+      pageChrome={[
+        engineName,
+        i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.pageChrome', {
+          defaultMessage: 'Search Preview',
+        }),
+      ]}
       pageViewTelemetry={EngineViewTabs.PREVIEW}
       isLoading={isLoadingEngine}
       pageHeader={{
-        pageTitle,
+        pageTitle: (
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.engine.searchPreview.pageTitle"
+            defaultMessage="{engineName}"
+            values={{ engineName }}
+          />
+        ),
         rightSideItems: [
           <>
-            <EuiButton
-              color="primary"
-              iconType="eye"
-              onClick={() => setShowAPICallFlyout(true)}
-              isLoading={lastAPICall == null}
-            >
-              View this API call
-            </EuiButton>
+            <ConfigurationPopover
+              engineName={engineName}
+              showConfiguration={showConfigurationPopover}
+              setCloseConfiguration={() => setShowConfigurationPopover(!showConfigurationPopover)}
+            />
           </>,
         ],
       }}
@@ -167,6 +361,9 @@ export const EngineSearchPreview: React.FC = () => {
           </EuiFlexGroup>
         </SearchProvider>
         <DocumentFlyout />
+        {/*
+        Uncomment when view this API call needed
+
         {showAPICallFlyout && lastAPICall && (
           <APICallFlyout
             onClose={() => setShowAPICallFlyout(false)}
@@ -174,6 +371,7 @@ export const EngineSearchPreview: React.FC = () => {
             engineName={engineName}
           />
         )}
+        */}
       </DocumentProvider>
     </EnterpriseSearchEnginesPageTemplate>
   );

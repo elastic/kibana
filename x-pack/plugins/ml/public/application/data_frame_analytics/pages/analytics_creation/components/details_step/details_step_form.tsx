@@ -9,6 +9,7 @@ import React, { FC, Fragment, useRef, useEffect, useMemo, useState } from 'react
 import { debounce } from 'lodash';
 import { EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
@@ -16,7 +17,6 @@ import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validat
 import { ContinueButton } from '../continue_button';
 import { ANALYTICS_STEPS } from '../../page';
 import { ml } from '../../../../../services/ml_api_service';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
 const DEFAULT_RESULTS_FIELD = 'ml';
 

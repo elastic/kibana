@@ -565,6 +565,88 @@ describe('utils', () => {
     });
 
     describe('files', () => {
+      it('rounds the average file size when it is a decimal', () => {
+        const attachmentFramework: AttachmentFrameworkAggsResult = {
+          externalReferenceTypes: {
+            buckets: [
+              {
+                doc_count: 5,
+                key: '.files',
+                references: {
+                  cases: {
+                    max: {
+                      value: 10,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          persistableReferenceTypes: {
+            buckets: [],
+          },
+        };
+
+        expect(
+          getAttachmentsFrameworkStats({
+            attachmentAggregations: attachmentFramework,
+            totalCasesForOwner: 5,
+            filesAggregations: {
+              averageSize: { value: 1.1 },
+              topMimeTypes: {
+                buckets: [],
+              },
+            },
+          }).attachmentFramework.files
+        ).toMatchInlineSnapshot(`
+          Object {
+            "average": 1,
+            "averageSize": 1,
+            "maxOnACase": 10,
+            "topMimeTypes": Array [],
+            "total": 5,
+          }
+        `);
+      });
+
+      it('sets the average file size to 0 when the aggregation does not exist', () => {
+        const attachmentFramework: AttachmentFrameworkAggsResult = {
+          externalReferenceTypes: {
+            buckets: [
+              {
+                doc_count: 5,
+                key: '.files',
+                references: {
+                  cases: {
+                    max: {
+                      value: 10,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          persistableReferenceTypes: {
+            buckets: [],
+          },
+        };
+
+        expect(
+          getAttachmentsFrameworkStats({
+            attachmentAggregations: attachmentFramework,
+            totalCasesForOwner: 5,
+          }).attachmentFramework.files
+        ).toMatchInlineSnapshot(`
+          Object {
+            "average": 1,
+            "averageSize": 0,
+            "maxOnACase": 10,
+            "topMimeTypes": Array [],
+            "total": 5,
+          }
+        `);
+      });
+
       it('sets the files stats to empty when the file aggregation results is the empty version', () => {
         const attachmentFramework: AttachmentFrameworkAggsResult = {
           externalReferenceTypes: {

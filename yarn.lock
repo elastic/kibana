@@ -3077,6 +3077,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-utils@link:packages/kbn-content-management-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/controls-example-plugin@link:examples/controls_example":
   version "0.0.0"
   uid ""
@@ -4545,6 +4549,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-error-utils@link:x-pack/packages/ml/error_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-is-defined@link:x-pack/packages/ml/is_defined":
   version "0.0.0"
   uid ""
@@ -4630,6 +4638,10 @@
   uid ""
 
 "@kbn/observability-fixtures-plugin@link:x-pack/test/cases_api_integration/common/plugins/observability":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_onboarding":
   version "0.0.0"
   uid ""
 
@@ -5454,6 +5466,10 @@
   uid ""
 
 "@kbn/url-forwarding-plugin@link:src/plugins/url_forwarding":
+  version "0.0.0"
+  uid ""
+
+"@kbn/url-state@link:packages/kbn-url-state":
   version "0.0.0"
   uid ""
 
@@ -29574,10 +29590,10 @@ xtend@~2.1.1:
   dependencies:
     object-keys "~0.4.0"
 
-xterm@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/xterm/-/xterm-5.0.0.tgz#0af50509b33d0dc62fde7a4ec17750b8e453cc5c"
-  integrity sha512-tmVsKzZovAYNDIaUinfz+VDclraQpPUnAME+JawosgWRMphInDded/PuY0xmU5dOhyeYZsI0nz5yd8dPYsdLTA==
+xterm@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/xterm/-/xterm-5.1.0.tgz#3e160d60e6801c864b55adf19171c49d2ff2b4fc"
+  integrity sha512-LovENH4WDzpwynj+OTkLyZgJPeDom9Gra4DMlGAgz6pZhIDCQ+YuO7yfwanY+gVbn/mmZIStNOnVRU/ikQuAEQ==
 
 y18n@^3.2.0:
   version "3.2.2"
