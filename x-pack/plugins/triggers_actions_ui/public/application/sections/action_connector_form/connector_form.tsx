@@ -27,6 +27,16 @@ export interface ConnectorFormState {
   preSubmitValidator: ConnectorValidationFunc | null;
 }
 
+export type ResetForm = (
+  options?:
+    | {
+        resetValues?: boolean | undefined;
+        defaultValue?:
+          | Partial<ConnectorFormSchema<Record<string, unknown>, Record<string, unknown>>>
+          | undefined;
+      }
+    | undefined
+) => void;
 interface Props {
   actionTypeModel: ActionTypeModel | null;
   connector: ConnectorFormSchema & { isMissingSecrets: boolean };
@@ -35,6 +45,7 @@ interface Props {
   onChange?: (state: ConnectorFormState) => void;
   /** Handler to receive update on the form "isModified" state */
   onFormModifiedChange?: (isModified: boolean) => void;
+  setResetForm?: (value: ResetForm) => void;
 }
 /**
  * The serializer and deserializer are needed to transform the headers of
@@ -101,13 +112,14 @@ const ConnectorFormComponent: React.FC<Props> = ({
   isEdit,
   onChange,
   onFormModifiedChange,
+  setResetForm,
 }) => {
   const { form } = useForm({
     defaultValue: connector,
     serializer: formSerializer,
     deserializer: formDeserializer,
   });
-  const { submit, isValid: isFormValid, isSubmitted, isSubmitting } = form;
+  const { submit, isValid: isFormValid, isSubmitted, isSubmitting, reset } = form;
   const [preSubmitValidator, setPreSubmitValidator] = useState<ConnectorValidationFunc | null>(
     null
   );
@@ -132,6 +144,13 @@ const ConnectorFormComponent: React.FC<Props> = ({
       onFormModifiedChange(isFormModified);
     }
   }, [isFormModified, onFormModifiedChange]);
+
+  useEffect(() => {
+    if (setResetForm) {
+      setResetForm(reset);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reset]);
 
   return (
     <Form form={form}>
