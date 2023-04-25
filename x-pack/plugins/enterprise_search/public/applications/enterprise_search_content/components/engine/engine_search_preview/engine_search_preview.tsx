@@ -10,7 +10,6 @@ import React, { useState, useMemo } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -139,7 +138,12 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             iconSide="right"
             onClick={setCloseConfiguration}
           >
-            Configuration
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.engine.searchPreview.configuration.buttonTitle',
+              {
+                defaultMessage: 'Configuration',
+              }
+            )}
           </EuiButtonEmpty>
         }
       >
