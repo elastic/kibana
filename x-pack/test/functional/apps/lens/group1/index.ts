@@ -83,6 +83,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       loadTestFile(require.resolve('./text_based_languages'));
       loadTestFile(require.resolve('./fields_list'));
       loadTestFile(require.resolve('./layer_actions'));
+      loadTestFile(require.resolve('./field_formatters'));
     }
   });
 };

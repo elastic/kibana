@@ -23,9 +23,11 @@ export const httpFormatters: HTTPFormatMap = {
   [ConfigKey.USERNAME]: null,
   [ConfigKey.PASSWORD]: null,
   [ConfigKey.PROXY_URL]: null,
+  [ConfigKey.PROXY_HEADERS]: objectToJsonFormatter,
   [ConfigKey.PORT]: null,
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: arrayToJsonFormatter,
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: arrayToJsonFormatter,
+  [ConfigKey.RESPONSE_JSON_CHECK]: arrayToJsonFormatter,
   [ConfigKey.RESPONSE_HEADERS_CHECK]: objectToJsonFormatter,
   [ConfigKey.RESPONSE_STATUS_CHECK]: arrayToJsonFormatter,
   [ConfigKey.REQUEST_HEADERS_CHECK]: objectToJsonFormatter,
@@ -33,6 +35,10 @@ export const httpFormatters: HTTPFormatMap = {
     fields[ConfigKey.REQUEST_BODY_CHECK]?.value
       ? JSON.stringify(fields[ConfigKey.REQUEST_BODY_CHECK]?.value)
       : null,
+  [ConfigKey.RESPONSE_BODY_MAX_BYTES]: null,
+  [ConfigKey.MODE]: null,
+  [ConfigKey.IPV4]: null,
+  [ConfigKey.IPV6]: null,
   ...tlsFormatters,
   ...commonFormatters,
 };
