@@ -96,7 +96,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async getMetricsTrendContainer() {
-      return testSubjects.find('hostsView-metricsTrend');
+      return testSubjects.find('hostsViewKPIGrid');
     },
 
     async getChartsContainer() {
@@ -114,12 +114,12 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async getAllMetricsTrendTiles() {
       const container = await this.getMetricsTrendContainer();
-      return container.findAllByCssSelector('[data-test-subj*="hostsView-metricsTrend-"]');
+      return container.findAllByCssSelector('[data-test-subj*="hostsViewKPI-"]');
     },
 
     async getMetricsTrendTileValue(type: string) {
       const container = await this.getMetricsTrendContainer();
-      const element = await container.findByTestSubject(`hostsView-metricsTrend-${type}`);
+      const element = await container.findByTestSubject(`hostsViewKPI-${type}`);
       const div = await element.findByClassName('echMetricText__value');
       return await div.getAttribute('title');
     },
