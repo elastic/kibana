@@ -44,8 +44,18 @@ import type { RuleInstallationInfoForReview } from '../../../../../../common/det
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
 
 interface RulesSnoozeSettings {
-  data: Record<string, RuleSnoozeSettings>; // The key is a rule SO's id (not ruleId)
+  /**
+   * A map object using rule SO's id (not ruleId) as keys and snooze settings as values
+   */
+  data: Record<string, RuleSnoozeSettings>;
+  /**
+   * Sets to true during the first data loading
+   */
   isLoading: boolean;
+  /**
+   * Sets to true during data loading
+   */
+  isFetching: boolean;
   isError: boolean;
 }
 
@@ -298,6 +308,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const {
     data: rulesSnoozeSettings,
     isLoading: isSnoozeSettingsLoading,
+    isFetching: isSnoozeSettingsFetching,
     isError: isSnoozeSettingsFetchError,
     refetch: refetchSnoozeSettings,
   } = useFetchRulesSnoozeSettings(
@@ -359,6 +370,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         rulesSnoozeSettings: {
           data: rulesSnoozeSettingsMap,
           isLoading: isSnoozeSettingsLoading,
+          isFetching: isSnoozeSettingsFetching,
           isError: isSnoozeSettingsFetchError,
         },
         pagination: {
@@ -394,6 +406,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     rulesToInstall,
     rulesSnoozeSettings,
     isSnoozeSettingsLoading,
+    isSnoozeSettingsFetching,
     isSnoozeSettingsFetchError,
     page,
     perPage,

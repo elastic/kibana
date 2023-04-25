@@ -77,6 +77,13 @@ export const JOB_STATUS_FAILED = i18n.translate(
   }
 );
 
+export const JOB_STATUS_WAITING = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.anomalies.jobStatusLoading',
+  {
+    defaultMessage: 'Waiting',
+  }
+);
+
 export const MODULE_NOT_COMPATIBLE_TITLE = (incompatibleJobCount: number) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.anomalies.moduleNotCompatibleTitle', {
     values: { incompatibleJobCount },

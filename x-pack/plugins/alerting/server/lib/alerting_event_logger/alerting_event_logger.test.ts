@@ -55,6 +55,7 @@ const context: RuleContextOpts = {
   spaceId: 'test-space',
   executionId: 'abcd-efgh-ijklmnop',
   taskScheduledAt: new Date('2020-01-01T00:00:00.000Z'),
+  ruleRevision: 0,
 };
 
 const contextWithScheduleDelay = { ...context, taskScheduleDelay: 7200000 };
@@ -280,6 +281,51 @@ describe('AlertingEventLogger', () => {
           },
         },
         message: 'rule failed!',
+      });
+    });
+  });
+
+  describe('setMaintenanceWindowIds()', () => {
+    test('should throw error if alertingEventLogger has not been initialized', () => {
+      expect(() =>
+        alertingEventLogger.setMaintenanceWindowIds([])
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
+    });
+
+    test('should throw error if event is null', () => {
+      alertingEventLogger.initialize(context);
+      expect(() =>
+        alertingEventLogger.setMaintenanceWindowIds([])
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
+    });
+
+    it('should update event maintenance window IDs correctly', () => {
+      alertingEventLogger.initialize(context);
+      alertingEventLogger.start();
+      alertingEventLogger.setMaintenanceWindowIds([]);
+
+      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            maintenance_window_ids: [],
+          },
+        },
+      });
+
+      alertingEventLogger.setMaintenanceWindowIds(['test-id-1', 'test-id-2']);
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            maintenance_window_ids: ['test-id-1', 'test-id-2'],
+          },
+        },
       });
     });
   });

@@ -54,7 +54,7 @@ describe('<HighlightedFields />', () => {
       browserFields: {},
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
         <RightPanelContext.Provider value={panelContextValue}>
           <HighlightedFields />
@@ -62,11 +62,7 @@ describe('<HighlightedFields />', () => {
       </ExpandableFlyoutContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should render empty component if browserFields is null', () => {
@@ -78,7 +74,7 @@ describe('<HighlightedFields />', () => {
       browserFields: null,
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
         <RightPanelContext.Provider value={panelContextValue}>
           <HighlightedFields />
@@ -86,11 +82,7 @@ describe('<HighlightedFields />', () => {
       </ExpandableFlyoutContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should render empty component if eventId is null', () => {
@@ -102,7 +94,7 @@ describe('<HighlightedFields />', () => {
       browserFields: {},
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
         <RightPanelContext.Provider value={panelContextValue}>
           <HighlightedFields />
@@ -110,10 +102,6 @@ describe('<HighlightedFields />', () => {
       </ExpandableFlyoutContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
 });

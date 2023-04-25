@@ -66,17 +66,23 @@ export interface ConfigEntry {
   required: boolean;
   sensitive: boolean;
   tooltip: string;
+  ui_restrictions: string[];
   value: string | number | boolean | null;
 }
 
 /**
  *
- * Sorts the connector configuration by specified order (if present)
+ * Sorts and filters the connector configuration
+ *
+ * Sorting is done by specified order (if present)
  * otherwise by alphabetic order of keys
  *
+ * Filtering is done on any fields with ui_restrictions
+ * or that have not had their dependencies met
+ *
  */
-function sortConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry[] {
-  return Object.keys(config)
+function sortAndFilterConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry[] {
+  const sortedConfig = Object.keys(config)
     .map(
       (key) =>
         ({
@@ -97,6 +103,20 @@ function sortConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry
       }
       return a.key.localeCompare(b.key);
     });
+
+  const dependencyLookup: DependencyLookup = sortedConfig.reduce(
+    (prev: Record<string, string | number | boolean | null>, configEntry: ConfigEntry) => ({
+      ...prev,
+      [configEntry.key]: configEntry.value,
+    }),
+    {}
+  );
+
+  return sortedConfig.filter(
+    (configEntry) =>
+      configEntry.ui_restrictions.length <= 0 &&
+      dependenciesSatisfied(configEntry.depends_on, dependencyLookup)
+  );
 }
 
 export function ensureStringType(value: string | number | boolean | null): string {
@@ -245,6 +265,8 @@ export const ConnectorConfigurationLogic = kea<
             required,
             sensitive,
             tooltip,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            ui_restrictions,
             value,
           }
         ) => ({
@@ -259,6 +281,7 @@ export const ConnectorConfigurationLogic = kea<
             required,
             sensitive,
             tooltip,
+            ui_restrictions,
             value,
           },
         }),
@@ -276,11 +299,11 @@ export const ConnectorConfigurationLogic = kea<
   selectors: ({ selectors }) => ({
     configView: [
       () => [selectors.configState],
-      (configState: ConnectorConfiguration) => sortConnectorConfiguration(configState),
+      (configState: ConnectorConfiguration) => sortAndFilterConnectorConfiguration(configState),
     ],
     localConfigView: [
       () => [selectors.localConfigState],
-      (configState) => sortConnectorConfiguration(configState),
+      (configState) => sortAndFilterConnectorConfiguration(configState),
     ],
   }),
 });

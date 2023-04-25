@@ -118,7 +118,7 @@ const useRuleSnoozeColumn = (): TableColumn => {
     () => ({
       field: 'snooze',
       name: i18n.COLUMN_SNOOZE,
-      render: (_, rule: Rule) => <RuleSnoozeBadge id={rule.id} />,
+      render: (_, rule: Rule) => <RuleSnoozeBadge ruleId={rule.id} />,
       width: '100px',
       sortable: false,
     }),

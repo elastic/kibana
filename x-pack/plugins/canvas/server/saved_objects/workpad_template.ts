@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { TEMPLATE_TYPE } from '../../common/lib/constants';
 import {
@@ -16,6 +17,7 @@ export const workpadTemplateType = (
   deps: CanvasSavedObjectTypeMigrationsDeps
 ): SavedObjectsType => ({
   name: TEMPLATE_TYPE,
+  indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'agnostic',
   mappings: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCode } from '@elastic/eui';
+import { EuiCode, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import styled from 'styled-components';
@@ -20,4 +20,11 @@ export const CodeSuccess = styled(EuiCode)`
 
 export const CodeWarning = styled(EuiCode)`
   color: ${euiThemeVars.euiColorWarning};
+`;
+
+export const FixedWidthLegendText = styled(EuiText)<{
+  $width: number | undefined;
+}>`
+  text-align: left;
+  ${({ $width }) => ($width != null ? `width: ${$width}px;` : '')}
 `;

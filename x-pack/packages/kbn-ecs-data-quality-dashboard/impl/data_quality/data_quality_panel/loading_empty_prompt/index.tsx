@@ -15,7 +15,9 @@ interface Props {
 const LoadingEmptyPromptComponent: React.FC<Props> = ({ loading }) => {
   const icon = useMemo(() => <EuiLoadingSpinner size="xxl" />, []);
 
-  return <EuiEmptyPrompt icon={icon} title={<h2>{loading}</h2>} />;
+  return (
+    <EuiEmptyPrompt data-test-subj="loadingEmptyPrompt" icon={icon} title={<h2>{loading}</h2>} />
+  );
 };
 
 LoadingEmptyPromptComponent.displayName = 'LoadingEmptyPromptComponent';

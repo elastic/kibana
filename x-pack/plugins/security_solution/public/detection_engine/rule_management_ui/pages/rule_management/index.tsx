@@ -41,6 +41,8 @@ import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_mana
 import { PrebuiltRulesInfoCallout } from '../../components/info_callout/prebuilt_rules_info_callout';
 import { NewRulesCallout } from '../../components/new_rules_callout/new_rules_callout';
 
+import { MaintenanceWindowCallout } from '../../components/maintenance_window_callout/maintenance_window_callout';
+
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
@@ -151,14 +153,11 @@ const RulesPageComponent: React.FC = () => {
                 </SecuritySolutionLinkButton>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {/*  */}
           </HeaderPage>
-          {/* {(prePackagedRuleStatus === 'ruleNeedUpdate' ||*/}
-          {/*  prePackagedTimelineStatus === 'timelineNeedUpdate') && (*/}
           <PrebuiltRulesInfoCallout data-test-subj="update-callout-button" />
           <EuiSpacer size={'s'} />
           <NewRulesCallout data-test-subj="new-callout-button" />
-          {/* )}*/}
+          <MaintenanceWindowCallout />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>

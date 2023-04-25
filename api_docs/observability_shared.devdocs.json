@@ -384,7 +384,7 @@
         "signature": [
           "Pick<",
           "KibanaPageTemplateProps",
-          ", \"children\" | \"data-test-subj\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
+          ", \"children\" | \"paddingSize\" | \"data-test-subj\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
@@ -436,7 +436,7 @@
           "ObservabilityPageTemplateDependencies",
           " & Pick<",
           "KibanaPageTemplateProps",
-          ", \"children\" | \"data-test-subj\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
+          ", \"children\" | \"paddingSize\" | \"data-test-subj\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",

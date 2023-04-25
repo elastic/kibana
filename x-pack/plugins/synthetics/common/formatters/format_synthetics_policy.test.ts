@@ -422,7 +422,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 'throttling.config': {
                   type: 'text',
-                  value: '5d/3u/20l',
+                  value: JSON.stringify({ download: 5, upload: 3, latency: 20 }),
                 },
                 timeout: {
                   type: 'text',

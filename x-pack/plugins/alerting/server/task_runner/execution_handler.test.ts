@@ -947,7 +947,7 @@ describe('Execution Handler', () => {
                 message:
                   'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
               },
-              alertsFilter: { query: { kql: 'test:1', dsl: '{}' } },
+              alertsFilter: { query: { kql: 'test:1', dsl: '{}', filters: [] } },
             },
           ],
         },
@@ -1332,7 +1332,7 @@ describe('Execution Handler', () => {
                   'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
               },
               alertsFilter: {
-                query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}' },
+                query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}', filters: [] },
               },
             },
           ],
@@ -1351,7 +1351,7 @@ describe('Execution Handler', () => {
       spaceId: 'test1',
       excludedAlertInstanceIds: ['foo'],
       alertsFilter: {
-        query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}' },
+        query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}', filters: [] },
       },
     });
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
@@ -1392,7 +1392,7 @@ describe('Execution Handler', () => {
               },
               params: {},
               alertsFilter: {
-                query: { kql: 'kibana.alert.instance.id:1', dsl: '{}' },
+                query: { kql: 'kibana.alert.instance.id:1', dsl: '{}', filters: [] },
               },
             },
           ],
@@ -1412,7 +1412,7 @@ describe('Execution Handler', () => {
       spaceId: 'test1',
       excludedAlertInstanceIds: ['foo'],
       alertsFilter: {
-        query: { kql: 'kibana.alert.instance.id:1', dsl: '{}' },
+        query: { kql: 'kibana.alert.instance.id:1', dsl: '{}', filters: [] },
       },
     });
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith([
