@@ -28,7 +28,7 @@ export const TableHeader: FC<Props> = ({
   const euiTheme = useEuiTheme();
   return (
     <>
-      <EuiFlexGroup gutterSize="none" alignItems="center" css={{ height: euiTheme.euiSizeXL }}>
+      <EuiFlexGroup gutterSize="none" alignItems="center" css={{ minHeight: euiTheme.euiSizeXL }}>
         <EuiFlexItem>
           <EuiText size="s">
             <FormattedMessage
