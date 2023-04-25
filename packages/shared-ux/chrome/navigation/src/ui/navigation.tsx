@@ -84,7 +84,6 @@ export const Navigation = (props: NavigationProps) => {
   };
 
   const LinkToCloud = () => {
-    // FIXME: link directly to the current project or deployment
     switch (props.linkToCloud) {
       case 'projects':
         return (
