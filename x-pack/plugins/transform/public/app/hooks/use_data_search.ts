@@ -8,18 +8,20 @@
 import { useCallback } from 'react';
 import { lastValueFrom } from 'rxjs';
 
+import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
+
 import { useAppDependencies } from '../app_dependencies';
 
 export const useDataSearch = () => {
   const { data } = useAppDependencies();
 
   return useCallback(
-    async (esSearchRequest: any, abortSignal?: AbortSignal) => {
+    async (esSearchRequestParams: IKibanaSearchRequest['params'], abortSignal?: AbortSignal) => {
       try {
         const { rawResponse: resp } = await lastValueFrom(
           data.search.search(
             {
-              params: esSearchRequest,
+              params: esSearchRequestParams,
             },
             { abortSignal }
           )
