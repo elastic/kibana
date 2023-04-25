@@ -7,7 +7,6 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import objectHash from 'object-hash';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
 import type {
   BaseFieldsLatest,
   NewTermsFieldsLatest,
@@ -34,6 +33,7 @@ export const wrapNewTermsAlerts = ({
   indicesToQuery,
   alertTimestampOverride,
   ruleExecutionLogger,
+  publicBaseUrl,
 }: {
   eventsAndTerms: EventsAndTerms[];
   spaceId: string | null | undefined;
@@ -42,6 +42,7 @@ export const wrapNewTermsAlerts = ({
   indicesToQuery: string[];
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  publicBaseUrl: string | undefined;
 }): Array<WrappedFieldsLatest<NewTermsFieldsLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const id = objectHash([
@@ -61,15 +62,17 @@ export const wrapNewTermsAlerts = ({
       buildReasonMessageForNewTermsAlert,
       indicesToQuery,
       alertTimestampOverride,
-      ruleExecutionLogger
+      ruleExecutionLogger,
+      id,
+      publicBaseUrl
     );
+
     return {
       _id: id,
       _index: '',
       _source: {
         ...baseAlert,
         [ALERT_NEW_TERMS]: eventAndTerms.newTerms,
-        [ALERT_UUID]: id,
       },
     };
   });
