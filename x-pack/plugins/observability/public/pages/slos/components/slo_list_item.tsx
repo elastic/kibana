@@ -34,10 +34,11 @@ import {
   transformValuesToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
 import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
-import { sloFeatureId } from '../../../../common';
+import { rulesLocatorID, sloFeatureId } from '../../../../common';
 import { paths } from '../../../config/paths';
 import type { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
+import type { RulesParams } from '../../../locators/rules';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse;
@@ -57,6 +58,9 @@ export function SloListItem({
   const {
     application: { navigateToUrl },
     http: { basePath },
+    share: {
+      url: { locators },
+    },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
@@ -92,12 +96,19 @@ export function SloListItem({
     queryClient.invalidateQueries(['fetchRulesForSlo']);
   };
 
-  const handleNavigateToRules = () => {
-    navigateToUrl(
-      basePath.prepend(
-        `${paths.observability.rules}?_a=(lastResponse:!(),search:%27%27,params:(sloId:%27${slo?.id}%27),status:!(),type:!())`
-      )
-    );
+  const handleNavigateToRules = async () => {
+    const locator = locators.get<RulesParams>(rulesLocatorID);
+
+    if (slo?.id) {
+      locator?.navigate(
+        {
+          params: { sloId: slo?.id || '' },
+        },
+        {
+          replace: true,
+        }
+      );
+    }
   };
 
   const handleClone = () => {
