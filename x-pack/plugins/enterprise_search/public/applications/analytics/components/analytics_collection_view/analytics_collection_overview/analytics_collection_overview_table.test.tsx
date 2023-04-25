@@ -48,7 +48,7 @@ describe('AnalyticsCollectionOverviewTable', () => {
     topReferrersTab.simulate('click');
 
     expect(mockActions.setSelectedTable).toHaveBeenCalledTimes(1);
-    expect(mockActions.setSelectedTable).toHaveBeenCalledWith(ExploreTables.TopReferrers, {
+    expect(mockActions.setSelectedTable).toHaveBeenCalledWith(ExploreTables.Referrers, {
       direction: 'desc',
       field: 'sessions',
     });

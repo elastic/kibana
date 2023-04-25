@@ -40,8 +40,8 @@ import {
   ExploreTableItem,
   ExploreTables,
   SearchTermsTable,
-  TopClickedTable,
-  TopReferrersTable,
+  ClickedTable,
+  ReferrersTable,
   WorsePerformersTable,
 } from '../analytics_collection_explore_table_types';
 import { FetchAnalyticsCollectionLogic } from '../fetch_analytics_collection_logic';
@@ -67,7 +67,7 @@ const tabsByFilter: Record<FilterBy, Array<{ id: ExploreTables; name: string }>>
   ],
   [FilterBy.Clicks]: [
     {
-      id: ExploreTables.TopClicked,
+      id: ExploreTables.Clicked,
       name: i18n.translate(
         'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTab.topClicked',
         { defaultMessage: 'Top clicked results' }
@@ -76,7 +76,7 @@ const tabsByFilter: Record<FilterBy, Array<{ id: ExploreTables; name: string }>>
   ],
   [FilterBy.Sessions]: [
     {
-      id: ExploreTables.TopReferrers,
+      id: ExploreTables.Referrers,
       name: i18n.translate(
         'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTab.topReferrers',
         { defaultMessage: 'Top referrers' }
@@ -96,8 +96,8 @@ interface TableSetting<T = ExploreTableItem, K = T> {
 
 const tableSettings: {
   [ExploreTables.SearchTerms]: TableSetting<SearchTermsTable>;
-  [ExploreTables.TopClicked]: TableSetting<TopClickedTable>;
-  [ExploreTables.TopReferrers]: TableSetting<TopReferrersTable>;
+  [ExploreTables.Clicked]: TableSetting<ClickedTable>;
+  [ExploreTables.Referrers]: TableSetting<ReferrersTable>;
   [ExploreTables.WorsePerformers]: TableSetting<WorsePerformersTable>;
 } = {
   [ExploreTables.SearchTerms]: {
@@ -158,7 +158,7 @@ const tableSettings: {
       },
     },
   },
-  [ExploreTables.TopClicked]: {
+  [ExploreTables.Clicked]: {
     columns: [
       {
         field: ExploreTableColumns.page,
@@ -193,7 +193,7 @@ const tableSettings: {
       },
     },
   },
-  [ExploreTables.TopReferrers]: {
+  [ExploreTables.Referrers]: {
     columns: [
       {
         field: ExploreTableColumns.page,

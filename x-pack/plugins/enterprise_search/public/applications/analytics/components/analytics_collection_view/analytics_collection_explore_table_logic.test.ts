@@ -112,7 +112,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
       });
 
       it('should handle setSelectedTable', () => {
-        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
+        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.Referrers);
         expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
       });
 
@@ -139,7 +139,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
         AnalyticsCollectionExploreTableLogic.actions.onTableChange({
           page: { index: 2, size: 10 },
         });
-        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
+        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.Referrers);
         expect(AnalyticsCollectionExploreTableLogic.values.pageIndex).toEqual(0);
       });
 
@@ -172,7 +172,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
         AnalyticsCollectionExploreTableLogic.actions.onTableChange({
           page: { index: 2, size: 10 },
         });
-        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
+        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.Referrers);
         expect(AnalyticsCollectionExploreTableLogic.values.pageSize).toEqual(10);
       });
 
@@ -193,7 +193,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
       it('should handle setSelectedTable', () => {
         AnalyticsCollectionExploreTableLogic.actions.setSearch('test');
-        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
+        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.Referrers);
         expect(AnalyticsCollectionExploreTableLogic.values.search).toEqual('');
       });
 
@@ -212,7 +212,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
   describe('listeners', () => {
     it('should fetch items when selectedTable changes', () => {
-      AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
+      AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.Referrers);
       expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
         indexPattern: undefined,
         sessionId: undefined,

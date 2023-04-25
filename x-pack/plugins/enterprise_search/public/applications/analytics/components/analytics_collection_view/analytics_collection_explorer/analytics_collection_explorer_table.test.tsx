@@ -27,7 +27,7 @@ describe('AnalyticsCollectionExplorerTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    setMockValues({ items: [], selectedTable: ExploreTables.TopClicked });
+    setMockValues({ items: [], selectedTable: ExploreTables.Clicked });
     setMockActions(mockActions);
   });
 

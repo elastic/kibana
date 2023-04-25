@@ -32,8 +32,8 @@ import {
   ExploreTableItem,
   ExploreTables,
   SearchTermsTable,
-  TopClickedTable,
-  TopReferrersTable,
+  ClickedTable,
+  ReferrersTable,
   WorsePerformersTable,
 } from './analytics_collection_explore_table_types';
 import {
@@ -62,8 +62,8 @@ interface TableParams<T extends ExploreTableItem = ExploreTableItem> {
 
 const tablesParams: {
   [ExploreTables.SearchTerms]: TableParams<SearchTermsTable>;
-  [ExploreTables.TopClicked]: TableParams<TopClickedTable>;
-  [ExploreTables.TopReferrers]: TableParams<TopReferrersTable>;
+  [ExploreTables.Clicked]: TableParams<ClickedTable>;
+  [ExploreTables.Referrers]: TableParams<ReferrersTable>;
   [ExploreTables.WorsePerformers]: TableParams<WorsePerformersTable>;
 } = {
   [ExploreTables.SearchTerms]: {
@@ -153,7 +153,7 @@ const tablesParams: {
         }
       ),
   },
-  [ExploreTables.TopClicked]: {
+  [ExploreTables.Clicked]: {
     parseResponse: (
       response: IKibanaSearchResponse<{
         aggregations: {
@@ -200,7 +200,7 @@ const tablesParams: {
         }
       ),
   },
-  [ExploreTables.TopReferrers]: {
+  [ExploreTables.Referrers]: {
     parseResponse: (
       response: IKibanaSearchResponse<{
         aggregations: {
