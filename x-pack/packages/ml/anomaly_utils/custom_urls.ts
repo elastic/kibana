@@ -6,7 +6,7 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { AnomalyRecordDoc } from './anomalies';
+import type { AnomalyRecordDoc } from './types';
 
 /**
  * Base Interface for basic custom URL.

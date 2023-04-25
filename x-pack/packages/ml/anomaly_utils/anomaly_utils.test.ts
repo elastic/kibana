@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnomalyRecordDoc } from '../types/anomalies';
+import { AnomalyRecordDoc } from './types';
 
 import {
   aggregationTypeTransform,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PARTITION_FIELDS, ANOMALY_RESULT_TYPE } from '../constants/anomalies';
+import { PARTITION_FIELDS, ANOMALY_RESULT_TYPE } from './constants';
 import type { KibanaUrlConfig } from './custom_urls';
 
 /**
