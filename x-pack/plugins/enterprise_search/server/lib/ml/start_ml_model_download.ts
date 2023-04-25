@@ -6,7 +6,6 @@
  */
 
 import { MlPutTrainedModelRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 import { MlClient } from '@kbn/ml-plugin/server/lib/ml_client';
 
