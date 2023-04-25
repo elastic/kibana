@@ -69,7 +69,6 @@ import type { ITelemetryReceiver } from './lib/telemetry/receiver';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
-import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
 import { createRuleExecutionLogService } from './lib/detection_engine/rule_monitoring';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
@@ -128,7 +127,6 @@ export class Plugin implements ISecuritySolutionPlugin {
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
-  private kibanaIndex?: string;
   private endpointContext: EndpointAppContext;
 
   constructor(context: PluginInitializerContext) {
@@ -159,7 +157,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const { appClientFactory, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
-    this.kibanaIndex = core.savedObjects.getKibanaIndex();
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings, experimentalFeatures);
@@ -241,6 +238,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       lists: plugins.lists,
       logger: this.logger,
       config: this.config,
+      publicBaseUrl: core.http.basePath.publicBaseUrl,
       ruleDataClient,
       ruleExecutionLoggerFactory: ruleExecutionLogService.createClientForExecutors,
       version: pluginContext.env.packageInfo.version,
@@ -452,17 +450,15 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       // Migrate artifacts to fleet and then start the minifest task after that is done
       plugins.fleet.fleetSetupCompleted().then(() => {
-        migrateArtifactsToFleet(savedObjectsClient, artifactClient, logger).finally(() => {
-          logger.info('Dependent plugin setup complete - Starting ManifestTask');
+        logger.info('Dependent plugin setup complete - Starting ManifestTask');
 
-          if (this.manifestTask) {
-            this.manifestTask.start({
-              taskManager,
-            });
-          } else {
-            logger.error(new Error('User artifacts task not available.'));
-          }
-        });
+        if (this.manifestTask) {
+          this.manifestTask.start({
+            taskManager,
+          });
+        } else {
+          logger.error(new Error('User artifacts task not available.'));
+        }
       });
 
       // License related start
@@ -516,8 +512,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryReceiver.start(
       core,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.kibanaIndex!,
+      (type: string) => core.savedObjects.getIndexForType(type),
       DEFAULT_ALERTS_INDEX,
       this.endpointAppContextService,
       exceptionListClient,

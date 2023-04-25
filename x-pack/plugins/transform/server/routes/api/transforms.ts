@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
@@ -527,33 +526,6 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<undefined, undefined, ScheduleNowTransformsRequestSchema>(
       scheduleNowTransformsHandler
     )
-  );
-
-  /**
-   * @apiGroup Transforms
-   *
-   * @api {post} /api/transform/es_search Transform ES Search Proxy
-   * @apiName PostTransformEsSearchProxy
-   * @apiDescription ES Search Proxy
-   *
-   * @apiSchema (body) any
-   */
-  router.post(
-    {
-      path: addBasePath('es_search'),
-      validate: {
-        body: schema.maybe(schema.any()),
-      },
-    },
-    license.guardApiRoute(async (ctx, req, res) => {
-      try {
-        const esClient = (await ctx.core).elasticsearch.client;
-        const body = await esClient.asCurrentUser.search(req.body, { maxRetries: 0 });
-        return res.ok({ body });
-      } catch (e) {
-        return res.customError(wrapError(wrapEsError(e)));
-      }
-    })
   );
 
   registerTransformsAuditMessagesRoutes(routeDependencies);

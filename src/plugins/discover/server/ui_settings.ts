@@ -137,6 +137,12 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     }),
     category: ['discover'],
     schema: schema.boolean(),
+    deprecation: {
+      message: i18n.translate('discover.advancedSettings.showLegacyFieldStatsTextDeprecation', {
+        defaultMessage: 'This setting is deprecated and will not be supported in a future version.',
+      }),
+      docLinksKey: 'discoverSettings',
+    },
   },
   [DOC_HIDE_TIME_COLUMN_SETTING]: {
     name: i18n.translate('discover.advancedSettings.docTableHideTimeColumnTitle', {

@@ -45,7 +45,11 @@ export const getPaginationRequestParams = (pageIndex: number, pageSize: number) 
 
 export const getBaseSearchTemplate = (
   aggregationFieldName: string,
-  { search, timeRange }: { search: string; timeRange: TimeRange },
+  {
+    search,
+    timeRange,
+    eventType,
+  }: { search: string; timeRange: TimeRange; eventType?: 'search' | 'search_click' | 'page_view' },
   aggs: IKibanaSearchRequest['params']['aggs']
 ): IKibanaSearchRequest => ({
   params: {
@@ -61,6 +65,7 @@ export const getBaseSearchTemplate = (
               },
             },
           },
+          ...(eventType ? [{ term: { 'event.action': eventType } }] : []),
           ...(search ? [getSearchQueryRequestParams(aggregationFieldName, search)] : []),
         ],
       },

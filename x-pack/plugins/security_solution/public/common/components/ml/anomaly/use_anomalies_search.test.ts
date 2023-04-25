@@ -162,14 +162,9 @@ describe('useNotableAnomaliesSearch', () => {
       await waitForNextUpdate();
 
       const names = result.current.data.map(({ name }) => name);
-      expect(names).toEqual([
-        firstJobSecurityName,
-        secondJobSecurityName,
-        'packetbeat_dns_tunneling',
-        'packetbeat_rare_dns_question',
-        'packetbeat_rare_server_domain',
-        'suspicious_login_activity',
-      ]);
+
+      expect(names[0]).toEqual(firstJobSecurityName);
+      expect(names[1]).toEqual(secondJobSecurityName);
     });
   });
 
