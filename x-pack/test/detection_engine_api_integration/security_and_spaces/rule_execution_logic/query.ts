@@ -34,6 +34,7 @@ import {
   ALERT_ORIGINAL_EVENT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
+import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import {
   createExceptionList,
@@ -102,6 +103,24 @@ export default ({ getService }: FtrProviderContext) => {
       const alerts = await getOpenSignals(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).greaterThan(0);
       expect(alerts.hits.hits[0]._source?.['kibana.alert.ancestors'][0].id).eql(ID);
+    });
+
+    it('generates max signals warning when circuit breaker is hit', async () => {
+      const rule: QueryRuleCreateProps = {
+        ...getRuleForSignalTesting(['auditbeat-*']),
+      };
+      const { logs } = await previewRule({ supertest, rule });
+      expect(logs[0].warnings).contain(getMaxSignalsWarning());
+    });
+
+    it("doesn't generate max signals warning when circuit breaker is met but not exceeded", async () => {
+      const rule = {
+        ...getRuleForSignalTesting(['auditbeat-*']),
+        query: 'process.executable: "/usr/bin/sudo"',
+        max_signals: 10,
+      };
+      const { logs } = await previewRule({ supertest, rule });
+      expect(logs[0].warnings).not.contain(getMaxSignalsWarning());
     });
 
     it('should abide by max_signals > 100', async () => {

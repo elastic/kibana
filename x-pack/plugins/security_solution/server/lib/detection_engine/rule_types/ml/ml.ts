@@ -107,7 +107,11 @@ export const mlExecutor = async ({
       exceptionFilter,
     });
 
-    if (anomalyResults.hits.total && anomalyResults.hits.total > tuple.maxSignals) {
+    if (
+      anomalyResults.hits.total &&
+      typeof anomalyResults.hits.total !== 'number' &&
+      anomalyResults.hits.total.value > tuple.maxSignals
+    ) {
       result.warningMessages.push(getMaxSignalsWarning());
     }
 

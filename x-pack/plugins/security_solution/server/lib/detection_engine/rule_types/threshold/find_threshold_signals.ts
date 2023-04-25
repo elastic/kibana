@@ -169,7 +169,7 @@ export const findThresholdSignals = async ({
     }
   }
 
-  if (buckets.length >= maxSignals) {
+  if (buckets.length > maxSignals) {
     warnings.push(getMaxSignalsWarning());
   }
 

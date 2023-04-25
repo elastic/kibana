@@ -312,13 +312,10 @@ export const createNewTermsAlertType = (
             })
           );
 
-          if (bulkCreateResult.alertsWereTruncated) {
-            result.warningMessages.push(getMaxSignalsWarning());
-          }
-
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });
 
           if (bulkCreateResult.alertsWereTruncated) {
+            result.warningMessages.push(getMaxSignalsWarning());
             break;
           }
         }
