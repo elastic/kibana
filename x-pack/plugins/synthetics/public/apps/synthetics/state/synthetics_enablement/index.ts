@@ -9,12 +9,6 @@ import { createReducer } from '@reduxjs/toolkit';
 import {
   getSyntheticsEnablement,
   getSyntheticsEnablementSuccess,
-  disableSynthetics,
-  disableSyntheticsSuccess,
-  disableSyntheticsFailure,
-  enableSynthetics,
-  enableSyntheticsSuccess,
-  enableSyntheticsFailure,
   getSyntheticsEnablementFailure,
 } from './actions';
 import { MonitorManagementEnablementResult } from '../../../../../common/runtime_types';
@@ -43,39 +37,6 @@ export const syntheticsEnablementReducer = createReducer(initialState, (builder)
       state.enablement = action.payload;
     })
     .addCase(getSyntheticsEnablementFailure, (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    })
-
-    .addCase(disableSynthetics, (state) => {
-      state.loading = true;
-    })
-    .addCase(disableSyntheticsSuccess, (state, action) => {
-      state.loading = false;
-      state.error = null;
-      state.enablement = {
-        canEnable: state.enablement?.canEnable ?? false,
-        areApiKeysEnabled: state.enablement?.areApiKeysEnabled ?? false,
-        canManageApiKeys: state.enablement?.canManageApiKeys ?? false,
-        isEnabled: false,
-        isValidApiKey: true,
-      };
-    })
-    .addCase(disableSyntheticsFailure, (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    })
-
-    .addCase(enableSynthetics, (state) => {
-      state.loading = true;
-      state.enablement = null;
-    })
-    .addCase(enableSyntheticsSuccess, (state, action) => {
-      state.loading = false;
-      state.error = null;
-      state.enablement = action.payload;
-    })
-    .addCase(enableSyntheticsFailure, (state, action) => {
       state.loading = false;
       state.error = action.payload;
     });
