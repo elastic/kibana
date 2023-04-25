@@ -33,6 +33,7 @@ export const alertIndexNoResults: PatternRollup = {
   indices: 1,
   pattern: '.alerts-security.alerts-default',
   results: undefined, // <-- no results
+  sizeInBytes: 6423408623,
   stats: {
     '.internal.alerts-security.alerts-default-000001': {
       health: 'green',
@@ -83,6 +84,7 @@ export const alertIndexWithAllResults: PatternRollup = {
       pattern: '.alerts-security.alerts-default',
     },
   },
+  sizeInBytes: 29717961631,
   stats: {
     '.internal.alerts-security.alerts-default-000001': {
       health: 'green',

@@ -16,17 +16,3 @@ export const getSyntheticsEnablementSuccess = createAction<MonitorManagementEnab
 export const getSyntheticsEnablementFailure = createAction<IHttpSerializedFetchError>(
   '[SYNTHETICS_ENABLEMENT] GET FAILURE'
 );
-
-export const disableSynthetics = createAction('[SYNTHETICS_ENABLEMENT] DISABLE');
-export const disableSyntheticsSuccess = createAction<{}>('[SYNTHETICS_ENABLEMENT] DISABLE SUCCESS');
-export const disableSyntheticsFailure = createAction<IHttpSerializedFetchError>(
-  '[SYNTHETICS_ENABLEMENT] DISABLE FAILURE'
-);
-
-export const enableSynthetics = createAction('[SYNTHETICS_ENABLEMENT] ENABLE');
-export const enableSyntheticsSuccess = createAction<MonitorManagementEnablementResult>(
-  '[SYNTHETICS_ENABLEMENT] ENABLE SUCCESS'
-);
-export const enableSyntheticsFailure = createAction<IHttpSerializedFetchError>(
-  '[SYNTHETICS_ENABLEMENT] ENABLE FAILURE'
-);
