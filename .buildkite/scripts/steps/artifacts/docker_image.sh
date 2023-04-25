@@ -46,7 +46,6 @@ docker image push "$KIBANA_IMAGE_OUTPUT-arm64"
 docker image push "$KIBANA_IMAGE_OUTPUT-amd64"
 
 echo "--- Create manifest"
-docker rmi "$KIBANA_IMAGE_OUTPUT"
 docker manifest create \
   "$KIBANA_IMAGE_OUTPUT" \
   --amend "$KIBANA_IMAGE_OUTPUT-arm64" \
