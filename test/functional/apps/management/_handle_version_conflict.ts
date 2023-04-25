@@ -16,6 +16,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -28,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'header']);
   const log = getService('log');
 
-  describe('index version conflict', function describeIndexTests() {
+  describe('FOO index version conflict', function describeIndexTests() {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -48,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.setScriptedFieldScript(`doc['bytes'].value`);
       const response = await es.update(
         {
-          index: '.kibana',
+          index: ANALYTICS_SAVED_OBJECT_INDEX,
           id: 'index-pattern:logstash-*',
           body: {
             doc: { 'index-pattern': { fieldFormatMap: '{"geo.src":{"id":"number"}}' } },
@@ -82,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.setFieldFormat('url');
       const response = await es.update(
         {
-          index: '.kibana',
+          index: ANALYTICS_SAVED_OBJECT_INDEX,
           id: 'index-pattern:logstash-*',
           body: {
             doc: { 'index-pattern': { fieldFormatMap: '{"geo.dest":{"id":"number"}}' } },

@@ -3077,6 +3077,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-utils@link:packages/kbn-content-management-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/controls-example-plugin@link:examples/controls_example":
   version "0.0.0"
   uid ""
@@ -4634,6 +4638,10 @@
   uid ""
 
 "@kbn/observability-fixtures-plugin@link:x-pack/test/cases_api_integration/common/plugins/observability":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-onboarding-plugin@link:x-pack/plugins/observability_onboarding":
   version "0.0.0"
   uid ""
 

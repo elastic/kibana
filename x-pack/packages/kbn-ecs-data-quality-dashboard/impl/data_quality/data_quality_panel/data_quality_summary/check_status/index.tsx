@@ -60,30 +60,31 @@ const CheckStatusComponent: React.FC<Props> = ({
   }, [lastChecked]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup data-test-subj="checkStatus" direction="column" gutterSize="none">
       {indexToCheck != null && (
         <>
           <EuiFlexItem grow={true}>
-            <EuiProgress
-              max={checkAllTotalIndiciesToCheck}
-              size="xs"
-              value={checkAllIndiciesChecked}
-            />
+            <EuiText size="s">
+              <span data-test-subj="checking">{i18n.CHECKING(indexToCheck.indexName)}</span>
+            </EuiText>
           </EuiFlexItem>
 
           <EuiSpacer size="xs" />
 
           <EuiFlexItem grow={true}>
-            <EuiText size="s">
-              <span>{i18n.CHECKING(indexToCheck.indexName)}</span>
-            </EuiText>
+            <EuiProgress
+              data-test-subj="progress"
+              max={checkAllTotalIndiciesToCheck}
+              size="xs"
+              value={checkAllIndiciesChecked}
+            />
           </EuiFlexItem>
         </>
       )}
 
       <EuiFlexItem grow={true}>
         {indexToCheck == null && (
-          <EuiText color="subdued" size="s">
+          <EuiText color="subdued" data-test-subj="lastChecked" size="s">
             {i18n.LAST_CHECKED}
             {': '}
             {formattedDate}

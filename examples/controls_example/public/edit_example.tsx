@@ -133,7 +133,7 @@ export const EditExample = () => {
               iconType="plusInCircle"
               isDisabled={controlGroupAPI === undefined}
               onClick={() => {
-                controlGroupAPI!.openAddDataControlFlyout(controlInputTransform);
+                controlGroupAPI!.openAddDataControlFlyout({ controlInputTransform });
               }}
             >
               Add control

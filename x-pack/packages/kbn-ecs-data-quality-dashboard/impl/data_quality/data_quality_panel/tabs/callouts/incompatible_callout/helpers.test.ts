@@ -12,7 +12,7 @@ import {
   hostNameWithTextMapping,
   someField,
   sourceIpWithTextMapping,
-} from '../../../../mock/enriched_field_metadata';
+} from '../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { EnrichedFieldMetadata } from '../../../../types';
 
 const sameFamily: EnrichedFieldMetadata = {

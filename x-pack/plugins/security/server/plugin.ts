@@ -229,7 +229,7 @@ export class SecurityPlugin
     core: CoreSetup<PluginStartDependencies>,
     { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
   ) {
-    this.kibanaIndexName = core.savedObjects.getKibanaIndex();
+    this.kibanaIndexName = core.savedObjects.getDefaultIndex();
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
       map((rawConfig) =>
         createConfig(rawConfig, this.initializerContext.logger.get('config'), {
