@@ -99,9 +99,7 @@ const IndicesDetailsComponent: React.FC<Props> = ({
           updatePatternIndexNames={updatePatternIndexNames}
           updatePatternRollup={updatePatternRollup}
         />
-        {i !== patterns.length - 1 ? (
-          <EuiSpacer data-test-subj="bodyPatternSpacer" size="s" />
-        ) : null}
+        {patterns[i + 1] && <EuiSpacer data-test-subj="bodyPatternSpacer" size="s" />}
       </EuiFlexItem>
     ))}
   </div>

@@ -150,7 +150,7 @@ describe('helpers', () => {
       const content = '0123456789'; // content.length === 10
       const expected = '------------'; // expected.length === 12
 
-      expect(getHeaderSeparator(content.length)).toEqual(expected);
+      expect(getHeaderSeparator(content)).toEqual(expected);
     });
   });
 

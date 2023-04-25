@@ -9,7 +9,7 @@ import type {
   IlmExplainLifecycleLifecycleExplain,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { sortBy } from 'lodash/fp';
+import { orderBy } from 'lodash/fp';
 
 import type { IndexSummaryTableItem } from '../summary_table/helpers';
 import type {
@@ -168,11 +168,7 @@ export const getSummaryTableItems = ({
     sizeInBytes: getSizeInBytes({ stats, indexName }),
   }));
 
-  if (sortByDirection === 'desc') {
-    return sortBy(sortByColumn, summaryTableItems).reverse();
-  } else {
-    return sortBy(sortByColumn, summaryTableItems);
-  }
+  return orderBy([sortByColumn], [sortByDirection], summaryTableItems);
 };
 
 export const shouldCreateIndexNames = ({

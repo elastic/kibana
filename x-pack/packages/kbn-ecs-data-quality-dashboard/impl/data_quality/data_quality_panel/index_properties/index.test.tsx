@@ -14,7 +14,7 @@ import { EMPTY_STAT } from '../../helpers';
 import { mockMappingsResponse } from '../../mock/mappings_response/mock_mappings_response';
 import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { mockUnallowedValuesResponse } from '../../mock/uallowed_values/mock_uallowed_values';
+import { mockUnallowedValuesResponse } from '../../mock/unallowed_values/mock_unallowed_values';
 import { LOADING_MAPPINGS, LOADING_UNALLOWED_VALUES } from './translations';
 import { UnallowedValueRequestItem } from '../../types';
 import { IndexProperties, Props } from '.';

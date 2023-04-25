@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { repeat } from 'lodash/fp';
-
 import {
   ERRORS_MAY_OCCUR,
   ERRORS_CALLOUT_SUMMARY,
@@ -66,11 +64,11 @@ export const escape = (content: string | undefined): string | undefined =>
 export const escapePreserveNewlines = (content: string | undefined): string | undefined =>
   content != null ? content.replaceAll('|', '\\|') : content;
 
-export const getHeaderSeparator = (headerLength: number): string => repeat(headerLength + 2, '-');
+export const getHeaderSeparator = (headerText: string): string => '-'.repeat(headerText.length + 2); // 2 extra, for the spaces on both sides of the column name
 
 export const getMarkdownTableHeader = (headerNames: string[]) => `
 | ${headerNames.map((name) => `${escape(name)} | `).join('')}
-|${headerNames.map((name) => `${getHeaderSeparator(name.length)}|`).join('')}`;
+|${headerNames.map((name) => `${getHeaderSeparator(name)}|`).join('')}`;
 
 export const getCodeFormattedValue = (value: string | undefined) =>
   `\`${escape(value ?? EMPTY_PLACEHOLDER)}\``;
@@ -220,7 +218,11 @@ export const getResultEmoji = (incompatible: number | undefined): string => {
 
 export const getSummaryTableMarkdownHeader = (): string =>
   `| ${RESULT} | ${INDEX} | ${DOCS} | ${INCOMPATIBLE_FIELDS} | ${ILM_PHASE} | ${SIZE} |
-|--------|-------|------|---------------------|-----------|------|`;
+|${getHeaderSeparator(RESULT)}|${getHeaderSeparator(INDEX)}|${getHeaderSeparator(
+    DOCS
+  )}|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|${getHeaderSeparator(
+    ILM_PHASE
+  )}|${getHeaderSeparator(SIZE)}|`;
 
 export const getSummaryTableMarkdownRow = ({
   docsCount,
@@ -301,7 +303,9 @@ export const getStatsRollupMarkdownComment = ({
   sizeInBytes: number | undefined;
 }): string =>
   `| ${INCOMPATIBLE_FIELDS} | ${INDICES_CHECKED} | ${INDICES} | ${SIZE} | ${DOCS} |
-|---------------------|-----------------|---------|------|------|
+|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|${getHeaderSeparator(
+    INDICES_CHECKED
+  )}|${getHeaderSeparator(INDICES)}|${getHeaderSeparator(SIZE)}|${getHeaderSeparator(DOCS)}|
 | ${incompatible ?? EMPTY_STAT} | ${indicesChecked ?? EMPTY_STAT} | ${
     indices ?? EMPTY_STAT
   } | ${formatBytes(sizeInBytes)} | ${formatNumber(docsCount)} |

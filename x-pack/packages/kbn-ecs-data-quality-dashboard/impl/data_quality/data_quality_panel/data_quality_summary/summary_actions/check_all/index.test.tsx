@@ -12,7 +12,7 @@ import React from 'react';
 
 import { mockMappingsResponse } from '../../../../mock/mappings_response/mock_mappings_response';
 import { TestProviders } from '../../../../mock/test_providers/test_providers';
-import { mockUnallowedValuesResponse } from '../../../../mock/uallowed_values/mock_uallowed_values';
+import { mockUnallowedValuesResponse } from '../../../../mock/unallowed_values/mock_unallowed_values';
 import { CANCEL, CHECK_ALL } from '../../../../translations';
 import {
   OnCheckCompleted,

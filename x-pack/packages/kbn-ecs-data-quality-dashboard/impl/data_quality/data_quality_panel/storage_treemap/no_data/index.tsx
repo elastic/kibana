@@ -21,7 +21,7 @@ interface Props {
 
 const NoDataComponent: React.FC<Props> = ({ reason }) => (
   <EuiFlexGroup alignItems="center" gutterSize="none">
-    <EuiFlexItem grow={true}>
+    <EuiFlexItem grow>
       <NoDataLabel color="subdued" data-test-subj="noDataLabel" size="xs">
         {i18n.NO_DATA_LABEL}
       </NoDataLabel>

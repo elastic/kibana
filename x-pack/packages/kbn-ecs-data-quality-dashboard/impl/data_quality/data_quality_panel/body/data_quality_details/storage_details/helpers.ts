@@ -7,7 +7,7 @@
 
 import type { Datum, Key, ArrayNode } from '@elastic/charts';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { sortBy } from 'lodash/fp';
+import { orderBy } from 'lodash/fp';
 
 import { getSizeInBytes } from '../../../../helpers';
 import { getIlmPhase } from '../../../pattern/helpers';
@@ -64,8 +64,9 @@ export const getLegendItemsForPattern = ({
   pattern: string;
   flattenedBuckets: FlattenedBucket[];
 }): LegendItem[] =>
-  sortBy(
-    'sizeInBytes',
+  orderBy(
+    ['sizeInBytes'],
+    ['desc'],
     flattenedBuckets
       .filter((x) => x.pattern === pattern)
       .map((flattenedBucket) => ({
@@ -75,7 +76,7 @@ export const getLegendItemsForPattern = ({
         pattern: flattenedBucket.pattern,
         sizeInBytes: flattenedBucket.sizeInBytes ?? 0,
       }))
-  ).reverse();
+  );
 
 export const getLegendItems = ({
   patterns,

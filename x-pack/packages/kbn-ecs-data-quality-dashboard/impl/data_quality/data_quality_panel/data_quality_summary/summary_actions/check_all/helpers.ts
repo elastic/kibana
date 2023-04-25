@@ -6,7 +6,7 @@
  */
 
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
-import { sortBy } from 'lodash/fp';
+import { orderBy } from 'lodash/fp';
 
 import { getDocsCount } from '../../../../helpers';
 import type { IndexToCheck, PatternRollup } from '../../../../types';
@@ -41,7 +41,7 @@ export const getAllIndicesToCheck = (
       getIndexToCheck({ indexName, pattern })
     );
 
-    const sortedIndicesToCheck = sortBy('indexName', indicesToCheck).reverse();
+    const sortedIndicesToCheck = orderBy(['indexName'], ['desc'], indicesToCheck);
 
     return [...acc, ...sortedIndicesToCheck];
   }, []);

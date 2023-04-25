@@ -147,7 +147,7 @@ const StorageTreemapComponent: React.FC<Props> = ({
     <EuiFlexGroup data-test-subj="storageTreemap" gutterSize="none">
       <ChartFlexItem grow={true} $maxChartHeight={maxChartHeight} $minChartHeight={minChartHeight}>
         {flattenedBuckets.length === 0 ? (
-          <NoData reason="" />
+          <NoData />
         ) : (
           <Chart>
             <Settings

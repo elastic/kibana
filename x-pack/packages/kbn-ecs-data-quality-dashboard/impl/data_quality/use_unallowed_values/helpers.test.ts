@@ -13,7 +13,7 @@ import {
   getUnallowedValues,
   isBucket,
 } from './helpers';
-import { mockUnallowedValuesResponse } from '../mock/uallowed_values/mock_uallowed_values';
+import { mockUnallowedValuesResponse } from '../mock/unallowed_values/mock_unallowed_values';
 import { UnallowedValueRequestItem, UnallowedValueSearchResult } from '../types';
 
 describe('helpers', () => {
