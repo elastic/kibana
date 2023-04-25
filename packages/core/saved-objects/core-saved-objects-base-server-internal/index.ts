@@ -14,6 +14,7 @@ export {
   getTypes,
   type IndexMapping,
   type IndexMappingMeta,
+  type IndexTypesMap,
   type SavedObjectsTypeMappingDefinitions,
   type IndexMappingMigrationStateMeta,
 } from './src/mappings';

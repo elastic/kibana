@@ -101,6 +101,7 @@ describe('ObservabilityDataViews', function () {
     expect(indexP).toEqual({ id: dataViewList.ux });
 
     expect(dataViews?.createAndSave).toHaveBeenCalledWith({
+      allowNoIndex: true,
       fieldFormats,
       id: 'rum_static_index_pattern_id_trace_apm_',
       timeFieldName: '@timestamp',

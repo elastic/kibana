@@ -24,6 +24,7 @@ const enabledActionTypes = [
   '.servicenow',
   '.servicenow-sir',
   '.slack',
+  '.slack_api',
   '.tines',
   '.webhook',
   'test.authorization',

@@ -8,14 +8,17 @@
 import { EcsFlat, EcsVersion } from '@kbn/ecs';
 
 import { EuiButton } from '@elastic/eui';
-import numeral from '@elastic/numeral';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import styled from 'styled-components';
 
 import { checkIndex } from './check_index';
-import { EMPTY_STAT } from '../../../../helpers';
 import { getAllIndicesToCheck } from './helpers';
 import * as i18n from '../../../../translations';
 import type { EcsMetadata, IndexToCheck, OnCheckCompleted } from '../../../../types';
+
+const CheckAllButton = styled(EuiButton)`
+  width: 112px;
+`;
 
 async function wait(ms: number) {
   const delay = () =>
@@ -29,7 +32,8 @@ async function wait(ms: number) {
 }
 
 interface Props {
-  defaultNumberFormat: string;
+  formatBytes: (value: number | undefined) => string;
+  formatNumber: (value: number | undefined) => string;
   ilmPhases: string[];
   incrementCheckAllIndiciesChecked: () => void;
   onCheckCompleted: OnCheckCompleted;
@@ -43,7 +47,8 @@ interface Props {
 const DELAY_AFTER_EVERY_CHECK_COMPLETES = 3000; // ms
 
 const CheckAllComponent: React.FC<Props> = ({
-  defaultNumberFormat,
+  formatBytes,
+  formatNumber,
   ilmPhases,
   incrementCheckAllIndiciesChecked,
   onCheckCompleted,
@@ -55,11 +60,6 @@ const CheckAllComponent: React.FC<Props> = ({
 }) => {
   const abortController = useRef(new AbortController());
   const [isRunning, setIsRunning] = useState<boolean>(false);
-  const formatNumber = useCallback(
-    (value: number | undefined): string =>
-      value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT,
-    [defaultNumberFormat]
-  );
 
   const cancelIfRunning = useCallback(() => {
     if (isRunning) {
@@ -89,6 +89,7 @@ const CheckAllComponent: React.FC<Props> = ({
           await checkIndex({
             abortController: abortController.current,
             ecsMetadata: EcsFlat as unknown as Record<string, EcsMetadata>,
+            formatBytes,
             formatNumber,
             indexName,
             onCheckCompleted,
@@ -118,6 +119,7 @@ const CheckAllComponent: React.FC<Props> = ({
     }
   }, [
     cancelIfRunning,
+    formatBytes,
     formatNumber,
     incrementCheckAllIndiciesChecked,
     isRunning,
@@ -141,14 +143,18 @@ const CheckAllComponent: React.FC<Props> = ({
     };
   }, [abortController]);
 
+  const disabled = ilmPhases.length === 0;
+
   return (
-    <EuiButton
+    <CheckAllButton
       aria-label={isRunning ? i18n.CANCEL : i18n.CHECK_ALL}
+      data-test-subj="checkAll"
+      disabled={disabled}
       fill={!isRunning}
       onClick={onClick}
     >
       {isRunning ? i18n.CANCEL : i18n.CHECK_ALL}
-    </EuiButton>
+    </CheckAllButton>
   );
 };
 

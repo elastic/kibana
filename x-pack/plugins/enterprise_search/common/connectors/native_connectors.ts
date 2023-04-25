@@ -19,7 +19,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mongodb.configuration.hostLabel',
           {
-            defaultMessage: 'Host',
+            defaultMessage: 'Server hostname',
           }
         ),
         options: [],
@@ -27,7 +27,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        type: 'str',
         ui_restrictions: [],
+        validations: [],
         value: '',
       },
       user: {
@@ -42,10 +44,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 2,
-        required: true,
+        required: false,
         sensitive: false,
         tooltip: '',
+        type: 'str',
         ui_restrictions: [],
+        validations: [],
         value: '',
       },
       password: {
@@ -60,10 +64,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ),
         options: [],
         order: 3,
-        required: true,
+        required: false,
         sensitive: true,
         tooltip: '',
+        type: 'str',
         ui_restrictions: [],
+        validations: [],
         value: '',
       },
       database: {
@@ -81,7 +87,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        type: 'str',
         ui_restrictions: [],
+        validations: [],
         value: '',
       },
       collection: {
@@ -99,11 +107,13 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        type: 'str',
         ui_restrictions: [],
+        validations: [],
         value: '',
       },
       direct_connection: {
-        default_value: true,
+        default_value: false,
         depends_on: [],
         display: DisplayType.TOGGLE,
         label: i18n.translate(
@@ -117,8 +127,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        type: 'bool',
         ui_restrictions: [],
-        value: true,
+        validations: [],
+        value: false,
       },
     },
     features: {
@@ -151,7 +163,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        type: 'str',
         ui_restrictions: [],
+        validations: [],
         value: '',
       },
       port: {
@@ -169,7 +183,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        type: 'int',
         ui_restrictions: [],
+        validations: [],
         value: '',
       },
       user: {
@@ -187,7 +203,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: false,
         sensitive: false,
         tooltip: '',
+        type: 'str',
         ui_restrictions: [],
+        validations: [],
         value: '',
       },
       password: {
@@ -205,7 +223,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: false,
         sensitive: true,
         tooltip: '',
+        type: 'str',
         ui_restrictions: [],
+        validations: [],
         value: '',
       },
       database: {
@@ -223,7 +243,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        type: 'str',
         ui_restrictions: [],
+        validations: [],
         value: '',
       },
       tables: {
@@ -233,7 +255,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.tablesLabel',
           {
-            defaultMessage: 'Tables',
+            defaultMessage: 'Comma-separated list of tables',
           }
         ),
         options: [],
@@ -241,7 +263,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        type: 'list',
         ui_restrictions: [],
+        validations: [],
         value: '',
       },
       ssl_enabled: {
@@ -259,7 +283,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        type: 'bool',
         ui_restrictions: [],
+        validations: [],
         value: false,
       },
       ssl_ca: {
@@ -277,8 +303,50 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: '',
+        type: 'str',
         ui_restrictions: [],
+        validations: [],
         value: '',
+      },
+      fetch_size: {
+        default_value: 50,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.rowsFetchedLabel',
+          {
+            defaultMessage: 'Rows fetched per request',
+          }
+        ),
+        options: [],
+        order: 9,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: 'int',
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 50,
+      },
+      retry_count: {
+        default_value: 3,
+        depends_on: [],
+        display: DisplayType.NUMERIC,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.retriesLabel',
+          {
+            defaultMessage: 'Retries per request',
+          }
+        ),
+        options: [],
+        order: 10,
+        required: false,
+        sensitive: false,
+        tooltip: '',
+        type: 'int',
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 3,
       },
     },
     features: {
