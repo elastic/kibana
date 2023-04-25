@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsServiceSetup } from '@kbn/core/server';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { cspRuleTemplateSavedObjectMapping } from './mappings';
 import { cspRuleTemplateMigrations } from './migrations';
 import {
@@ -20,6 +21,7 @@ import { CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../common/constants';
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType<CspRuleTemplate>({
     name: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+    indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {

@@ -21,10 +21,3 @@ export const ML_RULE_JOBS_WARNING_BUTTON_LABEL = i18n.translate(
     defaultMessage: 'Visit rule details page to investigate',
   }
 );
-
-export const UNABLE_TO_FETCH_RULES_SNOOZE_SETTINGS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleManagement.rulesSnoozeSettings.error.unableToFetch',
-  {
-    defaultMessage: 'Unable to fetch snooze settings',
-  }
-);

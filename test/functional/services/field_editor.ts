@@ -12,6 +12,7 @@ export class FieldEditorService extends FtrService {
   private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
+  private readonly find = this.ctx.getService('find');
 
   public async setName(name: string, clearFirst = false, typeCharByChar = false) {
     await this.testSubjects.setValue('nameField > input', name, {
@@ -48,6 +49,47 @@ export class FieldEditorService extends FtrService {
   }
   public async save() {
     await this.testSubjects.click('fieldSaveButton');
+  }
+
+  async setUrlFieldFormat(template: string) {
+    const urlTemplateField = await this.find.byCssSelector(
+      'input[data-test-subj="urlEditorUrlTemplate"]'
+    );
+    await urlTemplateField.type(template);
+  }
+
+  public async setStaticLookupFormat(oldValue: string, newValue: string) {
+    await this.testSubjects.click('staticLookupEditorAddEntry');
+    await this.testSubjects.setValue('~staticLookupEditorKey', oldValue);
+    await this.testSubjects.setValue('~staticLookupEditorValue', newValue);
+  }
+
+  public async setColorFormat(value: string, color: string, backgroundColor?: string) {
+    await this.testSubjects.click('colorEditorAddColor');
+    await this.testSubjects.setValue('~colorEditorKeyPattern', value);
+    await this.testSubjects.setValue('~colorEditorColorPicker', color);
+    if (backgroundColor) {
+      await this.testSubjects.setValue('~colorEditorBackgroundPicker', backgroundColor);
+    }
+  }
+
+  public async setStringFormat(transform: string) {
+    await this.testSubjects.selectValue('stringEditorTransform', transform);
+  }
+
+  public async setTruncateFormatLength(length: string) {
+    await this.testSubjects.setValue('truncateEditorLength', length);
+  }
+
+  public async setFieldFormat(format: string) {
+    await this.find.clickByCssSelector(
+      'select[data-test-subj="editorSelectedFormatId"] > option[value="' + format + '"]'
+    );
+  }
+
+  public async setFormat(format: string) {
+    await this.testSubjects.setEuiSwitch('formatRow > toggle', 'check');
+    await this.setFieldFormat(format);
   }
 
   public async confirmSave() {
