@@ -16,9 +16,9 @@ import {
   ALERT_START,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
-  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
@@ -188,7 +188,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                         name: options.rule.name,
                         id: options.rule.id,
                       }),
-                      results_link: (alert as any)[ALERT_URL],
+                      results_link: type.getViewInAppRelativeUrl?.({
+                        rule: options.rule,
+                        start: Date.parse(alert[TIMESTAMP]),
+                        end: Date.parse(alert[TIMESTAMP]),
+                      }),
                       alerts: [alert],
                     })
                 );
@@ -376,7 +380,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                         name: options.rule.name,
                         id: options.rule.id,
                       }),
-                      results_link: (alert as any)[ALERT_URL],
+                      results_link: type.getViewInAppRelativeUrl?.({
+                        rule: options.rule,
+                        start: Date.parse(alert[TIMESTAMP]),
+                        end: Date.parse(alert[TIMESTAMP]),
+                      }),
                       alerts: [alert],
                     })
                 );
