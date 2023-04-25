@@ -161,7 +161,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
                       disabled={formDisabled}
                       placeholder={i18n.translate(
                         'xpack.enterpriseSearch.content.engines.createEngine.nameEngine.placeholder',
-                        { defaultMessage: 'Search Application name' }
+                        { defaultMessage: 'Search application name' }
                       )}
                       value={engineName}
                       onChange={(e) => setEngineName(e.target.value)}
@@ -170,7 +170,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
                   status: engineNameStatus,
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.engines.createEngine.nameEngine.title',
-                    { defaultMessage: 'Search Application name' }
+                    { defaultMessage: 'Name your search application' }
                   ),
                 },
               ]}
