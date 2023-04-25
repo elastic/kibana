@@ -81,7 +81,7 @@ export const OptionsListPopoverSuggestions = ({
     /* This useEffect makes selectableOptions responsive to search, show only selected, and clear selections */
     const options: EuiSelectableOption[] = (suggestions ?? []).map((suggestion) => {
       if (typeof suggestion === 'string') {
-        // this means that `showOnlySelected` is true
+        // this means that `showOnlySelected` is true, and doc count is not known when this is the case
         suggestion = { value: suggestion };
       }
       return {
