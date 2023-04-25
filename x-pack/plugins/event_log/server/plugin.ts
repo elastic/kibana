@@ -61,13 +61,11 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
   }
 
   setup(core: CoreSetup): IEventLogService {
-    const kibanaIndex = core.savedObjects.getKibanaIndex();
-
+    const kibanaIndex = core.savedObjects.getDefaultIndex();
     this.systemLogger.debug('setting up plugin');
 
     this.esContext = createEsContext({
       logger: this.systemLogger,
-      // TODO: get index prefix from config.get(kibana.index)
       indexNameRoot: kibanaIndex,
       elasticsearchClientPromise: core
         .getStartServices()

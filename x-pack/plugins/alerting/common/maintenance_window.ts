@@ -46,6 +46,11 @@ export type MaintenanceWindow = MaintenanceWindowSOAttributes & {
   id: string;
 };
 
+export type MaintenanceWindowCreateBody = Omit<
+  MaintenanceWindowSOProperties,
+  'events' | 'expirationDate' | 'enabled' | 'archived'
+>;
+
 export interface MaintenanceWindowClientContext {
   getModificationMetadata: () => Promise<MaintenanceWindowModificationMetadata>;
   savedObjectsClient: SavedObjectsClientContract;
