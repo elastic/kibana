@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import React, { type FC, useState } from 'react';
-import { EuiCheckboxGroup, EuiCheckboxGroupOption, EuiConfirmModal } from '@elastic/eui';
+import React, { type FC, useState, useMemo } from 'react';
+import {
+  EuiCallOut,
+  EuiCheckboxGroup,
+  EuiCheckboxGroupOption,
+  EuiConfirmModal,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isDefined } from '@kbn/ml-is-defined';
 import type { ModelItem } from './models_list';
 
 interface ForceStopModelConfirmDialogProps {
@@ -53,6 +60,33 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
     (id) => checkboxIdToSelectedMap[id]
   );
 
+  const deploymentPipelinesMap = useMemo(() => {
+    if (!isPopulatedObject(model.pipelines)) return {};
+    return Object.entries(model.pipelines).reduce((acc, [pipelineId, pipelineDef]) => {
+      const deploymentIds: string[] = (pipelineDef?.processors ?? [])
+        .map((v) => v?.inference?.model_id)
+        .filter(isDefined);
+      deploymentIds.forEach((dId) => {
+        if (acc[dId]) {
+          acc[dId].push(pipelineId);
+        } else {
+          acc[dId] = [pipelineId];
+        }
+      });
+      return acc;
+    }, {} as Record<string, string[]>);
+  }, [model.pipelines]);
+
+  const pipelineWarning = useMemo<string[]>(() => {
+    return [
+      ...new Set(
+        Object.entries(deploymentPipelinesMap)
+          .filter(([deploymentId]) => selectedDeploymentIds.includes(deploymentId))
+          .flatMap(([, pipelineNames]) => pipelineNames)
+      ),
+    ].sort();
+  }, [deploymentPipelinesMap, selectedDeploymentIds]);
+
   return (
     <EuiConfirmModal
       title={i18n.translate('xpack.ml.trainedModels.modelsList.forceStopDialog.title', {
@@ -74,35 +108,45 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
       confirmButtonDisabled={model.deployment_ids.length > 1 && selectedDeploymentIds.length === 0}
     >
       {model.deployment_ids.length > 1 ? (
-        <EuiCheckboxGroup
-          legend={{
-            display: 'visible',
-            children: (
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.forceStopDialog.selectDeploymentsLegend"
-                defaultMessage="Select deployments to stop"
-              />
-            ),
-          }}
-          options={options}
-          idToSelectedMap={checkboxIdToSelectedMap}
-          onChange={onChange}
-        />
+        <>
+          <EuiCheckboxGroup
+            legend={{
+              display: 'visible',
+              children: (
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.forceStopDialog.selectDeploymentsLegend"
+                  defaultMessage="Select deployments to stop"
+                />
+              ),
+            }}
+            options={options}
+            idToSelectedMap={checkboxIdToSelectedMap}
+            onChange={onChange}
+          />
+          <EuiSpacer size={'m'} />
+        </>
       ) : null}
 
-      {isPopulatedObject(model.pipelines) ? (
+      {pipelineWarning.length > 0 ? (
         <>
-          <FormattedMessage
-            id="xpack.ml.trainedModels.modelsList.forceStopDialog.pipelinesWarning"
-            defaultMessage="You can't use these ingest pipelines until you restart the model:"
-          />
-          <ul>
-            {Object.keys(model.pipelines!)
-              .sort()
-              .map((pipelineName) => {
-                return <li key={pipelineName}>{pipelineName}</li>;
-              })}
-          </ul>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.forceStopDialog.pipelinesWarning"
+                defaultMessage="You can't use these ingest pipelines until you restart the model:"
+              />
+            }
+            color="warning"
+            iconType="warning"
+          >
+            <p>
+              <ul>
+                {pipelineWarning.map((pipelineName) => {
+                  return <li key={pipelineName}>{pipelineName}</li>;
+                })}
+              </ul>
+            </p>
+          </EuiCallOut>
         </>
       ) : null}
     </EuiConfirmModal>
