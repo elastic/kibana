@@ -9,6 +9,7 @@ import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { DISCOVER_APP_TARGET } from '../../common/constants';
 import { findInventoryFields } from '../../common/inventory_models';
 import type { InventoryItemType } from '../../common/inventory_models/types';
+import { InfraClientCoreSetup } from '../types';
 import type { LogsLocatorParams } from './logs_locator';
 
 const NODE_LOGS_LOCATOR_ID = 'NODE_LOGS_LOCATOR';
@@ -20,23 +21,34 @@ export interface NodeLogsLocatorParams extends LogsLocatorParams {
 
 export type NodeLogsLocator = LocatorPublic<NodeLogsLocatorParams>;
 
+export interface NodeLogsLocatorDependencies {
+  core: InfraClientCoreSetup;
+  appTarget: string;
+}
+
 export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLocatorParams> {
   public readonly id = NODE_LOGS_LOCATOR_ID;
 
-  constructor(protected readonly appTarget: string) {}
+  constructor(protected readonly deps: NodeLogsLocatorDependencies) {}
 
   public readonly getLocation = async (params: NodeLogsLocatorParams) => {
     const { parseSearchString } = await import('./helpers');
     const { nodeType, nodeId, filter } = params;
+
     const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
     const query = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
 
     const searchString = parseSearchString({ ...params, filter: query });
 
-    if (this.appTarget === DISCOVER_APP_TARGET) {
-      // TODO: check serverless flag
-      // if enabled, use discover locator to return a path to discover
-      // if disabled continue with the normal flow
+    if (this.deps.appTarget === DISCOVER_APP_TARGET) {
+      const [, plugins] = await this.deps.core.getStartServices();
+      const discoverLocation = await plugins.discover.locator?.getLocation({});
+
+      if (!discoverLocation) {
+        throw new Error('Discover location not found');
+      }
+
+      return discoverLocation;
     }
 
     return {

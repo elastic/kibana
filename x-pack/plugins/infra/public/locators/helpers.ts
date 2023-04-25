@@ -74,6 +74,6 @@ const constructLogFilter = ({
   return `${query},timeRange:(from:'${fromDate}',to:'${toDate}'))`;
 };
 
-export const addHoursToTimestamp = (timestamp: number, hours: number): string => {
+const addHoursToTimestamp = (timestamp: number, hours: number): string => {
   return moment(timestamp).add({ hours }).toISOString();
 };
