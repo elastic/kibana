@@ -131,7 +131,7 @@ export const eqlExecutor = async ({
 
       addToSearchAfterReturn({ current: result, next: createResult });
     }
-    if (result.createdSignalsCount >= ruleParams.maxSignals) {
+    if (response.hits.total && response.hits.total.value >= ruleParams.maxSignals) {
       result.warningMessages.push(getMaxSignalsWarning());
     }
     return result;
