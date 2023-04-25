@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useLocation, useHistory } from 'react-router-dom';
 import {
@@ -24,6 +24,7 @@ import { useKibana } from '../../../utils/kibana_react';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
 import { useShowSections } from '../hooks/use_show_sections';
+import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { useSectionFormValidation } from '../helpers/use_section_form_validation';
 import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
 import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
@@ -57,6 +58,10 @@ export function SloEditForm({ slo }: Props) {
   const history = useHistory();
   const { search } = useLocation();
 
+  const { data: rules, isInitialLoading } = useFetchRulesForSlo({
+    sloIds: slo?.id ? [slo.id] : undefined,
+  });
+
   const urlStateStorage = createKbnUrlStateStorage({
     history,
     useHash: false,
@@ -75,6 +80,12 @@ export function SloEditForm({ slo }: Props) {
   if (searchParams.has(CREATE_RULE_SEARCH_PARAM) && isEditMode && !isAddRuleFlyoutOpen) {
     setIsAddRuleFlyoutOpen(true);
   }
+
+  useEffect(() => {
+    if (isEditMode && rules && rules[slo.id].length && isCreateRuleCheckboxChecked) {
+      setIsCreateRuleCheckboxChecked(false);
+    }
+  }, [isCreateRuleCheckboxChecked, isEditMode, rules, slo]);
 
   const methods = useForm({
     defaultValues: { ...SLO_EDIT_FORM_DEFAULT_VALUES, ...urlParams },
@@ -211,6 +222,7 @@ export function SloEditForm({ slo }: Props) {
             <EuiCheckbox
               id="createNewRuleCheckbox"
               checked={isCreateRuleCheckboxChecked}
+              disabled={isInitialLoading}
               data-test-subj="createNewRuleCheckbox"
               label={
                 <>

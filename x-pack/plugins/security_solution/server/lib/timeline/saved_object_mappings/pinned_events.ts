@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { pinnedEventsMigrations } from './migrations/pinned_events';
 
@@ -32,6 +33,7 @@ export const pinnedEventSavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const pinnedEventType: SavedObjectsType = {
   name: pinnedEventSavedObjectType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',

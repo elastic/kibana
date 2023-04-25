@@ -140,7 +140,7 @@ import { EditRuleSettingButtonLink } from '../../../../detections/pages/detectio
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
-import { RuleDetailsSnoozeSettings } from './components/rule_details_snooze_settings';
+import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -559,7 +559,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           </RuleStatus>
         )}
         <EuiFlexItem grow={false}>
-          <RuleDetailsSnoozeSettings id={ruleId} />
+          <RuleSnoozeBadge ruleId={ruleId} showTooltipInline />
         </EuiFlexItem>
       </>
     );
