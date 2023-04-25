@@ -23,10 +23,10 @@ import { isLensEmbeddable } from './utils';
 import { KibanaContextProvider, KibanaServices } from '../../../common/lib/kibana';
 
 import { getUICapabilities } from '../../../client/helpers/capabilities';
-import type { CasesContextProps } from '../../cases_context';
 import CasesProvider from '../../cases_context';
 import { OWNER_INFO } from '../../../../common/constants';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import type { UIActionProps } from './types';
 
 export const ACTION_ID = 'embeddable_addToExistingCase';
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
@@ -37,12 +37,14 @@ const FlyoutChildren = ({ embeddable, node }) => {
   const { attributes, timeRange } = embeddable.getInput();
 
   const addToExistingCaseModal = useCasesAddToExistingCaseModal({
-    toastContent: i18n.translate(
-      'xpack.cases.actions.visualizationActions.addToExistingCase.successMessage',
-      {
-        defaultMessage: 'Successfully added visualization to the case',
-      }
-    ),
+    successToaster: {
+      title: i18n.translate(
+        'xpack.cases.actions.visualizationActions.addToExistingCase.successMessage',
+        {
+          defaultMessage: 'Successfully added visualization to the case',
+        }
+      ),
+    },
     onClose: () => {
       unmountComponentAtNode(node);
       document.body.removeChild(node);
@@ -59,27 +61,26 @@ const FlyoutChildren = ({ embeddable, node }) => {
     },
   ];
 
-  addToExistingCaseModal.open({ attachments });
+  addToExistingCaseModal.open({ getAttachments: () => attachments });
   return null;
 };
 
 const DashboardViewAddToExistingCaseFlyout = ({
-  getCreateCaseFlyoutProps,
+  caseContextProps,
   currentAppId,
   casesCapabilities,
   node,
   embeddable,
 }) => {
-  // const getCasesContext = getCasesContextLazy(getCreateCaseFlyoutProps);
-  // const CasesContext = getCasesContext();
+  const owner = Object.values(OWNER_INFO)
+    .map((i) => i.appId)
+    .filter((id) => id === currentAppId);
 
   return (
     <CasesProvider
       value={{
-        ...getCreateCaseFlyoutProps,
-        owner: Object.values(OWNER_INFO)
-          .map((i) => i.appId)
-          .filter((id) => id === currentAppId),
+        ...caseContextProps,
+        owner,
         permissions: casesCapabilities,
       }}
     >
@@ -93,13 +94,13 @@ DashboardViewAddToExistingCaseFlyout.displayName = 'DashboardViewAddToExistingCa
 export const createAddToExistingCaseLensAction = ({
   order,
   uiSettings,
-  getCreateCaseFlyoutProps,
+  caseContextProps,
   history,
 }: {
   order?: number;
   uiSettings: IUiSettingsClient;
   history: H.History;
-  getCreateCaseFlyoutProps: CasesContextProps;
+  caseContextProps: UIActionProps;
 }) => {
   const { application: applicationService, notifications, theme, security } = KibanaServices.get();
   let currentAppId: string | undefined;
@@ -152,7 +153,7 @@ export const createAddToExistingCaseLensAction = ({
             <EuiThemeProvider darkMode={uiSettings.get(DEFAULT_DARK_MODE)}>
               <Router history={history}>
                 <DashboardViewAddToExistingCaseFlyout
-                  getCreateCaseFlyoutProps={getCreateCaseFlyoutProps}
+                  caseContextProps={caseContextProps}
                   currentAppId={currentAppId}
                   casesCapabilities={casesCapabilities}
                   node={node}

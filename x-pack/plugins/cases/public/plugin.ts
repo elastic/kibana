@@ -8,7 +8,6 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type * as H from 'history';
 import { createBrowserHistory } from 'history';
 
 import { KibanaServices } from './common/lib/kibana';
@@ -32,6 +31,7 @@ import { PersistableStateAttachmentTypeRegistry } from './client/attachment_fram
 import { registerCaseFileKinds } from './files';
 import type { CasesPluginSetup, CasesPluginStart, CasesUiSetup, CasesUiStart } from './types';
 import { registerInternalAttachments } from './internal_attachments';
+import { registerActions } from './components/visualizations/actions';
 
 /**
  * @public
@@ -51,27 +51,7 @@ export class CasesUiPlugin
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   }
 
-  private lazyActions() {
-    /**
-     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-     * See https://webpack.js.org/api/module-methods/#magic-comments
-     */
-    return import(
-      /* webpackChunkName: "actions" */
-      './components/visualizations/actions'
-    );
-  }
-
-  private async registerActions(core: CoreStart, plugins: CasesPluginStart, history: H.History) {
-    const { registerActions: registerLoadedActions } = await this.lazyActions();
-    const getCreateCaseFlyoutProps = {
-      externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
-    };
-    registerLoadedActions(core, plugins, getCreateCaseFlyoutProps, history);
-  }
-
-  public async setup(core: CoreSetup, plugins: CasesPluginSetup): Promise<CasesUiSetup> {
+  public setup(core: CoreSetup, plugins: CasesPluginSetup): CasesUiSetup {
     const kibanaVersion = this.kibanaVersion;
     const storage = this.storage;
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
@@ -149,7 +129,16 @@ export class CasesUiPlugin
       getFilesClient: plugins.files.filesClientFactory.asScoped,
     });
 
-    this.registerActions(core, plugins, createBrowserHistory());
+    registerActions(
+      core,
+      plugins.uiActions,
+      {
+        externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+        persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+        getFilesClient: plugins.files.filesClientFactory.asScoped,
+      },
+      createBrowserHistory()
+    );
 
     return {
       api: createClientAPI({ http: core.http }),

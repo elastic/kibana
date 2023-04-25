@@ -11,35 +11,38 @@ import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import type * as H from 'history';
 
 import type { CasesPluginStart } from '../../../types';
-import type { CasesContextProps } from '../../cases_context';
 import { createAddToNewCaseLensAction } from './add_to_new_case';
 import { createAddToExistingCaseLensAction } from './add_to_existing_case';
+import type { UIActionProps } from './types';
 
 export const registerUIActions = (
-  { uiSettings }: CoreStart,
-  { uiActions }: CasesPluginStart,
-  getCreateCaseFlyoutProps: CasesContextProps,
+  coreStart: CoreStart,
+  uiActions: CasesPluginStart['uiActions'],
+  caseContextProps: UIActionProps,
   history: H.History
 ) => {
-  registerLensActions(uiActions, getCreateCaseFlyoutProps, uiSettings, history);
+  registerLensActions(coreStart, uiActions, caseContextProps, history);
 };
 
 const registerLensActions = (
-  uiActions: UiActionsStart,
-  getCreateCaseFlyoutProps: CasesContextProps,
-  uiSettings: IUiSettingsClient,
+  coreStart: CoreStart,
+  uiActions: CasesPluginStart['uiActions'],
+  caseContextProps: UIActionProps,
   history: H.History
 ) => {
+  const { uiSettings } = coreStart;
   const addToNewCaseAction = createAddToNewCaseLensAction({
     // order: 42,
-    getCreateCaseFlyoutProps,
+    coreStart,
+    caseContextProps,
     uiSettings,
   });
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToNewCaseAction);
 
   const addToExistingCaseAction = createAddToExistingCaseLensAction({
     // order: 41,
-    getCreateCaseFlyoutProps,
+    coreStart,
+    caseContextProps,
     uiSettings,
     history,
   });
