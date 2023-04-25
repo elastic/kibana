@@ -18,7 +18,8 @@ import { getServerLogConnectorType } from './server_log';
 import { getServiceNowITOMConnectorType } from './servicenow_itom';
 import { getServiceNowITSMConnectorType } from './servicenow_itsm';
 import { getServiceNowSIRConnectorType } from './servicenow_sir';
-import { getSlackConnectorType } from './slack';
+import { getSlackWebhookConnectorType } from './slack';
+import { getSlackApiConnectorType } from './slack_api';
 import { getSwimlaneConnectorType } from './swimlane';
 import { getTeamsConnectorType } from './teams';
 import { getTinesConnectorType } from './tines';
@@ -41,7 +42,8 @@ export function registerConnectorTypes({
   services: RegistrationServices;
 }) {
   connectorTypeRegistry.register(getServerLogConnectorType());
-  connectorTypeRegistry.register(getSlackConnectorType());
+  connectorTypeRegistry.register(getSlackWebhookConnectorType());
+  connectorTypeRegistry.register(getSlackApiConnectorType());
   connectorTypeRegistry.register(getEmailConnectorType(services));
   connectorTypeRegistry.register(getIndexConnectorType());
   connectorTypeRegistry.register(getPagerDutyConnectorType());

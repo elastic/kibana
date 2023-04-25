@@ -61,6 +61,7 @@ import { ConnectorsSelection } from './connectors_selection';
 import { ActionNotifyWhen } from './action_notify_when';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 import { ActionAlertsFilterTimeframe } from './action_alerts_filter_timeframe';
+import { ActionAlertsFilterQuery } from './action_alerts_filter_query';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -307,6 +308,7 @@ export const ActionTypeForm = ({
 
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
+  const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((atr) => atr.id);
 
   const showActionGroupErrorIcon = (): boolean => {
     return !isOpen && some(actionParamsErrors.errors, (error) => !isEmpty(error));
@@ -361,6 +363,7 @@ export const ActionTypeForm = ({
           }
         >
           <ConnectorsSelection
+            allowGroupConnector={allowGroupConnector}
             actionItem={actionItem}
             accordionIndex={index}
             actionTypesIndex={actionTypesIndex}
@@ -405,8 +408,13 @@ export const ActionTypeForm = ({
         {showActionAlertsFilter && (
           <>
             {!hideNotifyWhen && <EuiSpacer size="xl" />}
+            <ActionAlertsFilterQuery
+              state={actionItem.alertsFilter?.query}
+              onChange={(query) => setActionAlertsFilterProperty('query', query, index)}
+            />
+            <EuiSpacer size="s" />
             <ActionAlertsFilterTimeframe
-              state={actionItem.alertsFilter?.timeframe ?? null}
+              state={actionItem.alertsFilter?.timeframe}
               onChange={(timeframe) => setActionAlertsFilterProperty('timeframe', timeframe, index)}
             />
           </>

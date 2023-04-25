@@ -2098,6 +2098,7 @@ describe('createGetSummarizedAlertsFn', () => {
         query: {
           kql: 'kibana.alert.rule.name:test',
           dsl: '{"bool":{"minimum_should_match":1,"should":[{"match":{"kibana.alert.rule.name":"test"}}]}}',
+          filters: [],
         },
         timeframe: {
           days: [1, 2, 3, 4, 5],
@@ -2147,11 +2148,12 @@ describe('createGetSummarizedAlertsFn', () => {
                 script: {
                   script: {
                     params: {
+                      datetimeField: '@timestamp',
                       days: [1, 2, 3, 4, 5],
                       timezone: 'UTC',
                     },
                     source:
-                      "params.days.contains(doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())",
+                      'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
                   },
                 },
               },
@@ -2159,17 +2161,18 @@ describe('createGetSummarizedAlertsFn', () => {
                 script: {
                   script: {
                     params: {
+                      datetimeField: '@timestamp',
                       end: '17:00',
                       start: '08:00',
                       timezone: 'UTC',
                     },
                     source: `
-              def alertsDateTime = doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone));
+              def alertsDateTime = doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone));
               def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
               def start = LocalTime.parse(params.start);
               def end = LocalTime.parse(params.end);
 
-              if (end.isBefore(start)){ // overnight
+              if (end.isBefore(start) || end.equals(start)){ // overnight
                 def dayEnd = LocalTime.parse("23:59:59");
                 def dayStart = LocalTime.parse("00:00:00");
                 if ((alertsTime.isAfter(start) && alertsTime.isBefore(dayEnd)) || (alertsTime.isAfter(dayStart) && alertsTime.isBefore(end))) {
@@ -2231,11 +2234,12 @@ describe('createGetSummarizedAlertsFn', () => {
                 script: {
                   script: {
                     params: {
+                      datetimeField: '@timestamp',
                       days: [1, 2, 3, 4, 5],
                       timezone: 'UTC',
                     },
                     source:
-                      "params.days.contains(doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())",
+                      'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
                   },
                 },
               },
@@ -2243,17 +2247,18 @@ describe('createGetSummarizedAlertsFn', () => {
                 script: {
                   script: {
                     params: {
+                      datetimeField: '@timestamp',
                       end: '17:00',
                       start: '08:00',
                       timezone: 'UTC',
                     },
                     source: `
-              def alertsDateTime = doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone));
+              def alertsDateTime = doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone));
               def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
               def start = LocalTime.parse(params.start);
               def end = LocalTime.parse(params.end);
 
-              if (end.isBefore(start)){ // overnight
+              if (end.isBefore(start) || end.equals(start)){ // overnight
                 def dayEnd = LocalTime.parse("23:59:59");
                 def dayStart = LocalTime.parse("00:00:00");
                 if ((alertsTime.isAfter(start) && alertsTime.isBefore(dayEnd)) || (alertsTime.isAfter(dayStart) && alertsTime.isBefore(end))) {
@@ -2315,11 +2320,12 @@ describe('createGetSummarizedAlertsFn', () => {
                 script: {
                   script: {
                     params: {
+                      datetimeField: '@timestamp',
                       days: [1, 2, 3, 4, 5],
                       timezone: 'UTC',
                     },
                     source:
-                      "params.days.contains(doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())",
+                      'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
                   },
                 },
               },
@@ -2327,17 +2333,18 @@ describe('createGetSummarizedAlertsFn', () => {
                 script: {
                   script: {
                     params: {
+                      datetimeField: '@timestamp',
                       end: '17:00',
                       start: '08:00',
                       timezone: 'UTC',
                     },
                     source: `
-              def alertsDateTime = doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone));
+              def alertsDateTime = doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone));
               def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
               def start = LocalTime.parse(params.start);
               def end = LocalTime.parse(params.end);
 
-              if (end.isBefore(start)){ // overnight
+              if (end.isBefore(start) || end.equals(start)){ // overnight
                 def dayEnd = LocalTime.parse("23:59:59");
                 def dayStart = LocalTime.parse("00:00:00");
                 if ((alertsTime.isAfter(start) && alertsTime.isBefore(dayEnd)) || (alertsTime.isAfter(dayStart) && alertsTime.isBefore(end))) {

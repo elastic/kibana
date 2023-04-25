@@ -6,7 +6,7 @@
  */
 import React from 'react';
 
-import { EuiFlexGrid, EuiFlexItem, EuiFlexGroup, EuiText, EuiI18n } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MetricChart, MetricChartProps } from './metric_chart';
 
@@ -64,32 +64,12 @@ const CHARTS_IN_ORDER: Array<Pick<MetricChartProps, 'title' | 'type'> & { fullRo
 
 export const MetricsGrid = React.memo(() => {
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="hostsView-metricChart">
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false} style={{ flex: 1 }}>
-            <EuiText size="xs">
-              <EuiI18n
-                token="xpack.infra.hostsViewPage.tabs.metricsCharts.sortingCriteria"
-                default="Showing for Top {maxHosts} hosts by {attribute}"
-                values={{
-                  maxHosts: <strong>{DEFAULT_BREAKDOWN_SIZE}</strong>,
-                  attribute: <strong>name</strong>,
-                }}
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGrid columns={2} gutterSize="s">
-          {CHARTS_IN_ORDER.map(({ fullRow, ...chartProp }) => (
-            <EuiFlexItem key={chartProp.type} style={fullRow ? { gridColumn: '1/-1' } : {}}>
-              <MetricChart breakdownSize={DEFAULT_BREAKDOWN_SIZE} {...chartProp} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiFlexGrid columns={2} gutterSize="s">
+      {CHARTS_IN_ORDER.map(({ fullRow, ...chartProp }) => (
+        <EuiFlexItem key={chartProp.type} style={fullRow ? { gridColumn: '1/-1' } : {}}>
+          <MetricChart breakdownSize={DEFAULT_BREAKDOWN_SIZE} {...chartProp} />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGrid>
   );
 });

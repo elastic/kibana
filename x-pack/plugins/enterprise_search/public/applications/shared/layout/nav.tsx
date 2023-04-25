@@ -204,23 +204,14 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
               }),
             },
             {
-              id: 'enterpriseSearchEngineIndices',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.indicesTitle', {
-                defaultMessage: 'Indices',
+              id: 'enterpriseSearchApplicationsContent',
+              name: i18n.translate('xpack.enterpriseSearch.nav.engine.contentTitle', {
+                defaultMessage: 'Content',
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.INDICES}`,
-              }),
-            },
-            {
-              id: 'enterpriseSearchEngineSchema',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.schemaTitle', {
-                defaultMessage: 'Schema',
-              }),
-              ...generateNavLink({
-                shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.SCHEMA}`,
+                shouldShowActiveForSubroutes: true,
+                to: `${enginePath}/${EngineViewTabs.CONTENT}`,
               }),
             },
             {
