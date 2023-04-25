@@ -308,6 +308,7 @@ test('searchSessionId is updated prior to child embeddable parent subscription e
     },
   });
 
+  expect(sessionCount).toBeGreaterThan(1);
   const embeddableInput = embeddable.getInput();
   expect((embeddableInput as any).timeRange).toEqual({
     to: 'now',

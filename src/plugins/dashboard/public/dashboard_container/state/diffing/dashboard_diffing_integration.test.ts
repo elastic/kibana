@@ -111,7 +111,6 @@ describe('getShouldRefresh', () => {
     });
 
     test('should return true when syncColors change', () => {
-      const pinnedFilter = pinFilter(existsFilter);
       const lastInput = {
         syncColors: false,
       } as unknown as DashboardContainerInput;
