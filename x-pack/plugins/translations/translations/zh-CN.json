@@ -21378,7 +21378,6 @@
     "xpack.ml.timeSeriesExplorer.timeSeriesChart.zoomAggregationIntervalLabel": "（聚合时间间隔：{focusAggInt}，存储桶跨度：{bucketSpan}）",
     "xpack.ml.trainedModels.modelsList.deleteModal.header": "删除 {modelsCount, plural, one {{modelId}} other {# 个模型}}？",
     "xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage": "{modelsCount, plural, other {模型}}删除失败",
-    "xpack.ml.trainedModels.modelsList.forceStopDialog.title": "停止模型 {modelId}",
     "xpack.ml.trainedModels.modelsList.selectedModelsMessage": "{modelsCount, plural, other {# 个模型}}已选择",
     "xpack.ml.trainedModels.modelsList.startDeployment.modalTitle": "启动 {modelId} 部署",
     "xpack.ml.trainedModels.modelsList.startFailed": "无法启动“{modelId}”",
