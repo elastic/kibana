@@ -51,47 +51,49 @@ describe('getScreenshots', () => {
     await expect(
       getScreenshots(browser, eventLogger, { elements: elementsPositionAndAttributes, layout })
     ).resolves.toMatchInlineSnapshot(`
-            Array [
-              Object {
-                "data": Object {
-                  "data": Array [
-                    115,
-                    99,
-                    114,
-                    101,
-                    101,
-                    110,
-                    115,
-                    104,
-                    111,
-                    116,
-                  ],
-                  "type": "Buffer",
-                },
-                "description": "description1",
-                "title": "title1",
-              },
-              Object {
-                "data": Object {
-                  "data": Array [
-                    115,
-                    99,
-                    114,
-                    101,
-                    101,
-                    110,
-                    115,
-                    104,
-                    111,
-                    116,
-                  ],
-                  "type": "Buffer",
-                },
-                "description": "description2",
-                "title": "title2",
-              },
-            ]
-          `);
+      Array [
+        Object {
+          "data": Object {
+            "data": Array [
+              115,
+              99,
+              114,
+              101,
+              101,
+              110,
+              115,
+              104,
+              111,
+              116,
+            ],
+            "type": "Buffer",
+          },
+          "description": "description1",
+          "title": "title1",
+          "versionInfo": "mock version string from browser driver",
+        },
+        Object {
+          "data": Object {
+            "data": Array [
+              115,
+              99,
+              114,
+              101,
+              101,
+              110,
+              115,
+              104,
+              111,
+              116,
+            ],
+            "type": "Buffer",
+          },
+          "description": "description2",
+          "title": "title2",
+          "versionInfo": "mock version string from browser driver",
+        },
+      ]
+    `);
   });
 
   it('should forward elements positions', async () => {

@@ -74,6 +74,8 @@ export function createMockBrowserDriver(): jest.Mocked<HeadlessChromiumDriver> {
     throw new Error(selectorArg);
   });
 
+  const getVersion = () => Promise.resolve(`mock version string from browser driver`);
+
   return {
     evaluate,
     screenshot,
@@ -82,6 +84,7 @@ export function createMockBrowserDriver(): jest.Mocked<HeadlessChromiumDriver> {
     open: jest.fn(),
     setViewport: jest.fn(async () => {}),
     waitFor: jest.fn(),
+    getVersion,
   } as unknown as ReturnType<typeof createMockBrowserDriver>;
 }
 
