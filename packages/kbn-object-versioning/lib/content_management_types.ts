@@ -11,53 +11,57 @@ import type { ObjectTransforms, Version, VersionableObject } from './types';
 export interface ServicesDefinition {
   get?: {
     in?: {
-      options?: VersionableObject;
+      options?: VersionableObject<any, any, any, any>;
     };
     out?: {
-      result?: VersionableObject;
+      result?: VersionableObject<any, any, any, any>;
     };
   };
   bulkGet?: {
     in?: {
-      options?: VersionableObject;
+      options?: VersionableObject<any, any, any, any>;
     };
     out?: {
-      result?: VersionableObject;
+      result?: VersionableObject<any, any, any, any>;
     };
   };
   create?: {
     in?: {
-      data?: VersionableObject;
-      options?: VersionableObject;
+      data?: VersionableObject<any, any, any, any>;
+      options?: VersionableObject<any, any, any, any>;
     };
     out?: {
-      result?: VersionableObject;
+      result?: VersionableObject<any, any, any, any>;
     };
   };
   update?: {
     in?: {
-      data?: VersionableObject;
-      options?: VersionableObject;
+      data?: VersionableObject<any, any, any, any>;
+      options?: VersionableObject<any, any, any, any>;
     };
     out?: {
-      result?: VersionableObject;
+      result?: VersionableObject<any, any, any, any>;
     };
   };
   delete?: {
     in?: {
-      options?: VersionableObject;
+      options?: VersionableObject<any, any, any, any>;
     };
     out?: {
-      result?: VersionableObject;
+      result?: VersionableObject<any, any, any, any>;
     };
   };
   search?: {
     in?: {
-      query?: VersionableObject;
-      options?: VersionableObject;
+      options?: VersionableObject<any, any, any, any>;
     };
     out?: {
-      result?: VersionableObject;
+      result?: VersionableObject<any, any, any, any>;
+    };
+  };
+  mSearch?: {
+    out?: {
+      result?: VersionableObject<any, any, any, any>;
     };
   };
 }
@@ -65,53 +69,57 @@ export interface ServicesDefinition {
 export interface ServiceTransforms {
   get: {
     in: {
-      options: ObjectTransforms;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
   bulkGet: {
     in: {
-      options: ObjectTransforms;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
   create: {
     in: {
-      data: ObjectTransforms;
-      options: ObjectTransforms;
+      data: ObjectTransforms<any, any, any, any>;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
   update: {
     in: {
-      data: ObjectTransforms;
-      options: ObjectTransforms;
+      data: ObjectTransforms<any, any, any, any>;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
   delete: {
     in: {
-      options: ObjectTransforms;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
   search: {
     in: {
-      query: ObjectTransforms;
-      options: ObjectTransforms;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
+    };
+  };
+  mSearch: {
+    out: {
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
 }

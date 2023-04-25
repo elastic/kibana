@@ -43,6 +43,7 @@ import { LICENSED_FEATURES } from '../../../licensed_features';
 import { getHttp } from '../../../kibana_services';
 import { GetFeatureActionsArgs, GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
 import {
+  DataFilters,
   ESGeoGridSourceDescriptor,
   MapExtent,
   SizeDynamicOptions,
@@ -56,7 +57,11 @@ import { isMvt } from './is_mvt';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { getIconSize } from './get_icon_size';
 
-type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'>;
+interface ESGeoGridSourceSyncMeta {
+  geogridPrecision: number;
+  requestType: RENDER_AS;
+  resolution: GRID_RESOLUTION;
+}
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -93,6 +98,24 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     this._descriptor = sourceDescriptor;
   }
 
+  getBucketsName() {
+    if (this._descriptor.requestType === RENDER_AS.HEX) {
+      return i18n.translate('xpack.maps.source.esGeoGrid.hex.bucketsName', {
+        defaultMessage: 'hexagons',
+      });
+    }
+
+    if (this._descriptor.requestType === RENDER_AS.GRID) {
+      return i18n.translate('xpack.maps.source.esGeoGrid.grid.bucketsName', {
+        defaultMessage: 'grid',
+      });
+    }
+
+    return i18n.translate('xpack.maps.source.esGeoGrid.cluster.bucketsName', {
+      defaultMessage: 'clusters',
+    });
+  }
+
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> {
     async function onChange(...sourceChanges: OnSourceChangeArgs[]) {
       sourceEditorArgs.onChange(...sourceChanges);
@@ -124,6 +147,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     }
     return (
       <UpdateSourceEditor
+        bucketsName={this.getBucketsName()}
         currentLayerType={sourceEditorArgs.currentLayerType}
         geoFieldName={this.getGeoFieldName()}
         indexPatternId={this.getIndexPatternId()}
@@ -135,8 +159,9 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     );
   }
 
-  getSyncMeta(): ESGeoGridSourceSyncMeta {
+  getSyncMeta(dataFilters: DataFilters): ESGeoGridSourceSyncMeta {
     return {
+      geogridPrecision: this.getGeoGridPrecision(dataFilters.zoom),
       requestType: this._descriptor.requestType,
       resolution: this._descriptor.resolution,
     };
@@ -189,9 +214,9 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   getGeoGridPrecision(zoom: number): number {
-    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+    if (this.isMvt()) {
       // The target-precision needs to be determined server side.
-      return NaN;
+      return 0;
     }
 
     const targetGeotileLevel = Math.ceil(zoom) + this._getGeoGridPrecisionResolutionDelta();
@@ -441,17 +466,17 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
-    if (!searchFilters.buffer) {
+    if (!requestMeta.buffer) {
       throw new Error('Cannot get GeoJson without searchFilter.buffer');
     }
 
     const indexPattern: DataView = await this.getIndexPattern();
-    const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
+    const searchSource: ISearchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
 
     let bucketsPerGrid = 1;
@@ -469,32 +494,33 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     // https://github.com/elastic/elasticsearch/issues/60626
     const supportsCompositeAgg = !(await this._isGeoShape());
 
+    const precision = this.getGeoGridPrecision(requestMeta.zoom);
     const features: Feature[] =
       supportsCompositeAgg && tooManyBuckets
         ? await this._compositeAggRequest({
             searchSource,
-            searchSessionId: searchFilters.searchSessionId,
+            searchSessionId: requestMeta.searchSessionId,
             indexPattern,
-            precision: searchFilters.geogridPrecision || 0,
+            precision,
             layerName,
             registerCancelCallback,
             bucketsPerGrid,
             isRequestStillActive,
-            bufferedExtent: searchFilters.buffer,
+            bufferedExtent: requestMeta.buffer,
             inspectorAdapters,
-            executionContext: searchFilters.executionContext,
+            executionContext: requestMeta.executionContext,
           })
         : await this._nonCompositeAggRequest({
             searchSource,
-            searchSessionId: searchFilters.searchSessionId,
+            searchSessionId: requestMeta.searchSessionId,
             indexPattern,
-            precision: searchFilters.geogridPrecision || 0,
+            precision,
             layerName,
             registerCancelCallback,
-            bufferedExtent: searchFilters.buffer,
+            bufferedExtent: requestMeta.buffer,
             tooManyBuckets,
             inspectorAdapters,
-            executionContext: searchFilters.executionContext,
+            executionContext: requestMeta.executionContext,
           });
 
     return {
@@ -513,13 +539,13 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   async getTileUrl(
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     refreshToken: string,
     hasLabels: boolean,
     buffer: number
   ): Promise<string> {
     const dataView = await this.getIndexPattern();
-    const searchSource = await this.makeSearchSource(searchFilters, 0);
+    const searchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('aggs', this.getValueAggsDsl(dataView));
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
@@ -535,7 +561,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     params.set('requestBody', encodeMvtResponseBody(searchSource.getSearchRequestBody()));
     params.set('renderAs', this._descriptor.requestType);
     params.set('token', refreshToken);
-    const executionContextId = getExecutionContextId(searchFilters.executionContext);
+    const executionContextId = getExecutionContextId(requestMeta.executionContext);
     if (executionContextId) {
       params.set('executionContextId', executionContextId);
     }

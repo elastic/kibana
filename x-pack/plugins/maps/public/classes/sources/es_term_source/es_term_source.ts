@@ -26,11 +26,12 @@ import {
 } from '../../../../common/elasticsearch_util';
 import {
   ESTermSourceDescriptor,
-  VectorJoinSourceRequestMeta,
+  VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { ITermJoinSource } from '../term_join_source';
+import type { IESAggSource } from '../es_agg_source';
 import { IField } from '../../fields/field';
 import { mergeExecutionContext } from '../execution_context_utils';
 
@@ -52,7 +53,7 @@ export function extractPropertiesMap(rawEsData: any, countPropertyName: string):
   return propertiesMap;
 }
 
-export class ESTermSource extends AbstractESAggSource implements ITermJoinSource {
+export class ESTermSource extends AbstractESAggSource implements ITermJoinSource, IESAggSource {
   static type = SOURCE_TYPES.ES_TERM_SOURCE;
 
   static createDescriptor(descriptor: Partial<ESTermSourceDescriptor>): ESTermSourceDescriptor {
@@ -115,14 +116,14 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     }
     return aggType === AGG_TYPE.COUNT
       ? i18n.translate('xpack.maps.source.esJoin.countLabel', {
-          defaultMessage: `Count of {indexPatternLabel}`,
+          defaultMessage: `count of {indexPatternLabel}`,
           values: { indexPatternLabel },
         })
       : super.getAggLabel(aggType, fieldLabel);
   }
 
   async getPropertiesMap(
-    searchFilters: VectorJoinSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     leftSourceName: string,
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void,
@@ -133,7 +134,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     }
 
     const indexPattern = await this.getIndexPattern();
-    const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
+    const searchSource: ISearchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
     const termsField = getField(indexPattern, this._termField.getName());
     const termsAgg = {
@@ -158,10 +159,10 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
           rightSource: `${indexPattern.getName()}:${this._termField.getName()}`,
         },
       }),
-      searchSessionId: searchFilters.searchSessionId,
+      searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_term_source:terms' },
-        searchFilters.executionContext
+        requestMeta.executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
     });

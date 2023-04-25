@@ -8,28 +8,33 @@
 
 import type { ContainerOutput } from '@kbn/embeddable-plugin/public';
 import type { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import type { DashboardContainerByValueInput } from '../../common/dashboard_container/types';
+import type { DashboardContainerInput, DashboardOptions } from '../../common';
 
 export type DashboardReduxState = ReduxEmbeddableState<
-  DashboardContainerByValueInput,
+  DashboardContainerInput,
   DashboardContainerOutput,
   DashboardPublicState
 >;
 
 export type DashboardStateFromSaveModal = Pick<
-  DashboardContainerByValueInput,
+  DashboardContainerInput,
   'title' | 'description' | 'tags' | 'timeRestore' | 'timeRange' | 'refreshInterval'
 > &
   Pick<DashboardPublicState, 'lastSavedId'>;
 
+export type DashboardStateFromSettingsFlyout = DashboardStateFromSaveModal & DashboardOptions;
+
 export interface DashboardPublicState {
-  lastSavedInput: DashboardContainerByValueInput;
+  lastSavedInput: DashboardContainerInput;
   isEmbeddedExternally?: boolean;
   hasUnsavedChanges?: boolean;
+  hasOverlays?: boolean;
   expandedPanelId?: string;
   fullScreenMode?: boolean;
   savedQueryId?: string;
   lastSavedId?: string;
+  scrollToPanelId?: string;
+  highlightPanelId?: string;
 }
 
 export interface DashboardRenderPerformanceStats {
@@ -37,6 +42,8 @@ export interface DashboardRenderPerformanceStats {
   panelsRenderDoneTime: number;
   panelsRenderStartTime: number;
 }
+
+export type DashboardContainerInputWithoutId = Omit<DashboardContainerInput, 'id'>;
 
 export interface DashboardContainerOutput extends ContainerOutput {
   usedDataViewIds?: string[];

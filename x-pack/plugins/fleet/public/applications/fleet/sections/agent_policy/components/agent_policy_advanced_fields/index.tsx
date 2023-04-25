@@ -42,7 +42,7 @@ import { AgentPolicyPackageBadge } from '../../../../components';
 import { AgentPolicyDeleteProvider } from '../agent_policy_delete_provider';
 import type { ValidationResults } from '../agent_policy_validation';
 
-import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../../services';
+import { policyHasFleetServer } from '../../../../services';
 
 import {
   useOutputOptions,
@@ -66,7 +66,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   isEditing = false,
   onDelete = () => {},
 }) => {
-  const { agentFqdnMode: agentFqdnModeEnabled } = ExperimentalFeaturesService.get();
   const { docLinks } = useStartServices();
   const config = useConfig();
   const maxAgentPoliciesWithInactivityTimeout =
@@ -558,66 +557,38 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      {agentFqdnModeEnabled && (
-        <EuiDescribedFormGroup
-          title={
-            <h4>
-              <FormattedMessage
-                id="xpack.fleet.agentPolicyForm.hostnameFormatLabel"
-                defaultMessage="Host name format"
-              />
-              &nbsp;
-              <EuiBetaBadge label="beta" size="s" color="accent" />
-            </h4>
-          }
-          description={
+      <EuiDescribedFormGroup
+        title={
+          <h4>
             <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.hostnameFormatLabelDescription"
-              defaultMessage="Select how you would like agent domain names to be displayed."
+              id="xpack.fleet.agentPolicyForm.hostnameFormatLabel"
+              defaultMessage="Host name format"
             />
-          }
-        >
-          <EuiFormRow fullWidth>
-            <EuiRadioGroup
-              options={[
-                {
-                  id: 'hostname',
-                  label: (
-                    <>
-                      <EuiFlexGroup gutterSize="xs" direction="column">
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="s">
-                            <b>
-                              <FormattedMessage
-                                id="xpack.fleet.agentPolicyForm.hostnameFormatOptionHostname"
-                                defaultMessage="Hostname"
-                              />
-                            </b>
-                          </EuiText>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="s" color="subdued">
-                            <FormattedMessage
-                              id="xpack.fleet.agentPolicyForm.hostnameFormatOptionHostnameExample"
-                              defaultMessage="ex: My-Laptop"
-                            />
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                      <EuiSpacer size="s" />
-                    </>
-                  ),
-                },
-                {
-                  id: 'fqdn',
-                  label: (
+            &nbsp;
+            <EuiBetaBadge label="beta" size="s" color="accent" />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.hostnameFormatLabelDescription"
+            defaultMessage="Select how you would like agent domain names to be displayed."
+          />
+        }
+      >
+        <EuiFormRow fullWidth>
+          <EuiRadioGroup
+            options={[
+              {
+                id: 'hostname',
+                label: (
+                  <>
                     <EuiFlexGroup gutterSize="xs" direction="column">
                       <EuiFlexItem grow={false}>
                         <EuiText size="s">
                           <b>
                             <FormattedMessage
-                              id="xpack.fleet.agentPolicyForm.hostnameFormatOptionFqdn"
-                              defaultMessage="Fully Qualified Domain Name (FQDN)"
+                              id="xpack.fleet.agentPolicyForm.hostnameFormatOptionHostname"
+                              defaultMessage="Hostname"
                             />
                           </b>
                         </EuiText>
@@ -625,26 +596,52 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                       <EuiFlexItem grow={false}>
                         <EuiText size="s" color="subdued">
                           <FormattedMessage
-                            id="xpack.fleet.agentPolicyForm.hostnameFormatOptionFqdnExample"
-                            defaultMessage="ex: My-Laptop.admin.acme.co"
+                            id="xpack.fleet.agentPolicyForm.hostnameFormatOptionHostnameExample"
+                            defaultMessage="ex: My-Laptop"
                           />
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                  ),
-                },
-              ]}
-              idSelected={agentPolicy.agent_features?.length ? 'fqdn' : 'hostname'}
-              onChange={(id: string) => {
-                updateAgentPolicy({
-                  agent_features: id === 'hostname' ? [] : [{ name: 'fqdn', enabled: true }],
-                });
-              }}
-              name="radio group"
-            />
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
-      )}
+                    <EuiSpacer size="s" />
+                  </>
+                ),
+              },
+              {
+                id: 'fqdn',
+                label: (
+                  <EuiFlexGroup gutterSize="xs" direction="column">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <b>
+                          <FormattedMessage
+                            id="xpack.fleet.agentPolicyForm.hostnameFormatOptionFqdn"
+                            defaultMessage="Fully Qualified Domain Name (FQDN)"
+                          />
+                        </b>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s" color="subdued">
+                        <FormattedMessage
+                          id="xpack.fleet.agentPolicyForm.hostnameFormatOptionFqdnExample"
+                          defaultMessage="ex: My-Laptop.admin.acme.co"
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ),
+              },
+            ]}
+            idSelected={agentPolicy.agent_features?.length ? 'fqdn' : 'hostname'}
+            onChange={(id: string) => {
+              updateAgentPolicy({
+                agent_features: id === 'hostname' ? [] : [{ name: 'fqdn', enabled: true }],
+              });
+            }}
+            name="radio group"
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
       {isEditing && 'id' in agentPolicy && !agentPolicy.is_managed ? (
         <EuiDescribedFormGroup
           title={

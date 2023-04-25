@@ -88,7 +88,7 @@ describe('ESSearchSource', () => {
         });
       });
 
-      const searchFilters: VectorSourceRequestMeta = {
+      const requestMeta: VectorSourceRequestMeta = {
         isReadOnly: false,
         filters: [],
         zoom: 0,
@@ -116,7 +116,7 @@ describe('ESSearchSource', () => {
           geoField: geoFieldName,
           indexPatternId: 'ipId',
         });
-        const tileUrl = await esSearchSource.getTileUrl(searchFilters, '1234', false, 5);
+        const tileUrl = await esSearchSource.getTileUrl(requestMeta, '1234', false, 5);
 
         const urlParts = tileUrl.split('?');
         expect(urlParts[0]).toEqual('rootdir/api/maps/mvt/getTile/{z}/{x}/{y}.pbf');
@@ -140,7 +140,7 @@ describe('ESSearchSource', () => {
         });
         const tileUrl = await esSearchSource.getTileUrl(
           {
-            ...searchFilters,
+            ...requestMeta,
             executionContext: { name: APP_ID, id: 'map1234' },
           },
           '1234',

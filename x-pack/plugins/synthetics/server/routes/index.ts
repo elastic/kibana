@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
 import { createJourneyScreenshotRoute } from './pings/journey_screenshots';
 import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_blocks';
 import { createLastSuccessfulCheckRoute } from './pings/last_successful_check';
@@ -19,7 +20,6 @@ import { getServiceLocationsRoute } from './synthetics_service/get_service_locat
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
 import {
   disableSyntheticsRoute,
-  enableSyntheticsRoute,
   getSyntheticsEnablementRoute,
 } from './synthetics_service/enablement';
 import {
@@ -60,7 +60,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   deleteSyntheticsMonitorProjectRoute,
   disableSyntheticsRoute,
   editSyntheticsMonitorRoute,
-  enableSyntheticsRoute,
   getServiceLocationsRoute,
   getSyntheticsMonitorRoute,
   getSyntheticsProjectMonitorsRoute,
@@ -89,6 +88,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createJourneyFailedStepsRoute,
   createNetworkEventsRoute,
   createJourneyScreenshotRoute,
+  deletePackagePolicyRoute,
   addPrivateLocationRoute,
   deletePrivateLocationRoute,
   getPrivateLocationsRoute,

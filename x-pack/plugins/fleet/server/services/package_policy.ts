@@ -6,7 +6,7 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { omit, partition, isEqual } from 'lodash';
+import { omit, partition, isEqual, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
@@ -17,14 +17,17 @@ import type {
   Logger,
   RequestHandlerContext,
 } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { safeLoad } from 'js-yaml';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { type AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import pMap from 'p-map';
+
+import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
   packageToPackagePolicy,
@@ -104,6 +107,7 @@ import { handleExperimentalDatastreamFeatureOptIn } from './package_policies';
 import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
 import type { PackagePolicyClient, PackagePolicyService } from './package_policy_service';
 import { installAssetsForInputPackagePolicy } from './epm/packages/install';
+import { auditLoggingService } from './audit_logging';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -125,7 +129,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
-    options?: {
+    options: {
+      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
@@ -135,10 +140,27 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
-    },
+    } = {},
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PackagePolicy> {
+    // Ensure an ID is provided, so we can include it in the audit logs below
+    if (!options.id) {
+      options.id = SavedObjectsUtils.generateId();
+    }
+
+    let authorizationHeader = options.authorizationHeader;
+
+    if (!authorizationHeader && request) {
+      authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    }
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'create',
+      id: options.id,
+      savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    });
+
     const logger = appContextService.getLogger();
 
     const enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
@@ -187,6 +209,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           pkgName: enrichedPackagePolicy.package.name,
           pkgVersion: enrichedPackagePolicy.package.version,
           force: options?.force,
+          authorizationHeader,
         });
       }
 
@@ -260,6 +283,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     const createdPackagePolicy = { id: newSo.id, version: newSo.version, ...newSo.attributes };
+
     return packagePolicyService.runExternalCallbacks(
       'packagePolicyPostCreate',
       createdPackagePolicy,
@@ -278,6 +302,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       force?: true;
     }
   ): Promise<PackagePolicy[]> {
+    for (const packagePolicy of packagePolicies) {
+      if (!packagePolicy.id) {
+        packagePolicy.id = SavedObjectsUtils.generateId();
+      }
+
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'create',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+
     const agentPolicyIds = new Set(packagePolicies.map((pkgPolicy) => pkgPolicy.policy_id));
 
     for (const agentPolicyId of agentPolicyIds) {
@@ -390,6 +426,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       response.package.experimental_data_stream_features = experimentalFeatures;
     }
 
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'get',
+      id,
+      savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    });
+
     return response;
   }
 
@@ -406,11 +448,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return [];
     }
 
-    return packagePolicySO.saved_objects.map((so) => ({
+    const packagePolicies = packagePolicySO.saved_objects.map((so) => ({
       id: so.id,
       version: so.version,
       ...so.attributes,
     }));
+
+    for (const packagePolicy of packagePolicies) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'find',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    return packagePolicies;
   }
 
   public async getByIDs(
@@ -428,7 +480,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return null;
     }
 
-    return packagePolicySO.saved_objects
+    const packagePolicies = packagePolicySO.saved_objects
       .map((so): PackagePolicy | null => {
         if (so.error) {
           if (options.ignoreMissing && so.error.statusCode === 404) {
@@ -447,6 +499,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         };
       })
       .filter((packagePolicy): packagePolicy is PackagePolicy => packagePolicy !== null);
+
+    for (const packagePolicy of packagePolicies) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    return packagePolicies;
   }
 
   public async list(
@@ -463,6 +525,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       perPage,
       filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
     });
+
+    for (const packagePolicy of packagePolicies?.saved_objects ?? []) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'find',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
 
     return {
       items: packagePolicies?.saved_objects.map((packagePolicySO) => ({
@@ -492,6 +562,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
     });
 
+    for (const packagePolicy of packagePolicies.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'find',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+
     return {
       items: packagePolicies.saved_objects.map((packagePolicySO) => packagePolicySO.id),
       total: packagePolicies.total,
@@ -507,6 +585,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicyUpdate: UpdatePackagePolicy,
     options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
   ): Promise<PackagePolicy> {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id,
+      savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    });
+
     let enrichedPackagePolicy: UpdatePackagePolicy;
 
     try {
@@ -647,6 +731,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     options?: { user?: AuthenticatedUser; force?: boolean },
     currentVersion?: string
   ): Promise<PackagePolicy[] | null> {
+    for (const packagePolicy of packagePolicyUpdates) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'update',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
     const oldPackagePolicies = await this.getByIDs(
       soClient,
       packagePolicyUpdates.map((p) => p.id)
@@ -770,6 +861,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PostDeletePackagePoliciesResponse> {
+    for (const id of ids) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'delete',
+        id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    }
+
     const result: PostDeletePackagePoliciesResponse = [];
     const logger = appContextService.getLogger();
 
@@ -1517,6 +1616,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options?: {
+      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
@@ -1649,11 +1749,24 @@ async function _compilePackageStreams(
 }
 
 // temporary export to enable testing pending refactor https://github.com/elastic/kibana/issues/112386
+// TODO: Move this logic into `package_policies_to_agent_permissions.ts` since this is not a package policy concern
+// and is based entirely on the package contents
 export function _applyIndexPrivileges(
   packageDataStream: RegistryDataStream,
   stream: PackagePolicyInputStream
 ): PackagePolicyInputStream {
-  const streamOut = { ...stream };
+  const streamOut = cloneDeep(stream);
+
+  if (packageDataStream?.elasticsearch?.dynamic_dataset) {
+    streamOut.data_stream.elasticsearch = streamOut.data_stream.elasticsearch ?? {};
+    streamOut.data_stream.elasticsearch.dynamic_dataset =
+      packageDataStream.elasticsearch.dynamic_dataset;
+  }
+  if (packageDataStream?.elasticsearch?.dynamic_namespace) {
+    streamOut.data_stream.elasticsearch = streamOut.data_stream.elasticsearch ?? {};
+    streamOut.data_stream.elasticsearch.dynamic_namespace =
+      packageDataStream.elasticsearch.dynamic_namespace;
+  }
 
   const indexPrivileges = packageDataStream?.elasticsearch?.privileges?.indices;
 
@@ -1674,10 +1787,9 @@ export function _applyIndexPrivileges(
   }
 
   if (valid.length) {
-    stream.data_stream.elasticsearch = {
-      privileges: {
-        indices: valid,
-      },
+    streamOut.data_stream.elasticsearch = streamOut.data_stream.elasticsearch ?? {};
+    streamOut.data_stream.elasticsearch.privileges = {
+      indices: valid,
     };
   }
 

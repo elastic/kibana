@@ -26,15 +26,13 @@ import type { CollapseExpressionFunction } from '../../../common/expressions';
 import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { shouldShowValuesInLegend } from './render_helpers';
+import { PieLayerState, PieVisualizationState, EmptySizeRatios } from '../../../common/types';
 import {
   CategoryDisplay,
+  LegendDisplay,
   NumberDisplay,
   PieChartTypes,
-  PieLayerState,
-  PieVisualizationState,
-  EmptySizeRatios,
-  LegendDisplay,
-} from '../../../common';
+} from '../../../common/constants';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { isCollapsed } from './visualization';
 
@@ -194,7 +192,10 @@ const generateCommonArguments = (
     legendPosition: layer.legendPosition || Position.Right,
     maxLegendLines: layer.legendMaxLines ?? 1,
     legendSize: layer.legendSize,
-    nestedLegend: !!layer.nestedLegend,
+    nestedLegend:
+      layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0) > 1
+        ? Boolean(layer.nestedLegend)
+        : false,
     truncateLegend:
       layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
     palette: generatePaletteAstArguments(paletteService, state.palette),

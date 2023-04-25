@@ -12,7 +12,7 @@ import {
 } from '@kbn/screenshot-mode-plugin/server';
 import { truncate } from 'lodash';
 import open from 'opn';
-import puppeteer, { ElementHandle, Page, EvaluateFunc } from 'puppeteer';
+import { ElementHandle, Page, EvaluateFunc, HTTPResponse } from 'puppeteer';
 import { Subject } from 'rxjs';
 import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '.';
@@ -426,7 +426,7 @@ export class HeadlessChromiumDriver {
       this.interceptedCount = this.interceptedCount + (isData ? 0 : 1);
     });
 
-    this.page.on('response', (interceptedResponse: puppeteer.HTTPResponse) => {
+    this.page.on('response', (interceptedResponse: HTTPResponse) => {
       const interceptedUrl = interceptedResponse.url();
       const allowed = !interceptedUrl.startsWith('file://');
       const status = interceptedResponse.status();

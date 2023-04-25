@@ -14,7 +14,8 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 export default function createAggregateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('aggregate', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/150772
+  describe.skip('aggregate', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());

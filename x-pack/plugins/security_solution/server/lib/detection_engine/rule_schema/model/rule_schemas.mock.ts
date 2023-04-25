@@ -213,6 +213,7 @@ export const getRuleConfigMock = (type: string = 'rule-type'): SanitizedRuleConf
   consumer: 'sample consumer',
   notifyWhen: null,
   producer: 'sample producer',
+  revision: 0,
   ruleTypeId: `${type}-id`,
   ruleTypeName: type,
   muteAll: false,

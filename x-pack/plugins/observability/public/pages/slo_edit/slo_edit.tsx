@@ -16,6 +16,7 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import { SloEditForm } from './components/slo_edit_form';
+import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 
 export function SloEditPage() {
   const {
@@ -38,13 +39,13 @@ export function SloEditPage() {
     },
   ]);
 
-  const { slo, isLoading } = useFetchSloDetails(sloId || '');
+  const { slo, isInitialLoading } = useFetchSloDetails({ sloId });
 
   if (hasRightLicense === false) {
     navigateToUrl(basePath.prepend(paths.observability.slos));
   }
 
-  if (sloId && isLoading) {
+  if (sloId && isInitialLoading) {
     return null;
   }
 
@@ -58,7 +59,7 @@ export function SloEditPage() {
           : i18n.translate('xpack.observability.sloCreatePageTitle', {
               defaultMessage: 'Create new SLO',
             }),
-        rightSideItems: [],
+        rightSideItems: [<FeedbackButton />],
         bottomBorder: false,
       }}
       data-test-subj="slosEditPage"

@@ -12,6 +12,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { FleetStartContract, MessageSigningServiceInterface } from '@kbn/fleet-plugin/server';
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
@@ -61,6 +62,7 @@ export interface EndpointAppContextServiceStartContract {
   experimentalFeatures: ExperimentalFeatures;
   messageSigningService: MessageSigningServiceInterface | undefined;
   actionCreateService: ActionCreateService | undefined;
+  cloud: CloudSetup;
 }
 
 /**
@@ -92,6 +94,7 @@ export class EndpointAppContextService {
         logger,
         manifestManager,
         alerting,
+        cloud,
         licenseService,
         exceptionListsClient,
         featureUsageService,
@@ -106,7 +109,8 @@ export class EndpointAppContextService {
           this.setupDependencies.securitySolutionRequestContextFactory,
           alerting,
           licenseService,
-          exceptionListsClient
+          exceptionListsClient,
+          cloud
         )
       );
 
@@ -121,7 +125,8 @@ export class EndpointAppContextService {
           logger,
           licenseService,
           featureUsageService,
-          endpointMetadataService
+          endpointMetadataService,
+          cloud
         )
       );
 

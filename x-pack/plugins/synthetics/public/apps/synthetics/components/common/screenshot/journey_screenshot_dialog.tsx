@@ -27,6 +27,7 @@ import {
   EuiOutsideClickDetector,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import { SyntheticsSettingsContext } from '../../../contexts';
@@ -118,16 +119,16 @@ export const JourneyScreenshotDialog = ({
         }}
         onKeyDown={onKeyDown}
       >
-        <EuiModalBody>
+        <ModalBodyStyled css={{ display: 'flex' }}>
           <ScreenshotImage
             label={stepCountLabel}
             imgSrc={imgSrc}
-            isLoading={loading ?? false}
+            isLoading={!!loading}
             animateLoading={false}
             hasBorder={false}
             size={'full'}
           />
-        </EuiModalBody>
+        </ModalBodyStyled>
 
         <EuiModalFooter
           css={{
@@ -142,14 +143,14 @@ export const JourneyScreenshotDialog = ({
             // we don't want this to be captured by row click which leads to step list page
             evt.stopPropagation();
           }}
-          onKeyDown={(evt) => {
+          onKeyDown={(_evt) => {
             // Just to satisfy ESLint
           }}
         >
           {loading ? (
             <EuiProgress data-test-subj="screenshotImageLoadingProgress" size="xs" />
           ) : null}
-          <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexGroup alignItems="center" justifyContent="center" responsive={false}>
             <EuiFlexItem grow={true}>
               <EuiButtonEmpty
                 data-test-subj="screenshotImagePreviousButton"
@@ -165,7 +166,7 @@ export const JourneyScreenshotDialog = ({
                 {prevAriaLabel}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} css={{ flexBasis: 'fit-content' }}>
               <EuiText color={euiTheme.colors.text}>{stepCountLabel}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
@@ -205,6 +206,17 @@ export const JourneyScreenshotDialog = ({
     </EuiOutsideClickDetector>
   ) : null;
 };
+
+const ModalBodyStyled = euiStyled(EuiModalBody)`
+  &&& {
+    & > div {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 24px;
+    }
+  }
+`;
 
 export const getScreenshotUrl = ({
   basePath,

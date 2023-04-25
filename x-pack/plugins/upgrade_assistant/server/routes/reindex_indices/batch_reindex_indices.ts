@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 
 import { API_BASE_PATH } from '../../../common/constants';
-import { ReindexStatus } from '../../../common/types';
+import { REINDEX_OP_TYPE, ReindexStatus } from '../../../common/types';
 import { versionCheckHandlerWrapper } from '../../lib/es_version_precheck';
 import { ReindexWorker } from '../../lib/reindexing';
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
@@ -43,9 +43,12 @@ export function registerBatchReindexIndicesRoutes(
         elasticsearch: { client: esClient },
         savedObjects,
       } = await core;
-      const { client } = savedObjects;
+      const { getClient } = savedObjects;
       const callAsCurrentUser = esClient.asCurrentUser;
-      const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
+      const reindexActions = reindexActionsFactory(
+        getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
+        callAsCurrentUser
+      );
       try {
         const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);
         const { queue } = sortAndOrderReindexOperations(inProgressOps);
@@ -76,7 +79,7 @@ export function registerBatchReindexIndicesRoutes(
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       const {
-        savedObjects: { client: savedObjectsClient },
+        savedObjects: { getClient },
         elasticsearch: { client: esClient },
       } = await core;
       const { indexNames } = request.body;
@@ -87,7 +90,7 @@ export function registerBatchReindexIndicesRoutes(
       for (const indexName of indexNames) {
         try {
           const result = await reindexHandler({
-            savedObjects: savedObjectsClient,
+            savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
             dataClient: esClient,
             indexName,
             log,

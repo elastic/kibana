@@ -76,6 +76,18 @@ export const commandToRBACMap: Record<ConsoleResponseActionCommands, ResponseCon
     execute: 'writeExecuteOperations',
   });
 
-// 4 hrs in milliseconds
-// 4 * 60 * 60 * 1000
-export const DEFAULT_EXECUTE_ACTION_TIMEOUT = 14400000;
+export const RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP = Object.freeze<
+  Record<ResponseActionsApiCommandNames, ConsoleResponseActionCommands>
+>({
+  isolate: 'isolate',
+  unisolate: 'release',
+  execute: 'execute',
+  'get-file': 'get-file',
+  'running-processes': 'processes',
+  'kill-process': 'kill-process',
+  'suspend-process': 'suspend-process',
+});
+
+// 4 hrs in seconds
+// 4 * 60 * 60
+export const DEFAULT_EXECUTE_ACTION_TIMEOUT = 14400;

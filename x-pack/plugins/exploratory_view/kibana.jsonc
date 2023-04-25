@@ -17,22 +17,14 @@
       "files",
       "guidedOnboarding",
       "inspector",
-      "inspector",
-      "observability",
+      "lens",
+      "observabilityShared",
       "security",
       "share",
       "triggersActionsUi",
       "unifiedSearch"
     ],
-    "optionalPlugins": [
-      "discover",
-      "embeddable",
-      "home",
-      "lens",
-      "licensing",
-      "spaces",
-      "usageCollection"
-    ],
+    "optionalPlugins": ["discover", "embeddable", "home", "licensing", "spaces", "usageCollection"],
     "requiredBundles": [
       "data",
       "dataViews",
@@ -40,7 +32,6 @@
       "kibanaReact",
       "kibanaUtils",
       "lens",
-      "observability",
       "unifiedSearch",
       "visualizations"
     ],

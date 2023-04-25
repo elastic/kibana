@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
 
 import { ChartLegendItem } from './chart_legend_item';
 import { getEcsCompliantColor } from '../../data_quality_panel/tabs/helpers';
@@ -20,10 +18,9 @@ import { getCustomColor } from '../../data_quality_panel/tabs/custom_tab/helpers
 import { getIncompatibleColor } from '../../data_quality_panel/tabs/incompatible_tab/helpers';
 import type { PartitionedFieldMetadata } from '../../types';
 import * as i18n from '../../data_quality_panel/index_properties/translations';
+import { LegendContainer } from '../../data_quality_panel/tabs/styles';
 
-const ChartLegendFlexGroup = styled(EuiFlexGroup)`
-  width: 210px;
-`;
+const LEGEND_WIDTH = 200; // px
 
 interface Props {
   partitionedFieldMetadata: PartitionedFieldMetadata;
@@ -44,40 +41,34 @@ const ChartLegendComponent: React.FC<Props> = ({ partitionedFieldMetadata, setSe
   );
 
   return (
-    <ChartLegendFlexGroup direction="column" gutterSize="none">
+    <LegendContainer $width={LEGEND_WIDTH}>
       {partitionedFieldMetadata.incompatible.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <ChartLegendItem
-            color={getIncompatibleColor()}
-            count={partitionedFieldMetadata.incompatible.length}
-            onClick={showIncompatibleTab}
-            text={i18n.INCOMPATIBLE_FIELDS}
-          />
-        </EuiFlexItem>
+        <ChartLegendItem
+          color={getIncompatibleColor()}
+          count={partitionedFieldMetadata.incompatible.length}
+          onClick={showIncompatibleTab}
+          text={i18n.INCOMPATIBLE_FIELDS}
+        />
       )}
 
       {partitionedFieldMetadata.custom.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <ChartLegendItem
-            color={getCustomColor(partitionedFieldMetadata)}
-            count={partitionedFieldMetadata.custom.length}
-            onClick={showCustomTab}
-            text={i18n.CUSTOM_FIELDS}
-          />
-        </EuiFlexItem>
+        <ChartLegendItem
+          color={getCustomColor(partitionedFieldMetadata)}
+          count={partitionedFieldMetadata.custom.length}
+          onClick={showCustomTab}
+          text={i18n.CUSTOM_FIELDS}
+        />
       )}
 
       {partitionedFieldMetadata.ecsCompliant.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <ChartLegendItem
-            color={getEcsCompliantColor(partitionedFieldMetadata)}
-            count={partitionedFieldMetadata.ecsCompliant.length}
-            onClick={showEcsCompliantTab}
-            text={i18n.ECS_COMPLIANT_FIELDS}
-          />
-        </EuiFlexItem>
+        <ChartLegendItem
+          color={getEcsCompliantColor(partitionedFieldMetadata)}
+          count={partitionedFieldMetadata.ecsCompliant.length}
+          onClick={showEcsCompliantTab}
+          text={i18n.ECS_COMPLIANT_FIELDS}
+        />
       )}
-    </ChartLegendFlexGroup>
+    </LegendContainer>
   );
 };
 

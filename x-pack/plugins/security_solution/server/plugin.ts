@@ -28,6 +28,7 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
+import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
 import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
@@ -166,11 +167,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
     ruleExecutionLogService.registerEventLogProvider();
 
-    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
-      licensing: plugins.licensing,
-      osqueryCreateAction: plugins.osquery.osqueryCreateAction,
-    };
-
     const requestContextFactory = new RequestContextFactory({
       config,
       logger,
@@ -214,6 +210,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ml: plugins.ml,
       eventsTelemetry: this.telemetryEventsSender,
       version: pluginContext.env.packageInfo.version,
+      licensing: plugins.licensing,
     };
 
     const ruleDataServiceOptions = {
@@ -247,6 +244,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleDataClient,
       ruleExecutionLoggerFactory: ruleExecutionLogService.createClientForExecutors,
       version: pluginContext.env.packageInfo.version,
+    };
+
+    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
+      scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
+        endpointAppContextService: this.endpointAppContextService,
+        osqueryCreateAction: plugins.osquery.osqueryCreateAction,
+      }),
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -305,7 +309,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     registerLimitedConcurrencyRoutes(core);
     registerPolicyRoutes(router, this.endpointContext);
-    registerActionRoutes(router, this.endpointContext);
+    registerActionRoutes(
+      router,
+      this.endpointContext,
+      plugins.encryptedSavedObjects?.canEncrypt === true
+    );
 
     const ruleTypes = [
       LEGACY_NOTIFICATIONS_ID,
@@ -494,6 +502,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       manifestManager,
       registerIngestCallback,
       licenseService,
+      cloud: plugins.cloud,
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,

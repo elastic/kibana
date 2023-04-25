@@ -37,7 +37,7 @@ describe('StatusRuleExecutor', () => {
         getSpaceId: jest.fn().mockReturnValue('test-space'),
       },
     },
-    encryptedSavedObjects: mockEncryptedSO,
+    encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as UptimeServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
@@ -161,23 +161,23 @@ const testMonitors = [
       playwright_options: '',
       __ui: {
         script_source: { is_generated_script: false, file_name: '' },
-        is_zip_url_tls_enabled: false,
       },
       'url.port': null,
-      'source.zip_url.url': '',
-      'source.zip_url.folder': '',
-      'source.zip_url.proxy_url': '',
       playwright_text_assertion: '',
       urls: 'https://www.google.com',
       screenshots: 'on',
       'filter_journeys.match': '',
       'filter_journeys.tags': [],
       ignore_https_errors: false,
-      'throttling.is_enabled': true,
-      'throttling.download_speed': '5',
-      'throttling.upload_speed': '3',
-      'throttling.latency': '20',
-      'throttling.config': '5d/3u/20l',
+      throttling: {
+        id: 'custom',
+        label: 'Custom',
+        value: {
+          download: '5',
+          upload: '3',
+          latency: '20',
+        },
+      },
       'ssl.certificate_authorities': '',
       'ssl.certificate': '',
       'ssl.verification_mode': 'full',

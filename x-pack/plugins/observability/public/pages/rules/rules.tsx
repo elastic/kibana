@@ -32,6 +32,20 @@ export function RulesPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
 
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+        defaultMessage: 'Alerts',
+      }),
+      href: http.basePath.prepend('/app/observability/alerts'),
+    },
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+        defaultMessage: 'Rules',
+      }),
+    },
+  ]);
+
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
@@ -48,42 +62,48 @@ export function RulesPage() {
     useHashQuery: false,
   });
 
-  const { status, lastResponse } = urlStateStorage.get<{
-    status: RuleStatus[];
+  const { lastResponse, params, search, status, type } = urlStateStorage.get<{
     lastResponse: string[];
-  }>('_a') || { status: [], lastResponse: [] };
+    params: Record<string, string | number | object>;
+    search: string;
+    status: RuleStatus[];
+    type: string[];
+  }>('_a') || { lastResponse: [], params: {}, search: '', status: [], type: [] };
 
-  const [stateStatus, setStatus] = useState<RuleStatus[]>(status);
   const [stateLastResponse, setLastResponse] = useState<string[]>(lastResponse);
+  const [stateParams, setParams] = useState<Record<string, string | number | object>>(params);
+  const [stateSearch, setSearch] = useState<string>(search);
+  const [stateStatus, setStatus] = useState<RuleStatus[]>(status);
+  const [stateType, setType] = useState<string[]>(type);
+
   const [stateRefresh, setRefresh] = useState(new Date());
 
   const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
 
-  useBreadcrumbs([
-    {
-      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-        defaultMessage: 'Alerts',
-      }),
-      href: http.basePath.prepend('/app/observability/alerts'),
-    },
-    {
-      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
-        defaultMessage: 'Rules',
-      }),
-    },
-  ]);
-
   const handleStatusFilterChange = (newStatus: RuleStatus[]) => {
     setStatus(newStatus);
-    urlStateStorage.set('_a', { status: newStatus, lastResponse });
-    return { lastResponse: stateLastResponse || [], status: newStatus };
+    urlStateStorage.set('_a', { lastResponse, params, search, status: newStatus, type });
   };
 
   const handleLastRunOutcomeFilterChange = (newLastResponse: string[]) => {
     setRefresh(new Date());
     setLastResponse(newLastResponse);
-    urlStateStorage.set('_a', { status, lastResponse: newLastResponse });
-    return { lastResponse: newLastResponse, status: stateStatus || [] };
+    urlStateStorage.set('_a', { lastResponse: newLastResponse, params, search, status, type });
+  };
+
+  const handleTypeFilterChange = (newType: string[]) => {
+    setType(newType);
+    urlStateStorage.set('_a', { lastResponse, params, search, status, type: newType });
+  };
+
+  const handleSearchFilterChange = (newSearch: string) => {
+    setSearch(newSearch);
+    urlStateStorage.set('_a', { lastResponse, params, search: newSearch, status, type });
+  };
+
+  const handleRuleParamFilterChange = (newParams: Record<string, string | number | object>) => {
+    setParams(newParams);
+    urlStateStorage.set('_a', { lastResponse, params: newParams, search, status, type });
   };
 
   return (
@@ -130,8 +150,11 @@ export function RulesPage() {
             refresh={stateRefresh}
             ruleDetailsRoute="alerts/rules/:ruleId"
             rulesListKey="observability_rulesListColumns"
+            ruleParamFilter={stateParams}
             showActionFilter={false}
             statusFilter={stateStatus}
+            searchFilter={stateSearch}
+            typeFilter={stateType}
             visibleColumns={[
               'ruleName',
               'ruleExecutionStatusLastDate',
@@ -140,7 +163,10 @@ export function RulesPage() {
               'ruleExecutionState',
             ]}
             onLastRunOutcomeFilterChange={handleLastRunOutcomeFilterChange}
+            onRuleParamFilterChange={handleRuleParamFilterChange}
+            onSearchFilterChange={handleSearchFilterChange}
             onStatusFilterChange={handleStatusFilterChange}
+            onTypeFilterChange={handleTypeFilterChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
