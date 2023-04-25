@@ -156,10 +156,10 @@ const DeleteNoteButton = React.memo<{ noteId?: string | null; timelineId?: strin
       setConfirmingNoteId(null);
     }, [confirmingNoteId]);
 
-    const { isLoading } = useDeleteNote(noteToDelete);
+    const { isFetching } = useDeleteNote(noteToDelete);
     const disableDelete = useMemo(() => {
-      return isLoading || noteId == null;
-    }, [isLoading, noteId]);
+      return isFetching || noteId == null;
+    }, [isFetching, noteId]);
 
     return (
       <>
