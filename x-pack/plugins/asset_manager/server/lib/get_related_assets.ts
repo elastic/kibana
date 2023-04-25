@@ -90,7 +90,7 @@ export async function getRelatedAssets({
 
   debug('Performing Asset Query', '\n\n', JSON.stringify(dsl, null, 2));
 
-  const response = await esClient.search<{}>(dsl);
+  const response = await esClient.search(dsl);
   return response.hits.hits.map((hit) => hit._source as Asset);
 }
 
