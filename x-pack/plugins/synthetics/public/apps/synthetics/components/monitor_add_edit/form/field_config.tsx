@@ -1313,7 +1313,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Response body max bytes',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.responseBodyMaxBytes.helpText', {
-      defaultMessage: 'Control the maximum size of the stored body contents.',
+      defaultMessage: 'Controls the maximum size of the stored body contents.',
     }),
     hidden: (dependencies) => {
       const [responseBodyIndex] = dependencies || [];
