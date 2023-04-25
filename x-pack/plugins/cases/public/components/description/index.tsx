@@ -33,7 +33,7 @@ export interface DescriptionProps {
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
 }
 
-const DescriptionFooter = styled(EuiText)`
+const DescriptionFooter = styled(EuiFlexItem)`
   ${({ theme }) => `
     border-top: ${theme.eui.euiBorderThin};
     padding: ${theme.eui.euiSizeS};
