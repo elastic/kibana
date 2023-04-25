@@ -131,3 +131,46 @@ const fetchLastStreamedEndpointUpdate = async (
 
   return queryResult.hits?.hits[0]?._source;
 };
+
+/**
+ * Waits for an endpoint to have streamed data to ES and for that data to have made it to the
+ * Endpoint Details API (transform destination index)
+ * @param kbnClient
+ * @param endpointAgentId
+ * @param timeoutMs
+ */
+export const waitForEndpointToStreamData = async (
+  kbnClient: KbnClient,
+  endpointAgentId: string,
+  timeoutMs: number = 60000
+): Promise<HostInfo> => {
+  const started = new Date();
+  const hasTimedOut = (): boolean => {
+    const elapsedTime = Date.now() - started.getTime();
+    return elapsedTime > timeoutMs;
+  };
+  let found: HostInfo | undefined;
+
+  while (!found && !hasTimedOut()) {
+    found = await fetchEndpointMetadata(kbnClient, 'invalid-id-test').catch((error) => {
+      // Ignore `not found` (404) responses. Endpoint could be new and thus documents might not have
+      // been streamed yet.
+      if (error?.response?.status === 404) {
+        return undefined;
+      }
+
+      throw error;
+    });
+
+    if (!found) {
+      // sleep and check again
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+
+  if (!found) {
+    throw new Error(`Timed out waiting for Endpoint id [${endpointAgentId}] to stream data to ES`);
+  }
+
+  return found;
+};
