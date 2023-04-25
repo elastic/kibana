@@ -19,7 +19,18 @@ export const rotateKeyPairHandler: FleetRequestHandler<
   undefined
 > = async (_, __, response) => {
   try {
-    await appContextService.getMessageSigningService()?.rotateKeyPair();
+    const rotateKeyPairResponse = await appContextService
+      .getMessageSigningService()
+      ?.rotateKeyPair();
+
+    if (!rotateKeyPairResponse) {
+      return response.customError({
+        statusCode: 500,
+        body: {
+          message: 'Failed to rotate key pair!',
+        },
+      });
+    }
     return response.ok({
       body: {
         message: 'Key pair rotated successfully.',
