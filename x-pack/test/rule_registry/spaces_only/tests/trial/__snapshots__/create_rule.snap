@@ -70,6 +70,9 @@ Object {
   "processor.event": Array [
     "transaction",
   ],
+  "service.environment": Array [
+    "ENVIRONMENT_NOT_DEFINED",
+  ],
   "service.name": Array [
     "opbeans-go",
   ],
@@ -149,6 +152,9 @@ Object {
   ],
   "processor.event": Array [
     "transaction",
+  ],
+  "service.environment": Array [
+    "ENVIRONMENT_NOT_DEFINED",
   ],
   "service.name": Array [
     "opbeans-go",
