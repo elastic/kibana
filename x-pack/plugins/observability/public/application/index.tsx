@@ -128,6 +128,11 @@ export const renderApp = ({
     element
   );
   return () => {
+    // This needs to be present to fix https://github.com/elastic/kibana/issues/155704
+    // as the Overview page renders the UX Section component. That component renders a Lens embeddable
+    // via the ExploratoryView app, which uses search sessions. Therefore on unmounting we need to clear
+    // these sessions.
+    plugins.data.search.session.clear();
     ReactDOM.unmountComponentAtNode(element);
   };
 };
