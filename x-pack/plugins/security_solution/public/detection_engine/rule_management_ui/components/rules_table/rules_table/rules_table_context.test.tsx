@@ -190,8 +190,8 @@ describe('RulesTableContextProvider', () => {
             { id: '2', name: 'rule 2' },
           ] as Rule[],
           rulesSnoozeSettings: [
-            { id: '1', mute_all: true, snooze_schedule: [] },
-            { id: '2', mute_all: false, snooze_schedule: [] },
+            { id: '1', muteAll: true, snoozeSchedule: [] },
+            { id: '2', muteAll: false, snoozeSchedule: [] },
           ],
         });
 
@@ -216,21 +216,21 @@ describe('RulesTableContextProvider', () => {
             { id: '2', name: 'rule 2' },
           ] as Rule[],
           rulesSnoozeSettings: [
-            { id: '1', mute_all: true, snooze_schedule: [] },
-            { id: '2', mute_all: false, snooze_schedule: [] },
+            { id: '1', muteAll: true, snoozeSchedule: [] },
+            { id: '2', muteAll: false, snoozeSchedule: [] },
           ],
         });
 
         expect(state.rulesSnoozeSettings.data).toEqual({
           '1': {
             id: '1',
-            mute_all: true,
-            snooze_schedule: [],
+            muteAll: true,
+            snoozeSchedule: [],
           },
           '2': {
             id: '2',
-            mute_all: false,
-            snooze_schedule: [],
+            muteAll: false,
+            snoozeSchedule: [],
           },
         });
       });

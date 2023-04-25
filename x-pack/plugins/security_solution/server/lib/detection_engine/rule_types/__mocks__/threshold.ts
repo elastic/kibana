@@ -13,6 +13,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_NAMESPACE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_PRODUCER,
@@ -125,6 +126,7 @@ export const sampleThresholdAlert = {
       interval: '5m',
       exceptions_list: getListArrayMock(),
     }) as TypeOfFieldMap<RulesFieldMap>),
+    [ALERT_URL]: 'http://example.com/docID',
     'kibana.alert.depth': 1,
   },
 };
