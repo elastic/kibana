@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createInventoryViewsServiceStartMock } from './services/inventory_views/inventory_views_service.mock';
 import {
   createLogViewsServiceSetupMock,
   createLogViewsServiceStartMock,
@@ -23,6 +24,7 @@ const createInfraSetupMock = () => {
 const createInfraStartMock = () => {
   const infraStartMock: jest.Mocked<InfraPluginStart> = {
     getMetricIndices: jest.fn(),
+    inventoryViews: createInventoryViewsServiceStartMock(),
     logViews: createLogViewsServiceStartMock(),
   };
   return infraStartMock;

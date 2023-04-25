@@ -28,7 +28,7 @@ const HOST_ICON = 'storage';
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
  */
 export const EntitiesOverview: React.FC = () => {
-  const { eventId, getFieldsData, indexName } = useRightPanelContext();
+  const { eventId, getFieldsData, indexName, scopeId } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
   const hostName = getField(getFieldsData('host.name'));
   const userName = getField(getFieldsData('user.name'));
@@ -40,9 +40,10 @@ export const EntitiesOverview: React.FC = () => {
       params: {
         id: eventId,
         indexName,
+        scopeId,
       },
     });
-  }, [eventId, openLeftPanel, indexName]);
+  }, [eventId, openLeftPanel, indexName, scopeId]);
 
   if (!eventId || (!userName && !hostName)) {
     return null;

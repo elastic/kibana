@@ -147,3 +147,17 @@ export const ALERT_SUPPRESSION_PER_RULE_EXECUTION = i18n.translate(
     defaultMessage: 'One rule execution',
   }
 );
+
+export const ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionSuppressOnMissingFieldsDescription',
+  {
+    defaultMessage: 'Suppress on missing field value',
+  }
+);
+
+export const ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionDoNotSuppressOnMissingFieldsDescription',
+  {
+    defaultMessage: 'Do not suppress',
+  }
+);

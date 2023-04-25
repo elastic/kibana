@@ -21,6 +21,7 @@ import styled from 'styled-components';
 
 import { EMPTY_STAT, getIlmPhaseDescription, getIncompatibleStatColor } from '../../helpers';
 import { INCOMPATIBLE_INDEX_TOOL_TIP } from '../stat_label/translations';
+import { INDEX_SIZE_TOOLTIP } from '../../translations';
 import * as i18n from './translations';
 import type { IlmPhase } from '../../types';
 
@@ -39,6 +40,7 @@ export interface IndexSummaryTableItem {
   ilmPhase: IlmPhase | undefined;
   pattern: string;
   patternDocsCount: number;
+  sizeInBytes: number;
 }
 
 export const getResultToolTip = (incompatible: number | undefined): string => {
@@ -83,13 +85,27 @@ export const getDocsCountPercent = ({
       })
     : '';
 
+export const getToggleButtonId = ({
+  indexName,
+  isExpanded,
+  pattern,
+}: {
+  indexName: string;
+  isExpanded: boolean;
+  pattern: string;
+}): string => (isExpanded ? `collapse${indexName}${pattern}` : `expand${indexName}${pattern}`);
+
 export const getSummaryTableColumns = ({
+  formatBytes,
   formatNumber,
   itemIdToExpandedRowMap,
+  pattern,
   toggleExpanded,
 }: {
+  formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   itemIdToExpandedRowMap: Record<string, React.ReactNode>;
+  pattern: string;
   toggleExpanded: (indexName: string) => void;
 }): Array<EuiBasicTableColumn<IndexSummaryTableItem>> => [
   {
@@ -103,6 +119,11 @@ export const getSummaryTableColumns = ({
     render: ({ indexName }: IndexSummaryTableItem) => (
       <EuiButtonIcon
         aria-label={itemIdToExpandedRowMap[indexName] ? i18n.COLLAPSE : i18n.EXPAND}
+        data-toggle-button-id={getToggleButtonId({
+          indexName,
+          isExpanded: itemIdToExpandedRowMap[indexName] != null,
+          pattern,
+        })}
         onClick={() => toggleExpanded(indexName)}
         iconType={itemIdToExpandedRowMap[indexName] ? 'arrowDown' : 'arrowRight'}
       />
@@ -115,11 +136,15 @@ export const getSummaryTableColumns = ({
     render: (_, { incompatible }) =>
       incompatible != null ? (
         <EuiToolTip content={getResultToolTip(incompatible)}>
-          <EuiIcon color={getResultIconColor(incompatible)} type={getResultIcon(incompatible)} />
+          <EuiIcon
+            data-test-subj="resultIcon"
+            color={getResultIconColor(incompatible)}
+            type={getResultIcon(incompatible)}
+          />
         </EuiToolTip>
       ) : (
         <EuiToolTip content={getResultToolTip(incompatible)}>
-          <span>{EMPTY_STAT}</span>
+          <span data-test-subj="incompatiblePlaceholder">{EMPTY_STAT}</span>
         </EuiToolTip>
       ),
     sortable: true,
@@ -129,9 +154,11 @@ export const getSummaryTableColumns = ({
   {
     field: 'indexName',
     name: i18n.INDEX,
-    render: (_, { indexName, pattern }) => (
+    render: (_, { indexName }) => (
       <EuiToolTip content={i18n.INDEX_TOOL_TIP(pattern)}>
-        <span aria-roledescription={i18n.INDEX_NAME_LABEL}>{indexName}</span>
+        <span aria-roledescription={i18n.INDEX_NAME_LABEL} data-test-subj="indexName">
+          {indexName}
+        </span>
       </EuiToolTip>
     ),
     sortable: true,
@@ -144,6 +171,7 @@ export const getSummaryTableColumns = ({
     render: (_, { docsCount, patternDocsCount }) => (
       <ProgressContainer>
         <EuiProgress
+          data-test-subj="docsCount"
           label={formatNumber(docsCount)}
           max={patternDocsCount}
           size="m"
@@ -161,6 +189,7 @@ export const getSummaryTableColumns = ({
     render: (_, { incompatible, indexName }) => (
       <EuiToolTip content={INCOMPATIBLE_INDEX_TOOL_TIP(indexName)}>
         <EuiStat
+          data-test-subj="incompatibleStat"
           description={EMPTY_DESCRIPTION}
           reverse
           title={incompatible ?? EMPTY_STAT}
@@ -169,7 +198,7 @@ export const getSummaryTableColumns = ({
         />
       </EuiToolTip>
     ),
-    sortable: false,
+    sortable: true,
     truncateText: false,
   },
   {
@@ -178,10 +207,23 @@ export const getSummaryTableColumns = ({
     render: (_, { ilmPhase }) =>
       ilmPhase != null ? (
         <EuiToolTip content={getIlmPhaseDescription(ilmPhase)}>
-          <EuiBadge color="hollow">{ilmPhase}</EuiBadge>
+          <EuiBadge color="hollow" data-test-subj="ilmPhase">
+            {ilmPhase}
+          </EuiBadge>
         </EuiToolTip>
       ) : null,
-    sortable: false,
+    sortable: true,
+    truncateText: false,
+  },
+  {
+    field: 'sizeInBytes',
+    name: i18n.SIZE,
+    render: (_, { sizeInBytes }) => (
+      <EuiToolTip content={INDEX_SIZE_TOOLTIP}>
+        <span data-test-subj="sizeInBytes">{formatBytes(sizeInBytes)}</span>
+      </EuiToolTip>
+    ),
+    sortable: true,
     truncateText: false,
   },
 ];

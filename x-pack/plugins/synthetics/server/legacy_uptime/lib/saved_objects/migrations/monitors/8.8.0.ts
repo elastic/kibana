@@ -6,23 +6,31 @@
  */
 import { omit } from 'lodash';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { LegacyConfigKey } from '../../../../../../common/constants/monitor_management';
 import {
-  ConfigKey,
-  SyntheticsMonitorWithSecrets,
-  MonitorFields,
   BrowserFields,
+  ConfigKey,
+  MonitorFields,
   ScheduleUnit,
+  SyntheticsMonitorWithSecrets,
+  ThrottlingConfig,
 } from '../../../../../../common/runtime_types';
-import { ALLOWED_SCHEDULES_IN_MINUTES } from '../../../../../../common/constants/monitor_defaults';
+import {
+  ALLOWED_SCHEDULES_IN_MINUTES,
+  CUSTOM_LABEL,
+  PROFILE_VALUES,
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '../../../../../../common/constants/monitor_defaults';
 import {
   LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
   SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
 } from '../../synthetics_monitor';
 import { validateMonitor } from '../../../../../routes/monitor_cruds/monitor_validation';
 import {
-  normalizeMonitorSecretAttributes,
   formatSecrets,
+  normalizeMonitorSecretAttributes,
 } from '../../../../../synthetics_service/utils/secrets';
 
 export const migration880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => {
@@ -61,6 +69,8 @@ export const migration880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
         },
       };
       if (migrated.attributes.type === 'browser') {
+        migrated = updateThrottlingFields(migrated, logger);
+
         try {
           const normalizedMonitorAttributes = normalizeMonitorSecretAttributes(migrated.attributes);
           migrated = {
@@ -95,7 +105,7 @@ const getNearestSupportedSchedule = (currentSchedule: string): string => {
 
     return closest;
   } catch {
-    return ALLOWED_SCHEDULES_IN_MINUTES[0];
+    return '10';
   }
 };
 
@@ -117,4 +127,104 @@ const omitZipUrlFields = (fields: BrowserFields) => {
   }
 
   return formatSecrets(validationResult.decodedMonitor);
+};
+
+const updateThrottlingFields = (
+  doc: SavedObjectUnsanitizedDoc<
+    SyntheticsMonitorWithSecrets &
+      Partial<{
+        [LegacyConfigKey.THROTTLING_CONFIG]: string;
+        [LegacyConfigKey.IS_THROTTLING_ENABLED]: boolean;
+        [LegacyConfigKey.DOWNLOAD_SPEED]: string;
+        [LegacyConfigKey.UPLOAD_SPEED]: string;
+        [LegacyConfigKey.LATENCY]: string;
+        [ConfigKey.THROTTLING_CONFIG]: ThrottlingConfig;
+      }>
+  >,
+  logger: SavedObjectMigrationContext
+) => {
+  try {
+    const { attributes } = doc;
+
+    const migrated = {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        [ConfigKey.CONFIG_HASH]: '',
+      },
+    };
+
+    const isThrottlingEnabled = attributes[LegacyConfigKey.IS_THROTTLING_ENABLED];
+    if (isThrottlingEnabled) {
+      const defaultProfileValue = PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT].value!;
+
+      const download =
+        String(attributes[LegacyConfigKey.DOWNLOAD_SPEED]) || defaultProfileValue.download;
+      const upload = String(attributes[LegacyConfigKey.UPLOAD_SPEED]) || defaultProfileValue.upload;
+      const latency = String(attributes[LegacyConfigKey.LATENCY]) || defaultProfileValue.latency;
+
+      migrated.attributes[ConfigKey.THROTTLING_CONFIG] = getMatchingThrottlingConfig(
+        download,
+        upload,
+        latency
+      );
+    } else {
+      migrated.attributes[ConfigKey.THROTTLING_CONFIG] =
+        PROFILES_MAP[PROFILE_VALUES_ENUM.NO_THROTTLING];
+    }
+
+    // filter out legacy throttling fields
+    return {
+      ...migrated,
+      attributes: omit(migrated.attributes, [
+        LegacyConfigKey.THROTTLING_CONFIG,
+        LegacyConfigKey.IS_THROTTLING_ENABLED,
+        LegacyConfigKey.DOWNLOAD_SPEED,
+        LegacyConfigKey.UPLOAD_SPEED,
+        LegacyConfigKey.LATENCY,
+      ]),
+    };
+  } catch (e) {
+    logger.log.warn(
+      `Failed to migrate throttling fields from legacy Synthetics monitor: ${e.message}`
+    );
+    const { attributes } = doc;
+
+    attributes[ConfigKey.THROTTLING_CONFIG] = PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT];
+
+    return {
+      ...doc,
+      attributes: omit(attributes, [
+        LegacyConfigKey.THROTTLING_CONFIG,
+        LegacyConfigKey.IS_THROTTLING_ENABLED,
+        LegacyConfigKey.DOWNLOAD_SPEED,
+        LegacyConfigKey.UPLOAD_SPEED,
+        LegacyConfigKey.LATENCY,
+      ]),
+    };
+  }
+};
+
+const getMatchingThrottlingConfig = (download: string, upload: string, latency: string) => {
+  const matchedProfile = PROFILE_VALUES.find(({ value }) => {
+    return (
+      Number(value?.download) === Number(download) &&
+      Number(value?.upload) === Number(upload) &&
+      Number(value?.latency) === Number(latency)
+    );
+  });
+
+  if (matchedProfile) {
+    return matchedProfile;
+  } else {
+    return {
+      id: PROFILE_VALUES_ENUM.CUSTOM,
+      label: CUSTOM_LABEL,
+      value: {
+        download: String(download),
+        upload: String(upload),
+        latency: String(latency),
+      },
+    };
+  }
 };

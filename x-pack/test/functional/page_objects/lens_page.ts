@@ -637,9 +637,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return await testSubjects.isEuiSwitchChecked('indexPattern-nesting-switch');
     },
     /**
+     * Cen remove the dimension matching a specific test subject?
+     */
+    async canRemoveDimension(dimensionTestSubj: string) {
+      await testSubjects.moveMouseTo(`${dimensionTestSubj} > indexPattern-dimension-remove`);
+      return await testSubjects.isDisplayed(`${dimensionTestSubj} > indexPattern-dimension-remove`);
+    },
+    /**
      * Removes the dimension matching a specific test subject
      */
     async removeDimension(dimensionTestSubj: string) {
+      await testSubjects.moveMouseTo(`${dimensionTestSubj} > indexPattern-dimension-remove`);
       await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimension-remove`);
     },
     /**
@@ -1051,6 +1059,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
       const el = await this.getDatatableCell(rowIndex, colIndex);
+      const styleString = await el.getAttribute('style');
+      return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
+        const [prop, value] = cssLine.split(':');
+        if (prop && value) {
+          memo[prop.trim()] = value.trim();
+        }
+        return memo;
+      }, {});
+    },
+
+    async getDatatableCellSpanStyle(rowIndex = 0, colIndex = 0) {
+      const el = await (await this.getDatatableCell(rowIndex, colIndex)).findByCssSelector('span');
       const styleString = await el.getAttribute('style');
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
@@ -1687,7 +1707,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     ) {
       const groupCapitalized = `${group[0].toUpperCase()}${group.slice(1).toLowerCase()}`;
       const allFieldsForType = await find.allByCssSelector(
-        `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .unifiedFieldItemButton--${type}`
+        `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .unifiedFieldListItemButton--${type}`
       );
       // map to testSubjId
       return Promise.all(allFieldsForType.map((el) => el.getAttribute('data-test-subj')));

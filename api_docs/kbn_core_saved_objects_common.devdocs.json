@@ -1064,8 +1064,8 @@
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
+            "plugin": "@kbn/core-saved-objects-api-browser",
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-api-server",
@@ -1078,6 +1078,14 @@
           {
             "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-api-server",
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -2845,30 +2853,6 @@
             "path": "src/plugins/visualizations/public/utils/saved_visualization_references/timeseries_references.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts"
-          },
-          {
             "plugin": "controls",
             "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
           },
@@ -2915,6 +2899,30 @@
           {
             "plugin": "controls",
             "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts"
           },
           {
             "plugin": "savedObjectsTagging",
@@ -3238,19 +3246,27 @@
           },
           {
             "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/types.ts"
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/line_chart.ts"
           },
           {
             "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/types.ts"
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/line_chart.ts"
           },
           {
             "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/load.ts"
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/metric_chart.ts"
           },
           {
             "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/load.ts"
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/visualization_types/metric_chart.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/types.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/types.ts"
           },
           {
             "plugin": "cases",

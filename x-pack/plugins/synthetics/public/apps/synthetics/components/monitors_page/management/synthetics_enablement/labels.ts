@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SYNTHETICS_ENABLE_FAILURE = i18n.translate(
-  'xpack.synthetics.monitorManagement.syntheticsEnabledFailure',
-  {
-    defaultMessage: 'Monitor Management was not able to be enabled. Please contact support.',
-  }
-);
-
-export const SYNTHETICS_DISABLE_FAILURE = i18n.translate(
-  'xpack.synthetics.monitorManagement.syntheticsDisabledFailure',
-  {
-    defaultMessage: 'Monitor Management was not able to be disabled. Please contact support.',
-  }
-);
-
 export const SYNTHETICS_ENABLE_SUCCESS = i18n.translate(
   'xpack.synthetics.monitorManagement.syntheticsEnableSuccess',
   {
@@ -42,10 +28,10 @@ export const MONITOR_MANAGEMENT_ENABLEMENT_LABEL = i18n.translate(
   }
 );
 
-export const MONITOR_MANAGEMENT_DISABLED_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.emptyState.enablement.disabled.title',
+export const SYNTHETICS_APP_DISABLED_LABEL = i18n.translate(
+  'xpack.synthetics.emptyState.enablement.disabled.title',
   {
-    defaultMessage: 'Monitor Management is disabled',
+    defaultMessage: 'Synthetics App is disabled',
   }
 );
 
@@ -58,10 +44,10 @@ export const MONITOR_MANAGEMENT_ENABLEMENT_MESSAGE = i18n.translate(
 );
 
 export const MONITOR_MANAGEMENT_DISABLED_MESSAGE = i18n.translate(
-  'xpack.synthetics.monitorManagement.emptyState.enablement.disabledDescription',
+  'xpack.synthetics.emptyState.enablement.disabledDescription',
   {
     defaultMessage:
-      'Monitor Management is currently disabled. Monitor Management allows you to run lightweight and real-browser monitors from hosted testing locations around the world. To enable Monitor Management, please contact an administrator.',
+      'Synthetics App is currently disabled. Synthetics App allows you to run lightweight and real-browser monitors from hosted testing locations around the world. To enable Synthetics App, please contact an administrator.',
   }
 );
 

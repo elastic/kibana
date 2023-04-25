@@ -213,11 +213,7 @@ export class UptimePlugin
       id: 'synthetics',
       euiIconType: 'logoObservability',
       order: 8400,
-      title:
-        PLUGIN.SYNTHETICS +
-        i18n.translate('xpack.synthetics.overview.headingBeta', {
-          defaultMessage: ' (beta)',
-        }),
+      title: PLUGIN.SYNTHETICS,
       category: DEFAULT_APP_CATEGORIES.observability,
       keywords: appKeywords,
       deepLinks: [],
@@ -313,7 +309,6 @@ function registerUptimeRoutesWithNavigation(
                   path: OVERVIEW_ROUTE,
                   matchFullPath: false,
                   ignoreTrailingSlash: true,
-                  isBetaFeature: true,
                 },
               ],
             },

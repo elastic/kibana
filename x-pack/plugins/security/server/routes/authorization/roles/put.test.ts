@@ -325,6 +325,7 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_indices: [],
                 run_as: [],
                 applications: [],
               },
@@ -358,6 +359,7 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_indices: [],
                 run_as: [],
                 applications: [
                   {
@@ -400,6 +402,7 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_indices: [],
                 run_as: [],
                 applications: [
                   {
@@ -440,6 +443,7 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_indices: [],
                 run_as: [],
                 applications: [
                   {
@@ -535,6 +539,7 @@ describe('PUT role', () => {
                     query: `{ "match": { "title": "foo" } }`,
                   },
                 ],
+                remote_indices: [],
                 metadata: { foo: 'test-metadata' },
                 run_as: ['test-run-as-1', 'test-run-as-2'],
               },
@@ -656,6 +661,7 @@ describe('PUT role', () => {
                     query: `{ "match": { "title": "foo" } }`,
                   },
                 ],
+                remote_indices: [],
                 metadata: { foo: 'test-metadata' },
                 run_as: ['test-run-as-1', 'test-run-as-2'],
               },
@@ -759,6 +765,7 @@ describe('PUT role', () => {
                     privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
                   },
                 ],
+                remote_indices: [],
                 metadata: { foo: 'test-metadata' },
                 run_as: ['test-run-as-1', 'test-run-as-2'],
               },
@@ -796,6 +803,7 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_indices: [],
                 run_as: [],
                 applications: [
                   {
@@ -840,6 +848,7 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_indices: [],
                 run_as: [],
                 applications: [
                   {
@@ -884,6 +893,7 @@ describe('PUT role', () => {
               body: {
                 cluster: [],
                 indices: [],
+                remote_indices: [],
                 run_as: [],
                 applications: [
                   {
