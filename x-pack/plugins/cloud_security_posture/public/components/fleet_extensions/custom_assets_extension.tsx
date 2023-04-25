@@ -9,6 +9,7 @@ import React from 'react';
 import { type CustomAssetsAccordionProps, CustomAssetsAccordion } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
+import { EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { benchmarksNavigation, cloudPosturePages } from '../../common/navigation/constants';
 
@@ -60,7 +61,23 @@ export const CspCustomAssetsExtension = () => {
     },
   ];
 
-  return <CustomAssetsAccordion views={isCNVM ? viewsCNVM : views} initialIsOpen />;
+  return (
+    <>
+      {search.length === 0 ? (
+        <>
+          <CustomAssetsAccordion views={views} initialIsOpen CSPDropdown="Cloud Posture" />
+          <EuiSpacer size="m" />
+          <CustomAssetsAccordion
+            views={viewsCNVM}
+            initialIsOpen
+            CSPDropdown="Vulnerability Management"
+          />
+        </>
+      ) : (
+        <CustomAssetsAccordion views={isCNVM ? viewsCNVM : views} initialIsOpen />
+      )}
+    </>
+  );
 };
 // eslint-disable-next-line import/no-default-export
 export { CspCustomAssetsExtension as default };
