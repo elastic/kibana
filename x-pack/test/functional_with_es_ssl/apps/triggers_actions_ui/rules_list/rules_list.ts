@@ -722,7 +722,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('ruleSnoozeIndefiniteApply');
 
       await find.byCssSelector(
-        '[data-test-subj="rulesListNotifyBadge-snoozedIndefinitely"]:not(.euiButton-isDisabled)'
+        '[data-test-subj="rulesListNotifyBadge-unsnoozed"]:not(.euiButton-isDisabled)'
       );
       await testSubjects.existOrFail('rulesListNotifyBadge-snoozedIndefinitely');
     });
@@ -745,7 +745,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('ruleSnoozeCancel');
 
       await find.byCssSelector(
-        '[data-test-subj="rulesListNotifyBadge-unsnoozed"]:not(.euiButton-isDisabled)'
+        '[data-test-subj="rulesListNotifyBadge-snoozed"]:not(.euiButton-isDisabled)'
       );
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
