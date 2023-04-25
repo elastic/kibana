@@ -43,7 +43,6 @@ import { DeleteEngineModal } from './delete_engine_modal';
 import { EngineListIndicesFlyout } from './engines_list_flyout';
 import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 import { EnginesListLogic } from './engines_list_logic';
-import { OnlyFalseAllowed } from '@kbn/securitysolution-io-ts-types';
 
 interface CreateEngineButtonProps {
   disabled: boolean;

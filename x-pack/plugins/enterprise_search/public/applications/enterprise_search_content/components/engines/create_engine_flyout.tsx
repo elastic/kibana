@@ -130,12 +130,10 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow>
             <EuiCallOut title="Technical Preview feature" color="warning" iconType="beaker">
-              <p>
-                This functionality is in technical preview and may be changed or removed completely
-                in a future release. Elastic will take a best effort approach to fix any issues, but
-                features in technical preview are not subject to the support SLA of official GA
-                features.
-              </p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.engines.createEngine.technicalPreviewCallOut.title"
+                defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+              />
             </EuiCallOut>
           </EuiFlexItem>
           <EuiFlexItem grow>
