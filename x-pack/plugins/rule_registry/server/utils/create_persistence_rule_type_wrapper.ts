@@ -188,7 +188,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                         name: options.rule.name,
                         id: options.rule.id,
                       }),
-                      results_link: alert[ALERT_URL],
+                      results_link: (alert as any)[ALERT_URL],
                       alerts: [alert],
                     })
                 );
@@ -376,7 +376,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                         name: options.rule.name,
                         id: options.rule.id,
                       }),
-                      results_link: alert[ALERT_URL],
+                      results_link: (alert as any)[ALERT_URL],
                       alerts: [alert],
                     })
                 );
