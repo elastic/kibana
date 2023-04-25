@@ -25,25 +25,12 @@ import './header_logo.scss';
 import { NavigationBucket } from './navigation_bucket';
 
 export const Navigation = (props: NavigationProps) => {
-  // const { euiTheme } = useEuiTheme();
-  // const { fontSize: navSectionFontSize } = useEuiFontSize('m');
-  // const { fontSize: navItemFontSize } = useEuiFontSize('s');
-
-  const {
-    loadingCount,
-    activeNavItemId,
-    ...services
-  } = useNavigation();
+  const { loadingCount, activeNavItemId, ...services } = useNavigation();
   const { euiTheme } = useEuiTheme();
 
   const activeNav = activeNavItemId ?? props.activeNavItemId;
 
-  const nav = new NavigationModel(
-    services,
-    props.platformConfig,
-    props.solutions,
-    activeNav
-  );
+  const nav = new NavigationModel(services, props.platformConfig, props.solutions, activeNav);
 
   const solutions = nav.getSolutions();
   const { analytics, ml, devTools, management } = nav.getPlatform();
