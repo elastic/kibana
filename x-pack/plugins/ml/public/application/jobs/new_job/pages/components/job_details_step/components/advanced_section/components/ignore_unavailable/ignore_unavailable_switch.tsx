@@ -28,7 +28,7 @@ export const IgnoreUnavailableSwitch: FC = () => {
   return (
     <Description>
       <EuiSwitch
-        name="switch"
+        name="ignoreUnavailableSwitch"
         checked={ignoreUnavailable}
         onChange={toggleIgnoreUnavailable}
         data-test-subj="mlJobWizardSwitchIgnoreUnavailableIndex"
