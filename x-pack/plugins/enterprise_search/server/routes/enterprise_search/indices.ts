@@ -1028,13 +1028,7 @@ export function registerIndexRoutes({
         : undefined;
 
       try {
-        const deployResult = await startMlModelDownload(
-          modelName,
-          client,
-          mlClient,
-          trainedModelsProvider,
-          savedObjectService
-        );
+        const deployResult = await startMlModelDownload(modelName, mlClient, trainedModelsProvider);
 
         return response.ok({
           body: deployResult,
