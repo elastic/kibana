@@ -91,6 +91,7 @@ export interface SavedObjectsImportFailure {
    * If `overwrite` is specified, an attempt was made to overwrite an existing object.
    */
   overwrite?: boolean;
+  managed?: boolean;
   error:
     | SavedObjectsImportConflictError
     | SavedObjectsImportAmbiguousConflictError
