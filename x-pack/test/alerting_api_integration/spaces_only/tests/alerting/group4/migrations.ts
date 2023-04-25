@@ -674,7 +674,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     it('8.8 adds frequency to the actions for security solution', async () => {
       const response = await es.get<{ alert: RawRule }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:8990af61-c09a-11ec-9164-4bfd6fc32c43',
         },
         { meta: true }
