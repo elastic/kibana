@@ -170,6 +170,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-java');
         expect(resp.hits.hits[0]._source).property('service.environment', 'production');
         expect(resp.hits.hits[0]._source).property('transaction.name', 'tx-java');
+        expect(resp.hits.hits[0]._source).property(
+          'error.grouping_key',
+          '2cb494454edc437679309dc190d692368ae7da490f45aff291fb6f7989437d4a'
+        );
       });
 
       it('shows the correct alert count for each service on service inventory', async () => {
