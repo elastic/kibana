@@ -101,8 +101,8 @@ export const OverviewPage: React.FC = () => {
 
   return (
     <>
-      <AlertingCallout />
       <DisabledCallout total={absoluteTotal} />
+      <AlertingCallout />
       <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <SearchField />

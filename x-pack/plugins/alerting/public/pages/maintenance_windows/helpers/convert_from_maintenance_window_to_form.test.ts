@@ -34,6 +34,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       title,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
+      timezone: ['UTC'],
       recurring: false,
     });
   });
@@ -55,6 +56,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       title,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
+      timezone: ['UTC'],
       recurring: true,
       recurringSchedule: {
         byweekday: { 1: false, 2: false, 3: true, 4: false, 5: false, 6: false, 7: false },
@@ -85,6 +87,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       title,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
+      timezone: ['UTC'],
       recurring: true,
       recurringSchedule: {
         byweekday: { 1: false, 2: false, 3: true, 4: false, 5: false, 6: false, 7: false },
@@ -114,6 +117,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       title,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
+      timezone: ['UTC'],
       recurring: true,
       recurringSchedule: {
         byweekday: { 1: false, 2: false, 3: true, 4: false, 5: false, 6: false, 7: false },
@@ -142,6 +146,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       title,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
+      timezone: ['UTC'],
       recurring: true,
       recurringSchedule: {
         ends: 'never',
@@ -169,6 +174,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       title,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
+      timezone: ['UTC'],
       recurring: true,
       recurringSchedule: {
         ends: 'never',
@@ -188,7 +194,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         tzid: 'UTC',
         freq: RRuleFrequency.YEARLY,
         interval: 1,
-        bymonth: [2],
+        bymonth: [3],
         bymonthday: [22],
       },
     });
@@ -197,6 +203,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       title,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
+      timezone: ['UTC'],
       recurring: true,
       recurringSchedule: {
         ends: 'never',
@@ -222,6 +229,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       title,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
+      timezone: ['UTC'],
       recurring: true,
       recurringSchedule: {
         customFrequency: Frequency.DAILY,
@@ -249,6 +257,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       title,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
+      timezone: ['UTC'],
       recurring: true,
       recurringSchedule: {
         byweekday: { 1: false, 2: false, 3: true, 4: true, 5: false, 6: false, 7: false },
@@ -277,6 +286,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       title,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
+      timezone: ['UTC'],
       recurring: true,
       recurringSchedule: {
         bymonth: 'day',
@@ -297,7 +307,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
         tzid: 'UTC',
         freq: RRuleFrequency.YEARLY,
         interval: 3,
-        bymonth: [2],
+        bymonth: [3],
         bymonthday: [22],
       },
     });
@@ -306,6 +316,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       title,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
+      timezone: ['UTC'],
       recurring: true,
       recurringSchedule: {
         customFrequency: Frequency.YEARLY,

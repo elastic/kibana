@@ -29,11 +29,7 @@ export const useFetchRulesSnoozeSettings = (
 ) => {
   return useQuery(
     [...FETCH_RULE_SNOOZE_SETTINGS_QUERY_KEY, ...ids],
-    async ({ signal }) => {
-      const response = await fetchRulesSnoozeSettings({ ids, signal });
-
-      return response.data;
-    },
+    ({ signal }) => fetchRulesSnoozeSettings({ ids, signal }),
     {
       ...DEFAULT_QUERY_OPTIONS,
       ...queryOptions,
