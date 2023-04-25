@@ -25,13 +25,14 @@ import {
 const buildQuerySubmittedPayload = (
   hostState: HostsState & { parsedDateRange: StringDateRangeTimestamp }
 ) => {
-  const { panelFilters, filters, parsedDateRange, query: queryObj } = hostState;
+  const { panelFilters, filters, parsedDateRange, query: queryObj, limit } = hostState;
 
   return {
     control_filters: panelFilters.map((filter) => JSON.stringify(filter)),
     filters: filters.map((filter) => JSON.stringify(filter)),
     interval: telemetryTimeRangeFormatter(parsedDateRange.to - parsedDateRange.from),
     query: queryObj.query,
+    limit,
   };
 };
 

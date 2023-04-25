@@ -11,6 +11,7 @@ import { useCallback, useEffect } from 'react';
 import { catchError, map, Observable, of, startWith } from 'rxjs';
 import createContainer from 'constate';
 import type { QueryDslQueryContainer, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useDataSearch, useLatestPartialDataSearchResponse } from '../../../../utils/data_search';
 import { useMetricsDataViewContext } from './use_data_view';
@@ -18,6 +19,9 @@ import { useUnifiedSearchContext } from './use_unified_search';
 
 export const useHostCount = () => {
   const { dataView, metricAlias } = useMetricsDataViewContext();
+  const {
+    services: { telemetry },
+  } = useKibanaContextForPlugin();
   const { buildQuery, getParsedDateRange } = useUnifiedSearchContext();
 
   const { search: fetchHostCount, requests$ } = useDataSearch({
@@ -80,6 +84,14 @@ export const useHostCount = () => {
   useEffect(() => {
     fetchHostCount();
   }, [fetchHostCount]);
+
+  useEffect(() => {
+    if (latestResponseData) {
+      telemetry.reportHostsViewTotalHostCountRetrieved({
+        total: latestResponseData.count.value,
+      });
+    }
+  }, [latestResponseData, telemetry]);
 
   return {
     errors: latestResponseErrors,

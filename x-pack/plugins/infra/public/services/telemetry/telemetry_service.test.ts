@@ -107,6 +107,7 @@ describe('TelemetryService', () => {
         filters: [],
         interval: 'interval(now-1h)',
         query: '',
+        limit: 100,
       });
 
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -117,6 +118,7 @@ describe('TelemetryService', () => {
           filters: [],
           interval: 'interval(now-1h)',
           query: '',
+          limit: 100,
         }
       );
     });
@@ -157,6 +159,26 @@ describe('TelemetryService', () => {
         InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_ADDED,
         {
           field_name: 'agent.version',
+        }
+      );
+    });
+  });
+
+  describe('#reportHostsViewTotalHostCountRetrieved', () => {
+    it('should report Host Flyout Filter Added click with field name', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+
+      telemetry.reportHostsViewTotalHostCountRetrieved({
+        total: 300,
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        InfraTelemetryEventTypes.HOST_VIEW_TOTAL_HOST_COUNT_RETRIEVED,
+        {
+          total: 300,
         }
       );
     });

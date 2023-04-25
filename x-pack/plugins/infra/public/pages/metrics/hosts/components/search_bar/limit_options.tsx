@@ -77,5 +77,5 @@ const options: EuiButtonGroupOptionProps[] = HOST_LIMIT_OPTIONS.map((option) => 
   id: buildId(option),
   label: `${option}`,
   value: option,
-  'data-test-subj': `hostsViewLimitSelection${option}button`,
+  'data-test-subj': `hostsViewLimitSelection${option}Button`,
 }));

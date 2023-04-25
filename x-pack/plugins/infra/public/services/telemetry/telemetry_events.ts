@@ -43,6 +43,13 @@ const hostsViewQuerySubmittedEvent: InfraTelemetryEvent = {
         optional: false,
       },
     },
+    limit: {
+      type: 'integer',
+      _meta: {
+        description: 'Selected host limit',
+        optional: false,
+      },
+    },
   },
 };
 
@@ -78,6 +85,7 @@ const hostFlyoutRemoveFilter: InfraTelemetryEvent = {
     },
   },
 };
+
 const hostFlyoutAddFilter: InfraTelemetryEvent = {
   eventType: InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_ADDED,
   schema: {
@@ -91,9 +99,23 @@ const hostFlyoutAddFilter: InfraTelemetryEvent = {
   },
 };
 
+const hostViewTotalHostCountRetrieved: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.HOST_VIEW_TOTAL_HOST_COUNT_RETRIEVED,
+  schema: {
+    total: {
+      type: 'integer',
+      _meta: {
+        description: 'Total number of hosts retrieved.',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const infraTelemetryEvents = [
   hostsViewQuerySubmittedEvent,
   hostsEntryClickedEvent,
   hostFlyoutRemoveFilter,
   hostFlyoutAddFilter,
+  hostViewTotalHostCountRetrieved,
 ];

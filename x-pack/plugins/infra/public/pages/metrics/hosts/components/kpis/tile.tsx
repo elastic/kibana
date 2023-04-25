@@ -119,7 +119,7 @@ export const Tile = ({
       hasShadow={false}
       paddingSize={error ? 'm' : 'none'}
       style={{ minHeight: MIN_HEIGHT }}
-      data-test-subj={`hostsView-metricsTrend-${type}`}
+      data-test-subj={`hostsViewKPIGrid${type}Tile`}
     >
       {error ? (
         <EuiFlexGroup
@@ -149,7 +149,7 @@ export const Tile = ({
           anchorClassName="eui-fullWidth"
         >
           <LensWrapper
-            id={`hostViewKPIChart-${type}`}
+            id={`hostsViewKPIGrid${type}Tile`}
             attributes={afterLoadedState.attributes}
             style={{ height: MIN_HEIGHT }}
             extraActions={[extraActionOptions.openInLens]}
