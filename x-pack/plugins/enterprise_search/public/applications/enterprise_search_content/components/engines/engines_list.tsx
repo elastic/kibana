@@ -31,10 +31,13 @@ import { docLinks } from '../../../shared/doc_links';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { LicensingLogic } from '../../../shared/licensing';
+import {
+  LicensingCallout,
+  LICENSING_FEATURE,
+} from '../../../shared/licensing_callout/licensing_callout';
+
 import { ENGINES_PATH, ENGINE_CREATION_PATH } from '../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
-
-import { LicensingCallout, LICENSING_FEATURE } from '../shared/licensing_callout/licensing_callout';
 
 import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
 import { EnginesListTable } from './components/tables/engines_table';
