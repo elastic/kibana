@@ -9,7 +9,7 @@ import type {
   IlmExplainLifecycleLifecycleExplain,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { sortBy } from 'lodash/fp';
+import { orderBy } from 'lodash/fp';
 
 import type { IndexSummaryTableItem } from '../summary_table/helpers';
 import type {
@@ -17,8 +17,9 @@ import type {
   IlmExplainPhaseCounts,
   DataQualityCheckResult,
   PatternRollup,
+  SortConfig,
 } from '../../types';
-import { getDocsCount } from '../../helpers';
+import { getDocsCount, getSizeInBytes } from '../../helpers';
 
 export const isManaged = (
   ilmExplainRecord: IlmExplainLifecycleLifecycleExplain | undefined
@@ -144,6 +145,8 @@ export const getSummaryTableItems = ({
   pattern,
   patternDocsCount,
   results,
+  sortByColumn,
+  sortByDirection,
   stats,
 }: {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
@@ -151,6 +154,8 @@ export const getSummaryTableItems = ({
   pattern: string;
   patternDocsCount: number;
   results: Record<string, DataQualityCheckResult> | undefined;
+  sortByColumn: string;
+  sortByDirection: 'desc' | 'asc';
   stats: Record<string, IndicesStatsIndicesStats> | null;
 }): IndexSummaryTableItem[] => {
   const summaryTableItems = indexNames.map((indexName) => ({
@@ -160,47 +165,10 @@ export const getSummaryTableItems = ({
     ilmPhase: ilmExplain != null ? getIlmPhase(ilmExplain[indexName]) : undefined,
     pattern,
     patternDocsCount,
+    sizeInBytes: getSizeInBytes({ stats, indexName }),
   }));
 
-  return sortBy('docsCount', summaryTableItems).reverse();
-};
-
-export const getDefaultIndexIncompatibleCounts = (
-  indexNames: string[]
-): Record<string, number | undefined> =>
-  indexNames.reduce<Record<string, number | undefined>>(
-    (acc, indexName) => ({
-      ...acc,
-      [indexName]: undefined,
-    }),
-    {}
-  );
-
-export const createPatternIncompatibleEntries = ({
-  indexNames,
-  patternIncompatible,
-}: {
-  indexNames: string[];
-  patternIncompatible: Record<string, number | undefined>;
-}): Record<string, number | undefined> =>
-  indexNames.reduce<Record<string, number | undefined>>(
-    (acc, indexName) =>
-      indexName in patternIncompatible
-        ? { ...acc, [indexName]: patternIncompatible[indexName] }
-        : { ...acc, [indexName]: undefined },
-    {}
-  );
-
-export const getIncompatible = (
-  patternIncompatible: Record<string, number | undefined>
-): number | undefined => {
-  const allIndexes = Object.values(patternIncompatible);
-  const allIndexesHaveValues = allIndexes.every((incompatible) => Number.isInteger(incompatible));
-
-  // only return a number when all indexes have an `incompatible` count:
-  return allIndexesHaveValues
-    ? allIndexes.reduce<number>((acc, incompatible) => acc + Number(incompatible), 0)
-    : undefined;
+  return orderBy([sortByColumn], [sortByDirection], summaryTableItems);
 };
 
 export const shouldCreateIndexNames = ({
@@ -232,4 +200,39 @@ export const shouldCreatePatternRollup = ({
   const errorOccurred: boolean = error != null;
 
   return allDataLoaded || errorOccurred;
+};
+
+export const getIndexPropertiesContainerId = ({
+  indexName,
+  pattern,
+}: {
+  indexName: string;
+  pattern: string;
+}): string => `index-properties-container-${pattern}${indexName}`;
+
+export const defaultSort: SortConfig = {
+  sort: {
+    direction: 'desc',
+    field: 'docsCount',
+  },
+};
+
+export const MIN_PAGE_SIZE = 10;
+
+export const getPageIndex = ({
+  indexName,
+  items,
+  pageSize,
+}: {
+  indexName: string;
+  items: IndexSummaryTableItem[];
+  pageSize: number;
+}): number | null => {
+  const index = items.findIndex((x) => x.indexName === indexName);
+
+  if (index !== -1 && pageSize !== 0) {
+    return Math.floor(index / pageSize);
+  } else {
+    return null;
+  }
 };

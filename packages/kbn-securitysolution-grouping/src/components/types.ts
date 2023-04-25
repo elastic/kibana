@@ -19,7 +19,7 @@ export type RawBucket<T> = GenericBuckets & T;
 
 /** Defines the shape of the aggregation returned by Elasticsearch */
 // TODO: write developer docs for these fields
-export interface GroupingAggregation<T> {
+export interface RootAggregation<T> {
   groupByFields?: {
     buckets?: Array<RawBucket<T>>;
   };
@@ -38,6 +38,8 @@ export type GroupingFieldTotalAggregation<T> = Record<
     buckets?: Array<RawBucket<T>>;
   }
 >;
+
+export type GroupingAggregation<T> = RootAggregation<T> & GroupingFieldTotalAggregation<T>;
 
 export interface BadgeMetric {
   value: number;
@@ -67,3 +69,5 @@ export type OnGroupToggle = (params: {
   groupNumber: number;
   groupingId: string;
 }) => void;
+
+export type { GroupingProps } from './grouping';
