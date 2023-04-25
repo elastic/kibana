@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectMigration } from './legacy_migrations';
@@ -61,6 +62,7 @@ const legacyRuleActionsSavedObjectMappings: SavedObjectsType['mappings'] = {
 export const legacyType: SavedObjectsType = {
   convertToMultiNamespaceTypeVersion: '8.0.0',
   name: legacyRuleActionsSavedObjectType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: legacyRuleActionsSavedObjectMappings,
