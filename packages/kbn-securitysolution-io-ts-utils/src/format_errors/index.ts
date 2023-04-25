@@ -8,7 +8,6 @@
 
 import * as t from 'io-ts';
 import { isObject } from 'lodash/fp';
-import { i18n } from '@kbn/i18n';
 
 export const formatErrors = (errors: t.Errors): string[] => {
   const err = errors.map((error) => {
@@ -28,18 +27,9 @@ export const formatErrors = (errors: t.Errors): string[] => {
       const suppliedValue =
         keyContext !== '' ? keyContext : nameContext != null ? nameContext.type.name : '';
       const value = isObject(error.value) ? JSON.stringify(error.value) : error.value;
-      return INVALID_VALUE_ERROR(`${value}`, suppliedValue);
+      return `Invalid value "${value}" supplied to "${suppliedValue}"`;
     }
   });
 
   return [...new Set(err)];
 };
-
-const INVALID_VALUE_ERROR = (value: string, suppliedValue: string) =>
-  i18n.translate('xpack.synthetics.server.projectMonitors.invalidValueError', {
-    defaultMessage: 'Invalid value "{value}" supplied to "{suppliedValue}"',
-    values: {
-      value,
-      suppliedValue,
-    },
-  });
