@@ -65,7 +65,7 @@ export const getOutputRuleAlertForRest = (): RuleResponse => ({
   severity_mapping: [],
   updated_by: 'elastic',
   tags: [],
-  throttle: 'no_actions',
+  throttle: undefined,
   threat: getThreatMock(),
   exceptions_list: getListArrayMock(),
   filters: [

@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import { EuiOverlayMask, EuiFocusTrap, EuiImage } from '@elastic/eui';
+import { EuiOverlayMask, EuiFocusTrap, EuiImage, keys } from '@elastic/eui';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 
 import type { Owner } from '../../../common/constants/types';
@@ -35,6 +35,20 @@ const StyledOverlayMask = styled(EuiOverlayMask)`
 export const FilePreview = ({ closePreview, selectedFile }: FilePreviewProps) => {
   const { client: filesClient } = useFilesContext();
   const { owner } = useCasesContext();
+
+  useEffect(() => {
+    const keyboardListener = (event: KeyboardEvent) => {
+      if (event.key === keys.ESCAPE || event.code === 'Escape') {
+        closePreview();
+      }
+    };
+
+    window.addEventListener('keyup', keyboardListener);
+
+    return () => {
+      window.removeEventListener('keyup', keyboardListener);
+    };
+  }, [closePreview]);
 
   return (
     <StyledOverlayMask>
