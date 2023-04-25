@@ -147,7 +147,7 @@ export const MetricItem = ({
                             defaultMessage: 'Median duration of last 24 checks',
                           })}
                           content={i18n.translate(
-                            'xpack.synthetics.overview.duration.description',
+                            'xpack.synthetics.overview.duration.description.values',
                             {
                               defaultMessage: 'Avg: {avg}, Min: {min}, Max: {max}',
                               values: {
