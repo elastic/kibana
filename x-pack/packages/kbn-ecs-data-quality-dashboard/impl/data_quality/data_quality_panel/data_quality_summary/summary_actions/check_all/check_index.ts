@@ -15,7 +15,7 @@ import type { EcsMetadata, OnCheckCompleted, PartitionedFieldMetadata } from '..
 import { fetchMappings } from '../../../../use_mappings/helpers';
 import { fetchUnallowedValues, getUnallowedValues } from '../../../../use_unallowed_values/helpers';
 
-const EMPTY_PARTITIONED_FIELD_METADATA: PartitionedFieldMetadata = {
+export const EMPTY_PARTITIONED_FIELD_METADATA: PartitionedFieldMetadata = {
   all: [],
   custom: [],
   ecsCompliant: [],
@@ -25,6 +25,7 @@ const EMPTY_PARTITIONED_FIELD_METADATA: PartitionedFieldMetadata = {
 export async function checkIndex({
   abortController,
   ecsMetadata,
+  formatBytes,
   formatNumber,
   indexName,
   onCheckCompleted,
@@ -33,6 +34,7 @@ export async function checkIndex({
 }: {
   abortController: AbortController;
   ecsMetadata: Record<string, EcsMetadata> | null;
+  formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   indexName: string;
   onCheckCompleted: OnCheckCompleted;
@@ -74,6 +76,7 @@ export async function checkIndex({
     if (!abortController.signal.aborted) {
       onCheckCompleted({
         error: null,
+        formatBytes,
         formatNumber,
         indexName,
         partitionedFieldMetadata,
@@ -84,10 +87,8 @@ export async function checkIndex({
   } catch (error) {
     if (!abortController.signal.aborted) {
       onCheckCompleted({
-        error:
-          error.toString() != null
-            ? error.toString()
-            : i18n.AN_ERROR_OCCURRED_CHECKING_INDEX(indexName),
+        error: error != null ? error.toString() : i18n.AN_ERROR_OCCURRED_CHECKING_INDEX(indexName),
+        formatBytes,
         formatNumber,
         indexName,
         partitionedFieldMetadata: null,

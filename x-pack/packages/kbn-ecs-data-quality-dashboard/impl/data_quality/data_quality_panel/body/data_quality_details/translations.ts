@@ -7,9 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TAKE_ACTION = i18n.translate(
-  'ecsDataQualityDashboard.takeActionMenu.takeActionButton',
+export const INDICES_TAB_TITLE = i18n.translate(
+  'ecsDataQualityDashboard.body.tabs.indicesTabTitle',
   {
-    defaultMessage: 'Take action',
+    defaultMessage: 'Indices',
+  }
+);
+
+export const STORAGE_TAB_TITLE = i18n.translate(
+  'ecsDataQualityDashboard.body.tabs.storageTabTitle',
+  {
+    defaultMessage: 'Storage',
   }
 );
