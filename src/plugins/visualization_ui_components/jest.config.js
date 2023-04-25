@@ -7,7 +7,14 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../../../..',
+  preset: '@kbn/test',
+  rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/visualization_ui_components'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/src/plugins/visualization_ui_components',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/plugins/visualization_ui_components/{common,public,server}/**/*.{js,ts,tsx}',
+  ],
+  setupFiles: ['jest-canvas-mock'],
 };
