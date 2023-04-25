@@ -7,12 +7,30 @@
 
 import type { FilesSetup } from '@kbn/files-plugin/public';
 import type { FileKindBrowser } from '@kbn/shared-ux-file-types';
-import { MAX_FILE_SIZE, OWNERS, getOwnerUIName } from '../../common/constants';
+import {
+  GENERAL_CASES_OWNER,
+  MAX_FILE_SIZE,
+  OBSERVABILITY_OWNER,
+  OWNERS,
+  SECURITY_SOLUTION_OWNER,
+} from '../../common/constants';
 import type { Owner } from '../../common/constants/types';
 import { constructFileKindIdByOwner } from '../../common/files';
 import type { CaseFileKinds, FilesConfig } from './types';
-
 import * as i18n from './translations';
+
+const getOwnerUIName = (owner: Owner) => {
+  switch (owner) {
+    case SECURITY_SOLUTION_OWNER:
+      return 'Security Solution';
+    case OBSERVABILITY_OWNER:
+      return 'Observability';
+    case GENERAL_CASES_OWNER:
+      return 'Stack Management';
+    default:
+      return owner;
+  }
+};
 
 const buildFileKind = (config: FilesConfig, owner: Owner): FileKindBrowser => {
   return {

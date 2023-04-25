@@ -17,19 +17,6 @@ export const GENERAL_CASES_OWNER = APP_ID;
 
 export const OWNERS = [GENERAL_CASES_OWNER, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER] as const;
 
-export const getOwnerUIName = (owner: Owner) => {
-  switch (owner) {
-    case SECURITY_SOLUTION_OWNER:
-      return 'Security Solution';
-    case OBSERVABILITY_OWNER:
-      return 'Observability';
-    case GENERAL_CASES_OWNER:
-      return 'Stack Management';
-    default:
-      return owner;
-  }
-};
-
 interface RouteInfo {
   id: Owner;
   appId: string;
