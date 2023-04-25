@@ -82,6 +82,7 @@ export class RenderingService {
         serverBasePath: http.basePath.serverBasePath,
         packageInfo: this.coreContext.env.packageInfo,
         auth: http.auth,
+        userSettingsService: userSettings,
       }),
     });
 

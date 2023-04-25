@@ -12,6 +12,7 @@ import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { getJsDependencyPaths } from './get_js_dependency_paths';
 import { getThemeTag } from './get_theme_tag';
@@ -25,6 +26,7 @@ interface FactoryOptions {
   packageInfo: PackageInfo;
   uiPlugins: UiPlugins;
   auth: HttpAuth;
+  userSettingsService?: InternalUserSettingsServiceSetup;
 }
 
 interface RenderedOptions {
@@ -43,6 +45,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   serverBasePath,
   uiPlugins,
   auth,
+  userSettingsService,
 }) => {
   const isAuthenticated = (request: KibanaRequest) => {
     const { status: authStatus } = auth.get(request);
@@ -56,7 +59,16 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
 
     try {
       const authenticated = isAuthenticated(request);
-      darkMode = authenticated ? await uiSettingsClient.get('theme:darkMode') : false;
+
+      if (authenticated) {
+        const userSettingDarkMode = await userSettingsService?.getUserSettingDarkMode(request);
+
+        if (userSettingDarkMode) {
+          darkMode = userSettingDarkMode;
+        } else {
+          darkMode = await uiSettingsClient.get('theme:darkMode');
+        }
+      }
     } catch (e) {
       // just use the default values in case of connectivity issues with ES
     }
