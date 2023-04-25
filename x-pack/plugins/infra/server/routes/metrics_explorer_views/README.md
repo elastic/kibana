@@ -217,9 +217,11 @@ Status code: 409
 
 ## Update one: `PUT /api/infra/metrics_explorer_views/{metricsExplorerViewId}`
 
-Updates an metrics explorer view.
+Updates a metrics explorer view.
 
 Any attribute can be updated except for `isDefault` and `isStatic`, which are derived by the source configuration preference set by the user.
+
+Any attempt to update the static view with id `0` will return a `400 The metrics explorer view with id 0 is not configurable.` 
 
 ### Request
 
@@ -322,7 +324,9 @@ Status code: 409
 
 ## Delete one: `DELETE /api/infra/metrics_explorer_views/{metricsExplorerViewId}`
 
-Deletes an metrics explorer view.
+Deletes a metrics explorer view.
+
+Any attempt to delete the static view with id `0` will return a `400 The metrics explorer view with id 0 is not configurable.`
 
 ### Request
 

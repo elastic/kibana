@@ -38,18 +38,16 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
   ) {}
 
   static STATIC_VIEW_ID = '0';
+  static DEFAULT_SOURCE_ID = 'default';
 
   public async find(query: MetricsExplorerViewRequestQuery): Promise<MetricsExplorerView[]> {
     this.logger.debug('Trying to load metrics explorer views ...');
 
-    const sourceId = query.sourceId ?? 'default';
+    const sourceId = query.sourceId ?? MetricsExplorerViewsClient.DEFAULT_SOURCE_ID;
 
     const [sourceConfiguration, metricsExplorerViewSavedObject] = await Promise.all([
       this.infraSources.getSourceConfiguration(this.savedObjectsClient, sourceId),
-      this.savedObjectsClient.find({
-        type: metricsExplorerViewSavedObjectName,
-        perPage: 1000, // Fetch 1 page by default with a max of 1000 results
-      }),
+      this.getAllViews(),
     ]);
 
     const defaultView = MetricsExplorerViewsClient.createStaticView(
@@ -75,7 +73,7 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
   ): Promise<MetricsExplorerView> {
     this.logger.debug(`Trying to load metrics explorer view with id ${metricsExplorerViewId} ...`);
 
-    const sourceId = query.sourceId ?? 'default';
+    const sourceId = query.sourceId ?? MetricsExplorerViewsClient.DEFAULT_SOURCE_ID;
 
     // Handle the case where the requested resource is the static metrics explorer view
     if (metricsExplorerViewId === MetricsExplorerViewsClient.STATIC_VIEW_ID) {
@@ -128,7 +126,7 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
     // Validate there is not a view with the same name
     await this.assertNameConflict(attributes.name, [metricsExplorerViewId]);
 
-    const sourceId = query.sourceId ?? 'default';
+    const sourceId = query.sourceId ?? MetricsExplorerViewsClient.DEFAULT_SOURCE_ID;
 
     const [sourceConfiguration, metricsExplorerViewSavedObject] = await Promise.all([
       this.infraSources.getSourceConfiguration(this.savedObjectsClient, sourceId),
@@ -154,6 +152,13 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
       metricsExplorerViewSavedObjectName,
       metricsExplorerViewId
     );
+  }
+
+  private getAllViews() {
+    return this.savedObjectsClient.find<MetricsExplorerViewAttributes>({
+      type: metricsExplorerViewSavedObjectName,
+      perPage: 1000, // Fetch 1 page by default with a max of 1000 results
+    });
   }
 
   private mapSavedObjectToMetricsExplorerView(
@@ -191,10 +196,7 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
    * We want to control conflicting names on the views
    */
   private async assertNameConflict(name: string, whitelist: string[] = []) {
-    const results = await this.savedObjectsClient.find<MetricsExplorerViewAttributes>({
-      type: metricsExplorerViewSavedObjectName,
-      perPage: 1000,
-    });
+    const results = await this.getAllViews();
 
     const hasConflict = [
       MetricsExplorerViewsClient.createStaticView(),

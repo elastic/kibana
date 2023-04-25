@@ -35,18 +35,16 @@ export class InventoryViewsClient implements IInventoryViewsClient {
   ) {}
 
   static STATIC_VIEW_ID = '0';
+  static DEFAULT_SOURCE_ID = 'default';
 
   public async find(query: InventoryViewRequestQuery): Promise<InventoryView[]> {
     this.logger.debug('Trying to load inventory views ...');
 
-    const sourceId = query.sourceId ?? 'default';
+    const sourceId = query.sourceId ?? InventoryViewsClient.DEFAULT_SOURCE_ID;
 
     const [sourceConfiguration, inventoryViewSavedObject] = await Promise.all([
       this.infraSources.getSourceConfiguration(this.savedObjectsClient, sourceId),
-      this.savedObjectsClient.find({
-        type: inventoryViewSavedObjectName,
-        perPage: 1000, // Fetch 1 page by default with a max of 1000 results
-      }),
+      this.getAllViews(),
     ]);
 
     const defaultView = InventoryViewsClient.createStaticView(
@@ -72,7 +70,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
   ): Promise<InventoryView> {
     this.logger.debug(`Trying to load inventory view with id ${inventoryViewId} ...`);
 
-    const sourceId = query.sourceId ?? 'default';
+    const sourceId = query.sourceId ?? InventoryViewsClient.DEFAULT_SOURCE_ID;
 
     // Handle the case where the requested resource is the static inventory view
     if (inventoryViewId === InventoryViewsClient.STATIC_VIEW_ID) {
@@ -123,7 +121,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
     // Validate there is not a view with the same name
     await this.assertNameConflict(attributes.name, [inventoryViewId]);
 
-    const sourceId = query.sourceId ?? 'default';
+    const sourceId = query.sourceId ?? InventoryViewsClient.DEFAULT_SOURCE_ID;
 
     const [sourceConfiguration, inventoryViewSavedObject] = await Promise.all([
       this.infraSources.getSourceConfiguration(this.savedObjectsClient, sourceId),
@@ -160,6 +158,13 @@ export class InventoryViewsClient implements IInventoryViewsClient {
     };
   }
 
+  private getAllViews() {
+    return this.savedObjectsClient.find<InventoryViewAttributes>({
+      type: inventoryViewSavedObjectName,
+      perPage: 1000, // Fetch 1 page by default with a max of 1000 results
+    });
+  }
+
   private moveDefaultViewOnTop(views: InventoryView[]) {
     const defaultViewPosition = views.findIndex((view) => view.attributes.isDefault);
 
@@ -175,10 +180,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
    * We want to control conflicting names on the views
    */
   private async assertNameConflict(name: string, whitelist: string[] = []) {
-    const results = await this.savedObjectsClient.find<InventoryViewAttributes>({
-      type: inventoryViewSavedObjectName,
-      perPage: 1000,
-    });
+    const results = await this.getAllViews();
 
     const hasConflict = [InventoryViewsClient.createStaticView(), ...results.saved_objects].some(
       (obj) => !whitelist.includes(obj.id) && obj.attributes.name === name
