@@ -53,6 +53,7 @@ const testProps: GroupingQueryArgs = {
   pageNumber: 0,
   rootAggregations: [],
   runtimeMappings: {},
+  selectedGroupEsTypes: ['keyword'],
   size: 25,
   to: '2023-02-23T06:59:59.999Z',
 };
@@ -65,9 +66,11 @@ describe('group selector', () => {
     expect(result.aggs.groupByFields.multi_terms).toBeUndefined();
     expect(result.aggs.groupByFields.terms).toEqual({
       field: 'host.name',
+      missing: '-',
       size: MAX_QUERY_SIZE,
     });
     expect(result.aggs.groupByFields.aggs).toEqual({
+      nullGroup: { missing: { field: 'host.name' } },
       bucket_truncate: { bucket_sort: { from: 0, size: 25 } },
       alertsCount: { cardinality: { field: 'kibana.alert.uuid' } },
       rulesCountAggregation: { cardinality: { field: 'kibana.alert.rule.rule_id' } },
@@ -112,7 +115,10 @@ describe('group selector', () => {
     });
     expect(result.aggs.groupByFields.terms).toBeUndefined();
     expect(result.aggs.groupByFields.multi_terms).toEqual({
-      terms: [{ field: 'kibana.alert.rule.name' }, { field: 'kibana.alert.rule.description' }],
+      terms: [
+        { field: 'kibana.alert.rule.name', missing: '-' },
+        { field: 'kibana.alert.rule.description', missing: '-' },
+      ],
       size: MAX_QUERY_SIZE,
     });
   });
@@ -143,5 +149,32 @@ describe('group selector', () => {
       ],
     });
     expect(result.query.bool.filter.length).toEqual(2);
+  });
+  it('Uses NaN for number fields', () => {
+    const result = getGroupingQuery({ ...testProps, selectedGroupEsTypes: ['long'] });
+    expect(result.aggs.groupByFields.multi_terms).toBeUndefined();
+    expect(result.aggs.groupByFields.terms).toEqual({
+      field: 'host.name',
+      missing: 'NaN',
+      size: MAX_QUERY_SIZE,
+    });
+  });
+  it('Uses 0.0.0.0 for ip fields', () => {
+    const result = getGroupingQuery({ ...testProps, selectedGroupEsTypes: ['ip'] });
+    expect(result.aggs.groupByFields.multi_terms).toBeUndefined();
+    expect(result.aggs.groupByFields.terms).toEqual({
+      field: 'host.name',
+      missing: '0.0.0.0',
+      size: MAX_QUERY_SIZE,
+    });
+  });
+  it('Uses 0 for date fields', () => {
+    const result = getGroupingQuery({ ...testProps, selectedGroupEsTypes: ['date'] });
+    expect(result.aggs.groupByFields.multi_terms).toBeUndefined();
+    expect(result.aggs.groupByFields.terms).toEqual({
+      field: 'host.name',
+      missing: 0,
+      size: MAX_QUERY_SIZE,
+    });
   });
 });

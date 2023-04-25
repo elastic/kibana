@@ -168,6 +168,7 @@ const GroupingComponent = <T,>({
       takeActionItems,
       tracker,
       trigger,
+      unit,
     ]
   );
 

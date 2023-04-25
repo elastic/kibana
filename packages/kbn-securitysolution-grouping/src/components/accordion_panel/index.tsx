@@ -47,7 +47,7 @@ const DefaultGroupPanelRenderer = ({
         </EuiTitle>
       </EuiFlexItem>
       {isNullGroup && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj="null-group-icon">
           <EuiIconTip content={nullGroupMessage} position="right" />
         </EuiFlexItem>
       )}
