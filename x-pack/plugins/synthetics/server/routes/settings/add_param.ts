@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SyntheticsParamRequest, SyntheticsParamSO } from '../../../common/runtime_types';
 import { syntheticsParamType } from '../../../common/types/saved_objects';
@@ -34,7 +35,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
         request.body as SyntheticsParamRequest;
 
       const result = await savedObjectsClient.create<SyntheticsParamSO>(syntheticsParamType, data, {
-        initialNamespaces: shareAcrossSpaces ? ['*', spaceId] : [spaceId],
+        initialNamespaces: shareAcrossSpaces ? [ALL_SPACES_ID] : [spaceId],
       });
       return { data: result };
     } catch (error) {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import {
   EuiCheckbox,
   EuiComboBox,
@@ -119,9 +120,9 @@ export const AddParamForm = ({
               aria-label={NAMESPACES_LABEL}
               onChange={(e) => {
                 if (e.target.checked) {
-                  field.onChange(true);
+                  field.onChange([ALL_SPACES_ID]);
                 } else {
-                  field.onChange(false);
+                  field.onChange([]);
                 }
               }}
               checked={(field.value ?? []).length > 0 && (field.value ?? [])[0] === '*'}

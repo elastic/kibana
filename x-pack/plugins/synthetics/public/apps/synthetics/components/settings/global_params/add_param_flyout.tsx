@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -46,7 +47,7 @@ export const AddParamFlyout = ({
 
   const { id, ...dataToSave } = isEditingItem ?? {};
 
-  const form = useFormWrapped<SyntheticsParam>({
+  const form = useFormWrapped<SyntheticsParamSO>({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
     shouldFocusError: true,
@@ -66,7 +67,7 @@ export const AddParamFlyout = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setIsEditingItem]);
 
-  const [paramData, setParamData] = useState<SyntheticsParam | null>(null);
+  const [paramData, setParamData] = useState<SyntheticsParamSO | null>(null);
 
   const { application } = useKibana<ClientPluginsStart>().services;
 
@@ -74,12 +75,19 @@ export const AddParamFlyout = ({
     if (!paramData) {
       return;
     }
-    const { namespaces } = paramData;
-    const shareAcrossSpaces = namespaces?.includes('*');
+    const { namespaces, ...paramRequest } = paramData;
+    const shareAcrossSpaces = namespaces?.includes(ALL_SPACES_ID);
     if (isEditingItem) {
-      return apiService.put(SYNTHETICS_API_URLS.PARAMS, { id, ...paramData, shareAcrossSpaces });
+      return apiService.put(SYNTHETICS_API_URLS.PARAMS, {
+        id,
+        ...paramRequest,
+        share_across_spaces: shareAcrossSpaces,
+      });
     }
-    return apiService.post(SYNTHETICS_API_URLS.PARAMS, { ...paramData, shareAcrossSpaces });
+    return apiService.post(SYNTHETICS_API_URLS.PARAMS, {
+      ...paramRequest,
+      share_across_spaces: shareAcrossSpaces,
+    });
   }, [paramData]);
 
   const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
