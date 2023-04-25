@@ -45,9 +45,8 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
         const pipelineDefinition = pipelines?.[pipelineName];
 
         return (
-          <>
+          <React.Fragment key={pipelineName}>
             <EuiAccordion
-              key={pipelineName}
               id={pipelineName}
               buttonContent={
                 <EuiTitle size="xs">
@@ -123,7 +122,7 @@ export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats
                 ) : null}
               </EuiFlexGrid>
             </EuiAccordion>
-          </>
+          </React.Fragment>
         );
       })}
     </>

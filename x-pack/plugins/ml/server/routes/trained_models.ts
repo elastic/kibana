@@ -10,13 +10,13 @@ import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   getInferenceQuerySchema,
+  inferTrainedModelBody,
+  inferTrainedModelQuery,
   modelIdSchema,
   optionalModelIdSchema,
-  putTrainedModelQuerySchema,
-  inferTrainedModelQuery,
-  inferTrainedModelBody,
-  threadingParamsSchema,
   pipelineSimulateBody,
+  putTrainedModelQuerySchema,
+  threadingParamsSchema,
   updateDeploymentParamsSchema,
 } from './schemas/inference_schema';
 
@@ -59,14 +59,33 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const result = body.trained_model_configs as TrainedModelConfigResponse[];
         try {
           if (withPipelines) {
+            // Also need to retrieve the list of deployment IDs from stats
+            const stats = await mlClient.getTrainedModelsStats({
+              ...(modelId ? { model_id: modelId } : {}),
+              size: 10000,
+            });
+
+            const modelDeploymentsMap = stats.trained_model_stats.reduce((acc, curr) => {
+              if (!curr.deployment_stats) return acc;
+              // @ts-ignore elasticsearch-js client is missing deployment_id
+              const deploymentId = curr.deployment_stats.deployment_id;
+              if (acc[curr.model_id]) {
+                acc[curr.model_id].push(deploymentId);
+              } else {
+                acc[curr.model_id] = [deploymentId];
+              }
+              return acc;
+            }, {} as Record<string, string[]>);
+
             const modelIdsAndAliases: string[] = Array.from(
-              new Set(
-                result
+              new Set([
+                ...result
                   .map(({ model_id: id, metadata }) => {
                     return [id, ...(metadata?.model_aliases ?? [])];
                   })
-                  .flat()
-              )
+                  .flat(),
+                ...Object.values(modelDeploymentsMap).flat(),
+              ])
             );
 
             const pipelinesResponse = await modelsProvider(client).getModelsPipelines(
@@ -79,6 +98,12 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
                   return {
                     ...acc,
                     ...(pipelinesResponse.get(alias) ?? {}),
+                  };
+                }, {}),
+                ...(modelDeploymentsMap[model.model_id] ?? []).reduce((acc, deploymentId) => {
+                  return {
+                    ...acc,
+                    ...(pipelinesResponse.get(deploymentId) ?? {}),
                   };
                 }, {}),
               };
