@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Influencer } from '@kbn/ml-plugin/public';
+import type { Influencer } from '@kbn/ml-anomaly-utils';
 import type { FlowTarget } from '../../../../common/search_strategy';
 
 import type { HostsType } from '../../../explore/hosts/store/model';
