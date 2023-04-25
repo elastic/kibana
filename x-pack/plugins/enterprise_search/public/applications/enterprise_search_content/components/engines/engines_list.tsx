@@ -15,6 +15,7 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
@@ -42,6 +43,7 @@ import { DeleteEngineModal } from './delete_engine_modal';
 import { EngineListIndicesFlyout } from './engines_list_flyout';
 import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 import { EnginesListLogic } from './engines_list_logic';
+import { OnlyFalseAllowed } from '@kbn/securitysolution-io-ts-types';
 
 interface CreateEngineButtonProps {
   disabled: boolean;
@@ -79,10 +81,17 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
       }
     >
       <EuiPopoverTitle>
-        <FormattedMessage
-          id="xpack.enterpriseSearch.content.searchApplications.createEngineTechnicalPreviewPopover.title"
-          defaultMessage="Technical Preview"
-        />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="beaker" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.searchApplications.createEngineTechnicalPreviewPopover.title"
+              defaultMessage="Technical Preview"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPopoverTitle>
       <div style={{ width: '300px' }} data-test-subj="create-engine-button-popover-content">
         <EuiFlexGroup direction="column" gutterSize="m">
