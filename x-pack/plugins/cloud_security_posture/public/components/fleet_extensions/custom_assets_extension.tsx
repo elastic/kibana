@@ -8,6 +8,7 @@
 import React from 'react';
 import { type CustomAssetsAccordionProps, CustomAssetsAccordion } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { useLocation } from 'react-router-dom';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { benchmarksNavigation, cloudPosturePages } from '../../common/navigation/constants';
 
@@ -15,6 +16,21 @@ const SECURITY_APP_NAME = 'securitySolutionUI';
 
 export const CspCustomAssetsExtension = () => {
   const { application } = useKibana().services;
+  const { search } = useLocation();
+  const isCNVM = search.includes('vuln_mgmt');
+
+  const viewsCNVM: CustomAssetsAccordionProps['views'] = [
+    {
+      name: cloudPosturePages.findings.name,
+      url: application.getUrlForApp(SECURITY_APP_NAME, {
+        path: cloudPosturePages.findings.path + '/vulnerabilities',
+      }),
+      description: i18n.translate(
+        'xpack.csp.createPackagePolicy.customAssetsTab.findingsViewLabel',
+        { defaultMessage: 'View CSP Findings ' }
+      ),
+    },
+  ];
 
   const views: CustomAssetsAccordionProps['views'] = [
     {
@@ -27,7 +43,9 @@ export const CspCustomAssetsExtension = () => {
     },
     {
       name: cloudPosturePages.findings.name,
-      url: application.getUrlForApp(SECURITY_APP_NAME, { path: cloudPosturePages.findings.path }),
+      url: application.getUrlForApp(SECURITY_APP_NAME, {
+        path: cloudPosturePages.findings.path,
+      }),
       description: i18n.translate(
         'xpack.csp.createPackagePolicy.customAssetsTab.findingsViewLabel',
         { defaultMessage: 'View CSP Findings ' }
@@ -42,7 +60,7 @@ export const CspCustomAssetsExtension = () => {
     },
   ];
 
-  return <CustomAssetsAccordion views={views} initialIsOpen />;
+  return <CustomAssetsAccordion views={isCNVM ? viewsCNVM : views} initialIsOpen />;
 };
 // eslint-disable-next-line import/no-default-export
 export { CspCustomAssetsExtension as default };
