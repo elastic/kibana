@@ -11,6 +11,7 @@ import {
   addExceptionListItem,
   deleteExceptionListById,
   deleteExceptionListItemById,
+  duplicateExceptionList,
   exportExceptionList,
   fetchExceptionListById,
   fetchExceptionListItemById,
@@ -726,6 +727,32 @@ describe('Exceptions Lists API', () => {
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual(blob);
+    });
+  });
+
+  describe('#duplicateExceptionList', () => {
+    beforeEach(() => {
+      httpMock.fetch.mockResolvedValue(getExceptionListSchemaMock());
+    });
+
+    test('it invokes "duplicateExceptionList" with expected url and body values', async () => {
+      await duplicateExceptionList({
+        http: httpMock,
+        includeExpiredExceptions: false,
+        listId: 'my_list',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+
+      expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/_duplicate', {
+        method: 'POST',
+        query: {
+          include_expired_exceptions: false,
+          list_id: 'my_list',
+          namespace_type: 'single',
+        },
+        signal: abortCtrl.signal,
+      });
     });
   });
 });

@@ -88,6 +88,7 @@ packages/content-management/content_editor @elastic/appex-sharedux
 examples/content_management_examples @elastic/appex-sharedux
 src/plugins/content_management @elastic/appex-sharedux
 packages/content-management/table_list @elastic/appex-sharedux
+packages/kbn-content-management-utils @elastic/kibana-data-discovery
 examples/controls_example @elastic/kibana-presentation
 src/plugins/controls @elastic/kibana-presentation
 src/core @elastic/kibana-core
@@ -455,6 +456,7 @@ src/plugins/maps_ems @elastic/kibana-gis
 x-pack/plugins/maps @elastic/kibana-gis
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/date_picker @elastic/ml-ui
+x-pack/packages/ml/error_utils @elastic/ml-ui
 x-pack/packages/ml/is_defined @elastic/ml-ui
 x-pack/packages/ml/is_populated_object @elastic/ml-ui
 x-pack/packages/ml/local_storage @elastic/ml-ui
