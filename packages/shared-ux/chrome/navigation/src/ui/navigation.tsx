@@ -17,6 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
+import { getI18nStrings } from './i18n_strings';
 import { NavigationBucketProps, NavigationProps } from '../../types';
 import { NavigationModel } from '../model';
 import { useNavigation } from '../services';
@@ -35,6 +36,8 @@ export const Navigation = (props: NavigationProps) => {
   const solutions = nav.getSolutions();
   const { analytics, ml, devTools, management } = nav.getPlatform();
 
+  const strings = getI18nStrings();
+
   const NavHeader = () => {
     const homeUrl = services.basePath.prepend(props.homeHref);
     const navigateHome = (event: React.MouseEvent) => {
@@ -45,7 +48,7 @@ export const Navigation = (props: NavigationProps) => {
       loadingCount === 0 ? (
         <EuiHeaderLogo
           iconType="logoElastic"
-          aria-label="Go to home page"
+          aria-label={strings.headerLogoAriaText}
           onClick={navigateHome}
           data-test-subj="nav-header-logo"
         />
@@ -79,7 +82,7 @@ export const Navigation = (props: NavigationProps) => {
             color="text"
             data-test-subj="nav-header-link-to-projects"
           >
-            <EuiCollapsibleNavGroup iconType="spaces" title="My projects" />
+            <EuiCollapsibleNavGroup iconType="spaces" title={strings.linkToCloudProjects} />
           </EuiLink>
         );
       case 'deployments':
@@ -89,7 +92,7 @@ export const Navigation = (props: NavigationProps) => {
             color="text"
             data-test-subj="nav-header-link-to-deployments"
           >
-            <EuiCollapsibleNavGroup iconType="spaces" title="My deployments" />
+            <EuiCollapsibleNavGroup iconType="spaces" title={strings.linkToCloudDeployments} />
           </EuiLink>
         );
       default:
