@@ -473,6 +473,57 @@ describe('Task Run Statistics', () => {
         }
       });
     });
+
+    test('returns a running count of load with custom window size', async () => {
+      const loads = [40, 80, 100, 100, 10, 10, 60, 40];
+      const events$ = new Subject<TaskLifecycleEvent>();
+      const taskPollingLifecycle = taskPollingLifecycleMock.create({
+        events$: events$ as Observable<TaskLifecycleEvent>,
+      });
+
+      const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
+        taskPollingLifecycle,
+        new AdHocTaskCounter(),
+        pollInterval,
+        3
+      );
+
+      function expectWindowEqualsUpdate(
+        taskStat: AggregatedStat<BackgroundTaskUtilizationStat>,
+        window: number[]
+      ) {
+        expect(taskStat.value.load).toEqual(mean(window));
+      }
+
+      return new Promise<void>((resolve) => {
+        BackgroundTaskUtilizationAggregator.pipe(
+          // skip initial stat which is just initialized data which
+          // ensures we don't stall on combineLatest
+          skip(1),
+          map(({ key, value }: AggregatedStat<BackgroundTaskUtilizationStat>) => ({
+            key,
+            value,
+          })),
+          take(loads.length),
+          bufferCount(loads.length)
+        ).subscribe((taskStats: Array<AggregatedStat<BackgroundTaskUtilizationStat>>) => {
+          expectWindowEqualsUpdate(taskStats[0], loads.slice(0, 1));
+          expectWindowEqualsUpdate(taskStats[1], loads.slice(0, 2));
+          expectWindowEqualsUpdate(taskStats[2], loads.slice(0, 3));
+          // from the 4th value, begin to drop old values as our window is 3
+          expectWindowEqualsUpdate(taskStats[3], loads.slice(1, 4));
+          expectWindowEqualsUpdate(taskStats[4], loads.slice(2, 5));
+          expectWindowEqualsUpdate(taskStats[5], loads.slice(3, 6));
+          expectWindowEqualsUpdate(taskStats[6], loads.slice(4, 7));
+          expectWindowEqualsUpdate(taskStats[7], loads.slice(5, 8));
+          resolve();
+        });
+
+        for (const load of loads) {
+          events$.next(mockTaskStatEvent('workerUtilization', load));
+        }
+      });
+    });
   });
 
   describe('summarizeUtilizationStats', () => {

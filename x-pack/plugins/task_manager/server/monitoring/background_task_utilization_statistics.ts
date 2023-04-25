@@ -22,8 +22,8 @@ import {
 import { MonitoredStat } from './monitoring_stats_stream';
 import { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { createRunningAveragedStat } from './task_run_calcultors';
+import { DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW } from '../config';
 
-const BACKGROUND_UTILIZATION_LOAD_RUNNING_AVERAGE_WINDOW_SIZE = 5; // Average over 5 polling cycles which is 15 seconds with the default polling interval
 export interface PublicBackgroundTaskUtilizationStat extends JsonObject {
   load: number;
 }
@@ -52,7 +52,8 @@ interface AdhocTaskStat extends TaskStat {
 export function createBackgroundTaskUtilizationAggregator(
   taskPollingLifecycle: TaskPollingLifecycle,
   adHocTaskCounter: AdHocTaskCounter,
-  pollInterval: number
+  pollInterval: number,
+  workerUtilizationRunningAverageWindowSize: number = DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW
 ): AggregatedStatProvider<BackgroundTaskUtilizationStat> {
   const taskRunEventToAdhocStat = createTaskRunEventToAdhocStat();
   const taskRunAdhocEvents$: Observable<Pick<BackgroundTaskUtilizationStat, 'adhoc'>> =
@@ -82,7 +83,9 @@ export function createBackgroundTaskUtilizationAggregator(
       })
     );
 
-  const taskManagerUtilizationEventToLoadStat = createTaskRunEventToLoadStat();
+  const taskManagerUtilizationEventToLoadStat = createTaskRunEventToLoadStat(
+    workerUtilizationRunningAverageWindowSize
+  );
   const taskManagerWorkerUtilizationEvent$: Observable<
     Pick<BackgroundTaskUtilizationStat, 'load'>
   > = taskPollingLifecycle.events.pipe(
@@ -239,10 +242,8 @@ function createTaskRunEventToRecurringStat() {
   };
 }
 
-function createTaskRunEventToLoadStat() {
-  const loadQueue = createRunningAveragedStat<number>(
-    BACKGROUND_UTILIZATION_LOAD_RUNNING_AVERAGE_WINDOW_SIZE
-  );
+function createTaskRunEventToLoadStat(workerUtilizationRunningAverageWindowSize: number) {
+  const loadQueue = createRunningAveragedStat<number>(workerUtilizationRunningAverageWindowSize);
   return (load: number): Pick<BackgroundTaskUtilizationStat, 'load'> => {
     const historicalLoad = loadQueue(load);
     return {

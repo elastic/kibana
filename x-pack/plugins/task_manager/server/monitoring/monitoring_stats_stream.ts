@@ -109,7 +109,8 @@ export function createAggregators(
       createBackgroundTaskUtilizationAggregator(
         taskPollingLifecycle,
         adHocTaskCounter,
-        config.poll_interval
+        config.poll_interval,
+        config.worker_utilization_running_average_window
       )
     );
   }

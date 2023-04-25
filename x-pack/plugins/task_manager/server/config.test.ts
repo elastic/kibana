@@ -44,6 +44,7 @@ describe('config validation', () => {
           "exclude_task_types": Array [],
         },
         "version_conflict_threshold": 80,
+        "worker_utilization_running_average_window": 5,
       }
     `);
   });
@@ -95,6 +96,7 @@ describe('config validation', () => {
           "exclude_task_types": Array [],
         },
         "version_conflict_threshold": 80,
+        "worker_utilization_running_average_window": 5,
       }
     `);
   });
@@ -149,6 +151,7 @@ describe('config validation', () => {
           "exclude_task_types": Array [],
         },
         "version_conflict_threshold": 80,
+        "worker_utilization_running_average_window": 5,
       }
     `);
   });
