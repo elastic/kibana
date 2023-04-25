@@ -479,6 +479,7 @@ x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
 x-pack/packages/observability/alert_details @elastic/actionable-observability
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
+x-pack/plugins/observability_onboarding @elastic/apm-ui
 x-pack/plugins/observability @elastic/actionable-observability
 x-pack/plugins/observability_shared @elastic/actionable-observability
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
@@ -776,21 +777,20 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 
 ### Observability Plugins
 
-# Observability Shared
-/x-pack/plugins/observability/public/components/shared/date_picker/ @elastic/uptime
+# Observability Shared App
+x-pack/plugins/observability_shared @elastic/observability-ui
 
-# Unified Observability - on hold due to team capacity shortage
-# For now, if you're changing these pages, get a review from someone who understand the changes
-# /x-pack/plugins/observability/public/context @elastic/unified-observability
-# /x-pack/test/observability_functional @elastic/unified-observability
+# Observability App
+x-pack/plugins/observability @elastic/actionable-observability
 
-# Home/Overview/Landing Pages
-/x-pack/plugins/observability/public/pages/home @elastic/observability-ui
-/x-pack/plugins/observability/public/pages/landing @elastic/observability-ui
-/x-pack/plugins/observability/public/pages/overview @elastic/observability-ui
+# Observability App > Overview page
+x-pack/plugins/observability/public/pages/overview @elastic/observability-ui
 
-# Actionable Observability
-/x-pack/test/observability_functional @elastic/actionable-observability
+# Observability App > Alert Details
+x-pack/packages/observability/alert_details @elastic/actionable-observability
+
+# Observability App > Functional Tests
+x-pack/test/observability_functional @elastic/actionable-observability
 
 # Observability robots
 /.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots
