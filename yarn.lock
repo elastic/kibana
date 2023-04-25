@@ -4777,6 +4777,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-mocks@link:x-pack/plugins/reporting_mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-plugin@link:x-pack/plugins/reporting":
   version "0.0.0"
   uid ""

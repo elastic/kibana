@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/reporting-mocks",
+  "owner": "@elastic/appex-sharedux",
+  "plugin": {
+    "id": "reportingMocks",
+    "server": true,
+    "browser": false,
+    "configPath": ["xpack"],
+    "requiredPlugins": ["reporting"],
+    "optionalPlugins": [],
+    "requiredBundles": [],
+  },
+}

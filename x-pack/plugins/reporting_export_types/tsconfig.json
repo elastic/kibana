@@ -28,6 +28,7 @@
     "@kbn/licensing-plugin",
     "@kbn/security-plugin",
     "@kbn/task-manager-plugin",
+    "@kbn/reporting-mocks",
   ],
   "exclude": [
     "target/**/*",
