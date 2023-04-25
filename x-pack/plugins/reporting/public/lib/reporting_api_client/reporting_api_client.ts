@@ -17,14 +17,13 @@ import {
   ManagementLinkFn,
   ReportApiJSON,
 } from '@kbn/reporting-export-types/common';
-import { buildKibanaPath } from '../../../common/build_kibana_path';
+import { buildKibanaPath, getRedirectAppPath } from '@kbn/reporting-common';
 import {
   API_BASE_GENERATE,
   API_BASE_URL,
   API_GENERATE_IMMEDIATE,
   API_LIST_URL,
   API_MIGRATE_ILM_POLICY_URL,
-  getRedirectAppPath,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
 import { add } from '../../notifier/job_completion_notifications';
