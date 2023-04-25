@@ -17,18 +17,19 @@ import { useLeftPanelContext } from '../context';
 import { getSessionViewProcessIndex } from '../../../common/components/header_actions/helpers';
 
 export const SESSION_VIEW_ID = 'session_view';
-const SESSION_ENTITY_ID = 'process.entry_leader.entity_id';
-const SESSION_START_TIME = 'process.entry_leader.start';
+export const SESSION_ENTITY_ID = 'process.entry_leader.entity_id';
+export const SESSION_START_TIME = 'process.entry_leader.start';
+export const KIBANA_ANCESTOR_INDEX = 'kibana.alert.ancestors.index';
 
 /**
  * Session view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const SessionView: FC = () => {
   const { sessionView } = useKibana().services;
-  const { getFieldsData } = useLeftPanelContext();
+  const { getFieldsData, indexName } = useLeftPanelContext();
 
   const processIndex = getSessionViewProcessIndex(
-    getField(getFieldsData('kibana.alert.ancestors.index')) || getField(getFieldsData('_index'))
+    getField(getFieldsData(KIBANA_ANCESTOR_INDEX)) || indexName
   );
   const sessionEntityId = getField(getFieldsData(SESSION_ENTITY_ID));
   const sessionStartTime = getField(getFieldsData(SESSION_START_TIME));
