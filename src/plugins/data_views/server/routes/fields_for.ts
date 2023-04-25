@@ -17,10 +17,10 @@ import {
 import { IndexPatternsFetcher } from '../fetcher';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
 
-const parseMetaFields = (metaFields: string | string[]) => {
+const parseMetaFields = (metaFields: string | string[]): string[] => {
   let parsedFields: string[] = [];
   if (typeof metaFields === 'string') {
-    parsedFields = JSON.parse(metaFields);
+    parsedFields = [metaFields];
   } else {
     parsedFields = metaFields;
   }
