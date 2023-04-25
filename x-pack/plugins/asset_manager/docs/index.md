@@ -78,7 +78,7 @@ _Notes:_
 <summary>Invalid request with type and ean both specified</summary>
 
 ```curl
-GET /assets?from=2023-03-25T17:44:44.000Z&type=k8s.pod&ean=k8s.pod:123
+GET kbn:/api/asset-manager/assets?from=2023-03-25T17:44:44.000Z&type=k8s.pod&ean=k8s.pod:123
 
 {
   "statusCode": 400,
@@ -94,7 +94,7 @@ GET /assets?from=2023-03-25T17:44:44.000Z&type=k8s.pod&ean=k8s.pod:123
 <summary>All assets JSON response</summary>
 
 ```curl
-GET /assets?from=2023-03-25T17:44:44.000Z&to=2023-03-25T18:44:44.000Z
+GET kbn:/api/asset-manager/assets?from=2023-03-25T17:44:44.000Z&to=2023-03-25T18:44:44.000Z
 
 {
   "results": [
@@ -273,7 +273,7 @@ GET /assets?from=2023-03-25T17:44:44.000Z&to=2023-03-25T18:44:44.000Z
 <summary>Assets by type JSON response</summary>
 
 ```curl
-GET /assets?from=2023-03-25T17:44:44.000Z&to=2023-03-25T18:44:44.000Z&type=k8s.pod
+GET kbn:/api/asset-manager/assets?from=2023-03-25T17:44:44.000Z&to=2023-03-25T18:44:44.000Z&type=k8s.pod
 
 {
   "results": [
@@ -378,7 +378,7 @@ GET /assets?from=2023-03-25T17:44:44.000Z&to=2023-03-25T18:44:44.000Z&type=k8s.p
 <summary>Assets by EAN JSON response</summary>
 
 ```curl
-GET /assets?from=2023-03-25T17:44:44.000Z&to=2023-03-25T18:44:44.000Z&ean=k8s.node:node-101&ean=k8s.pod:pod-6r1z
+GET kbn:/api/asset-manager/assets?from=2023-03-25T17:44:44.000Z&to=2023-03-25T18:44:44.000Z&ean=k8s.node:node-101&ean=k8s.pod:pod-6r1z
 
 {
   "results": [
@@ -427,7 +427,7 @@ Returns assets found in the two time ranges, split by what occurs in only either
 <summary>Request where comparison range is missing assets that are found in the baseline range</summary>
 
 ```curl
-GET /assets/diff?aFrom=2022-02-07T00:00:00.000Z&aTo=2022-02-07T01:30:00.000Z&bFrom=2022-02-07T01:00:00.000Z&bTo=2022-02-07T02:00:00.000Z
+GET kbn:/api/asset-manager/assets/diff?aFrom=2022-02-07T00:00:00.000Z&aTo=2022-02-07T01:30:00.000Z&bFrom=2022-02-07T01:00:00.000Z&bTo=2022-02-07T02:00:00.000Z
 
 {
   "onlyInA": [
@@ -589,7 +589,7 @@ GET /assets/diff?aFrom=2022-02-07T00:00:00.000Z&aTo=2022-02-07T01:30:00.000Z&bFr
 <summary>Request where baseline range is missing assets that are found in the comparison range</summary>
 
 ```curl
-GET /assets/diff?aFrom=2022-02-07T01:00:00.000Z&aTo=2022-02-07T01:30:00.000Z&bFrom=2022-02-07T01:00:00.000Z&bTo=2022-02-07T03:00:00.000Z
+GET kbn:/api/asset-manager/assets/diff?aFrom=2022-02-07T01:00:00.000Z&aTo=2022-02-07T01:30:00.000Z&bFrom=2022-02-07T01:00:00.000Z&bTo=2022-02-07T03:00:00.000Z
 
 {
   "onlyInA": [],
@@ -751,7 +751,7 @@ GET /assets/diff?aFrom=2022-02-07T01:00:00.000Z&aTo=2022-02-07T01:30:00.000Z&bFr
 <summary>Request where each range is missing assets found in the other range</summary>
 
 ```curl
-GET /assets/diff?aFrom=2022-02-07T00:00:00.000Z&aTo=2022-02-07T01:30:00.000Z&bFrom=2022-02-07T01:00:00.000Z&bTo=2022-02-07T03:00:00.000Z
+GET kbn:/api/asset-manager/assets/diff?aFrom=2022-02-07T00:00:00.000Z&aTo=2022-02-07T01:30:00.000Z&bFrom=2022-02-07T01:00:00.000Z&bTo=2022-02-07T03:00:00.000Z
 
 {
   "onlyInA": [
@@ -934,7 +934,7 @@ GET /assets/diff?aFrom=2022-02-07T00:00:00.000Z&aTo=2022-02-07T01:30:00.000Z&bFr
 <summary>Request where each range is missing assets found in the other range, but restricted by type</summary>
 
 ```curl
-GET /assets/diff?aFrom=2022-02-07T00:00:00.000Z&aTo=2022-02-07T01:30:00.000Z&bFrom=2022-02-07T01:00:00.000Z&bTo=2022-02-07T03:00:00.000Z&type=k8s.pod
+GET kbn:/api/asset-manager/assets/diff?aFrom=2022-02-07T00:00:00.000Z&aTo=2022-02-07T01:30:00.000Z&bFrom=2022-02-07T01:00:00.000Z&bTo=2022-02-07T03:00:00.000Z&type=k8s.pod
 
 {
   "onlyInA": [
@@ -1060,7 +1060,7 @@ Returns assets related to the provided ean. The relation can be one of ancestors
 <summary>Request looking for ancestors</summary>
 
 ```curl
-GET /assets/related?ean=k8s.node:node-101&relation=ancestors&maxDistance=1&from=2023-04-18T13:10:13.111Z&to=2023-04-18T15:10:13.111Z
+GET kbn:/api/asset-manager/assets/related?ean=k8s.node:node-101&relation=ancestors&maxDistance=1&from=2023-04-18T13:10:13.111Z&to=2023-04-18T15:10:13.111Z
 {
     "results": {
         "primary": {
@@ -1106,7 +1106,7 @@ GET /assets/related?ean=k8s.node:node-101&relation=ancestors&maxDistance=1&from=
 <summary>Request looking for descendants</summary>
 
 ```curl
-GET /assets/related?ean=k8s.cluster:cluster-001&relation=descendants&maxDistance=1&from=2023-04-18T13:10:13.111Z&to=2023-04-18T15:10:13.111Z
+GET kbn:/api/asset-manager/assets/related?ean=k8s.cluster:cluster-001&relation=descendants&maxDistance=1&from=2023-04-18T13:10:13.111Z&to=2023-04-18T15:10:13.111Z
 
 {
     "results": {
@@ -1187,7 +1187,7 @@ GET /assets/related?ean=k8s.cluster:cluster-001&relation=descendants&maxDistance
 <summary>Request looking for references</summary>
 
 ```curl
-GET /assets/related?ean=k8s.pod:pod-200xrg1&relation=references&maxDistance=1&from=2023-04-18T13:10:13.111Z&to=2023-04-18T15:10:13.111Z
+GET kbn:/api/asset-manager/assets/related?ean=k8s.pod:pod-200xrg1&relation=references&maxDistance=1&from=2023-04-18T13:10:13.111Z&to=2023-04-18T15:10:13.111Z
 
 {
     "results": {
@@ -1231,7 +1231,7 @@ GET /assets/related?ean=k8s.pod:pod-200xrg1&relation=references&maxDistance=1&fr
 <summary>Request with type filter and non-default maxDistance</summary>
 
 ```curl
-GET /assets/related?ean=k8s.cluster:cluster-001&relation=descendants&maxDistance=2&from=2023-04-18T13:10:13.111Z&to=2023-04-18T15:10:13.111Z&type=k8s.pod
+GET kbn:/api/asset-manager/assets/related?ean=k8s.cluster:cluster-001&relation=descendants&maxDistance=2&from=2023-04-18T13:10:13.111Z&to=2023-04-18T15:10:13.111Z&type=k8s.pod
 
 {
     "results": {
