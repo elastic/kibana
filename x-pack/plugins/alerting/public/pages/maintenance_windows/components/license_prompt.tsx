@@ -14,7 +14,7 @@ const title = <h2 data-test-subj="license-prompt-title">{i18n.UPGRADE_TO_PLATINU
 const body = (
   <FormattedMessage
     data-test-subj="license-prompt-body"
-    defaultMessage="Maintenance windows is available when you have the {appropriateLicense}, are using a {cloud}, or are testing out a Free Trial."
+    defaultMessage="Use a {cloud}, start a trial, or upgrade your {appropriateLicense}."
     id="xpack.alerting.maintenanceWindows.callout.message"
     values={{
       appropriateLicense: (
