@@ -9,8 +9,22 @@ import { schema } from '@kbn/config-schema';
 
 export const RotateKeyPairSchema = {
   query: schema.maybe(
-    schema.object({
-      acknowledge: schema.boolean({ defaultValue: false }),
-    })
+    schema.object(
+      {
+        acknowledge: schema.boolean({
+          defaultValue: false,
+        }),
+      },
+      {
+        defaultValue: { acknowledge: false },
+        validate: (value: { acknowledge: boolean }) => {
+          if (!value.acknowledge) {
+            throw new Error(
+              'You must acknowledge the risks of rotating the key pair with acknowledge=true in the request parameters.'
+            );
+          }
+        },
+      }
+    )
   ),
 };

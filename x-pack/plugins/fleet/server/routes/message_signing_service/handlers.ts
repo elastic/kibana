@@ -17,16 +17,7 @@ export const rotateKeyPairHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof RotateKeyPairSchema.query>,
   undefined
-> = async (_, request, response) => {
-  if (!request.query?.acknowledge) {
-    return response.ok({
-      body: {
-        message:
-          'You must acknowledge the risks of rotating the key pair with acknowledge=true in the request parameters.',
-      },
-    });
-  }
-
+> = async (_, __, response) => {
   try {
     await appContextService.getMessageSigningService()?.rotateKeyPair();
     return response.ok({
