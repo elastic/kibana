@@ -101,4 +101,24 @@ describe('getShouldRefresh', () => {
       expect(getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(true);
     });
   });
+
+  describe('key without custom diffing function (syncColors)', () => {
+    test('should return false when syncColors do not change', () => {
+      const lastInput = {
+        syncColors: false,
+      } as unknown as DashboardContainerInput;
+      expect(getShouldRefresh.bind(dashboardContainerMock)(lastInput, lastInput)).toBe(false);
+    });
+
+    test('should return true when syncColors change', () => {
+      const pinnedFilter = pinFilter(existsFilter);
+      const lastInput = {
+        syncColors: false,
+      } as unknown as DashboardContainerInput;
+      const input = {
+        syncColors: true,
+      } as unknown as DashboardContainerInput;
+      expect(getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(true);
+    });
+  });
 });
