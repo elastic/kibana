@@ -18,7 +18,7 @@ export const RotateKeyPairSchema = {
       {
         defaultValue: { acknowledge: false },
         validate: (value: { acknowledge: boolean }) => {
-          if (!value.acknowledge) {
+          if (!value || !value.acknowledge) {
             throw new Error(
               'You must acknowledge the risks of rotating the key pair with acknowledge=true in the request parameters.'
             );

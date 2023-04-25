@@ -8,15 +8,35 @@
 import { RotateKeyPairSchema } from './message_signing_service';
 
 describe('RotateKeyPairSchema', () => {
-  it('should allow without any query', () => {
-    expect(() => RotateKeyPairSchema.query.validate({})).not.toThrow();
-  });
-
-  it('should not allow non boolean values for acknowledge', () => {
+  it('should throw on `false` values for acknowledge', () => {
     expect(() =>
       RotateKeyPairSchema.query.validate({
-        acknowledge: 1,
+        acknowledge: false,
       })
-    ).toThrowError('[acknowledge]: expected value of type [boolean] but got [number]');
+    ).toThrowError(
+      'You must acknowledge the risks of rotating the key pair with acknowledge=true in the request parameters.'
+    );
+  });
+
+  it('should allow without any query', () => {
+    expect(() => RotateKeyPairSchema.query.validate({})).toThrowError(
+      'You must acknowledge the risks of rotating the key pair with acknowledge=true in the request parameters.'
+    );
+  });
+
+  it.each([1, 'string'])('should not allow non-boolean `%s` values for acknowledge', (value) => {
+    expect(() =>
+      RotateKeyPairSchema.query.validate({
+        acknowledge: value,
+      })
+    ).toThrowError(`[acknowledge]: expected value of type [boolean] but got [${typeof value}]`);
+  });
+
+  it('should not throw on `true` values for acknowledge', () => {
+    expect(() =>
+      RotateKeyPairSchema.query.validate({
+        acknowledge: true,
+      })
+    ).not.toThrow();
   });
 });
