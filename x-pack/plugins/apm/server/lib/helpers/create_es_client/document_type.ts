@@ -88,6 +88,10 @@ const documentTypeConfigMap: Record<
       },
     }),
   },
+  [ApmDocumentType.ErrorEvent]: {
+    processorEvent: ProcessorEvent.error,
+    rollupIntervals: [RollupInterval.None],
+  },
 };
 
 type DocumentTypeConfigOf<TApmDocumentType extends ApmDocumentType> =
