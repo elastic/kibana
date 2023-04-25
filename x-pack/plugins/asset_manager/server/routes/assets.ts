@@ -96,7 +96,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       // What if maxDistance is below 1?
       const maxDistance = req.query.maxDistance ? Math.min(req.query.maxDistance, 5) : 1; // Validate maxDistance not larger than 5
       const size = req.query.size ? Math.min(req.query.size, 100) : 10; // Do we need pagination and sorting? Yes.
-      const type = validateTypeParameter(req.query.type);
+      const type = toArray<AssetType>(req.query.type);
       // Validate from and to to be ISO string only. Or use io-ts to coerce.
 
       try {
@@ -133,7 +133,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
     },
     async (context, req, res) => {
       const { aFrom, aTo, bFrom, bTo } = req.query;
-      const type = validateTypeParameter(req.query.type);
+      const type = toArray<AssetType>(req.query.type);
 
       if (new Date(aFrom) > new Date(aTo)) {
         return res.badRequest({
@@ -187,18 +187,12 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
   );
 }
 
-function validateTypeParameter(type?: AssetType | AssetType[]) {
-  if (!type) {
-    return undefined;
+function toArray<T>(maybeArray: T | T[] | undefined): T[] {
+  if (!maybeArray) {
+    return [];
   }
-
-  if (Array.isArray(type)) {
-    if (type.length !== 0) {
-      return type;
-    }
-
-    return undefined;
+  if (Array.isArray(maybeArray)) {
+    return maybeArray;
   }
-
-  return [type];
+  return [maybeArray];
 }
