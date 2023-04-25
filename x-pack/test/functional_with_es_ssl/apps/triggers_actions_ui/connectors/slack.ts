@@ -113,13 +113,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         connectorId: string;
       }) => {
         await testSubjects.click('.slack-alerting-ActionTypeSelectOption'); // "Slack" in connector list
-        // @xavier start here
-        // console.log('opening', name, 'connectorId', connectorId);
-        // const comboBoxInputs = await find.allByCssSelector(
-        //   '[data-test-subj="comboBoxInput"]',
-        //   1000
-        // );
-        // await comboBoxInputs[1].click();
+        await testSubjects.click('selectActionConnector-.slack-0');
+        await testSubjects.click(`dropdown-connector-${connectorId}`);
       };
 
       before(async () => {
