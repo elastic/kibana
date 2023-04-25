@@ -28,7 +28,12 @@ export const getErrorsViewerTableColumns = (): Array<EuiTableFieldDataColumnType
   {
     field: 'indexName',
     name: i18n.INDEX,
-    render: (indexName) => (indexName != null && indexName !== '' ? indexName : EMPTY_PLACEHOLDER),
+    render: (indexName: string | null) =>
+      indexName != null && indexName !== '' ? (
+        <span data-test-subj="indexName">{indexName}</span>
+      ) : (
+        <span data-test-subj="emptyPlaceholder">{EMPTY_PLACEHOLDER}</span>
+      ),
     sortable: false,
     truncateText: false,
     width: '25%',
@@ -36,7 +41,7 @@ export const getErrorsViewerTableColumns = (): Array<EuiTableFieldDataColumnType
   {
     field: 'error',
     name: i18n.ERROR,
-    render: (errorText) => <EuiCode>{errorText}</EuiCode>,
+    render: (errorText) => <EuiCode data-test-subj="error">{errorText}</EuiCode>,
     sortable: false,
     truncateText: false,
     width: '50%',

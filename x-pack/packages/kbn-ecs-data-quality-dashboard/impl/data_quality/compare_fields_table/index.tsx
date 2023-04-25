@@ -36,11 +36,12 @@ const CompareFieldsTableComponent: React.FC<Props> = ({
   return (
     <>
       <EuiTitle size="xs">
-        <>{title}</>
+        <span data-test-subj="title">{title}</span>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiInMemoryTable
         columns={columns}
+        data-test-subj="table"
         items={enrichedFieldMetadata}
         search={search}
         sorting={true}
