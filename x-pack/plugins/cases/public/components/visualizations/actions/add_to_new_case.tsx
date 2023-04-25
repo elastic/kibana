@@ -110,8 +110,8 @@ export const createAddToNewCaseLensAction = ({
         return (
           <CasesContext
             owner={Object.values(OWNER_INFO)
-              .map((i) => i.appId)
-              .filter((id) => id === currentAppId)}
+              .filter((info) => info.appId === currentAppId)
+              .map((i) => i.id)}
             permissions={casesCapabilities}
           >
             <FlyoutChildren />
