@@ -102,7 +102,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         description={
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.startDeployment.deploymentIdHelp"
-            defaultMessage="Specify unique identifier for the model deployment"
+            defaultMessage="Specify unique identifier for the model deployment."
           />
         }
       >
