@@ -16,6 +16,7 @@ import type {
 const UNALLOWED_VALUES_API_ROUTE = '/internal/ecs_data_quality_dashboard/unallowed_field_values';
 
 export const isBucket = (maybeBucket: unknown): maybeBucket is Bucket =>
+  maybeBucket != null &&
   typeof (maybeBucket as Bucket).key === 'string' &&
   typeof (maybeBucket as Bucket).doc_count === 'number';
 
