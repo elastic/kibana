@@ -225,13 +225,14 @@ describe(' Filter Group Component ', () => {
 
     it('should call controlGroupTransform which returns object WITHOUT placeholder when type != OPTION_LIST_CONTROL on opening Flyout', async () => {
       const returnValueWatcher = jest.fn();
-      controlGroupMock.openAddDataControlFlyout.mockImplementationOnce((fn) => {
-        if (fn) {
-          const returnValue = fn({}, 'NOT_OPTIONS_LIST_CONTROL');
-          returnValueWatcher(returnValue);
+      controlGroupMock.openAddDataControlFlyout.mockImplementationOnce(
+        ({ controlInputTransform }) => {
+          if (controlInputTransform) {
+            const returnValue = controlInputTransform({}, 'NOT_OPTIONS_LIST_CONTROL');
+            returnValueWatcher(returnValue);
+          }
         }
-      });
-
+      );
       render(<TestComponent />);
       // delete some panels
       const newInputData = {
@@ -261,12 +262,14 @@ describe(' Filter Group Component ', () => {
 
     it('should call controlGroupTransform which returns object WITH correct placeholder value when type = OPTION_LIST_CONTROL on opening Flyout', async () => {
       const returnValueWatcher = jest.fn();
-      controlGroupMock.openAddDataControlFlyout.mockImplementationOnce((fn) => {
-        if (fn) {
-          const returnValue = fn({}, OPTIONS_LIST_CONTROL);
-          returnValueWatcher(returnValue);
+      controlGroupMock.openAddDataControlFlyout.mockImplementationOnce(
+        ({ controlInputTransform }) => {
+          if (controlInputTransform) {
+            const returnValue = controlInputTransform({}, OPTIONS_LIST_CONTROL);
+            returnValueWatcher(returnValue);
+          }
         }
-      });
+      );
 
       render(<TestComponent />);
       // delete some panels
