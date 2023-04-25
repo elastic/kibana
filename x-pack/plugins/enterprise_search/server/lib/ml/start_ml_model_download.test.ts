@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-jest.mock('@kbn/ml-plugin/server/saved_objects', () => ({
-  syncSavedObjectsFactory: jest.fn(),
-}));
-
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { SyncSavedObjectResponse } from '@kbn/ml-plugin/common/types/saved_objects';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 import { MlClient } from '@kbn/ml-plugin/server/lib/ml_client/types';
-import * as mockMLSavedObjectService from '@kbn/ml-plugin/server/saved_objects';
 
 import { MlModelDeploymentState } from '../../../common/types/ml';
 
@@ -24,7 +17,6 @@ import { startMlModelDownload } from './start_ml_model_download';
 
 describe('startMlModelDownload', () => {
   const knownModelName = '.elser_model_1_SNAPSHOT';
-  const mockIScopedClusterClient = {};
   const mockMlClient = {
     putTrainedModel: jest.fn(),
     startTrainedModelDeployment: jest.fn(),
@@ -40,13 +32,7 @@ describe('startMlModelDownload', () => {
 
   it('should error when there is no trained model provider', () => {
     expect(() =>
-      startMlModelDownload(
-        knownModelName,
-        mockIScopedClusterClient as unknown as IScopedClusterClient,
-        mockMlClient as unknown as MlClient,
-        undefined,
-        mockMLSavedObjectService as unknown as mockMLSavedObjectService.MLSavedObjectService
-      )
+      startMlModelDownload(knownModelName, mockMlClient as unknown as MlClient, undefined)
     ).rejects.toThrowError('Machine Learning is not enabled');
   });
 
@@ -54,10 +40,8 @@ describe('startMlModelDownload', () => {
     try {
       await startMlModelDownload(
         'unknownModelName',
-        mockIScopedClusterClient as unknown as IScopedClusterClient,
         mockMlClient as unknown as MlClient,
-        mockTrainedModelsProvider as unknown as MlTrainedModels,
-        mockMLSavedObjectService as unknown as mockMLSavedObjectService.MLSavedObjectService
+        mockTrainedModelsProvider as unknown as MlTrainedModels
       );
     } catch (e) {
       const asResponseError = e as unknown as ElasticsearchResponseError;
@@ -79,10 +63,8 @@ describe('startMlModelDownload', () => {
 
     const response = await startMlModelDownload(
       knownModelName,
-      mockIScopedClusterClient as unknown as IScopedClusterClient,
       mockMlClient as unknown as MlClient,
-      mockTrainedModelsProvider as unknown as MlTrainedModels,
-      mockMLSavedObjectService as unknown as mockMLSavedObjectService.MLSavedObjectService
+      mockTrainedModelsProvider as unknown as MlTrainedModels
     );
 
     expect(response.deploymentState).toEqual(MlModelDeploymentState.Starting);
@@ -110,30 +92,14 @@ describe('startMlModelDownload', () => {
         })
       );
 
-    (mockMLSavedObjectService.syncSavedObjectsFactory as jest.Mock).mockReturnValue({
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      syncSavedObjects: async (_simulate: boolean = false) => {
-        const results: SyncSavedObjectResponse = {
-          datafeedsAdded: {},
-          datafeedsRemoved: {},
-          savedObjectsCreated: {},
-          savedObjectsDeleted: {},
-        };
-        return results;
-      },
-    });
-
     mockMlClient.putTrainedModel.mockImplementation(async () => {});
 
     const response = await startMlModelDownload(
       knownModelName,
-      mockIScopedClusterClient as unknown as IScopedClusterClient,
       mockMlClient as unknown as MlClient,
-      mockTrainedModelsProvider as unknown as MlTrainedModels,
-      mockMLSavedObjectService as unknown as mockMLSavedObjectService.MLSavedObjectService
+      mockTrainedModelsProvider as unknown as MlTrainedModels
     );
     expect(response.deploymentState).toEqual(MlModelDeploymentState.Downloading);
     expect(mockMlClient.putTrainedModel).toBeCalledTimes(1);
-    expect(mockMLSavedObjectService.syncSavedObjectsFactory).toBeCalledTimes(1);
   });
 });

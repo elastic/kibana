@@ -9,7 +9,6 @@ import { MlPutTrainedModelRequest } from '@elastic/elasticsearch/lib/api/typesWi
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 import { MlClient } from '@kbn/ml-plugin/server/lib/ml_client';
-import { MLSavedObjectService, syncSavedObjectsFactory } from '@kbn/ml-plugin/server/saved_objects';
 
 import { MlModelDeploymentState, MlModelDeploymentStatus } from '../../../common/types/ml';
 import {
@@ -22,10 +21,8 @@ import { acceptableModelNames } from './start_ml_model_deployment';
 
 export const startMlModelDownload = async (
   modelName: string,
-  clusterClient: IScopedClusterClient,
   mlClient: MlClient | undefined,
-  trainedModelsProvider: MlTrainedModels | undefined,
-  savedObjectService: MLSavedObjectService | undefined
+  trainedModelsProvider: MlTrainedModels | undefined
 ): Promise<MlModelDeploymentStatus> => {
   if (!trainedModelsProvider || !mlClient) {
     throw new Error('Machine Learning is not enabled');
@@ -66,10 +63,6 @@ export const startMlModelDownload = async (
     }
   }
 
-  if (!savedObjectService) {
-    throw new Error('Saved object service is not available');
-  }
-
   // we're not downloaded yet - let's initiate that...
   const putRequest: MlPutTrainedModelRequest = {
     body: {
@@ -80,10 +73,9 @@ export const startMlModelDownload = async (
     },
     model_id: modelName,
   };
-  await mlClient.putTrainedModel(putRequest);
 
-  // and sync our objects
-  await syncSavedObjectsFactory(clusterClient, savedObjectService).syncSavedObjects(false);
+  // this will also sync our saved objects for us
+  await mlClient.putTrainedModel(putRequest);
 
   // and return our status
   return await getMlModelDeploymentStatus(modelName, trainedModelsProvider);

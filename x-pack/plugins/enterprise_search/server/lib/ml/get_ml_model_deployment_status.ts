@@ -11,7 +11,11 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import { MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';
+import {
+  MlModelDeploymentStatus,
+  MlModelDeploymentState,
+  MlTrainedModelConfigWithDefined,
+} from '../../../common/types/ml';
 import { isResourceNotFoundException } from '../../utils/identify_exceptions';
 
 export const getMlModelDeploymentStatus = async (
@@ -22,7 +26,10 @@ export const getMlModelDeploymentStatus = async (
     throw new Error('Machine Learning is not enabled');
   }
 
+  // TODO: the ts-expect-error below should be removed once the correct typings are
+  // available in Kibana
   const modelDetailsRequest: MlGetTrainedModelsRequest = {
+    // @ts-expect-error @elastic-elasticsearch getTrainedModels types incorrect
     include: 'definition_status',
     model_id: modelName,
   };
@@ -35,11 +42,14 @@ export const getMlModelDeploymentStatus = async (
       return getDefaultStatusReturn(MlModelDeploymentState.NotDeployed, modelName);
     }
 
+    // TODO - we can remove this cast to the extension once the new types are available
+    // in kibana that includes the fully_defined field
+    const firstTrainedModelConfig = modelDetailsResponse.trained_model_configs
+      ? (modelDetailsResponse.trained_model_configs[0] as MlTrainedModelConfigWithDefined)
+      : (undefined as unknown as MlTrainedModelConfigWithDefined);
+
     // are we downloaded?
-    if (
-      !modelDetailsResponse.trained_model_configs ||
-      !modelDetailsResponse.trained_model_configs[0].fully_defined
-    ) {
+    if (!firstTrainedModelConfig || !firstTrainedModelConfig.fully_defined) {
       // we're still downloading...
       return getDefaultStatusReturn(MlModelDeploymentState.Downloading, modelName);
     }
