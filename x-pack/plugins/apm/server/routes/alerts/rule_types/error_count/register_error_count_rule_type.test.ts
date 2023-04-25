@@ -246,7 +246,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
-      'transaction.name': 'tx-name-foo',
+      transactionName: 'tx-name-foo',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
@@ -258,7 +258,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
-      'transaction.name': 'tx-name-foo-2',
+      transactionName: 'tx-name-foo-2',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
@@ -270,7 +270,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
-      'transaction.name': 'tx-name-bar',
+      transactionName: 'tx-name-bar',
     });
   });
 
@@ -348,7 +348,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo',
-      'error.grouping_key': 'error-key-foo',
+      errorGroupingKey: 'error-key-foo',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
@@ -360,7 +360,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=env-foo-2',
-      'error.grouping_key': 'error-key-foo-2',
+      errorGroupingKey: 'error-key-foo-2',
     });
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',
@@ -372,7 +372,7 @@ describe('Error count alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',
-      'error.grouping_key': 'error-key-bar',
+      errorGroupingKey: 'error-key-bar',
     });
   });
 

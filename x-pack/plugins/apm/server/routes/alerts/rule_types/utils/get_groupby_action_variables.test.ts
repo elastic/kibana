@@ -14,12 +14,14 @@ describe('getGroupByActionVariables', () => {
       'service.environment': 'development',
       'transaction.type': 'request',
       'transaction.name': 'tx-java',
+      'error.grouping_key': 'error-key-0',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "environment": "development",
+        "errorGroupingKey": "error-key-0",
         "serviceName": "opbeans-java",
-        "transaction.name": "tx-java",
+        "transactionName": "tx-java",
         "transactionType": "request",
       }
     `);
@@ -36,7 +38,7 @@ describe('getGroupByActionVariables', () => {
       Object {
         "environment": "Not defined",
         "serviceName": "opbeans-java",
-        "transaction.name": "tx-java",
+        "transactionName": "tx-java",
         "transactionType": "request",
       }
     `);

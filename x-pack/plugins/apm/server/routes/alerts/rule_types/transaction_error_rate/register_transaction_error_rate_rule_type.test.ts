@@ -234,7 +234,7 @@ describe('Transaction error rate alert', () => {
       interval: '5 mins',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
-      'transaction.name': 'tx-name-foo',
+      transactionName: 'tx-name-foo',
     });
   });
 

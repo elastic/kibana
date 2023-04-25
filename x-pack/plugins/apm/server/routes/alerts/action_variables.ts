@@ -71,7 +71,7 @@ export const apmActionVariables = {
       'xpack.apm.alerts.action_variables.transactionName',
       { defaultMessage: 'The transaction name the alert is created for' }
     ),
-    name: 'transaction.name' as const,
+    name: 'transactionName' as const,
   },
   triggerValue: {
     description: i18n.translate(
@@ -101,6 +101,6 @@ export const apmActionVariables = {
         defaultMessage: 'The error grouping key the alert is created for',
       }
     ),
-    name: 'error.grouping_key' as const,
+    name: 'errorGroupingKey' as const,
   },
 };

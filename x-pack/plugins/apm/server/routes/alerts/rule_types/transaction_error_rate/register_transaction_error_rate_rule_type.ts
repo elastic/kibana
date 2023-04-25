@@ -277,7 +277,7 @@ export function registerTransactionErrorRateRuleType({
               ),
               reason: reasonMessage,
               threshold: ruleParams.threshold,
-              'transaction.name': ruleParams.transactionName,
+              transactionName: ruleParams.transactionName,
               triggerValue: asDecimalOrInteger(errorRate),
               viewInAppUrl,
               ...groupByActionVariables,

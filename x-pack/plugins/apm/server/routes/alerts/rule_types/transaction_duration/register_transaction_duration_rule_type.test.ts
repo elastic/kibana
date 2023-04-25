@@ -60,7 +60,7 @@ describe('registerTransactionDurationRuleType', () => {
       alertDetailsUrl: expect.stringContaining(
         'http://localhost:5601/eyr/app/observability/alerts/'
       ),
-      'transaction.name': 'GET /orders',
+      transactionName: 'GET /orders',
       environment: 'development',
       interval: `5 mins`,
       reason:
@@ -140,7 +140,7 @@ describe('registerTransactionDurationRuleType', () => {
       triggerValue: '5,500 ms',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=development',
-      'transaction.name': 'GET /products',
+      transactionName: 'GET /products',
     });
   });
 
@@ -280,7 +280,7 @@ describe('registerTransactionDurationRuleType', () => {
       triggerValue: '5,500 ms',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=ENVIRONMENT_ALL',
-      'transaction.name': 'tx-java',
+      transactionName: 'tx-java',
     });
   });
 });

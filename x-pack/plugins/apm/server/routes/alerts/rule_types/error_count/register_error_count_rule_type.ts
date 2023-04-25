@@ -215,7 +215,7 @@ export function registerErrorCountRuleType({
                 ),
                 reason: alertReason,
                 threshold: ruleParams.threshold,
-                'error.grouping_key': ruleParams.errorGroupingKey, // When group by doesn't include error.grouping_key, the context.error.grouping_key action variable will contain value of the Error Grouping Key filter
+                errorGroupingKey: ruleParams.errorGroupingKey, // When group by doesn't include error.grouping_key, the context.error.grouping_key action variable will contain value of the Error Grouping Key filter
                 triggerValue: errorCount,
                 viewInAppUrl,
                 ...groupByActionVariables,
