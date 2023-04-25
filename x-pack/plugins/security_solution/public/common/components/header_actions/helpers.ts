@@ -59,9 +59,9 @@ export const getSessionViewProcessIndex = (eventIndex?: string | null) => {
     return;
   }
 
-  const match = eventIndex.match(/([a-z]:)?\.ds-logs-(endpoint|cloud_defend)/);
+  const match = eventIndex.match(/([a-z0-9_-]+:)?\.ds-logs-(endpoint|cloud_defend)/i);
   const cluster = match?.[1];
-  const clusterStr = cluster ? `${cluster}:` : '';
+  const clusterStr = cluster ? `${cluster}` : '';
   const service = match?.[2];
 
   if (service === 'endpoint') {

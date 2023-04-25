@@ -79,6 +79,14 @@ describe('getSessionViewProcessIndex', () => {
     expect(result).toEqual('logs-cloud_defend.process*');
   });
 
+  test('it returns process index for cloud_defend that includes cluster', () => {
+    const result = getSessionViewProcessIndex(
+      'aws_ec2:.ds-logs-cloud_defend.process-default-2023.04.25-000001'
+    );
+
+    expect(result).toEqual('aws_ec2:logs-cloud_defend.process*');
+  });
+
   test('it returns process index for endpoint file index', () => {
     const result = getSessionViewProcessIndex(
       '.ds-logs-endpoint.events.file-default-2023.04.25-000001'
@@ -99,5 +107,13 @@ describe('getSessionViewProcessIndex', () => {
     );
 
     expect(result).toEqual('logs-endpoint.events.process*');
+  });
+
+  test('it returns process index for endpoint that includes cluster', () => {
+    const result = getSessionViewProcessIndex(
+      'azure-01:.ds-logs-endpoint.events.process-default-2023.04.25-000001'
+    );
+
+    expect(result).toEqual('azure-01:logs-endpoint.events.process*');
   });
 });
