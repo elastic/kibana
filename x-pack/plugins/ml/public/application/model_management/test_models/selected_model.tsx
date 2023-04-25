@@ -35,42 +35,44 @@ interface Props {
 export const SelectedModel: FC<Props> = ({ model, inputType, deploymentId }) => {
   const { trainedModels } = useMlApiContext();
 
-  const inferrer: InferrerType | undefined = useMemo(() => {
+  const inferrer = useMemo<InferrerType | undefined>(() => {
+    let newInferrer: InferrerType | undefined;
+
     if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
       const taskType = Object.keys(model.inference_config)[0];
 
       switch (taskType) {
         case SUPPORTED_PYTORCH_TASKS.NER:
-          return new NerInference(trainedModels, model, inputType);
+          newInferrer = new NerInference(trainedModels, model, inputType);
           break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION:
-          return new TextClassificationInference(trainedModels, model, inputType);
+          newInferrer = new TextClassificationInference(trainedModels, model, inputType);
           break;
         case SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION:
-          return new ZeroShotClassificationInference(trainedModels, model, inputType);
+          newInferrer = new ZeroShotClassificationInference(trainedModels, model, inputType);
           break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING:
-          return new TextEmbeddingInference(trainedModels, model, inputType);
+          newInferrer = new TextEmbeddingInference(trainedModels, model, inputType);
           break;
         case SUPPORTED_PYTORCH_TASKS.FILL_MASK:
-          return new FillMaskInference(trainedModels, model, inputType);
+          newInferrer = new FillMaskInference(trainedModels, model, inputType);
           break;
         case SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING:
-          return new QuestionAnsweringInference(trainedModels, model, inputType);
+          newInferrer = new QuestionAnsweringInference(trainedModels, model, inputType);
           break;
-
         default:
           break;
       }
     } else if (model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
-      return new LangIdentInference(trainedModels, model, inputType);
+      newInferrer = new LangIdentInference(trainedModels, model, inputType);
     }
-  }, [inputType, model, trainedModels]);
 
-  useEffect(() => {
-    if (!inferrer) return;
-    inferrer.deploymentId = deploymentId;
-  }, [deploymentId, inferrer]);
+    if (newInferrer) {
+      newInferrer.deploymentId = deploymentId;
+    }
+
+    return newInferrer;
+  }, [inputType, model, trainedModels, deploymentId]);
 
   useEffect(() => {
     return () => {

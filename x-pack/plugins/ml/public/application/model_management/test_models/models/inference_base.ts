@@ -88,14 +88,11 @@ export abstract class InferenceBase<TInferResponse> {
     this.subscriptions$.unsubscribe();
   }
 
-  public set deploymentId(deploymentId: string) {
+  public set deploymentId(deploymentId: string | null) {
     this._deploymentId = deploymentId;
   }
 
-  public get deploymentId() {
-    if (!this._deploymentId) {
-      throw new Error('Deployment ID is required');
-    }
+  public get deploymentId(): string | null {
     return this._deploymentId;
   }
 
@@ -256,7 +253,7 @@ export abstract class InferenceBase<TInferResponse> {
   ): estypes.IngestProcessorContainer[] {
     const processor: estypes.IngestProcessorContainer = {
       inference: {
-        model_id: this.deploymentId,
+        model_id: this.deploymentId ?? this.model.model_id,
         target_field: this.inferenceType,
         field_map: {
           [this.inputField$.getValue()]: this.modelInputField,
@@ -290,7 +287,7 @@ export abstract class InferenceBase<TInferResponse> {
       const inferenceConfig = getInferenceConfig();
 
       const resp = (await this.trainedModelsApi.inferTrainedModel(
-        this.deploymentId,
+        this.deploymentId ?? this.model.model_id,
         {
           docs: this.getInferDocs(),
           ...(inferenceConfig ? { inference_config: inferenceConfig } : {}),
