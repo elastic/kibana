@@ -270,3 +270,75 @@ export const sourcePort: EnrichedFieldMetadata = {
   isEcsCompliant: true,
   isInSameFamily: false, // `long` is not a member of any families
 };
+
+export const mockCustomFields: EnrichedFieldMetadata[] = [
+  {
+    indexFieldName: 'host.name.keyword',
+    indexFieldType: 'keyword',
+    indexInvalidValues: [],
+    hasEcsMetadata: false,
+    isEcsCompliant: false,
+    isInSameFamily: false,
+  },
+  {
+    indexFieldName: 'some.field',
+    indexFieldType: 'text',
+    indexInvalidValues: [],
+    hasEcsMetadata: false,
+    isEcsCompliant: false,
+    isInSameFamily: false,
+  },
+  {
+    indexFieldName: 'some.field.keyword',
+    indexFieldType: 'keyword',
+    indexInvalidValues: [],
+    hasEcsMetadata: false,
+    isEcsCompliant: false,
+    isInSameFamily: false,
+  },
+  {
+    indexFieldName: 'source.ip.keyword',
+    indexFieldType: 'keyword',
+    indexInvalidValues: [],
+    hasEcsMetadata: false,
+    isEcsCompliant: false,
+    isInSameFamily: false,
+  },
+];
+
+export const mockIncompatibleMappings: EnrichedFieldMetadata[] = [
+  {
+    dashed_name: 'host-name',
+    description:
+      'Name of the host.\nIt can contain what `hostname` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.',
+    flat_name: 'host.name',
+    ignore_above: 1024,
+    level: 'core',
+    name: 'name',
+    normalize: [],
+    short: 'Name of the host.',
+    type: 'keyword',
+    indexFieldName: 'host.name',
+    indexFieldType: 'text',
+    indexInvalidValues: [],
+    hasEcsMetadata: true,
+    isEcsCompliant: false,
+    isInSameFamily: false,
+  },
+  {
+    dashed_name: 'source-ip',
+    description: 'IP address of the source (IPv4 or IPv6).',
+    flat_name: 'source.ip',
+    level: 'core',
+    name: 'ip',
+    normalize: [],
+    short: 'IP address of the source.',
+    type: 'ip',
+    indexFieldName: 'source.ip',
+    indexFieldType: 'text',
+    indexInvalidValues: [],
+    hasEcsMetadata: true,
+    isEcsCompliant: false,
+    isInSameFamily: false,
+  },
+];
