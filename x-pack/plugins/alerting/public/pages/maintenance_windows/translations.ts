@@ -572,7 +572,7 @@ export const UPCOMING = i18n.translate('xpack.alerting.maintenanceWindows.upcomi
 export const UPGRADE_TO_PLATINUM = i18n.translate(
   'xpack.alerting.maintenanceWindows.callout.updateToPlatinumTitle',
   {
-    defaultMessage: 'Upgrade to an appropriate license',
+    defaultMessage: 'To access maintenance windows, you must upgrade your license',
   }
 );
 
