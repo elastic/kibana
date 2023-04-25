@@ -16,6 +16,7 @@ import {
   ALERT_START,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   VERSION,
@@ -187,6 +188,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                         name: options.rule.name,
                         id: options.rule.id,
                       }),
+                      results_link: alert[ALERT_URL],
+                      alerts: [alert],
                     })
                 );
 
@@ -373,6 +376,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                         name: options.rule.name,
                         id: options.rule.id,
                       }),
+                      results_link: alert[ALERT_URL],
+                      alerts: [alert],
                     })
                 );
 

@@ -147,10 +147,7 @@ const EditRulePageComponent: FC = () => {
     };
     fetchDataViews();
   }, [dataServices.dataViews]);
-  const { actionMessageParams, summaryActionMessageParams } = useMemo(
-    () => getActionMessageParams(rule?.type),
-    [rule?.type]
-  );
+  const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
   const setFormHook = useCallback(
     <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => {
       formHooks.current[step] = hook;
@@ -312,7 +309,7 @@ const EditRulePageComponent: FC = () => {
                   defaultValues={actionsStep.data}
                   setForm={setFormHook}
                   actionMessageParams={actionMessageParams}
-                  summaryActionMessageParams={summaryActionMessageParams}
+                  summaryActionMessageParams={actionMessageParams}
                   ruleType={rule?.type}
                 />
               )}
@@ -326,21 +323,20 @@ const EditRulePageComponent: FC = () => {
       rule?.immutable,
       rule?.type,
       loading,
+      defineStep.data,
+      isLoading,
       isSavedQueryLoading,
       defineStepDataWithSavedQuery,
-      isLoading,
       setFormHook,
       dataViewOptions,
       indicesConfig,
       threatIndicesConfig,
       onDataChange,
-      savedQuery,
       aboutStep.data,
-      defineStep.data,
       scheduleStep.data,
       actionsStep.data,
       actionMessageParams,
-      summaryActionMessageParams,
+      savedQuery,
     ]
   );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_REVISION } from '@kbn/rule-data-utils';
+import { ALERT_RULE_REVISION, ALERT_URL } from '@kbn/rule-data-utils';
 import { CommonAlertFields870 } from '../8.7.0';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.8.0.
@@ -20,6 +20,7 @@ new schemas to the union of all alert schemas, and re-export the new schemas as 
 
 export interface RevisionField880 {
   [ALERT_RULE_REVISION]: number;
+  [ALERT_URL]: string | undefined;
 }
 
 export type CommonAlertFields880 = CommonAlertFields870 & RevisionField880;
