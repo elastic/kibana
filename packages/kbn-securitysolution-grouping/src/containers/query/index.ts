@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { getFieldTypeMissingValue } from './helpers';
 import type { GroupingQueryArgs, GroupingQuery } from './types';
 /** The maximum number of groups to render */
 export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;
@@ -24,6 +25,7 @@ export const MAX_QUERY_SIZE = 10000;
  * @param rootAggregations Top level aggregations to get the groups number or overall groups metrics.
  * Array of {@link NamedAggregation}
  * @param runtimeMappings mappings of runtime fields [see runtimeMappings]{@link GroupingQueryArgs.runtimeMappings}
+ * @param selectedGroupEsTypes array of selected group types
  * @param size number of grouping results per page
  * @param sort add one or more sorts on specific fields
  * @param statsAggregations group level aggregations which correspond to {@link GroupStatsRenderer} configuration
@@ -35,10 +37,11 @@ export const getGroupingQuery = ({
   additionalFilters = [],
   from,
   groupByFields,
+  pageNumber,
   rootAggregations,
   runtimeMappings,
+  selectedGroupEsTypes,
   size = DEFAULT_GROUP_BY_FIELD_SIZE,
-  pageNumber,
   sort,
   statsAggregations,
   to,
@@ -51,6 +54,8 @@ export const getGroupingQuery = ({
             multi_terms: {
               terms: groupByFields.map((groupByField) => ({
                 field: groupByField,
+                // docs with empty field values will be grouped under this key
+                missing: getFieldTypeMissingValue(selectedGroupEsTypes),
               })),
               size: MAX_QUERY_SIZE,
             },
@@ -58,6 +63,8 @@ export const getGroupingQuery = ({
         : {
             terms: {
               field: groupByFields[0],
+              // docs with empty field values will be grouped under this key
+              missing: getFieldTypeMissingValue(selectedGroupEsTypes),
               size: MAX_QUERY_SIZE,
             },
           }),

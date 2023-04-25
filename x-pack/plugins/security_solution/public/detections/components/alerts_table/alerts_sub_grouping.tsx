@@ -15,7 +15,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/securitysolution-grouping/src';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
-import { combineQueries } from '../../../common/lib/kuery';
+import { combineQueries, getFieldEsTypes } from '../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
@@ -140,17 +140,32 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
 
+  const selectedGroupEsTypes = useMemo(
+    () => getFieldEsTypes(selectedGroup, browserFields),
+    [selectedGroup, browserFields]
+  );
+
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
       additionalFilters,
       selectedGroup,
+      selectedGroupEsTypes,
       from,
       runtimeMappings,
       to,
       pageSize,
       pageIndex,
     });
-  }, [additionalFilters, from, pageIndex, pageSize, runtimeMappings, selectedGroup, to]);
+  }, [
+    additionalFilters,
+    from,
+    pageIndex,
+    pageSize,
+    runtimeMappings,
+    selectedGroup,
+    selectedGroupEsTypes,
+    to,
+  ]);
 
   const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);
 
