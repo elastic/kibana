@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('create-connector-flyout-save-test-btn');
       await commonScreenshots.takeScreenshot('slack-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
-    })
+    });
 
     it('email connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
