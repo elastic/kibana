@@ -1,2 +1,3 @@
 /build
 /target
+config/kibana.yml
