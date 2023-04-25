@@ -97,14 +97,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       (updatedPolicy: NewPackagePolicy) => onChange({ isValid: true, updatedPolicy }),
       [onChange]
     );
-
-    const getSetupStatus = useCspSetupStatusApi();
-    const installedPackagePolicyCount = Object.entries(getSetupStatus?.data ?? {})?.find(
-      ([key, _value]) => key === integration
-    )?.[1]?.installedPackagePolicies;
-
-    const currentPackagePolicyCount =
-      typeof installedPackagePolicyCount === 'number' ? installedPackagePolicyCount + 1 : undefined;
     /**
      * - Updates policy inputs by user selection
      * - Updates hidden policy vars
@@ -154,7 +146,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       integration,
       newPolicy,
       updatePolicy,
-      currentPackagePolicyCount,
     });
 
     useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
@@ -243,15 +234,21 @@ const usePolicyTemplateInitialName = ({
   integration,
   newPolicy,
   updatePolicy,
-  currentPackagePolicyCount,
 }: {
   isEditPage: boolean;
   isLoading: boolean;
   integration: CloudSecurityPolicyTemplate | undefined;
   newPolicy: NewPackagePolicy;
-  currentPackagePolicyCount: number | undefined;
   updatePolicy: (policy: NewPackagePolicy) => void;
 }) => {
+  const getSetupStatus = useCspSetupStatusApi();
+  const installedPackagePolicyCount = Object.entries(getSetupStatus?.data ?? {})?.find(
+    ([key, _value]) => key === integration
+  )?.[1]?.installedPackagePolicies;
+
+  const currentPackagePolicyCount =
+    typeof installedPackagePolicyCount === 'number' ? installedPackagePolicyCount + 1 : undefined;
+
   useEffect(() => {
     if (!integration) return;
     if (isEditPage) return;
