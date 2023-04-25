@@ -14,11 +14,12 @@ import {
   PNG_JOB_TYPE as jobType,
 } from '@kbn/reporting-plugin/common/constants';
 import { CreateJobFn, RunTaskFn } from '@kbn/reporting-plugin/server/types';
+import { JobParamsPNGDeprecated } from '../../../common';
+import { TaskPayloadPNG } from '../../../common/types/png';
 import { ExportTypeDefinition } from '../types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
-import { JobParamsPNGDeprecated, TaskPayloadPNG } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
   CreateJobFn<JobParamsPNGDeprecated>,

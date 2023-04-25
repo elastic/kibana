@@ -4,8 +4,3 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export type {
-  JobParamsPNGDeprecated,
-  TaskPayloadPNG,
-} from '@kbn/reporting-plugin/common/types/export_types/png';

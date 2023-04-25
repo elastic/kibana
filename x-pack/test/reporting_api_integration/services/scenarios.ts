@@ -12,7 +12,7 @@ import {
 } from '@kbn/reporting-plugin/common/constants';
 import { JobParamsCSV } from '@kbn/reporting-export-types/server/export_types/csv_searchsource/types';
 import { JobParamsDownloadCSV } from '@kbn/reporting-export-types/server/export_types/csv_searchsource_immediate/types';
-import { JobParamsPNGDeprecated } from '@kbn/reporting-export-types/server/export_types/png/types';
+import { JobParamsPNGDeprecated } from '@kbn/reporting-export-types/common';
 import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types/server/export_types/printable_pdf/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
