@@ -33,11 +33,11 @@ node scripts/build \
   --skip-docker-contexts
 
 echo "--- Tag images"
-docker rmi "$KIBANA_IMAGE_OUTPUT"
+docker rmi "$KIBANA_IMAGE_INPUT"
 docker load < "target/kibana-serverless-$BASE_VERSION-docker-image.tar.gz"
 docker tag "$KIBANA_IMAGE_INPUT" "$KIBANA_IMAGE_OUTPUT-amd64"
 
-docker rmi "$KIBANA_IMAGE_OUTPUT"
+docker rmi "$KIBANA_IMAGE_INPUT"
 docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.gz"
 docker tag "$KIBANA_IMAGE_INPUT" "$KIBANA_IMAGE_OUTPUT-arm64"
 
