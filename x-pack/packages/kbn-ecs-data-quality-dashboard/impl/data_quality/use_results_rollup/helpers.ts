@@ -8,7 +8,11 @@
 import { getIndexDocsCountFromRollup } from '../data_quality_panel/data_quality_summary/summary_actions/check_all/helpers';
 import { getIlmPhase } from '../data_quality_panel/pattern/helpers';
 import { getAllIncompatibleMarkdownComments } from '../data_quality_panel/tabs/incompatible_tab/helpers';
-import { getTotalPatternIncompatible, getTotalPatternIndicesChecked } from '../helpers';
+import {
+  getSizeInBytes,
+  getTotalPatternIncompatible,
+  getTotalPatternIndicesChecked,
+} from '../helpers';
 import type { IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../types';
 
 export const getTotalIndices = (
@@ -19,7 +23,7 @@ export const getTotalIndices = (
 
   // only return the total when all `PatternRollup`s have a `indices`:
   return allRollupsHaveIndices
-    ? allRollups.reduce((acc, { indices }) => acc + (indices ?? 0), 0)
+    ? allRollups.reduce((acc, { indices }) => acc + Number(indices), 0)
     : undefined;
 };
 
@@ -31,7 +35,21 @@ export const getTotalDocsCount = (
 
   // only return the total when all `PatternRollup`s have a `docsCount`:
   return allRollupsHaveDocsCount
-    ? allRollups.reduce((acc, { docsCount }) => acc + (docsCount ?? 0), 0)
+    ? allRollups.reduce((acc, { docsCount }) => acc + Number(docsCount), 0)
+    : undefined;
+};
+
+export const getTotalSizeInBytes = (
+  patternRollups: Record<string, PatternRollup>
+): number | undefined => {
+  const allRollups = Object.values(patternRollups);
+  const allRollupsHaveSizeInBytes = allRollups.every(({ sizeInBytes }) =>
+    Number.isInteger(sizeInBytes)
+  );
+
+  // only return the total when all `PatternRollup`s have a `sizeInBytes`:
+  return allRollupsHaveSizeInBytes
+    ? allRollups.reduce((acc, { sizeInBytes }) => acc + Number(sizeInBytes), 0)
     : undefined;
 };
 
@@ -69,6 +87,7 @@ export const onPatternRollupUpdated = ({
 
 export const updateResultOnCheckCompleted = ({
   error,
+  formatBytes,
   formatNumber,
   indexName,
   partitionedFieldMetadata,
@@ -76,6 +95,7 @@ export const updateResultOnCheckCompleted = ({
   patternRollups,
 }: {
   error: string | null;
+  formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   indexName: string;
   partitionedFieldMetadata: PartitionedFieldMetadata | null;
@@ -85,7 +105,7 @@ export const updateResultOnCheckCompleted = ({
   const patternRollup: PatternRollup | undefined = patternRollups[pattern];
 
   if (patternRollup != null) {
-    const ilmExplain = patternRollup.ilmExplain ?? null;
+    const ilmExplain = patternRollup.ilmExplain;
 
     const ilmPhase: IlmPhase | undefined =
       ilmExplain != null ? getIlmPhase(ilmExplain[indexName]) : undefined;
@@ -97,15 +117,19 @@ export const updateResultOnCheckCompleted = ({
 
     const patternDocsCount = patternRollup.docsCount ?? 0;
 
+    const sizeInBytes = getSizeInBytes({ indexName, stats: patternRollup.stats });
+
     const markdownComments =
       partitionedFieldMetadata != null
         ? getAllIncompatibleMarkdownComments({
             docsCount,
+            formatBytes,
             formatNumber,
             ilmPhase,
             indexName,
             partitionedFieldMetadata,
             patternDocsCount,
+            sizeInBytes,
           })
         : [];
 
