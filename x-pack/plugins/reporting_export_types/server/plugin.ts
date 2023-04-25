@@ -11,7 +11,6 @@ import type { ReportingSetup } from '@kbn/reporting-plugin/server/types';
 import { getExportType as getExportTypeCsv } from './export_types/csv_searchsource';
 import { getExportType as getExportTypePng } from './export_types/png_v2';
 import { getExportType as getExportTypePdf } from './export_types/printable_pdf_v2';
-import { ExportTypeDefinition } from './export_types/types';
 
 export interface ExportTypesPluginSetupDependencies {
   // this plugin is dependent on the Reporting plugin
@@ -20,7 +19,6 @@ export interface ExportTypesPluginSetupDependencies {
 
 /** This plugin creates the export types in export type definitions to be registered in the Reporting Export Type Registry */
 export class ExportTypesPlugin implements Plugin<void, void> {
-  public exportTypeEntry: ExportTypeDefinition | undefined;
   // on setup() this plugin needs to use the reporting plugin to register the export types
   public setup({}, { reporting }: ExportTypesPluginSetupDependencies) {
     reporting.registerExportType(getExportTypeCsv());

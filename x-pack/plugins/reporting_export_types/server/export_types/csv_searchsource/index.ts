@@ -14,8 +14,8 @@ import {
   LICENSE_TYPE_BASIC,
   PDF_JOB_TYPE_V2 as jobType,
 } from '@kbn/reporting-common';
+import type { ExportTypeDefinition } from '@kbn/reporting-plugin/server/types';
 import { JobParamsCSV, TaskPayloadCSV } from '../../../common/types/csv_searchsource';
-import { ExportTypeDefinition } from '../types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';

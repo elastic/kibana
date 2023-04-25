@@ -6,24 +6,4 @@
  * Side Public License, v 1.
  */
 
-import type {
-  CreateJobFn,
-  RunTaskFn,
-  CreateJobFnFactory,
-  RunTaskFnFactory,
-} from '@kbn/reporting-plugin/server/types';
-
-// ExportTypeDefintion interface in reporting/server/types.ts
-export interface ExportTypeDefinition<
-  CreateJobFnType = CreateJobFn | null,
-  RunTaskFnType = RunTaskFn
-> {
-  id: string;
-  name: string;
-  jobType: string;
-  jobContentEncoding?: string;
-  jobContentExtension: string;
-  createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase
-  runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
-  validLicenses: string[];
-}
+export type { ExportTypeDefinition } from '@kbn/reporting-plugin/server/types';
