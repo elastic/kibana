@@ -29,7 +29,7 @@ const ErrorsViewerComponent: React.FC<Props> = ({ errorSummary }) => {
   const columns = useMemo(() => getErrorsViewerTableColumns(), []);
 
   return (
-    <ErrorsViewerContainer>
+    <ErrorsViewerContainer data-test-subj="errorsViewer">
       <EuiInMemoryTable
         columns={columns}
         compressed={true}

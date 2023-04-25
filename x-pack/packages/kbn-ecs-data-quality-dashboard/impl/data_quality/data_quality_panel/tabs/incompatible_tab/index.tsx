@@ -13,14 +13,12 @@ import {
   EuiEmptyPrompt,
   EuiSpacer,
 } from '@elastic/eui';
-import numeral from '@elastic/numeral';
 import React, { useCallback, useMemo } from 'react';
 
 import { IncompatibleCallout } from '../callouts/incompatible_callout';
 import { CompareFieldsTable } from '../../../compare_fields_table';
 import { getIncompatibleMappingsTableColumns } from '../../../compare_fields_table/get_incompatible_mappings_table_columns';
 import { getIncompatibleValuesTableColumns } from '../../../compare_fields_table/helpers';
-import { EMPTY_STAT } from '../../../helpers';
 import { EmptyPromptBody } from '../../index_properties/empty_prompt_body';
 import { EmptyPromptTitle } from '../../index_properties/empty_prompt_title';
 import {
@@ -41,31 +39,30 @@ import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
   addToNewCaseDisabled: boolean;
-  defaultNumberFormat: string;
   docsCount: number;
+  formatBytes: (value: number | undefined) => string;
+  formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
   onAddToNewCase: (markdownComments: string[]) => void;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   patternDocsCount: number;
+  sizeInBytes: number | undefined;
 }
 
 const IncompatibleTabComponent: React.FC<Props> = ({
   addSuccessToast,
   addToNewCaseDisabled,
-  defaultNumberFormat,
   docsCount,
+  formatBytes,
+  formatNumber,
   ilmPhase,
   indexName,
   onAddToNewCase,
   partitionedFieldMetadata,
   patternDocsCount,
+  sizeInBytes,
 }) => {
-  const formatNumber = useCallback(
-    (value: number | undefined): string =>
-      value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT,
-    [defaultNumberFormat]
-  );
   const body = useMemo(() => <EmptyPromptBody body={i18n.INCOMPATIBLE_EMPTY} />, []);
   const title = useMemo(() => <EmptyPromptTitle title={i18n.INCOMPATIBLE_EMPTY_TITLE} />, []);
   const incompatibleMappings = useMemo(
@@ -80,13 +77,24 @@ const IncompatibleTabComponent: React.FC<Props> = ({
     () =>
       getAllIncompatibleMarkdownComments({
         docsCount,
+        formatBytes,
         formatNumber,
         ilmPhase,
         indexName,
         partitionedFieldMetadata,
         patternDocsCount,
+        sizeInBytes,
       }),
-    [docsCount, formatNumber, ilmPhase, indexName, partitionedFieldMetadata, patternDocsCount]
+    [
+      docsCount,
+      formatBytes,
+      formatNumber,
+      ilmPhase,
+      indexName,
+      partitionedFieldMetadata,
+      patternDocsCount,
+      sizeInBytes,
+    ]
   );
   const onClickAddToCase = useCallback(
     () => onAddToNewCase([markdownComments.join('\n')]),
@@ -101,7 +109,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
   }, [addSuccessToast, markdownComments]);
 
   return (
-    <>
+    <div data-test-subj="incompatibleTab">
       {showInvalidCallout(partitionedFieldMetadata.incompatible) ? (
         <>
           <IncompatibleCallout enrichedFieldMetadata={partitionedFieldMetadata.incompatible}>
@@ -161,7 +169,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
           titleSize="s"
         />
       )}
-    </>
+    </div>
   );
 };
 

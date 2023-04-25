@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { EntityAnalyticsAnomalies } from '.';
 import type { AnomaliesCount } from '../../../../common/components/ml/anomaly/use_anomalies_search';
@@ -13,6 +13,13 @@ import { AnomalyEntity } from '../../../../common/components/ml/anomaly/use_anom
 
 import { TestProviders } from '../../../../common/mock';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
+
+jest.mock('../../../../common/components/ml_popover/hooks/use_enable_data_feed', () => ({
+  useEnableDataFeed: () => ({
+    loading: false,
+    enableDatafeed: jest.fn().mockResolvedValue({ enabled: true }),
+  }),
+}));
 
 // Query toggle only works if pageName.lenght > 0
 jest.mock('../../../../common/utils/route/use_route_spy', () => ({
@@ -160,6 +167,32 @@ describe('EntityAnalyticsAnomalies', () => {
     expect(getByTestId('anomalies-table-column-name')).toHaveTextContent(jobCount.name);
     expect(getByTestId('anomalies-table-column-count')).toHaveTextContent('Run job');
     expect(getByTestId('enable-job')).toBeInTheDocument();
+  });
+
+  it('renders recently installed jobs', async () => {
+    const jobCount: AnomaliesCount = {
+      job: { isInstalled: false, isCompatible: true } as SecurityJob,
+      name: 'v3_windows_anomalous_script',
+      count: 0,
+
+      entity: AnomalyEntity.User,
+    };
+
+    mockUseNotableAnomaliesSearch.mockReturnValue({
+      isLoading: false,
+      data: [jobCount],
+      refetch: jest.fn(),
+    });
+
+    const { getByTestId } = render(<EntityAnalyticsAnomalies />, { wrapper: TestProviders });
+
+    act(() => {
+      fireEvent.click(getByTestId('enable-job'));
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('anomalies-table-column-count')).toHaveTextContent('0');
+    });
   });
 
   it('renders failed jobs', () => {
