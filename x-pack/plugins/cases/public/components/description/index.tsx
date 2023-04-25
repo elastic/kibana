@@ -117,6 +117,9 @@ export const Description = ({
     setIsEditable(true);
   }
 
+  const hasUnsavedChanges =
+    draftDescription && draftDescription !== caseData.description && !isLoadingDescription;
+
   return isEditable ? (
     <EditableMarkdown
       id="description"
@@ -131,7 +134,7 @@ export const Description = ({
     />
   ) : (
     <Panel hasShadow={false} hasBorder={true} data-test-subj="description">
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize={isCollapsed ? 'none' : 'm'}>
         <EuiFlexItem>
           <Header
             justifyContent="spaceBetween"
@@ -147,6 +150,9 @@ export const Description = ({
                   css: css`
                     background: ${euiTheme.colors.lightestShade};
                     border-radius: 6px;
+                    ${hasUnsavedChanges
+                      ? 'border-bottom-left-radius: 0; border-bottom-right-radius: 0;'
+                      : ''}
                   `,
                 })}
           >
@@ -182,7 +188,7 @@ export const Description = ({
             <ScrollableMarkdown content={caseData.description} />
           </Body>
         ) : null}
-        {draftDescription && draftDescription !== caseData.description && !isLoadingDescription ? (
+        {hasUnsavedChanges ? (
           <DescriptionFooter>
             <EuiText color="subdued" size="xs" data-test-subj="description-unsaved-draft">
               {i18n.UNSAVED_DRAFT_DESCRIPTION}
