@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-jest.mock('../routes');
-jest.mock('../usage');
+jest.mock('@kbn/reporting-plugin/server/routes');
+jest.mock('@kbn/reporting-plugin/server/usage');
 
 import _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
@@ -27,11 +28,11 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ReportingConfig, ReportingCore } from '..';
-import { buildConfig, ReportingConfigType } from '../config';
-import { ReportingInternalSetup, ReportingInternalStart } from '../core';
-import { ReportingStore } from '../lib';
-import { setFieldFormats } from '../services';
+import { ReportingStore } from '@kbn/reporting-plugin/server/lib';
+import { ReportingConfig, ReportingCore } from '@kbn/reporting-plugin/server';
+import { buildConfig, ReportingConfigType } from '@kbn/reporting-plugin/server/config';
+import { ReportingInternalSetup, ReportingInternalStart } from '@kbn/reporting-plugin/server/core';
+import { setFieldFormats } from '@kbn/reporting-export-types/server/services/services';
 
 export const createMockPluginSetup = (
   setupMock: Partial<Record<keyof ReportingInternalSetup, any>>
