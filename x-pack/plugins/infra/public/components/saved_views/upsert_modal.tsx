@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -21,49 +21,54 @@ import {
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
+import { EuiSwitchEvent } from '@elastic/eui';
 
-interface Props<ViewState> {
+interface Props {
   isInvalid: boolean;
-  close(): void;
-  save(name: string, shouldIncludeTime: boolean): void;
-  currentView: ViewState;
+  onClose(): void;
+  onSave(name: string, shouldIncludeTime: boolean): void;
+  initialName?: string;
+  initialIncludeTime?: boolean;
+  title: React.ReactNode;
 }
 
-export function SavedViewUpdateModal<ViewState extends { id: string; name: string }>({
-  close,
-  save,
+export const UpsertViewModal = ({
+  onClose,
+  onSave,
   isInvalid,
-  currentView,
-}: Props<ViewState>) {
-  const [viewName, setViewName] = useState(currentView.name);
-  const [includeTime, setIncludeTime] = useState(false);
-  const onCheckChange = useCallback((e) => setIncludeTime(e.target.checked), []);
-  const textChange = useCallback((e) => setViewName(e.target.value), []);
+  initialName = '',
+  initialIncludeTime = false,
+  title,
+}: Props) => {
+  const [viewName, setViewName] = useState(initialName);
+  const [includeTime, setIncludeTime] = useState(initialIncludeTime);
 
-  const saveView = useCallback(() => {
-    save(viewName, includeTime);
-  }, [includeTime, save, viewName]);
+  const handleNameChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    setViewName(e.target.value);
+  };
+
+  const handleTimeCheckChange = (e: EuiSwitchEvent) => {
+    setIncludeTime(e.target.checked);
+  };
+
+  const saveView = () => {
+    onSave(viewName, includeTime);
+  };
 
   return (
-    <EuiModal onClose={close}>
+    <EuiModal onClose={onClose} data-test-subj="savedViews-upsertModal">
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <FormattedMessage
-            defaultMessage="Update View"
-            id="xpack.infra.waffle.savedView.updateHeader"
-          />
-        </EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
-
       <EuiModalBody>
         <EuiFieldText
           isInvalid={isInvalid}
           placeholder={i18n.translate('xpack.infra.waffle.savedViews.viewNamePlaceholder', {
             defaultMessage: 'Name',
           })}
-          data-test-subj="savedViewViweName"
+          data-test-subj="savedViewName"
           value={viewName}
-          onChange={textChange}
+          onChange={handleNameChange}
           aria-label={i18n.translate('xpack.infra.waffle.savedViews.viewNamePlaceholder', {
             defaultMessage: 'Name',
           })}
@@ -78,19 +83,18 @@ export function SavedViewUpdateModal<ViewState extends { id: string; name: strin
             />
           }
           checked={includeTime}
-          onChange={onCheckChange}
+          onChange={handleTimeCheckChange}
         />
         <EuiSpacer size="s" />
-        <EuiText size={'xs'} grow={false} style={{ maxWidth: 400 }}>
+        <EuiText size="xs" grow={false} style={{ maxWidth: 400 }}>
           <FormattedMessage
             defaultMessage="This changes the time filter to the currently selected time each time the view is loaded"
             id="xpack.infra.waffle.savedViews.includeTimeHelpText"
           />
         </EuiText>
       </EuiModalBody>
-
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="infraSavedViewUpdateModalCancelButton" onClick={close}>
+        <EuiButtonEmpty data-test-subj="infraSavedViewCreateModalCancelButton" onClick={onClose}>
           <FormattedMessage
             defaultMessage="Cancel"
             id="xpack.infra.waffle.savedViews.cancelButton"
@@ -98,14 +102,14 @@ export function SavedViewUpdateModal<ViewState extends { id: string; name: strin
         </EuiButtonEmpty>
         <EuiButton
           color="primary"
-          disabled={!viewName}
-          fill={true}
+          disabled={viewName.length === 0}
+          fill
           onClick={saveView}
-          data-test-subj="updateSavedViewButton"
+          data-test-subj="createSavedViewButton"
         >
           <FormattedMessage defaultMessage="Save" id="xpack.infra.waffle.savedViews.saveButton" />
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   );
-}
+};
