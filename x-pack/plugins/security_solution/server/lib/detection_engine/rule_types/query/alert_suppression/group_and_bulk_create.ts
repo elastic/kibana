@@ -9,24 +9,28 @@ import type moment from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
-import type { ESSearchResponse } from '@kbn/es-types';
-
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { buildTimeRangeFilter } from '../../utils/build_events_query';
-import type {
-  RuleServices,
-  RunOpts,
-  SearchAfterAndBulkCreateReturnType,
-  SignalSource,
-} from '../../types';
-import { addToSearchAfterReturn, getUnprocessedExceptionsWarnings } from '../../utils/utils';
-import type { SuppressionBuckets } from './wrap_suppressed_alerts';
+import type { RuleServices, RunOpts, SearchAfterAndBulkCreateReturnType } from '../../types';
+import {
+  addToSearchAfterReturn,
+  getUnprocessedExceptionsWarnings,
+  mergeReturns,
+} from '../../utils/utils';
+import type { SuppressionBucket } from './wrap_suppressed_alerts';
 import { wrapSuppressedAlerts } from './wrap_suppressed_alerts';
 import { buildGroupByFieldAggregation } from './build_group_by_field_aggregation';
+import type { EventGroupingMultiBucketAggregationResult } from './build_group_by_field_aggregation';
 import { singleSearchAfter } from '../../utils/single_search_after';
 import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
 import type { UnifiedQueryRuleParams } from '../../../rule_schema';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
+import {
+  AlertSuppressionMissingFieldsStrategy,
+  DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+} from '../../../../../../common/detection_engine/rule_schema';
+import { bulkCreateUnsuppressedAlerts } from './bulk_create_unsuppressed_alerts';
+import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
 export interface BucketHistory {
   key: Record<string, string | number | null>;
@@ -41,6 +45,7 @@ export interface GroupAndBulkCreateParams {
   buildReasonMessage: BuildReasonMessage;
   bucketHistory?: BucketHistory[];
   groupByFields: string[];
+  eventsTelemetry: ITelemetryEventsSender | undefined;
 }
 
 export interface GroupAndBulkCreateReturnType extends SearchAfterAndBulkCreateReturnType {
@@ -48,15 +53,6 @@ export interface GroupAndBulkCreateReturnType extends SearchAfterAndBulkCreateRe
     suppressionGroupHistory: BucketHistory[];
   };
 }
-
-type EventGroupingMultiBucketAggregationResult = ESSearchResponse<
-  SignalSource,
-  {
-    body: {
-      aggregations: ReturnType<typeof buildGroupByFieldAggregation>;
-    };
-  }
->;
 
 /**
  * Builds a filter that excludes documents from existing buckets.
@@ -80,22 +76,21 @@ export const buildBucketHistoryFilter = ({
       bool: {
         must_not: bucketHistory.map((bucket) => ({
           bool: {
+            must_not: Object.entries(bucket.key)
+              .filter(([_, value]) => value == null)
+              .map(([field, _]) => ({
+                exists: {
+                  field,
+                },
+              })),
             filter: [
-              ...Object.entries(bucket.key).map(([field, value]) =>
-                value != null
-                  ? {
-                      term: {
-                        [field]: value,
-                      },
-                    }
-                  : {
-                      must_not: {
-                        exists: {
-                          field,
-                        },
-                      },
-                    }
-              ),
+              ...Object.entries(bucket.key)
+                .filter(([_, value]) => value != null)
+                .map(([field, value]) => ({
+                  term: {
+                    [field]: value,
+                  },
+                })),
               buildTimeRangeFilter({
                 to: bucket.endDate,
                 from: from.toISOString(),
@@ -128,6 +123,7 @@ export const groupAndBulkCreate = async ({
   buildReasonMessage,
   bucketHistory,
   groupByFields,
+  eventsTelemetry,
 }: GroupAndBulkCreateParams): Promise<GroupAndBulkCreateReturnType> => {
   return withSecuritySpan('groupAndBulkCreate', async () => {
     const tuple = runOpts.tuple;
@@ -137,7 +133,7 @@ export const groupAndBulkCreate = async ({
       fromDate: tuple.from.toDate(),
     });
 
-    const toReturn: GroupAndBulkCreateReturnType = {
+    let toReturn: GroupAndBulkCreateReturnType = {
       success: true,
       warning: false,
       searchAfterTimes: [],
@@ -170,13 +166,20 @@ export const groupAndBulkCreate = async ({
         from: tuple.from,
       });
 
+      // if we do not suppress alerts for docs with missing values, we will create aggregation for null missing buckets
+      const suppressOnMissingFields =
+        (runOpts.completeRule.ruleParams.alertSuppression?.missingFieldsStrategy ??
+          DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
+        AlertSuppressionMissingFieldsStrategy.Suppress;
+
       const groupingAggregation = buildGroupByFieldAggregation({
         groupByFields,
         maxSignals: tuple.maxSignals,
         aggregatableTimestampField: runOpts.aggregatableTimestampField,
+        missingBucket: suppressOnMissingFields,
       });
 
-      const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+      const eventsSearchParams = {
         aggregations: groupingAggregation,
         searchAfterSortIds: undefined,
         index: runOpts.inputIndex,
@@ -190,7 +193,11 @@ export const groupAndBulkCreate = async ({
         secondaryTimestamp: runOpts.secondaryTimestamp,
         runtimeMappings: runOpts.runtimeMappings,
         additionalFilters: bucketHistoryFilter,
-      });
+      };
+      const { searchResult, searchDuration, searchErrors } = await singleSearchAfter(
+        eventsSearchParams
+      );
+
       toReturn.searchAfterTimes.push(searchDuration);
       toReturn.errors.push(...searchErrors);
 
@@ -202,11 +209,26 @@ export const groupAndBulkCreate = async ({
 
       const buckets = eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;
 
+      // we can create only as many unsuppressed alerts, as total number of alerts(suppressed and unsuppressed) does not exceeds maxSignals
+      const maxUnsuppressedCount = tuple.maxSignals - buckets.length;
+      if (suppressOnMissingFields === false && maxUnsuppressedCount > 0) {
+        const unsuppressedResult = await bulkCreateUnsuppressedAlerts({
+          groupByFields,
+          size: maxUnsuppressedCount,
+          runOpts,
+          buildReasonMessage,
+          eventsTelemetry,
+          filter,
+          services,
+        });
+        toReturn = { ...toReturn, ...mergeReturns([toReturn, unsuppressedResult]) };
+      }
+
       if (buckets.length === 0) {
         return toReturn;
       }
 
-      const suppressionBuckets: SuppressionBuckets[] = buckets.map((bucket) => ({
+      const suppressionBuckets: SuppressionBucket[] = buckets.map((bucket) => ({
         event: bucket.topHits.hits.hits[0],
         count: bucket.doc_count,
         start: bucket.min_timestamp.value_as_string
@@ -243,6 +265,7 @@ export const groupAndBulkCreate = async ({
           alertTimestampOverride: runOpts.alertTimestampOverride,
         });
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
+        runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
       } else {
         const bulkCreateResult = await runOpts.bulkCreate(wrappedAlerts);
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
