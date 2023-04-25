@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { SnoozeSchedule } from '../../../../../types';
 import { loadRule } from '../../../../lib/rule_api/get_rule';
@@ -23,6 +23,13 @@ export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
   const [loadingSnoozeAction, setLoadingSnoozeAction] = useState<boolean>(false);
   const [ruleSnoozeInfo, setRuleSnoozeInfo] =
     useState<RulesListNotifyBadgePropsWithApi['rule']>(rule);
+
+  // This helps to fix problems related to rule prop updates. As component handles the loading state via isLoading prop
+  // rule prop is obviously not ready atm so when it's ready ruleSnoozeInfo won't be updated without useEffect so
+  // incorrect state will be shown.
+  useEffect(() => {
+    setRuleSnoozeInfo(rule);
+  }, [rule]);
 
   const onSnoozeRule = useCallback(
     (snoozeSchedule: SnoozeSchedule) => {

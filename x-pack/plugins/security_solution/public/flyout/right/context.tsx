@@ -19,6 +19,7 @@ import { SecurityPageName } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import type { RightPanelProps } from '.';
+import type { GetFieldsData } from '../../common/hooks/use_get_fields_data';
 import { useGetFieldsData } from '../../common/hooks/use_get_fields_data';
 
 export interface RightPanelContext {
@@ -57,7 +58,7 @@ export interface RightPanelContext {
   /**
    * Retrieves searchHit values for the provided field
    */
-  getFieldsData: (field: string) => unknown | unknown[];
+  getFieldsData: GetFieldsData;
 }
 
 export const RightPanelContext = createContext<RightPanelContext | undefined>(undefined);

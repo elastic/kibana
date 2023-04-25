@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 
 import { ArtifactConstants, ManifestConstants } from './common';
@@ -27,6 +28,7 @@ export const manifestSavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const manifestType: SavedObjectsType = {
   name: manifestSavedObjectType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'agnostic',
   mappings: manifestSavedObjectMappings,
