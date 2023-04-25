@@ -57,18 +57,21 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
         description: 'This is the default space',
         _reserved: true,
         disabledFeatures: [],
+        managed: false,
       },
       {
         id: 'space_1',
         name: 'Space 1',
         description: 'This is the first test space',
         disabledFeatures: [],
+        managed: false,
       },
       {
         id: 'space_2',
         name: 'Space 2',
         description: 'This is the second test space',
         disabledFeatures: [],
+        managed: false,
       },
     ];
     expect(resp.body).to.eql(allSpaces.find((space) => space.id === spaceId));
