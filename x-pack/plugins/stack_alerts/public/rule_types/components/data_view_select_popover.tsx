@@ -20,7 +20,7 @@ import {
   EuiText,
   useEuiPaddingCSS,
 } from '@elastic/eui';
-import type { DataViewListItem, DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataViewSelector } from '@kbn/unified-search-plugin/public';
 import type { DataViewListItemEnhanced } from '@kbn/unified-search-plugin/public/dataview_picker/dataview_list';
 import { useTriggerUiActionServices } from '../es_query/util';
@@ -49,7 +49,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   onChangeMetaData,
 }) => {
   const { dataViews, dataViewEditor } = useTriggerUiActionServices();
-  const [dataViewItems, setDataViewsItems] = useState<DataViewListItem[]>([]);
+  const [dataViewItems, setDataViewsItems] = useState<DataViewListItemEnhanced[]>([]);
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
 
   const closeDataViewEditor = useRef<() => void | undefined>();
