@@ -581,7 +581,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('should retain the managed property of exported saved objects', () => {
+    describe('should retain the managed property value of exported saved objects', () => {
       before(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
