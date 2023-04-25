@@ -6,8 +6,8 @@
  */
 
 import { CONTENT_TYPE_CSV } from '@kbn/generate-csv/src/constants';
+import * as jobTypes from '@kbn/reporting-common';
 import * as reportTypes from './report_types';
-import * as jobTypes from './job_types';
 
 const { PDF_JOB_TYPE, PDF_JOB_TYPE_V2, PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } = jobTypes;
 
@@ -30,7 +30,6 @@ export const ALLOWED_JOB_CONTENT_TYPES = [
 
 // Re-export type definitions here for convenience.
 export * from './report_types';
-export * from './job_types';
 
 type ReportTypeDeclaration = typeof reportTypes;
 export type ReportTypes = ReportTypeDeclaration[keyof ReportTypeDeclaration];
