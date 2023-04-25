@@ -111,6 +111,7 @@ describe('startMlModelDownload', () => {
       );
 
     (mockMLSavedObjectService.syncSavedObjectsFactory as jest.Mock).mockReturnValue({
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       syncSavedObjects: async (_simulate: boolean = false) => {
         const results: SyncSavedObjectResponse = {
           datafeedsAdded: {},
