@@ -579,7 +579,7 @@ export const UPGRADE_TO_PLATINUM = i18n.translate(
 export const LINK_APPROPRIATE_LICENSE = i18n.translate(
   'xpack.alerting.maintenanceWindows.callout.appropriateLicense',
   {
-    defaultMessage: 'appropriate license',
+    defaultMessage: 'subscription level',
   }
 );
 
