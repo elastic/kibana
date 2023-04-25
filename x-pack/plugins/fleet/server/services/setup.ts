@@ -211,7 +211,6 @@ export async function ensureFleetFileUploadIndices(
     pkgNames: [...FILE_STORAGE_INTEGRATION_NAMES],
   });
 
-  if (!installedFileUploadIntegrations.length) return [];
   const integrationNames = installedFileUploadIntegrations.map(({ name }) => name);
   if (!integrationNames.includes(FLEET_ELASTIC_AGENT_PACKAGE)) {
     integrationNames.push(FLEET_ELASTIC_AGENT_PACKAGE);
