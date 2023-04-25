@@ -8,10 +8,11 @@ import { schema } from '@kbn/config-schema';
 // These fields are not searched or aggregated on
 export const SpacesSavedObjectSchemas = {
   '8.7.0': schema.object({
+    name: schema.string({ minLength: 1 }),
     description: schema.maybe(schema.string()),
     initials: schema.maybe(schema.string()),
     color: schema.maybe(schema.string()),
-    disabledFeatures: schema.maybe(schema.string()),
+    disabledFeatures: schema.maybe(schema.arrayOf(schema.string())),
     imageUrl: schema.maybe(schema.string()),
     _reserved: schema.maybe(schema.boolean()),
   }),
