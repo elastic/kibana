@@ -49,9 +49,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await actionPanel.click();
       const editRuleMenu = await testSubjects.find('editRule');
       await editRuleMenu.click();
-      // const expandWhenExpression = testSubjects.find('expandwhenExpressionRow');
-      // await expandWhenExpression.click();
-      await testSubjects.scrollIntoView('intervalInput');
+      const expandExpression = await testSubjects.find('expandRow');
+      await expandExpression.click();
       await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot(
         'rule-flyout-rule-conditions',
