@@ -48,7 +48,6 @@ import {
 } from '../get_service_group_fields';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
-import { getAlertFieldsFromGroupBy } from '../utils/get_groupby_alert_fields';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
@@ -191,7 +190,6 @@ export function registerErrorCountRuleType({
               relativeViewInAppUrl
             );
 
-            const groupByAlertFields = getAlertFieldsFromGroupBy(groupByFields);
             const groupByActionVariables =
               getGroupByActionVariables(groupByFields);
 
@@ -205,7 +203,7 @@ export function registerErrorCountRuleType({
                   [ERROR_GROUP_ID]: ruleParams.errorGroupingKey,
                   [ALERT_REASON]: alertReason,
                   ...sourceFields,
-                  ...groupByAlertFields,
+                  ...groupByFields,
                 },
               })
               .scheduleActions(ruleTypeConfig.defaultActionGroupId, {

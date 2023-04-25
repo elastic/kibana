@@ -64,7 +64,6 @@ import {
   getMultiTermsSortOrder,
 } from './average_or_percentile_agg';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
-import { getAlertFieldsFromGroupBy } from '../utils/get_groupby_alert_fields';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
@@ -269,7 +268,6 @@ export function registerTransactionDurationRuleType({
           )
         );
 
-        const groupByAlertFields = getAlertFieldsFromGroupBy(groupByFields);
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
 
         services
@@ -282,7 +280,7 @@ export function registerTransactionDurationRuleType({
               [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
               [ALERT_REASON]: reason,
               ...sourceFields,
-              ...groupByAlertFields,
+              ...groupByFields,
             },
           })
           .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
