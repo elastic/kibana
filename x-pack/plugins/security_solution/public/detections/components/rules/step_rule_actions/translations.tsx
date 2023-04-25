@@ -28,3 +28,18 @@ export const NO_ACTIONS_READ_PERMISSIONS = i18n.translate(
       'Cannot create rule actions. You do not have "Read" permissions for the "Actions" plugin.',
   }
 );
+
+export const RULE_SNOOZE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.snoozeDescription',
+  {
+    defaultMessage:
+      'Select when automated actions should be performed if a rule evaluates as true.',
+  }
+);
+
+export const SNOOZED_ACTIONS_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.snoozedActionsWarning',
+  {
+    defaultMessage: 'Actions will not be preformed until it is unsnoozed.',
+  }
+);
