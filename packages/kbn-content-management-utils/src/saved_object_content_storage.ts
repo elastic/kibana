@@ -171,17 +171,16 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     if (enableMSearch) {
       this.mSearch = {
         savedObjectType: this.savedObjectType,
-        toItemResult: (
-          ctx: StorageContext,
-          savedObject: SavedObjectsFindResult<Types['Attributes']>
-        ): Types['Item'] => {
+        toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult): Types['Item'] => {
           const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
 
           // Validate DB response and DOWN transform to the request version
           const { value, error: resultError } = transforms.mSearch.out.result.down<
             Types['Item'],
             Types['Item']
-          >(savedObjectToMapItem(savedObject, false));
+          >(
+            savedObjectToMapItem(savedObject as SavedObjectsFindResult<Types['Attributes']>, false)
+          );
 
           if (resultError) {
             throw Boom.badRequest(`Invalid response. ${resultError.message}`);
@@ -202,7 +201,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     savedObjectType: string;
     toItemResult: (
       ctx: StorageContext,
-      savedObject: SavedObjectsFindResult<Types['Attributes']>
+      savedObject: SavedObjectsFindResult // <Types['Attributes']>
     ) => Types['Item'];
   };
 
