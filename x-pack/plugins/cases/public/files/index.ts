@@ -22,7 +22,7 @@ import * as i18n from './translations';
 const getOwnerUIName = (owner: Owner) => {
   switch (owner) {
     case SECURITY_SOLUTION_OWNER:
-      return 'Security Solution';
+      return 'Security';
     case OBSERVABILITY_OWNER:
       return 'Observability';
     case GENERAL_CASES_OWNER:
