@@ -398,4 +398,41 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
     return titles;
   }
+
+  public setScrollToPanelId = (id: string | undefined) => {
+    this.dispatch.setScrollToPanelId(id);
+  };
+
+  public scrollToPanel = async (panelRef: HTMLDivElement) => {
+    const id = this.getState().componentState.scrollToPanelId;
+    if (!id) return;
+
+    this.untilEmbeddableLoaded(id).then(() => {
+      this.setScrollToPanelId(undefined);
+      panelRef.scrollIntoView({ block: 'center' });
+    });
+  };
+
+  public scrollToTop = () => {
+    window.scroll(0, 0);
+  };
+
+  public setHighlightPanelId = (id: string | undefined) => {
+    this.dispatch.setHighlightPanelId(id);
+  };
+
+  public highlightPanel = (panelRef: HTMLDivElement) => {
+    const id = this.getState().componentState.highlightPanelId;
+
+    if (id && panelRef) {
+      this.untilEmbeddableLoaded(id).then(() => {
+        panelRef.classList.add('dshDashboardGrid__item--highlighted');
+        // Removes the class after the highlight animation finishes
+        setTimeout(() => {
+          panelRef.classList.remove('dshDashboardGrid__item--highlighted');
+        }, 5000);
+      });
+    }
+    this.setHighlightPanelId(undefined);
+  };
 }

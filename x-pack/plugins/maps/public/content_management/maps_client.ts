@@ -19,18 +19,19 @@ import type {
   MapSearchOut,
   MapSearchOptions,
 } from '../../common/content_management';
+import { CONTENT_ID as contentTypeId } from '../../common/content_management';
 import { getContentManagement } from '../kibana_services';
 
 const get = async (id: string) => {
   return getContentManagement().client.get<MapGetIn, MapGetOut>({
-    contentTypeId: 'map',
+    contentTypeId,
     id,
   });
 };
 
 const create = async ({ data, options }: Omit<MapCreateIn, 'contentTypeId'>) => {
   const res = await getContentManagement().client.create<MapCreateIn, MapCreateOut>({
-    contentTypeId: 'map',
+    contentTypeId,
     data,
     options,
   });
@@ -39,7 +40,7 @@ const create = async ({ data, options }: Omit<MapCreateIn, 'contentTypeId'>) => 
 
 const update = async ({ id, data, options }: Omit<MapUpdateIn, 'contentTypeId'>) => {
   const res = await getContentManagement().client.update<MapUpdateIn, MapUpdateOut>({
-    contentTypeId: 'map',
+    contentTypeId,
     id,
     data,
     options,
@@ -49,14 +50,14 @@ const update = async ({ id, data, options }: Omit<MapUpdateIn, 'contentTypeId'>)
 
 const deleteMap = async (id: string) => {
   await getContentManagement().client.delete<MapDeleteIn, MapDeleteOut>({
-    contentTypeId: 'map',
+    contentTypeId,
     id,
   });
 };
 
 const search = async (query: SearchQuery = {}, options?: MapSearchOptions) => {
   return getContentManagement().client.search<MapSearchIn, MapSearchOut>({
-    contentTypeId: 'map',
+    contentTypeId,
     query,
     options,
   });

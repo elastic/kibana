@@ -20,9 +20,12 @@ import {
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
 import {
+  ACTIONS_NOTIFY_WHEN_BUTTON,
+  ACTIONS_SUMMARY_BUTTON,
+} from '../../screens/common/rule_actions';
+import {
   ABOUT_CONTINUE_BTN,
   ABOUT_EDIT_BUTTON,
-  ACTIONS_THROTTLE_INPUT,
   CUSTOM_QUERY_INPUT,
   DEFINE_CONTINUE_BUTTON,
   DEFINE_EDIT_BUTTON,
@@ -401,11 +404,10 @@ describe('Custom query rules', () => {
 
         goToActionsStepTab();
 
-        cy.get(ACTIONS_THROTTLE_INPUT).invoke('val').should('eql', 'no_actions');
-
-        cy.get(ACTIONS_THROTTLE_INPUT).select('Weekly');
-
         addEmailConnectorAndRuleAction('test@example.com', 'Subject');
+
+        cy.get(ACTIONS_SUMMARY_BUTTON).should('have.text', 'Summary of alerts');
+        cy.get(ACTIONS_NOTIFY_WHEN_BUTTON).should('have.text', 'Per rule run');
 
         goToAboutStepTab();
         cy.get(TAGS_CLEAR_BUTTON).click({ force: true });
