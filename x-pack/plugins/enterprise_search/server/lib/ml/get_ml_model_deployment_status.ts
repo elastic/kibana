@@ -16,7 +16,7 @@ import {
   MlModelDeploymentState,
   MlTrainedModelConfigWithDefined,
 } from '../../../common/types/ml';
-import { isResourceNotFoundException } from '../../utils/identify_exceptions';
+import { ElasticsearchResponseError, isNotFoundException, isResourceNotFoundException } from '../../utils/identify_exceptions';
 
 export const getMlModelDeploymentStatus = async (
   modelName: string,
@@ -54,7 +54,7 @@ export const getMlModelDeploymentStatus = async (
       return getDefaultStatusReturn(MlModelDeploymentState.Downloading, modelName);
     }
   } catch (error) {
-    if (!isResourceNotFoundException(error)) {
+    if (!isNotFoundExceptionError(error)) {
       throw error;
     }
     // not found? return a default
@@ -114,4 +114,13 @@ function getMlModelDeploymentStateForStatus(state?: string): MlModelDeploymentSt
 
   // unknown state? return default
   return MlModelDeploymentState.NotDeployed;
+}
+
+function isNotFoundExceptionError(error: unknown): boolean {
+  return (
+    isResourceNotFoundException(error as ElasticsearchResponseError) ||
+    isNotFoundException(error as ElasticsearchResponseError) ||
+    // @ts-expect-error error types incorrect
+    error?.statusCode === 404
+  );
 }
