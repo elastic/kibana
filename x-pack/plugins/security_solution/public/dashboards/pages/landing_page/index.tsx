@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
-import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
+import { DashboardListingTable, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { DashboardsTable } from '../../../common/components/dashboards/dashboards_table';
@@ -21,6 +21,7 @@ import { LinkButton } from '../../../common/components/links/helpers';
 import * as i18n from './translations';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../common/lib/telemetry';
 import { DASHBOARDS_PAGE_TITLE } from '../translations';
+import { useGetSecuritySolutionUrl } from '../../../common/components/link_to';
 
 const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard }) => {
   const { isLoading, url } = useCreateSecurityDashboardLink();
@@ -57,7 +58,13 @@ export const DashboardsLandingPage = () => {
   const dashboardLinks = useAppRootNavLink(SecurityPageName.dashboards)?.links ?? [];
   const { show: canReadDashboard, createNew: canCreateDashboard } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
-
+  const { navigateTo } = useNavigateTo();
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const getHref = (id: string) =>
+    `${getSecuritySolutionUrl({
+      deepLinkId: SecurityPageName.dashboards,
+      path: id,
+    })}`;
   return (
     <SecuritySolutionPageWrapper>
       <Header canCreateDashboard={canCreateDashboard} />
@@ -77,7 +84,20 @@ export const DashboardsLandingPage = () => {
           </EuiTitle>
           <EuiHorizontalRule margin="s" />
           <EuiSpacer size="m" />
-          <DashboardsTable />
+          <DashboardListingTable
+            goToDashboard={(dashboardId) => {
+              if (dashboardId) {
+                track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.DASHBOARD);
+                navigateTo({ url: getHref(dashboardId) });
+              }
+              return alert(
+                `Here's where I would redirect you to ${dashboardId ?? 'a new Dashboard'}`
+              );
+            }}
+            getDashboardUrl={(id, timeRestore) => {
+              return getHref(id);
+            }}
+          />
         </>
       )}
 
