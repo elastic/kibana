@@ -167,6 +167,9 @@ export const actionCreateService = (
           index: ENDPOINT_ACTIONS_INDEX,
           body: {
             ...doc,
+            agent: {
+              id: payload.endpoint_ids,
+            },
           },
           refresh: 'wait_for',
         },
