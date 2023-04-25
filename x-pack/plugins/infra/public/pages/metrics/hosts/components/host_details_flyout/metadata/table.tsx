@@ -12,6 +12,7 @@ import {
   EuiLink,
   EuiInMemoryTable,
   EuiSearchBarProps,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -19,16 +20,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useToggle from 'react-use/lib/useToggle';
 import { debounce } from 'lodash';
 import { Query } from '@elastic/eui';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type { HorizontalAlignment } from '@elastic/eui';
 import { useHostFlyoutOpen } from '../../../hooks/use_host_flyout_open_url_state';
 import { AddMetadataFilterButton } from './add_metadata_filter_button';
-
-interface Row {
-  name: string;
-  value: string | string[] | undefined;
-}
+import { AddMetadataPinToRow } from './add_pin_to_row';
+import { LOCAL_STORAGE_PINNED_METADATA_ROWS } from '../../../constants';
+import { getRowsWithPins } from './utils';
+import type { Field } from './utils';
 
 interface Props {
-  rows: Row[];
+  rows: Field[];
   loading: boolean;
 }
 
@@ -72,6 +74,18 @@ export const Table = (props: Props) => {
   const { rows, loading } = props;
   const [searchError, setSearchError] = useState<SearchErrorType | null>(null);
   const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
+  const [fieldsWithPins, setFieldsWithPins] = useState(rows);
+
+  const [pinnedItems, setPinnedItems] = useLocalStorage<Array<Field['name']>>(
+    LOCAL_STORAGE_PINNED_METADATA_ROWS,
+    []
+  );
+
+  useMemo(() => {
+    if (pinnedItems) {
+      setFieldsWithPins(getRowsWithPins(rows, pinnedItems) ?? rows);
+    }
+  }, [rows, pinnedItems]);
 
   const debouncedSearchOnChange = useMemo(
     () =>
@@ -109,6 +123,23 @@ export const Table = (props: Props) => {
   const columns = useMemo(
     () => [
       {
+        field: 'value',
+        name: <EuiIcon type="pin" />,
+        align: 'center' as HorizontalAlignment,
+        width: '5%',
+        sortable: false,
+        showOnHover: true,
+        render: (_name: string, item: Field) => {
+          return (
+            <AddMetadataPinToRow
+              fieldName={item.name}
+              pinnedItems={pinnedItems ?? []}
+              setPinnedItems={setPinnedItems}
+            />
+          );
+        },
+      },
+      {
         field: 'name',
         name: FIELD_LABEL,
         width: '35%',
@@ -118,21 +149,22 @@ export const Table = (props: Props) => {
       {
         field: 'value',
         name: VALUE_LABEL,
-        width: '55%',
+        width: '50%',
         sortable: false,
-        render: (_name: string, item: Row) => <ExpandableContent values={item.value} />,
+        render: (_name: string, item: Field) => <ExpandableContent values={item.value} />,
       },
       {
         field: 'value',
         name: 'Actions',
+        width: '10%',
         sortable: false,
         showOnHover: true,
-        render: (_name: string, item: Row) => {
+        render: (_name: string, item: Field) => {
           return <AddMetadataFilterButton item={item} />;
         },
       },
     ],
-    []
+    [pinnedItems, setPinnedItems]
   );
 
   return (
@@ -141,7 +173,7 @@ export const Table = (props: Props) => {
       tableLayout={'fixed'}
       responsive={false}
       columns={columns}
-      items={rows}
+      items={fieldsWithPins}
       rowProps={{ className: 'euiTableRow-hasActions' }}
       search={search}
       loading={loading}

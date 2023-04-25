@@ -52,6 +52,14 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsView-flyout-metadata-remove-filter');
     },
 
+    async clickAddMetadataPin() {
+      return testSubjects.click('hostsView-flyout-metadata-add-pin');
+    },
+
+    async clickRemoveMetadataPin() {
+      return testSubjects.click('hostsView-flyout-metadata-remove-pin');
+    },
+
     async getHostsLandingPageDisabled() {
       const container = await testSubjects.find('hostView-no-enable-access');
       const containerText = await container.getVisibleText();
@@ -139,7 +147,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.existOrFail('embeddablePanelAction-openInLens');
     },
 
-    // Flyout Tabs
+    // Flyout Tabs: Metadata
     getMetadataTab() {
       return testSubjects.find('hostsView-flyout-tabs-metadata');
     },
@@ -161,6 +169,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.exists('hostsView-flyout-metadata-remove-filter');
     },
 
+    async getRemovePinExist() {
+      return testSubjects.exists('hostsView-flyout-metadata-remove-pin');
+    },
+
+    // Flyout Tabs: Processes
     async getProcessesTabContentTitle(index: number) {
       const processesListElements = await testSubjects.findAll('infraProcessesSummaryTableItem');
       return processesListElements[index].findByCssSelector('dt');

@@ -17,6 +17,7 @@ export const DEFAULT_HOST_LIMIT: HostLimitOptions = 100;
 export const DEFAULT_PAGE_SIZE = 10;
 export const LOCAL_STORAGE_HOST_LIMIT_KEY = 'hostsView:hostLimitSelection';
 export const LOCAL_STORAGE_PAGE_SIZE_KEY = 'hostsView:pageSizeSelection';
+export const LOCAL_STORAGE_PINNED_METADATA_ROWS = 'hostsView:pinnedMetadataRows';
 
 export const ALL_ALERTS: AlertStatusFilter = {
   status: ALERT_STATUS_ALL,
