@@ -47,6 +47,11 @@ export function ExplainLogRateSpikesPageProvider({
 
     async setQueryInput(query: string) {
       const aiopsQueryInput = await testSubjects.find('aiopsQueryInput');
+
+      await aiopsQueryInput.clearValueWithKeyboard();
+      const queryBarEmpty = await aiopsQueryInput.getVisibleText();
+      expect(queryBarEmpty).to.eql('', `Expected query bar to be emptied, got '${queryBarEmpty}'`);
+
       await aiopsQueryInput.type(query);
       await aiopsQueryInput.pressKeys(browser.keys.ENTER);
       await header.waitUntilLoadingHasFinished();
