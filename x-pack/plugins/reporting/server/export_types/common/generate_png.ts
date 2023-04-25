@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Protocol } from 'devtools-protocol';
 import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import * as Rx from 'rxjs';
@@ -19,7 +18,7 @@ interface PngResult {
   buffer: Buffer;
   metrics?: PngMetrics;
   warnings: string[];
-  versionInfo: Protocol.Browser.GetVersionResponse;
+  versionInfo: string;
 }
 
 export function generatePngObservable(
