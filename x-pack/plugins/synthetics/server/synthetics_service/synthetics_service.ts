@@ -555,7 +555,7 @@ export class SyntheticsService {
   async getSyntheticsParams({ spaceId }: { spaceId?: string } = {}) {
     const encryptedClient = this.server.encryptedSavedObjects.getClient();
 
-    const paramsBySpace: Record<string, Record<string, string>> = {};
+    const paramsBySpace: Record<string, Record<string, string>> = Object.create(null);
 
     const finder =
       await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParam>({
@@ -568,7 +568,7 @@ export class SyntheticsService {
       response.saved_objects.forEach((param) => {
         param.namespaces?.forEach((namespace) => {
           if (!paramsBySpace[namespace]) {
-            paramsBySpace[namespace] = {};
+            paramsBySpace[namespace] = Object.create(null);
           }
           paramsBySpace[namespace][param.attributes.key] = param.attributes.value;
         });
