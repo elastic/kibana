@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiForm,
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonGroup,
-  EuiFormRow,
+  EuiCallOut,
+  EuiDescribedFormGroup,
   EuiFieldNumber,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiLink,
   EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiCallOut,
-  EuiSpacer,
-  EuiDescribedFormGroup,
-  EuiLink,
-  EuiFieldText,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiSelect,
+  EuiSpacer,
 } from '@elastic/eui';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { Observable } from 'rxjs';
@@ -69,6 +69,11 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
 }) => {
   const numOfAllocation = config.numOfAllocations;
   const threadsPerAllocations = config.threadsPerAllocations;
+
+  const defaultDeploymentId = useMemo(() => {
+    return config.deploymentId;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const threadsPerAllocationsOptions = useMemo(
     () =>
@@ -124,6 +129,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
         >
           {!isUpdate ? (
             <EuiFieldText
+              placeholder={defaultDeploymentId}
               isInvalid={!!errors.deploymentId}
               value={config.deploymentId ?? ''}
               onChange={(e) => {
