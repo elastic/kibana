@@ -23,12 +23,6 @@
     "@kbn/reporting-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/discover-plugin",
-    "@kbn/features-plugin",
-    "@kbn/licensing-plugin",
-    "@kbn/security-plugin",
-    "@kbn/task-manager-plugin",
-    "@kbn/reporting-mocks",
   ],
   "exclude": [
     "target/**/*",
