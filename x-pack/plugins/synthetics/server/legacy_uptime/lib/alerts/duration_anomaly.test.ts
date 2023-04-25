@@ -9,9 +9,9 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
+import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from '@kbn/ml-common';
 import { durationAnomalyAlertFactory } from './duration_anomaly';
 import { DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
-import { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from '@kbn/ml-common';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
 import { Ping } from '../../../../common/runtime_types/ping';
