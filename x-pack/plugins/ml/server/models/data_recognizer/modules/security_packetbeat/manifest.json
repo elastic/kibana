@@ -1,16 +1,14 @@
 {
   "id": "security_packetbeat",
   "title": "Security: Packetbeat",
-  "description": "Detect suspicious network activity in Packetbeat data.",
+  "description": "Detect suspicious activity in Packetbeat data.",
   "type": "Packetbeat data",
   "logoFile": "logo.json",
-  "defaultIndexPattern": "packetbeat-*",
+  "defaultIndexPattern": "packetbeat-*,logs-*",
   "query": {
     "bool": {
-      "filter": [
-        {"term": {"agent.type": "packetbeat"}}
-      ],
-      "must_not": { "terms": { "_tier": [ "data_frozen", "data_cold" ] } }
+      "filter": [{ "term": { "agent.type": "packetbeat" } }],
+      "must_not": { "terms": { "_tier": ["data_frozen", "data_cold"] } }
     }
   },
   "jobs": [

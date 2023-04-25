@@ -55,7 +55,7 @@ export const AnalyticsCollectionToolbarLogic = kea<
       actions.setSearchSessionId(null);
     },
   }),
-  path: ['enterprise_search', 'analytics', 'collections', 'toolbar'],
+  path: ['enterprise_search', 'analytics', 'collection', 'toolbar'],
   reducers: () => ({
     _searchSessionId: [
       null,

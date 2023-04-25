@@ -16,7 +16,7 @@ import {
   FetchAnalyticsCollectionLogic,
 } from './fetch_analytics_collection_logic';
 
-interface AnalyticsCollectionDataViewLogicValues {
+export interface AnalyticsCollectionDataViewLogicValues {
   dataView: DataView | null;
 }
 
@@ -39,7 +39,7 @@ export const AnalyticsCollectionDataViewLogic = kea<
       actions.setDataView(await findOrCreateDataView(collection));
     },
   }),
-  path: ['enterprise_search', 'analytics', 'collections', 'dataView'],
+  path: ['enterprise_search', 'analytics', 'collection', 'dataView'],
   reducers: () => ({
     dataView: [null, { setDataView: (_, { dataView }) => dataView }],
   }),
