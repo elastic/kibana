@@ -10,7 +10,7 @@ import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import assert from 'assert';
-import { mkdir, unlink } from 'fs/promises';
+import { mkdir, unlink, readdir, stat } from 'fs/promises';
 import { join } from 'path';
 import fs from 'fs';
 import { finished } from 'stream/promises';
@@ -60,8 +60,6 @@ export const createAndEnrollEndpointHost = async ({
   useClosestVersionMatch = false,
   useCache = true,
 }: CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse> => {
-  let cacheCleanupPromise = Promise.resolve();
-
   const [vm, agentDownload, fleetServerUrl, enrollmentToken] = await Promise.all([
     createMultipassVm({
       vmName: hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`,
@@ -76,8 +74,6 @@ export const createAndEnrollEndpointHost = async ({
     }>((url) => {
       if (useCache) {
         const agentDownloadClient = new AgentDownloadStorage();
-
-        cacheCleanupPromise = agentDownloadClient.cleanupDownloads();
 
         return agentDownloadClient.downloadAndStore(url).then((cache) => {
           return {
@@ -115,8 +111,6 @@ export const createAndEnrollEndpointHost = async ({
     enrollmentToken,
     vmName: vm.vmName,
   });
-
-  await cacheCleanupPromise;
 
   return {
     hostname: vm.vmName,
@@ -270,23 +264,26 @@ interface DownloadedAgentInfo {
 class AgentDownloadStorage extends SettingsStorage {
   private downloadsFolderExists = false;
   private readonly downloadsDirName = 'agent_download_storage';
+  private readonly downloadsDirFullPath: string;
 
   constructor() {
     super('agent_download_storage_settings.json');
+
+    this.downloadsDirFullPath = this.buildPath(this.downloadsDirName);
   }
 
   protected async ensureExists(): Promise<void> {
     await super.ensureExists();
 
     if (!this.downloadsFolderExists) {
-      await mkdir(this.buildPath(this.downloadsDirName), { recursive: true });
+      await mkdir(this.downloadsDirFullPath, { recursive: true });
       this.downloadsFolderExists = true;
     }
   }
 
   public getPathsForUrl(agentDownloadUrl: string): DownloadedAgentInfo {
     const filename = agentDownloadUrl.replace(/^https?:\/\//gi, '').replace(/\//g, '#');
-    const directory = this.buildPath(join(this.downloadsDirName));
+    const directory = this.downloadsDirFullPath;
     const fullFilePath = this.buildPath(join(this.downloadsDirName, filename));
 
     return {
@@ -323,14 +320,28 @@ class AgentDownloadStorage extends SettingsStorage {
     return newDownloadInfo;
   }
 
-  public async cleanupDownloads(): Promise<void> {
-    // FIXME:PT implement
-    //
-    // Read all files from downloads directory
-    //
-    // delete any `snapshot` downloads that are older than [x] amount of days old
-    //
-    // Delete any files that is older than [xx] amount of days
+  public async cleanupDownloads(): Promise<string[]> {
+    const deletedFiles: string[] = [];
+    const deleteFilePromises: Array<Promise<unknown>> = [];
+    const maxAgeDate = new Date();
+
+    maxAgeDate.setMilliseconds(-1.728e8); // -2 days
+
+    const allFiles = await readdir(this.downloadsDirFullPath);
+
+    for (const fileName of allFiles) {
+      const filePath = join(this.downloadsDirFullPath, fileName);
+      const fileStats = await stat(filePath);
+
+      if (fileStats.isFile() && fileStats.birthtime < maxAgeDate) {
+        deleteFilePromises.push(unlink(filePath));
+        deletedFiles.push(filePath);
+      }
+    }
+
+    await Promise.allSettled(deleteFilePromises);
+
+    return deletedFiles;
   }
 }
 
