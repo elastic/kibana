@@ -140,10 +140,15 @@ export class ObservabilityDataViews {
           timeFieldName: '@timestamp',
           fieldFormats: this.getFieldFormats(app),
           name: DataTypesLabels[app],
+          allowNoIndex: true,
         },
         false,
         false
       );
+
+      if (dataView.matchedIndices.length === 0) {
+        throw new DataViewMissingIndices('No indices match pattern');
+      }
 
       if (runtimeFields !== null) {
         runtimeFields.forEach(({ name, field }) => {
@@ -170,6 +175,7 @@ export class ObservabilityDataViews {
       timeFieldName: '@timestamp',
       fieldFormats: this.getFieldFormats(app),
       name: DataTypesLabels[app],
+      allowNoIndex: true,
     });
   }
   // we want to make sure field formats remain same
