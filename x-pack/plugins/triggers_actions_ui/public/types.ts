@@ -257,6 +257,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   subtype?: Array<{ id: string; name: string }>;
   convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
   hideInUi?: boolean;
+  modalWidth?: number;
 }
 
 export interface GenericValidationResult<T> {
