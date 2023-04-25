@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { DISCOVER_APP_TARGET } from '../../common/constants';
 import { findInventoryFields } from '../../common/inventory_models';
@@ -33,7 +34,7 @@ export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLoca
 
   public readonly getLocation = async (params: NodeLogsLocatorParams) => {
     const { parseSearchString } = await import('./helpers');
-    const { nodeType, nodeId, filter } = params;
+    const { nodeType, nodeId, filter, timeRange } = params;
 
     const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
     const query = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
@@ -42,7 +43,18 @@ export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLoca
 
     if (this.deps.appTarget === DISCOVER_APP_TARGET) {
       const [, plugins] = await this.deps.core.getStartServices();
-      const discoverLocation = await plugins.discover.locator?.getLocation({});
+      const discoverParams: DiscoverAppLocatorParams = {
+        ...(timeRange ? { from: timeRange.from, to: timeRange.to } : {}),
+        ...(filter
+          ? {
+              query: {
+                language: 'kuery',
+                query: filter,
+              },
+            }
+          : {}),
+      };
+      const discoverLocation = await plugins.discover.locator?.getLocation(discoverParams);
 
       if (!discoverLocation) {
         throw new Error('Discover location not found');

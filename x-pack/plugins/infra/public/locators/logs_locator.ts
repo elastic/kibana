@@ -7,6 +7,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_TARGET } from '../../common/constants';
 import type { InfraClientCoreSetup, QueryTimeRange } from '../types';
 
@@ -36,12 +37,24 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
   constructor(protected readonly deps: LogsLocatorDependencies) {}
 
   public readonly getLocation = async (params: LogsLocatorParams) => {
+    const { filter, timeRange } = params;
     const { parseSearchString } = await import('./helpers');
     const searchString = parseSearchString(params);
 
     if (this.deps.appTarget === DISCOVER_APP_TARGET) {
       const [, plugins] = await this.deps.core.getStartServices();
-      const discoverLocation = await plugins.discover.locator?.getLocation({});
+      const discoverParams: DiscoverAppLocatorParams = {
+        ...(timeRange ? { from: timeRange.from, to: timeRange.to } : {}),
+        ...(filter
+          ? {
+              query: {
+                language: 'kuery',
+                query: filter,
+              },
+            }
+          : {}),
+      };
+      const discoverLocation = await plugins.discover.locator?.getLocation(discoverParams);
 
       if (!discoverLocation) {
         throw new Error('Discover location not found');
