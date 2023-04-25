@@ -35,7 +35,6 @@ Object {
           "host.name": Object {
             "terms": Object {
               "field": "host.name",
-              "missing_bucket": true,
             },
           },
         },

@@ -85,7 +85,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -8350,7 +8350,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -15672,7 +15672,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",

@@ -92,6 +92,14 @@ export function SloListItem({
     queryClient.invalidateQueries(['fetchRulesForSlo']);
   };
 
+  const handleNavigateToRules = () => {
+    navigateToUrl(
+      basePath.prepend(
+        `${paths.observability.rules}?_a=(lastResponse:!(),search:%27%27,params:(sloId:%27${slo?.id}%27),status:!(),type:!())`
+      )
+    );
+  };
+
   const handleClone = () => {
     const newSlo = transformValuesToCreateSLOInput(
       transformSloResponseToCreateSloInput({ ...slo, name: `[Copy] ${slo.name}` })!
@@ -203,7 +211,18 @@ export function SloListItem({
                   data-test-subj="sloActionsCreateRule"
                 >
                   {i18n.translate('xpack.observability.slo.slo.item.actions.createRule', {
-                    defaultMessage: 'Create Alert rule',
+                    defaultMessage: 'Create new Alert rule',
+                  })}
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  key="manageRules"
+                  icon="list"
+                  disabled={!hasWriteCapabilities}
+                  onClick={handleNavigateToRules}
+                  data-test-subj="sloActionsManageRules"
+                >
+                  {i18n.translate('xpack.observability.slo.slo.item.actions.manageRules', {
+                    defaultMessage: 'Manage rules',
                   })}
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem

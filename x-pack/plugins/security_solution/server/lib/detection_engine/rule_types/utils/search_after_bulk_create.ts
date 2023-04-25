@@ -45,6 +45,7 @@ export const searchAfterAndBulkCreate = async ({
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
+  additionalFilters,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     let toReturn = createSearchAfterReturnType();
@@ -81,6 +82,7 @@ export const searchAfterAndBulkCreate = async ({
             secondaryTimestamp,
             trackTotalHits,
             sortOrder,
+            additionalFilters,
           });
           mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
           toReturn = mergeReturns([

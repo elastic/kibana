@@ -31,7 +31,8 @@ import { postCaseReq } from './mock';
 
 export const createSecuritySolutionAlerts = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
-  log: ToolingLog
+  log: ToolingLog,
+  numberOfSignals: number = 1
 ): Promise<estypes.SearchResponse<DetectionAlert & RiskEnrichmentFields>> => {
   const rule = {
     ...getRuleForSignalTesting(['auditbeat-*']),
@@ -39,7 +40,7 @@ export const createSecuritySolutionAlerts = async (
   };
   const { id } = await createRule(supertest, log, rule);
   await waitForRuleSuccess({ supertest, log, id });
-  await waitForSignalsToBePresent(supertest, log, 1, [id]);
+  await waitForSignalsToBePresent(supertest, log, numberOfSignals, [id]);
   const signals = await getSignalsByIds(supertest, log, [id]);
 
   return signals;

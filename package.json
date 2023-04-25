@@ -494,6 +494,7 @@
     "@kbn/object-versioning": "link:packages/kbn-object-versioning",
     "@kbn/observability-alert-details": "link:x-pack/packages/observability/alert_details",
     "@kbn/observability-fixtures-plugin": "link:x-pack/test/cases_api_integration/common/plugins/observability",
+    "@kbn/observability-onboarding-plugin": "link:x-pack/plugins/observability_onboarding",
     "@kbn/observability-plugin": "link:x-pack/plugins/observability",
     "@kbn/observability-shared-plugin": "link:x-pack/plugins/observability_shared",
     "@kbn/oidc-provider-plugin": "link:x-pack/test/security_api_integration/plugins/oidc_provider",
@@ -951,7 +952,7 @@
     "whatwg-fetch": "^3.0.0",
     "xml2js": "^0.4.22",
     "xstate": "^4.35.2",
-    "xterm": "^5.0.0",
+    "xterm": "^5.1.0",
     "yauzl": "^2.10.0",
     "yazl": "^2.5.1"
   },

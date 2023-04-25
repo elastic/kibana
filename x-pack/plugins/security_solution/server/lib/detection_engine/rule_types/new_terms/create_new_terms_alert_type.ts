@@ -108,6 +108,7 @@ export const createNewTermsAlertType = (
           exceptionFilter,
           unprocessedExceptions,
           alertTimestampOverride,
+          publicBaseUrl,
         },
         services,
         params,
@@ -301,6 +302,7 @@ export const createNewTermsAlertType = (
             indicesToQuery: inputIndex,
             alertTimestampOverride,
             ruleExecutionLogger,
+            publicBaseUrl,
           });
 
           const bulkCreateResult = await bulkCreate(
