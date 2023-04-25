@@ -30,8 +30,10 @@ export const LogsLinkToStream = ({
         onClick={() =>
           locators.logsLocator?.navigate({
             time: endTimestamp,
-            from: startTimestamp,
-            to: endTimestamp,
+            timeRange: {
+              from: startTimestamp,
+              to: endTimestamp,
+            },
             filter: query,
           })
         }
