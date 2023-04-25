@@ -19,7 +19,7 @@ export const openResponseConsoleFromEndpointList = () => {
 };
 
 export const inputConsoleCommand = (command: string) => {
-  cy.getByTestSubj('endpointResponseActionsConsole-inputCapture').click().type(`${command}`);
+  cy.getByTestSubj('endpointResponseActionsConsole-inputCapture').click().type(command);
 };
 
 export const clearConsoleCommandInput = () => {

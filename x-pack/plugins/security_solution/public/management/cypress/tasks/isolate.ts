@@ -129,7 +129,7 @@ export const filterOutIsolatedHosts = (): void => {
   cy.getByTestSubj('querySubmitButton').click();
 };
 
-export const checkEndpointListForIsolatedHosts = (expectIsolated = true): void => {
+const checkEndpointListForIsolatedHosts = (expectIsolated: boolean): void => {
   const chainer = expectIsolated ? 'contain.text' : 'not.contain.text';
   cy.getByTestSubj('endpointListTable').within(() => {
     cy.get('tbody tr').each(($tr) => {
@@ -139,3 +139,8 @@ export const checkEndpointListForIsolatedHosts = (expectIsolated = true): void =
     });
   });
 };
+
+export const checkEndpointListForOnlyUnIsolatedHosts = (): void =>
+  checkEndpointListForIsolatedHosts(false);
+export const checkEndpointListForOnlyIsolatedHosts = (): void =>
+  checkEndpointListForIsolatedHosts(true);
