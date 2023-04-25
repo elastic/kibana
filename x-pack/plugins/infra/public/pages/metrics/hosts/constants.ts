@@ -7,13 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import { AlertStatusFilter } from './types';
+import { AlertStatusFilter, HostLimitOptions } from './types';
 
 export const ALERT_STATUS_ALL = 'all';
 export const TIMESTAMP_FIELD = '@timestamp';
 export const DATA_VIEW_PREFIX = 'infra_metrics';
 
+export const DEFAULT_HOST_LIMIT: HostLimitOptions = 100;
 export const DEFAULT_PAGE_SIZE = 10;
+export const LOCAL_STORAGE_HOST_LIMIT_KEY = 'hostsView:hostLimitSelection';
 export const LOCAL_STORAGE_PAGE_SIZE_KEY = 'hostsView:pageSizeSelection';
 
 export const ALL_ALERTS: AlertStatusFilter = {
@@ -55,3 +57,5 @@ export const ALERT_STATUS_QUERY = {
   [ACTIVE_ALERTS.status]: ACTIVE_ALERTS.query,
   [RECOVERED_ALERTS.status]: RECOVERED_ALERTS.query,
 };
+
+export const HOST_LIMIT_OPTIONS = [10, 20, 50, 100, 500] as const;
