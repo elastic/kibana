@@ -106,6 +106,9 @@ describe('activeMaintenanceWindowsRoute', () => {
     });
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenLastCalledWith({ body: [] });
   });
 });
