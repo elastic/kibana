@@ -34802,7 +34802,6 @@
     "xpack.synthetics.monitorDetails.statusBar.pingType.icmp": "ICMP",
     "xpack.synthetics.monitorDetails.statusBar.pingType.tcp": "TCP",
     "xpack.synthetics.monitorDetails.summary.availability": "可用性",
-    "xpack.synthetics.monitorDetails.summary.avgDuration": "平均持续时间",
     "xpack.synthetics.monitorDetails.summary.brushArea": "轻刷某个区域以提高保真度",
     "xpack.synthetics.monitorDetails.summary.complete": "已完成",
     "xpack.synthetics.monitorDetails.summary.duration": "持续时间",
