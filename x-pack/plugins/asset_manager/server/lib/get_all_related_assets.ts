@@ -11,6 +11,7 @@ import { Asset, AssetType, Relation, RelationField } from '../../common/types_ap
 import { getAssets } from './get_assets';
 import { getRelatedAssets } from './get_related_assets';
 import { AssetNotFoundError } from './errors';
+import { toArray } from './utils';
 
 interface GetAllRelatedAssetsOptions {
   ean: string;
@@ -103,7 +104,6 @@ async function findRelatedAssets(
   { relation, from, to, type, visitedEans }: FindRelatedAssetsOptions
 ): Promise<Asset[]> {
   const relationField = relationToDirectField(relation);
-  // Why isn't it always an array?
   const directlyRelatedEans = toArray(primary[relationField]);
 
   let directlyRelatedAssets: Asset[] = [];
@@ -136,18 +136,6 @@ function relationToDirectField(relation: Relation): RelationField {
   } else {
     return 'asset.references';
   }
-}
-
-function toArray(maybeArray: string | string[] | undefined): string[] {
-  if (!maybeArray) {
-    return [];
-  }
-
-  if (Array.isArray(maybeArray)) {
-    return maybeArray;
-  }
-
-  return [maybeArray];
 }
 
 function withDistance(

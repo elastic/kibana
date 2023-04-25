@@ -16,6 +16,7 @@ import { getAllRelatedAssets } from '../lib/get_all_related_assets';
 import { SetupRouteOptions } from './types';
 import { getEsClientFromContext } from './utils';
 import { AssetNotFoundError } from '../lib/errors';
+import { toArray } from '../lib/utils';
 
 const assetType = schema.oneOf([
   schema.literal('k8s.pod'),
@@ -185,14 +186,4 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       }
     }
   );
-}
-
-function toArray<T>(maybeArray: T | T[] | undefined): T[] {
-  if (!maybeArray) {
-    return [];
-  }
-  if (Array.isArray(maybeArray)) {
-    return maybeArray;
-  }
-  return [maybeArray];
 }
