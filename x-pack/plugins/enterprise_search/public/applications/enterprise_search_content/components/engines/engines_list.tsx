@@ -71,7 +71,7 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
             {i18n.translate(
               'xpack.enterpriseSearch.content.searchApplications.createEngineButtonLabel',
               {
-                defaultMessage: 'Create Search Application',
+                defaultMessage: 'Create',
               }
             )}
           </EuiButton>
@@ -162,7 +162,7 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
           description: (
             <FormattedMessage
               id="xpack.enterpriseSearch.content.searchApplications.description"
-              defaultMessage="Search Applications allow you to query indexed data with a complete set of relevance, analytics and personalization tools. To learn more about how Search applications work in Enterprise search {documentationUrl}"
+              defaultMessage="Search Applications help make your Elasticsearch data searchable for end users, with out-of-the-box relevance, analytics and personalization tools. To learn more about how Search applications work in Enterprise Search {documentationUrl}"
               values={{
                 documentationUrl: (
                   <EuiLink

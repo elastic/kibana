@@ -90,7 +90,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.content.engines.createEngine.headerSubTitle"
-              defaultMessage="A Search Application allows your users to query data in your indices. Explore our {enginesDocsLink} to learn more!"
+              defaultMessage="Explore our {enginesDocsLink} to learn more!"
               values={{
                 enginesDocsLink: (
                   <EuiLink
@@ -172,7 +172,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
                   status: engineNameStatus,
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.engines.createEngine.nameEngine.title',
-                    { defaultMessage: 'Name your Search Application' }
+                    { defaultMessage: 'Search Application name' }
                   ),
                 },
               ]}
@@ -203,7 +203,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
               }}
             >
               {i18n.translate('xpack.enterpriseSearch.content.engines.createEngine.submit', {
-                defaultMessage: 'Create this Search Application',
+                defaultMessage: 'Create',
               })}
             </EuiButton>
           </EuiFlexItem>
