@@ -19,6 +19,7 @@ interface ConnectorOption {
 }
 
 interface SelectionProps {
+  allowGroupConnector?: string[];
   actionItem: RuleAction;
   accordionIndex: number;
   actionTypesIndex: ActionTypeIndex;
@@ -30,6 +31,7 @@ interface SelectionProps {
 export const ConnectorsSelection = React.memo(ConnectorsSelectionComponent);
 
 function ConnectorsSelectionComponent({
+  allowGroupConnector,
   actionItem,
   accordionIndex,
   actionTypesIndex,
@@ -38,13 +40,19 @@ function ConnectorsSelectionComponent({
   onConnectorSelected,
 }: SelectionProps) {
   const validConnectors = useMemo(
-    () => getValidConnectors(connectors, actionItem, actionTypesIndex),
-    [actionItem, actionTypesIndex, connectors]
+    () => getValidConnectors(connectors, actionItem, actionTypesIndex, allowGroupConnector),
+    [actionItem, actionTypesIndex, allowGroupConnector, connectors]
   );
 
   const selectedConnectors = useMemo(
-    () => getValueOfSelectedConnector(actionItem.id, validConnectors, actionTypeRegistered),
-    [actionItem.id, validConnectors, actionTypeRegistered]
+    () =>
+      getValueOfSelectedConnector(
+        actionItem.id,
+        validConnectors,
+        actionTypeRegistered,
+        allowGroupConnector
+      ),
+    [actionItem.id, validConnectors, actionTypeRegistered, allowGroupConnector]
   );
 
   const options = useMemo(
@@ -83,10 +91,15 @@ function ConnectorsSelectionComponent({
 const getValueOfSelectedConnector = (
   actionItemId: string,
   connectors: ActionConnector[],
-  actionTypeRegistered: ActionTypeModel
+  actionTypeRegistered: ActionTypeModel,
+  allowGroupConnector: string[] = []
 ): Array<EuiComboBoxOptionOption<ConnectorOption>> => {
-  const selectedConnector = connectors.find((connector) => connector.id === actionItemId);
-
+  let selectedConnector = connectors.find((connector) => connector.id === actionItemId);
+  if (allowGroupConnector.length > 0 && !selectedConnector) {
+    selectedConnector = connectors.find((connector) =>
+      allowGroupConnector.includes(connector.actionTypeId)
+    );
+  }
   if (!selectedConnector) {
     return [];
   }
