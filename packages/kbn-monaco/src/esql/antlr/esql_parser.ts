@@ -62,29 +62,30 @@ export class esql_parser extends Parser {
 	public static readonly NULL = 33;
 	public static readonly OR = 34;
 	public static readonly RP = 35;
-	public static readonly BOOLEAN_VALUE = 36;
-	public static readonly COMPARISON_OPERATOR = 37;
-	public static readonly PLUS = 38;
-	public static readonly MINUS = 39;
-	public static readonly ASTERISK = 40;
-	public static readonly SLASH = 41;
-	public static readonly PERCENT = 42;
-	public static readonly ORDERING = 43;
-	public static readonly NULLS_ORDERING = 44;
-	public static readonly NULLS_ORDERING_DIRECTION = 45;
-	public static readonly MATH_FUNCTION = 46;
-	public static readonly UNARY_FUNCTION = 47;
-	public static readonly WHERE_FUNCTIONS = 48;
-	public static readonly UNQUOTED_IDENTIFIER = 49;
-	public static readonly QUOTED_IDENTIFIER = 50;
-	public static readonly EXPR_LINE_COMMENT = 51;
-	public static readonly EXPR_MULTILINE_COMMENT = 52;
-	public static readonly EXPR_WS = 53;
-	public static readonly SRC_UNQUOTED_IDENTIFIER = 54;
-	public static readonly SRC_QUOTED_IDENTIFIER = 55;
-	public static readonly SRC_LINE_COMMENT = 56;
-	public static readonly SRC_MULTILINE_COMMENT = 57;
-	public static readonly SRC_WS = 58;
+	public static readonly UNDERSCORE = 36;
+	public static readonly BOOLEAN_VALUE = 37;
+	public static readonly COMPARISON_OPERATOR = 38;
+	public static readonly PLUS = 39;
+	public static readonly MINUS = 40;
+	public static readonly ASTERISK = 41;
+	public static readonly SLASH = 42;
+	public static readonly PERCENT = 43;
+	public static readonly ORDERING = 44;
+	public static readonly NULLS_ORDERING = 45;
+	public static readonly NULLS_ORDERING_DIRECTION = 46;
+	public static readonly MATH_FUNCTION = 47;
+	public static readonly UNARY_FUNCTION = 48;
+	public static readonly WHERE_FUNCTIONS = 49;
+	public static readonly UNQUOTED_IDENTIFIER = 50;
+	public static readonly QUOTED_IDENTIFIER = 51;
+	public static readonly EXPR_LINE_COMMENT = 52;
+	public static readonly EXPR_MULTILINE_COMMENT = 53;
+	public static readonly EXPR_WS = 54;
+	public static readonly SRC_UNQUOTED_IDENTIFIER = 55;
+	public static readonly SRC_QUOTED_IDENTIFIER = 56;
+	public static readonly SRC_LINE_COMMENT = 57;
+	public static readonly SRC_MULTILINE_COMMENT = 58;
+	public static readonly SRC_WS = 59;
 	public static readonly RULE_singleStatement = 0;
 	public static readonly RULE_query = 1;
 	public static readonly RULE_sourceCommand = 2;
@@ -149,11 +150,11 @@ export class esql_parser extends Parser {
 	];
 
 	private static readonly _LITERAL_NAMES: Array<string | undefined> = [
-		undefined, "'dissect'", "'grok'", "'eval'", "'explain'", "'from'", "'row'", 
-		"'stats'", "'where'", "'sort'", "'limit'", "'project'", "'drop'", "'rename'", 
+		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
+		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
 		"'by'", undefined, "'and'", undefined, undefined, "'.'", "'('", "'['", 
-		"']'", "'not'", "'like'", "'rlike'", "'null'", "'or'", "')'", undefined, 
+		"']'", "'not'", "'like'", "'rlike'", "'null'", "'or'", "')'", "'_'", undefined, 
 		undefined, "'+'", "'-'", "'*'", "'/'", "'%'", undefined, "'nulls'",
 	];
 	private static readonly _SYMBOLIC_NAMES: Array<string | undefined> = [
@@ -161,9 +162,9 @@ export class esql_parser extends Parser {
 		"WHERE", "SORT", "LIMIT", "PROJECT", "DROP", "RENAME", "LINE_COMMENT", 
 		"MULTILINE_COMMENT", "WS", "PIPE", "STRING", "INTEGER_LITERAL", "DECIMAL_LITERAL", 
 		"BY", "DATE_LITERAL", "AND", "ASSIGN", "COMMA", "DOT", "LP", "OPENING_BRACKET", 
-		"CLOSING_BRACKET", "NOT", "LIKE", "RLIKE", "NULL", "OR", "RP", "BOOLEAN_VALUE", 
-		"COMPARISON_OPERATOR", "PLUS", "MINUS", "ASTERISK", "SLASH", "PERCENT", 
-		"ORDERING", "NULLS_ORDERING", "NULLS_ORDERING_DIRECTION", "MATH_FUNCTION", 
+		"CLOSING_BRACKET", "NOT", "LIKE", "RLIKE", "NULL", "OR", "RP", "UNDERSCORE", 
+		"BOOLEAN_VALUE", "COMPARISON_OPERATOR", "PLUS", "MINUS", "ASTERISK", "SLASH", 
+		"PERCENT", "ORDERING", "NULLS_ORDERING", "NULLS_ORDERING_DIRECTION", "MATH_FUNCTION", 
 		"UNARY_FUNCTION", "WHERE_FUNCTIONS", "UNQUOTED_IDENTIFIER", "QUOTED_IDENTIFIER", 
 		"EXPR_LINE_COMMENT", "EXPR_MULTILINE_COMMENT", "EXPR_WS", "SRC_UNQUOTED_IDENTIFIER", 
 		"SRC_QUOTED_IDENTIFIER", "SRC_LINE_COMMENT", "SRC_MULTILINE_COMMENT", 
@@ -1035,7 +1036,7 @@ export class esql_parser extends Parser {
 						this.state = 236;
 						_localctx._operator = this._input.LT(1);
 						_la = this._input.LA(1);
-						if (!(((((_la - 40)) & ~0x1F) === 0 && ((1 << (_la - 40)) & ((1 << (esql_parser.ASTERISK - 40)) | (1 << (esql_parser.SLASH - 40)) | (1 << (esql_parser.PERCENT - 40)))) !== 0))) {
+						if (!(((((_la - 41)) & ~0x1F) === 0 && ((1 << (_la - 41)) & ((1 << (esql_parser.ASTERISK - 41)) | (1 << (esql_parser.SLASH - 41)) | (1 << (esql_parser.PERCENT - 41)))) !== 0))) {
 							_localctx._operator = this._errHandler.recoverInline(this);
 						} else {
 							if (this._input.LA(1) === Token.EOF) {
@@ -2458,7 +2459,7 @@ export class esql_parser extends Parser {
 	}
 
 	public static readonly _serializedATN: string =
-		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03<\u01B2\x04\x02" +
+		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03=\u01B2\x04\x02" +
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07" +
 		"\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x04\f\t\f\x04\r\t\r\x04" +
 		"\x0E\t\x0E\x04\x0F\t\x0F\x04\x10\t\x10\x04\x11\t\x11\x04\x12\t\x12\x04" +
@@ -2505,8 +2506,8 @@ export class esql_parser extends Parser {
 		"\n\x02\f\x02\x0E\x02\x10\x02\x12\x02\x14\x02\x16\x02\x18\x02\x1A\x02\x1C" +
 		"\x02\x1E\x02 \x02\"\x02$\x02&\x02(\x02*\x02,\x02.\x020\x022\x024\x026" +
 		"\x028\x02:\x02<\x02>\x02@\x02B\x02D\x02F\x02H\x02J\x02L\x02N\x02P\x02" +
-		"R\x02T\x02V\x02X\x02Z\x02\\\x02^\x02`\x02\x02\x06\x03\x02()\x03\x02*," +
-		"\x03\x0289\x03\x0234\x02\u01BF\x02b\x03\x02\x02\x02\x04e\x03\x02\x02\x02" +
+		"R\x02T\x02V\x02X\x02Z\x02\\\x02^\x02`\x02\x02\x06\x03\x02)*\x03\x02+-" +
+		"\x03\x029:\x03\x0245\x02\u01BF\x02b\x03\x02\x02\x02\x04e\x03\x02\x02\x02" +
 		"\x06s\x03\x02\x02\x02\b\x7F\x03\x02\x02\x02\n\x81\x03\x02\x02\x02\f\x9E" +
 		"\x03\x02\x02\x02\x0E\xA4\x03\x02\x02\x02\x10\xBF\x03\x02\x02\x02\x12\xC3" +
 		"\x03\x02\x02\x02\x14\xC5\x03\x02\x02\x02\x16\xC9\x03\x02\x02\x02\x18\xD7" +
@@ -2538,7 +2539,7 @@ export class esql_parser extends Parser {
 		"\x9F\x05\x12\n\x02\x87\x9F\x05\x10\t\x02\x88\x89\x05\x0E\b\x02\x89\x8A" +
 		"\x07\x19\x02\x02\x8A\x8B\x05\x0E\b\x02\x8B\x9F\x03\x02\x02\x02\x8C\x8D" +
 		"\x05\x0E\b\x02\x8D\x8E\x07$\x02\x02\x8E\x8F\x05\x0E\b\x02\x8F\x9F\x03" +
-		"\x02\x02\x02\x90\x91\x072\x02\x02\x91\x92\x07\x1D\x02\x02\x92\x9A\x05" +
+		"\x02\x02\x02\x90\x91\x073\x02\x02\x91\x92\x07\x1D\x02\x02\x92\x9A\x05" +
 		"2\x1A\x02\x93\x94\x07\x1B\x02\x02\x94\x96\x05.\x18\x02\x95\x93\x03\x02" +
 		"\x02\x02\x96\x99\x03\x02\x02\x02\x97\x95\x03\x02\x02\x02\x97\x98\x03\x02" +
 		"\x02\x02\x98\x9B\x03\x02\x02\x02\x99\x97\x03\x02\x02\x02\x9A\x97\x03\x02" +
@@ -2621,7 +2622,7 @@ export class esql_parser extends Parser {
 		"\u014E\x03\x02\x02\x02\u0151\u0154\x03\x02\x02\x02\u0152\u0150\x03\x02" +
 		"\x02\x02\u0152\u0153\x03\x02\x02\x02\u01535\x03\x02\x02\x02\u0154\u0152" +
 		"\x03\x02\x02\x02\u0155\u0156\t\x05\x02\x02\u01567\x03\x02\x02\x02\u0157" +
-		"\u0158\x070\x02\x02\u01589\x03\x02\x02\x02\u0159\u015A\x071\x02\x02\u015A" +
+		"\u0158\x071\x02\x02\u01589\x03\x02\x02\x02\u0159\u015A\x072\x02\x02\u015A" +
 		";\x03\x02\x02\x02\u015B\u0160\x07#\x02\x02\u015C\u0160\x05X-\x02\u015D" +
 		"\u0160\x05V,\x02\u015E\u0160\x05Z.\x02\u015F\u015B\x03\x02\x02\x02\u015F" +
 		"\u015C\x03\x02\x02\x02\u015F\u015D\x03\x02\x02\x02\u015F\u015E\x03\x02" +
@@ -2630,9 +2631,9 @@ export class esql_parser extends Parser {
 		"\u016A\x05B\"\x02\u0166\u0167\x07\x1B\x02\x02\u0167\u0169\x05B\"\x02\u0168" +
 		"\u0166\x03\x02\x02\x02\u0169\u016C\x03\x02\x02\x02\u016A\u0168\x03\x02" +
 		"\x02\x02\u016A\u016B\x03\x02\x02\x02\u016BA\x03\x02\x02\x02\u016C\u016A" +
-		"\x03\x02\x02\x02\u016D\u016F\x05\x0E\b\x02\u016E\u0170\x07-\x02\x02\u016F" +
+		"\x03\x02\x02\x02\u016D\u016F\x05\x0E\b\x02\u016E\u0170\x07.\x02\x02\u016F" +
 		"\u016E\x03\x02\x02\x02\u016F\u0170\x03\x02\x02\x02\u0170\u0173\x03\x02" +
-		"\x02\x02\u0171\u0172\x07.\x02\x02\u0172\u0174\x07/\x02\x02\u0173\u0171" +
+		"\x02\x02\u0171\u0172\x07/\x02\x02\u0172\u0174\x070\x02\x02\u0173\u0171" +
 		"\x03\x02\x02\x02\u0173\u0174\x03\x02\x02\x02\u0174C\x03\x02\x02\x02\u0175" +
 		"\u0176\x07\r\x02\x02\u0176\u0177\x054\x1B\x02\u0177E\x03\x02\x02\x02\u0178" +
 		"\u0179\x07\x0E\x02\x02\u0179\u017A\x054\x1B\x02\u017AG\x03\x02\x02\x02" +
@@ -2650,15 +2651,15 @@ export class esql_parser extends Parser {
 		"\x02\x02\u0198\u019B\x03\x02\x02\x02\u0199\u0197\x03\x02\x02\x02\u0199" +
 		"\u019A\x03\x02\x02\x02\u019AS\x03\x02\x02\x02\u019B\u0199\x03\x02\x02" +
 		"\x02\u019C\u019D\x056\x1C\x02\u019D\u019E\x07\x1A\x02\x02\u019E\u019F" +
-		"\x05<\x1F\x02\u019FU\x03\x02\x02\x02\u01A0\u01A1\x07&\x02\x02\u01A1W\x03" +
-		"\x02\x02\x02\u01A2\u01A5\x07\x16\x02\x02\u01A3\u01A5\x07\x15\x02\x02\u01A4" +
-		"\u01A2\x03\x02\x02\x02\u01A4\u01A3\x03\x02\x02\x02\u01A5Y\x03\x02\x02" +
-		"\x02\u01A6\u01A7\x07\x14\x02\x02\u01A7[\x03\x02\x02\x02\u01A8\u01A9\x07" +
-		"\'\x02\x02\u01A9]\x03\x02\x02\x02\u01AA\u01AB\x07\x06\x02\x02\u01AB\u01AC" +
-		"\x05`1\x02\u01AC_\x03\x02\x02\x02\u01AD\u01AE\x07\x1E\x02\x02\u01AE\u01AF" +
-		"\x05\x04\x03\x02\u01AF\u01B0\x07\x1F\x02\x02\u01B0a\x03\x02\x02\x02*m" +
-		"s\x7F\x97\x9A\x9E\xA4\xAC\xAE\xB3\xBA\xBF\xC3\xD0\xD3\xDE\xE1\xEB\xF3" +
-		"\xF5\u0105\u0108\u010C\u0116\u011E\u0128\u0130\u0134\u013A\u0143\u014A" +
+		"\x05<\x1F\x02\u019FU\x03\x02\x02\x02\u01A0\u01A1\x07\'\x02\x02\u01A1W" +
+		"\x03\x02\x02\x02\u01A2\u01A5\x07\x16\x02\x02\u01A3\u01A5\x07\x15\x02\x02" +
+		"\u01A4\u01A2\x03\x02\x02\x02\u01A4\u01A3\x03\x02\x02\x02\u01A5Y\x03\x02" +
+		"\x02\x02\u01A6\u01A7\x07\x14\x02\x02\u01A7[\x03\x02\x02\x02\u01A8\u01A9" +
+		"\x07(\x02\x02\u01A9]\x03\x02\x02\x02\u01AA\u01AB\x07\x06\x02\x02\u01AB" +
+		"\u01AC\x05`1\x02\u01AC_\x03\x02\x02\x02\u01AD\u01AE\x07\x1E\x02\x02\u01AE" +
+		"\u01AF\x05\x04\x03\x02\u01AF\u01B0\x07\x1F\x02\x02\u01B0a\x03\x02\x02" +
+		"\x02*ms\x7F\x97\x9A\x9E\xA4\xAC\xAE\xB3\xBA\xBF\xC3\xD0\xD3\xDE\xE1\xEB" +
+		"\xF3\xF5\u0105\u0108\u010C\u0116\u011E\u0128\u0130\u0134\u013A\u0143\u014A" +
 		"\u0152\u015F\u016A\u016F\u0173\u0183\u018E\u0199\u01A4";
 	public static __ATN: ATN;
 	public static get _ATN(): ATN {

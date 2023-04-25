@@ -7,19 +7,21 @@
 
 lexer grammar esql_lexer;
 
-DISSECT : 'dissect' -> pushMode(EXPRESSION);
-GROK : 'grok' -> pushMode(EXPRESSION);
-EVAL : 'eval' -> pushMode(EXPRESSION);
-EXPLAIN : 'explain' -> pushMode(EXPRESSION);
-FROM : 'from' -> pushMode(SOURCE_IDENTIFIERS);
-ROW : 'row' -> pushMode(EXPRESSION);
-STATS : 'stats' -> pushMode(EXPRESSION);
-WHERE : 'where' -> pushMode(EXPRESSION);
-SORT : 'sort' -> pushMode(EXPRESSION);
-LIMIT : 'limit' -> pushMode(EXPRESSION);
-PROJECT : 'project' -> pushMode(EXPRESSION);
-DROP : 'drop' -> pushMode(EXPRESSION);
-RENAME : 'rename' -> pushMode(EXPRESSION);
+options { caseInsensitive = true; }
+
+DISSECT : D I S S E C T -> pushMode(EXPRESSION);
+GROK : G R O K -> pushMode(EXPRESSION);
+EVAL : E V A L -> pushMode(EXPRESSION);
+EXPLAIN : E X P L A I N -> pushMode(EXPRESSION);
+FROM : F R O M -> pushMode(SOURCE_IDENTIFIERS);
+ROW : R O W -> pushMode(EXPRESSION);
+STATS : S T A T S -> pushMode(EXPRESSION);
+WHERE : W H E R E -> pushMode(EXPRESSION);
+SORT : S O R T -> pushMode(EXPRESSION);
+LIMIT : L I M I T -> pushMode(EXPRESSION);
+PROJECT : P R O J E C T -> pushMode(EXPRESSION);
+DROP : D R O P -> pushMode(EXPRESSION);
+RENAME : R E N A M E -> pushMode(EXPRESSION);
 
 LINE_COMMENT
     : '//' ~[\r\n]* '\r'? '\n'? -> channel(HIDDEN)
@@ -97,6 +99,7 @@ RLIKE: 'rlike';
 NULL : 'null';
 OR : 'or';
 RP : ')';
+UNDERSCORE: '_';
 
 BOOLEAN_VALUE
    : 'true'
@@ -130,22 +133,22 @@ NULLS_ORDERING_DIRECTION
     ;
 
 MATH_FUNCTION
-    : 'round'
-    | 'abs'
-    | 'substring'
-    | 'concat'
-    | 'starts_with'
-    | 'date_format'
-    | 'date_trunc'
+    : R O U N D
+    | A B S
+    | S U B S T R I N G
+    | C O N C A T
+    | S T A R T S UNDERSCORE W I T H
+    | D A T E UNDERSCORE F O R M A T
+    | D A T E UNDERSCORE T R U N C
     ;
 
 UNARY_FUNCTION
-    : 'avg'
-    | 'min'
-    | 'max'
-    | 'sum'
-    | 'count'
-    | 'count_distinct'
+    : A V G
+    | M I N
+    | M A X
+    | S U M
+    | C O U N T
+    | C O U N T UNDERSCORE D I S T I N C T
     ;
 
 WHERE_FUNCTIONS
@@ -205,3 +208,30 @@ SRC_MULTILINE_COMMENT
 SRC_WS
     : WS -> channel(HIDDEN)
     ;
+
+fragment A : [aA]; // match either an 'a' or 'A'
+fragment B : [bB];
+fragment C : [cC];
+fragment D : [dD];
+fragment E : [eE];
+fragment F : [fF];
+fragment G : [gG];
+fragment H : [hH];
+fragment I : [iI];
+fragment J : [jJ];
+fragment K : [kK];
+fragment L : [lL];
+fragment M : [mM];
+fragment N : [nN];
+fragment O : [oO];
+fragment P : [pP];
+fragment Q : [qQ];
+fragment R : [rR];
+fragment S : [sS];
+fragment T : [tT];
+fragment U : [uU];
+fragment V : [vV];
+fragment W : [wW];
+fragment X : [xX];
+fragment Y : [yY];
+fragment Z : [zZ];
