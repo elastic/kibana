@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import { isDefined } from '@kbn/ml-is-defined';
 
 // Partial list of packages/core/ui-settings/core-ui-settings-common/src/timezones.ts
-const ACCEPTED_TIMEZONES = new Set([
+export const ACCEPTED_TIMEZONES = new Set([
   ...moment.tz
     .names()
     // We need to filter out some time zones, that moment.js knows about, but Elasticsearch
@@ -17,6 +17,5 @@ const ACCEPTED_TIMEZONES = new Set([
     .filter((tz) => !['America/Nuuk', 'EST', 'HST', 'ROC', 'MST'].includes(tz)),
 ]);
 
-export const TIMEZONE_OPTIONS = [...ACCEPTED_TIMEZONES].map((value) => ({ value, text: value }));
-
-export const isValidTimeZone = (s?: string) => isDefined(s) && ACCEPTED_TIMEZONES.has(s);
+export const isValidTimeZone = (arg?: unknown): arg is string =>
+  isDefined(arg) && typeof arg === 'string' && ACCEPTED_TIMEZONES.has(arg);
