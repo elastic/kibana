@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { VIEW_MODE } from '../../common';
@@ -17,6 +18,7 @@ export function getSavedSearchObjectType(
 ): SavedObjectsType {
   return {
     name: 'search',
+    indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',

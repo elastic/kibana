@@ -77,6 +77,7 @@ export const ManageRules: FC<ManageRulesProps> = memo(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="manageListRulesSaveButton"
                 isLoading={showButtonLoader}
                 disabled={saveIsDisabled}
                 onClick={onSave}

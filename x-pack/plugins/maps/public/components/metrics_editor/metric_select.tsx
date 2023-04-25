@@ -9,54 +9,39 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { AGG_TYPE } from '../../../common/constants';
+import { getAggDisplayName } from '../../classes/sources/es_agg_source';
 
 const AGG_OPTIONS = [
   {
-    label: i18n.translate('xpack.maps.metricSelect.averageDropDownOptionLabel', {
-      defaultMessage: 'Average',
-    }),
+    label: getAggDisplayName(AGG_TYPE.AVG),
     value: AGG_TYPE.AVG,
   },
   {
-    label: i18n.translate('xpack.maps.metricSelect.countDropDownOptionLabel', {
-      defaultMessage: 'Count',
-    }),
+    label: getAggDisplayName(AGG_TYPE.COUNT),
     value: AGG_TYPE.COUNT,
   },
   {
-    label: i18n.translate('xpack.maps.metricSelect.maxDropDownOptionLabel', {
-      defaultMessage: 'Max',
-    }),
+    label: getAggDisplayName(AGG_TYPE.MAX),
     value: AGG_TYPE.MAX,
   },
   {
-    label: i18n.translate('xpack.maps.metricSelect.minDropDownOptionLabel', {
-      defaultMessage: 'Min',
-    }),
+    label: getAggDisplayName(AGG_TYPE.MIN),
     value: AGG_TYPE.MIN,
   },
   {
-    label: i18n.translate('xpack.maps.metricSelect.percentileDropDownOptionLabel', {
-      defaultMessage: 'Percentile',
-    }),
+    label: getAggDisplayName(AGG_TYPE.PERCENTILE),
     value: AGG_TYPE.PERCENTILE,
   },
   {
-    label: i18n.translate('xpack.maps.metricSelect.sumDropDownOptionLabel', {
-      defaultMessage: 'Sum',
-    }),
+    label: getAggDisplayName(AGG_TYPE.SUM),
     value: AGG_TYPE.SUM,
   },
   {
-    label: i18n.translate('xpack.maps.metricSelect.termsDropDownOptionLabel', {
-      defaultMessage: 'Top term',
-    }),
+    label: getAggDisplayName(AGG_TYPE.TERMS),
     value: AGG_TYPE.TERMS,
   },
   {
-    label: i18n.translate('xpack.maps.metricSelect.cardinalityDropDownOptionLabel', {
-      defaultMessage: 'Unique count',
-    }),
+    label: getAggDisplayName(AGG_TYPE.UNIQUE_COUNT),
     value: AGG_TYPE.UNIQUE_COUNT,
   },
 ];

@@ -32,6 +32,7 @@ import { QuickFilters } from './overview/quick_filters';
 import { SearchField } from '../common/search_field';
 import { NoMonitorsFound } from '../common/no_monitors_found';
 import { OverviewErrors } from './overview/overview_errors/overview_errors';
+import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
 
 export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });
@@ -101,6 +102,7 @@ export const OverviewPage: React.FC = () => {
   return (
     <>
       <DisabledCallout total={absoluteTotal} />
+      <AlertingCallout />
       <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <SearchField />
@@ -116,7 +118,7 @@ export const OverviewPage: React.FC = () => {
       {!noMonitorFound ? (
         <>
           <EuiFlexGroup gutterSize="m" wrap>
-            <EuiFlexItem grow={2}>
+            <EuiFlexItem grow={false}>
               <OverviewStatus />
             </EuiFlexItem>
             <EuiFlexItem grow={3} style={{ minWidth: 300 }}>

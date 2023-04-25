@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { Client } from '@elastic/elasticsearch';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 
 export interface TaskManagerDoc {
@@ -138,7 +139,7 @@ export class TaskManagerUtils {
   async waitForActionTaskParamsToBeCleanedUp(createdAtFilter: Date): Promise<void> {
     return await this.retry.try(async () => {
       const searchResult = await this.es.search({
-        index: '.kibana',
+        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
         body: {
           query: {
             bool: {

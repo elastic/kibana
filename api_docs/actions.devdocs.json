@@ -1391,13 +1391,13 @@
             "label": "validate",
             "description": [],
             "signature": [
-              "{ params?: ",
+              "{ params: ",
               "ValidatorType",
-              "<Params> | undefined; config?: ",
+              "<Params>; config: ",
               "ValidatorType",
-              "<Config> | undefined; secrets?: ",
+              "<Config>; secrets: ",
               "ValidatorType",
-              "<Secrets> | undefined; connector?: ((config: Config, secrets: Secrets) => string | null) | undefined; } | undefined"
+              "<Secrets>; connector?: ((config: Config, secrets: Secrets) => string | null) | undefined; }"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
@@ -1941,7 +1941,7 @@
         "label": "ActionsClient",
         "description": [],
         "signature": [
-          "{ create: ({ action: { actionTypeId, name, config, secrets }, }: ",
+          "{ create: ({ action: { actionTypeId, name, config, secrets }, options, }: ",
           "CreateOptions",
           ") => Promise<",
           {
