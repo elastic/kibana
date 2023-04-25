@@ -31,6 +31,8 @@ import {
   FORM_CUSTOM_FREQUENCY_OPTION,
   FORM_ERRORS_TITLE,
   FORM_ON_ACTIVE_ALERT_OPTION,
+  FORM_FOR_EACH_ALERT_BODY_MESSAGE,
+  FORM_SUMMARY_BODY_MESSAGE,
 } from './translations';
 
 const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
@@ -81,9 +83,6 @@ interface Props {
 }
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
-const DEFAULT_ACTION_MESSAGE = 'Rule {{context.rule.name}} generated alert {{alert.id}}';
-const DEFAULT_SUMMARY_ACTION_MESSAGE =
-  'Rule {{context.rule.name}} generated {{state.signals_count}} alerts';
 
 const FieldErrorsContainer = styled.div`
   p {
@@ -244,8 +243,8 @@ export const RuleActionsField: React.FC<Props> = ({
         setActionFrequencyProperty: setActionFrequency,
         setActionAlertsFilterProperty,
         featureId: SecurityConnectorFeatureId,
-        defaultActionMessage: DEFAULT_ACTION_MESSAGE,
-        defaultSummaryMessage: DEFAULT_SUMMARY_ACTION_MESSAGE,
+        defaultActionMessage: FORM_FOR_EACH_ALERT_BODY_MESSAGE,
+        defaultSummaryMessage: FORM_SUMMARY_BODY_MESSAGE,
         hideActionHeader: true,
         hasSummary: true,
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
