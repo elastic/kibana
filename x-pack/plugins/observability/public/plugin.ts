@@ -50,6 +50,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
+import { RulesLocatorDefinition } from './locators/rules';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { registerDataHandler } from './data_handler';
 import {
@@ -190,6 +191,9 @@ export class Plugin
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
+
+    const locator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
+
     pluginsSetup.share.url.locators.create(new RuleDetailsLocatorDefinition());
 
     const mount = async (params: AppMountParameters<unknown>) => {
@@ -310,6 +314,7 @@ export class Plugin
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
+      rulesLocator: locator,
     };
   }
 
