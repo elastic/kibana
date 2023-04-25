@@ -40,6 +40,7 @@ import { CopyAndCustomizePipelinePanel } from './ingest_pipelines/customize_pipe
 import { IngestPipelinesCard } from './ingest_pipelines/ingest_pipelines_card';
 import { ManageCustomPipelineActions } from './ingest_pipelines/manage_custom_pipeline_actions';
 import { AddInferencePipelineFlyout } from './ml_inference/add_inference_pipeline_flyout';
+import { TextExpansionErrors } from './ml_inference/text_expansion_errors';
 import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
 import { PipelinesJSONConfigurations } from './pipelines_json_configurations';
 import { PipelinesLogic } from './pipelines_logic';
@@ -118,6 +119,7 @@ export const SearchIndexPipelines: React.FC = () => {
           <EuiSpacer />
         </>
       )}
+      <TextExpansionErrors />
       <CopyAndCustomizePipelinePanel />
       <EuiFlexGroup direction="row" wrap>
         <EuiFlexItem grow={5}>

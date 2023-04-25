@@ -42,3 +42,4 @@ export enum SearchApplicationConnectTabs {
 }
 
 export const ML_MANAGE_TRAINED_MODELS_PATH = '/app/ml/trained_models';
+export const ML_NOTIFICATIONS_PATH = '/app/ml/notifications';
