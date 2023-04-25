@@ -7,11 +7,12 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { constructUrlSearchString } from './helpers';
-import { LogsLocatorDefinition } from './logs_locator';
+import { LogsLocatorDefinition, LogsLocatorDependencies } from './logs_locator';
 import { NodeLogsLocatorDefinition } from './node_logs_locator';
 import type { LogsLocatorParams } from './logs_locator';
 import type { NodeLogsLocatorParams } from './node_logs_locator';
 import { LOGS_APP_TARGET } from '../../common/constants';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const APP_ID = 'logs';
 const nodeType = 'host';
@@ -22,9 +23,13 @@ const time = 1550671089404;
 const from = 1676815089000;
 const to = 1682351734323;
 
-const setupLogsLocator = async (appId: string = LOGS_APP_TARGET) => {
-  const logsLocator = new LogsLocatorDefinition(appId);
-  const nodeLogsLocator = new NodeLogsLocatorDefinition(appId);
+const setupLogsLocator = async (appTarget: string = LOGS_APP_TARGET) => {
+  const deps: LogsLocatorDependencies = {
+    core: coreMock.createSetup(),
+    appTarget,
+  };
+  const logsLocator = new LogsLocatorDefinition(deps);
+  const nodeLogsLocator = new NodeLogsLocatorDefinition(deps);
 
   return {
     logsLocator,
