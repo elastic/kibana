@@ -138,7 +138,7 @@ export const useFetchIndex = (
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
     dataView: undefined,
-    loading: true,
+    loading: false,
   });
   const { addError } = useAppToasts();
 
@@ -146,6 +146,7 @@ export const useFetchIndex = (
     (iNames) => {
       const asyncSearch = async () => {
         try {
+          setState({ ...state, loading: true });
           abortCtrl.current = new AbortController();
           const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
           const { browserFields } = getDataViewStateFromIndexFields(
@@ -179,7 +180,7 @@ export const useFetchIndex = (
 
       asyncSearch();
     },
-    [addError, data.dataViews, includeUnmapped, indexNames, setState]
+    [addError, data.dataViews, includeUnmapped, indexNames, state]
   );
 
   useEffect(() => {
