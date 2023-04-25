@@ -15,6 +15,7 @@ import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/serv
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -78,12 +79,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
       },
       autoRecoverAlerts: false,
       getViewInAppRelativeUrl: ({ rule, start, end }) => {
-        if (!start || !end) {
-          return '';
-        }
+        const {
+          schedule: { interval },
+        } = rule;
+
+        const isValidTimeBound = start && end;
+        const startTime = isValidTimeBound ? new Date(start).toISOString() : `now-${interval}`;
+        const endTime = isValidTimeBound ? new Date(end).toISOString() : 'now';
+
+        const fromInMs = parseScheduleDates(startTime)?.format('x');
+        const toInMs = parseScheduleDates(endTime)?.format('x');
+
         return getNotificationResultsLink({
-          from: new Date(start).toISOString(),
-          to: new Date(end).toISOString(),
+          from: fromInMs,
+          to: toInMs,
           id: rule.id,
           kibanaSiemAppUrl: (rule.params?.meta as { kibana_siem_app_url?: string } | undefined)
             ?.kibana_siem_app_url,
