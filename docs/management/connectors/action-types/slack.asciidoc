@@ -89,7 +89,7 @@ Before you can create a Slack connector, you must configure your account and obt
 ==== Configure a Slack account with Webhook
 
 . Log in to http://slack.com[slack.com] as a team administrator.
-. Follow first 3 paragraphs of https://api.slack.com/messaging/webhooks.
+. Create a Slack app, enable incoming webhooks, then create an incoming webhook. Refer to https://api.slack.com/messaging/webhooks.
 . Copy the generated webhook URL so you can paste it into your Slack connector form.
 . If you are using the <<action-settings,`xpack.actions.allowedHosts`>> setting, make sure the hostname from the URL is added to the allowed hosts.
 
