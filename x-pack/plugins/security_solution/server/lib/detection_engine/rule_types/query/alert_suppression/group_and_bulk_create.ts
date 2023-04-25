@@ -224,6 +224,7 @@ export const groupAndBulkCreate = async ({
         completeRule: runOpts.completeRule,
         mergeStrategy: runOpts.mergeStrategy,
         indicesToQuery: runOpts.inputIndex,
+        publicBaseUrl: runOpts.publicBaseUrl,
         buildReasonMessage,
         alertTimestampOverride: runOpts.alertTimestampOverride,
         ruleExecutionLogger: runOpts.ruleExecutionLogger,

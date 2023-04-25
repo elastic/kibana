@@ -8,7 +8,6 @@
 import objectHash from 'object-hash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import {
-  ALERT_UUID,
   ALERT_SUPPRESSION_TERMS,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
@@ -56,6 +55,7 @@ export const wrapSuppressedAlerts = ({
   buildReasonMessage,
   alertTimestampOverride,
   ruleExecutionLogger,
+  publicBaseUrl,
 }: {
   suppressionBuckets: SuppressionBuckets[];
   spaceId: string;
@@ -65,6 +65,7 @@ export const wrapSuppressedAlerts = ({
   buildReasonMessage: BuildReasonMessage;
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  publicBaseUrl: string | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   return suppressionBuckets.map((bucket) => {
     const id = objectHash([
@@ -91,8 +92,11 @@ export const wrapSuppressedAlerts = ({
       buildReasonMessage,
       indicesToQuery,
       alertTimestampOverride,
-      ruleExecutionLogger
+      ruleExecutionLogger,
+      id,
+      publicBaseUrl
     );
+
     return {
       _id: id,
       _index: '',
@@ -102,7 +106,6 @@ export const wrapSuppressedAlerts = ({
         [ALERT_SUPPRESSION_START]: bucket.start,
         [ALERT_SUPPRESSION_END]: bucket.end,
         [ALERT_SUPPRESSION_DOCS_COUNT]: bucket.count - 1,
-        [ALERT_UUID]: id,
         [ALERT_INSTANCE_ID]: instanceId,
       },
     };

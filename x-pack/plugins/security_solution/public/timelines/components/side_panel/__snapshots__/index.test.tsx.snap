@@ -49,18 +49,26 @@ Array [
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <button
-        aria-label="close"
-        class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
-        type="button"
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
       >
-        <span
-          aria-hidden="true"
-          class="euiButtonIcon__icon"
-          color="inherit"
-          data-euiicon-type="cross"
-        />
-      </button>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <button
+            aria-label="close"
+            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="cross"
+            />
+          </button>
+        </div>
+      </div>
     </div>
   </div>,
   <div
@@ -168,6 +176,13 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
       />
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
+        />
+      </div>
     </div>
   </div>
   <div
