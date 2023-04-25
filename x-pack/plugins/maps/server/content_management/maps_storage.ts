@@ -49,6 +49,7 @@ export class MapsStorage extends SOContentStorage<MapCrudTypes> {
       savedObjectType: CONTENT_ID,
       cmServicesDefinition,
       searchArgsToSOFindOptions,
+      enableMSearch: true,
     });
   }
 }

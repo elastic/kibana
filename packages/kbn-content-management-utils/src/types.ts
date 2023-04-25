@@ -352,7 +352,6 @@ export interface ContentManagementCrudTypes<
    * Update item result
    */
   UpdateOut: UpdateResult<SOWithMetadataPartial<Attributes>>;
-
   /**
    * Delete item params
    */
