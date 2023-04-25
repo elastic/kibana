@@ -80,7 +80,7 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
       }
     >
       <EuiPopoverTitle>
-        <EuiFlexGroup justifyContent="center" gutterSize='s'>
+        <EuiFlexGroup justifyContent="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiIcon type="beaker" />
           </EuiFlexItem>
