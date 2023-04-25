@@ -65,6 +65,10 @@
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
     "@kbn/dom-drag-drop",
+    "@kbn/content-management-plugin",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/object-versioning",
+    "@kbn/config-schema",
   ],
   "exclude": [
     "target/**/*",
