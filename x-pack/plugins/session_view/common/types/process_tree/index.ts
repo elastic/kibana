@@ -290,6 +290,7 @@ export interface ProcessEventCloud {
   };
   project?: {
     id?: string;
+    name?: string;
   };
   provider?: string;
   region?: string;
