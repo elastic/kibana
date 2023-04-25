@@ -87,7 +87,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
     describe('isLoading', () => {
       beforeEach(() => {
-        mount({ selectedTable: ExploreTables.TopReferrers });
+        mount({ selectedTable: ExploreTables.Referrers });
       });
 
       it('should handle onTableChange', () => {
