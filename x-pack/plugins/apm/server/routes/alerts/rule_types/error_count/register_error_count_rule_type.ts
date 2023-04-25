@@ -113,8 +113,12 @@ export function registerErrorCountRuleType({
                     },
                   },
                   { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName),
-                  ...termQuery(ERROR_GROUP_ID, ruleParams.errorGroupingKey),
+                  ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                    queryEmptyString: false,
+                  }),
+                  ...termQuery(ERROR_GROUP_ID, ruleParams.errorGroupingKey, {
+                    queryEmptyString: false,
+                  }),
                   ...environmentQuery(ruleParams.environment),
                 ],
               },

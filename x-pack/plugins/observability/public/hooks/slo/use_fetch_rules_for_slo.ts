@@ -11,13 +11,13 @@ import {
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 
 type SloId = string;
 
 interface Params {
-  sloIds: SloId[];
+  sloIds?: SloId[];
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
@@ -42,7 +42,7 @@ export interface UseFetchRulesForSloResponse {
   ) => Promise<QueryObserverResult<Record<string, Array<Rule<SloRule>>> | undefined, unknown>>;
 }
 
-export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSloResponse {
+export function useFetchRulesForSlo({ sloIds }: Params): UseFetchRulesForSloResponse {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
@@ -51,7 +51,11 @@ export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSl
       queryFn: async () => {
         try {
           const body = JSON.stringify({
-            filter: `alert.attributes.params.sloId:(${sloIds.join(' or ')})`,
+            filter: `${sloIds?.reduce((acc, sloId, index, array) => {
+              return `${acc}alert.attributes.params.sloId:${sloId}${
+                index < array.length - 1 ? ' or ' : ''
+              }`;
+            }, '')}`,
             fields: ['params.sloId', 'name'],
             per_page: 1000,
           });
@@ -60,7 +64,7 @@ export function useFetchRulesForSlo({ sloIds = [] }: Params): UseFetchRulesForSl
             body,
           });
 
-          const init = sloIds.reduce((acc, sloId) => ({ ...acc, [sloId]: [] }), {});
+          const init = sloIds?.reduce((acc, sloId) => ({ ...acc, [sloId]: [] }), {});
 
           return response.data.reduce(
             (acc, rule) => ({

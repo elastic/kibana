@@ -6,6 +6,7 @@
  */
 
 export { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from './plugin';
+export { INGEST_SAVED_OBJECT_INDEX } from './saved_objects';
 export * from './routes';
 export * from './agent';
 export * from './agent_policy';
