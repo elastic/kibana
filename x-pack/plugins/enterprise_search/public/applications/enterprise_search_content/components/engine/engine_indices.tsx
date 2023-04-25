@@ -11,7 +11,6 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiBasicTableColumn,
-  EuiButton,
   EuiCallOut,
   EuiConfirmModal,
   EuiIcon,
@@ -32,24 +31,15 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
 
-import { SEARCH_INDEX_PATH, EngineViewTabs } from '../../routes';
+import { SEARCH_INDEX_PATH } from '../../routes';
 
-import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
-
-import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineIndicesLogic } from './engine_indices_logic';
-
-const pageTitle = i18n.translate('xpack.enterpriseSearch.content.engine.indices.pageTitle', {
-  defaultMessage: 'Indices',
-});
 
 export const EngineIndices: React.FC = () => {
   const subduedBackground = useEuiBackgroundColor('subdued');
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
-  const { engineData, engineName, isLoadingEngine, addIndicesFlyoutOpen } =
-    useValues(EngineIndicesLogic);
-  const { removeIndexFromEngine, openAddIndicesFlyout, closeAddIndicesFlyout } =
-    useActions(EngineIndicesLogic);
+  const { engineData } = useValues(EngineIndicesLogic);
+  const { removeIndexFromEngine } = useActions(EngineIndicesLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
   const [removeIndexConfirm, setConfirmRemoveIndex] = useState<string | null>(null);
 
@@ -177,116 +167,92 @@ export const EngineIndices: React.FC = () => {
     },
   ];
   return (
-    <EnterpriseSearchEnginesPageTemplate
-      pageChrome={[engineName, pageTitle]}
-      pageViewTelemetry={EngineViewTabs.INDICES}
-      isLoading={isLoadingEngine}
-      pageHeader={{
-        pageTitle,
-        rightSideItems: [
-          <EuiButton
-            data-telemetry-id="entSearchContent-engines-indices-addNewIndices"
-            data-test-subj="engine-add-new-indices-btn"
-            iconType="plusInCircle"
-            fill
-            onClick={openAddIndicesFlyout}
-          >
-            {i18n.translate('xpack.enterpriseSearch.content.engine.indices.addNewIndicesButton', {
-              defaultMessage: 'Add new indices',
-            })}
-          </EuiButton>,
-        ],
-      }}
-      engineName={engineName}
-    >
-      <>
-        {hasUnknownIndices && (
-          <>
-            <EuiCallOut
-              color="warning"
-              iconType="warning"
-              title={i18n.translate(
-                'xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.title',
-                { defaultMessage: 'Some of your indices are unavailable.' }
-              )}
-            >
-              <p>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.description',
-                  {
-                    defaultMessage:
-                      'Some data might be unreachable from this search application. Check for any pending operations or errors on affected indices, or remove those that should no longer be used by this search application.',
-                  }
-                )}
-              </p>
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        )}
-        <EuiInMemoryTable
-          items={indices}
-          columns={columns}
-          rowProps={(index: EnterpriseSearchEngineIndex) => {
-            if (index.health === 'unknown') {
-              return { style: { backgroundColor: subduedBackground } };
-            }
-
-            return {};
-          }}
-          search={{
-            box: {
-              incremental: true,
-              placeholder: i18n.translate(
-                'xpack.enterpriseSearch.content.engine.indices.searchPlaceholder',
-                { defaultMessage: 'Filter indices' }
-              ),
-              schema: true,
-            },
-          }}
-          pagination
-          sorting
-        />
-        {removeIndexConfirm !== null && (
-          <EuiConfirmModal
-            onCancel={() => setConfirmRemoveIndex(null)}
-            onConfirm={() => {
-              removeIndexFromEngine(removeIndexConfirm);
-              setConfirmRemoveIndex(null);
-              sendEnterpriseSearchTelemetry({
-                action: 'clicked',
-                metric: 'entSearchContent-engines-indices-removeIndexConfirm',
-              });
-            }}
+    <>
+      {hasUnknownIndices && (
+        <>
+          <EuiCallOut
+            color="warning"
+            iconType="warning"
             title={i18n.translate(
-              'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.title',
-              { defaultMessage: 'Remove this index from the Search Application' }
+              'xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.title',
+              { defaultMessage: 'Some of your indices are unavailable.' }
             )}
-            buttonColor="danger"
-            cancelButtonText={CANCEL_BUTTON_LABEL}
-            confirmButtonText={i18n.translate(
-              'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.text',
-              {
-                defaultMessage: 'Yes, Remove This Index',
-              }
-            )}
-            defaultFocusedButton="confirm"
-            maxWidth
           >
-            <EuiText>
-              <p>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.description',
-                  {
-                    defaultMessage:
-                      "This won't delete the index. You may add it back to this search application at a later time.",
-                  }
-                )}
-              </p>
-            </EuiText>
-          </EuiConfirmModal>
-        )}
-        {addIndicesFlyoutOpen && <AddIndicesFlyout onClose={closeAddIndicesFlyout} />}
-      </>
-    </EnterpriseSearchEnginesPageTemplate>
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.description',
+                {
+                  defaultMessage:
+                    'Some data might be unreachable from this search application. Check for any pending operations or errors on affected indices, or remove indices that should no longer be used by this search application.',
+                }
+              )}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+      <EuiInMemoryTable
+        items={indices}
+        columns={columns}
+        rowProps={(index: EnterpriseSearchEngineIndex) => {
+          if (index.health === 'unknown') {
+            return { style: { backgroundColor: subduedBackground } };
+          }
+
+          return {};
+        }}
+        search={{
+          box: {
+            incremental: true,
+            placeholder: i18n.translate(
+              'xpack.enterpriseSearch.content.engine.indices.searchPlaceholder',
+              { defaultMessage: 'Filter indices' }
+            ),
+            schema: true,
+          },
+        }}
+        pagination
+        sorting
+      />
+      {removeIndexConfirm !== null && (
+        <EuiConfirmModal
+          onCancel={() => setConfirmRemoveIndex(null)}
+          onConfirm={() => {
+            removeIndexFromEngine(removeIndexConfirm);
+            setConfirmRemoveIndex(null);
+            sendEnterpriseSearchTelemetry({
+              action: 'clicked',
+              metric: 'entSearchContent-engines-indices-removeIndexConfirm',
+            });
+          }}
+          title={i18n.translate(
+            'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.title',
+            { defaultMessage: 'Remove this index from the search application' }
+          )}
+          buttonColor="danger"
+          cancelButtonText={CANCEL_BUTTON_LABEL}
+          confirmButtonText={i18n.translate(
+            'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.text',
+            {
+              defaultMessage: 'Yes, Remove This Index',
+            }
+          )}
+          defaultFocusedButton="confirm"
+          maxWidth
+        >
+          <EuiText>
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.description',
+                {
+                  defaultMessage:
+                    "This won't delete the index. You may add it back to this search application at a later time.",
+                }
+              )}
+            </p>
+          </EuiText>
+        </EuiConfirmModal>
+      )}
+    </>
   );
 };

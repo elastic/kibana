@@ -13,6 +13,7 @@ import { createFilterInCellActionFactory, createFilterOutCellActionFactory } fro
 import {
   createAddToTimelineLensAction,
   createAddToTimelineCellActionFactory,
+  createAddToNewTimelineCellActionFactory,
 } from './add_to_timeline';
 import { createShowTopNCellActionFactory } from './show_top_n';
 import {
@@ -52,6 +53,7 @@ const registerCellActions = (
     filterIn: createFilterInCellActionFactory({ store, services }),
     filterOut: createFilterOutCellActionFactory({ store, services }),
     addToTimeline: createAddToTimelineCellActionFactory({ store, services }),
+    addToNewTimeline: createAddToNewTimelineCellActionFactory({ store, services }),
     showTopN: createShowTopNCellActionFactory({ store, history, services }),
     copyToClipboard: createCopyToClipboardCellActionFactory({ services }),
     toggleColumn: createToggleColumnCellActionFactory({ store }),
@@ -77,6 +79,13 @@ const registerCellActions = (
     ],
     services,
   });
+
+  registerCellActionsTrigger({
+    triggerId: SecurityCellActionsTrigger.ALERTS_COUNT,
+    cellActions,
+    actionsOrder: ['addToNewTimeline'],
+    services,
+  });
 };
 
 const registerCellActionsTrigger = ({
@@ -95,8 +104,10 @@ const registerCellActionsTrigger = ({
 
   actionsOrder.forEach((actionName, order) => {
     const actionFactory = cellActions[actionName];
-    const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
+    if (actionFactory) {
+      const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
 
-    uiActions.addTriggerAction(triggerId, enhanceActionWithTelemetry(action, services));
+      uiActions.addTriggerAction(triggerId, enhanceActionWithTelemetry(action, services));
+    }
   });
 };

@@ -102,6 +102,17 @@ export const INDICES = i18n.translate(
   }
 );
 
+export const SIZE = i18n.translate('ecsDataQualityDashboard.statLabels.sizeLabel', {
+  defaultMessage: 'Size',
+});
+
+export const INDICES_SIZE_PATTERN_TOOL_TIP = (pattern: string) =>
+  i18n.translate('ecsDataQualityDashboard.statLabels.indicesSizePatternToolTip', {
+    values: { pattern },
+    defaultMessage:
+      'The total size of the primary indices matching the {pattern} pattern (does not include replicas)',
+  });
+
 export const TOTAL_COUNT_OF_INDICES_CHECKED_MATCHING_PATTERN_TOOL_TIP = (pattern: string) =>
   i18n.translate(
     'securitySolutionPackages.ecsDataQualityDashboard.statLabels.totalCountOfIndicesCheckedMatchingPatternToolTip',
@@ -146,5 +157,12 @@ export const TOTAL_INDICES_TOOL_TIP = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.statLabels.totalIndicesToolTip',
   {
     defaultMessage: 'The total count of all indices',
+  }
+);
+
+export const TOTAL_SIZE_TOOL_TIP = i18n.translate(
+  'ecsDataQualityDashboard.statLabels.totalSizeToolTip',
+  {
+    defaultMessage: 'The total size of all primary indices (does not include replicas)',
   }
 );
