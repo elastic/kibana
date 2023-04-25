@@ -57,13 +57,20 @@ export function useRunOnceErrors({
   const expectPings =
     publicLocations.length - (locationErrors ?? []).filter(({ locationId }) => !!locationId).length;
 
+  const locationErrorReasons = useMemo(() => {
+    return (locationErrors ?? [])
+      .map(({ error }) => error.reason)
+      .filter((reason, i, arr) => arr.indexOf(reason) === i);
+  }, [locationErrors]);
   const hasBlockingError =
     !!runOnceServiceError ||
     (locationErrors?.length && locationErrors?.length === publicLocations.length);
 
   const errorMessages = useMemo(() => {
     if (hasBlockingError) {
-      return [{ name: 'Error', message: PushErrorService, title: PushErrorLabel }];
+      return locationErrorReasons.length === 1
+        ? [{ name: 'Error', message: locationErrorReasons[0], title: RunErrorLabel }]
+        : [{ name: 'Error', message: PushErrorService, title: PushErrorLabel }];
     } else if (locationErrors?.length > 0) {
       // If only some of the locations were unsuccessful
       return locationErrors
@@ -77,7 +84,7 @@ export function useRunOnceErrors({
     }
 
     return [];
-  }, [locationsById, locationErrors, hasBlockingError]);
+  }, [locationsById, locationErrors, locationErrorReasons, hasBlockingError]);
 
   useEffect(() => {
     if (showErrors) {
@@ -92,7 +99,10 @@ export function useRunOnceErrors({
   return {
     expectPings,
     hasBlockingError,
-    blockingErrorMessage: hasBlockingError ? PushErrorService : null,
+    blockingErrorTitle: hasBlockingError ? PushErrorLabel : null,
+    blockingErrorMessage: hasBlockingError
+      ? `${PushErrorService} ${errorMessages[0]?.message}`
+      : null,
     errorMessages,
   };
 }
