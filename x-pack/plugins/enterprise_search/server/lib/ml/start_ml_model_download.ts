@@ -12,6 +12,7 @@ import { MlClient } from '@kbn/ml-plugin/server/lib/ml_client';
 import { MlModelDeploymentState, MlModelDeploymentStatus } from '../../../common/types/ml';
 import {
   ElasticsearchResponseError,
+  isNotFoundException,
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
 
@@ -26,8 +27,6 @@ export const startMlModelDownload = async (
   if (!trainedModelsProvider || !mlClient) {
     throw new Error('Machine Learning is not enabled');
   }
-
-  let deploymentState: MlModelDeploymentState = MlModelDeploymentState.NotDeployed;
 
   // before anything else, check our model name
   // to ensure we only allow those names we want
@@ -45,8 +44,7 @@ export const startMlModelDownload = async (
     // try and get the deployment status of the model first
     // and see if it's already deployed or deploying...
     const deploymentStatus = await getMlModelDeploymentStatus(modelName, trainedModelsProvider);
-
-    deploymentState = deploymentStatus?.deploymentState || MlModelDeploymentState.NotDeployed;
+    const deploymentState = deploymentStatus?.deploymentState || MlModelDeploymentState.NotDeployed;
 
     // if we're downloading or already started / starting / done
     // return the status
@@ -57,7 +55,7 @@ export const startMlModelDownload = async (
     // don't rethrow the not found here -
     // if it's not found there's a good chance it's not started
     // downloading yet
-    if (!isResourceNotFoundException(error)) {
+    if (!isResourceNotFoundException(error) && !isNotFoundException(error)) {
       throw error;
     }
   }

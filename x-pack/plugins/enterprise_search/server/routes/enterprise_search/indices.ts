@@ -1020,7 +1020,7 @@ export function registerIndexRoutes({
         true,
         undefined,
         client,
-        () => Promise.resolve() // pretend isMlReady, to allow us to initialize the saved objects
+        () => Promise.resolve()
       );
 
       const mlClient = savedObjectService
