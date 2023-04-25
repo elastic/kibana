@@ -28,11 +28,14 @@ export function useLast50DurationChart({
     size: 50,
     timestamp,
   });
-  const { data, median } = useMemo(() => {
+  const { data, median, min, max, avg } = useMemo(() => {
     if (loading) {
       return {
         data: [],
         median: 0,
+        avg: 0,
+        min: 0,
+        max: 0,
       };
     }
 
@@ -59,6 +62,11 @@ export function useLast50DurationChart({
     return {
       data: coords as Array<{ x: number; y: number }>,
       median: sortedByDuration[Math.floor(hits.length / 2)]?.['monitor.duration.us']?.[0] || 0,
+      avg:
+        sortedByDuration.reduce((acc, curr) => acc + (curr?.['monitor.duration.us']?.[0] || 0), 0) /
+        hits.length,
+      min: sortedByDuration[0]?.['monitor.duration.us']?.[0] || 0,
+      max: sortedByDuration[sortedByDuration.length - 1]?.['monitor.duration.us']?.[0] || 0,
     };
   }, [hits, loading]);
 
@@ -66,8 +74,11 @@ export function useLast50DurationChart({
     () => ({
       data,
       medianDuration: median,
+      avgDuration: avg,
+      minDuration: min,
+      maxDuration: max,
       loading,
     }),
-    [data, median, loading]
+    [data, median, avg, min, max, loading]
   );
 }
