@@ -15,5 +15,10 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": ["@kbn/content-management-plugin"]
+  "kbn_references": [
+    "@kbn/content-management-plugin",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/config-schema",
+    "@kbn/object-versioning",
+  ]
 }

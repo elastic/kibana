@@ -12,6 +12,10 @@ import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters'
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
@@ -70,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
+      await supertest.put(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
         .post('/api/fleet/epm/packages/synthetics/0.11.4')
@@ -190,11 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
             'service.name': '',
             synthetics_args: [],
             tags: [],
-            'throttling.config': '5d/3u/20l',
-            'throttling.download_speed': '5',
-            'throttling.is_enabled': true,
-            'throttling.latency': '20',
-            'throttling.upload_speed': '3',
+            throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
@@ -253,7 +253,11 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          expect(decryptedCreatedMonitor.body.attributes['throttling.is_enabled']).to.eql(false);
+          expect(decryptedCreatedMonitor.body.attributes.throttling).to.eql({
+            value: null,
+            id: 'no-throttling',
+            label: 'No throttling',
+          });
         }
       } finally {
         await Promise.all([
@@ -689,7 +693,7 @@ export default function ({ getService }: FtrProviderContext) {
                 type: 'browser',
                 hash: 'ekrjelkjrelkjre',
               },
-              reason: 'Failed to save or update monitor. Configuration is not valid',
+              reason: "Couldn't save or update monitor because of an invalid configuration.",
             },
           ],
           createdMonitors: [],
@@ -1841,6 +1845,191 @@ export default function ({ getService }: FtrProviderContext) {
           status: {
             enabled: testAlert.status.enabled,
           },
+        });
+      } finally {
+        await deleteMonitor(httpProjectMonitors.monitors[1].id, project);
+      }
+    });
+
+    it('project monitors - handles sending invalid public location', async () => {
+      const project = `test-project-${uuidv4()}`;
+      try {
+        const response = await supertest
+          .put(`${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: [
+              {
+                ...httpProjectMonitors.monitors[1],
+                locations: ['does not exist'],
+              },
+            ],
+          })
+          .expect(200);
+        expect(response.body).eql({
+          createdMonitors: [],
+          failedMonitors: [
+            {
+              details:
+                'Invalid location: "does not exist". Remove it or replace it with a valid location.',
+              id: httpProjectMonitors.monitors[1].id,
+              payload: {
+                'check.request': {
+                  headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                  },
+                  method: 'POST',
+                },
+                'check.response': {
+                  body: {
+                    positive: ['Saved', 'saved'],
+                  },
+                  status: [200],
+                },
+                enabled: false,
+                hash: 'ekrjelkjrelkjre',
+                id: httpProjectMonitors.monitors[1].id,
+                locations: ['does not exist'],
+                name: 'My Monitor 3',
+                response: {
+                  include_body: 'always',
+                },
+                'response.include_headers': false,
+                schedule: 60,
+                'ssl.verification_mode': 'strict',
+                tags: 'tag2,tag2',
+                timeout: '80s',
+                type: 'http',
+                urls: ['http://localhost:9200'],
+              },
+              reason: "Couldn't save or update monitor because of an invalid configuration.",
+            },
+          ],
+          updatedMonitors: [],
+        });
+      } finally {
+        await deleteMonitor(httpProjectMonitors.monitors[1].id, project);
+      }
+    });
+
+    it('project monitors - handles sending invalid private locations', async () => {
+      const project = `test-project-${uuidv4()}`;
+      try {
+        const response = await supertest
+          .put(`${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: [
+              {
+                ...httpProjectMonitors.monitors[1],
+                privateLocations: ['does not exist'],
+              },
+            ],
+          })
+          .expect(200);
+        expect(response.body).eql({
+          createdMonitors: [],
+          failedMonitors: [
+            {
+              details:
+                'Invalid private location: "does not exist". Remove it or replace it with a valid private location.',
+              id: httpProjectMonitors.monitors[1].id,
+              payload: {
+                'check.request': {
+                  headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                  },
+                  method: 'POST',
+                },
+                'check.response': {
+                  body: {
+                    positive: ['Saved', 'saved'],
+                  },
+                  status: [200],
+                },
+                enabled: false,
+                hash: 'ekrjelkjrelkjre',
+                id: httpProjectMonitors.monitors[1].id,
+                privateLocations: ['does not exist'],
+                name: 'My Monitor 3',
+                response: {
+                  include_body: 'always',
+                },
+                'response.include_headers': false,
+                schedule: 60,
+                'ssl.verification_mode': 'strict',
+                tags: 'tag2,tag2',
+                timeout: '80s',
+                type: 'http',
+                urls: ['http://localhost:9200'],
+                locations: ['localhost'],
+              },
+              reason: "Couldn't save or update monitor because of an invalid configuration.",
+            },
+          ],
+          updatedMonitors: [],
+        });
+      } finally {
+        await deleteMonitor(httpProjectMonitors.monitors[1].id, project);
+      }
+    });
+
+    it('project monitors - handles no locations specified', async () => {
+      const project = `test-project-${uuidv4()}`;
+      try {
+        const response = await supertest
+          .put(`${API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: [
+              {
+                ...httpProjectMonitors.monitors[1],
+                privateLocations: [],
+                locations: [],
+              },
+            ],
+          })
+          .expect(200);
+        expect(response.body).eql({
+          createdMonitors: [],
+          failedMonitors: [
+            {
+              details: 'You must add at least one location or private location to this monitor.',
+              id: httpProjectMonitors.monitors[1].id,
+              payload: {
+                'check.request': {
+                  headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                  },
+                  method: 'POST',
+                },
+                'check.response': {
+                  body: {
+                    positive: ['Saved', 'saved'],
+                  },
+                  status: [200],
+                },
+                enabled: false,
+                hash: 'ekrjelkjrelkjre',
+                id: httpProjectMonitors.monitors[1].id,
+                privateLocations: [],
+                name: 'My Monitor 3',
+                response: {
+                  include_body: 'always',
+                },
+                'response.include_headers': false,
+                schedule: 60,
+                'ssl.verification_mode': 'strict',
+                tags: 'tag2,tag2',
+                timeout: '80s',
+                type: 'http',
+                urls: ['http://localhost:9200'],
+                locations: [],
+              },
+              reason: "Couldn't save or update monitor because of an invalid configuration.",
+            },
+          ],
+          updatedMonitors: [],
         });
       } finally {
         await deleteMonitor(httpProjectMonitors.monitors[1].id, project);

@@ -116,6 +116,14 @@ export const name = i18n.translate('xpack.cloudDefend.name', {
   defaultMessage: 'Name',
 });
 
+export const unusedSelector = i18n.translate('xpack.cloudDefend.unusedSelector', {
+  defaultMessage: 'Not in use',
+});
+
+export const unusedSelectorHelp = i18n.translate('xpack.cloudDefend.unusedSelectorHelp', {
+  defaultMessage: 'This selector is not in use by any response.',
+});
+
 export const errorInvalidResourceLabel = i18n.translate(
   'xpack.cloudDefend.errorInvalidResourceLabel',
   {

@@ -15,11 +15,13 @@ export const errorCountParamsSchema = schema.object({
   threshold: schema.number(),
   serviceName: schema.maybe(schema.string()),
   environment: schema.string(),
+  errorGroupingKey: schema.maybe(schema.string()),
 });
 
 export const transactionDurationParamsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
   transactionType: schema.maybe(schema.string()),
+  transactionName: schema.maybe(schema.string()),
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),
@@ -50,6 +52,7 @@ export const transactionErrorRateParamsSchema = schema.object({
   windowUnit: schema.string(),
   threshold: schema.number(),
   transactionType: schema.maybe(schema.string()),
+  transactionName: schema.maybe(schema.string()),
   serviceName: schema.maybe(schema.string()),
   environment: schema.string(),
 });

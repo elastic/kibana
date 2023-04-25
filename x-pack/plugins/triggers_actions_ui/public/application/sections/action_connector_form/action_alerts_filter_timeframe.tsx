@@ -24,8 +24,8 @@ import { AlertsFilterTimeframe, IsoWeekday } from '@kbn/alerting-plugin/common';
 import { I18N_WEEKDAY_OPTIONS_DDD, ISO_WEEKDAYS } from '../../../common/constants';
 
 interface ActionAlertsFilterTimeframeProps {
-  state: AlertsFilterTimeframe | null;
-  onChange: (update: AlertsFilterTimeframe | null) => void;
+  state?: AlertsFilterTimeframe;
+  onChange: (update?: AlertsFilterTimeframe) => void;
 }
 
 const TIMEZONE_OPTIONS = moment.tz?.names().map((n) => ({ label: n })) ?? [{ label: 'UTC' }];
@@ -46,14 +46,14 @@ const useDefaultTimezone = () => {
   return kibanaTz;
 };
 
-const useTimeframe = (initialTimeframe: AlertsFilterTimeframe | null) => {
+const useTimeframe = (initialTimeframe?: AlertsFilterTimeframe) => {
   const timezone = useDefaultTimezone();
   const DEFAULT_TIMEFRAME = {
     days: [],
     timezone,
     hours: {
       start: '00:00',
-      end: '24:00',
+      end: '23:59',
     },
   };
   return useState<AlertsFilterTimeframe>(initialTimeframe || DEFAULT_TIMEFRAME);
@@ -79,12 +79,12 @@ export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframePr
   const weekdayOptions = useSortedWeekdayOptions();
 
   useEffect(() => {
-    const nextState = timeframeEnabled ? timeframe : null;
+    const nextState = timeframeEnabled ? timeframe : undefined;
     if (!deepEqual(state, nextState)) onChange(nextState);
   }, [timeframeEnabled, timeframe, state, onChange]);
 
   const toggleTimeframe = useCallback(
-    () => onChange(state ? null : timeframe),
+    () => onChange(state ? undefined : timeframe),
     [state, timeframe, onChange]
   );
   const updateTimeframe = useCallback(

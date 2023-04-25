@@ -5,11 +5,23 @@
  * 2.0.
  */
 
-import type { ContentManagementCrudTypes, SearchOptions } from '@kbn/content-management-utils';
-export type { CreateOptions, UpdateOptions } from '@kbn/content-management-utils';
+import type {
+  ContentManagementCrudTypes,
+  SavedObjectCreateOptions,
+  SavedObjectUpdateOptions,
+} from '@kbn/content-management-utils';
 import { MapContentType } from '../types';
 
-export type MapCrudTypes = ContentManagementCrudTypes<MapContentType, MapAttributes>;
+export type MapCrudTypes = ContentManagementCrudTypes<
+  MapContentType,
+  MapAttributes,
+  Pick<SavedObjectCreateOptions, 'references'>,
+  Pick<SavedObjectUpdateOptions, 'references'>,
+  {
+    /** Flag to indicate to only search the text on the "title" field */
+    onlyTitle?: boolean;
+  }
+>;
 
 /* eslint-disable-next-line @typescript-eslint/consistent-type-definitions */
 export type MapAttributes = {
@@ -19,32 +31,3 @@ export type MapAttributes = {
   layerListJSON?: string;
   uiStateJSON?: string;
 };
-
-export type MapItem = MapCrudTypes['Item'];
-export type PartialMapItem = MapCrudTypes['PartialItem'];
-
-// ----------- GET --------------
-
-export type MapGetIn = MapCrudTypes['GetIn'];
-export type MapGetOut = MapCrudTypes['GetOut'];
-
-// ----------- CREATE --------------
-
-export type MapCreateIn = MapCrudTypes['CreateIn'];
-export type MapCreateOut = MapCrudTypes['CreateOut'];
-
-// ----------- UPDATE --------------
-
-export type MapUpdateIn = MapCrudTypes['UpdateIn'];
-export type MapUpdateOut = MapCrudTypes['UpdateOut'];
-
-// ----------- DELETE --------------
-
-export type MapDeleteIn = MapCrudTypes['DeleteIn'];
-export type MapDeleteOut = MapCrudTypes['DeleteOut'];
-
-// ----------- SEARCH --------------
-
-export type MapSearchIn = MapCrudTypes['SearchIn'];
-export type MapSearchOut = MapCrudTypes['SearchOut'];
-export type MapSearchOptions = SearchOptions;
