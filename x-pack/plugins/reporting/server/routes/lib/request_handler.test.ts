@@ -7,7 +7,7 @@
 
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { TaskPayloadPDF } from '@kbn/reporting-export-types/common/types/printable_pdf';
+import type { TaskPayloadPDF } from '@kbn/reporting-export-types/common/types/printable_pdf';
 import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types/server';
 import { ReportingCore } from '../..';
 import { Report, ReportingStore } from '../../lib/store';
@@ -16,7 +16,7 @@ import { createMockConfigSchema, createMockReportingCore } from '../../test_help
 import { ReportingRequestHandlerContext, ReportingSetup } from '../../types';
 import { RequestHandler } from './request_handler';
 
-jest.mock('../../lib/crypto', () => ({
+jest.mock('@kbn/reporting-export-types/common/crypto', () => ({
   cryptoFactory: () => ({
     encrypt: () => `hello mock cypher text`,
   }),

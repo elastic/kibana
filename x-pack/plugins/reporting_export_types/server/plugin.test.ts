@@ -7,7 +7,7 @@
  */
 
 import { ExportTypesPlugin } from './plugin';
-import { createMockPluginSetup } from './test_helpers';
+import { createMockPluginSetup } from '@kbn/reporting-mocks';
 
 describe('ExportTypesPlugin', () => {
   it('returns', async () => {

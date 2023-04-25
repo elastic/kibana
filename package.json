@@ -515,7 +515,6 @@
     "@kbn/reporting-common": "link:packages/kbn-reporting/common",
     "@kbn/reporting-example-plugin": "link:x-pack/examples/reporting_example",
     "@kbn/reporting-export-types": "link:x-pack/plugins/reporting_export_types",
-    "@kbn/reporting-mocks": "link:x-pack/plugins/reporting_mocks",
     "@kbn/reporting-plugin": "link:x-pack/plugins/reporting",
     "@kbn/resolver-test-plugin": "link:x-pack/test/plugin_functional/plugins/resolver_test",
     "@kbn/response-stream-plugin": "link:examples/response_stream",

@@ -13,3 +13,4 @@ export { PassThroughStream } from './passthrough_stream';
 export { statuses } from './statuses';
 export { ReportingStore, IlmPolicyManager } from './store';
 export { startTrace } from './trace';
+export { cryptoFactory } from './crypto';
