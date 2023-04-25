@@ -173,8 +173,10 @@ export function getShouldRefresh(
   input: DashboardContainerInput
 ): boolean {
   for (const key of sessionChangeKeys) {
-    if (
-      !isKeyEqual(
+    if (input[key] === undefined && lastInput[key] === undefined) {
+      continue;
+    }
+    if (!isKeyEqual(
         key,
         {
           container: this,

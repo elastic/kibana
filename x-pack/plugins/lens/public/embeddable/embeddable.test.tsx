@@ -442,11 +442,6 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
 
     embeddable.updateInput({
-      filters: [{ meta: { alias: 'test', negate: false, disabled: false } }],
-    });
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    embeddable.updateInput({
       searchSessionId: 'nextSession',
     });
     await new Promise((resolve) => setTimeout(resolve, 0));

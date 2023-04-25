@@ -313,5 +313,5 @@ test('searchSessionId is updated prior to child embeddable parent subscription e
     to: 'now',
     from: 'now-7d',
   });
-  expect(embeddableInput.searchSessionId).toBe('searchSessionId2');
+  expect(embeddableInput.searchSessionId).toBe(`searchSessionId${sessionCount}`);
 });
