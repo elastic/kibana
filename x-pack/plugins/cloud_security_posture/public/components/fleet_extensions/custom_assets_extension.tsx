@@ -27,7 +27,7 @@ export const CspCustomAssetsExtension = () => {
         path: cloudPosturePages.findings.path + '/vulnerabilities',
       }),
       description: i18n.translate(
-        'xpack.csp.createPackagePolicy.customAssetsTab.findingsViewLabel',
+        'xpack.csp.createPackagePolicy.customAssetsTab.vulnerabilityFindingsViewLabel',
         { defaultMessage: 'View Vulnerability Findings ' }
       ),
     },
