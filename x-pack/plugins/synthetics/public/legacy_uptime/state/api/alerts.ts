@@ -199,6 +199,12 @@ export const fetchAnomalyAlertRecords = async ({
       }),
       ruleTypeId: monitorRule.rule_type_id,
     };
+  } else if (monitorRule) {
+    const rule = monitorRule as Rule<NewAlertParams> & { rule_type_id: string };
+    return {
+      ...rule,
+      ruleTypeId: rule.rule_type_id,
+    };
   }
   return monitorRule as Rule<NewAlertParams>;
 };
