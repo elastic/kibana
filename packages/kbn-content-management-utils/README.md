@@ -1,27 +1,17 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
+# Content management utils
 
+Utilities to ease the implementation of the Content Management API with Saved Objects.
+
+```ts
 import type {
   ContentManagementCrudTypes,
-  SavedObjectCreateOptions,
-  SavedObjectUpdateOptions,
+  CreateOptions,
+  SearchOptions,
+  UpdateOptions,
 } from '@kbn/content-management-utils';
 import { MapContentType } from '../types';
 
-export type MapCrudTypes = ContentManagementCrudTypes<
-  MapContentType,
-  MapAttributes,
-  Pick<SavedObjectCreateOptions, 'references'>,
-  Pick<SavedObjectUpdateOptions, 'references'>,
-  {
-    /** Flag to indicate to only search the text on the "title" field */
-    onlyTitle?: boolean;
-  }
->;
+export type MapCrudTypes = ContentManagementCrudTypes<MapContentType, MapAttributes>;
 
 /* eslint-disable-next-line @typescript-eslint/consistent-type-definitions */
 export type MapAttributes = {
@@ -44,13 +34,13 @@ export type MapGetOut = MapCrudTypes['GetOut'];
 
 export type MapCreateIn = MapCrudTypes['CreateIn'];
 export type MapCreateOut = MapCrudTypes['CreateOut'];
-export type MapCreateOptions = MapCrudTypes['CreateOptions'];
+export type MapCreateOptions = CreateOptions;
 
 // ----------- UPDATE --------------
 
 export type MapUpdateIn = MapCrudTypes['UpdateIn'];
 export type MapUpdateOut = MapCrudTypes['UpdateOut'];
-export type MapUpdateOptions = MapCrudTypes['UpdateOptions'];
+export type MapUpdateOptions = UpdateOptions;
 
 // ----------- DELETE --------------
 
@@ -61,4 +51,8 @@ export type MapDeleteOut = MapCrudTypes['DeleteOut'];
 
 export type MapSearchIn = MapCrudTypes['SearchIn'];
 export type MapSearchOut = MapCrudTypes['SearchOut'];
-export type MapSearchOptions = MapCrudTypes['SearchOptions'];
+export type MapSearchOptions = SearchOptions;
+
+```
+
+
