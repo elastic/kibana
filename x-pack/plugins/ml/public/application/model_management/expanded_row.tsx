@@ -374,7 +374,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
           },
         ]
       : []),
-    ...((pipelines && Object.keys(pipelines).length > 0) || stats.ingest
+    ...((isPopulatedObject(pipelines) && Object.keys(pipelines).length > 0) || stats.ingest
       ? [
           {
             id: 'pipelines',
@@ -384,8 +384,10 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 <FormattedMessage
                   id="xpack.ml.trainedModels.modelsList.expandedRow.pipelinesTabLabel"
                   defaultMessage="Pipelines"
-                />{' '}
-                <EuiNotificationBadge>{Object.keys(pipelines!).length}</EuiNotificationBadge>
+                />
+                <EuiNotificationBadge>
+                  {isPopulatedObject(pipelines) ? Object.keys(pipelines!).length : 0}
+                </EuiNotificationBadge>
               </>
             ),
             content: (
