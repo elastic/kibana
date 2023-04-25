@@ -34,6 +34,9 @@ describe('useLast50DurationChart', () => {
     );
     expect(result.current).toEqual({
       medianDuration: 5,
+      maxDuration: 9,
+      minDuration: 0,
+      avgDuration: 4.5,
       data: [
         {
           x: 0,
@@ -133,6 +136,9 @@ describe('useLast50DurationChart', () => {
 
     expect(result.current).toEqual({
       medianDuration: [...data].sort((a, b) => a.y - b.y)[Math.floor(data.length / 2)].y,
+      maxDuration: 9,
+      minDuration: 0,
+      avgDuration: 4.4,
       data,
       loading: false,
     });

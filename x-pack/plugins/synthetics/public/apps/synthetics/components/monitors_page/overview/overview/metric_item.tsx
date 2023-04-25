@@ -151,9 +151,9 @@ export const MetricItem = ({
                             {
                               defaultMessage: 'Avg: {avg}, Min: {min}, Max: {max}',
                               values: {
-                                avg: formatDuration(avgDuration),
-                                min: formatDuration(minDuration),
-                                max: formatDuration(maxDuration),
+                                avg: formatDuration(avgDuration, { noSpace: true }),
+                                min: formatDuration(minDuration, { noSpace: true }),
+                                max: formatDuration(maxDuration, { noSpace: true }),
                               },
                             }
                           )}
