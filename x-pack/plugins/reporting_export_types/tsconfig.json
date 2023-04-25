@@ -1,7 +1,7 @@
 {
-  "extends": "../../../tsconfig.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types"
+    "outDir": "target/types"
   },
   "include": [
     "index.ts",
@@ -10,7 +10,19 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
-    "../../typings/**/*",
-     "../reporting/public/lib/export_types_registry.ts"  ],
-  "exclude": []
+  ],
+  "kbn_references": [
+    "@kbn/reporting-plugin",
+    "@kbn/reporting-common",
+    "@kbn/screenshotting-plugin",
+    "@kbn/data-plugin",
+    "@kbn/utility-types",
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/generate-csv",
+    "@kbn/core-plugins-server",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
 }

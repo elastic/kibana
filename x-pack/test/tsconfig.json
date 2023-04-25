@@ -123,5 +123,6 @@
     "@kbn/alerting-state-types",
     "@kbn/assetManager-plugin",
     "@kbn/field-formats-plugin",
+    "@kbn/reporting-export-types",
   ]
 }
