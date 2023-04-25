@@ -16,22 +16,6 @@ export const ERROR_LOADING_METADATA_TITLE = (pattern: string) =>
     }
   );
 
-export const ERROR_LOADING_METADATA_BODY = ({
-  error,
-  pattern,
-}: {
-  error: string;
-  pattern: string;
-}) =>
-  i18n.translate(
-    'securitySolutionPackages.ecsDataQualityDashboard.emptyErrorPrompt.errorLoadingMetadataBody',
-    {
-      values: { error, pattern },
-      defaultMessage:
-        "Indices matching the {pattern} pattern won't be checked, because an error occurred: {error}",
-    }
-  );
-
 export const LOADING_STATS = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.emptyLoadingPrompt.loadingStatsPrompt',
   {
