@@ -16,7 +16,11 @@ import {
   MlModelDeploymentState,
   MlTrainedModelConfigWithDefined,
 } from '../../../common/types/ml';
-import { ElasticsearchResponseError, isNotFoundException, isResourceNotFoundException } from '../../utils/identify_exceptions';
+import {
+  ElasticsearchResponseError,
+  isNotFoundException,
+  isResourceNotFoundException,
+} from '../../utils/identify_exceptions';
 
 export const getMlModelDeploymentStatus = async (
   modelName: string,
