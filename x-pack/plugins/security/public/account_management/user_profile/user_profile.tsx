@@ -162,7 +162,7 @@ function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfi
       description={
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.themeFormGroupDescription"
-          defaultMessage="Select the interface theme that you wish to apply across the platform."
+          defaultMessage="Select the appearance of your interface."
         />
       }
     >
@@ -173,7 +173,7 @@ function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfi
             <FormLabel for="data.userSettings.darkMode">
               <FormattedMessage
                 id="xpack.security.accountManagement.userProfile.userSettings.theme"
-                defaultMessage="Theme mode"
+                defaultMessage="Mode"
               />
             </FormLabel>
           }
@@ -183,7 +183,7 @@ function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfi
             legend={i18n.translate(
               'xpack.security.accountManagement.userProfile.userSettings.themeGroupDescription',
               {
-                defaultMessage: 'Kibana Theme',
+                defaultMessage: 'Elastic theme',
               }
             )}
             buttonSize="m"
