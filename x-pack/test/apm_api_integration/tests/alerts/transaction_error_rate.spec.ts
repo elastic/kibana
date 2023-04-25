@@ -15,7 +15,11 @@ import {
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
 } from './alerting_api_helper';
-import { waitForRuleStatus, waitForDocumentInIndex } from './wait_for_rule_status';
+import {
+  waitForRuleStatus,
+  waitForDocumentInIndex,
+  waitForAlertInIndex,
+} from './wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -123,7 +127,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ruleId = createdRule.id;
       });
 
-      it('checks if alert is active', async () => {
+      it('checks if rule is active', async () => {
         const executionStatus = await waitForRuleStatus({
           id: ruleId,
           expectedStatus: 'active',
@@ -139,6 +143,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(resp.hits.hits[0]._source?.message).eql(`Transaction Name: tx-java`);
+      });
+
+      it('indexes alert document with all group-by fields', async () => {
+        const resp = await waitForAlertInIndex({
+          es,
+          indexName: '.alerts*',
+          ruleId,
+        });
+
+        expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-java');
+        expect(resp.hits.hits[0]._source).property('service.environment', 'production');
+        expect(resp.hits.hits[0]._source).property('transaction.type', 'request');
+        expect(resp.hits.hits[0]._source).property('transaction.name', 'tx-java');
       });
 
       it('shows the correct alert count for each service on service inventory', async () => {
