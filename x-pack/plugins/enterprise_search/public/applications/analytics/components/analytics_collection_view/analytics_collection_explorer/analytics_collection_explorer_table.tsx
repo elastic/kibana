@@ -277,6 +277,7 @@ export const AnalyticsCollectionExplorerTable = () => {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             isClearable
+            isLoading={isLoading}
             incremental
             fullWidth
           />
