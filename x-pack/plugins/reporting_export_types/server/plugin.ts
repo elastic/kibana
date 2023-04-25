@@ -7,7 +7,7 @@
  */
 
 import { Plugin } from '@kbn/core/server';
-import { ReportingSetup } from '@kbn/reporting-plugin/server/types';
+import type { ReportingSetup } from '@kbn/reporting-plugin/server/types';
 import { getExportType as getExportTypeCsv } from './export_types/csv_searchsource';
 import { getExportType as getExportTypePng } from './export_types/png_v2';
 import { getExportType as getExportTypePdf } from './export_types/printable_pdf_v2';

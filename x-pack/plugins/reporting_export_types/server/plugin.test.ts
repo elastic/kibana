@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { CancellationToken } from './cancellation_token';
-export { buildKibanaPath } from './build_kibana_path';
-export type { TaskRunMetrics, CsvMetrics, TaskRunResult } from './metrics';
-export * from './errors';
-export * from './constants';
-export * from './schema_utils';
+import { ExportTypesPlugin } from './plugin';
+import { createMockPluginSetup } from './test_helpers';
+
+describe('ExportTypesPlugin', () => {
+  it('returns', async () => {
+    const plugin = new ExportTypesPlugin();
+    const { registerExportType } = await plugin.setup({}, createMockPluginSetup);
+  });
+});

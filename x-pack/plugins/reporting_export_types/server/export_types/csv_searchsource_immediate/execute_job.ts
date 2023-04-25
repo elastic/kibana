@@ -9,12 +9,12 @@ import { KibanaRequest } from '@kbn/core/server';
 import { Writable } from 'stream';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import { CsvGenerator } from '@kbn/generate-csv';
-import { getFieldFormats } from '@kbn/reporting-plugin/server/services';
-import {
+import type {
   ReportingRequestHandlerContext,
   RunTaskFnFactory,
 } from '@kbn/reporting-plugin/server/types';
-import { JobParamsDownloadCSV } from './types';
+import { JobParamsDownloadCSV } from '../../../common/types/csv_searchsource_immediate';
+import { getFieldFormats } from '../../services/services';
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was

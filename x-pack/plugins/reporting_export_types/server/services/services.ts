@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import nodeCrypto from '@elastic/node-crypto';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/server';
 
-export function cryptoFactory(encryptionKey?: string) {
-  if (typeof encryptionKey !== 'string') {
-    throw new Error('Encryption Key required.');
-  }
-
-  return nodeCrypto({ encryptionKey });
-}
+export const [getFieldFormats, setFieldFormats] =
+  createGetterSetter<FieldFormatsStart>('FieldFormats');

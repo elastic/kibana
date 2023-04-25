@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { CancellationToken } from './cancellation_token';
-export { buildKibanaPath } from './build_kibana_path';
-export type { TaskRunMetrics, CsvMetrics, TaskRunResult } from './metrics';
-export * from './errors';
-export * from './constants';
-export * from './schema_utils';
+export const CSV_JOB_TYPE = 'csv_searchsource';
+
+export const PDF_JOB_TYPE = 'printable_pdf';
+export const PDF_JOB_TYPE_V2 = 'printable_pdf_v2';
+
+export const PNG_JOB_TYPE = 'PNG';
+export const PNG_JOB_TYPE_V2 = 'PNGV2';

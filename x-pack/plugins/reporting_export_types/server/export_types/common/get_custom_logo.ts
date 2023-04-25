@@ -7,7 +7,7 @@
 
 import type { Headers, Logger } from '@kbn/core/server';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '@kbn/reporting-common';
-import { ReportingCore } from '@kbn/reporting-plugin/server';
+import type { ReportingCore } from '@kbn/reporting-plugin/server';
 
 export const getCustomLogo = async (
   reporting: ReportingCore,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '@kbn/reporting-plugin/common/constants';
+import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '@kbn/reporting-common';
 
 export const metadata = {
   id: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,

@@ -6,10 +6,10 @@
  */
 
 import { CsvGenerator } from '@kbn/generate-csv';
-import { getFieldFormats } from '@kbn/reporting-plugin/server/services';
-import { RunTaskFn, RunTaskFnFactory } from '@kbn/reporting-plugin/server/types';
+import type { RunTaskFn, RunTaskFnFactory } from '@kbn/reporting-plugin/server/types';
 import { TaskPayloadCSV } from './types';
 import { decryptJobHeaders } from '../common';
+import { getFieldFormats } from '../../services/services';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
   reporting,

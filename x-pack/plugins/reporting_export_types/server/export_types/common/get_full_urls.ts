@@ -12,7 +12,7 @@ import {
   UrlWithStringQuery,
 } from 'url';
 import { ReportingConfig } from '@kbn/reporting-plugin/server';
-import { TaskPayloadPNG } from '../png/types';
+import { TaskPayloadPNG } from '../../../common/types/png';
 import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 import { validateUrls } from './validate_urls';
@@ -39,7 +39,7 @@ export function getFullUrls(config: ReportingConfig, job: TaskPayloadPDF | TaskP
   if (isPngJob(job)) {
     relativeUrls = [job.relativeUrl];
   } else if (isPdfJob(job)) {
-    relativeUrls = job.objects.map((obj) => obj.relativeUrl);
+    relativeUrls = job.objects.map((obj: any) => obj.relativeUrl);
   } else {
     throw new Error(
       `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``

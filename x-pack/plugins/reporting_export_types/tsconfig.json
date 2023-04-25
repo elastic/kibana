@@ -12,7 +12,6 @@
     "server/**/*.ts",
   ],
   "kbn_references": [
-    "@kbn/reporting-plugin",
     "@kbn/reporting-common",
     "@kbn/screenshotting-plugin",
     "@kbn/data-plugin",

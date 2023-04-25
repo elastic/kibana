@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { CreateJobFn, RunTaskFn } from '@kbn/reporting-plugin/server/types';
 import {
-  CSV_JOB_TYPE as jobType,
-  LICENSE_TYPE_BASIC,
+  LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_TRIAL,
-} from '@kbn/reporting-plugin/common/constants';
-import { CreateJobFn, RunTaskFn } from '@kbn/reporting-plugin/server/types';
+  LICENSE_TYPE_BASIC,
+  PDF_JOB_TYPE_V2 as jobType,
+} from '@kbn/reporting-common';
+import { JobParamsCSV, TaskPayloadCSV } from '../../../common/types/csv_searchsource';
 import { ExportTypeDefinition } from '../types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
-import { JobParamsCSV, TaskPayloadCSV } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
   CreateJobFn<JobParamsCSV>,

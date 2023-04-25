@@ -8,16 +8,13 @@
 import * as Rx from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
-import { ReportingCore } from '@kbn/reporting-plugin/server';
+import type { ReportingCore } from '@kbn/reporting-plugin/server';
 import { CancellationToken } from '@kbn/reporting-common';
-import { cryptoFactory } from '@kbn/reporting-plugin/server/lib';
-import {
-  createMockConfigSchema,
-  createMockReportingCore,
-} from '@kbn/reporting-plugin/server/test_helpers';
 import { generatePdfObservable } from '../lib/generate_pdf';
-import { TaskPayloadPDF } from '../types';
 import { runTaskFnFactory } from '.';
+import { cryptoFactory } from '../../../../common/crypto';
+import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
+import { TaskPayloadPDF } from '../../../../common/types/printable_pdf';
 
 jest.mock('../lib/generate_pdf');
 

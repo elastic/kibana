@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ReportingConfig } from '../..';
+import { TaskPayloadPNG } from '../../../common/types/png';
+import type { ReportingConfig } from '@kbn/reporting-plugin/server';
 import { createMockConfig } from '../../test_helpers';
-import { TaskPayloadPNG } from '../png/types';
 import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getFullUrls } from './get_full_urls';
 

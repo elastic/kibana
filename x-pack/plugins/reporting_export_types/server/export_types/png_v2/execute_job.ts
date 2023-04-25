@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { TaskRunResult } from '@kbn/reporting-common';
+import { REPORTING_TRANSACTION_TYPE, TaskRunResult } from '@kbn/reporting-common';
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
-import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-plugin/common/constants';
-import { RunTaskFn, RunTaskFnFactory } from '@kbn/reporting-plugin/server/types';
+import type { RunTaskFn, RunTaskFnFactory } from '@kbn/reporting-plugin/server/types';
+import { TaskPayloadPNGV2 } from '../../../common/types/png_v2';
 import { decryptJobHeaders, generatePngObservable } from '../common';
 import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
-import { TaskPayloadPNGV2 } from './types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
   function executeJobFactoryFn(reporting, parentLogger) {

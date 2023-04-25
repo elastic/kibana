@@ -17,8 +17,8 @@ import {
   createMockReportingCore,
 } from '@kbn/reporting-plugin/server/test_helpers';
 import { generatePngObservable } from '../../common';
-import { TaskPayloadPNG } from '../types';
 import { runTaskFnFactory } from '.';
+import { TaskPayloadPNG } from '../../../../common/types/png';
 
 jest.mock('../../common/generate_png');
 

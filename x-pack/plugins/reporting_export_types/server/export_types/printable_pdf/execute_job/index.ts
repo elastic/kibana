@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { TaskRunResult } from '@kbn/reporting-common';
+import { REPORTING_TRANSACTION_TYPE, TaskRunResult } from '@kbn/reporting-common';
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
-import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-plugin/common/constants';
-import { RunTaskFn, RunTaskFnFactory } from '@kbn/reporting-plugin/server/types';
+import type { RunTaskFn, RunTaskFnFactory } from '@kbn/reporting-plugin/server/types';
+import { TaskPayloadPDF } from '../../../../common/types/printable_pdf';
 import { decryptJobHeaders, getCustomLogo, getFullUrls } from '../../common';
 import { generatePdfObservable } from '../lib/generate_pdf';
-import { TaskPayloadPDF } from '../types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
   function executeJobFactoryFn(reporting, parentLogger) {

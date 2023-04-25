@@ -11,8 +11,8 @@ import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
 import type { ReportingCore } from '@kbn/reporting-plugin/server';
 import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-plugin/common/constants';
-import type { PngMetrics } from '@kbn/reporting-plugin/common/types';
 import type { PngScreenshotOptions } from '@kbn/reporting-plugin/server/types';
+import { PngMetrics } from '@kbn/reporting-common/metrics';
 
 interface PngResult {
   buffer: Buffer;

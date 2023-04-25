@@ -12,8 +12,8 @@ import {
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_TRIAL,
   PNG_JOB_TYPE as jobType,
-} from '@kbn/reporting-plugin/common/constants';
-import { CreateJobFn, RunTaskFn } from '@kbn/reporting-plugin/server/types';
+} from '@kbn/reporting-common/constants';
+import type { CreateJobFn, RunTaskFn } from '@kbn/reporting-plugin/server/types';
 import { JobParamsPNGDeprecated } from '../../../common';
 import { TaskPayloadPNG } from '../../../common/types/png';
 import { ExportTypeDefinition } from '../types';

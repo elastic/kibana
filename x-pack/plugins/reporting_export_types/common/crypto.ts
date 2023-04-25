@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export type {
-  JobParamsCSV,
-  TaskPayloadCSV,
-} from '@kbn/reporting-plugin/common/types/export_types/csv_searchsource';
+import nodeCrypto from '@elastic/node-crypto';
+
+export const cryptoFactory = (encryptionKey?: string) => {
+  if (typeof encryptionKey !== 'string') {
+    throw new Error('Encryption Key required.');
+  }
+
+  return nodeCrypto({ encryptionKey });
+};

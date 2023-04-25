@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateJobFn, CreateJobFnFactory } from '@kbn/reporting-plugin/server/types';
+import type { CreateJobFn, CreateJobFnFactory } from '@kbn/reporting-plugin/server/types';
 import { TaskPayloadPDFV2 } from '../../../common/types/printable_pdf_v2';
 import { JobParamsPDFV2 } from '../../../common';
 

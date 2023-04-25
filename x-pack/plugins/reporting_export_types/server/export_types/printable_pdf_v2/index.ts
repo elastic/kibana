@@ -13,7 +13,7 @@ import {
   LICENSE_TYPE_TRIAL,
   PDF_JOB_TYPE_V2 as jobType,
 } from '@kbn/reporting-plugin/common/constants';
-import { CreateJobFn, RunTaskFn } from '@kbn/reporting-plugin/server/types';
+import type { CreateJobFn, RunTaskFn } from '@kbn/reporting-plugin/server/types';
 import { JobParamsPDFV2 } from '../../../common';
 import { TaskPayloadPDFV2 } from '../../../common/types/printable_pdf_v2';
 import { ExportTypeDefinition } from '../types';
