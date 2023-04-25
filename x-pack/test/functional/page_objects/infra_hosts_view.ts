@@ -109,7 +109,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async visitMetricsTab() {
       const metricsTab = await this.getMetricsTab();
-      metricsTab.click();
+      await metricsTab.click();
     },
 
     async getAllMetricsTrendTiles() {
@@ -129,14 +129,14 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return container.findAllByCssSelector('[data-test-subj*="hostsView-metricChart-"]');
     },
 
-    async getOpenInLensOption() {
-      const metricCharts = await this.getAllMetricsCharts();
-      const chart = metricCharts.at(-1)!;
-      await chart.moveMouseTo();
-      const button = await testSubjects.findDescendant('embeddablePanelToggleMenuIcon', chart);
+    async clickAndValidateMetriChartActionOptions() {
+      const element = await testSubjects.find('hostsView-metricChart-diskIOWrite');
+      await element.moveMouseTo();
+      const button = await element.findByTestSubject('embeddablePanelToggleMenuIcon');
       await button.click();
-      await testSubjects.existOrFail('embeddablePanelContextMenuOpen');
-      return testSubjects.existOrFail('embeddablePanelAction-openInLens');
+      await testSubjects.existOrFail('embeddablePanelAction-openInLens');
+      // forces the modal to close
+      await element.click();
     },
 
     // Flyout Tabs
@@ -187,7 +187,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async visitLogsTab() {
       const logsTab = await this.getLogsTab();
-      logsTab.click();
+      await logsTab.click();
     },
 
     async getLogEntries() {
@@ -212,7 +212,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async visitAlertTab() {
       const alertsTab = await this.getAlertsTab();
-      alertsTab.click();
+      await alertsTab.click();
     },
 
     setAlertStatusFilter(alertStatus?: AlertStatus) {
