@@ -50,10 +50,10 @@ export function StatsList({
     <ManagedTable
       noItemsMessage={
         isLoading
-          ? i18n.translate('xpack.apm.statsTable.loading', {
+          ? i18n.translate('xpack.apm.mobile.stats.table.loading', {
               defaultMessage: 'Loading...',
             })
-          : i18n.translate('xpack.apm.statsTable.noDataLabel', {
+          : i18n.translate('xpack.apm.mobile.stats.table.noDataMessage', {
               defaultMessage: 'No data found',
             })
       }

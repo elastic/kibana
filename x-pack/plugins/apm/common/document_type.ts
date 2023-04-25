@@ -11,6 +11,7 @@ export enum ApmDocumentType {
   TransactionEvent = 'transactionEvent',
   ServiceDestinationMetric = 'serviceDestinationMetric',
   ServiceSummaryMetric = 'serviceSummaryMetric',
+  ErrorEvent = 'error',
 }
 
 export type ApmServiceTransactionDocumentType =

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   kqlQuery,
   rangeQuery,
@@ -24,6 +23,8 @@ import { getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../typings/timeseries';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 
 interface MobileDetailedStatistics {
   fieldName: string;
@@ -75,7 +76,12 @@ async function getMobileDetailedStatisticsByField({
     `get_mobile_detailed_statistics_by_field`,
     {
       apm: {
-        events: [ProcessorEvent.transaction],
+        sources: [
+          {
+            documentType: ApmDocumentType.TransactionEvent,
+            rollupInterval: RollupInterval.None,
+          },
+        ],
       },
       body: {
         track_total_hits: false,

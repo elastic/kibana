@@ -82,7 +82,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         const fieldValues = response.mainStatistics.map((item) => item.name);
 
-        expect(fieldValues).to.be.eql(['2.3', '1.1', '1.2']);
+        expect(fieldValues).to.be.eql(['1.1', '1.2', '2.3']);
 
         const latencyValues = response.mainStatistics.map((item) => item.latency);
 
@@ -90,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const throughputValues = response.mainStatistics.map((item) => item.throughput);
         expect(throughputValues).to.be.eql([
-          1.2000013333348147, 0.40000044444493826, 0.40000044444493826,
+          1.0000011111123457, 0.20000022222246913, 0.20000022222246913,
         ]);
       });
       it('returns the correct data for Os version', async () => {
@@ -109,7 +109,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(latencyValues).to.be.eql([128571.42857142857]);
 
         const throughputValues = response.mainStatistics.map((item) => item.throughput);
-        expect(throughputValues).to.be.eql([2.0000022222246914]);
+        expect(throughputValues).to.be.eql([1.4000015555572838]);
       });
       it('returns the correct data for Devices', async () => {
         const response = await getMobileMainStatisticsByField({
@@ -120,12 +120,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const fieldValues = response.mainStatistics.map((item) => item.name);
 
         expect(fieldValues).to.be.eql([
-          'SM-G973F',
           'HUAWEI P2-0000',
           'SM-G930F',
-          'Pixel 7',
+          'SM-G973F',
           'Pixel 7 Pro',
           'Pixel 8',
+          'SM-G930F',
         ]);
 
         const latencyValues = response.mainStatistics.map((item) => item.latency);
@@ -134,7 +134,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const throughputValues = response.mainStatistics.map((item) => item.throughput);
         expect(throughputValues).to.be.eql([
-          0.6000006666674074, 0.40000044444493826, 0.40000044444493826, 0.20000022222246913,
+          0.40000044444493826, 0.20000022222246913, 0.20000022222246913, 0.20000022222246913,
           0.20000022222246913, 0.20000022222246913,
         ]);
       });

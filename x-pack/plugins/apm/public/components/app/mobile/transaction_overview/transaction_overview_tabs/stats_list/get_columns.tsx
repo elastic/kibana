@@ -50,7 +50,7 @@ export function getColumns({
     {
       field: 'name',
       name: i18n.translate(
-        'xpack.apm.mobile.transactions.overview.table.nameLabel',
+        'xpack.apm.mobile.transactions.overview.table.nameColumnLabel',
         {
           defaultMessage: 'Name',
         }
@@ -130,7 +130,7 @@ export function getColumns({
     {
       field: 'crashRate',
       name: i18n.translate(
-        'xpack.apm.mobile.transactions.overview.table.crashRate',
+        'xpack.apm.mobile.transactions.overview.table.crashRateColumnLabel',
         {
           defaultMessage: 'Crash rate',
         }
