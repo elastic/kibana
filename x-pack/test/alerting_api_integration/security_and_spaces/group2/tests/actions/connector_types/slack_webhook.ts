@@ -18,7 +18,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
 
-  describe('slack action', () => {
+  describe('Slack webhook action', () => {
     let simulatedActionId = '';
     let slackSimulatorURL: string = '';
     let slackServer: http.Server;

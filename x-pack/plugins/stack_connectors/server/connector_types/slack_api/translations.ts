@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { getConnectorType as getSlackWebhookConnectorType } from './slack';
+import { i18n } from '@kbn/i18n';
+
+export const SLACK_CONNECTOR_NAME = i18n.translate('xpack.stackConnectors.slackApi.title', {
+  defaultMessage: 'Slack API',
+});

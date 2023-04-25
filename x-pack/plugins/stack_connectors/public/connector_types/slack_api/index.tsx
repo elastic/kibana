@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getConnectorType as getSlackWebhookConnectorType } from './slack';
+export { getConnectorType as getSlackApiConnectorType } from './slack_api';

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { getConnectorType as getSlackWebhookConnectorType } from './slack';
+export const SLACK_API_CONNECTOR_ID = '.slack_api';
+export const SLACK_URL = 'https://slack.com/api/';
