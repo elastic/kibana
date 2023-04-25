@@ -128,6 +128,8 @@ export const renderApp = ({
     element
   );
   return () => {
+    // This needs to be present to fix https://github.com/elastic/kibana/issues/155704
+    plugins.data.search.session.clear();
     ReactDOM.unmountComponentAtNode(element);
   };
 };
