@@ -36,7 +36,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     let ruleId: string;
     let actionId: string | undefined;
 
-    const INDEX_NAME = 'error-count';
+    const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
+    const ALERT_ACTION_INDEX_NAME = 'alert-action-error-count';
 
     before(async () => {
       const opbeansJava = apm
@@ -73,9 +74,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await synthtraceEsClient.clean();
       await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
       await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
-      await esDeleteAllIndices(INDEX_NAME);
+      await esDeleteAllIndices(ALERT_ACTION_INDEX_NAME);
       await es.deleteByQuery({
-        index: '.alerts*',
+        index: APM_ALERTS_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
       });
       await es.deleteByQuery({
@@ -89,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         actionId = await createIndexConnector({
           supertest,
           name: 'Error count API test',
-          indexName: INDEX_NAME,
+          indexName: ALERT_ACTION_INDEX_NAME,
         });
         const createdRule = await createApmRule({
           supertest,
@@ -100,7 +101,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             threshold: 1,
             windowSize: 1,
             windowUnit: 'h',
-            groupBy: ['service.name', 'service.environment', 'transaction.name'],
+            groupBy: [
+              'service.name',
+              'service.environment',
+              'transaction.name',
+              'error.grouping_key',
+            ],
           },
           actions: [
             {
@@ -110,7 +116,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 documents: [
                   {
                     message: `${errorCountMessage}
-- Transaction name: {{context.transaction.name}}`,
+- Transaction name: {{context.transactionName}}
+- Error grouping key: {{context.errorGroupingKey}}`,
                   },
                 ],
               },
@@ -138,7 +145,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns correct message', async () => {
         const resp = await waitForDocumentInIndex<{ message: string }>({
           es,
-          indexName: INDEX_NAME,
+          indexName: ALERT_ACTION_INDEX_NAME,
         });
 
         expect(resp.hits.hits[0]._source?.message).eql(
@@ -148,14 +155,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 - Environment: production
 - Threshold: 1
 - Triggered value: 15 errors over the last 1 hr
-- Transaction name: tx-java`
+- Transaction name: tx-java
+- Error grouping key: 2cb494454edc437679309dc190d692368ae7da490f45aff291fb6f7989437d4a`
         );
       });
 
       it('indexes alert document with all group-by fields', async () => {
         const resp = await waitForAlertInIndex({
           es,
-          indexName: '.alerts*',
+          indexName: APM_ALERTS_INDEX,
           ruleId,
         });
 

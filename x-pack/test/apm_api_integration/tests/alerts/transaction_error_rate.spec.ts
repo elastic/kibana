@@ -35,7 +35,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     let ruleId: string;
     let actionId: string | undefined;
 
-    const INDEX_NAME = 'transaction-error-rate';
+    const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
+    const ALERT_ACTION_INDEX_NAME = 'alert-action-transaction-error-rate';
 
     before(async () => {
       const opbeansJava = apm
@@ -72,9 +73,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await synthtraceEsClient.clean();
       await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
       await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
-      await esDeleteAllIndices([INDEX_NAME]);
+      await esDeleteAllIndices([ALERT_ACTION_INDEX_NAME]);
       await es.deleteByQuery({
-        index: '.alerts*',
+        index: APM_ALERTS_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
       });
       await es.deleteByQuery({
@@ -88,7 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         actionId = await createIndexConnector({
           supertest,
           name: 'Transation error rate API test',
-          indexName: INDEX_NAME,
+          indexName: ALERT_ACTION_INDEX_NAME,
         });
         const createdRule = await createApmRule({
           supertest,
@@ -113,7 +114,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               group: 'threshold_met',
               id: actionId,
               params: {
-                documents: [{ message: 'Transaction Name: {{context.transaction.name}}' }],
+                documents: [{ message: 'Transaction Name: {{context.transactionName}}' }],
               },
               frequency: {
                 notify_when: 'onActionGroupChange',
@@ -139,7 +140,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns correct message', async () => {
         const resp = await waitForDocumentInIndex<{ message: string }>({
           es,
-          indexName: INDEX_NAME,
+          indexName: ALERT_ACTION_INDEX_NAME,
         });
 
         expect(resp.hits.hits[0]._source?.message).eql(`Transaction Name: tx-java`);
@@ -148,7 +149,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('indexes alert document with all group-by fields', async () => {
         const resp = await waitForAlertInIndex({
           es,
-          indexName: '.alerts*',
+          indexName: APM_ALERTS_INDEX,
           ruleId,
         });
 
