@@ -91,5 +91,6 @@
     "@kbn/utility-types",
     "@kbn/ml-error-utils",
     "@kbn/ml-common",
+    "@kbn/ml-anomaly-utils",
   ],
 }
