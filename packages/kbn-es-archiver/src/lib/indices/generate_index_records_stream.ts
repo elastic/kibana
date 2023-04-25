@@ -9,6 +9,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import { Transform } from 'stream';
 import { ToolingLog } from '@kbn/tooling-log';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { Stats } from '../stats';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 import { getIndexTemplate } from '..';
@@ -100,7 +101,10 @@ export function createGenerateIndexRecordsStream({
               value: {
                 // if keepIndexNames is false, rewrite the .kibana_* index to .kibana_1 so that
                 // when it is loaded it can skip migration, if possible
-                index: index.startsWith('.kibana') && !keepIndexNames ? '.kibana_1' : index,
+                index:
+                  index.startsWith(MAIN_SAVED_OBJECT_INDEX) && !keepIndexNames
+                    ? `${MAIN_SAVED_OBJECT_INDEX}_1`
+                    : index,
                 settings,
                 mappings,
                 aliases,

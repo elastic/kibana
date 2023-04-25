@@ -37,7 +37,7 @@ import { convertToCaseUserWithProfileInfo } from '../../user_profiles/user_conve
 import type { UserActivityParams } from '../../user_actions_activity_bar/types';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { CaseViewTabs } from '../case_view_tabs';
-import { DescriptionWrapper } from '../../description/description_wrapper';
+import { Description } from '../../description';
 
 const buildUserProfilesMap = (users?: CaseUsers): Map<string, UserProfileWithAvatar> => {
   const userProfiles = new Map();
@@ -210,10 +210,9 @@ export const CaseViewActivity = ({
     <>
       <EuiFlexItem grow={6}>
         <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
-        <DescriptionWrapper
+        <Description
           isLoadingDescription={isLoadingDescription}
-          data={caseData}
-          userProfiles={userProfiles}
+          caseData={caseData}
           onUpdateField={onUpdateField}
         />
         <EuiSpacer size="l" />

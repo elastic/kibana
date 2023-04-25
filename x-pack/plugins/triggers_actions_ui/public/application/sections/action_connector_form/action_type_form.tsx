@@ -308,6 +308,7 @@ export const ActionTypeForm = ({
 
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
+  const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((atr) => atr.id);
 
   const showActionGroupErrorIcon = (): boolean => {
     return !isOpen && some(actionParamsErrors.errors, (error) => !isEmpty(error));
@@ -362,6 +363,7 @@ export const ActionTypeForm = ({
           }
         >
           <ConnectorsSelection
+            allowGroupConnector={allowGroupConnector}
             actionItem={actionItem}
             accordionIndex={index}
             actionTypesIndex={actionTypesIndex}

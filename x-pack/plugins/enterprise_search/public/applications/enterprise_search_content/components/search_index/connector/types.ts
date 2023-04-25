@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-export interface ConnectorDefinition {
+import { ConnectorServerSideDefinition } from '../../../../../../common/connectors/connectors';
+
+export interface ConnectorClientSideDefinition {
   docsUrl?: string;
   externalAuthDocsUrl?: string;
   externalDocsUrl: string;
   icon: string;
-  isBeta: boolean;
-  isNative: boolean;
-  name: string;
-  serviceType: string;
 }
+
+export type ConnectorDefinition = ConnectorClientSideDefinition & ConnectorServerSideDefinition;
