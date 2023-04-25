@@ -79,13 +79,19 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
       },
       autoRecoverAlerts: false,
       getViewInAppRelativeUrl: ({ rule, start, end }) => {
-        const {
-          schedule: { interval },
-        } = rule;
+        let startTime = null;
+        let endTime = null;
 
-        const isValidTimeBound = start && end;
-        const startTime = isValidTimeBound ? new Date(start).toISOString() : `now-${interval}`;
-        const endTime = isValidTimeBound ? new Date(end).toISOString() : 'now';
+        if (start && end) {
+          startTime = new Date(start).toISOString();
+          endTime = new Date(end).toISOString();
+        } else if (rule.schedule?.interval) {
+          startTime = `now-${rule.schedule?.interval}`;
+          endTime = 'now';
+        }
+        if (!startTime || !endTime) {
+          return '';
+        }
 
         const fromInMs = parseScheduleDates(startTime)?.format('x');
         const toInMs = parseScheduleDates(endTime)?.format('x');
