@@ -114,5 +114,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1024
       );
     });
+
+    it('rule conditions screenshots', async () => {
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.setValue('ruleSearchField', ruleName);
+      const actionPanel = await testSubjects.find('collapsedItemActions');
+      await actionPanel.click();
+      const editRuleMenu = await testSubjects.find('editRule');
+      await editRuleMenu.click();
+      await testSubjects.scrollIntoView('intervalInput');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await commonScreenshots.takeScreenshot(
+        'rule-flyout-rule-conditions',
+        screenshotDirectories,
+        1400,
+        1500
+      );
+    });
   });
 }

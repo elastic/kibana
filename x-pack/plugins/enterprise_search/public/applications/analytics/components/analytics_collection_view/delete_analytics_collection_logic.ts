@@ -48,7 +48,7 @@ export const DeleteAnalyticsCollectionLogic = kea<
       actions.makeRequest({ name });
     },
   }),
-  path: ['enterprise_search', 'analytics', 'collections', 'delete'],
+  path: ['enterprise_search', 'analytics', 'collection', 'delete'],
   selectors: ({ selectors }) => ({
     isLoading: [
       () => [selectors.status],

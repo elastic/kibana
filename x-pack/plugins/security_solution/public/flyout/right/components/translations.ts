@@ -101,9 +101,16 @@ export const HIGHLIGHTED_FIELDS_TITLE = i18n.translate(
   { defaultMessage: 'Highlighted fields' }
 );
 
+/* Insights section */
+
 export const ENTITIES_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.entitiesTitle',
   { defaultMessage: 'Entities' }
+);
+
+export const THREAT_INTELLIGENCE_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.threatIntelligenceTitle',
+  { defaultMessage: 'Threat Intelligence' }
 );
 
 export const INSIGHTS_TITLE = i18n.translate(
@@ -131,8 +138,59 @@ export const ENTITIES_TEXT = i18n.translate(
   }
 );
 
+export const THREAT_INTELLIGENCE_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligenceText',
+  {
+    defaultMessage: 'fields of threat intelligence',
+  }
+);
+
+export const THREAT_MATCH_DETECTED = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligence.threatMatch',
+  {
+    defaultMessage: `threat match detected`,
+  }
+);
+
+export const THREAT_MATCHES_DETECTED = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligence.threatMatches',
+  {
+    defaultMessage: `threat matches detected`,
+  }
+);
+
+export const THREAT_ENRICHMENT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligence.threatEnrichment',
+  {
+    defaultMessage: `field enriched with threat intelligence`,
+  }
+);
+
+export const THREAT_ENRICHMENTS = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligence.threatEnrichments',
+  {
+    defaultMessage: `fields enriched with threat intelligence`,
+  }
+);
+
 export const VIEW_ALL = (text: string) =>
   i18n.translate('xpack.securitySolution.flyout.documentDetails.overviewTab.viewAllButton', {
     values: { text },
     defaultMessage: 'View all {text}',
   });
+export const VISUALIZATIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.visualizationsTitle',
+  { defaultMessage: 'Visualizations' }
+);
+
+export const ANALYZER_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.analyzerPreviewTitle',
+  { defaultMessage: 'Analyzer preview' }
+);
+
+export const ANALYZER_PREVIEW_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.analyzerPreviewText',
+  {
+    defaultMessage: 'analyzer preview.',
+  }
+);

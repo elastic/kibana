@@ -14,8 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'home', 'maps']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/154913
-  describe.skip('Maps app Accessibility', () => {
+  describe('Maps app Accessibility', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
@@ -79,12 +78,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('full screen button should exist', async () => {
-      await testSubjects.click('mapsFullScreenMode');
+      await PageObjects.maps.existFullScreen();
       await a11y.testAppSnapshot();
     });
 
     it('displays exit full screen logo button', async () => {
-      await testSubjects.click('exitFullScreenModeButton');
+      await PageObjects.maps.enterFullScreen();
       await a11y.testAppSnapshot();
     });
 

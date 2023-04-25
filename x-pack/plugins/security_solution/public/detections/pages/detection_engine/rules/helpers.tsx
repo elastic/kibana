@@ -76,12 +76,11 @@ export const getActionsStepsData = (
     response_actions?: ResponseAction[];
   }
 ): ActionsStepRule => {
-  const { enabled, throttle, meta, actions = [], response_actions: responseActions } = rule;
+  const { enabled, meta, actions = [], response_actions: responseActions } = rule;
 
   return {
     actions: actions?.map(transformRuleToAlertAction),
     responseActions: responseActions?.map(transformRuleToAlertResponseAction),
-    throttle,
     kibanaSiemAppUrl: meta?.kibana_siem_app_url,
     enabled,
   };

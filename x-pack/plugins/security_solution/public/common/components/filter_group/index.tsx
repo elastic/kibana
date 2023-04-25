@@ -9,12 +9,12 @@ import type { Filter } from '@kbn/es-query';
 import type { ControlPanelState, OptionsListEmbeddableInput } from '@kbn/controls-plugin/common';
 import type {
   ControlGroupInput,
-  controlGroupInputBuilder,
+  ControlGroupInputBuilder,
   ControlGroupOutput,
   ControlGroupContainer,
   ControlGroupRendererProps,
 } from '@kbn/controls-plugin/public';
-import { LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -22,7 +22,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import { cloneDeep, debounce, isEqual } from 'lodash';
-import { withSuspense } from '@kbn/shared-ux-utility';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import type { FilterGroupProps, FilterItemObj } from './types';
@@ -39,10 +38,6 @@ import { getFilterItemObjListFromControlInput } from './utils';
 import { FiltersChangedBanner } from './filters_changed_banner';
 import { FilterGroupContext } from './filter_group_context';
 import { NUM_OF_CONTROLS } from './config';
-
-type ControlGroupBuilder = typeof controlGroupInputBuilder;
-
-const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 const FilterWrapper = styled.div.attrs((props) => ({
   className: props.className,
@@ -197,6 +192,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const onControlGroupLoadHandler = useCallback(
     (controlGroupContainer: ControlGroupContainer) => {
+      if (!controlGroupContainer) return;
       if (onInit) onInit(controlGroupContainer);
       setControlGroup(controlGroupContainer);
     },
@@ -264,7 +260,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
     async (
       defaultInput: Partial<ControlGroupInput>,
-      { addOptionsListControl }: ControlGroupBuilder
+      { addOptionsListControl }: ControlGroupInputBuilder
     ) => {
       const initialInput: Partial<ControlGroupInput> = {
         ...defaultInput,
@@ -406,7 +402,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
           {Array.isArray(initialUrlParam) ? (
             <EuiFlexItem grow={true} data-test-subj="filter_group__items">
               <ControlGroupRenderer
-                onLoadComplete={onControlGroupLoadHandler}
+                ref={onControlGroupLoadHandler}
                 getCreationOptions={getCreationOptions}
               />
               {!controlGroup ? <FilterGroupLoading /> : null}

@@ -1229,7 +1229,7 @@
             "section": "def-common.SortColumnTable",
             "text": "SortColumnTable"
           },
-          "[]; readonly title: string; readonly filters?: ",
+          "[]; readonly title: string; readonly isLoading: boolean; readonly filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1251,7 +1251,7 @@
             "section": "def-common.IFieldSubType",
             "text": "IFieldSubType"
           },
-          " | undefined; type?: string | undefined; })[]; readonly isLoading: boolean; readonly viewMode: ",
+          " | undefined; type?: string | undefined; })[]; readonly viewMode: ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
             "scope": "common",

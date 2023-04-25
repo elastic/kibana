@@ -7,7 +7,7 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { cloneDeep, omit } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import {
@@ -68,6 +68,8 @@ import {
   RulesClientContext,
   NormalizedAlertActionWithGeneratedValues,
 } from '../types';
+
+import { migrateLegacyActions } from '../lib';
 
 export type BulkEditFields = keyof Pick<
   Rule,
@@ -449,6 +451,19 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
 
     await ensureAuthorizationForBulkUpdate(context, operations, rule);
 
+    // migrate legacy actions only for SIEM rules
+    const migratedActions = await migrateLegacyActions(context, {
+      ruleId: rule.id,
+      actions: rule.attributes.actions,
+      references: rule.references,
+      attributes: rule.attributes,
+    });
+
+    if (migratedActions.hasLegacyActions) {
+      rule.attributes.actions = migratedActions.resultedActions;
+      rule.references = migratedActions.resultedReferences;
+    }
+
     const { attributes, ruleActions, hasUpdateApiKeyOperation, isAttributesUpdateSkipped } =
       await getUpdatedAttributesFromOperations(context, operations, rule, ruleType);
 
@@ -488,11 +503,11 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
     }
 
     // validate rule params
-    const validatedAlertTypeParams = validateRuleTypeParams(ruleParams, ruleType.validate?.params);
+    const validatedAlertTypeParams = validateRuleTypeParams(ruleParams, ruleType.validate.params);
     const validatedMutatedAlertTypeParams = validateMutatedRuleTypeParams(
       validatedAlertTypeParams,
       rule.attributes.params,
-      ruleType.validate?.params
+      ruleType.validate.params
     );
 
     const {
@@ -621,17 +636,6 @@ async function getUpdatedAttributesFromOperations(
         if (isAttributeModified) {
           ruleActions = modifiedAttributes;
           isAttributesUpdateSkipped = false;
-        }
-
-        // TODO https://github.com/elastic/kibana/issues/148414
-        // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
-        const firstFrequency = updatedOperation.value[0]?.frequency;
-        if (rule.attributes.consumer === AlertConsumers.SIEM && firstFrequency) {
-          ruleActions.actions = ruleActions.actions.map((action) => omit(action, 'frequency'));
-          if (!attributes.notifyWhen) {
-            attributes.notifyWhen = firstFrequency.notifyWhen;
-            attributes.throttle = firstFrequency.throttle;
-          }
         }
 
         break;

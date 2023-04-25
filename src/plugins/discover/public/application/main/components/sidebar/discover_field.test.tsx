@@ -7,7 +7,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { EuiPopover, EuiProgress, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiProgress } from '@elastic/eui';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -23,6 +23,7 @@ import { DataDocuments$ } from '../../services/discover_data_state_container';
 import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
 import * as DetailsUtil from './deprecated_stats/get_details';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { FieldItemButton } from '@kbn/unified-field-list-plugin/public';
 
 jest.spyOn(DetailsUtil, 'getDetails');
 
@@ -97,7 +98,10 @@ async function getComponent({
     onEditField: jest.fn(),
     onRemoveField: jest.fn(),
     showFieldStats,
-    selected,
+    isSelected: selected,
+    isEmpty: false,
+    groupIndex: 1,
+    itemIndex: 0,
     contextualFields: [],
   };
   const services = {
@@ -206,7 +210,7 @@ describe('discover sidebar field', function () {
     findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
     expect(DetailsUtil.getDetails).toHaveBeenCalledTimes(1);
   });
-  it('should not return the popover if onAddFilter is not provided', async function () {
+  it('should not enable the popover if onAddFilter is not provided', async function () {
     const field = new DataViewField({
       name: '_source',
       type: '_source',
@@ -220,8 +224,8 @@ describe('discover sidebar field', function () {
       field,
       onAddFilterExists: false,
     });
-    const popover = findTestSubject(comp, 'discoverFieldListPanelPopover');
-    expect(popover.length).toBe(0);
+
+    expect(comp.find(FieldItemButton).prop('onClick')).toBeUndefined();
   });
   it('should request field stats', async function () {
     const field = new DataViewField({

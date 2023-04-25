@@ -11,6 +11,7 @@ import {
   testGuideStep1ActiveState,
   testGuideNotActiveState,
   mockPluginStateNotStarted,
+  testGuideParams,
 } from '@kbn/guided-onboarding-plugin/public/services/api.mocks';
 import {
   guideStateSavedObjectsType,
@@ -109,6 +110,20 @@ export default function testGetState({ getService }: FtrProviderContext) {
       const response = await supertest.get(getStatePath).expect(200);
       expect(response.body.pluginState).not.to.be.empty();
       expect(response.body.pluginState.isActivePeriod).to.eql(true);
+    });
+
+    it('returns the dynamic params', async () => {
+      // Create an active guide
+      await createGuides(kibanaServer, [{ ...testGuideStep1ActiveState, params: testGuideParams }]);
+
+      // Create a plugin state
+      await createPluginState(kibanaServer, {
+        status: 'in_progress',
+        creationDate: new Date().toISOString(),
+      });
+
+      const response = await supertest.get(getStatePath).expect(200);
+      expect(response.body.pluginState.activeGuide.params).to.eql(testGuideParams);
     });
   });
 }

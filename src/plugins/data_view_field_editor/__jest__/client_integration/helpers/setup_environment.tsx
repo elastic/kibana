@@ -149,7 +149,7 @@ export const WithFieldEditorDependencies =
     };
 
     const mergedDependencies = merge({}, dependencies, overridingDependencies);
-    const previewController = new PreviewController({ dataView, search });
+    const previewController = new PreviewController({ dataView, search, fieldFormats });
 
     return (
       <FieldEditorProvider {...mergedDependencies}>

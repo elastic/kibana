@@ -118,6 +118,96 @@ export async function generateMobileData({
       carrierMCC: '440',
     });
 
+  const pixel7 = apm
+    .mobileApp({
+      name: 'synth-android',
+      environment: 'production',
+      agentName: 'android/java',
+    })
+    .mobileDevice({ serviceVersion: '2.3' })
+    .deviceInfo({
+      manufacturer: 'Google',
+      modelIdentifier: 'Pixel 7',
+      modelName: 'Pixel 7',
+    })
+    .osInfo({
+      osType: 'android',
+      osVersion: '10',
+      osFull: 'Android 10, API level 29, BUILD A022MUBU2AUD1',
+      runtimeVersion: '2.1.0',
+    })
+    .setGeoInfo({
+      clientIp: '223.72.43.22',
+      cityName: 'Beijing',
+      continentName: 'Asia',
+      countryIsoCode: 'CN',
+      countryName: 'China',
+      regionIsoCode: 'CN-BJ',
+      regionName: 'Beijing',
+      location: { coordinates: [116.3861, 39.9143], type: 'Point' },
+    })
+    .setNetworkConnection({ type: 'wifi' });
+
+  const pixel7Pro = apm
+    .mobileApp({
+      name: 'synth-android',
+      environment: 'production',
+      agentName: 'android/java',
+    })
+    .mobileDevice({ serviceVersion: '2.3' })
+    .deviceInfo({
+      manufacturer: 'Google',
+      modelIdentifier: 'Pixel 7 Pro',
+      modelName: 'Pixel 7 Pro',
+    })
+    .osInfo({
+      osType: 'android',
+      osVersion: '10',
+      osFull: 'Android 10, API level 29, BUILD A022MUBU2AUD1',
+      runtimeVersion: '2.1.0',
+    })
+    .setGeoInfo({
+      clientIp: '223.72.43.22',
+      cityName: 'Beijing',
+      continentName: 'Asia',
+      countryIsoCode: 'CN',
+      countryName: 'China',
+      regionIsoCode: 'CN-BJ',
+      regionName: 'Beijing',
+      location: { coordinates: [116.3861, 39.9143], type: 'Point' },
+    })
+    .setNetworkConnection({ type: 'wifi' });
+
+  const pixel8 = apm
+    .mobileApp({
+      name: 'synth-android',
+      environment: 'production',
+      agentName: 'android/java',
+    })
+    .mobileDevice({ serviceVersion: '2.3' })
+    .deviceInfo({
+      manufacturer: 'Google',
+      modelIdentifier: 'Pixel 8',
+      modelName: 'Pixel 8',
+    })
+    .osInfo({
+      osType: 'android',
+      osVersion: '10',
+      osFull: 'Android 10, API level 29, BUILD A022MUBU2AUD1',
+      runtimeVersion: '2.1.0',
+    })
+    .setGeoInfo({
+      clientIp: '223.72.43.22',
+      cityName: 'Beijing',
+      continentName: 'Asia',
+      countryIsoCode: 'CN',
+      countryName: 'China',
+      regionIsoCode: 'CN-BJ',
+      regionName: 'Beijing',
+      location: { coordinates: [116.3861, 39.9143], type: 'Point' },
+    })
+    .setNetworkConnection({ type: 'wifi' });
+
   return await synthtraceEsClient.index([
     timerange(start, end)
       .interval('5m')
@@ -126,6 +216,9 @@ export async function generateMobileData({
         galaxy10.startNewSession();
         galaxy7.startNewSession();
         huaweiP2.startNewSession();
+        pixel7.startNewSession();
+        pixel7Pro.startNewSession();
+        pixel8.startNewSession();
         return [
           galaxy10
             .transaction('Start View - View Appearing', 'Android Activity')
@@ -215,6 +308,87 @@ export async function generateMobileData({
                 .success()
                 .timestamp(timestamp + 20),
               galaxy7
+                .httpSpan({
+                  spanName: 'GET backend:1234',
+                  httpMethod: 'GET',
+                  httpUrl: 'https://backend:1234/api/start',
+                })
+                .duration(800)
+                .success()
+                .timestamp(timestamp + 400)
+            ),
+          pixel7
+            .transaction('Start View - View Appearing', 'Android Activity')
+            .timestamp(timestamp)
+            .duration(20)
+            .success()
+            .children(
+              pixel7
+                .span({
+                  spanName: 'onCreate',
+                  spanType: 'app',
+                  spanSubtype: 'external',
+                  'service.target.type': 'http',
+                  'span.destination.service.resource': 'external',
+                })
+                .duration(50)
+                .success()
+                .timestamp(timestamp + 20),
+              pixel7
+                .httpSpan({
+                  spanName: 'GET backend:1234',
+                  httpMethod: 'GET',
+                  httpUrl: 'https://backend:1234/api/start',
+                })
+                .duration(800)
+                .success()
+                .timestamp(timestamp + 400)
+            ),
+          pixel8
+            .transaction('Start View - View Appearing', 'Android Activity')
+            .timestamp(timestamp)
+            .duration(20)
+            .success()
+            .children(
+              pixel8
+                .span({
+                  spanName: 'onCreate',
+                  spanType: 'app',
+                  spanSubtype: 'external',
+                  'service.target.type': 'http',
+                  'span.destination.service.resource': 'external',
+                })
+                .duration(50)
+                .success()
+                .timestamp(timestamp + 20),
+              pixel8
+                .httpSpan({
+                  spanName: 'GET backend:1234',
+                  httpMethod: 'GET',
+                  httpUrl: 'https://backend:1234/api/start',
+                })
+                .duration(800)
+                .success()
+                .timestamp(timestamp + 400)
+            ),
+          pixel7Pro
+            .transaction('Start View - View Appearing', 'Android Activity')
+            .timestamp(timestamp)
+            .duration(20)
+            .success()
+            .children(
+              pixel7Pro
+                .span({
+                  spanName: 'onCreate',
+                  spanType: 'app',
+                  spanSubtype: 'external',
+                  'service.target.type': 'http',
+                  'span.destination.service.resource': 'external',
+                })
+                .duration(50)
+                .success()
+                .timestamp(timestamp + 20),
+              pixel7Pro
                 .httpSpan({
                   spanName: 'GET backend:1234',
                   httpMethod: 'GET',

@@ -1,23 +1,16 @@
 {
   "description": "Security: Packetbeat - Looks for unusual HTTP user agent activity that could indicate execution, persistence, command-and-control or data exfiltration activity.",
-  "groups": [
-    "security",
-    "packetbeat",
-    "web"
-  ],
+  "groups": ["security", "packetbeat"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare by \"user_agent.original\"",
+        "detector_description": "Detects rare web user agents.",
         "function": "rare",
         "by_field_name": "user_agent.original"
       }
     ],
-    "influencers": [
-      "host.name",
-      "destination.ip"
-    ]
+    "influencers": ["host.name", "destination.ip"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -28,12 +21,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-packetbeat",
-    "custom_urls": [
-      {
-        "url_name": "Host Details",
-        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
-      }
-    ],
-    "security_app_display_name": "Unusual Web User Agent"
+    "security_app_display_name": "Unusual Web User Agent",
+    "managed": true,
+    "job_revision": 4
   }
 }

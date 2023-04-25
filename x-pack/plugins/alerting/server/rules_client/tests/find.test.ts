@@ -19,6 +19,15 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
+import { schema } from '@kbn/config-schema';
+import { enabledRule1, enabledRule2, siemRule1, siemRule2 } from './test_helpers';
+import { formatLegacyActions } from '../lib';
+
+jest.mock('../lib/siem_legacy_actions/format_legacy_actions', () => {
+  return {
+    formatLegacyActions: jest.fn(),
+  };
+});
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -362,6 +371,9 @@ describe('find()', () => {
         return { state: {} };
       },
       producer: 'myApp',
+      validate: {
+        params: schema.any(),
+      },
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
@@ -378,6 +390,9 @@ describe('find()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
+      },
+      validate: {
+        params: schema.any(),
       },
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({
@@ -562,6 +577,9 @@ describe('find()', () => {
         return { state: {} };
       },
       producer: 'myApp',
+      validate: {
+        params: schema.any(),
+      },
     }));
     ruleTypeRegistry.get.mockImplementationOnce(() => ({
       id: '123',
@@ -578,6 +596,9 @@ describe('find()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
+      },
+      validate: {
+        params: schema.any(),
       },
     }));
     unsecuredSavedObjectsClient.find.mockResolvedValue({
@@ -804,6 +825,41 @@ describe('find()', () => {
           },
         })
       );
+    });
+  });
+
+  describe('legacy actions migration for SIEM', () => {
+    test('should call migrateLegacyActions', async () => {
+      const rulesClient = new RulesClient(rulesClientParams);
+
+      (formatLegacyActions as jest.Mock).mockResolvedValueOnce([
+        { ...siemRule1, migrated: true },
+        { ...siemRule2, migrated: true },
+      ]);
+
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [enabledRule1, enabledRule2, siemRule1, siemRule2].map((r) => ({
+          ...r,
+          score: 1,
+        })),
+      });
+
+      const result = await rulesClient.find({ options: {} });
+
+      expect(formatLegacyActions).toHaveBeenCalledTimes(1);
+      expect(formatLegacyActions).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({ id: siemRule1.id }),
+          expect.objectContaining({ id: siemRule2.id }),
+        ],
+        expect.any(Object)
+      );
+      expect(result.data[2]).toEqual(expect.objectContaining({ id: siemRule1.id, migrated: true }));
+      expect(result.data[3]).toEqual(expect.objectContaining({ id: siemRule2.id, migrated: true }));
     });
   });
 });

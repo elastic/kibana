@@ -1543,10 +1543,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@77.0.0":
-  version "77.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-77.0.0.tgz#931bb7f8a109b571dedefe481ccf41a9229a6286"
-  integrity sha512-4RV6GxSFFWGEZtUkLpZWQrwTdEVMq/hmicSZiCpvJUnilLmhfnNEGqCn5Qu8g/OOb5AL3XayfytWMiiaJ9Yw+g==
+"@elastic/eui@77.1.1":
+  version "77.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-77.1.1.tgz#82f4294bf3239d5d825c1d939c49d125bfdbeb72"
+  integrity sha512-guJmHoGDbvKh/738taKDZGSdNk+OXMse513oPaPf4NoXpQUeYvl3gLT50mX5J4nwILS1LFKNGrbU2Es77HM1cQ==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -3077,6 +3077,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-utils@link:packages/kbn-content-management-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/controls-example-plugin@link:examples/controls_example":
   version "0.0.0"
   uid ""
@@ -4545,6 +4549,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-error-utils@link:x-pack/packages/ml/error_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-is-defined@link:x-pack/packages/ml/is_defined":
   version "0.0.0"
   uid ""
@@ -5454,6 +5462,10 @@
   uid ""
 
 "@kbn/url-forwarding-plugin@link:src/plugins/url_forwarding":
+  version "0.0.0"
+  uid ""
+
+"@kbn/url-state@link:packages/kbn-url-state":
   version "0.0.0"
   uid ""
 
@@ -10050,10 +10062,10 @@ ajv@^6.1.0, ajv@^6.10.0, ajv@^6.10.2, ajv@^6.11.0, ajv@^6.12.2, ajv@^6.12.4, ajv
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-ajv@^8.0.0, ajv@^8.0.1, ajv@^8.11.0, ajv@^8.8.0:
-  version "8.11.0"
-  resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.11.0.tgz#977e91dd96ca669f54a11e23e378e33b884a565f"
-  integrity sha512-wGgprdCvMalC0BztXvitD2hC04YffAvtsUn93JbGXYLAtCUO4xd17mCCZQxUOItiBwZvJScWo8NIvQMQ71rdpg==
+ajv@^8.0.0, ajv@^8.0.1, ajv@^8.12.0, ajv@^8.8.0:
+  version "8.12.0"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.12.0.tgz#d1a0527323e22f53562c567c00991577dfbe19d1"
+  integrity sha512-sRu1kpcO9yLtYxBKvqfTeh9KzZEwO3STyX1HT+4CaDzC6HpTGYhIhPIzj9XuKU7KYDwnaeh5hcOwjy1QuJzBPA==
   dependencies:
     fast-deep-equal "^3.1.1"
     json-schema-traverse "^1.0.0"
@@ -22312,7 +22324,7 @@ p-limit@^1.1.0:
   dependencies:
     p-try "^1.0.0"
 
-p-limit@^2.0.0, p-limit@^2.2.0, p-limit@^2.3.0:
+p-limit@^2.0.0, p-limit@^2.2.0, p-limit@^2.2.2, p-limit@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/p-limit/-/p-limit-2.3.0.tgz#3dd33c647a214fdfffd835933eb086da0dc21db1"
   integrity sha512-//88mFWSJx8lxCzwdAABTJL2MyWB12+eIY7MDL2SqLmAkeKU9qxRvWuSyTjm3FUmpBEMuFfckAIqEaVGUDxb6w==
@@ -22373,6 +22385,11 @@ p-map@^4.0.0:
   dependencies:
     aggregate-error "^3.0.0"
 
+p-reflect@2.1.0, p-reflect@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/p-reflect/-/p-reflect-2.1.0.tgz#5d67c7b3c577c4e780b9451fc9129675bd99fe67"
+  integrity sha512-paHV8NUz8zDHu5lhr/ngGWQiW067DK/+IbJ+RfZ4k+s8y4EKyYCz8pGYWjxCg35eHztpJAt+NUgvN4L+GCbPlg==
+
 p-retry@^4.2.0, p-retry@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/p-retry/-/p-retry-4.5.0.tgz#6685336b3672f9ee8174d3769a660cb5e488521d"
@@ -22380,6 +22397,14 @@ p-retry@^4.2.0, p-retry@^4.5.0:
   dependencies:
     "@types/retry" "^0.12.0"
     retry "^0.12.0"
+
+p-settle@4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/p-settle/-/p-settle-4.1.1.tgz#37fbceb2b02c9efc28658fc8d36949922266035f"
+  integrity sha512-6THGh13mt3gypcNMm0ADqVNCcYa3BK6DWsuJWFCuEKP1rpY+OKGp7gaZwVmLspmic01+fsg/fN57MfvDzZ/PuQ==
+  dependencies:
+    p-limit "^2.2.2"
+    p-reflect "^2.1.0"
 
 p-timeout@^2.0.1:
   version "2.0.1"

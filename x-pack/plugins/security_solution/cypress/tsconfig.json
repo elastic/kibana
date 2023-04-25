@@ -28,6 +28,7 @@
       "force": true
     },
     "@kbn/rison",
-    "@kbn/datemath"
+    "@kbn/datemath",
+    "@kbn/alerting-plugin"
   ]
 }

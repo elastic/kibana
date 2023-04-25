@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EuiButton,
   EuiSpacer,
@@ -21,14 +23,18 @@ import {
 import { Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUrlState } from '@kbn/ml-url-state';
+import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
 import type { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import {
+  getDefaultAiOpsListState,
+  isFullAiOpsListState,
+  type AiOpsPageUrlState,
+} from '../../application/utils/url_state';
 
-import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import { SearchPanel } from '../search_panel';
 import { PageHeader } from '../page_header';
 
@@ -47,7 +53,10 @@ export const LogCategorizationPage: FC = () => {
   const { dataView, savedSearch } = useDataSource();
 
   const { runCategorizeRequest, cancelRequest } = useCategorizeRequest();
-  const [aiopsListState, setAiopsListState] = useState(restorableDefaults);
+  const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
+    'AIOPS_INDEX_VIEWER',
+    getDefaultAiOpsListState()
+  );
   const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedField, setSelectedField] = useState<string | undefined>();
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -76,7 +85,7 @@ export const LogCategorizationPage: FC = () => {
 
   const setSearchParams = useCallback(
     (searchParams: {
-      searchQuery: Query['query'];
+      searchQuery: estypes.QueryDslQueryContainer;
       searchString: Query['query'];
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
@@ -111,6 +120,7 @@ export const LogCategorizationPage: FC = () => {
     { selectedDataView: dataView, selectedSavedSearch },
     aiopsListState,
     setGlobalState,
+    'log_categorization',
     undefined,
     undefined,
     BAR_TARGET
@@ -288,7 +298,10 @@ export const LogCategorizationPage: FC = () => {
         fieldSelected={selectedField !== null}
       />
 
-      {selectedField !== undefined && categories !== null && categories.length > 0 ? (
+      {selectedField !== undefined &&
+      categories !== null &&
+      categories.length > 0 &&
+      isFullAiOpsListState(aiopsListState) ? (
         <CategoryTable
           categories={categories}
           aiopsListState={aiopsListState}

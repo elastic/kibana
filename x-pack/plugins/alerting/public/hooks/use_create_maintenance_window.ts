@@ -23,12 +23,12 @@ export function useCreateMaintenanceWindow() {
   };
 
   return useMutation(mutationFn, {
-    onSuccess: (variables: MaintenanceWindow) => {
+    onSuccess: (data) => {
       toasts.addSuccess(
         i18n.translate('xpack.alerting.maintenanceWindowsCreateSuccess', {
           defaultMessage: "Created maintenance window '{title}'",
           values: {
-            title: variables.title,
+            title: data.title,
           },
         })
       );

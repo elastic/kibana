@@ -23,9 +23,11 @@ import { safeLoad } from 'js-yaml';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { type AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import pMap from 'p-map';
+
+import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
   packageToPackagePolicy,
@@ -128,6 +130,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options: {
+      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
@@ -144,6 +147,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Ensure an ID is provided, so we can include it in the audit logs below
     if (!options.id) {
       options.id = SavedObjectsUtils.generateId();
+    }
+
+    let authorizationHeader = options.authorizationHeader;
+
+    if (!authorizationHeader && request) {
+      authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     }
 
     auditLoggingService.writeCustomSoAuditLog({
@@ -200,6 +209,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           pkgName: enrichedPackagePolicy.package.name,
           pkgVersion: enrichedPackagePolicy.package.version,
           force: options?.force,
+          authorizationHeader,
         });
       }
 
@@ -1606,6 +1616,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options?: {
+      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;

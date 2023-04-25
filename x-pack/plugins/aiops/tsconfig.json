@@ -34,7 +34,6 @@
     "@kbn/ui-theme",
     "@kbn/i18n-react",
     "@kbn/rison",
-    "@kbn/core-http-browser",
     "@kbn/aiops-components",
     "@kbn/aiops-utils",
     "@kbn/licensing-plugin",
@@ -51,6 +50,8 @@
     "@kbn/ml-route-utils",
     "@kbn/unified-field-list-plugin",
     "@kbn/ml-random-sampler-utils",
+    "@kbn/utility-types",
+    "@kbn/ml-error-utils",
   ],
   "exclude": [
     "target/**/*",

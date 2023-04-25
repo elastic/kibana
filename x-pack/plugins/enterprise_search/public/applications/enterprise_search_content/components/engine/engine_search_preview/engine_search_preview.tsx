@@ -87,6 +87,10 @@ class InternalEngineTransporter implements Transporter {
   }
 }
 
+const pageTitle = i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.pageTitle', {
+  defaultMessage: 'Search Preview',
+});
+
 export const EngineSearchPreview: React.FC = () => {
   const { http } = useValues(HttpLogic);
   const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);
@@ -114,13 +118,11 @@ export const EngineSearchPreview: React.FC = () => {
 
   return (
     <EnterpriseSearchEnginesPageTemplate
-      pageChrome={[engineName]}
+      pageChrome={[engineName, pageTitle]}
       pageViewTelemetry={EngineViewTabs.PREVIEW}
       isLoading={isLoadingEngine}
       pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.pageTitle', {
-          defaultMessage: 'Search Preview',
-        }),
+        pageTitle,
         rightSideItems: [
           <>
             <EuiButton

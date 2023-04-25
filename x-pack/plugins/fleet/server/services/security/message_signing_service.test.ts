@@ -153,7 +153,8 @@ describe('MessageSigningService', () => {
         MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
         keyPairObj.id,
         {
-          passphrase: expect.any(String),
+          ...keyPairObj.attributes,
+          passphrase: keyPairObj.attributes.passphrase_plain,
           passphrase_plain: '',
         }
       );

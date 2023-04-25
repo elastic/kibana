@@ -37,7 +37,7 @@ describe('getMetricFields', () => {
     });
     const metrics = source.getMetricFields();
     expect(metrics[0].getName()).toEqual('__kbnjoin__count__1234');
-    expect(await metrics[0].getLabel()).toEqual('Count of foobar');
+    expect(await metrics[0].getLabel()).toEqual('count of foobar');
   });
 
   it('should override name and label of sum metric', async () => {
@@ -51,7 +51,7 @@ describe('getMetricFields', () => {
     expect(metrics[0].getName()).toEqual('__kbnjoin__sum_of_myFieldGettingSummed__1234');
     expect(await metrics[0].getLabel()).toEqual('my custom label');
     expect(metrics[1].getName()).toEqual('__kbnjoin__count__1234');
-    expect(await metrics[1].getLabel()).toEqual('Count of foobar');
+    expect(await metrics[1].getLabel()).toEqual('count of foobar');
   });
 });
 

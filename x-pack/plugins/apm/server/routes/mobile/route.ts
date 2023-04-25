@@ -26,6 +26,15 @@ import {
   getMobileTermsByField,
   MobileTermsByFieldResponse,
 } from './get_mobile_terms_by_field';
+import {
+  getMobileMostUsedCharts,
+  MobileMostUsedChartResponse,
+} from './get_mobile_most_used_charts/get_device_os_app_charts';
+import {
+  getMobileMostUsedNCTCharts,
+  MobileMostUsedNCTChartResponse,
+} from './get_mobile_most_used_charts/get_nct_chart';
+import { MobilePropertyType } from '../../../common/mobile_types';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -63,6 +72,60 @@ const mobileFiltersRoute = createApmServerRoute({
       apmEventClient,
     });
     return { mobileFilters: filters };
+  },
+});
+
+const mobileChartsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/most_used_charts',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      environmentRt,
+      t.partial({
+        transactionType: t.string,
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    mostUsedCharts: Array<{
+      key: MobilePropertyType;
+      options: MobileMostUsedChartResponse[number]['options'] &
+        MobileMostUsedNCTChartResponse['options'];
+    }>;
+  }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { kuery, environment, start, end, transactionType } = params.query;
+
+    const [deviceOsAndAppVersionChart, nctChart] = await Promise.all([
+      getMobileMostUsedCharts({
+        kuery,
+        environment,
+        transactionType,
+        start,
+        end,
+        serviceName,
+        apmEventClient,
+      }),
+      getMobileMostUsedNCTCharts({
+        kuery,
+        environment,
+        start,
+        end,
+        serviceName,
+        apmEventClient,
+      }),
+    ]);
+
+    return { mostUsedCharts: [...deviceOsAndAppVersionChart, nctChart] };
   },
 });
 
@@ -268,6 +331,7 @@ const mobileTermsByFieldRoute = createApmServerRoute({
 
 export const mobileRouteRepository = {
   ...mobileFiltersRoute,
+  ...mobileChartsRoute,
   ...sessionsChartRoute,
   ...httpRequestsChartRoute,
   ...mobileStatsRoute,

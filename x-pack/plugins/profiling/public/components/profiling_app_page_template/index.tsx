@@ -39,10 +39,10 @@ export function ProfilingAppPageTemplate({
   pageTitle?: React.ReactNode;
 }) {
   const {
-    start: { observability },
+    start: { observabilityShared },
   } = useProfilingDependencies();
 
-  const { PageTemplate: ObservabilityPageTemplate } = observability.navigation;
+  const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
 
   const history = useHistory();
 

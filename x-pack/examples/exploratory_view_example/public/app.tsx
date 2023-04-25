@@ -28,7 +28,7 @@ export const App = (props: {
   plugins: StartDependencies;
   defaultIndexPattern: DataView | null;
 }) => {
-  const ExploratoryViewComponent = props.plugins.observability.ExploratoryViewEmbeddable;
+  const ExploratoryViewComponent = props.plugins.exploratoryView.ExploratoryViewEmbeddable;
 
   const seriesList: AllSeries = [
     {

@@ -54,6 +54,11 @@ export const StdErrorLogs = ({
       render: (date: string) => formatDate(date, 'dateTime'),
     },
     {
+      field: 'synthetics.type',
+      name: TYPE_LABEL,
+      sortable: true,
+    },
+    {
       field: 'synthetics.payload.message',
       name: 'Message',
       render: (message: string) => (
@@ -68,10 +73,10 @@ export const StdErrorLogs = ({
 
   const { items, loading } = useStdErrorLogs({ monitorId, checkGroup });
 
-  const { discover, observability } = useKibana<ClientPluginsStart>().services;
+  const { discover, exploratoryView } = useKibana<ClientPluginsStart>().services;
 
   const { data: discoverLink } = useFetcher(async () => {
-    const dataView = await observability.getAppDataView('synthetics', SYNTHETICS_INDEX_PATTERN);
+    const dataView = await exploratoryView.getAppDataView('synthetics', SYNTHETICS_INDEX_PATTERN);
     return discover.locator?.getUrl({
       query: { language: 'kuery', query: `monitor.check_group: ${checkGroup}` },
       indexPatternId: dataView?.id,
@@ -144,6 +149,10 @@ export const StdErrorLogs = ({
 
 export const TIMESTAMP_LABEL = i18n.translate('xpack.synthetics.monitorList.timestamp', {
   defaultMessage: 'Timestamp',
+});
+
+export const TYPE_LABEL = i18n.translate('xpack.synthetics.monitorList.type', {
+  defaultMessage: 'Type',
 });
 
 export const ERROR_SUMMARY_LABEL = i18n.translate('xpack.synthetics.monitorList.errorSummary', {

@@ -337,7 +337,7 @@ export const validatePackagePolicyConfig = (
     }
   }
 
-  if (varDef.type === 'select' && parsedValue) {
+  if (varDef.type === 'select' && parsedValue !== undefined) {
     if (!varDef.options?.map((o) => o.value).includes(parsedValue)) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidSelectValueErrorMessage', {

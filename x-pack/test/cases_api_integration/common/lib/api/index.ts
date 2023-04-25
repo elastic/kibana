@@ -10,15 +10,20 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
 import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 
 import type SuperTest from 'supertest';
 import {
   CASES_INTERNAL_URL,
   CASES_URL,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_CONFIGURE_SAVED_OBJECT,
   CASE_CONFIGURE_URL,
   CASE_REPORTERS_URL,
+  CASE_SAVED_OBJECT,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
+  CASE_USER_ACTION_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
 import {
   CasesConfigureResponse,
@@ -190,7 +195,7 @@ export const deleteAllCaseItems = async (es: Client) => {
 
 export const deleteCasesUserActions = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     q: 'type:cases-user-actions',
     wait_for_completion: true,
     refresh: true,
@@ -201,7 +206,7 @@ export const deleteCasesUserActions = async (es: Client): Promise<void> => {
 
 export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     q: 'type:cases',
     wait_for_completion: true,
     refresh: true,
@@ -212,7 +217,7 @@ export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
 
 export const deleteComments = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     q: 'type:cases-comments',
     wait_for_completion: true,
     refresh: true,
@@ -223,7 +228,7 @@ export const deleteComments = async (es: Client): Promise<void> => {
 
 export const deleteConfiguration = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     q: 'type:cases-configure',
     wait_for_completion: true,
     refresh: true,
@@ -234,7 +239,7 @@ export const deleteConfiguration = async (es: Client): Promise<void> => {
 
 export const deleteMappings = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.kibana',
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     q: 'type:cases-connector-mappings',
     wait_for_completion: true,
     refresh: true,
@@ -289,7 +294,7 @@ export const getConnectorMappingsFromES = async ({ es }: { es: Client }) => {
     unknown
   > = await es.search(
     {
-      index: '.kibana',
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
       body: {
         query: {
           term: {
@@ -319,12 +324,12 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: Client }) => 
     unknown
   > = await es.search(
     {
-      index: '.kibana',
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
       body: {
         query: {
           term: {
             type: {
-              value: 'cases-configure',
+              value: CASE_CONFIGURE_SAVED_OBJECT,
             },
           },
         },
@@ -337,17 +342,17 @@ export const getConfigureSavedObjectsFromES = async ({ es }: { es: Client }) => 
 };
 
 export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
-  const configure: TransportResult<
+  const cases: TransportResult<
     estypes.SearchResponse<{ cases: ESCaseAttributes }>,
     unknown
   > = await es.search(
     {
-      index: '.kibana',
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
       body: {
         query: {
           term: {
             type: {
-              value: 'cases',
+              value: CASE_SAVED_OBJECT,
             },
           },
         },
@@ -356,7 +361,53 @@ export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
     { meta: true }
   );
 
-  return configure;
+  return cases;
+};
+
+export const getCaseCommentSavedObjectsFromES = async ({ es }: { es: Client }) => {
+  const comments: TransportResult<
+    estypes.SearchResponse<{ ['cases-comments']: ESCaseAttributes }>,
+    unknown
+  > = await es.search(
+    {
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      body: {
+        query: {
+          term: {
+            type: {
+              value: CASE_COMMENT_SAVED_OBJECT,
+            },
+          },
+        },
+      },
+    },
+    { meta: true }
+  );
+
+  return comments;
+};
+
+export const getCaseUserActionsSavedObjectsFromES = async ({ es }: { es: Client }) => {
+  const userActions: TransportResult<
+    estypes.SearchResponse<{ ['cases-user-actions']: ESCaseAttributes }>,
+    unknown
+  > = await es.search(
+    {
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      body: {
+        query: {
+          term: {
+            type: {
+              value: CASE_USER_ACTION_SAVED_OBJECT,
+            },
+          },
+        },
+      },
+    },
+    { meta: true }
+  );
+
+  return userActions;
 };
 
 export const updateCase = async ({
@@ -724,7 +775,7 @@ export const getSOFromKibanaIndex = async ({
 }) => {
   const esResponse = await es.get<SavedObjectsRawDocSource>(
     {
-      index: '.kibana',
+      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
       id: `${soType}:${soId}`,
     },
     { meta: true }

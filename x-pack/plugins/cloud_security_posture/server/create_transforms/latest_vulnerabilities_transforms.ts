@@ -32,12 +32,17 @@ export const latestVulnerabilitiesTransform: TransformPutTransformRequest = {
   retention_policy: {
     time: {
       field: '@timestamp',
-      max_age: '50h',
+      max_age: '3d',
     },
   },
   latest: {
     sort: '@timestamp',
-    unique_key: ['vulnerability.id', 'resource.id', 'package.version'],
+    unique_key: [
+      'vulnerability.id',
+      'resource.id',
+      'vulnerability.package.name',
+      'vulnerability.package.version',
+    ],
   },
   _meta: {
     package: {
