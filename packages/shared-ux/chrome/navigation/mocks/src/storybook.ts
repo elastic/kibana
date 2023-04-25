@@ -14,7 +14,7 @@ import { NavigationProps, NavigationServices } from '../../types';
 type Arguments = NavigationProps & NavigationServices;
 export type Params = Pick<
   Arguments,
-  'activeNavItemId' | 'loadingCount' | 'navIsOpen' | 'platformConfig' | 'recentItems' | 'solutions'
+  'activeNavItemId' | 'loadingCount' | 'navIsOpen' | 'platformConfig' | 'solutions'
 >;
 
 export class StorybookMock extends AbstractStorybookMock<NavigationProps, NavigationServices> {
@@ -34,7 +34,7 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
   dependencies = [];
 
   getServices(params: Params): NavigationServices {
-    const { navIsOpen, recentItems } = params;
+    const { navIsOpen } = params;
 
     const navAction = action('Navigate to');
     const navigateToUrl = (url: string) => {
@@ -54,7 +54,6 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
       basePath: { prepend: (suffix: string) => `/basepath${suffix}` },
       navigateToUrl,
       navIsOpen,
-      recentItems,
       registerNavItemClick,
     };
   }

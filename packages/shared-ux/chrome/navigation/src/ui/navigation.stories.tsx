@@ -124,14 +124,6 @@ ReducedPlatformLinks.args = {
 };
 ReducedPlatformLinks.argTypes = storybookMock.getArgumentTypes();
 
-export const WithRecentItems: ComponentStory<typeof Template> = Template.bind({});
-WithRecentItems.args = {
-  activeNavItemId: 'example_project.root.get_started',
-  recentItems: [{ id: 'recent_1', label: 'This is a test recent link', link: 'testo' }],
-  solutions: [getSolutionPropertiesMock()],
-};
-WithRecentItems.argTypes = storybookMock.getArgumentTypes();
-
 export const WithRequestsLoading: ComponentStory<typeof Template> = Template.bind({});
 WithRequestsLoading.args = {
   activeNavItemId: 'example_project.root.get_started',

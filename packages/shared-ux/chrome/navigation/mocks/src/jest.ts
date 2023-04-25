@@ -9,7 +9,6 @@
 import { NavigationServices, SolutionProperties } from '../../types';
 
 export const getServicesMock = (): NavigationServices => {
-  const recentItems = [{ label: 'This is a test', id: 'test', link: 'legendOfZelda' }];
   const navigateToUrl = jest.fn().mockResolvedValue(undefined);
   const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
   const registerNavItemClick = jest.fn();
@@ -20,7 +19,6 @@ export const getServicesMock = (): NavigationServices => {
     loadingCount,
     navIsOpen: true,
     navigateToUrl,
-    recentItems,
     registerNavItemClick,
   };
 };
