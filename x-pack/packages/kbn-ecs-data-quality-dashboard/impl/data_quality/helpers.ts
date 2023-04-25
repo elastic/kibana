@@ -255,6 +255,14 @@ export const getDocsCount = ({
   stats: Record<string, IndicesStatsIndicesStats> | null;
 }): number => (stats && stats[indexName]?.primaries?.docs?.count) ?? 0;
 
+export const getSizeInBytes = ({
+  indexName,
+  stats,
+}: {
+  indexName: string;
+  stats: Record<string, IndicesStatsIndicesStats> | null;
+}): number => (stats && stats[indexName]?.primaries?.store?.size_in_bytes) ?? 0;
+
 export const getTotalDocsCount = ({
   indexNames,
   stats,
@@ -264,6 +272,18 @@ export const getTotalDocsCount = ({
 }): number =>
   indexNames.reduce(
     (acc: number, indexName: string) => acc + getDocsCount({ stats, indexName }),
+    0
+  );
+
+export const getTotalSizeInBytes = ({
+  indexNames,
+  stats,
+}: {
+  indexNames: string[];
+  stats: Record<string, IndicesStatsIndicesStats> | null;
+}): number =>
+  indexNames.reduce(
+    (acc: number, indexName: string) => acc + getSizeInBytes({ stats, indexName }),
     0
   );
 

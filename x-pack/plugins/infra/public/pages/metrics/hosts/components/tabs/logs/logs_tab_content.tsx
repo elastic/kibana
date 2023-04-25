@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InfraLoadingPanel } from '../../../../../../components/loading';
-import { SnapshotNode } from '../../../../../../../common/http_api';
 import { LogStream } from '../../../../../../components/log_stream';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -30,7 +29,7 @@ export const LogsTabContent = () => {
   );
 
   const logsLinkToStreamQuery = useMemo(() => {
-    const hostsFilterQueryParam = createHostsFilterQueryParam(hostNodes);
+    const hostsFilterQueryParam = createHostsFilterQueryParam(hostNodes.map((p) => p.name));
 
     if (filterQuery.query && hostsFilterQueryParam) {
       return `${filterQuery.query} and ${hostsFilterQueryParam}`;
@@ -83,12 +82,12 @@ export const LogsTabContent = () => {
   );
 };
 
-const createHostsFilterQueryParam = (hostNodes: SnapshotNode[]): string => {
+const createHostsFilterQueryParam = (hostNodes: string[]): string => {
   if (!hostNodes.length) {
     return '';
   }
 
-  const joinedHosts = hostNodes.map((p) => p.name).join(' or ');
+  const joinedHosts = hostNodes.join(' or ');
   const hostsQueryParam = `host.name:(${joinedHosts})`;
 
   return hostsQueryParam;

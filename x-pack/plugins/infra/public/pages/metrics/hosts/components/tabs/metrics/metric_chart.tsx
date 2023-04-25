@@ -40,13 +40,13 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
   const { euiTheme } = useEuiTheme();
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
-  const { baseRequest, loading } = useHostsViewContext();
+  const { requestTs, loading } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
 
   // prevents updates on requestTs and serchCriteria states from relaoding the chart
   // we want it to reload only once the table has finished loading
   const { afterLoadedState } = useAfterLoadedState(loading, {
-    lastReloadRequestTime: baseRequest.requestTs,
+    lastReloadRequestTime: requestTs,
     ...searchCriteria,
   });
 

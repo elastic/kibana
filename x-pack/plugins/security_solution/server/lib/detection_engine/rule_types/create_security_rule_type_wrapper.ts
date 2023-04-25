@@ -65,7 +65,16 @@ export const securityRuleTypeFieldMap = {
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
-  ({ lists, logger, config, ruleDataClient, ruleExecutionLoggerFactory, version, isPreview }) =>
+  ({
+    lists,
+    logger,
+    config,
+    publicBaseUrl,
+    ruleDataClient,
+    ruleExecutionLoggerFactory,
+    version,
+    isPreview,
+  }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
@@ -319,6 +328,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               spaceId,
               indicesToQuery: inputIndex,
               alertTimestampOverride,
+              publicBaseUrl,
               ruleExecutionLogger,
             });
 
@@ -328,6 +338,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               mergeStrategy,
               completeRule,
               spaceId,
+              publicBaseUrl,
               indicesToQuery: inputIndex,
               alertTimestampOverride,
             });
@@ -371,6 +382,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     alertTimestampOverride,
                     alertWithSuppression,
                     refreshOnIndexingAlerts: refresh,
+                    publicBaseUrl,
                   },
                 });
 
