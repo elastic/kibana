@@ -295,7 +295,7 @@ export class EnterpriseSearchPlugin implements Plugin {
      */
 
     if (globalSearch) {
-      globalSearch.registerResultProvider(getSearchResultProvider(http.basePath));
+      globalSearch.registerResultProvider(getSearchResultProvider(http.basePath, config));
     }
   }
 

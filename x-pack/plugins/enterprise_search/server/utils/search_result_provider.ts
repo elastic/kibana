@@ -10,6 +10,7 @@ import { from, takeUntil } from 'rxjs';
 import { IBasePath } from '@kbn/core-http-server';
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/server';
 
+import { ConfigType } from '..';
 import { CONNECTOR_DEFINITIONS } from '../../common/connectors/connectors';
 import {
   ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
@@ -48,7 +49,10 @@ export function toSearchResult({
   };
 }
 
-export function getSearchResultProvider(basePath: IBasePath): GlobalSearchResultProvider {
+export function getSearchResultProvider(
+  basePath: IBasePath,
+  config: ConfigType
+): GlobalSearchResultProvider {
   return {
     find: ({ term, types, tags }, { aborted$, maxResults }) => {
       if (
@@ -58,13 +62,17 @@ export function getSearchResultProvider(basePath: IBasePath): GlobalSearchResult
         return from([[]]);
       }
       const result = [
-        {
-          iconPath: 'crawler.svg',
-          keywords: ['crawler', 'web', 'website', 'internet', 'google'],
-          name: 'Elastic Web Crawler',
-          serviceType: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
-        },
-        ...CONNECTOR_DEFINITIONS,
+        ...(config.hasWebCrawler
+          ? [
+              {
+                iconPath: 'crawler.svg',
+                keywords: ['crawler', 'web', 'website', 'internet', 'google'],
+                name: 'Elastic Web Crawler',
+                serviceType: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+              },
+            ]
+          : []),
+        ...(config.hasConnectors ? CONNECTOR_DEFINITIONS : []),
       ]
         .map(({ iconPath, keywords, name, serviceType }) => {
           let score = 0;

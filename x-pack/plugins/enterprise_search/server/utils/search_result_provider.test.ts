@@ -47,7 +47,10 @@ describe('Enterprise Search search provider', () => {
     },
   };
 
-  const searchResultProvider = getSearchResultProvider(basePathMock);
+  const searchResultProvider = getSearchResultProvider(basePathMock, {
+    hasConnectors: true,
+    hasWebCrawler: true,
+  } as any);
 
   beforeEach(() => {});
 
@@ -87,7 +90,7 @@ describe('Enterprise Search search provider', () => {
       });
     });
 
-    test('respect maximum results', () => {
+    it('respect maximum results', () => {
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
           searchResultProvider.find(
@@ -101,7 +104,43 @@ describe('Enterprise Search search provider', () => {
       });
     });
 
-    test('returns nothing if tag is specified', () => {
+    it('omits crawler if config has crawler disabled', () => {
+      const searchProvider = getSearchResultProvider(basePathMock, {
+        hasConnectors: true,
+        hasWebCrawler: false,
+      } as any);
+      getTestScheduler().run(({ expectObservable }) => {
+        expectObservable(
+          searchProvider.find(
+            { term: '' },
+            { aborted$: NEVER, maxResults: 100, preference: '' },
+            {} as any
+          )
+        ).toBe('(a|)', {
+          a: expect.not.arrayContaining([{ ...crawlerResult, score: 80 }]),
+        });
+      });
+    });
+
+    it('omits connectors if config has connectors disabled', () => {
+      const searchProvider = getSearchResultProvider(basePathMock, {
+        hasConnectors: false,
+        hasWebCrawler: true,
+      } as any);
+      getTestScheduler().run(({ expectObservable }) => {
+        expectObservable(
+          searchProvider.find(
+            { term: '' },
+            { aborted$: NEVER, maxResults: 100, preference: '' },
+            {} as any
+          )
+        ).toBe('(a|)', {
+          a: expect.not.arrayContaining([{ mongoResult, score: 80 }]),
+        });
+      });
+    });
+
+    it('returns nothing if tag is specified', () => {
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
           searchResultProvider.find(
@@ -114,7 +153,7 @@ describe('Enterprise Search search provider', () => {
         });
       });
     });
-    test('returns nothing if unknown type is specified', () => {
+    it('returns nothing if unknown type is specified', () => {
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
           searchResultProvider.find(
@@ -127,7 +166,7 @@ describe('Enterprise Search search provider', () => {
         });
       });
     });
-    test('returns results for integrations tag', () => {
+    it('returns results for integrations tag', () => {
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
           searchResultProvider.find(
@@ -140,7 +179,7 @@ describe('Enterprise Search search provider', () => {
         });
       });
     });
-    test('returns results for enterprise search tag', () => {
+    it('returns results for enterprise search tag', () => {
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
           searchResultProvider.find(
