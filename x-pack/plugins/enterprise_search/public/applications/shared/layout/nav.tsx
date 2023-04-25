@@ -189,6 +189,7 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
           name: engineName,
           ...generateNavLink({
             shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
             to: enginePath,
           }),
           items: [
@@ -203,33 +204,28 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
               }),
             },
             {
-              id: 'enterpriseSearchEngineIndices',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.indicesTitle', {
-                defaultMessage: 'Indices',
+              id: 'enterpriseSearchApplicationsContent',
+              name: i18n.translate('xpack.enterpriseSearch.nav.engine.contentTitle', {
+                defaultMessage: 'Content',
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.INDICES}`,
+                shouldShowActiveForSubroutes: true,
+                to: `${enginePath}/${EngineViewTabs.CONTENT}`,
               }),
             },
             {
-              id: 'enterpriseSearchEngineSchema',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.schemaTitle', {
-                defaultMessage: 'Schema',
-              }),
+              id: 'enterpriseSearchApplicationConnect',
+              name: i18n.translate(
+                'xpack.enterpriseSearch.nav.applications.searchApplications.connectTitle',
+                {
+                  defaultMessage: 'Connect',
+                }
+              ),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.SCHEMA}`,
-              }),
-            },
-            {
-              id: 'enterpriseSearchEngineAPI',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.apiTitle', {
-                defaultMessage: 'API',
-              }),
-              ...generateNavLink({
-                shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.API}`,
+                shouldShowActiveForSubroutes: true,
+                to: `${enginePath}/${EngineViewTabs.CONNECT}`,
               }),
             },
           ],
