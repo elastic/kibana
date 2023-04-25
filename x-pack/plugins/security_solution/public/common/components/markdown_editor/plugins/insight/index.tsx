@@ -223,7 +223,7 @@ const InsightComponent = ({
           keepDataView={true}
           data-test-subj="insight-investigate-in-timeline-button"
         >
-          <EuiIcon type="timeline" />
+          <EuiIcon type="timelineArrow" />
           {` ${label} (${numeral(totalCount).format(resultFormat)})`}
         </InvestigateInTimelineButton>
         <div>{description}</div>
@@ -484,10 +484,10 @@ const exampleInsight = `${insightPrefix}
 }}`;
 
 export const plugin = {
-  name: 'insights',
+  name: 'investigate',
   button: {
-    label: 'Insights',
-    iconType: 'aggregate',
+    label: 'Investigate in timeline',
+    iconType: 'timelineArrow',
   },
   helpText: (
     <div>
