@@ -79,7 +79,7 @@ describe('EPM template', () => {
     ]);
   });
 
-  it('does not fleet agend id verification component template if agentIdVerification is disabled', () => {
+  it('does not create fleet agent id verification component template if agentIdVerification is disabled', () => {
     appContextService.start(
       createAppContextStartContractMock({
         agentIdVerificationEnabled: false,
