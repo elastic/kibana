@@ -27,7 +27,7 @@ export const initFindMetricsExplorerViewRoute = ({
     },
     async (_requestContext, request, response) => {
       const { query } = request;
-      const { metricsExplorerViews } = (await getStartServices())[2];
+      const [, , { metricsExplorerViews }] = await getStartServices();
       const metricsExplorerViewsClient = metricsExplorerViews.getScopedClient(request);
 
       try {

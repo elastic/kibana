@@ -27,7 +27,7 @@ export const initDeleteMetricsExplorerViewRoute = ({
     },
     async (_requestContext, request, response) => {
       const { params } = request;
-      const { metricsExplorerViews } = (await getStartServices())[2];
+      const [, , { metricsExplorerViews }] = await getStartServices();
       const metricsExplorerViewsClient = metricsExplorerViews.getScopedClient(request);
 
       try {

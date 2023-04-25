@@ -32,7 +32,7 @@ export const initUpdateMetricsExplorerViewRoute = ({
     },
     async (_requestContext, request, response) => {
       const { body, params, query } = request;
-      const { metricsExplorerViews } = (await getStartServices())[2];
+      const [, , { metricsExplorerViews }] = await getStartServices();
       const metricsExplorerViewsClient = metricsExplorerViews.getScopedClient(request);
 
       try {
