@@ -26,7 +26,7 @@ describe('SpacesSavedObjectsService', () => {
         expect.objectContaining({
           name: 'space',
           mappings: expect.any(Object),
-          schemas: { '8.7.0': expect.any(Object) },
+          schemas: { '8.8.0': expect.any(Object) },
         })
       );
       expect(core.savedObjects.registerType).toHaveBeenNthCalledWith(
