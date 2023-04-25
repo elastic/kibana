@@ -15,6 +15,7 @@ export {
   getSeverityColor,
   getSeverityType,
   getSeverity,
+  getSeverityWithLow,
   isCategorizationAnomaly,
   isRuleSupported,
   isMultiBucketAnomaly,
@@ -43,7 +44,13 @@ export {
   type UrlConfig,
 } from './custom_urls';
 
-export { ACTION, FILTER_TYPE, APPLIES_TO, OPERATOR } from './detector_rule';
+export {
+  ACTION,
+  APPLIES_TO,
+  CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
+  FILTER_TYPE,
+  OPERATOR,
+} from './detector_rule';
 
 export type {
   EntityFieldType,
