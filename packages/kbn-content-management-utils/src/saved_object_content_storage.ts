@@ -7,14 +7,26 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SearchQuery } from '@kbn/content-management-plugin/common';
-import type { ContentStorage, StorageContext } from '@kbn/content-management-plugin/server';
+import type { SearchQuery, SearchIn } from '@kbn/content-management-plugin/common';
+import type {
+  ContentStorage,
+  StorageContext,
+  MSearchConfig,
+} from '@kbn/content-management-plugin/server';
 import type {
   SavedObject,
   SavedObjectReference,
   SavedObjectsFindOptions,
+  SavedObjectsCreateOptions,
+  SavedObjectsUpdateOptions,
+  SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import type { CMCrudTypes, ServicesDefinitionSet } from './types';
+import type {
+  CMCrudTypes,
+  ServicesDefinitionSet,
+  SOWithMetadata,
+  SOWithMetadataPartial,
+} from './types';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
   if (!ctx.requestHandlerContext) {
@@ -29,16 +41,19 @@ type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
 };
 
-function savedObjectToMapItem(savedObject: SavedObject<MapAttributes>, partial: false): MapItem;
+function savedObjectToMapItem<Attributes extends object, Item extends SOWithMetadata>(
+  savedObject: SavedObject<Attributes>,
+  partial: false
+): Item;
 
-function savedObjectToMapItem(
-  savedObject: PartialSavedObject<MapAttributes>,
+function savedObjectToMapItem<Attributes extends object, PartialItem extends SOWithMetadata>(
+  savedObject: PartialSavedObject<Attributes>,
   partial: true
-): PartialMapItem;
+): PartialItem;
 
 function savedObjectToMapItem<Attributes extends object>(
   savedObject: SavedObject<Attributes> | PartialSavedObject<Attributes>
-): MapItem | PartialMapItem {
+): SOWithMetadata | SOWithMetadataPartial {
   const {
     id,
     type,
@@ -62,10 +77,134 @@ function savedObjectToMapItem<Attributes extends object>(
   };
 }
 
-export class SOContentStorage<Types extends CMCrudTypes>
-  implements ContentStorage<Types['Item'], Types['PartialItem']>
+export interface SearchArgsToSOFindOptionsOptionsDefault {
+  fields?: string[];
+  searchFields?: string[];
+}
+
+export const searchArgsToSOFindOptionsDefault = <T extends string>(
+  params: SearchIn<T, SearchArgsToSOFindOptionsOptionsDefault>
+): SavedObjectsFindOptions => {
+  const { query, contentTypeId, options } = params;
+  const { included, excluded } = query.tags ?? {};
+  const hasReference: SavedObjectsFindOptions['hasReference'] = included
+    ? included.map((id) => ({
+        id,
+        type: 'tag',
+      }))
+    : undefined;
+
+  const hasNoReference: SavedObjectsFindOptions['hasNoReference'] = excluded
+    ? excluded.map((id) => ({
+        id,
+        type: 'tag',
+      }))
+    : undefined;
+
+  return {
+    type: contentTypeId,
+    search: query.text,
+    perPage: query.limit,
+    page: query.cursor ? +query.cursor : undefined,
+    defaultSearchOperator: 'AND',
+    searchFields: options?.searchFields ?? ['description', 'title'],
+    fields: options?.fields ?? ['description', 'title'],
+    hasReference,
+    hasNoReference,
+  };
+};
+
+export const createArgsToSoCreateOptionsDefault = (
+  params: SavedObjectsCreateOptions
+): SavedObjectsCreateOptions => params;
+
+export const updateArgsToSoUpdateOptionsDefault = <Types extends CMCrudTypes>(
+  params: SavedObjectsUpdateOptions<Types['Attributes']>
+): SavedObjectsUpdateOptions<Types['Attributes']> => params;
+
+export type CreateArgsToSoCreateOptions<Types extends CMCrudTypes> = (
+  params: Types['CreateOptions']
+) => SavedObjectsCreateOptions;
+
+export type SearchArgsToSOFindOptions<Types extends CMCrudTypes> = (
+  params: Types['SearchIn']
+) => SavedObjectsFindOptions;
+
+export type UpdateArgsToSoUpdateOptions<Types extends CMCrudTypes> = (
+  params: Types['UpdateOptions']
+) => SavedObjectsUpdateOptions<Types['Attributes']>;
+
+export interface SOContentStorageConstrutorParams<Types extends CMCrudTypes> {
+  savedObjectType: string;
+  cmServicesDefinition: ServicesDefinitionSet;
+  createArgsToSoCreateOptions?: CreateArgsToSoCreateOptions<Types>;
+  updateArgsToSoUpdateOptions?: UpdateArgsToSoUpdateOptions<Types>;
+  searchArgsToSOFindOptions?: SearchArgsToSOFindOptions<Types>;
+  enableMSearch?: boolean;
+}
+
+export abstract class SOContentStorage<Types extends CMCrudTypes>
+  implements
+    ContentStorage<
+      Types['Item'],
+      Types['PartialItem'],
+      MSearchConfig<Types['Item'], Types['Attributes']>
+    >
 {
-  constructor(private cmServicesDefinition: ServicesDefinitionSet, private SO_TYPE: string) {}
+  constructor({
+    savedObjectType,
+    cmServicesDefinition,
+    createArgsToSoCreateOptions,
+    updateArgsToSoUpdateOptions,
+    searchArgsToSOFindOptions,
+    enableMSearch,
+  }: SOContentStorageConstrutorParams<Types>) {
+    this.savedObjectType = savedObjectType;
+    this.cmServicesDefinition = cmServicesDefinition;
+    this.createArgsToSoCreateOptions =
+      createArgsToSoCreateOptions || createArgsToSoCreateOptionsDefault;
+    this.updateArgsToSoUpdateOptions =
+      updateArgsToSoUpdateOptions || updateArgsToSoUpdateOptionsDefault;
+    this.searchArgsToSOFindOptions = searchArgsToSOFindOptions || searchArgsToSOFindOptionsDefault;
+
+    // todo - talk to anton about a better way to implement this
+    if (enableMSearch) {
+      this.mSearch = {
+        savedObjectType: this.savedObjectType,
+        toItemResult: (
+          ctx: StorageContext,
+          savedObject: SavedObjectsFindResult<Types['Attributes']>
+        ): Types['Item'] => {
+          const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
+
+          // Validate DB response and DOWN transform to the request version
+          const { value, error: resultError } = transforms.mSearch.out.result.down<
+            Types['Item'],
+            Types['Item']
+          >(savedObjectToMapItem(savedObject, false));
+
+          if (resultError) {
+            throw Boom.badRequest(`Invalid response. ${resultError.message}`);
+          }
+
+          return value;
+        },
+      };
+    }
+  }
+
+  private savedObjectType: SOContentStorageConstrutorParams<Types>['savedObjectType'];
+  private cmServicesDefinition: SOContentStorageConstrutorParams<Types>['cmServicesDefinition'];
+  private createArgsToSoCreateOptions: CreateArgsToSoCreateOptions<Types>;
+  private updateArgsToSoUpdateOptions: UpdateArgsToSoUpdateOptions<Types>;
+  private searchArgsToSOFindOptions: SearchArgsToSOFindOptions<Types>;
+  mSearch?: {
+    savedObjectType: string;
+    toItemResult: (
+      ctx: StorageContext,
+      savedObject: SavedObjectsFindResult<Types['Attributes']>
+    ) => Types['Item'];
+  };
 
   async get(ctx: StorageContext, id: string): Promise<Types['GetOut']> {
     const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
@@ -77,7 +216,7 @@ export class SOContentStorage<Types extends CMCrudTypes>
       alias_purpose: aliasPurpose,
       alias_target_id: aliasTargetId,
       outcome,
-    } = await soClient.resolve<Types['Attributes']>(this.SO_TYPE, id);
+    } = await soClient.resolve<Types['Attributes']>(this.savedObjectType, id);
 
     const response: Types['GetOut'] = {
       item: savedObjectToMapItem(savedObject, false),
@@ -102,17 +241,17 @@ export class SOContentStorage<Types extends CMCrudTypes>
   }
 
   async bulkGet(): Promise<never> {
-    // Not implemented. Maps does not use bulkGet
-    throw new Error(`[bulkGet] has not been implemented. See MapsStorage class.`);
+    // Not implemented
+    throw new Error(`[bulkGet] has not been implemented. See ${this.constructor.name} class.`);
   }
 
   async create(
     ctx: StorageContext,
     data: Types['Attributes'],
-    // todo this is lame!
     options: Types['CreateOptions']
   ): Promise<Types['CreateOut']> {
     const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
+    const soClient = await savedObjectClientFromRequest(ctx);
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.create.in.data.up<
@@ -131,12 +270,13 @@ export class SOContentStorage<Types extends CMCrudTypes>
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
+    const createOptions = this.createArgsToSoCreateOptions(optionsToLatest);
+
     // Save data in DB
-    const soClient = await savedObjectClientFromRequest(ctx);
     const savedObject = await soClient.create<Types['Attributes']>(
-      this.SO_TYPE,
+      this.savedObjectType,
       dataToLatest,
-      optionsToLatest
+      createOptions
     );
 
     // Validate DB response and DOWN transform to the request version
@@ -160,10 +300,8 @@ export class SOContentStorage<Types extends CMCrudTypes>
     data: Types['Attributes'],
     options: Types['UpdateOptions']
   ): Promise<Types['UpdateOut']> {
-    const {
-      utils: { getTransforms },
-    } = ctx;
-    const transforms = getTransforms(this.cmServicesDefinition);
+    const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
+    const soClient = await savedObjectClientFromRequest(ctx);
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
@@ -182,13 +320,14 @@ export class SOContentStorage<Types extends CMCrudTypes>
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
+    const updateOptions = this.updateArgsToSoUpdateOptions(optionsToLatest);
+
     // Save data in DB
-    const soClient = await savedObjectClientFromRequest(ctx);
     const partialSavedObject = await soClient.update<Types['Attributes']>(
-      this.SO_TYPE,
+      this.savedObjectType,
       id,
       dataToLatest,
-      optionsToLatest
+      updateOptions
     );
 
     // Validate DB response and DOWN transform to the request version
@@ -208,7 +347,7 @@ export class SOContentStorage<Types extends CMCrudTypes>
 
   async delete(ctx: StorageContext, id: string): Promise<Types['DeleteOut']> {
     const soClient = await savedObjectClientFromRequest(ctx);
-    await soClient.delete(this.SO_TYPE, id);
+    await soClient.delete(this.savedObjectType, id);
     return { success: true };
   }
 
@@ -217,10 +356,7 @@ export class SOContentStorage<Types extends CMCrudTypes>
     query: SearchQuery,
     options: Types['SearchOptions'] = {}
   ): Promise<Types['SearchOut']> {
-    const {
-      utils: { getTransforms },
-    } = ctx;
-    const transforms = getTransforms(this.cmServicesDefinition);
+    const transforms = ctx.utils.getTransforms(this.cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
 
     // Validate and UP transform the options
@@ -231,35 +367,12 @@ export class SOContentStorage<Types extends CMCrudTypes>
     if (optionsError) {
       throw Boom.badRequest(`Invalid payload. ${optionsError.message}`);
     }
-    const { onlyTitle = false } = optionsToLatest;
 
-    const { included, excluded } = query.tags ?? {};
-    const hasReference: SavedObjectsFindOptions['hasReference'] = included
-      ? included.map((id) => ({
-          id,
-          type: 'tag',
-        }))
-      : undefined;
-
-    const hasNoReference: SavedObjectsFindOptions['hasNoReference'] = excluded
-      ? excluded.map((id) => ({
-          id,
-          type: 'tag',
-        }))
-      : undefined;
-
-    const soQuery: SavedObjectsFindOptions = {
-      type: this.SO_TYPE,
-      search: query.text,
-      perPage: query.limit,
-      page: query.cursor ? +query.cursor : undefined,
-      defaultSearchOperator: 'AND',
-      searchFields: onlyTitle ? ['title'] : ['title^3', 'description'],
-      fields: ['description', 'title'],
-      hasReference,
-      hasNoReference,
-    };
-
+    const soQuery: SavedObjectsFindOptions = this.searchArgsToSOFindOptions({
+      contentTypeId: this.savedObjectType,
+      query,
+      options: optionsToLatest,
+    });
     // Execute the query in the DB
     const response = await soClient.find<Types['Attributes']>(soQuery);
 

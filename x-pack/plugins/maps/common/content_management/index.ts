@@ -9,24 +9,8 @@ export { LATEST_VERSION, CONTENT_ID } from './constants';
 
 export type { MapContentType } from './types';
 
-export type {
-  MapAttributes,
-  MapItem,
-  PartialMapItem,
-  MapGetIn,
-  MapGetOut,
-  MapCreateIn,
-  MapCreateOut,
-  MapCreateOptions,
-  MapUpdateIn,
-  MapUpdateOut,
-  MapUpdateOptions,
-  MapDeleteIn,
-  MapDeleteOut,
-  MapSearchIn,
-  MapSearchOptions,
-  MapSearchOut,
-} from './latest';
+// todo I'm not sure how much of this is used
+export type { MapCrudTypes } from './latest';
 
 // Today "v1" === "latest" so the export under MapV1 namespace is not really useful
 // We leave it as a reference for future version when it will be needed to export/support older types
