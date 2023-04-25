@@ -12,9 +12,9 @@ import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregati
 import { asPercent } from '@kbn/apm-plugin/common/utils/formatters';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
-import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 
 type TransactionsGroupsDetailedStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
