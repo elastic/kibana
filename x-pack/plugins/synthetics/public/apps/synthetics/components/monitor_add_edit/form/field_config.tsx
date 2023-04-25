@@ -771,7 +771,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.RESPONSE_STATUS_CHECK,
     component: FormattedComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseStatusCheck.label', {
-      defaultMessage: 'Check response status equals',
+      defaultMessage: 'Response status equals',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.responseStatusCheck.helpText', {
       defaultMessage:
@@ -800,7 +800,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.RESPONSE_HEADERS_CHECK,
     component: HeaderField,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseHeadersCheck.label', {
-      defaultMessage: 'Check response headers contain',
+      defaultMessage: 'Response headers contain',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.responseHeadersCheck.helpText', {
       defaultMessage: 'A list of expected response headers.',
@@ -820,7 +820,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
     component: FormattedComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheck.label', {
-      defaultMessage: 'Check response body contains',
+      defaultMessage: 'Response body contains',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheck.helpText', {
       defaultMessage:
@@ -836,7 +836,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
     component: FormattedComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheckNegative.label', {
-      defaultMessage: 'Check response body does not contain',
+      defaultMessage: 'Response body does not contain',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheckNegative.helpText', {
       defaultMessage:
@@ -852,7 +852,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.RESPONSE_RECEIVE_CHECK,
     component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseReceiveCheck.label', {
-      defaultMessage: 'Check response contains',
+      defaultMessage: 'Response contains',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.responseReceiveCheck.helpText', {
       defaultMessage: 'The expected remote host response.',
@@ -1393,7 +1393,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.RESPONSE_JSON_CHECK,
     component: KeyValuePairsField,
     label: i18n.translate('xpack.synthetics.monitorConfig.responseJSON.label', {
-      defaultMessage: 'Check response body contains JSON',
+      defaultMessage: 'Response body contains JSON',
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.responseJSON.helpText', {
       defaultMessage:
