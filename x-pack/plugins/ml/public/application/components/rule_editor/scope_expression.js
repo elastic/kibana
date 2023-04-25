@@ -22,9 +22,10 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-import { FILTER_TYPE } from '../../../../common/constants/detector_rule';
-import { filterTypeToText } from './utils';
+import { FILTER_TYPE } from '@kbn/ml-anomaly-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { filterTypeToText } from './utils';
 
 function getFilterListOptions(filterListIds) {
   return filterListIds.map((filterId) => ({ value: filterId, text: filterId }));

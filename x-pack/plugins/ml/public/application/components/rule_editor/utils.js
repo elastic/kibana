@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import {
-  ACTION,
-  APPLIES_TO,
-  FILTER_TYPE,
-  OPERATOR,
-} from '../../../../common/constants/detector_rule';
-
 import { cloneDeep } from 'lodash';
+
+import { i18n } from '@kbn/i18n';
+import { ACTION, APPLIES_TO, FILTER_TYPE, OPERATOR } from '@kbn/ml-anomaly-utils';
+
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
-import { i18n } from '@kbn/i18n';
 import { processCreatedBy } from '../../../../common/util/job_utils';
 
 export function getNewConditionDefaults() {

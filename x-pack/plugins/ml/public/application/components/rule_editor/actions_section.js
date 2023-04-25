@@ -21,7 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { ACTION } from '../../../../common/constants/detector_rule';
+import { ACTION } from '@kbn/ml-anomaly-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export function ActionsSection({ actions, onSkipResultChange, onSkipModelUpdateChange }) {

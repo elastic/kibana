@@ -16,11 +16,12 @@ jest.mock('../../capabilities/check_capabilities', () => ({
   checkPermission: (privilege) => mockCheckPermission(privilege),
 }));
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { FILTER_TYPE } from '@kbn/ml-anomaly-utils';
+
 import { ScopeSection } from './scope_section';
-import { FILTER_TYPE } from '../../../../common/constants/detector_rule';
 
 describe('ScopeSection', () => {
   const testFilterListIds = ['web_domains', 'safe_domains', 'uk_domains'];

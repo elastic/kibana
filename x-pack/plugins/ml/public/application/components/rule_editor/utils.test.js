@@ -5,13 +5,9 @@
  * 2.0.
  */
 
+import { ACTION, APPLIES_TO, OPERATOR, FILTER_TYPE } from '@kbn/ml-anomaly-utils';
+
 import { isValidRule, buildRuleDescription, getAppliesToValueFromAnomaly } from './utils';
-import {
-  ACTION,
-  APPLIES_TO,
-  OPERATOR,
-  FILTER_TYPE,
-} from '../../../../common/constants/detector_rule';
 
 describe('ML - rule editor utils', () => {
   const ruleWithCondition = {

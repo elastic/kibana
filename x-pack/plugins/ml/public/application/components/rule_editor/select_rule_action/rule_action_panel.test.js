@@ -29,11 +29,12 @@ jest.mock('../../../services/ml_api_service', () => ({
   },
 }));
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { ACTION } from '@kbn/ml-anomaly-utils';
+
 import { RuleActionPanel } from './rule_action_panel';
-import { ACTION } from '../../../../../common/constants/detector_rule';
 
 describe('RuleActionPanel', () => {
   const job = {

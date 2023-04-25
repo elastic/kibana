@@ -7,11 +7,12 @@
 
 jest.mock('../../../services/job_service', () => 'mlJobService');
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { APPLIES_TO } from '@kbn/ml-anomaly-utils';
+
 import { EditConditionLink } from './edit_condition_link';
-import { APPLIES_TO } from '../../../../../common/constants/detector_rule';
 
 function prepareTest(updateConditionValueFn, appliesTo) {
   const anomaly = {

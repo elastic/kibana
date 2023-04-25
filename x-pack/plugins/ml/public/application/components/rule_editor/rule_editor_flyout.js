@@ -31,7 +31,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { ACTION, CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '@kbn/ml-anomaly-utils';
 
 import { DetectorDescriptionList } from './components/detector_description_list';
 import { ActionsSection } from './actions_section';
@@ -48,12 +50,7 @@ import {
   addItemToFilter,
 } from './utils';
 
-import {
-  ACTION,
-  CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
-} from '../../../../common/constants/detector_rule';
 import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 

@@ -11,8 +11,9 @@ jest.mock('../../services/job_service', () => 'mlJobService');
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
+import { APPLIES_TO, OPERATOR } from '@kbn/ml-anomaly-utils';
+
 import { ConditionExpression } from './condition_expression';
-import { APPLIES_TO, OPERATOR } from '../../../../common/constants/detector_rule';
 
 describe('ConditionExpression', () => {
   const updateCondition = jest.fn(() => {});

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { ACTION } from '@kbn/ml-anomaly-utils';
+
 import { ActionsSection } from './actions_section';
-import { ACTION } from '../../../../common/constants/detector_rule';
 
 describe('ActionsSection', () => {
   const onSkipResultChange = jest.fn(() => {});
