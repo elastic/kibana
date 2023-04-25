@@ -94,4 +94,18 @@ describe('activeMaintenanceWindowsRoute', () => {
     const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
+
+  test('ensures only platinum license can access API', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    activeMaintenanceWindowsRoute(router, licenseState);
+
+    (licenseState.ensureLicenseForMaintenanceWindow as jest.Mock).mockImplementation(() => {
+      throw new Error('Failure');
+    });
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
+    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+  });
 });
