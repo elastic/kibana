@@ -374,6 +374,7 @@ export interface SearchAfterAndBulkCreateParams {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  additionalFilters?: estypes.QueryDslQueryContainer[];
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
