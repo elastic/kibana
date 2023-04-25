@@ -14,10 +14,11 @@ import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import { KibanaThemeProvider, toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type * as H from 'history';
 
+import type { Case } from '../../../../common';
 import { CommentType } from '../../../../common';
 import { isLensEmbeddable } from './utils';
 import { KibanaContextProvider, KibanaServices } from '../../../common/lib/kibana';
@@ -27,29 +28,26 @@ import CasesProvider from '../../cases_context';
 import { OWNER_INFO } from '../../../../common/constants';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UIActionProps } from './types';
+import AllCasesSelectorModal from '../../all_cases/selector_modal';
+import { useCreateAttachments } from '../../../containers/use_create_attachments';
+import { useAddAttachmentToExistingCaseTransaction } from '../../../common/apm/use_cases_transactions';
+import { useCasesToast } from '../../../common/use_cases_toast';
 
 export const ACTION_ID = 'embeddable_addToExistingCase';
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
 export const APP_NAME = 'Security' as const;
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 
-const FlyoutChildren = ({ embeddable, node }) => {
+const DashboardViewAddToExistingCaseModal = ({
+  onClose,
+  embeddable,
+  appId,
+}: {
+  embeddable: Embeddable;
+  onClose: () => void;
+  appId: string | undefined;
+}) => {
   const { attributes, timeRange } = embeddable.getInput();
-
-  const addToExistingCaseModal = useCasesAddToExistingCaseModal({
-    successToaster: {
-      title: i18n.translate(
-        'xpack.cases.actions.visualizationActions.addToExistingCase.successMessage',
-        {
-          defaultMessage: 'Successfully added visualization to the case',
-        }
-      ),
-    },
-    onClose: () => {
-      unmountComponentAtNode(node);
-      document.body.removeChild(node);
-    },
-  });
 
   const attachments = [
     {
@@ -60,49 +58,59 @@ const FlyoutChildren = ({ embeddable, node }) => {
       type: CommentType.user as const,
     },
   ];
+  const { createAttachments } = useCreateAttachments();
+  const { startTransaction } = useAddAttachmentToExistingCaseTransaction();
+  const casesToasts = useCasesToast();
 
-  addToExistingCaseModal.open({ getAttachments: () => attachments });
-  return null;
+  const onRowClick = async (theCase?: Case) => {
+    try {
+      if (theCase === undefined || !appId) {
+        // closeModal();
+        // createNewCaseFlyout.open({ attachments });
+        return;
+      }
+      // add attachments to the case
+
+      startTransaction({ appId, attachments });
+
+      await createAttachments({
+        caseId: theCase.id,
+        caseOwner: theCase.owner,
+        data: attachments,
+        throwOnError: true,
+      });
+
+      casesToasts.showSuccessAttach({
+        theCase,
+        attachments,
+        title: 'Visualization added successfully',
+        // content: props.successToaster?.content,
+      });
+    } catch (error) {
+      // error toast is handled
+      // inside the createAttachments method
+    }
+  };
+
+  return <AllCasesSelectorModal onRowClick={onRowClick} onClose={onClose} />;
 };
 
-const DashboardViewAddToExistingCaseFlyout = ({
-  caseContextProps,
-  currentAppId,
-  casesCapabilities,
-  node,
-  embeddable,
-}) => {
-  const owner = Object.values(OWNER_INFO)
-    .map((i) => i.appId)
-    .filter((id) => id === currentAppId);
-
-  return (
-    <CasesProvider
-      value={{
-        ...caseContextProps,
-        owner,
-        permissions: casesCapabilities,
-      }}
-    >
-      <FlyoutChildren node={node} embeddable={embeddable} />
-    </CasesProvider>
-  );
-};
-
-DashboardViewAddToExistingCaseFlyout.displayName = 'DashboardViewAddToExistingCaseFlyout';
+DashboardViewAddToExistingCaseModal.displayName = 'DashboardViewAddToExistingCaseModal';
 
 export const createAddToExistingCaseLensAction = ({
   order,
+  coreStart,
   uiSettings,
   caseContextProps,
   history,
 }: {
   order?: number;
+  coreStart: CoreStart;
   uiSettings: IUiSettingsClient;
   history: H.History;
   caseContextProps: UIActionProps;
 }) => {
-  const { application: applicationService, notifications, theme, security } = KibanaServices.get();
+  const { application: applicationService, theme, security } = KibanaServices.get();
   let currentAppId: string | undefined;
   applicationService?.currentAppId$.subscribe((appId) => {
     currentAppId = appId;
@@ -135,36 +143,53 @@ export const createAddToExistingCaseLensAction = ({
         return;
       }
 
-      const node = document.createElement('div');
-      document.body.appendChild(node);
+      const targetDomElement = document.createElement('div');
 
-      const element = (
-        <KibanaContextProvider
-          services={{
-            appName: APP_NAME,
-            application: applicationService,
-            notifications,
-            theme,
-            uiSettings,
-            security,
-          }}
-        >
-          <KibanaThemeProvider theme$={theme.theme$}>
+      const cleanupDom = () => {
+        if (targetDomElement != null) {
+          unmountComponentAtNode(targetDomElement);
+        }
+      };
+
+      const onModalClose = () => {
+        cleanupDom();
+      };
+
+      const owner = Object.values(OWNER_INFO)
+        .map((i) => i.appId)
+        .filter((id) => id === currentAppId);
+
+      const mount = toMountPoint(
+        wrapWithTheme(
+          <KibanaContextProvider
+            services={{
+              ...coreStart,
+              security,
+            }}
+          >
             <EuiThemeProvider darkMode={uiSettings.get(DEFAULT_DARK_MODE)}>
-              <Router history={history}>
-                <DashboardViewAddToExistingCaseFlyout
-                  caseContextProps={caseContextProps}
-                  currentAppId={currentAppId}
-                  casesCapabilities={casesCapabilities}
-                  node={node}
-                  embeddable={embeddable}
-                />
-              </Router>
+              <CasesProvider
+                value={{
+                  ...caseContextProps,
+                  owner,
+                  permissions: casesCapabilities,
+                }}
+              >
+                <Router history={history}>
+                  <DashboardViewAddToExistingCaseModal
+                    embeddable={embeddable}
+                    onClose={onModalClose}
+                    appId={currentAppId}
+                  />
+                </Router>
+              </CasesProvider>
             </EuiThemeProvider>
-          </KibanaThemeProvider>
-        </KibanaContextProvider>
+          </KibanaContextProvider>,
+          theme.theme$
+        )
       );
-      ReactDOM.render(element, node);
+
+      mount(targetDomElement);
     },
   });
 };
