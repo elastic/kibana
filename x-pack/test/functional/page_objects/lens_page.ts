@@ -1047,7 +1047,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCellSpanStyle(rowIndex = 0, colIndex = 0) {
       const el = await (await this.getDatatableCell(rowIndex, colIndex)).findByCssSelector('span');
-      );
       const styleString = await el.getAttribute('style');
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
