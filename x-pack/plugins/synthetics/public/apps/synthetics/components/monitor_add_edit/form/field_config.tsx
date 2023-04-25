@@ -1397,7 +1397,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.responseJSON.helpText', {
       defaultMessage:
-        'A list of expressions executed against the body when parsed as JSON. Body sizes must be less than or equal to 100 MiB',
+        'A list of expressions executed against the body when parsed as JSON. The body size must be less than or equal to 100 MiB.',
     }),
     controlled: true,
     props: ({ field, setValue }): KeyValuePairsFieldProps => ({
