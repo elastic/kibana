@@ -90,6 +90,8 @@ exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Error ERROR_TYPE 1`] = `undefined`;
+
 exports[`Error EVENT_NAME 1`] = `undefined`;
 
 exports[`Error EVENT_OUTCOME 1`] = `undefined`;
@@ -417,6 +419,8 @@ exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 
+exports[`Span ERROR_TYPE 1`] = `undefined`;
+
 exports[`Span EVENT_NAME 1`] = `undefined`;
 
 exports[`Span EVENT_OUTCOME 1`] = `"unknown"`;
@@ -739,6 +743,8 @@ exports[`Transaction ERROR_LOG_LEVEL 1`] = `undefined`;
 exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 
 exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
+
+exports[`Transaction ERROR_TYPE 1`] = `undefined`;
 
 exports[`Transaction EVENT_NAME 1`] = `undefined`;
 
