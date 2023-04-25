@@ -18,6 +18,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
+  EuiPageSection,
   EuiPanel,
   EuiPopover,
   EuiSpacer,
@@ -72,6 +73,7 @@ import {
   ResultsView,
   Sorting,
 } from './search_ui_components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 class InternalEngineTransporter implements Transporter {
   constructor(
@@ -304,6 +306,7 @@ export const EngineSearchPreview: React.FC = () => {
 
   return (
     <EnterpriseSearchEnginesPageTemplate
+      customPageSections
       pageChrome={[
         engineName,
         i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.pageChrome', {
@@ -312,57 +315,77 @@ export const EngineSearchPreview: React.FC = () => {
       ]}
       pageViewTelemetry={EngineViewTabs.PREVIEW}
       isLoading={isLoadingEngine}
-      pageHeader={{
-        bottomBorder: false,
-        pageTitle: (
-          <FormattedMessage
-            id="xpack.enterpriseSearch.content.engine.searchPreview.pageTitle"
-            defaultMessage="{engineName}"
-            values={{ engineName }}
-          />
-        ),
-        rightSideItems: [
-          <>
-            <ConfigurationPopover
-              engineName={engineName}
-              showConfiguration={showConfigurationPopover}
-              setCloseConfiguration={() => setShowConfigurationPopover(!showConfigurationPopover)}
-            />
-          </>,
-        ],
-      }}
+      // pageHeader={{
+      //   bottomBorder: false,
+      //   pageTitle: (
+      //     <FormattedMessage
+      //       id="xpack.enterpriseSearch.content.engine.searchPreview.pageTitle"
+      //       defaultMessage="{engineName}"
+      //       values={{ engineName }}
+      //     />
+      //   ),
+      //   rightSideItems: [
+      //     <>
+      //       <ConfigurationPopover
+      //         engineName={engineName}
+      //         showConfiguration={showConfigurationPopover}
+      //         setCloseConfiguration={() => setShowConfigurationPopover(!showConfigurationPopover)}
+      //       />
+      //     </>,
+      //   ],
+      // }}
       engineName={engineName}
     >
-      <DocumentProvider>
-        <SearchProvider config={config}>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <SearchBox inputView={InputView} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false} css={{ minWidth: '240px' }}>
-              <ResultsPerPage view={ResultsPerPageView} options={RESULTS_PER_PAGE_OPTIONS} />
-              <EuiSpacer size="m" />
-              <Sorting sortableFields={sortableFields} />
-              <EuiSpacer size="m" />
-              <EuiLink href={docLinks.enterpriseSearchEngines} target="_blank">
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.content.engine.searchPreview.improveResultsLink"
-                  defaultMessage="Improve these results"
-                />
-              </EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <PagingInfo view={PagingInfoView} />
-              <EuiSpacer size="m" />
-              <Results view={ResultsView} resultView={ResultView} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </SearchProvider>
-        <DocumentFlyout />
-        {/*
+      <KibanaPageTemplate.Section color="subdued">
+        <KibanaPageTemplate.Header
+          bottomBorder={false}
+          pageTitle={
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.engine.searchPreview.pageTitle"
+              defaultMessage="{engineName}"
+              values={{ engineName }}
+            />
+          }
+          rightSideItems={[
+            <>
+              <ConfigurationPopover
+                engineName={engineName}
+                showConfiguration={showConfigurationPopover}
+                setCloseConfiguration={() => setShowConfigurationPopover(!showConfigurationPopover)}
+              />
+            </>,
+          ]}
+        />
+        <DocumentProvider>
+          <SearchProvider config={config}>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <SearchBox inputView={InputView} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false} css={{ minWidth: '240px' }}>
+                <ResultsPerPage view={ResultsPerPageView} options={RESULTS_PER_PAGE_OPTIONS} />
+                <EuiSpacer size="m" />
+                <Sorting sortableFields={sortableFields} />
+                <EuiSpacer size="m" />
+                <EuiLink href={docLinks.enterpriseSearchEngines} target="_blank">
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.engine.searchPreview.improveResultsLink"
+                    defaultMessage="Improve these results"
+                  />
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <PagingInfo view={PagingInfoView} />
+                <EuiSpacer size="m" />
+                <Results view={ResultsView} resultView={ResultView} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </SearchProvider>
+          <DocumentFlyout />
+          {/*
         Uncomment when view this API call needed
 
         {showAPICallFlyout && lastAPICall && (
@@ -373,7 +396,8 @@ export const EngineSearchPreview: React.FC = () => {
           />
         )}
         */}
-      </DocumentProvider>
+        </DocumentProvider>
+      </KibanaPageTemplate.Section>
     </EnterpriseSearchEnginesPageTemplate>
   );
 };

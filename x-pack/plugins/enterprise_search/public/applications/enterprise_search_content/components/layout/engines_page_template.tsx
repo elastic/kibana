@@ -23,13 +23,14 @@ export const EnterpriseSearchEnginesPageTemplate: React.FC<
   EnterpriseSearchEnginesPageTemplateProps
 > = ({ children, pageChrome, pageViewTelemetry, engineName, ...pageTemplateProps }) => {
   const navItems = useEnterpriseSearchEngineNav(engineName, pageTemplateProps.isEmptyState);
-  const color = useEuiBackgroundColor('subdued');
-  pageTemplateProps.pageHeader = {
-    ...pageTemplateProps.pageHeader,
-    css: { 'background-color': color },
-  };
+
+  // pageTemplateProps.pageHeader = {
+  //   ...pageTemplateProps.pageHeader,
+  //   css: { 'background-color': color },
+  // };
   return (
     <EnterpriseSearchPageTemplateWrapper
+      panelled
       {...pageTemplateProps}
       solutionNav={{
         items: navItems,

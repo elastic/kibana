@@ -163,7 +163,6 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
           }),
         ]}
         pageHeader={{
-          bottomBorder: false,
           description: (
             <FormattedMessage
               id="xpack.enterpriseSearch.content.searchApplications.description"
