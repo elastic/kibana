@@ -55,7 +55,7 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
 
 export const DashboardsLandingPage = () => {
   const dashboardLinks = useRootNavLink(SecurityPageName.dashboards)?.links ?? [];
-  const { show: canReadDashboard, createNew: canCreateDashboard } =
+  const { show: canReadDashboard } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
   const { navigateTo } = useNavigateTo();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
@@ -64,39 +64,31 @@ export const DashboardsLandingPage = () => {
       deepLinkId: SecurityPageName.dashboards,
       path: id,
     })}`;
+  useCreateSecurityDashboardLink();
+
   return (
-    <SecuritySolutionPageWrapper>
-      <Header canCreateDashboard={canCreateDashboard} />
-      <EuiSpacer size="xl" />
-
-      <EuiTitle size="xxxs">
-        <h2>{i18n.DASHBOARDS_PAGE_SECTION_DEFAULT}</h2>
-      </EuiTitle>
-      <EuiHorizontalRule margin="s" />
-      <LandingImageCards items={dashboardLinks} />
-      <EuiSpacer size="xxl" />
-
+    <SecuritySolutionPageWrapper noPadding>
       {canReadDashboard && (
         <>
-          <EuiTitle size="xxxs">
-            <h2>{i18n.DASHBOARDS_PAGE_SECTION_CUSTOM}</h2>
-          </EuiTitle>
-          <EuiHorizontalRule margin="s" />
-          <EuiSpacer size="m" />
           <DashboardListingTable
             goToDashboard={(dashboardId) => {
               if (dashboardId) {
                 track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.DASHBOARD);
                 navigateTo({ url: getHref(dashboardId) });
               }
-              return alert(
-                `Here's where I would redirect you to ${dashboardId ?? 'a new Dashboard'}`
-              );
             }}
             getDashboardUrl={(id, timeRestore) => {
               return getHref(id);
             }}
-          />
+          >
+            <LandingImageCards items={dashboardLinks} />
+            <EuiSpacer size="m" />
+            <EuiTitle size="xxxs">
+              <h2>{i18n.DASHBOARDS_PAGE_SECTION_CUSTOM}</h2>
+            </EuiTitle>
+            <EuiHorizontalRule margin="s" />
+            <EuiSpacer size="m" />
+          </DashboardListingTable>
         </>
       )}
 
