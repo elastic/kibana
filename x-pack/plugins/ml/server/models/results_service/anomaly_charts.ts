@@ -12,6 +12,12 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { extent, max, min } from 'd3';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
+import {
+  aggregationTypeTransform,
+  getEntityFieldList,
+  isMultiBucketAnomaly,
+  type EntityField,
+} from '@kbn/ml-anomaly-utils';
 import type { MlClient } from '../../lib/ml_client';
 import { isRuntimeMappings } from '../../../common';
 import type {
@@ -34,12 +40,6 @@ import {
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
 import { CriteriaField } from './results_service';
-import {
-  aggregationTypeTransform,
-  EntityField,
-  getEntityFieldList,
-  isMultiBucketAnomaly,
-} from '../../../common/util/anomaly_utils';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { AnomalyRecordDoc, CombinedJob, Datafeed, RecordForInfluencer } from '../../shared';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';

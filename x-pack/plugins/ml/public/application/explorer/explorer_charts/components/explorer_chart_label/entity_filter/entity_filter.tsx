@@ -8,10 +8,7 @@ import React, { FC } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  ENTITY_FIELD_OPERATIONS,
-  EntityFieldOperation,
-} from '../../../../../../../common/util/anomaly_utils';
+import { ENTITY_FIELD_OPERATIONS, EntityFieldOperation } from '@kbn/ml-anomaly-utils';
 import { blurButtonOnClick } from '../../../../../util/component_utils';
 import './_entity_filter.scss';
 

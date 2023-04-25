@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import React, { useEffect, useState } from 'react';
-import { getSeverityColor, getSeverity } from '@kbn/ml-plugin/public';
+import { getSeverityColor, getSeverity } from '@kbn/ml-anomaly-utils';
 import { AnomalyTranslations } from './translations';
 import { AlertExpressionPopover } from '../alert_expression_popover';
 import { DEFAULT_SEVERITY, SelectSeverity, SEVERITY_OPTIONS } from './select_severity';

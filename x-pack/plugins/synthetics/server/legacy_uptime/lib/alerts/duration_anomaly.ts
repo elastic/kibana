@@ -14,7 +14,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { AnomaliesTableRecord } from '@kbn/ml-plugin/common/types/anomalies';
-import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
+import { getSeverityType } from '@kbn/ml-anomaly-utils';
 import { UptimeEsClient } from '../lib';
 import {
   updateState,

@@ -18,9 +18,9 @@ import {
   EuiHealth,
   EuiHighlight,
 } from '@elastic/eui';
+import { getSeverityColor } from '@kbn/ml-anomaly-utils';
 import { EntityFieldType } from '../../../../../common/types/anomalies';
 import { UiPartitionFieldConfig } from '../series_controls/series_controls';
-import { getSeverityColor } from '../../../../../common';
 import { EntityConfig } from './entity_config';
 
 export interface Entity {

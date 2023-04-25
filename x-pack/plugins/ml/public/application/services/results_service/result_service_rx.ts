@@ -8,7 +8,7 @@
 // Queries Elasticsearch to obtain metric aggregation results.
 // index can be a String, or String[], of index names to search.
 // entityFields parameter must be an array, with each object in the array having 'fieldName'
-//  and 'fieldValue' properties.
+// and 'fieldValue' properties.
 // Extra query object can be supplied, or pass null if no additional query
 // to that built from the supplied entity fields.
 // Returned response contains a results property containing the requested aggregation.
@@ -17,18 +17,18 @@ import { map } from 'rxjs/operators';
 import { each, get } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ErrorType } from '@kbn/ml-error-utils';
+import { aggregationTypeTransform, EntityField } from '@kbn/ml-anomaly-utils';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
-import { MlApiServices } from '../ml_api_service';
-import { CriteriaField } from '.';
 import { findAggField } from '../../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
-import { aggregationTypeTransform, EntityField } from '../../../../common/util/anomaly_utils';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
-import { RecordForInfluencer } from './results_service';
 import { isRuntimeMappings } from '../../../../common';
+import { MlApiServices } from '../ml_api_service';
+import { RecordForInfluencer } from './results_service';
+import { CriteriaField } from '.';
 
 export interface ResultResponse {
   success: boolean;

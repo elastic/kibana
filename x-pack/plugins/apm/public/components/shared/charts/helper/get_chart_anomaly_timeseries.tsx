@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { getSeverity } from '@kbn/ml-plugin/public';
+import { getSeverity } from '@kbn/ml-anomaly-utils';
 import { getSeverityColor } from '../../../../../common/anomaly_detection';
 import {
   ANOMALY_SEVERITY,

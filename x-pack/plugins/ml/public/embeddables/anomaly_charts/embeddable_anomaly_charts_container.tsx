@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
+import type { EntityField, EntityFieldOperation } from '@kbn/ml-anomaly-utils';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
@@ -20,7 +21,6 @@ import type {
   AnomalyChartsEmbeddableOutput,
   AnomalyChartsEmbeddableServices,
 } from '..';
-import type { EntityField, EntityFieldOperation } from '../../../common/util/anomaly_utils';
 
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
 import { ML_APP_LOCATOR } from '../../../common/constants/locator';

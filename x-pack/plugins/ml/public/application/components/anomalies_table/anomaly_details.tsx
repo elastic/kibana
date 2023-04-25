@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { getSeverity } from '../../../../common/util/anomaly_utils';
+import { getSeverity } from '@kbn/ml-anomaly-utils';
 import { MAX_CHARS } from './anomalies_table_constants';
 import type { CategoryDefinition } from '../../services/ml_api_service/results';
 import { AnomaliesTableRecordExtended } from '../../../../common/types/anomalies';

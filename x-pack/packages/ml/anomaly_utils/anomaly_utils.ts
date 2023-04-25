@@ -11,9 +11,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../constants/anomalies';
 import type { AnomaliesTableRecord, AnomalyRecordDoc } from '../types/anomalies';
+import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_rule';
 
 export interface SeverityType {
   id: ANOMALY_SEVERITY;

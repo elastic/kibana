@@ -16,6 +16,7 @@ import {
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { isDefined } from '@kbn/ml-is-defined';
+import { getEntityFieldName, getEntityFieldValue } from '@kbn/ml-anomaly-utils';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
@@ -35,7 +36,6 @@ import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert
 import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
-import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
 import { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 import type { AwaitReturnType } from '../../../common/types/common';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';

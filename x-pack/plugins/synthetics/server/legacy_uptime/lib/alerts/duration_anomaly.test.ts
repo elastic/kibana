@@ -13,7 +13,7 @@ import { durationAnomalyAlertFactory } from './duration_anomaly';
 import { DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
 import { AnomaliesTableRecord, AnomalyRecordDoc } from '@kbn/ml-plugin/common/types/anomalies';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
-import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
+import { getSeverityType } from '@kbn/ml-anomaly-utils';
 import { Ping } from '../../../../common/runtime_types/ping';
 
 interface MockAnomaly {
