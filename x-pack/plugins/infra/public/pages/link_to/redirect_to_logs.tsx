@@ -8,7 +8,6 @@
 import React from 'react';
 import { match as RouteMatch, Redirect, RouteComponentProps } from 'react-router-dom';
 import { useFetcher } from '@kbn/observability-plugin/public';
-import { EuiSkeletonText } from '@elastic/eui';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
@@ -33,9 +32,5 @@ export const RedirectToLogs = ({ location, match }: RedirectToLogsProps) => {
     return locators.logsLocator.getLocation({ time, filter, logViewId });
   }, []);
 
-  if (!data) {
-    return <EuiSkeletonText lines={1} />;
-  }
-
-  return <Redirect to={data.path} />;
+  return data ? <Redirect to={data.path} /> : null;
 };

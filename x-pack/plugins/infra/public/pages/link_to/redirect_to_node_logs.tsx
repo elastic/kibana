@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LinkDescriptor, useFetcher } from '@kbn/observability-plugin/public';
 import React from 'react';
@@ -66,11 +65,7 @@ export const RedirectToNodeLogs = ({
     );
   }
 
-  if (!data) {
-    return <EuiSkeletonText lines={1} />;
-  }
-
-  return <Redirect to={data.path} />;
+  return data ? <Redirect to={data.path} /> : null;
 };
 
 export const getNodeLogsUrl = ({
