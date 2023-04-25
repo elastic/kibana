@@ -23,6 +23,7 @@ import {
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { type FieldMap } from '@kbn/alerts-as-data-utils';
+import { Filter } from '@kbn/es-query';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -285,11 +286,12 @@ export type UntypedRuleType = RuleType<
 >;
 
 export interface RawAlertsFilter extends AlertsFilter {
-  query: null | {
+  query?: {
     kql: string;
+    filters: Filter[];
     dsl: string;
   };
-  timeframe: null | AlertsFilterTimeframe;
+  timeframe?: AlertsFilterTimeframe;
 }
 
 export interface RawRuleAction extends SavedObjectAttributes {
