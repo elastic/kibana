@@ -20,7 +20,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import * as i18n from './translations';
-import { useNotableAnomaliesSearch } from '../../../../common/components/ml/anomaly/use_anomalies_search';
+import { useAggregatedAnomaliesByJob } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { useAnomaliesColumns } from './columns';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -66,7 +66,7 @@ export const EntityAnalyticsAnomalies = () => {
     isLoading: isSearchLoading,
     data,
     refetch,
-  } = useNotableAnomaliesSearch({
+  } = useAggregatedAnomaliesByJob({
     skip: !toggleStatus,
     from,
     to,

@@ -30,7 +30,7 @@ jest.mock('../../../../common/utils/route/use_route_spy', () => ({
   ]),
 }));
 
-const mockUseNotableAnomaliesSearch = jest.fn().mockReturnValue({
+const mockUseAggregatedAnomaliesByJob = jest.fn().mockReturnValue({
   isLoading: false,
   data: [],
   refetch: jest.fn(),
@@ -51,7 +51,7 @@ jest.mock('../../../../common/components/ml/anomaly/use_anomalies_search', () =>
   );
   return {
     ...original,
-    useNotableAnomaliesSearch: () => mockUseNotableAnomaliesSearch(),
+    useAggregatedAnomaliesByJob: () => mockUseAggregatedAnomaliesByJob(),
   };
 });
 
@@ -95,7 +95,7 @@ describe('EntityAnalyticsAnomalies', () => {
       entity: AnomalyEntity.User,
     };
 
-    mockUseNotableAnomaliesSearch.mockReturnValue({
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
       isLoading: false,
       data: [jobCount],
       refetch: jest.fn(),
@@ -126,7 +126,7 @@ describe('EntityAnalyticsAnomalies', () => {
       entity: AnomalyEntity.User,
     };
 
-    mockUseNotableAnomaliesSearch.mockReturnValue({
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
       isLoading: false,
       data: [jobCount],
       refetch: jest.fn(),
@@ -152,7 +152,7 @@ describe('EntityAnalyticsAnomalies', () => {
       entity: AnomalyEntity.User,
     };
 
-    mockUseNotableAnomaliesSearch.mockReturnValue({
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
       isLoading: false,
       data: [jobCount],
       refetch: jest.fn(),
@@ -178,7 +178,7 @@ describe('EntityAnalyticsAnomalies', () => {
       entity: AnomalyEntity.User,
     };
 
-    mockUseNotableAnomaliesSearch.mockReturnValue({
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
       isLoading: false,
       data: [jobCount],
       refetch: jest.fn(),
@@ -208,7 +208,7 @@ describe('EntityAnalyticsAnomalies', () => {
       entity: AnomalyEntity.User,
     };
 
-    mockUseNotableAnomaliesSearch.mockReturnValue({
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
       isLoading: false,
       data: [jobCount],
       refetch: jest.fn(),
@@ -232,7 +232,7 @@ describe('EntityAnalyticsAnomalies', () => {
       entity: AnomalyEntity.User,
     };
 
-    mockUseNotableAnomaliesSearch.mockReturnValue({
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
       isLoading: true,
       data: [jobCount],
       refetch: jest.fn(),
@@ -260,7 +260,7 @@ describe('EntityAnalyticsAnomalies', () => {
       entity: AnomalyEntity.User,
     };
 
-    mockUseNotableAnomaliesSearch.mockReturnValue({
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
       isLoading: false,
       data: [jobCount],
       refetch: jest.fn(),
@@ -288,7 +288,7 @@ describe('EntityAnalyticsAnomalies', () => {
       entity: AnomalyEntity.User,
     };
 
-    mockUseNotableAnomaliesSearch.mockReturnValue({
+    mockUseAggregatedAnomaliesByJob.mockReturnValue({
       isLoading: false,
       data: [jobCount],
       refetch: jest.fn(),
