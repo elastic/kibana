@@ -118,7 +118,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
           error={
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.startDeployment.deploymentIdError"
-              defaultMessage="Deployment with this ID already exist"
+              defaultMessage="Deployment with this ID already exists."
             />
           }
         >
