@@ -15,7 +15,9 @@ export function useRunOnceErrors({
   serviceError,
   errors,
   locations,
+  showErrors = true,
 }: {
+  showErrors?: boolean;
   testRunId: string;
   serviceError?: Error;
   errors: ServiceLocationErrors;
@@ -65,11 +67,11 @@ export function useRunOnceErrors({
     } else if (locationErrors?.length > 0) {
       // If only some of the locations were unsuccessful
       return locationErrors
-        .map(({ locationId }) => locationsById[locationId])
-        .filter((location) => !!location)
-        .map((location) => ({
+        .map(({ locationId, error }) => ({ location: locationsById[locationId], error }))
+        .filter((locationWithError) => !!locationWithError.location)
+        .map(({ location, error }) => ({
           name: 'Error',
-          message: getLocationTestErrorLabel(location.label),
+          message: getLocationTestErrorLabel(location.label, error.reason),
           title: RunErrorLabel,
         }));
     }
@@ -78,12 +80,14 @@ export function useRunOnceErrors({
   }, [locationsById, locationErrors, hasBlockingError]);
 
   useEffect(() => {
-    errorMessages.forEach(
-      ({ name, message, title }: { name: string; message: string; title: string }) => {
-        kibanaService.toasts.addError({ name, message }, { title });
-      }
-    );
-  }, [errorMessages]);
+    if (showErrors) {
+      errorMessages.forEach(
+        ({ name, message, title }: { name: string; message: string; title: string }) => {
+          kibanaService.toasts.addError({ name, message }, { title });
+        }
+      );
+    }
+  }, [errorMessages, showErrors]);
 
   return {
     expectPings,
@@ -101,10 +105,10 @@ const RunErrorLabel = i18n.translate('xpack.synthetics.testRun.runErrorLabel', {
   defaultMessage: 'Error running test',
 });
 
-const getLocationTestErrorLabel = (locationName: string) =>
-  i18n.translate('xpack.synthetics.testRun.runErrorLocation', {
-    defaultMessage: 'Failed to run monitor on location {locationName}.',
-    values: { locationName },
+const getLocationTestErrorLabel = (locationName: string, reason: string) =>
+  i18n.translate('xpack.synthetics.testRun.runErrorLocation.reason', {
+    defaultMessage: 'Failed to run monitor on location {locationName}. {reason}',
+    values: { locationName, reason },
   });
 
 const PushErrorService = i18n.translate('xpack.synthetics.testRun.pushError', {
