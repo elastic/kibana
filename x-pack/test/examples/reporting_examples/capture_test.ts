@@ -19,6 +19,7 @@ export default function ({
   const testSubjects = getService('testSubjects');
   const png = getService('png');
   const config = getService('config');
+  const log = getService('log');
   const screenshotDir = config.get('screenshots.directory');
 
   const appId = 'reportingExample';
@@ -29,6 +30,9 @@ export default function ({
     baselineAPdfPrint: path.resolve(__dirname, 'fixtures/baseline/capture_a_print.pdf'),
   };
 
+  // NOTE: Occasionally, you may need to run the test and copy the "session" image file and replace the
+  // "baseline" image file to reflect current renderings. The source and destination file paths can be found in
+  // the INFO logs for this test run.
   describe('Captures', () => {
     it('PNG file matches the baseline image', async () => {
       await PageObjects.common.navigateToApp(appId);
@@ -48,6 +52,11 @@ export default function ({
         screenshotDir
       );
 
+      log.info(
+        `session image path: ${pngSessionFilePath}` +
+          `, baseline image path: ${fixtures.baselineAPng}`
+      );
+
       expect(
         await png.compareAgainstBaseline(
           pngSessionFilePath,
@@ -55,7 +64,7 @@ export default function ({
           screenshotDir,
           updateBaselines
         )
-      ).to.be.lessThan(0.09);
+      ).to.be.lessThan(0.01);
     });
   });
 }
