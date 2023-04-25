@@ -60,7 +60,7 @@ export async function getRelatedAssets({
     },
   };
 
-  const musts = [
+  const musts: QueryDslQueryContainer = [
     {
       terms: {
         [relationField]: [ean],
