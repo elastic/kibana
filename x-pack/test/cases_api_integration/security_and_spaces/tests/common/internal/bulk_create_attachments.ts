@@ -13,11 +13,9 @@ import {
   BulkCreateCommentRequest,
   CaseResponse,
   CaseStatuses,
-  CommentRequestAlertType,
   CommentRequestExternalReferenceSOType,
   CommentType,
 } from '@kbn/cases-plugin/common/api';
-import { isEqual } from 'lodash';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
@@ -81,7 +79,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  const validateCommentsIgnoreOrder = (
+  const validateCommentsIgnoringOrder = (
     comments: CaseResponse['comments'],
     attachments: BulkCreateCommentRequest
   ) => {
@@ -130,7 +128,7 @@ export default ({ getService }: FtrProviderContext): void => {
           numberOfAttachments: 1,
         });
 
-        validateCommentsIgnoreOrder(theCase.comments, attachments);
+        validateCommentsIgnoringOrder(theCase.comments, attachments);
       });
 
       it('should bulk create multiple attachments', async () => {
@@ -141,7 +139,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(theCase.totalComment).to.eql(attachments.length);
         expect(theCase.updated_by).to.eql(defaultUser);
 
-        validateCommentsIgnoreOrder(theCase.comments, attachments);
+        validateCommentsIgnoringOrder(theCase.comments, attachments);
       });
 
       it('creates the correct user action', async () => {
@@ -1304,6 +1302,20 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should create a new attachment without alerts attached to the case', async () => {
+        const alertCommentWithId3 = {
+          ...postCommentAlertMultipleIdsReq,
+          alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
+          index: ['test-index-1', 'test-index-2', 'test-index-3'],
+        };
+
+        const alertCommentOnlyId3 = {
+          ...postCommentAlertMultipleIdsReq,
+          alertId: ['test-id-3'],
+          index: ['test-index-3'],
+        };
+
+        const allAttachments = [postCommentAlertMultipleIdsReq, alertCommentOnlyId3];
+
         const postedCase = await createCase(supertest, postCaseReq);
 
         await bulkCreateAttachments({
@@ -1316,66 +1328,71 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [
-            {
-              ...postCommentAlertMultipleIdsReq,
-              alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
-              index: ['test-index-1', 'test-index-2', 'test-index-3'],
-            },
-          ],
+          params: [alertCommentWithId3],
           expectedHttpCode: 200,
         });
 
         const attachments = await getAllComments({ supertest, caseId: postedCase.id });
         expect(attachments.length).to.eql(2);
 
-        const secondAttachment = attachments[1] as CommentRequestAlertType;
-
-        expect(secondAttachment.alertId).to.eql(['test-id-3']);
-        expect(secondAttachment.index).to.eql(['test-index-3']);
+        validateCommentsIgnoringOrder(attachments, allAttachments);
       });
 
       it('should create a new attachment without alerts attached to the case on the same request', async () => {
+        const alertCommentWithId3 = {
+          ...postCommentAlertMultipleIdsReq,
+          alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
+          index: ['test-index-1', 'test-index-2', 'test-index-3'],
+        };
+
+        const alertCommentOnlyId3 = {
+          ...postCommentAlertMultipleIdsReq,
+          alertId: ['test-id-3'],
+          index: ['test-index-3'],
+        };
+
+        const allAttachments = [postCommentAlertMultipleIdsReq, alertCommentOnlyId3];
+
         const postedCase = await createCase(supertest, postCaseReq);
 
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [
-            postCommentAlertMultipleIdsReq,
-            {
-              ...postCommentAlertMultipleIdsReq,
-              alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
-              index: ['test-index-1', 'test-index-2', 'test-index-3'],
-            },
-          ],
+          params: [postCommentAlertMultipleIdsReq, alertCommentWithId3],
           expectedHttpCode: 200,
         });
 
         const attachments = await getAllComments({ supertest, caseId: postedCase.id });
         expect(attachments.length).to.eql(2);
 
-        let foundAlert3 = false;
-
-        for (const attachment of attachments) {
-          const castedAlertAttachment = attachment as CommentRequestAlertType;
-
-          if (
-            isEqual(castedAlertAttachment.alertId, ['test-id-3']) &&
-            isEqual(castedAlertAttachment.index, ['test-index-3'])
-          ) {
-            if (!foundAlert3) {
-              foundAlert3 = true;
-            } else {
-              expect().fail('found test-id/index-3 multiple times');
-            }
-          }
-        }
-
-        expect(foundAlert3).to.be(true);
+        validateCommentsIgnoringOrder(attachments, allAttachments);
       });
 
       it('does not remove user comments when filtering out duplicate alerts', async () => {
+        const alertCommentWithId3 = {
+          ...postCommentAlertMultipleIdsReq,
+          alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
+          index: ['test-index-1', 'test-index-2', 'test-index-3'],
+        };
+
+        const alertCommentOnlyId3 = {
+          ...postCommentAlertMultipleIdsReq,
+          alertId: ['test-id-3'],
+          index: ['test-index-3'],
+        };
+
+        const superComment = {
+          ...postCommentUserReq,
+          comment: 'Super comment',
+        };
+
+        const allAttachments = [
+          postCommentAlertMultipleIdsReq,
+          alertCommentOnlyId3,
+          postCommentUserReq,
+          superComment,
+        ];
+
         const postedCase = await createCase(supertest, postCaseReq);
 
         await bulkCreateAttachments({
@@ -1388,35 +1405,14 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [
-            postCommentUserReq,
-            {
-              ...postCommentAlertMultipleIdsReq,
-              alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
-              index: ['test-index-1', 'test-index-2', 'test-index-3'],
-            },
-            postCommentUserReq,
-          ],
+          params: [superComment, alertCommentWithId3, postCommentUserReq],
           expectedHttpCode: 200,
         });
 
         const attachments = await getAllComments({ supertest, caseId: postedCase.id });
         expect(attachments.length).to.eql(4);
 
-        const firstAlert = attachments[0] as CommentRequestAlertType;
-        const firstUserComment = attachments[1] as CommentRequestAlertType;
-        const secondAlert = attachments[2] as CommentRequestAlertType;
-        const secondUserComment = attachments[3] as CommentRequestAlertType;
-
-        expect(firstUserComment.type).to.eql('user');
-        expect(secondUserComment.type).to.eql('user');
-        expect(firstAlert.type).to.eql('alert');
-        expect(secondAlert.type).to.eql('alert');
-
-        expect(firstAlert.alertId).to.eql(['test-id-1', 'test-id-2']);
-        expect(firstAlert.index).to.eql(['test-index', 'test-index-2']);
-        expect(secondAlert.alertId).to.eql(['test-id-3']);
-        expect(secondAlert.index).to.eql(['test-index-3']);
+        validateCommentsIgnoringOrder(attachments, allAttachments);
       });
     });
 
