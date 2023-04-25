@@ -133,7 +133,7 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
             title={
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.forceStopDialog.pipelinesWarning"
-                defaultMessage="You can't use these ingest pipelines until you restart the model:"
+                defaultMessage="You won't be able to use these ingest pipelines until you restart the model:"
               />
             }
             color="warning"
