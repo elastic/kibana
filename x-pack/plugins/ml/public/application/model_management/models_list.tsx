@@ -27,7 +27,11 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { BUILT_IN_MODEL_TYPE, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
+import {
+  BUILT_IN_MODEL_TYPE,
+  BUILT_IN_MODEL_TAG,
+  DEPLOYMENT_STATE,
+} from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
@@ -355,20 +359,22 @@ export const ModelsList: FC<Props> = ({
       ),
       'data-test-subj': 'mlModelsTableColumnType',
     },
-    // FIXME show combined deploymnetss state
-    // {
-    //   name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
-    //     defaultMessage: 'State',
-    //   }),
-    //   sortable: (item) => item.stats?.deployment_stats?.state,
-    //   align: 'left',
-    //   truncateText: true,
-    //   render: (model: ModelItem) => {
-    //     const state = model.stats?.deployment_stats?.state;
-    //     return state ? <EuiBadge color="hollow">{state}</EuiBadge> : null;
-    //   },
-    //   'data-test-subj': 'mlModelsTableColumnDeploymentState',
-    // },
+    {
+      name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
+        defaultMessage: 'State',
+      }),
+      align: 'left',
+      truncateText: false,
+      render: (model: ModelItem) => {
+        const state = model.stats?.deployment_stats?.some(
+          (v) => v.state === DEPLOYMENT_STATE.STARTED
+        )
+          ? DEPLOYMENT_STATE.STARTED
+          : '';
+        return state ? <EuiBadge color="hollow">{state}</EuiBadge> : null;
+      },
+      'data-test-subj': 'mlModelsTableColumnDeploymentState',
+    },
     {
       field: ModelsTableToConfigMapping.createdAt,
       name: i18n.translate('xpack.ml.trainedModels.modelsList.createdAtHeader', {
