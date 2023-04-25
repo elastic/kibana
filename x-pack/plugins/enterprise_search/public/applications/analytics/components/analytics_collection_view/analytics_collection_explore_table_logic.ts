@@ -66,11 +66,11 @@ interface TableParams<T extends ExploreTableItem = ExploreTableItem> {
 }
 
 const tablesParams: {
-  [ExploreTables.SearchTerms]: TableParams<SearchTermsTable>;
   [ExploreTables.Clicked]: TableParams<ClickedTable>;
-  [ExploreTables.Referrers]: TableParams<ReferrersTable>;
-  [ExploreTables.WorsePerformers]: TableParams<WorsePerformersTable>;
   [ExploreTables.Locations]: TableParams<LocationsTable>;
+  [ExploreTables.Referrers]: TableParams<ReferrersTable>;
+  [ExploreTables.SearchTerms]: TableParams<SearchTermsTable>;
+  [ExploreTables.WorsePerformers]: TableParams<WorsePerformersTable>;
 } = {
   [ExploreTables.SearchTerms]: {
     parseResponse: (
@@ -96,7 +96,7 @@ const tablesParams: {
       getBaseSearchTemplate(
         dataView,
         aggregationFieldName,
-        { search, timeRange, eventType: 'search' },
+        { eventType: 'search', search, timeRange },
         {
           searches: {
             terms: {
@@ -141,7 +141,7 @@ const tablesParams: {
       getBaseSearchTemplate(
         dataView,
         aggregationFieldName,
-        { search, timeRange, eventType: 'search' },
+        { eventType: 'search', search, timeRange },
         {
           formula: {
             aggs: {
@@ -191,7 +191,7 @@ const tablesParams: {
       getBaseSearchTemplate(
         dataView,
         aggregationFieldName,
-        { search, timeRange, eventType: 'search_click' },
+        { eventType: 'search_click', search, timeRange },
         {
           formula: {
             aggs: {
@@ -241,7 +241,7 @@ const tablesParams: {
       getBaseSearchTemplate(
         dataView,
         aggregationFieldName,
-        { search, timeRange },
+        { eventType: 'page_view', search, timeRange },
         {
           formula: {
             aggs: {
@@ -279,7 +279,8 @@ const tablesParams: {
       items:
         response.rawResponse.aggregations?.formula.searches.buckets.map((bucket) => ({
           [ExploreTableColumns.sessions]: bucket.doc_count,
-          [ExploreTableColumns.location]: bucket.key,
+          [ExploreTableColumns.location]: bucket.key[0],
+          countryISOCode: bucket.key[1],
         })) || [],
       totalCount: response.rawResponse.aggregations?.formula.totalCount.value || 0,
     }),
@@ -291,21 +292,24 @@ const tablesParams: {
       getBaseSearchTemplate(
         dataView,
         aggregationFieldName,
-        { search, timeRange, eventType: 'page_view' },
+        { eventType: 'page_view', search, timeRange },
         {
           formula: {
             aggs: {
               ...getTotalCountRequestParams(aggregationFieldName),
               searches: {
-                terms: {
+                multi_terms: {
                   ...getPaginationRequestSizeParams(pageIndex, pageSize),
-                  field: aggregationFieldName,
                   order: sorting
                     ? {
                         [sorting?.field === ExploreTableColumns.sessions ? '_count' : '_key']:
                           sorting?.direction,
                       }
                     : undefined,
+                  terms: [
+                    { field: aggregationFieldName },
+                    { field: 'session.location.country_iso_code' },
+                  ],
                 },
                 ...getPaginationRequestParams(pageIndex, pageSize),
               },

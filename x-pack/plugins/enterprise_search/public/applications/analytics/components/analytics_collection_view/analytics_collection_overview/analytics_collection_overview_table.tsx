@@ -25,6 +25,7 @@ import {
   EuiTableSortingType,
 } from '@elastic/eui/src/components/basic_table/table_types';
 import { UseEuiTheme } from '@elastic/eui/src/services/theme/hooks';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -32,6 +33,7 @@ import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 import { COLLECTION_EXPLORER_PATH } from '../../../routes';
+import { getFlag } from '../../../utils/get_flag';
 import { FilterBy } from '../../../utils/get_formula_by_filter';
 
 import { AnalyticsCollectionExploreTableLogic } from '../analytics_collection_explore_table_logic';
@@ -43,6 +45,7 @@ import {
   ClickedTable,
   ReferrersTable,
   WorsePerformersTable,
+  LocationsTable,
 } from '../analytics_collection_explore_table_types';
 import { FetchAnalyticsCollectionLogic } from '../fetch_analytics_collection_logic';
 
@@ -76,6 +79,13 @@ const tabsByFilter: Record<FilterBy, Array<{ id: ExploreTables; name: string }>>
   ],
   [FilterBy.Sessions]: [
     {
+      id: ExploreTables.Locations,
+      name: i18n.translate(
+        'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTab.topLocations',
+        { defaultMessage: 'Top locations' }
+      ),
+    },
+    {
       id: ExploreTables.Referrers,
       name: i18n.translate(
         'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTab.topReferrers',
@@ -95,9 +105,10 @@ interface TableSetting<T = ExploreTableItem, K = T> {
 }
 
 const tableSettings: {
-  [ExploreTables.SearchTerms]: TableSetting<SearchTermsTable>;
   [ExploreTables.Clicked]: TableSetting<ClickedTable>;
+  [ExploreTables.Locations]: TableSetting<LocationsTable>;
   [ExploreTables.Referrers]: TableSetting<ReferrersTable>;
+  [ExploreTables.SearchTerms]: TableSetting<SearchTermsTable>;
   [ExploreTables.WorsePerformers]: TableSetting<WorsePerformersTable>;
 } = {
   [ExploreTables.SearchTerms]: {
@@ -206,6 +217,46 @@ const tableSettings: {
             <EuiText size="s" color={euiTheme.colors.primaryText}>
               <p>{value}</p>
             </EuiText>
+          ),
+        truncateText: true,
+      },
+      {
+        align: 'right',
+        field: ExploreTableColumns.sessions,
+        name: i18n.translate(
+          'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.session',
+          { defaultMessage: 'Session' }
+        ),
+        sortable: true,
+        truncateText: true,
+      },
+    ],
+    sorting: {
+      readOnly: true,
+      sort: {
+        direction: 'desc',
+        field: ExploreTableColumns.sessions,
+      },
+    },
+  },
+  [ExploreTables.Locations]: {
+    columns: [
+      {
+        field: ExploreTableColumns.location,
+        name: i18n.translate(
+          'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.location',
+          { defaultMessage: 'Location' }
+        ),
+        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string, data: LocationsTable) =>
+          (
+            <EuiFlexGroup gutterSize="m" alignItems="center">
+              <EuiText>
+                <h3>{getFlag(data.countryISOCode)}</h3>
+              </EuiText>
+              <EuiText size="s" color={euiTheme.colors.primaryText}>
+                <p>{value}</p>
+              </EuiText>
+            </EuiFlexGroup>
           ),
         truncateText: true,
       },

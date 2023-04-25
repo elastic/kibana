@@ -45,6 +45,7 @@ export interface ReferrersTable {
 export interface LocationsTable {
   [ExploreTableColumns.location]: string;
   [ExploreTableColumns.sessions]: number;
+  countryISOCode: string;
 }
 
 export type ExploreTableItem =
