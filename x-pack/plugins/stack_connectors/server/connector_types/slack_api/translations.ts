@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { GrokMode } from './grok_mode';
+import { i18n } from '@kbn/i18n';
+
+export const SLACK_CONNECTOR_NAME = i18n.translate('xpack.stackConnectors.slackApi.title', {
+  defaultMessage: 'Slack API',
+});

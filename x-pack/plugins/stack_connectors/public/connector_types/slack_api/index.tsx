@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import 'brace/mode/json';
-import 'brace/mode/text';
-import 'brace/theme/textmate';
+export { getConnectorType as getSlackApiConnectorType } from './slack_api';

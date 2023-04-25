@@ -588,9 +588,7 @@ export const registerEnterpriseSearchIntegrations = (
       icons: [
         {
           type: 'svg',
-          src: http.basePath.prepend(
-            '/plugins/enterpriseSearch/assets/source_icons/microsoft_sql.svg'
-          ),
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/mssql.svg'),
         },
       ],
       shipper: 'enterprise_search',
@@ -651,7 +649,7 @@ export const registerEnterpriseSearchIntegrations = (
       icons: [
         {
           type: 'svg',
-          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/amazon_s3.svg'),
+          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/s3.svg'),
         },
       ],
       shipper: 'enterprise_search',
