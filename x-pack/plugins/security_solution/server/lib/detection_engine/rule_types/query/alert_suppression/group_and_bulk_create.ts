@@ -9,7 +9,6 @@ import type moment from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
-import { uniq } from 'lodash/fp';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { buildTimeRangeFilter } from '../../utils/build_events_query';
 import type { RuleServices, RunOpts, SearchAfterAndBulkCreateReturnType } from '../../types';
