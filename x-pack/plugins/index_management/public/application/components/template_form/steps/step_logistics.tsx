@@ -316,7 +316,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                   path="_meta"
                   component={JsonEditorField}
                   componentProps={{
-                    euiCodeEditorProps: {
+                    codeEditorProps: {
                       height: '280px',
                       'aria-label': i18n.translate(
                         'xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorAriaLabel',

@@ -40,7 +40,7 @@ export const MetaParameter: FunctionComponent<Props> = ({ defaultToggleValue }) 
       config={getFieldConfig('meta')}
       component={JsonEditorField}
       componentProps={{
-        euiCodeEditorProps: {
+        codeEditorProps: {
           ['data-test-subj']: 'metaParameterEditor',
           height: '300px',
           'aria-label': i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterAriaLabel', {
