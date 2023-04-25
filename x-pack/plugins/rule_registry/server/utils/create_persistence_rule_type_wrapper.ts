@@ -193,7 +193,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                         start: Date.parse(alert[TIMESTAMP]),
                         end: Date.parse(alert[TIMESTAMP]),
                       }),
-                      alerts: [formatAlert?.(alert) ?? alert],
+                      alerts: [alert],
                     })
                 );
 
@@ -385,7 +385,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                         start: Date.parse(alert[TIMESTAMP]),
                         end: Date.parse(alert[TIMESTAMP]),
                       }),
-                      alerts: [formatAlert?.(alert) ?? alert],
+                      alerts: [alert],
                     })
                 );
 
