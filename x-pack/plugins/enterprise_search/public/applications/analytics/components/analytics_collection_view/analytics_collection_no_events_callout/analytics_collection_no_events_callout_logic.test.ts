@@ -24,6 +24,7 @@ describe('analyticsEventsExistLogic', () => {
   const DEFAULT_VALUES = {
     data: undefined,
     hasEvents: false,
+    isLoading: false,
     status: Status.IDLE,
   };
 
@@ -33,13 +34,14 @@ describe('analyticsEventsExistLogic', () => {
 
   describe('selectors', () => {
     it('updates when apiSuccess listener triggered', () => {
-      AnalyticsCollectionNoEventsCalloutLogic.actions.apiSuccess({ exist: indexName });
+      AnalyticsCollectionNoEventsCalloutLogic.actions.apiSuccess({ exists: indexName });
 
       expect(AnalyticsCollectionNoEventsCalloutLogic.values).toEqual({
         ...DEFAULT_VALUES,
+        data: { exists: indexName },
         hasEvents: true,
+        isLoading: false,
         status: Status.SUCCESS,
-        data: { exist: indexName },
       });
     });
   });
