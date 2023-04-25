@@ -414,6 +414,7 @@ kibana_vars=(
     xpack.task_manager.event_loop_delay.monitor
     xpack.task_manager.event_loop_delay.warn_threshold
     xpack.uptime.index
+    serverless
 )
 
 longopts=''

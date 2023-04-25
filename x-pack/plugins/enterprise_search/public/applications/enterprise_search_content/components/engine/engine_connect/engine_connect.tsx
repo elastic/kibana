@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
 import {
-  SEARCH_APPLICATION_CONNECT_PATH,
+  SEARCH_APPLICATION_CONTENT_PATH,
   EngineViewTabs,
   SearchApplicationConnectTabs,
 } from '../../../routes';
@@ -55,7 +55,7 @@ export const EngineConnect: React.FC = () => {
   }>();
   const onTabClick = (tab: SearchApplicationConnectTabs) => () => {
     KibanaLogic.values.navigateToUrl(
-      generateEncodedPath(SEARCH_APPLICATION_CONNECT_PATH, {
+      generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
         engineName,
         connectTabId: tab,
       })
