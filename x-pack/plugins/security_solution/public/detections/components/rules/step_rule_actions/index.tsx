@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleObjectId } from '../../../../../common/detection_engine/rule_schema';
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ResponseActionsForm } from '../../../../detection_engine/rule_response_actions/response_actions_form';
@@ -35,8 +36,10 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getSchema } from './get_schema';
 import * as I18n from './translations';
 import { APP_UI_ID } from '../../../../../common/constants';
+import { RuleSnoozeSection } from './rule_snooze_section';
 
 interface StepRuleActionsProps extends RuleStepProps {
+  ruleId?: RuleObjectId; // Rule SO's id (not ruleId)
   defaultValues?: ActionsStepRule | null;
   actionMessageParams: ActionVariables;
   ruleType?: Type;
@@ -68,6 +71,7 @@ const DisplayActionsHeader = () => {
 };
 
 const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
+  ruleId,
   addPadding = false,
   defaultValues,
   isReadOnlyView,
@@ -166,9 +170,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     return application.capabilities.actions.show ? (
       <>
         <DisplayActionsHeader />
+        {ruleId && <RuleSnoozeSection ruleId={ruleId} />}
         {displayActionsOptions}
         {responseActionsEnabled && displayResponseActionsOptions}
-
         <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
         <UseField path="enabled" component={GhostFormField} />
       </>
@@ -178,6 +182,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       </>
     );
   }, [
+    ruleId,
     application.capabilities.actions.show,
     displayActionsOptions,
     displayResponseActionsOptions,

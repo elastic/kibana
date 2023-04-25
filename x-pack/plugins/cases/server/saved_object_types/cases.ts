@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type {
   CoreSetup,
   Logger,
@@ -22,6 +23,7 @@ export const createCaseSavedObjectType = (
   logger: Logger
 ): SavedObjectsType => ({
   name: CASE_SAVED_OBJECT,
+  indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',

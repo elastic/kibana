@@ -7,6 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectReference } from '@kbn/core/server';
 import type { LegacyRuleActions } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_actions_legacy';
 
@@ -15,7 +16,7 @@ interface LegacyActionSO extends LegacyRuleActions {
 }
 
 /**
- * Fetch legacy action sidecar SOs from the .kibana index
+ * Fetch legacy action sidecar SOs from the security solution savedObjects index
  * @param es The ElasticSearch service
  * @param id SO id
  */
@@ -24,6 +25,6 @@ export const getLegacyActionSOById = async (
   id: string
 ): Promise<SearchResponse<LegacyActionSO>> =>
   es.search({
-    index: '.kibana',
+    index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
     q: `type:siem-detection-engine-rule-actions AND _id:"siem-detection-engine-rule-actions:${id}"`,
   });
