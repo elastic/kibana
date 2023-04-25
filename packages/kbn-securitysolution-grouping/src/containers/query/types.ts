@@ -19,6 +19,7 @@ interface RangeAgg {
 }
 
 export type NamedAggregation = Record<string, estypes.AggregationsAggregationContainer>;
+export type MissingAggregation = Record<'nullGroup', estypes.AggregationsAggregationContainer>;
 
 export interface GroupingQueryArgs {
   additionalFilters: BoolAgg[];
@@ -37,7 +38,7 @@ export interface GroupingQueryArgs {
 
 export interface MainAggregation extends NamedAggregation {
   groupByFields: {
-    aggs: NamedAggregation;
+    aggs: MissingAggregation & NamedAggregation;
     multi_terms?: estypes.AggregationsAggregationContainer['multi_terms'];
     terms?: estypes.AggregationsAggregationContainer['terms'];
   };

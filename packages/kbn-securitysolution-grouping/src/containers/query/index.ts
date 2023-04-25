@@ -76,28 +76,16 @@ export const getGroupingQuery = ({
             size,
           },
         },
+        nullGroup: {
+          missing: {
+            field: groupByFields[0],
+          },
+        },
         ...(statsAggregations
           ? statsAggregations.reduce((aggObj, subAgg) => Object.assign(aggObj, subAgg), {})
           : {}),
       },
     },
-
-    ...(groupByFields.length > 1
-      ? // this happens when group by field is rule name, and all alerts have a rule name
-        {}
-      : {
-          nullGrouping: {
-            missing: {
-              field: groupByFields[0],
-            },
-            aggs: {
-              ...(statsAggregations
-                ? statsAggregations.reduce((aggObj, subAgg) => Object.assign(aggObj, subAgg), {})
-                : {}),
-            },
-          },
-        }),
-
     ...(rootAggregations
       ? rootAggregations.reduce((aggObj, subAgg) => Object.assign(aggObj, subAgg), {})
       : {}),

@@ -24,7 +24,7 @@ import { EmptyGroupingComponent } from './empty_results_panel';
 import { countCss, groupingContainerCss, groupingContainerCssLevel } from './styles';
 import { GROUPS_UNIT } from './translations';
 import type { GroupingAggregation, GroupPanelRenderer } from './types';
-import { GroupStatsRenderer, NONE_GROUP_LABEL, OnGroupToggle } from './types';
+import { GroupStatsRenderer, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
 
 export interface GroupingProps<T> {
@@ -80,18 +80,14 @@ const GroupingComponent = <T,>({
   );
 
   const unitCount = data?.unitsCount?.value ?? 0;
-  const nullGroupUnitCount = data?.nullGrouping?.doc_count ?? 0;
-  const totalUnitCount = unitCount + nullGroupUnitCount;
   const unitCountText = useMemo(() => {
-    return `${totalUnitCount.toLocaleString()} ${unit && unit(totalUnitCount)}`;
-  }, [totalUnitCount, unit]);
+    return `${unitCount.toLocaleString()} ${unit && unit(unitCount)}`;
+  }, [unitCount, unit]);
 
   const groupCount = data?.groupsCount?.value ?? 0;
-  const nullGroupCount = nullGroupUnitCount > 0 ? 1 : 0;
-  const totalGroupCount = groupCount + nullGroupCount;
   const groupCountText = useMemo(
-    () => `${totalGroupCount.toLocaleString()} ${GROUPS_UNIT(totalGroupCount)}`,
-    [totalGroupCount]
+    () => `${groupCount.toLocaleString()} ${GROUPS_UNIT(groupCount)}`,
+    [groupCount]
   );
 
   const groupPanels = useMemo(
@@ -99,15 +95,21 @@ const GroupingComponent = <T,>({
       data?.groupByFields?.buckets?.map((groupBucket, groupNumber) => {
         const group = firstNonNullValue(groupBucket.key);
         const groupKey = `group-${groupNumber}-${group}`;
+        const isNullGroup = groupBucket.nullGroup.doc_count > 0;
 
         return (
           <span key={groupKey}>
             <GroupPanel
+              isNullGroup={isNullGroup}
               onGroupClose={onGroupClose}
               extraAction={
                 <GroupStats
                   bucketKey={groupKey}
-                  groupFilter={createGroupFilter(selectedGroup, group)}
+                  groupFilter={
+                    isNullGroup
+                      ? getNullGroupFilter(selectedGroup)
+                      : createGroupFilter(selectedGroup, group)
+                  }
                   groupNumber={groupNumber}
                   statRenderers={
                     groupStatsRenderer && groupStatsRenderer(selectedGroup, groupBucket)
@@ -164,72 +166,6 @@ const GroupingComponent = <T,>({
     ]
   );
 
-  const nullGroupPanels = useMemo(() => {
-    if (data?.nullGrouping == null || data.nullGrouping.doc_count === 0) return null;
-    const groupNumber = totalGroupCount;
-    const group = NONE_GROUP_LABEL;
-    const groupBucket = {
-      ...data.nullGrouping,
-      key: group,
-    };
-    const groupKey = `group-${groupNumber}-${group}`;
-    return (
-      <GroupPanel
-        isNullGroup
-        onGroupClose={onGroupClose}
-        extraAction={
-          <GroupStats
-            bucketKey={groupKey}
-            groupFilter={getNullGroupFilter(selectedGroup)}
-            groupNumber={groupNumber}
-            statRenderers={groupStatsRenderer && groupStatsRenderer(selectedGroup, groupBucket)}
-            takeActionItems={takeActionItems}
-          />
-        }
-        forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
-        groupBucket={groupBucket}
-        groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(selectedGroup, groupBucket)}
-        isLoading={isLoading}
-        onToggleGroup={(isOpen) => {
-          // built-in telemetry: UI-counter
-          tracker?.(
-            METRIC_TYPE.CLICK,
-            getTelemetryEvent.groupToggled({ isOpen, groupingId, groupNumber })
-          );
-          setTrigger({
-            // ...trigger, -> this change will keep only one group at a time expanded and one table displayed
-            [groupKey]: {
-              state: isOpen ? 'open' : 'closed',
-            },
-          });
-          onGroupToggle?.({ isOpen, groupName: group, groupNumber, groupingId });
-        }}
-        renderChildComponent={
-          trigger[groupKey] && trigger[groupKey].state === 'open'
-            ? renderChildComponent
-            : () => <span />
-        }
-        selectedGroup={selectedGroup}
-        groupingLevel={groupingLevel}
-      />
-    );
-  }, [
-    data?.nullGrouping,
-    groupPanelRenderer,
-    groupStatsRenderer,
-    groupingId,
-    groupingLevel,
-    isLoading,
-    onGroupClose,
-    onGroupToggle,
-    renderChildComponent,
-    selectedGroup,
-    takeActionItems,
-    totalGroupCount,
-    tracker,
-    trigger,
-  ]);
-
   const pageCount = useMemo(
     () => (groupCount ? Math.ceil(groupCount / itemsPerPage) : 1),
     [groupCount, itemsPerPage]
@@ -245,7 +181,7 @@ const GroupingComponent = <T,>({
           style={{ paddingBottom: 20, paddingTop: 20 }}
         >
           <EuiFlexItem grow={false}>
-            {totalGroupCount > 0 && totalUnitCount > 0 ? (
+            {groupCount > 0 && unitCount > 0 ? (
               <EuiFlexGroup gutterSize="none">
                 <EuiFlexItem grow={false}>
                   <span css={countCss} data-test-subj="unit-count">
@@ -275,11 +211,9 @@ const GroupingComponent = <T,>({
         {isLoading && (
           <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
         )}
-        {totalGroupCount > 0 ? (
+        {groupCount > 0 ? (
           <>
             {groupPanels}
-            {/* show null grouping on last page only */}
-            {pageCount === activePage + 1 && nullGroupPanels}
             {groupCount > 0 && (
               <>
                 <EuiSpacer size="m" />

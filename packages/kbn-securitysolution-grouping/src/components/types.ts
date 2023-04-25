@@ -6,15 +6,13 @@
  * Side Public License, v 1.
  */
 
-// copied from common/search_strategy/common
 export interface GenericBuckets {
   key: string | string[];
   key_as_string?: string; // contains, for example, formatted dates
   doc_count: number;
 }
-
+export type MissingAggregation = Record<'nullGroup', GenericBuckets>;
 export const NONE_GROUP_KEY = 'none';
-export const NONE_GROUP_LABEL = '-';
 
 export type RawBucket<T> = GenericBuckets & T;
 
@@ -22,9 +20,8 @@ export type RawBucket<T> = GenericBuckets & T;
 // TODO: write developer docs for these fields
 export interface RootAggregation<T> {
   groupByFields?: {
-    buckets?: Array<RawBucket<T>>;
+    buckets?: Array<RawBucket<T> & MissingAggregation>;
   };
-  nullGrouping?: RawBucket<T>;
   groupsCount?: {
     value?: number | null;
   };
