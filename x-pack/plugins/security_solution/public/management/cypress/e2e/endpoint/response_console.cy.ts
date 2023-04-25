@@ -7,6 +7,7 @@
 
 import type { Agent } from '@kbn/fleet-plugin/common';
 import {
+  checkReturnedProcessesTable,
   inputConsoleCommand,
   openResponseConsoleFromEndpointList,
   performCommandInputChecks,
@@ -116,15 +117,7 @@ describe('Response console', () => {
       submitCommand();
       cy.contains('Action pending.').should('exist');
       cy.getByTestSubj('getProcessesSuccessCallout', { timeout: 120000 }).within(() => {
-        ['USER', 'PID', 'ENTITY ID', 'COMMAND'].forEach((header) => {
-          cy.contains(header);
-        });
-
-        cy.get('tbody')
-          .find('tr')
-          .then((rows) => {
-            expect(rows.length).to.be.greaterThan(0);
-          })
+        checkReturnedProcessesTable()
           .find('td')
           .contains('/usr/sbin/cron')
           .then((td) => {
