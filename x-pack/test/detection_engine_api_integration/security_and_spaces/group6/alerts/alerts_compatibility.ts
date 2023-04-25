@@ -571,9 +571,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
-        const rule: SavedQueryRuleCreateProps = getSavedQueryRuleForSignalTesting([
-          `.alerts-security.alerts-default`,
-        ]);
+        const rule: SavedQueryRuleCreateProps = {
+          ...getSavedQueryRuleForSignalTesting([`.alerts-security.alerts-default`]),
+          query: 'agent.name: "security-linux-1.example.dev"',
+        };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
