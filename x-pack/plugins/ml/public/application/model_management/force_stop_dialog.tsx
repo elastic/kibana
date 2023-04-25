@@ -56,9 +56,10 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
     });
   };
 
-  const selectedDeploymentIds = Object.keys(checkboxIdToSelectedMap).filter(
-    (id) => checkboxIdToSelectedMap[id]
-  );
+  const selectedDeploymentIds =
+    model.deployment_ids.length > 1
+      ? Object.keys(checkboxIdToSelectedMap).filter((id) => checkboxIdToSelectedMap[id])
+      : model.deployment_ids;
 
   const deploymentPipelinesMap = useMemo(() => {
     if (!isPopulatedObject(model.pipelines)) return {};
@@ -78,6 +79,9 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
   }, [model.pipelines]);
 
   const pipelineWarning = useMemo<string[]>(() => {
+    if (model.deployment_ids.length === 1 && isPopulatedObject(model.pipelines)) {
+      return Object.keys(model.pipelines);
+    }
     return [
       ...new Set(
         Object.entries(deploymentPipelinesMap)
@@ -85,7 +89,7 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
           .flatMap(([, pipelineNames]) => pipelineNames)
       ),
     ].sort();
-  }, [deploymentPipelinesMap, selectedDeploymentIds]);
+  }, [model, deploymentPipelinesMap, selectedDeploymentIds]);
 
   return (
     <EuiConfirmModal
