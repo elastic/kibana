@@ -187,6 +187,7 @@
     "@kbn/content-management-examples-plugin": "link:examples/content_management_examples",
     "@kbn/content-management-plugin": "link:src/plugins/content_management",
     "@kbn/content-management-table-list": "link:packages/content-management/table_list",
+    "@kbn/content-management-utils": "link:packages/kbn-content-management-utils",
     "@kbn/controls-example-plugin": "link:examples/controls_example",
     "@kbn/controls-plugin": "link:src/plugins/controls",
     "@kbn/core": "link:src/core",

@@ -16,7 +16,6 @@ import type {
   XYChartElementEvent,
 } from '@elastic/charts';
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import numeral from '@elastic/numeral';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { getUnallowedValueRequestItems } from '../allowed_values/helpers';
@@ -28,8 +27,8 @@ import {
   hasAllDataFetchingCompleted,
   INCOMPATIBLE_TAB_ID,
 } from './helpers';
-import { EMPTY_STAT } from '../../helpers';
 import { LoadingEmptyPrompt } from '../loading_empty_prompt';
+import { getIndexPropertiesContainerId } from '../pattern/helpers';
 import { getTabs } from '../tabs/helpers';
 import { getAllIncompatibleMarkdownComments } from '../tabs/incompatible_tab/helpers';
 import * as i18n from './translations';
@@ -40,10 +39,11 @@ import { useUnallowedValues } from '../../use_unallowed_values';
 
 const EMPTY_MARKDOWN_COMMENTS: string[] = [];
 
-interface Props {
+export interface Props {
   addSuccessToast: (toast: { title: string }) => void;
   canUserCreateAndReadCases: () => boolean;
-  defaultNumberFormat: string;
+  formatBytes: (value: number | undefined) => string;
+  formatNumber: (value: number | undefined) => string;
   docsCount: number;
   getGroupByFieldsOnClick: (
     elements: Array<
@@ -76,7 +76,8 @@ interface Props {
 const IndexPropertiesComponent: React.FC<Props> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
-  defaultNumberFormat,
+  formatBytes,
+  formatNumber,
   docsCount,
   getGroupByFieldsOnClick,
   ilmPhase,
@@ -87,11 +88,6 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   theme,
   updatePatternRollup,
 }) => {
-  const formatNumber = useCallback(
-    (value: number | undefined): string =>
-      value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT,
-    [defaultNumberFormat]
-  );
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
 
   const requestItems = useMemo(
@@ -142,7 +138,8 @@ const IndexPropertiesComponent: React.FC<Props> = ({
       getTabs({
         addSuccessToast,
         addToNewCaseDisabled,
-        defaultNumberFormat,
+        formatBytes,
+        formatNumber,
         docsCount,
         getGroupByFieldsOnClick,
         ilmPhase,
@@ -152,13 +149,15 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         pattern,
         patternDocsCount: patternRollup?.docsCount ?? 0,
         setSelectedTabId,
+        stats: patternRollup?.stats ?? null,
         theme,
       }),
     [
       addSuccessToast,
       addToNewCaseDisabled,
-      defaultNumberFormat,
       docsCount,
+      formatBytes,
+      formatNumber,
       getGroupByFieldsOnClick,
       ilmPhase,
       indexName,
@@ -166,6 +165,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
       partitionedFieldMetadata,
       pattern,
       patternRollup?.docsCount,
+      patternRollup?.stats,
       theme,
     ]
   );
@@ -212,11 +212,13 @@ const IndexPropertiesComponent: React.FC<Props> = ({
           partitionedFieldMetadata != null
             ? getAllIncompatibleMarkdownComments({
                 docsCount,
+                formatBytes,
                 formatNumber,
                 ilmPhase,
                 indexName,
                 partitionedFieldMetadata,
                 patternDocsCount: patternRollup.docsCount ?? 0,
+                sizeInBytes: patternRollup.sizeInBytes,
               })
             : EMPTY_MARKDOWN_COMMENTS;
 
@@ -239,6 +241,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     }
   }, [
     docsCount,
+    formatBytes,
     formatNumber,
     ilmPhase,
     indexName,
@@ -265,10 +268,10 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   }
 
   return indexes != null ? (
-    <>
+    <div data-index-properties-container={getIndexPropertiesContainerId({ indexName, pattern })}>
       <EuiTabs>{renderTabs()}</EuiTabs>
       {selectedTabContent}
-    </>
+    </div>
   ) : null;
 };
 IndexPropertiesComponent.displayName = 'IndexPropertiesComponent';

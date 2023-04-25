@@ -171,14 +171,14 @@ describe(`UserActions`, () => {
     userEvent.click(
       within(
         screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-      ).getByTestId('user-action-cancel-markdown')
+      ).getByTestId('editable-cancel-markdown')
     );
 
     await waitFor(() => {
       expect(
         within(
           screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-        ).queryByTestId('user-action-markdown-form')
+        ).queryByTestId('editable-markdown-form')
       ).not.toBeInTheDocument();
     });
   });
@@ -212,14 +212,14 @@ describe(`UserActions`, () => {
     userEvent.click(
       within(
         screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-      ).getByTestId('user-action-save-markdown')
+      ).getByTestId('editable-save-markdown')
     );
 
     await waitFor(() => {
       expect(
         within(
           screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-        ).queryByTestId('user-action-markdown-form')
+        ).queryByTestId('editable-markdown-form')
       ).not.toBeInTheDocument();
 
       expect(patchComment).toBeCalledWith({
@@ -306,14 +306,14 @@ describe(`UserActions`, () => {
     userEvent.click(
       within(
         screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-      ).getByTestId('user-action-save-markdown')
+      ).getByTestId('editable-save-markdown')
     );
 
     await waitFor(() => {
       expect(
         within(
           screen.getAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[1]
-        ).queryByTestId('user-action-markdown-form')
+        ).queryByTestId('editable-markdown-form')
       ).not.toBeInTheDocument();
     });
 

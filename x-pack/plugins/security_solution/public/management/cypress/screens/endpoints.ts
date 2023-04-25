@@ -6,7 +6,7 @@
  */
 
 import { APP_PATH } from '../../../../common/constants';
-import { getEndpointDetailsPath } from '../../common/routing';
+import { getEndpointDetailsPath, getEndpointListPath } from '../../common/routing';
 
 export const AGENT_HOSTNAME_CELL = 'hostnameCellLink';
 export const AGENT_POLICY_CELL = 'policyNameCellLink';
@@ -20,4 +20,8 @@ export const navigateToEndpointPolicyResponse = (
     APP_PATH +
       getEndpointDetailsPath({ name: 'endpointPolicyResponse', selected_endpoint: endpointAgentId })
   );
+};
+
+export const navigateToEndpointList = (): Cypress.Chainable<Cypress.AUTWindow> => {
+  return cy.visit(APP_PATH + getEndpointListPath({ name: 'endpointList' }));
 };
