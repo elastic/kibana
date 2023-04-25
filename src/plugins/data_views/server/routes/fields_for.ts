@@ -17,22 +17,12 @@ import {
 import { IndexPatternsFetcher } from '../fetcher';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
 
-const parseMetaFields = (metaFields: string | string[]): string[] => {
-  let parsedFields: string[] = [];
-  if (typeof metaFields === 'string') {
-    parsedFields = [metaFields];
-  } else {
-    parsedFields = metaFields;
-  }
-  return parsedFields;
-};
-
 const path = '/api/index_patterns/_fields_for_wildcard';
 
 type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
 interface IQuery {
   pattern: string;
-  meta_fields: string[];
+  meta_fields: string | string[];
   type?: string;
   rollup_index?: string;
   allow_no_index?: boolean;
@@ -70,12 +60,12 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
   // not available to get request
   const indexFilter = request.body?.index_filter;
 
-  let parsedFields: string[] = [];
-  try {
-    parsedFields = parseMetaFields(metaFields);
-  } catch (error) {
+  // meta_fields should be sent as an array of strings, rather than a single comma-separated string
+  if (typeof metaFields === 'string' && metaFields.includes(',')) {
     return response.badRequest();
   }
+
+  const parsedFields: string[] = Array.isArray(metaFields) ? metaFields : [metaFields];
 
   try {
     const { fields, indices } = await indexPatterns.getFieldsForWildcard({
