@@ -62,8 +62,8 @@ export const startMlModelDownload = async (
 
   // we're not downloaded yet - let's initiate that...
   const putRequest: MlPutTrainedModelRequest = {
+    // @ts-expect-error @elastic-elasticsearch inference_config can be optional
     body: {
-      inference_config: {},
       input: {
         field_names: ['text_field'],
       },
