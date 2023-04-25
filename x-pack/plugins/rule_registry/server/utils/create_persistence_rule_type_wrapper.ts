@@ -189,7 +189,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                         id: options.rule.id,
                       }),
                       results_link: type.getViewInAppRelativeUrl?.({
-                        rule: options.rule,
+                        rule: { ...options.rule, params: options.params },
                         start: Date.parse(alert[TIMESTAMP]),
                         end: Date.parse(alert[TIMESTAMP]),
                       }),
@@ -381,7 +381,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                         id: options.rule.id,
                       }),
                       results_link: type.getViewInAppRelativeUrl?.({
-                        rule: options.rule,
+                        rule: { ...options.rule, params: options.params },
                         start: Date.parse(alert[TIMESTAMP]),
                         end: Date.parse(alert[TIMESTAMP]),
                       }),
