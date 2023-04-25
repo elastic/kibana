@@ -9,6 +9,7 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import { TimefilterContract, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { EntityField } from '@kbn/ml-anomaly-utils';
 import {
   getBoundsRoundedToInterval,
   TimeBuckets,
@@ -23,7 +24,6 @@ import {
 } from '../explorer/explorer_utils';
 import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
 import { MlResultsService } from './results_service';
-import { EntityField } from '../../../common/util/anomaly_utils';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
 
 /**

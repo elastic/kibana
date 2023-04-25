@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-common';
-import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
+import { getSeverityColor } from '@kbn/ml-anomaly-utils';
 
 const warningLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
   defaultMessage: 'warning',

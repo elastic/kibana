@@ -20,11 +20,11 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { type MlInfluencer, type MlRecordForInfluencer, ML_JOB_AGGREGATION } from '@kbn/ml-common';
 
+import { EntityField, getEntityFieldList } from '@kbn/ml-anomaly-utils';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
-import { EntityField, getEntityFieldList } from '../../../common/util/anomaly_utils';
 import { getDataViewIdFromName } from '../util/index_utils';
 import {
   isSourceDataChartableForDetector,

@@ -11,13 +11,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type MlAnomaliesTableRecord, type MlAnomalyRecordDoc } from '@kbn/ml-common';
 import {
+  type MlAnomaliesTableRecord,
+  type MlAnomalyRecordDoc,
   ML_ANOMALY_SEVERITY,
   ML_ANOMALY_THRESHOLD,
   ML_SEVERITY_COLORS,
-} from '@kbn/ml-common/constants/anomalies';
-import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
+} from '@kbn/ml-common';
+import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_rule';
 
 export interface SeverityType {
   id: ML_ANOMALY_SEVERITY;

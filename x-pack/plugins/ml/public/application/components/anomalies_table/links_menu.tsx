@@ -27,6 +27,7 @@ import type {
   MlCustomUrlAnomalyRecordDoc,
   MlKibanaUrlConfig,
 } from '@kbn/ml-common';
+import { isCategorizationAnomaly, isRuleSupported } from '@kbn/ml-anomaly-utils';
 import { mlJobService } from '../../services/job_service';
 import { getDataViewIdFromName } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
@@ -46,7 +47,6 @@ import {
   getDateFormatTz,
   SourceIndicesWithGeoFields,
 } from '../../explorer/explorer_utils';
-import { isCategorizationAnomaly, isRuleSupported } from '../../../../common/util/anomaly_utils';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useMlKibana } from '../../contexts/kibana';

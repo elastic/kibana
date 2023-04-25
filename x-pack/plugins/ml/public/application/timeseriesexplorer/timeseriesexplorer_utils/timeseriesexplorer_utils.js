@@ -16,7 +16,7 @@ import moment from 'moment-timezone';
 
 import { ML_JOB_AGGREGATION } from '@kbn/ml-common';
 
-import { isMultiBucketAnomaly } from '../../../../common/util/anomaly_utils';
+import { isMultiBucketAnomaly } from '@kbn/ml-anomaly-utils';
 import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
 

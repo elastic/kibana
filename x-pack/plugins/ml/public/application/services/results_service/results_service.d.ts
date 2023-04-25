@@ -6,10 +6,10 @@
  */
 
 import type { RuntimeMappings } from '@kbn/ml-common';
+import type { EntityField } from '@kbn/ml-anomaly-utils';
 import { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
-import { EntityField } from '../../../../common/util/anomaly_utils';
 
 export function resultsServiceProvider(mlApiServices: MlApiServices): {
   getScoresByBucket(

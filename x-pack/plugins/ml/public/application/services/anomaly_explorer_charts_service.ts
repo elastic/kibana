@@ -12,7 +12,7 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { MlRecordForInfluencer } from '@kbn/ml-common';
-import type { EntityField } from '../../../common/util/anomaly_utils';
+import type { EntityField } from '@kbn/ml-anomaly-utils';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { MlApiServices } from './ml_api_service';
 import type { MlResultsService } from './results_service';

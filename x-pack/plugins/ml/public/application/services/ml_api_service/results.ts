@@ -9,6 +9,7 @@
 import { useMemo } from 'react';
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { type MlAnomalyRecordDoc, ML_JOB_ID, ML_PARTITION_FIELD_VALUE } from '@kbn/ml-common';
+import type { EntityField } from '@kbn/ml-anomaly-utils';
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 
@@ -21,7 +22,6 @@ import type {
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 import type { PartitionFieldsConfig } from '../../../../common/types/storage';
-import type { EntityField } from '../../../../common/util/anomaly_utils';
 import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import type { ExplorerChartsData } from '../../../../common/types/results';
 

@@ -7,10 +7,10 @@
 
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
 import { ES_AGGREGATION, ML_ANOMALY_SEVERITY } from '@kbn/ml-common';
+import { getSeverityType } from '@kbn/ml-anomaly-utils';
 import { JobCreatorType, isMultiMetricJobCreator } from '../job_creator';
 import { mlResultsService, ModelPlotOutputResults } from '../../../../services/results_service';
 import { TimeBuckets } from '../../../../util/time_buckets';
-import { getSeverityType } from '../../../../../../common/util/anomaly_utils';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { getScoresByRecord } from './searches';
 import { ChartLoader } from '../chart_loader';

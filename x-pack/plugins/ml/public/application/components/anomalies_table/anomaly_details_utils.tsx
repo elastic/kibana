@@ -23,17 +23,15 @@ import {
   type MlAnomalyRecordDoc,
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-common';
-import { EntityCell, EntityCellFilter } from '../entity_cell';
-import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
-import {
-  showActualForFunction,
-  showTypicalForFunction,
-} from '../../../../common/util/anomaly_utils';
-import { formatValue } from '../../formatters/format_value';
 import {
   getAnomalyScoreExplanationImpactValue,
   getSeverityColor,
-} from '../../../../common/util/anomaly_utils';
+  showActualForFunction,
+  showTypicalForFunction,
+} from '@kbn/ml-anomaly-utils';
+import { EntityCell, EntityCellFilter } from '../entity_cell';
+import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
+import { formatValue } from '../../formatters/format_value';
 import { useMlKibana } from '../../contexts/kibana';
 
 const TIME_FIELD_NAME = 'timestamp';

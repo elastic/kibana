@@ -14,6 +14,12 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import { MlAnomalyRecordDoc, MlRecordForInfluencer } from '@kbn/ml-common';
 import { _DOC_COUNT, DOC_COUNT, ES_AGGREGATION, ML_JOB_AGGREGATION } from '@kbn/ml-common';
+import {
+  aggregationTypeTransform,
+  getEntityFieldList,
+  isMultiBucketAnomaly,
+  type EntityField,
+} from '@kbn/ml-anomaly-utils';
 import type { MlClient } from '../../lib/ml_client';
 import { isRuntimeMappings } from '../../../common';
 import type {
@@ -36,12 +42,6 @@ import {
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
 import { CriteriaField } from './results_service';
-import {
-  aggregationTypeTransform,
-  EntityField,
-  getEntityFieldList,
-  isMultiBucketAnomaly,
-} from '../../../common/util/anomaly_utils';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { CombinedJob, Datafeed } from '../../shared';
 import { parseInterval } from '../../../common/util/parse_interval';

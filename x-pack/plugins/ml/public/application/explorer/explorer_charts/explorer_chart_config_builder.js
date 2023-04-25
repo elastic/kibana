@@ -11,7 +11,7 @@
  */
 
 import { parseInterval } from '../../../../common/util/parse_interval';
-import { getEntityFieldList } from '../../../../common/util/anomaly_utils';
+import { getEntityFieldList } from '@kbn/ml-anomaly-utils';
 import { buildConfigFromDetector } from '../../util/chart_config_builder';
 import { mlJobService } from '../../services/job_service';
 import { mlFunctionToESAggregation } from '../../../../common/util/job_utils';

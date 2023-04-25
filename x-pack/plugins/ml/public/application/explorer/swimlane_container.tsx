@@ -37,6 +37,7 @@ import { i18n } from '@kbn/i18n';
 import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
 import { ML_ANOMALY_THRESHOLD, ML_SEVERITY_COLORS } from '@kbn/ml-common';
+import { getFormattedSeverityScore } from '@kbn/ml-anomaly-utils';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
@@ -60,9 +61,6 @@ declare global {
   }
 }
 
-function getFormattedSeverityScore(score: number): string {
-  return String(parseInt(String(score), 10));
-}
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
  */

@@ -29,7 +29,7 @@ import {
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { MlAnomaliesTableRecordExtended } from '@kbn/ml-common';
-import { getSeverity } from '../../../../common/util/anomaly_utils';
+import { getSeverity } from '@kbn/ml-anomaly-utils';
 import { MAX_CHARS } from './anomalies_table_constants';
 import type { CategoryDefinition } from '../../services/ml_api_service/results';
 import { EntityCellFilter } from '../entity_cell';
