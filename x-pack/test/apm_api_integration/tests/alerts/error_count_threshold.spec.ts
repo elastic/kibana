@@ -8,6 +8,7 @@
 import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { errorCountMessage } from '@kbn/apm-plugin/common/rules/default_action_message';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -39,6 +40,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
     const ALERT_ACTION_INDEX_NAME = 'alert-action-error-count';
 
+    const errorMessage = '[ResponseError] index_not_found_exception';
+    const errorGroupingKey = getErrorGroupingKey(errorMessage);
+
     before(async () => {
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
@@ -55,11 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .timestamp(timestamp)
               .duration(100)
               .failure()
-              .errors(
-                opbeansJava
-                  .error({ message: '[ResponseError] index_not_found_exception' })
-                  .timestamp(timestamp + 50)
-              ),
+              .errors(opbeansJava.error({ message: errorMessage }).timestamp(timestamp + 50)),
             opbeansNode
               .transaction({ transactionName: 'tx-node' })
               .timestamp(timestamp)
@@ -156,7 +156,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 - Threshold: 1
 - Triggered value: 15 errors over the last 1 hr
 - Transaction name: tx-java
-- Error grouping key: 2cb494454edc437679309dc190d692368ae7da490f45aff291fb6f7989437d4a`
+- Error grouping key: ${errorGroupingKey}`
         );
       });
 
@@ -170,10 +170,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-java');
         expect(resp.hits.hits[0]._source).property('service.environment', 'production');
         expect(resp.hits.hits[0]._source).property('transaction.name', 'tx-java');
-        expect(resp.hits.hits[0]._source).property(
-          'error.grouping_key',
-          '2cb494454edc437679309dc190d692368ae7da490f45aff291fb6f7989437d4a'
-        );
+        expect(resp.hits.hits[0]._source).property('error.grouping_key', errorGroupingKey);
       });
 
       it('shows the correct alert count for each service on service inventory', async () => {
