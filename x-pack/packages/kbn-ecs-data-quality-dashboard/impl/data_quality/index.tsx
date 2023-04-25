@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import numeral from '@elastic/numeral';
 import type {
   FlameElementEvent,
   HeatmapElementEvent,
@@ -14,15 +15,16 @@ import type {
   WordCloudElementEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { Body } from './data_quality_panel/body';
-import { IlmPhasesEmptyPrompt } from './ilm_phases_empty_prompt';
+import { EMPTY_STAT } from './helpers';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
   canUserCreateAndReadCases: () => boolean;
   defaultNumberFormat: string;
+  defaultBytesFormat: string;
   getGroupByFieldsOnClick: (
     elements: Array<
       | FlameElementEvent
@@ -54,6 +56,7 @@ interface Props {
 const DataQualityPanelComponent: React.FC<Props> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
+  defaultBytesFormat,
   defaultNumberFormat,
   getGroupByFieldsOnClick,
   ilmPhases,
@@ -63,15 +66,24 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   setLastChecked,
   theme,
 }) => {
-  if (ilmPhases.length === 0) {
-    return <IlmPhasesEmptyPrompt />;
-  }
+  const formatBytes = useCallback(
+    (value: number | undefined): string =>
+      value != null ? numeral(value).format(defaultBytesFormat) : EMPTY_STAT,
+    [defaultBytesFormat]
+  );
+
+  const formatNumber = useCallback(
+    (value: number | undefined): string =>
+      value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT,
+    [defaultNumberFormat]
+  );
 
   return (
     <Body
       addSuccessToast={addSuccessToast}
       canUserCreateAndReadCases={canUserCreateAndReadCases}
-      defaultNumberFormat={defaultNumberFormat}
+      formatBytes={formatBytes}
+      formatNumber={formatNumber}
       getGroupByFieldsOnClick={getGroupByFieldsOnClick}
       ilmPhases={ilmPhases}
       lastChecked={lastChecked}

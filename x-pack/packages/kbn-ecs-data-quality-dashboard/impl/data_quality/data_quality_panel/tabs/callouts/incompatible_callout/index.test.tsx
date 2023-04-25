@@ -21,8 +21,8 @@ import {
   eventCategoryWithUnallowedValues,
   hostNameWithTextMapping,
   sourceIpWithTextMapping,
-} from '../../../../mock/enriched_field_metadata';
-import { TestProviders } from '../../../../mock/test_providers';
+} from '../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
+import { TestProviders } from '../../../../mock/test_providers/test_providers';
 import { EnrichedFieldMetadata } from '../../../../types';
 import { IncompatibleCallout } from '.';
 
