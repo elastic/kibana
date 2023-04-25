@@ -7,6 +7,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import { DISCOVER_APP_TARGET } from '../../common/constants';
 
 const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 
@@ -26,18 +27,21 @@ export type LogsLocator = LocatorPublic<LogsLocatorParams>;
 export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParams> {
   public readonly id = LOGS_LOCATOR_ID;
 
+  constructor(protected readonly appTarget: string) {}
+
   public readonly getLocation = async (params: LogsLocatorParams) => {
     const { parseSearchString } = await import('./helpers');
     const searchString = parseSearchString(params);
 
-    // TODO: check serverless flag
-    // if enabled, use discover locator to return a path to discover
-    // if disabled continue with the normal flow
-    const path = `/stream?${searchString}`;
+    if (this.appTarget === DISCOVER_APP_TARGET) {
+      // TODO: check serverless flag
+      // if enabled, use discover locator to return a path to discover
+      // if disabled continue with the normal flow
+    }
 
     return {
       app: 'logs',
-      path,
+      path: `/stream?${searchString}`,
       state: {},
     };
   };

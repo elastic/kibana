@@ -10,7 +10,10 @@ import moment from 'moment';
 import type { LogsLocatorParams } from './logs_locator';
 import type { NodeLogsLocatorParams } from './node_logs_locator';
 import { findInventoryFields } from '../../common/inventory_models';
-import { replaceLogViewInQueryString } from '../observability_logs/log_view_state';
+import {
+  DEFAULT_LOG_VIEW_ID,
+  replaceLogViewInQueryString,
+} from '../observability_logs/log_view_state';
 import { replaceLogFilterInQueryString } from '../observability_logs/log_stream_query_state';
 import { replaceLogPositionInQueryString } from '../observability_logs/log_stream_position_state/src/url_state_storage_service';
 
@@ -19,7 +22,7 @@ export const parseSearchString = ({
   from,
   to,
   filter = '',
-  logViewId = 'default',
+  logViewId = DEFAULT_LOG_VIEW_ID,
 }: LogsLocatorParams) => {
   return flowRight(
     replaceLogFilterInQueryString({ language: 'kuery', query: filter }, time, from, to),
@@ -31,20 +34,20 @@ export const parseSearchString = ({
 export const constructUrlSearchString = (params: Partial<NodeLogsLocatorParams>) => {
   const { time = 1550671089404, logViewId } = params;
 
-  return `/stream?logView=${getLogView(logViewId)}&logPosition=${getLogPosition(
+  return `/stream?logView=${constructLogView(logViewId)}&logPosition=${constructLogPosition(
     time
-  )}&logFilter=${getLogFilter(params)}`;
+  )}&logFilter=${constructLogFilter(params)}`;
 };
 
-const getLogView = (logViewId: string = 'default') => {
+const constructLogView = (logViewId: string = DEFAULT_LOG_VIEW_ID) => {
   return `(logViewId:${logViewId},type:log-view-reference)`;
 };
 
-const getLogPosition = (time: number = 1550671089404) => {
+const constructLogPosition = (time: number = 1550671089404) => {
   return `(position:(tiebreaker:0,time:${time}))`;
 };
 
-const getLogFilter = ({
+const constructLogFilter = ({
   nodeType,
   nodeId,
   filter,

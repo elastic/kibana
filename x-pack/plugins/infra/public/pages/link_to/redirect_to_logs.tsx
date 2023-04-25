@@ -10,6 +10,7 @@ import { match as RouteMatch, Redirect, RouteComponentProps } from 'react-router
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import { DEFAULT_LOG_VIEW_ID } from '../../observability_logs/log_view_state';
 
 type RedirectToLogsType = RouteComponentProps<{}>;
 
@@ -24,7 +25,7 @@ export const RedirectToLogs = ({ location, match }: RedirectToLogsProps) => {
     services: { locators },
   } = useKibanaContextForPlugin();
 
-  const logViewId = match.params.logViewId || 'default';
+  const logViewId = match.params.logViewId || DEFAULT_LOG_VIEW_ID;
   const filter = getFilterFromLocation(location);
   const time = getTimeFromLocation(location);
 

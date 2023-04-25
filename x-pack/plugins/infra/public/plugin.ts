@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { DISCOVER_APP_TARGET, LOGS_APP_TARGET } from '../common/constants';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
@@ -48,6 +49,7 @@ export class Plugin implements InfraClientPluginClass {
   private logViews: LogViewsService;
   private telemetry: TelemetryService;
   private locators?: InfraLocators;
+  private appTarget: string;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
@@ -57,6 +59,7 @@ export class Plugin implements InfraClientPluginClass {
         this.config.sources?.default?.fields?.message ?? defaultLogViewsStaticConfig.messageFields,
     });
     this.telemetry = new TelemetryService();
+    this.appTarget = this.config.logs.app_target;
   }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
@@ -139,7 +142,7 @@ export class Plugin implements InfraClientPluginClass {
       new LogStreamEmbeddableFactoryDefinition(core.getStartServices)
     );
 
-    if (this.config.logs.app_target === 'discover') {
+    if (this.appTarget === DISCOVER_APP_TARGET) {
       core.application.register({
         id: 'logs-to-discover',
         title: '',
@@ -156,7 +159,7 @@ export class Plugin implements InfraClientPluginClass {
       });
     }
 
-    if (this.config.logs.app_target === 'logs-ui') {
+    if (this.appTarget === LOGS_APP_TARGET) {
       core.application.register({
         id: 'logs',
         title: i18n.translate('xpack.infra.logs.pluginTitle', {
@@ -284,8 +287,12 @@ export class Plugin implements InfraClientPluginClass {
     this.telemetry.setup({ analytics: core.analytics });
 
     // Register Locators
-    const logsLocator = pluginsSetup.share.url.locators.create(new LogsLocatorDefinition());
-    const nodeLogsLocator = pluginsSetup.share.url.locators.create(new NodeLogsLocatorDefinition());
+    const logsLocator = pluginsSetup.share.url.locators.create(
+      new LogsLocatorDefinition(this.appTarget)
+    );
+    const nodeLogsLocator = pluginsSetup.share.url.locators.create(
+      new NodeLogsLocatorDefinition(this.appTarget)
+    );
 
     this.locators = {
       logsLocator,

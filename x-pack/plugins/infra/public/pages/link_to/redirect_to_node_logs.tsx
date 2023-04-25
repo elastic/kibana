@@ -14,6 +14,7 @@ import { InventoryItemType } from '../../../common/inventory_models/types';
 import { LoadingPage } from '../../components/loading_page';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useLogView } from '../../hooks/use_log_view';
+import { DEFAULT_LOG_VIEW_ID } from '../../observability_logs/log_view_state';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
@@ -24,7 +25,7 @@ type RedirectToNodeLogsType = RouteComponentProps<{
 
 export const RedirectToNodeLogs = ({
   match: {
-    params: { nodeId, nodeType, logViewId = 'default' },
+    params: { nodeId, nodeType, logViewId = DEFAULT_LOG_VIEW_ID },
   },
   location,
 }: RedirectToNodeLogsType) => {
