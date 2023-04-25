@@ -72,7 +72,8 @@ export const getMlModelDeploymentStatus = async (
   const modelStatsResponse = await trainedModelsProvider.getTrainedModelsStats(modelRequest);
   if (
     !modelStatsResponse.trained_model_stats ||
-    modelStatsResponse.trained_model_stats.length < 1
+    modelStatsResponse.trained_model_stats.length < 1 ||
+    modelStatsResponse.trained_model_stats[0]?.deployment_stats === undefined
   ) {
     // if we're here - we're downloaded, but not deployed if we can't find the stats
     return getDefaultStatusReturn(MlModelDeploymentState.Downloaded, modelName);
