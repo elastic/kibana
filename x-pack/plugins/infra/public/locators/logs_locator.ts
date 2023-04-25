@@ -7,7 +7,6 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import { parseSearchString } from './helpers';
 
 const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 
@@ -28,6 +27,7 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
   public readonly id = LOGS_LOCATOR_ID;
 
   public readonly getLocation = async (params: LogsLocatorParams) => {
+    const { parseSearchString } = await import('./helpers');
     const searchString = parseSearchString(params);
 
     // TODO: check serverless flag

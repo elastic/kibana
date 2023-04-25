@@ -9,7 +9,6 @@ import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { findInventoryFields } from '../../common/inventory_models';
 import type { InventoryItemType } from '../../common/inventory_models/types';
 import type { LogsLocatorParams } from './logs_locator';
-import { parseSearchString } from './helpers';
 
 const NODE_LOGS_LOCATOR_ID = 'NODE_LOGS_LOCATOR';
 
@@ -24,6 +23,7 @@ export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLoca
   public readonly id = NODE_LOGS_LOCATOR_ID;
 
   public readonly getLocation = async (params: NodeLogsLocatorParams) => {
+    const { parseSearchString } = await import('./helpers');
     const { nodeType, nodeId, filter } = params;
     const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
     const query = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
