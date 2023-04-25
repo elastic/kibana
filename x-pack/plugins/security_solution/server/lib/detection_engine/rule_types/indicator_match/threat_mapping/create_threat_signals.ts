@@ -169,7 +169,7 @@ export const createThreatSignals = async ({
       if (results.createdSignalsCount >= params.maxSignals) {
         if (results.warningMessages.includes(getMaxSignalsWarning())) {
           results.warningMessages = uniq(results.warningMessages);
-        } else {
+        } else if (documentCount > 0) {
           results.warningMessages.push(getMaxSignalsWarning());
         }
         ruleExecutionLogger.debug(
