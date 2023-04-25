@@ -13,7 +13,6 @@ import {
   EuiHeaderLogo,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSideNavItemType,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
@@ -31,42 +30,21 @@ export const Navigation = (props: NavigationProps) => {
   // const { fontSize: navItemFontSize } = useEuiFontSize('s');
 
   const {
-    recentItems: recentItemsFromService,
     loadingCount,
     activeNavItemId,
     ...services
   } = useNavigation();
   const { euiTheme } = useEuiTheme();
 
-  let recentItems: Array<EuiSideNavItemType<unknown>> | undefined;
-  if (recentItemsFromService) {
-    recentItems = [
-      {
-        name: '',
-        id: 'recent_items_root',
-        items: recentItemsFromService.map((item) => ({
-          id: item.id,
-          name: item.label,
-          onClick: () => {
-            // FIXME not implemented
-            // console.log(`Go to ${item.link}`);
-          },
-        })),
-      },
-    ];
-  }
-
   const activeNav = activeNavItemId ?? props.activeNavItemId;
 
   const nav = new NavigationModel(
     services,
-    recentItems,
     props.platformConfig,
     props.solutions,
     activeNav
   );
 
-  const recent = nav.getRecent();
   const solutions = nav.getSolutions();
   const { analytics, ml, devTools, management } = nav.getPlatform();
 
@@ -146,8 +124,6 @@ export const Navigation = (props: NavigationProps) => {
         </EuiCollapsibleNavGroup>
 
         <LinkToCloud />
-
-        {recentItems ? <NavigationBucketHoc {...recent} /> : null}
 
         {solutions.map((solutionBucket, idx) => {
           return <NavigationBucketHoc {...solutionBucket} key={`solution${idx}`} />;

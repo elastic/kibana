@@ -31,21 +31,11 @@ export class NavigationModel {
 
   constructor(
     deps: NavigationModelDeps,
-    private recentItems: Array<EuiSideNavItemType<unknown>> | undefined,
     private platformConfig: NavigationProps['platformConfig'] | undefined,
     private solutions: SolutionProperties[],
     activeNavItemId: string | undefined
   ) {
     this.createSideNavData = createSideNavDataFactory(deps, activeNavItemId);
-  }
-
-  public getRecent(): NavigationBucketProps {
-    return {
-      id: 'recent',
-      icon: 'clock',
-      name: 'Recent',
-      items: this.recentItems,
-    };
   }
 
   private convertToSideNavItems(

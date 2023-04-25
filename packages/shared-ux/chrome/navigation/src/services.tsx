@@ -31,11 +31,6 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   const { basePath } = http;
   const { navigateToUrl } = core.application;
 
-  // FIXME
-  // const recentItems$ = chrome.recentlyAccessed.get$();
-  // const recentItems = useObservable(recentItems$, []);
-  const recentItems = [{ label: 'This is a test', id: 'test', link: 'legendOfZelda' }];
-
   const navIsOpen = useObservable(chrome.getProjectNavIsOpen$(), true);
   const activeNavItemId = useObservable(chrome.getActiveNavItemId$());
   const loadingCount = useObservable(http.getLoadingCount$(), 0);
@@ -48,7 +43,7 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
     loadingCount,
     navIsOpen,
     navigateToUrl,
-    recentItems,
+    recentItems: [], // currently not implemented: https://github.com/elastic/kibana/issues/154488
     registerNavItemClick,
   };
 
