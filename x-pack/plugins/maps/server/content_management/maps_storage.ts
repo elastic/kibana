@@ -13,6 +13,23 @@ import type { MapCrudTypes } from '../../common/content_management';
 
 const searchArgsToSOFindOptions = (args: MapCrudTypes['SearchIn']): SavedObjectsFindOptions => {
   const { query, contentTypeId, options } = args;
+  const { included, excluded } = query.tags || {};
+
+  // todo find a way to reuse this code
+  const hasReference: SavedObjectsFindOptions['hasReference'] = included
+    ? included.map((id) => ({
+        id,
+        type: 'tag',
+      }))
+    : undefined;
+
+  const hasNoReference: SavedObjectsFindOptions['hasNoReference'] = excluded
+    ? excluded.map((id) => ({
+        id,
+        type: 'tag',
+      }))
+    : undefined;
+
   return {
     type: contentTypeId,
     searchFields: options?.onlyTitle ? ['title'] : ['title^3', 'description'],
@@ -21,6 +38,8 @@ const searchArgsToSOFindOptions = (args: MapCrudTypes['SearchIn']): SavedObjects
     perPage: query.limit,
     page: query.cursor ? +query.cursor : undefined,
     defaultSearchOperator: 'AND',
+    hasReference,
+    hasNoReference,
   };
 };
 

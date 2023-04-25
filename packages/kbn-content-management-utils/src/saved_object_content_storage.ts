@@ -41,17 +41,17 @@ type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
 };
 
-function savedObjectToMapItem<Attributes extends object, Item extends SOWithMetadata>(
+function savedObjectToItem<Attributes extends object, Item extends SOWithMetadata>(
   savedObject: SavedObject<Attributes>,
   partial: false
 ): Item;
 
-function savedObjectToMapItem<Attributes extends object, PartialItem extends SOWithMetadata>(
+function savedObjectToItem<Attributes extends object, PartialItem extends SOWithMetadata>(
   savedObject: PartialSavedObject<Attributes>,
   partial: true
 ): PartialItem;
 
-function savedObjectToMapItem<Attributes extends object>(
+function savedObjectToItem<Attributes extends object>(
   savedObject: SavedObject<Attributes> | PartialSavedObject<Attributes>
 ): SOWithMetadata | SOWithMetadataPartial {
   const {
@@ -87,6 +87,7 @@ export const searchArgsToSOFindOptionsDefault = <T extends string>(
 ): SavedObjectsFindOptions => {
   const { query, contentTypeId, options } = params;
   const { included, excluded } = query.tags ?? {};
+
   const hasReference: SavedObjectsFindOptions['hasReference'] = included
     ? included.map((id) => ({
         id,
@@ -178,9 +179,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
           const { value, error: resultError } = transforms.mSearch.out.result.down<
             Types['Item'],
             Types['Item']
-          >(
-            savedObjectToMapItem(savedObject as SavedObjectsFindResult<Types['Attributes']>, false)
-          );
+          >(savedObjectToItem(savedObject as SavedObjectsFindResult<Types['Attributes']>, false));
 
           if (resultError) {
             throw Boom.badRequest(`Invalid response. ${resultError.message}`);
@@ -218,7 +217,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     } = await soClient.resolve<Types['Attributes']>(this.savedObjectType, id);
 
     const response: Types['GetOut'] = {
-      item: savedObjectToMapItem(savedObject, false),
+      item: savedObjectToItem(savedObject, false),
       meta: {
         aliasPurpose,
         aliasTargetId,
@@ -283,7 +282,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       Types['CreateOut'],
       Types['CreateOut']
     >({
-      item: savedObjectToMapItem(savedObject, false),
+      item: savedObjectToItem(savedObject, false),
     });
 
     if (resultError) {
@@ -334,7 +333,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       Types['UpdateOut'],
       Types['UpdateOut']
     >({
-      item: savedObjectToMapItem(partialSavedObject, true),
+      item: savedObjectToItem(partialSavedObject, true),
     });
 
     if (resultError) {
@@ -380,7 +379,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       Types['SearchOut'],
       Types['SearchOut']
     >({
-      hits: response.saved_objects.map((so) => savedObjectToMapItem(so, false)),
+      hits: response.saved_objects.map((so) => savedObjectToItem(so, false)),
       pagination: {
         total: response.total,
       },
