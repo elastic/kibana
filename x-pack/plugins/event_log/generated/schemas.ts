@@ -140,6 +140,7 @@ export const EventSchema = schema.maybe(
         alert: schema.maybe(
           schema.object({
             flapping: ecsBoolean(),
+            maintenance_window_ids: ecsStringMulti(),
             uuid: ecsString(),
             rule: schema.maybe(
               schema.object({
@@ -177,6 +178,7 @@ export const EventSchema = schema.maybe(
                     ),
                   })
                 ),
+                revision: ecsStringOrNumber(),
                 rule_type_id: ecsString(),
               })
             ),

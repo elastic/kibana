@@ -28,6 +28,10 @@ import {
   EuiTextArea,
   EuiTextAreaProps,
 } from '@elastic/eui';
+import {
+  ThrottlingConfigField,
+  ThrottlingConfigFieldProps,
+} from '../fields/throttling/throttling_config_field';
 import { SourceField, SourceFieldProps } from '../fields/source_field';
 import {
   FormattedComboBox as DefaultFormattedComboBox,
@@ -145,4 +149,8 @@ export const RequestBodyField = React.forwardRef<unknown, DefaultRequestBodyFiel
 
 export const ResponseBodyIndexField = React.forwardRef<unknown, DefaultResponseBodyIndexFieldProps>(
   (props, _ref) => <DefaultResponseBodyIndexField {...props} />
+);
+
+export const ThrottlingWrapper = React.forwardRef<unknown, ThrottlingConfigFieldProps>(
+  (props, _ref) => <ThrottlingConfigField {...props} />
 );

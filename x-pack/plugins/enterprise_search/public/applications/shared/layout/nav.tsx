@@ -42,6 +42,28 @@ export const useEnterpriseSearchNav = () => {
         shouldNotCreateHref: true,
         to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
       }),
+      items: [
+        {
+          id: 'elasticsearch',
+          name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
+            defaultMessage: 'Elasticsearch',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: ELASTICSEARCH_PLUGIN.URL,
+          }),
+        },
+        {
+          id: 'searchExperiences',
+          name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
+            defaultMessage: 'Search Experiences',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: SEARCH_EXPERIENCES_PLUGIN.URL,
+          }),
+        },
+      ],
     },
     {
       id: 'content',
@@ -78,22 +100,12 @@ export const useEnterpriseSearchNav = () => {
       }),
     },
     {
-      id: 'enginesSearch',
+      id: 'applications',
       items: [
         {
-          id: 'elasticsearch',
-          name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
-            defaultMessage: 'Elasticsearch',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: ELASTICSEARCH_PLUGIN.URL,
-          }),
-        },
-        {
-          id: 'enterpriseSearchEngines',
-          name: i18n.translate('xpack.enterpriseSearch.nav.enginesTitle', {
-            defaultMessage: 'Engines',
+          id: 'searchApplications',
+          name: i18n.translate('xpack.enterpriseSearch.nav.searchApplicationsTitle', {
+            defaultMessage: 'Search Applications',
           }),
           ...generateNavLink({
             shouldNotCreateHref: true,
@@ -101,27 +113,9 @@ export const useEnterpriseSearchNav = () => {
           }),
         },
         {
-          id: 'searchExperiences',
-          name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
-            defaultMessage: 'Search Experiences',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: SEARCH_EXPERIENCES_PLUGIN.URL,
-          }),
-        },
-      ],
-      name: i18n.translate('xpack.enterpriseSearch.nav.searchTitle', {
-        defaultMessage: 'Search',
-      }),
-    },
-    {
-      id: 'enterpriseSearchAnalytics',
-      items: [
-        {
-          id: 'analytics_collections',
-          name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollectionsTitle', {
-            defaultMessage: 'Collections',
+          id: 'analyticsCollections',
+          name: i18n.translate('xpack.enterpriseSearch.nav.analyticsTitle', {
+            defaultMessage: 'Behavioral Analytics',
           }),
           ...generateNavLink({
             shouldNotCreateHref: true,
@@ -129,8 +123,8 @@ export const useEnterpriseSearchNav = () => {
           }),
         },
       ],
-      name: i18n.translate('xpack.enterpriseSearch.nav.analyticsTitle', {
-        defaultMessage: 'Behavioral Analytics',
+      name: i18n.translate('xpack.enterpriseSearch.nav.applicationsTitle', {
+        defaultMessage: 'Applications',
       }),
     },
     ...(productAccess.hasAppSearchAccess || productAccess.hasWorkplaceSearchAccess
@@ -181,10 +175,10 @@ export const useEnterpriseSearchNav = () => {
 export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?: boolean) => {
   const navItems = useEnterpriseSearchNav();
   if (!engineName) return navItems;
-  const searchItem = navItems.find((item) => item.id === 'enginesSearch');
-  if (!searchItem || !searchItem.items) return navItems;
-  const enginesItem = searchItem.items[1];
-  if (!enginesItem || enginesItem.id !== 'enterpriseSearchEngines') return navItems;
+  const applicationsItem = navItems.find((item) => item.id === 'applications');
+  if (!applicationsItem || !applicationsItem.items) return navItems;
+  const enginesItem = applicationsItem.items?.find((item) => item.id === 'searchApplications');
+  if (!enginesItem || enginesItem.id !== 'searchApplications') return navItems;
 
   const enginePath = `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${ENGINES_PATH}/${engineName}`;
 
@@ -195,39 +189,10 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
           name: engineName,
           ...generateNavLink({
             shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
             to: enginePath,
           }),
           items: [
-            {
-              id: 'enterpriseSearchEngineOverview',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.overviewTitle', {
-                defaultMessage: 'Overview',
-              }),
-              ...generateNavLink({
-                shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.OVERVIEW}`,
-              }),
-            },
-            {
-              id: 'enterpriseSearchEngineIndices',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.indicesTitle', {
-                defaultMessage: 'Indices',
-              }),
-              ...generateNavLink({
-                shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.INDICES}`,
-              }),
-            },
-            {
-              id: 'enterpriseSearchEngineSchema',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.schemaTitle', {
-                defaultMessage: 'Schema',
-              }),
-              ...generateNavLink({
-                shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.SCHEMA}`,
-              }),
-            },
             {
               id: 'enterpriseSearchEnginePreview',
               name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
@@ -239,13 +204,28 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
               }),
             },
             {
-              id: 'enterpriseSearchEngineAPI',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.apiTitle', {
-                defaultMessage: 'API',
+              id: 'enterpriseSearchApplicationsContent',
+              name: i18n.translate('xpack.enterpriseSearch.nav.engine.contentTitle', {
+                defaultMessage: 'Content',
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.API}`,
+                shouldShowActiveForSubroutes: true,
+                to: `${enginePath}/${EngineViewTabs.CONTENT}`,
+              }),
+            },
+            {
+              id: 'enterpriseSearchApplicationConnect',
+              name: i18n.translate(
+                'xpack.enterpriseSearch.nav.applications.searchApplications.connectTitle',
+                {
+                  defaultMessage: 'Connect',
+                }
+              ),
+              ...generateNavLink({
+                shouldNotCreateHref: true,
+                shouldShowActiveForSubroutes: true,
+                to: `${enginePath}/${EngineViewTabs.CONNECT}`,
               }),
             },
           ],
@@ -275,19 +255,17 @@ export const useEnterpriseSearchAnalyticsNav = (
   }
 ) => {
   const navItems = useEnterpriseSearchNav();
-  const collectionNav = navItems.find(
-    (item) =>
-      item.id === 'enterpriseSearchAnalytics' && item.items?.[0]?.id === 'analytics_collections'
-  )?.items?.[0];
+  const applicationsNav = navItems.find((item) => item.id === 'applications');
+  const analyticsNav = applicationsNav?.items?.find((item) => item.id === 'analyticsCollections');
 
-  if (!name || !paths || !collectionNav) return navItems;
+  if (!name || !paths || !analyticsNav) return navItems;
 
-  collectionNav.items = [
+  analyticsNav.items = [
     {
-      id: 'analytics_collections',
+      id: 'analyticsCollection',
       items: [
         {
-          id: 'enterpriseSearchEngineOverview',
+          id: 'analyticsCollectionOverview',
           name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollections.overviewTitle', {
             defaultMessage: 'Overview',
           }),
@@ -297,7 +275,7 @@ export const useEnterpriseSearchAnalyticsNav = (
           }),
         },
         {
-          id: 'enterpriseSearchEngineIndices',
+          id: 'analyticsCollectionExplorer',
           name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollections.explorerTitle', {
             defaultMessage: 'Explorer',
           }),
@@ -307,7 +285,7 @@ export const useEnterpriseSearchAnalyticsNav = (
           }),
         },
         {
-          id: 'enterpriseSearchEngineSchema',
+          id: 'analyticsCollectionIntegration',
           name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollections.integrationTitle', {
             defaultMessage: 'Integration',
           }),

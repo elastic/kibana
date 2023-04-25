@@ -65,6 +65,7 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
             useChartsBaseTheme: () => {},
             useChartsTheme: () => {},
           },
+          activeCursor: () => {},
         },
         data: {},
         dataViews: {
@@ -91,6 +92,7 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         theme: {
           theme$: createTheme$Mock(),
         },
+        triggersActionsUi: { getAddRuleFlyout: {} },
         uiSettings: {
           get: (setting: string) => {
             if (setting === 'dateFormat') {
