@@ -106,7 +106,7 @@ describe('#importSavedObjectsFromStream', () => {
   const createObject = ({
     type = 'foo-type',
     title = 'some-title',
-    managed = undefined, // yea, explicitly declare this as not set to test against existing objects
+    managed = undefined, // explicitly declare undefined so as not set to test against existing objects
   }: { type?: string; title?: string; managed?: boolean } = {}): SavedObject<{
     title: string;
     managed?: boolean;
@@ -506,7 +506,7 @@ describe('#importSavedObjectsFromStream', () => {
         });
 
         const result = await importSavedObjectsFromStream(options);
-        // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
+        // successResults only includes the imported object's type, id, managed, and destinationId (if a new one was generated)
         const successResults = [
           {
             type: obj1.type,
@@ -560,11 +560,11 @@ describe('#importSavedObjectsFromStream', () => {
           createdObjects: [
             { ...obj1, managed: true },
             { ...obj2, managed: true },
-          ], // default applied in createSavedObjects
+          ], // make sure the default isn't applied in createSavedObjects
         });
 
         const result = await importSavedObjectsFromStream(options);
-        // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
+        // successResults only includes the imported object's type, id, managed and destinationId (if a new one was generated)
         const successResults = [
           {
             type: obj1.type,
@@ -622,7 +622,7 @@ describe('#importSavedObjectsFromStream', () => {
         });
 
         const result = await importSavedObjectsFromStream(options);
-        // successResults only includes the imported object's type, id, destinationId (if a new one was generated) and managed
+        // successResults only includes the imported object's type, id, managed and destinationId (if a new one was generated)
         const successResults = [
           {
             type: obj1.type,

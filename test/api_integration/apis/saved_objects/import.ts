@@ -82,17 +82,11 @@ export default function ({ getService }: FtrProviderContext) {
         await kibanaServer.importExport.load(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
-        // await kibanaServer.importExport.load(
-        //   'test/api_integration/fixtures/kbn_archiver/saved_objects/managed_basic.json'
-        // );
       });
       after(async () => {
         await kibanaServer.importExport.unload(
           'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
-        // await kibanaServer.importExport.unload(
-        //   'test/api_integration/fixtures/kbn_archiver/saved_objects/managed_basic.json'
-        // );
       });
 
       it('should return 415 when no file passed in', async () => {

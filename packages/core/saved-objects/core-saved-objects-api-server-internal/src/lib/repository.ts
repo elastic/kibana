@@ -615,7 +615,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           typeMigrationVersion: object.typeMigrationVersion,
           ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
           ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-          managed: setManaged({ optionsManaged, objectManaged: object.managed }), // managed: optionsManaged ?? object.managed ?? false,
+          managed: setManaged({ optionsManaged, objectManaged: object.managed }),
           updated_at: time,
           created_at: time,
           references: object.references || [],
