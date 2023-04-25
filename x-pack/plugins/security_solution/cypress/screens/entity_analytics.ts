@@ -47,6 +47,15 @@ export const ANOMALIES_TABLE =
 
 export const ANOMALIES_TABLE_ROWS = '[data-test-subj="entity_analytics_anomalies"] .euiTableRow';
 
+export const ANOMALIES_TABLE_ENABLE_JOB_BUTTON = '[data-test-subj="enable-job"]';
+
+export const ANOMALIES_TABLE_ENABLE_JOB_LOADER = '[data-test-subj="job-switch-loader"]';
+
+export const ANOMALIES_TABLE_COUNT_COLUMN = '[data-test-subj="anomalies-table-column-count"]';
+
+export const ANOMALIES_TABLE_NEXT_PAGE_BUTTON =
+  '[data-test-subj="entity_analytics_anomalies"] [data-test-subj="pagination-button-next"]';
+
 export const UPGRADE_CONFIRMATION_MODAL = (riskScoreEntity: RiskScoreEntity) =>
   `[data-test-subj="${riskScoreEntity}-risk-score-upgrade-confirmation-modal"]`;
 

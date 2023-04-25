@@ -130,6 +130,7 @@ export function AlertDetails() {
           rule={rule}
           timeZone={timeZone}
           setAlertSummaryFields={setSummaryFields}
+          ruleLink={http.basePath.prepend(paths.observability.ruleDetails(rule.id))}
         />
       )}
     </ObservabilityPageTemplate>
