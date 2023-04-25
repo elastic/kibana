@@ -33,7 +33,7 @@ import {
   useDebouncedValue,
   DimensionEditorSection,
   ColorPicker,
-} from '@kbn/visualization-ui-components';
+} from '@kbn/visualization-ui-components/public';
 import { FormatFactory } from '../../../../../common/types';
 import { isHorizontalChart } from '../../state_helpers';
 import { defaultAnnotationLabel, defaultRangeAnnotationLabel } from '../../annotations/helpers';

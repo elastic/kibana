@@ -7,7 +7,7 @@
 import React, { useCallback } from 'react';
 import { isEqual } from 'lodash';
 import type { Query } from '@kbn/es-query';
-import { validateQuery, FilterQueryInput } from '@kbn/visualization-ui-components';
+import { validateQuery, FilterQueryInput } from '@kbn/visualization-ui-components/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
 import type { FormBasedLayer } from '../types';

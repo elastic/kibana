@@ -33,7 +33,11 @@ import {
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { css } from '@emotion/react';
-import { DebouncedInput, useDebouncedValue, IconSelect } from '@kbn/visualization-ui-components';
+import {
+  DebouncedInput,
+  useDebouncedValue,
+  IconSelect,
+} from '@kbn/visualization-ui-components/public';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';

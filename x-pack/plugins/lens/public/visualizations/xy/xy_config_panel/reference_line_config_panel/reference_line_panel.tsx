@@ -14,7 +14,7 @@ import {
   useDebouncedValue,
   IconSelectSetting,
   ColorPicker,
-} from '@kbn/visualization-ui-components';
+} from '@kbn/visualization-ui-components/public';
 import type { VisualizationDimensionEditorProps } from '../../../../types';
 import { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
 import { FormatFactory } from '../../../../../common/types';

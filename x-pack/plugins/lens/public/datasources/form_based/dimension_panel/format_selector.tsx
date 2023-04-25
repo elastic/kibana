@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiComboBox, EuiSpacer, EuiRange, EuiFieldText } from '@elastic/eui';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
 import { GenericIndexPatternColumn } from '../form_based';
 import { isColumnFormatted } from '../operations/definitions/helpers';
 

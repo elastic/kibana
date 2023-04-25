@@ -14,7 +14,7 @@ import {
   FieldsBucketContainer,
   NewBucketButton,
   DraggableBucketContainer,
-} from '@kbn/visualization-ui-components';
+} from '@kbn/visualization-ui-components/public';
 import { IndexPattern } from '../../../../../types';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import type { TermsIndexPatternColumn } from './types';

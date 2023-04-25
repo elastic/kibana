@@ -16,7 +16,7 @@ import {
   FilterQueryInput,
   FieldOptionValue,
   FieldPicker,
-} from '@kbn/visualization-ui-components';
+} from '@kbn/visualization-ui-components/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { FramePublicAPI } from '../../../../types';
 import type { XYState, XYAnnotationLayerConfig } from '../../types';

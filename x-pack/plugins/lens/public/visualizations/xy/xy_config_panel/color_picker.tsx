@@ -16,7 +16,7 @@ import {
   EuiIcon,
   euiPaletteColorBlind,
 } from '@elastic/eui';
-import { TooltipWrapper } from '@kbn/visualization-ui-components';
+import { TooltipWrapper } from '@kbn/visualization-ui-components/public';
 
 const tooltipContent = {
   auto: i18n.translate('xpack.lens.configPanel.color.tooltip.auto', {

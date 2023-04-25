@@ -25,7 +25,7 @@ import {
 } from '@kbn/data-plugin/public';
 
 import { estypes } from '@elastic/elasticsearch';
-import { isQueryValid } from '@kbn/visualization-ui-components';
+import { isQueryValid } from '@kbn/visualization-ui-components/public';
 import type { DateRange } from '../../../common/types';
 import type {
   FramePublicAPI,

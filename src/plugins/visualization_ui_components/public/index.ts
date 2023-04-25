@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { VisualizationUiComponentsPlugin } from './plugin';
+
 export {
   FieldPicker,
   TruncatedLabel,
@@ -28,3 +30,7 @@ export {
 } from './components';
 
 export type { DataType, FieldOptionValue, FieldOption, IconSet } from './components';
+
+export function plugin() {
+  return new VisualizationUiComponentsPlugin();
+}

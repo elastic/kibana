@@ -8,6 +8,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-visualization-ui-components'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/plugins/visualization_ui_components'],
 };
