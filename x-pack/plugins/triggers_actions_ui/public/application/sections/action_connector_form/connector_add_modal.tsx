@@ -215,7 +215,12 @@ const ConnectorAddModal = ({
   }, []);
 
   return (
-    <EuiModal className="actConnectorModal" data-test-subj="connectorAddModal" onClose={closeModal}>
+    <EuiModal
+      className="actConnectorModal"
+      data-test-subj="connectorAddModal"
+      onClose={closeModal}
+      style={{ width: actionTypeRegistry.get(actionType.id).modalWidth }}
+    >
       <EuiModalHeader>
         <EuiFlexGroup gutterSize="m" alignItems="center">
           {actionTypeModel && actionTypeModel.iconClass ? (

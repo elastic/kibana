@@ -44,7 +44,6 @@
     "@kbn/ui-theme",
     "@kbn/datemath",
     "@kbn/core-capabilities-common",
-    "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
     "@kbn/alerts-ui-shared",
     "@kbn/safer-lodash-set",
@@ -52,7 +51,7 @@
     "@kbn/field-types",
     "@kbn/ecs",
     "@kbn/alerts-as-data-utils",
-    "@kbn/core-ui-settings-common"
+    "@kbn/core-ui-settings-common",
   ],
   "exclude": ["target/**/*"]
 }

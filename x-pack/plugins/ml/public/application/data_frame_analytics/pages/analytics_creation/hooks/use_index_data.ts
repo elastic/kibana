@@ -9,11 +9,13 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiDataGridColumn } from '@elastic/eui';
-import { CoreSetup } from '@kbn/core/public';
 
+import { CoreSetup } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+
 import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../../../common/types/fields';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
@@ -34,7 +36,7 @@ import {
   getProcessedFields,
   getCombinedRuntimeMappings,
 } from '../../../../components/data_grid';
-import { extractErrorMessage } from '../../../../../../common/util/errors';
+
 import { INDEX_STATUS } from '../../../common/analytics';
 import { ml } from '../../../../services/ml_api_service';
 

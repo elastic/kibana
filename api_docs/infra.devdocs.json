@@ -660,6 +660,20 @@
       "children": [
         {
           "parentPluginId": "infra",
+          "id": "def-server.InfraPluginStart.inventoryViews",
+          "type": "Object",
+          "tags": [],
+          "label": "inventoryViews",
+          "description": [],
+          "signature": [
+            "InventoryViewsServiceStart"
+          ],
+          "path": "x-pack/plugins/infra/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
           "id": "def-server.InfraPluginStart.logViews",
           "type": "Object",
           "tags": [],
