@@ -486,7 +486,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               showOnHover
               snoozeSettings={rule}
               loading={!!isLoadingMap[rule.id]}
-              disabled={rule.isEditable}
+              disabled={!rule.isEditable}
               onRuleChanged={onRuleChanged}
               snoozeRule={async (snoozeSchedule) => {
                 await onSnoozeRule(rule, snoozeSchedule);
