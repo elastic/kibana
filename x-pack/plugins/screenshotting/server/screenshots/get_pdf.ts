@@ -27,7 +27,6 @@ export async function getPdf(
       data: await browser.printA4Pdf({ title, ...options }),
       title: null,
       description: null,
-      versionInfo: await browser.getVersion(),
     },
   ];
 

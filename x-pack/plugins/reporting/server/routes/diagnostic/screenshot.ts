@@ -64,12 +64,23 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         .then((screenshot) => {
           counters.usageCounter();
 
-          const { versionInfo, warnings } = screenshot;
-          const logs = ([] as string[]).concat(versionInfo).concat(warnings).join('\n');
-          const body = { success: warnings.length === 0, logs, help: [] };
-
           // NOTE: the screenshot could be returned as a string using `data:image/png;base64,` + results.buffer.toString('base64')
-          return res.ok({ body });
+          if (screenshot.warnings.length) {
+            return res.ok({
+              body: {
+                success: false,
+                help: [],
+                logs: screenshot.warnings,
+              },
+            });
+          }
+          return res.ok({
+            body: {
+              success: true,
+              help: [],
+              logs: '',
+            },
+          });
         })
         .catch((error) => {
           counters.errorCounter();

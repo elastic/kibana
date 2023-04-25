@@ -180,6 +180,10 @@ export class HeadlessChromiumDriverFactory {
         await devTools.send('Performance.enable', { timeDomain: 'timeTicks' });
         const startMetrics = await devTools.send('Performance.getMetrics');
 
+        // Log version info for debugging / maintenance
+        const versionInfo = await devTools.send('Browser.getVersion');
+        logger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
+
         await page.emulateTimezone(browserTimezone);
 
         // Set the default timeout for all navigation methods to the openUrl timeout

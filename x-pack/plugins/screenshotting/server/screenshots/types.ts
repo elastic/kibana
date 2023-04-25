@@ -32,9 +32,4 @@ export interface Screenshot {
    * Screenshot description.
    */
   description: string | null;
-
-  /**
-   * Chromium browser version info
-   */
-  versionInfo: string;
 }
