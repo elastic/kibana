@@ -1901,6 +1901,12 @@ export default function ({ getService }: FtrProviderContext) {
                     positive: ['Saved', 'saved'],
                   },
                   status: [200],
+                  json: [
+                    {
+                      description: 'check status',
+                      expression: 'foo.bar == "myValue"',
+                    },
+                  ],
                 },
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
@@ -1909,6 +1915,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: 900,
                 },
                 'response.include_headers': false,
                 schedule: 60,
@@ -1962,6 +1969,12 @@ export default function ({ getService }: FtrProviderContext) {
                     positive: ['Saved', 'saved'],
                   },
                   status: [200],
+                  json: [
+                    {
+                      description: 'check status',
+                      expression: 'foo.bar == "myValue"',
+                    },
+                  ],
                 },
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
@@ -1970,6 +1983,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: 900,
                 },
                 'response.include_headers': false,
                 schedule: 60,
@@ -2024,6 +2038,12 @@ export default function ({ getService }: FtrProviderContext) {
                     positive: ['Saved', 'saved'],
                   },
                   status: [200],
+                  json: [
+                    {
+                      description: 'check status',
+                      expression: 'foo.bar == "myValue"',
+                    },
+                  ],
                 },
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
@@ -2032,6 +2052,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: 900,
                 },
                 'response.include_headers': false,
                 schedule: 60,
