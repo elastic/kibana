@@ -16,9 +16,12 @@ import { getServerlessIcon } from '../agent_icon/get_serverless_icon';
 import { CloudDetails } from './cloud_details';
 import { ServerlessDetails } from './serverless_details';
 import { ContainerDetails } from './container_details';
+import { OTelDetails } from './otel_details';
 import { IconPopover } from './icon_popover';
 import { ServiceDetails } from './service_details';
 import { ServerlessType } from '../../../../common/serverless';
+import { isOpenTelemetryAgentName } from '../../../../common/agent_name';
+import openTelemetryIcon from '../agent_icon/icons/opentelemetry.svg';
 
 interface Props {
   serviceName: string;
@@ -70,7 +73,13 @@ export function getContainerIcon(container?: ContainerType) {
   }
 }
 
-type Icons = 'service' | 'container' | 'serverless' | 'cloud' | 'alerts';
+type Icons =
+  | 'service'
+  | 'opentelemetry'
+  | 'container'
+  | 'serverless'
+  | 'cloud'
+  | 'alerts';
 
 export interface PopoverItem {
   key: Icons;
@@ -141,6 +150,23 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
         defaultMessage: 'Service',
       }),
       component: <ServiceDetails service={details?.service} />,
+    },
+    {
+      key: 'opentelemetry',
+      icon: {
+        type: openTelemetryIcon,
+      },
+      isVisible:
+        !!icons?.agentName && isOpenTelemetryAgentName(icons.agentName),
+      title: i18n.translate('xpack.apm.serviceIcons.opentelemetry', {
+        defaultMessage: 'OpenTelemetry',
+      }),
+      component: (
+        <OTelDetails
+          opentelemetry={details?.opentelemetry}
+          agentName={icons?.agentName}
+        />
+      ),
     },
     {
       key: 'container',

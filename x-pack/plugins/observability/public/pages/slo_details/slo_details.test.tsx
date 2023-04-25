@@ -54,7 +54,7 @@ const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       application: { navigateToUrl: mockNavigate },
-      charts: chartPluginMock.createSetupContract(),
+      charts: chartPluginMock.createStartContract(),
       http: {
         basePath: {
           prepend: mockBasePathPrepend,

@@ -149,7 +149,7 @@ export interface UsageData extends UsageStats {
 }
 
 interface CollectorDeps {
-  kibanaIndex: string;
+  getIndexForType: (type: string) => Promise<string>;
   features: PluginsSetup['features'];
   licensing: PluginsSetup['licensing'];
   usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
@@ -453,11 +453,12 @@ export function getSpacesUsageCollector(
       },
     },
     fetch: async ({ esClient }: CollectorFetchContext) => {
-      const { licensing, kibanaIndex, features, usageStatsServicePromise } = deps;
+      const { licensing, getIndexForType, features, usageStatsServicePromise } = deps;
       const license = await firstValueFrom(licensing.license$);
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
 
-      const usageData = await getSpacesUsage(esClient, kibanaIndex, features, available);
+      const spaceIndex = await getIndexForType('space');
+      const usageData = await getSpacesUsage(esClient, spaceIndex, features, available);
       const usageStats = await getUsageStats(usageStatsServicePromise, available);
 
       return {

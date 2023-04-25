@@ -432,8 +432,10 @@ export const performBulkActionRoute = (
                 }
 
                 let shouldDuplicateExceptions = true;
+                let shouldDuplicateExpiredExceptions = true;
                 if (body.duplicate !== undefined) {
                   shouldDuplicateExceptions = body.duplicate.include_exceptions;
+                  shouldDuplicateExpiredExceptions = body.duplicate.include_expired_exceptions;
                 }
 
                 const duplicateRuleToCreate = await duplicateRule({
@@ -449,6 +451,7 @@ export const performBulkActionRoute = (
                   ? await duplicateExceptions({
                       ruleId: rule.params.ruleId,
                       exceptionLists: rule.params.exceptionsList,
+                      includeExpiredExceptions: shouldDuplicateExpiredExceptions,
                       exceptionsClient,
                     })
                   : [];
