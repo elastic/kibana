@@ -665,6 +665,10 @@ Elastic.
 |An awesome Kibana reporting plugin
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/reporting_export_types/README.md[reportingExportTypes]
+|There are three constructs that interact: the ReportingPlugin, the ExportTypesPlugin and the ExportTypesRegistry.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/rollup/README.md[rollup]
 |Welcome to the Kibana rollup plugin! This plugin provides Kibana support for Elasticsearch's rollup feature. Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
 
