@@ -59,7 +59,8 @@ export function useRunOnceErrors({
 
   const locationErrorReasons = useMemo(() => {
     return (locationErrors ?? [])
-      .map(({ error }) => error.reason)
+      .map(({ error }) => error?.reason)
+      .filter((reason) => !!reason)
       .filter((reason, i, arr) => arr.indexOf(reason) === i);
   }, [locationErrors]);
   const hasBlockingError =
@@ -69,7 +70,13 @@ export function useRunOnceErrors({
   const errorMessages = useMemo(() => {
     if (hasBlockingError) {
       return locationErrorReasons.length === 1
-        ? [{ name: 'Error', message: locationErrorReasons[0], title: RunErrorLabel }]
+        ? [
+            {
+              name: 'Error',
+              message: locationErrorReasons[0] ?? PushErrorService,
+              title: RunErrorLabel,
+            },
+          ]
         : [{ name: 'Error', message: PushErrorService, title: PushErrorLabel }];
     } else if (locationErrors?.length > 0) {
       // If only some of the locations were unsuccessful
@@ -78,7 +85,7 @@ export function useRunOnceErrors({
         .filter((locationWithError) => !!locationWithError.location)
         .map(({ location, error }) => ({
           name: 'Error',
-          message: getLocationTestErrorLabel(location.label, error.reason),
+          message: getLocationTestErrorLabel(location.label, error?.reason ?? ''),
           title: RunErrorLabel,
         }));
     }
