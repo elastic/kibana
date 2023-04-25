@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { debug } from '../../common/debug_log';
 import { Asset, AssetType, Relation, RelationField } from '../../common/types_api';
 import { ASSETS_INDEX_PREFIX } from '../constants';
@@ -31,8 +31,34 @@ export async function getRelatedAssets({
   relation,
   type,
 }: GetRelatedAssetsOptions): Promise<Asset[]> {
-  // Maybe it makes the most sense to validate the filters here?
   const relationField = relationToIndirectField(relation);
+  const must: QueryDslQueryContainer[] = [
+    {
+      terms: {
+        [relationField]: [ean],
+      },
+    },
+  ];
+
+  if (type?.length) {
+    must.push({
+      terms: {
+        ['asset.type']: type,
+      },
+    });
+  }
+
+  const mustNot: QueryDslQueryContainer[] =
+    excludeEans && excludeEans.length
+      ? [
+          {
+            terms: {
+              'asset.ean': excludeEans,
+            },
+          },
+        ]
+      : [];
+
   const dsl: SearchRequest = {
     index: ASSETS_INDEX_PREFIX + '*',
     size,
@@ -48,6 +74,8 @@ export async function getRelatedAssets({
             },
           },
         ],
+        must,
+        must_not: mustNot,
       },
     },
     collapse: {
@@ -59,34 +87,6 @@ export async function getRelatedAssets({
       },
     },
   };
-
-  const musts: QueryDslQueryContainer = [
-    {
-      terms: {
-        [relationField]: [ean],
-      },
-    },
-  ];
-
-  if (type?.length) {
-    musts.push({
-      terms: {
-        ['asset.type']: type,
-      },
-    });
-  }
-
-  dsl.query!.bool!.must = musts;
-
-  if (excludeEans && excludeEans.length) {
-    dsl.query!.bool!.must_not = [
-      {
-        terms: {
-          'asset.ean': excludeEans,
-        },
-      },
-    ];
-  }
 
   debug('Performing Asset Query', '\n\n', JSON.stringify(dsl, null, 2));
 
