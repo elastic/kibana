@@ -11,7 +11,19 @@
     "server/**/*.ts",
     "../../typings/**/*"
   ],
-  "kbn_references": [],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/features-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/screenshotting-plugin",
+    "@kbn/security-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/reporting-plugin",
+    "@kbn/reporting-export-types",
+  ],
   "exclude": [
     "target/**/*",
   ]

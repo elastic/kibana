@@ -10,7 +10,6 @@
     "@kbn/discover-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/kibana-react-plugin",
-    "@kbn/kibana-utils-plugin",
     "@kbn/management-plugin",
     "@kbn/screenshot-mode-plugin",
     "@kbn/share-plugin",
