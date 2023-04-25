@@ -28,7 +28,7 @@ export const CspCustomAssetsExtension = () => {
       }),
       description: i18n.translate(
         'xpack.csp.createPackagePolicy.customAssetsTab.findingsViewLabel',
-        { defaultMessage: 'View CSP Findings ' }
+        { defaultMessage: 'View Vulnerability Findings ' }
       ),
     },
   ];
@@ -70,7 +70,7 @@ export const CspCustomAssetsExtension = () => {
           <CustomAssetsAccordion
             views={viewsCNVM}
             initialIsOpen
-            CSPDropdown="Vulnerability Management"
+            CSPDropdown="Cloud Native Vulnerability Management"
           />
         </>
       ) : (
