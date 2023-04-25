@@ -128,7 +128,12 @@ export function showPlaceholderUntil<TPlacementMethodArgs extends IPanelPlacemen
   // this is useful as sometimes panels can load faster than the placeholder one (i.e. by value embeddables)
   this.untilEmbeddableLoaded(originalPanelState.explicitInput.id)
     .then(() => newStateComplete)
-    .then((newPanelState: Partial<PanelState>) =>
-      this.replacePanel(placeholderPanelState, newPanelState)
-    );
+    .then(async (newPanelState: Partial<PanelState>) => {
+      const panelId = await this.replacePanel(placeholderPanelState, newPanelState);
+
+      if (placementArgs?.scrollToPanel) {
+        this.setScrollToPanelId(panelId);
+        this.setHighlightPanelId(panelId);
+      }
+    });
 }

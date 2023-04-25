@@ -22,7 +22,7 @@ import type {
 } from '../../../../../common/detection_engine/rule_monitoring';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { RuleSnoozeBadge } from '../../../components/rule_snooze_badge';
+import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
@@ -46,7 +46,6 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
 import { MlRuleWarningPopover } from './ml_rule_warning_popover';
-import * as rulesTableI18n from './translations';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -109,33 +108,15 @@ const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): Ta
 };
 
 const useRuleSnoozeColumn = (): TableColumn => {
-  const {
-    state: { rulesSnoozeSettings },
-  } = useRulesTableContext();
-
   return useMemo(
     () => ({
       field: 'snooze',
       name: i18n.COLUMN_SNOOZE,
-      render: (_, rule: Rule) => {
-        const snoozeSettings = rulesSnoozeSettings.data[rule.id];
-        const { isFetching, isError } = rulesSnoozeSettings;
-
-        return (
-          <RuleSnoozeBadge
-            snoozeSettings={snoozeSettings}
-            error={
-              isError || (!snoozeSettings && !isFetching)
-                ? rulesTableI18n.UNABLE_TO_FETCH_RULES_SNOOZE_SETTINGS
-                : undefined
-            }
-          />
-        );
-      },
+      render: (_, rule: Rule) => <RuleSnoozeBadge ruleId={rule.id} />,
       width: '100px',
       sortable: false,
     }),
-    [rulesSnoozeSettings]
+    []
   );
 };
 
