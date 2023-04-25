@@ -8,17 +8,17 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { DISCOVER_APP_TARGET } from '../../common/constants';
-import { InfraClientCoreSetup } from '../types';
+import type { InfraClientCoreSetup, QueryTimeRange } from '../types';
 
 const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 
 export interface LogsLocatorParams extends SerializableRecord {
   /** Defines log position */
   time: number;
-  /** Defines from timestamp, defaults to one hour before time property */
-  from?: number;
-  /** Defines to timestamp, defaults to one hour after time property */
-  to?: number;
+  /**
+   * Optionally set the time range in the time picker.
+   */
+  timeRange?: QueryTimeRange;
   filter?: string;
   logViewId?: string;
 }

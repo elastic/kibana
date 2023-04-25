@@ -19,13 +19,12 @@ import { replaceLogPositionInQueryString } from '../observability_logs/log_strea
 
 export const parseSearchString = ({
   time,
-  from,
-  to,
+  timeRange,
   filter = '',
   logViewId = DEFAULT_LOG_VIEW_ID,
 }: LogsLocatorParams) => {
   return flowRight(
-    replaceLogFilterInQueryString({ language: 'kuery', query: filter }, time, from, to),
+    replaceLogFilterInQueryString({ language: 'kuery', query: filter }, time, timeRange),
     replaceLogPositionInQueryString(time),
     replaceLogViewInQueryString({ type: 'log-view-reference', logViewId })
   )('');
@@ -51,8 +50,7 @@ const constructLogFilter = ({
   nodeType,
   nodeId,
   filter,
-  from,
-  to,
+  timeRange,
   time,
 }: Partial<NodeLogsLocatorParams>) => {
   let finalFilter = filter || '';
@@ -68,8 +66,13 @@ const constructLogFilter = ({
 
   if (!time) return `${query})`;
 
-  const fromDate = from ? addHoursToTimestamp(from, 0) : addHoursToTimestamp(time, -1);
-  const toDate = to ? addHoursToTimestamp(to, 0) : addHoursToTimestamp(time, 1);
+  const fromDate = timeRange?.from
+    ? addHoursToTimestamp(timeRange.from, 0)
+    : addHoursToTimestamp(time, -1);
+
+  const toDate = timeRange?.to
+    ? addHoursToTimestamp(timeRange.to, 0)
+    : addHoursToTimestamp(time, 1);
 
   return `${query},timeRange:(from:'${fromDate}',to:'${toDate}'))`;
 };
