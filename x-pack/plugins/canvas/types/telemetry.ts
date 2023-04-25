@@ -8,11 +8,10 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 /**
-  Function for collecting information about canvas usage
+ Function for collecting information about canvas usage
  */
 export type TelemetryCollector = (
-  /** The server instance */
-  kibanaIndex: string,
+  getIndexForType: (type: string) => Promise<string>,
   /** Function for calling elasticsearch */
   esClient: ElasticsearchClient
 ) => Record<string, any>;
