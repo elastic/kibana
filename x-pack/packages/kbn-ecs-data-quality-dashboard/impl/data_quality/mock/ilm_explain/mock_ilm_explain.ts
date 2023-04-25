@@ -48,4 +48,8 @@ export const mockIlmExplain: Record<string, IlmExplainLifecycleLifecycleExplain>
       modified_date_in_millis: 1675536751205,
     },
   },
+  'auditbeat-custom-index-1': {
+    index: 'auditbeat-custom-index-1',
+    managed: false,
+  },
 };

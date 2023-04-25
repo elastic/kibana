@@ -6,7 +6,7 @@
  */
 
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
-import { sortBy } from 'lodash/fp';
+import { orderBy } from 'lodash/fp';
 
 import { getDocsCount } from '../../../../helpers';
 import type { IndexToCheck, PatternRollup } from '../../../../types';
@@ -34,14 +34,14 @@ export const getAllIndicesToCheck = (
     return a.localeCompare(b);
   });
 
-  // return all `IndexToCheck` sorted first by pattern A-Z, and then by `docsCount` within the pattern
+  // return all `IndexToCheck` sorted first by pattern A-Z:
   return sortedPatterns.reduce<IndexToCheck[]>((acc, pattern) => {
-    const indexNames = patternIndexNames[pattern] ?? [];
+    const indexNames = patternIndexNames[pattern];
     const indicesToCheck = indexNames.map<IndexToCheck>((indexName) =>
       getIndexToCheck({ indexName, pattern })
     );
 
-    const sortedIndicesToCheck = sortBy('indexName', indicesToCheck).reverse();
+    const sortedIndicesToCheck = orderBy(['indexName'], ['desc'], indicesToCheck);
 
     return [...acc, ...sortedIndicesToCheck];
   }, []);
