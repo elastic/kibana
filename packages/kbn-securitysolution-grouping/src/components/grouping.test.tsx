@@ -14,104 +14,15 @@ import { createGroupFilter } from './accordion_panel/helpers';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { getTelemetryEvent } from '../telemetry/const';
 
+import { mockGroupingProps, rule1Name, rule2Name } from './grouping.mock';
+
 const renderChildComponent = jest.fn();
 const takeActionItems = jest.fn();
 const mockTracker = jest.fn();
-const rule1Name = 'Rule 1 name';
-const rule1Desc = 'Rule 1 description';
-const rule2Name = 'Rule 2 name';
-const rule2Desc = 'Rule 2 description';
 
 const testProps = {
-  data: {
-    groupsCount: {
-      value: 2,
-    },
-    groupByFields: {
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 0,
-      buckets: [
-        {
-          key: [rule1Name, rule1Desc],
-          key_as_string: `${rule1Name}|${rule1Desc}`,
-          doc_count: 1,
-          hostsCountAggregation: {
-            value: 1,
-          },
-          ruleTags: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [],
-          },
-          alertsCount: {
-            value: 1,
-          },
-          severitiesSubAggregation: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              {
-                key: 'low',
-                doc_count: 1,
-              },
-            ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
-          usersCountAggregation: {
-            value: 1,
-          },
-        },
-        {
-          key: [rule2Name, rule2Desc],
-          key_as_string: `${rule2Name}|${rule2Desc}`,
-          doc_count: 1,
-          hostsCountAggregation: {
-            value: 1,
-          },
-          ruleTags: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [],
-          },
-          unitsCount: {
-            value: 1,
-          },
-          severitiesSubAggregation: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              {
-                key: 'low',
-                doc_count: 1,
-              },
-            ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
-          usersCountAggregation: {
-            value: 1,
-          },
-        },
-      ],
-    },
-    unitsCount: {
-      value: 2,
-    },
-  },
-  groupingId: 'test-grouping-id',
-  isLoading: false,
-  pagination: {
-    pageIndex: 0,
-    pageSize: 25,
-    onChangeItemsPerPage: jest.fn(),
-    onChangePage: jest.fn(),
-    itemsPerPageOptions: [10, 25, 50, 100],
-  },
+  ...mockGroupingProps,
   renderChildComponent,
-  selectedGroup: 'kibana.alert.rule.name',
   takeActionItems,
   tracker: mockTracker,
 };

@@ -129,16 +129,13 @@
           {
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.AddVersionOpts.version",
-            "type": "Uncategorized",
+            "type": "string",
             "tags": [
               "experimental"
             ],
             "label": "version",
             "description": [
               "\nVersion to assign to this route"
-            ],
-            "signature": [
-              "`${number}`"
             ],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,
@@ -7367,7 +7364,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\" | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -7432,7 +7429,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\" | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -7497,7 +7494,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\" | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -7562,7 +7559,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\" | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -7627,7 +7624,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\" | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -7758,14 +7755,15 @@
         "type": "Type",
         "tags": [
           "note",
+          "note",
           "experimental"
         ],
         "label": "ApiVersion",
         "description": [
-          "\nA Kibana HTTP API version"
+          "\nA Kibana HTTP API version\n"
         ],
         "signature": [
-          "`${number}`"
+          "string"
         ],
         "path": "packages/core/http/core-http-common/src/versioning.ts",
         "deprecated": false,
@@ -10110,7 +10108,7 @@
             "section": "def-common.RouteConfigOptions",
             "text": "RouteConfigOptions"
           },
-          "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\" | undefined; }"
+          "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; }"
         ],
         "path": "packages/core/http/core-http-server/src/versioning/types.ts",
         "deprecated": false,
@@ -10180,7 +10178,7 @@
                 "section": "def-common.RouteConfigOptions",
                 "text": "RouteConfigOptions"
               },
-              "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\" | undefined; }"
+              "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; }"
             ],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,

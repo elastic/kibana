@@ -14,6 +14,24 @@ import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { ServiceConfig } from '../../common/config';
 import axios from 'axios';
 import { LocationStatus, PublicLocations } from '../../common/runtime_types';
+import { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
+
+const licenseMock: LicenseGetResponse = {
+  license: {
+    status: 'active',
+    uid: '1d34eb9f-e66f-47d1-8d24-cd60d187587a',
+    type: 'trial',
+    issue_date: '2022-05-05T14:25:00.732Z',
+    issue_date_in_millis: 165176070074432,
+    expiry_date: '2022-06-04T14:25:00.732Z',
+    expiry_date_in_millis: 165435270073332,
+    max_nodes: 1000,
+    max_resource_units: null,
+    issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+    issuer: 'elasticsearch',
+    start_date_in_millis: -1,
+  },
+};
 
 jest.mock('axios', () => jest.fn());
 jest.mock('@kbn/server-http-tools', () => ({
@@ -167,7 +185,7 @@ describe('callAPI', () => {
     await apiClient.callAPI('POST', {
       monitors: testMonitors,
       output,
-      licenseLevel: 'trial',
+      license: licenseMock.license,
     });
 
     expect(spy).toHaveBeenCalledTimes(3);
@@ -177,12 +195,11 @@ describe('callAPI', () => {
       1,
       {
         isEdit: undefined,
-        runOnce: undefined,
         monitors: testMonitors.filter((monitor: any) =>
           monitor.locations.some((loc: any) => loc.id === 'us_central')
         ),
         output,
-        licenseLevel: 'trial',
+        license: licenseMock.license,
       },
       'POST',
       devUrl
@@ -192,12 +209,11 @@ describe('callAPI', () => {
       2,
       {
         isEdit: undefined,
-        runOnce: undefined,
         monitors: testMonitors.filter((monitor: any) =>
           monitor.locations.some((loc: any) => loc.id === 'us_central_qa')
         ),
         output,
-        licenseLevel: 'trial',
+        license: licenseMock.license,
       },
       'POST',
       'https://qa.service.elstc.co'
@@ -207,12 +223,11 @@ describe('callAPI', () => {
       3,
       {
         isEdit: undefined,
-        runOnce: undefined,
         monitors: testMonitors.filter((monitor: any) =>
           monitor.locations.some((loc: any) => loc.id === 'us_central_staging')
         ),
         output,
-        licenseLevel: 'trial',
+        license: licenseMock.license,
       },
       'POST',
       'https://qa.service.stg.co'
@@ -226,6 +241,7 @@ describe('callAPI', () => {
         output,
         stack_version: '8.7.0',
         license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
       },
       headers: {
         Authorization: 'Basic ZGV2OjEyMzQ1',
@@ -245,6 +261,7 @@ describe('callAPI', () => {
         output,
         stack_version: '8.7.0',
         license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
       },
       headers: {
         Authorization: 'Basic ZGV2OjEyMzQ1',
@@ -264,6 +281,7 @@ describe('callAPI', () => {
         output,
         stack_version: '8.7.0',
         license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
       },
       headers: {
         Authorization: 'Basic ZGV2OjEyMzQ1',
@@ -284,15 +302,15 @@ describe('callAPI', () => {
     });
     expect(logger.debug).toHaveBeenNthCalledWith(
       2,
-      'Successfully called service location https://service.dev with method POST with 4 monitors '
+      'Successfully called service location https://service.devundefined with method POST with 4 monitors'
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       4,
-      'Successfully called service location https://qa.service.elstc.co with method POST with 4 monitors '
+      'Successfully called service location https://qa.service.elstc.coundefined with method POST with 4 monitors'
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
       6,
-      'Successfully called service location https://qa.service.stg.co with method POST with 1 monitors '
+      'Successfully called service location https://qa.service.stg.coundefined with method POST with 1 monitors'
     );
   });
 
@@ -320,7 +338,6 @@ describe('callAPI', () => {
         coreStart: mockCoreStart,
       } as UptimeServerSetup
     );
-
     apiClient.locations = testLocations;
 
     const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
@@ -328,7 +345,7 @@ describe('callAPI', () => {
     await apiClient.callAPI('POST', {
       monitors: testMonitors,
       output,
-      licenseLevel: 'platinum',
+      license: licenseMock.license,
     });
 
     expect(axiosSpy).toHaveBeenNthCalledWith(1, {
@@ -337,7 +354,8 @@ describe('callAPI', () => {
         is_edit: undefined,
         output,
         stack_version: '8.7.0',
-        license_level: 'platinum',
+        license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
       },
       headers: {
         'x-kibana-version': '8.7.0',
@@ -352,6 +370,118 @@ describe('callAPI', () => {
       }),
       method: 'POST',
       url: 'https://service.dev/monitors',
+    });
+  });
+
+  it('Calls the `/run` endpoint when calling `runOnce`', async () => {
+    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+      status: 200,
+      statusText: 'ok',
+      headers: {},
+      config: {},
+      data: { allowed: true, signupUrl: 'http://localhost:666/example' },
+    });
+
+    const apiClient = new ServiceAPIClient(
+      logger,
+      {
+        manifestUrl: 'http://localhost:8080/api/manifest',
+        tls: { certificate: 'test-certificate', key: 'test-key' } as any,
+      },
+      { isDev: true, stackVersion: '8.7.0' } as UptimeServerSetup
+    );
+
+    apiClient.locations = testLocations;
+
+    const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
+
+    await apiClient.runOnce({
+      monitors: testMonitors,
+      output,
+      license: licenseMock.license,
+    });
+
+    expect(axiosSpy).toHaveBeenNthCalledWith(1, {
+      data: {
+        monitors: request1,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+      },
+      headers: {
+        'x-kibana-version': '8.7.0',
+      },
+      httpsAgent: expect.objectContaining({
+        options: {
+          rejectUnauthorized: true,
+          path: null,
+          cert: 'test-certificate',
+          key: 'test-key',
+        },
+      }),
+      method: 'POST',
+      url: 'https://service.dev/run',
+    });
+  });
+
+  it('Calls the `/monitors/sync` endpoint when calling `syncMonitors`', async () => {
+    const axiosSpy = (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({
+      status: 200,
+      statusText: 'ok',
+      headers: {},
+      config: {},
+      data: { allowed: true, signupUrl: 'http://localhost:666/example' },
+    });
+
+    const apiClient = new ServiceAPIClient(
+      logger,
+      {
+        manifestUrl: 'http://localhost:8080/api/manifest',
+        tls: { certificate: 'test-certificate', key: 'test-key' } as any,
+      },
+      {
+        isDev: true,
+        stackVersion: '8.7.0',
+        cloud: { cloudId: 'test-id', deploymentId: 'deployment-id' },
+      } as UptimeServerSetup
+    );
+
+    apiClient.locations = testLocations;
+
+    const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
+
+    await apiClient.syncMonitors({
+      monitors: testMonitors,
+      output,
+      license: licenseMock.license,
+    });
+
+    expect(axiosSpy).toHaveBeenNthCalledWith(1, {
+      data: {
+        monitors: request1,
+        is_edit: undefined,
+        output,
+        stack_version: '8.7.0',
+        license_level: 'trial',
+        license_issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+        cloud_id: 'test-id',
+        deployment_id: 'deployment-id',
+      },
+      headers: {
+        'x-kibana-version': '8.7.0',
+      },
+      httpsAgent: expect.objectContaining({
+        options: {
+          rejectUnauthorized: true,
+          path: null,
+          cert: 'test-certificate',
+          key: 'test-key',
+        },
+      }),
+      method: 'PUT',
+      url: 'https://service.dev/monitors/sync',
     });
   });
 });

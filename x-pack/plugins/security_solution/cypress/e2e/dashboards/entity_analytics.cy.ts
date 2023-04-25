@@ -28,6 +28,10 @@ import {
   USERS_TABLE_ALERT_CELL,
   HOSTS_TABLE_ALERT_CELL,
   HOSTS_TABLE,
+  ANOMALIES_TABLE_NEXT_PAGE_BUTTON,
+  ANOMALIES_TABLE_ENABLE_JOB_BUTTON,
+  ANOMALIES_TABLE_ENABLE_JOB_LOADER,
+  ANOMALIES_TABLE_COUNT_COLUMN,
 } from '../../screens/entity_analytics';
 import { openRiskTableFilterAndSelectTheLowOption } from '../../tasks/host_risk';
 import { createRule } from '../../tasks/api_calls/rules';
@@ -35,6 +39,7 @@ import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { getNewRule } from '../../objects/rule';
 import { clickOnFirstHostsAlerts, clickOnFirstUsersAlerts } from '../../tasks/risk_scores';
 import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../screens/common/filter_group';
+import { setRowsPerPageTo } from '../../tasks/table_pagination';
 
 const TEST_USER_ALERTS = 2;
 const TEST_USER_NAME = 'test';
@@ -239,13 +244,39 @@ describe('Entity Analytics Dashboard', () => {
   });
 
   describe('With anomalies data', () => {
+    before(() => {
+      esArchiverLoad('network');
+    });
+
+    after(() => {
+      esArchiverUnload('network');
+    });
+
     beforeEach(() => {
       visit(ENTITY_ANALYTICS_URL);
     });
 
-    it('renders table', () => {
+    it('renders table with pagination', () => {
       cy.get(ANOMALIES_TABLE).should('be.visible');
-      cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 6);
+      cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 10);
+
+      // navigates to next page
+      cy.get(ANOMALIES_TABLE_NEXT_PAGE_BUTTON).click();
+      cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 10);
+
+      // updates rows per page to 25 items
+      setRowsPerPageTo(25);
+      cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 25);
+    });
+
+    it('enables a job', () => {
+      cy.get(ANOMALIES_TABLE_ROWS)
+        .eq(5)
+        .within(() => {
+          cy.get(ANOMALIES_TABLE_ENABLE_JOB_BUTTON).click();
+          cy.get(ANOMALIES_TABLE_ENABLE_JOB_LOADER).should('be.visible');
+          cy.get(ANOMALIES_TABLE_COUNT_COLUMN).should('include.text', '0');
+        });
     });
   });
 });

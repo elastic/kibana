@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
@@ -16,6 +15,13 @@ import {
 } from '@kbn/core/server';
 
 import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
+import { generateTransformSecondaryAuthHeaders } from '../../../common/utils/transform_api_key';
+import {
+  reauthorizeTransformsRequestSchema,
+  ReauthorizeTransformsRequestSchema,
+  ReauthorizeTransformsResponseSchema,
+} from '../../../common/api_schemas/reauthorize_transforms';
 import { TRANSFORM_STATE } from '../../../common/constants';
 import {
   transformIdParamSchema,
@@ -72,6 +78,7 @@ import { transformHealthServiceProvider } from '../../lib/alerting/transform_hea
 
 enum TRANSFORM_ACTIONS {
   DELETE = 'delete',
+  REAUTHORIZE = 'reauthorize',
   RESET = 'reset',
   SCHEDULE_NOW = 'schedule_now',
   STOP = 'stop',
@@ -79,7 +86,7 @@ enum TRANSFORM_ACTIONS {
 }
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
-  const { router, license, coreStart, dataViews } = routeDependencies;
+  const { router, license, coreStart, dataViews, security: securityStart } = routeDependencies;
   /**
    * @apiGroup Transforms
    *
@@ -296,6 +303,61 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   );
 
   /**
+   * @apiGroup Reauthorize transforms with API key generated from currently logged in user
+   * @api {post} /api/transform/reauthorize_transforms Post reauthorize transforms
+   * @apiName Reauthorize Transforms
+   * @apiDescription Reauthorize transforms by generating an API Key for current user
+   * and update transform's es-secondary-authorization headers with the generated key,
+   * then start the transform.
+   * @apiSchema (body) reauthorizeTransformsRequestSchema
+   */
+  router.post<undefined, undefined, StartTransformsRequestSchema>(
+    {
+      path: addBasePath('reauthorize_transforms'),
+      validate: {
+        body: reauthorizeTransformsRequestSchema,
+      },
+    },
+    license.guardApiRoute<undefined, undefined, StartTransformsRequestSchema>(
+      async (ctx, req, res) => {
+        try {
+          const transformsInfo = req.body;
+          const { elasticsearch } = coreStart;
+          const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
+
+          let apiKeyWithCurrentUserPermission;
+
+          // If security is not enabled or available, user should not have the need to reauthorize
+          // in that case, start anyway
+          if (securityStart) {
+            apiKeyWithCurrentUserPermission = await securityStart.authc.apiKeys.grantAsInternalUser(
+              req,
+              {
+                name: `auto-generated-transform-api-key`,
+                role_descriptors: {},
+              }
+            );
+          }
+          const secondaryAuth = generateTransformSecondaryAuthHeaders(
+            apiKeyWithCurrentUserPermission
+          );
+
+          const authorizedTransforms = await reauthorizeAndStartTransforms(
+            transformsInfo,
+            esClient,
+            {
+              ...(secondaryAuth ? secondaryAuth : {}),
+            }
+          );
+          return res.ok({ body: authorizedTransforms });
+        } catch (e) {
+          return res.customError(wrapError(wrapEsError(e)));
+        }
+      }
+    )
+  );
+
+  /**
    * @apiGroup Transforms
    *
    * @api {post} /api/transform/delete_transforms Post delete transforms
@@ -464,33 +526,6 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<undefined, undefined, ScheduleNowTransformsRequestSchema>(
       scheduleNowTransformsHandler
     )
-  );
-
-  /**
-   * @apiGroup Transforms
-   *
-   * @api {post} /api/transform/es_search Transform ES Search Proxy
-   * @apiName PostTransformEsSearchProxy
-   * @apiDescription ES Search Proxy
-   *
-   * @apiSchema (body) any
-   */
-  router.post(
-    {
-      path: addBasePath('es_search'),
-      validate: {
-        body: schema.maybe(schema.any()),
-      },
-    },
-    license.guardApiRoute(async (ctx, req, res) => {
-      try {
-        const esClient = (await ctx.core).elasticsearch.client;
-        const body = await esClient.asCurrentUser.search(req.body, { maxRetries: 0 });
-        return res.ok({ body });
-      } catch (e) {
-        return res.customError(wrapError(wrapEsError(e)));
-      }
-    })
   );
 
   registerTransformsAuditMessagesRoutes(routeDependencies);
@@ -853,6 +888,47 @@ async function scheduleNowTransforms(
           id: transformId,
           items: transformsInfo,
           action: TRANSFORM_ACTIONS.SCHEDULE_NOW,
+        });
+      }
+      results[transformId] = { success: false, error: e.meta.body.error };
+    }
+  }
+  return results;
+}
+
+async function reauthorizeAndStartTransforms(
+  transformsInfo: ReauthorizeTransformsRequestSchema,
+  esClient: ElasticsearchClient,
+  options?: TransportRequestOptions
+) {
+  const results: ReauthorizeTransformsResponseSchema = {};
+
+  for (const transformInfo of transformsInfo) {
+    const transformId = transformInfo.id;
+    try {
+      await esClient.transform.updateTransform(
+        {
+          body: {},
+          transform_id: transformId,
+        },
+        options ?? {}
+      );
+
+      await esClient.transform.startTransform(
+        {
+          transform_id: transformId,
+        },
+        { ignore: [409] }
+      );
+
+      results[transformId] = { success: true };
+    } catch (e) {
+      if (isRequestTimeout(e)) {
+        return fillResultsWithTimeouts({
+          results,
+          id: transformId,
+          items: transformsInfo,
+          action: TRANSFORM_ACTIONS.REAUTHORIZE,
         });
       }
       results[transformId] = { success: false, error: e.meta.body.error };

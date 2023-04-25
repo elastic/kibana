@@ -12,6 +12,10 @@ import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters'
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
@@ -70,10 +74,10 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
+      await supertest.put(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.11.4')
+        .post('/api/fleet/epm/packages/synthetics/0.12.0')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -190,11 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
             'service.name': '',
             synthetics_args: [],
             tags: [],
-            'throttling.config': '5d/3u/20l',
-            'throttling.download_speed': '5',
-            'throttling.is_enabled': true,
-            'throttling.latency': '20',
-            'throttling.upload_speed': '3',
+            throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
@@ -253,7 +253,11 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          expect(decryptedCreatedMonitor.body.attributes['throttling.is_enabled']).to.eql(false);
+          expect(decryptedCreatedMonitor.body.attributes.throttling).to.eql({
+            value: null,
+            id: 'no-throttling',
+            label: 'No throttling',
+          });
         }
       } finally {
         await Promise.all([
@@ -317,6 +321,9 @@ export default function ({ getService }: FtrProviderContext) {
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             'check.response.body.negative': [],
             'check.response.body.positive': ['Saved', 'saved'],
+            'check.response.json': [
+              { description: 'check status', expression: 'foo.bar == "myValue"' },
+            ],
             'check.response.headers': {},
             'check.request.body': {
               type: 'text',
@@ -353,8 +360,10 @@ export default function ({ getService }: FtrProviderContext) {
             username: '',
             password: '',
             proxy_url: '',
+            proxy_headers: {},
             'response.include_body': 'always',
             'response.include_headers': false,
+            'response.include_body_max_bytes': '900',
             revision: 1,
             schedule: {
               number: '60',
@@ -374,6 +383,9 @@ export default function ({ getService }: FtrProviderContext) {
             'url.port': null,
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
+            mode: 'any',
+            ipv6: true,
+            ipv4: true,
           });
         }
       } finally {
@@ -482,6 +494,9 @@ export default function ({ getService }: FtrProviderContext) {
             urls: '',
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
+            mode: 'any',
+            ipv6: true,
+            ipv4: true,
           });
         }
       } finally {
@@ -586,6 +601,9 @@ export default function ({ getService }: FtrProviderContext) {
                 : `${parseInt(monitor.wait?.slice(0, -1) || '1', 10) * 60}`,
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
+            mode: 'any',
+            ipv4: true,
+            ipv6: true,
           });
         }
       } finally {
@@ -1780,6 +1798,7 @@ export default function ({ getService }: FtrProviderContext) {
                     positive: ['Saved', 'saved'],
                   },
                   status: [200],
+                  json: [{ description: 'check status', expression: 'foo.bar == "myValue"' }],
                 },
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
@@ -1788,6 +1807,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: 900,
                 },
                 'response.include_headers': false,
                 schedule: 60,
@@ -1881,6 +1901,12 @@ export default function ({ getService }: FtrProviderContext) {
                     positive: ['Saved', 'saved'],
                   },
                   status: [200],
+                  json: [
+                    {
+                      description: 'check status',
+                      expression: 'foo.bar == "myValue"',
+                    },
+                  ],
                 },
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
@@ -1889,6 +1915,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: 900,
                 },
                 'response.include_headers': false,
                 schedule: 60,
@@ -1942,6 +1969,12 @@ export default function ({ getService }: FtrProviderContext) {
                     positive: ['Saved', 'saved'],
                   },
                   status: [200],
+                  json: [
+                    {
+                      description: 'check status',
+                      expression: 'foo.bar == "myValue"',
+                    },
+                  ],
                 },
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
@@ -1950,6 +1983,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: 900,
                 },
                 'response.include_headers': false,
                 schedule: 60,
@@ -2004,6 +2038,12 @@ export default function ({ getService }: FtrProviderContext) {
                     positive: ['Saved', 'saved'],
                   },
                   status: [200],
+                  json: [
+                    {
+                      description: 'check status',
+                      expression: 'foo.bar == "myValue"',
+                    },
+                  ],
                 },
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
@@ -2012,6 +2052,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: 900,
                 },
                 'response.include_headers': false,
                 schedule: 60,

@@ -119,6 +119,14 @@ function validOptions(
   return { ...options, body };
 }
 
+/** @internal */
+interface RouterOptions {
+  /** Whether we are running in development */
+  isDev?: boolean;
+  /** Whether we are running in a serverless */
+  isServerless?: boolean;
+}
+
 /**
  * @internal
  */
@@ -135,7 +143,8 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   constructor(
     public readonly routerPath: string,
     private readonly log: Logger,
-    private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>
+    private readonly enhanceWithContext: ContextEnhancer<any, any, any, any, any>,
+    private readonly options: RouterOptions = { isDev: false, isServerless: false }
   ) {
     const buildMethod =
       <Method extends RouteMethod>(method: Method) =>
@@ -209,7 +218,11 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   private versionedRouter: undefined | VersionedRouter<Context> = undefined;
   public get versioned(): VersionedRouter<Context> {
     if (this.versionedRouter === undefined) {
-      this.versionedRouter = CoreVersionedRouter.from({ router: this });
+      this.versionedRouter = CoreVersionedRouter.from({
+        router: this,
+        isDev: this.options.isDev,
+        defaultHandlerResolutionStrategy: this.options.isServerless ? 'newest' : 'oldest',
+      });
     }
     return this.versionedRouter;
   }

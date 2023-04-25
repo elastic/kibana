@@ -17,10 +17,12 @@ export const httpFormatters: HTTPFormatMap = {
   [ConfigKey.METADATA]: objectFormatter,
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: arrayFormatter,
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: arrayFormatter,
+  [ConfigKey.RESPONSE_JSON_CHECK]: arrayFormatter,
   [ConfigKey.RESPONSE_HEADERS_CHECK]: objectFormatter,
   [ConfigKey.RESPONSE_STATUS_CHECK]: arrayFormatter,
   [ConfigKey.REQUEST_HEADERS_CHECK]: objectFormatter,
   [ConfigKey.REQUEST_BODY_CHECK]: (fields) => fields[ConfigKey.REQUEST_BODY_CHECK]?.value || null,
+  [ConfigKey.PROXY_HEADERS]: objectFormatter,
   ...tlsFormatters,
   ...commonFormatters,
 };

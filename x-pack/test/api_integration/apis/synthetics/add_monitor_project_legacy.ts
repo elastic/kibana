@@ -16,6 +16,10 @@ import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
@@ -82,7 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.11.4')
+        .post('/api/fleet/epm/packages/synthetics/0.12.0')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -175,11 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
             'service.name': '',
             synthetics_args: [],
             tags: [],
-            'throttling.config': '5d/3u/20l',
-            'throttling.download_speed': '5',
-            'throttling.is_enabled': true,
-            'throttling.latency': '20',
-            'throttling.upload_speed': '3',
+            throttling: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
             'ssl.certificate': '',
             'ssl.certificate_authorities': '',
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
@@ -256,6 +256,9 @@ export default function ({ getService }: FtrProviderContext) {
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             'check.response.body.negative': [],
             'check.response.body.positive': ['Saved', 'saved'],
+            'check.response.json': [
+              { description: 'check status', expression: 'foo.bar == "myValue"' },
+            ],
             'check.response.headers': {},
             'check.request.body': {
               type: 'text',
@@ -292,8 +295,10 @@ export default function ({ getService }: FtrProviderContext) {
             username: '',
             password: '',
             proxy_url: '',
+            proxy_headers: {},
             'response.include_body': 'always',
             'response.include_headers': false,
+            'response.include_body_max_bytes': '900',
             revision: 1,
             schedule: {
               number: '60',
@@ -313,6 +318,9 @@ export default function ({ getService }: FtrProviderContext) {
             'url.port': null,
             id: `${journeyId}-test-suite-default`,
             hash: 'ekrjelkjrelkjre',
+            ipv6: true,
+            ipv4: true,
+            mode: 'any',
           });
         }
       } finally {
@@ -418,6 +426,9 @@ export default function ({ getService }: FtrProviderContext) {
             urls: '',
             id: `${journeyId}-test-suite-default`,
             hash: 'ekrjelkjrelkjre',
+            ipv6: true,
+            ipv4: true,
+            mode: 'any',
           });
         }
       } finally {
@@ -520,6 +531,9 @@ export default function ({ getService }: FtrProviderContext) {
                 : `${parseInt(monitor.wait?.slice(0, -1) || '1', 10) * 60}`,
             id: `${journeyId}-test-suite-default`,
             hash: 'ekrjelkjrelkjre',
+            ipv6: true,
+            ipv4: true,
+            mode: 'any',
           });
         }
       } finally {
@@ -1802,11 +1816,13 @@ export default function ({ getService }: FtrProviderContext) {
                 timeout: { value: '80s', type: 'text' },
                 max_redirects: { value: '0', type: 'integer' },
                 proxy_url: { value: '', type: 'text' },
+                proxy_headers: { value: null, type: 'yaml' },
                 tags: { value: '["tag2","tag2"]', type: 'yaml' },
                 username: { value: '', type: 'text' },
                 password: { value: '', type: 'password' },
                 'response.include_headers': { value: false, type: 'bool' },
                 'response.include_body': { value: 'always', type: 'text' },
+                'response.include_body_max_bytes': { value: '900', type: 'text' },
                 'check.request.method': { value: 'POST', type: 'text' },
                 'check.request.headers': {
                   value: '{"Content-Type":"application/x-www-form-urlencoded"}',
@@ -1817,6 +1833,10 @@ export default function ({ getService }: FtrProviderContext) {
                 'check.response.headers': { value: null, type: 'yaml' },
                 'check.response.body.positive': { value: '["Saved","saved"]', type: 'yaml' },
                 'check.response.body.negative': { value: null, type: 'yaml' },
+                'check.response.json': {
+                  value: '[{"description":"check status","expression":"foo.bar == \\"myValue\\""}]',
+                  type: 'yaml',
+                },
                 'ssl.certificate_authorities': { value: null, type: 'yaml' },
                 'ssl.certificate': { value: null, type: 'yaml' },
                 'ssl.key': { value: null, type: 'yaml' },
@@ -1842,6 +1862,9 @@ export default function ({ getService }: FtrProviderContext) {
                   type: 'text',
                   value: 'test-suite',
                 },
+                ipv4: { type: 'bool', value: true },
+                ipv6: { type: 'bool', value: true },
+                mode: { type: 'text', value: 'any' },
               },
               id: `synthetics/http-http-${id}-${testPolicyId}`,
               compiled_stream: {
@@ -1866,6 +1889,15 @@ export default function ({ getService }: FtrProviderContext) {
                 'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
                 'run_from.geo.name': 'Test private location 0',
                 'run_from.id': 'Test private location 0',
+                'check.response.json': [
+                  {
+                    description: 'check status',
+                    expression: 'foo.bar == "myValue"',
+                  },
+                ],
+                ipv4: true,
+                ipv6: true,
+                mode: 'any',
                 processors: [
                   {
                     add_fields: {
