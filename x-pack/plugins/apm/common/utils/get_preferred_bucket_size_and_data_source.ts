@@ -6,7 +6,7 @@
  */
 import { parseInterval } from '@kbn/data-plugin/common';
 import { orderBy, last } from 'lodash';
-import { ApmDataSource } from '../data_source';
+import { ApmDataSourceWithSummary } from '../data_source';
 import { ApmDocumentType } from '../document_type';
 import { RollupInterval } from '../rollup';
 
@@ -28,13 +28,13 @@ export function getPreferredBucketSizeAndDataSource({
   sources,
   bucketSizeInSeconds,
 }: {
-  sources: ApmDataSource[];
+  sources: ApmDataSourceWithSummary[];
   bucketSizeInSeconds: number;
 }): {
-  source: ApmDataSource;
+  source: ApmDataSourceWithSummary;
   bucketSizeInSeconds: number;
 } {
-  let preferred: ApmDataSource | undefined;
+  let preferred: ApmDataSourceWithSummary | undefined;
 
   const sourcesInPreferredOrder = orderBy(
     sources,
@@ -68,6 +68,7 @@ export function getPreferredBucketSizeAndDataSource({
     preferred = {
       documentType: ApmDocumentType.TransactionEvent,
       rollupInterval: RollupInterval.None,
+      isSummaryFieldAvailable: false,
     };
   }
 

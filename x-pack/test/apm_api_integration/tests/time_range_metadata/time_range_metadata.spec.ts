@@ -65,6 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           documentType: ApmDocumentType.TransactionEvent,
           rollupInterval: RollupInterval.None,
           hasDocs: true,
+          isSummaryFieldAvailable: false,
         },
       ]);
     });
@@ -103,36 +104,43 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               documentType: ApmDocumentType.ServiceTransactionMetric,
               rollupInterval: RollupInterval.TenMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.ServiceTransactionMetric,
               rollupInterval: RollupInterval.OneMinute,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.ServiceTransactionMetric,
               rollupInterval: RollupInterval.SixtyMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.TransactionEvent,
               rollupInterval: RollupInterval.None,
               hasDocs: true,
+              isSummaryFieldAvailable: false,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.TenMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.OneMinute,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.SixtyMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
           ]);
         });
@@ -151,16 +159,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               documentType: ApmDocumentType.ServiceTransactionMetric,
               rollupInterval: RollupInterval.OneMinute,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.TransactionEvent,
               rollupInterval: RollupInterval.None,
               hasDocs: true,
+              isSummaryFieldAvailable: false,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.OneMinute,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
           ]);
         });
@@ -179,21 +190,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               documentType: ApmDocumentType.TransactionEvent,
               rollupInterval: RollupInterval.None,
               hasDocs: true,
+              isSummaryFieldAvailable: false,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.TenMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.OneMinute,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.SixtyMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
           ]);
         });
@@ -211,36 +226,43 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               documentType: ApmDocumentType.ServiceTransactionMetric,
               rollupInterval: RollupInterval.TenMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.ServiceTransactionMetric,
               rollupInterval: RollupInterval.OneMinute,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.ServiceTransactionMetric,
               rollupInterval: RollupInterval.SixtyMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.TransactionEvent,
               rollupInterval: RollupInterval.None,
               hasDocs: true,
+              isSummaryFieldAvailable: false,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.TenMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.OneMinute,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.SixtyMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
           ]);
         });
@@ -258,36 +280,43 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               documentType: ApmDocumentType.ServiceTransactionMetric,
               rollupInterval: RollupInterval.TenMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.ServiceTransactionMetric,
               rollupInterval: RollupInterval.OneMinute,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.ServiceTransactionMetric,
               rollupInterval: RollupInterval.SixtyMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.TransactionEvent,
               rollupInterval: RollupInterval.None,
               hasDocs: true,
+              isSummaryFieldAvailable: false,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.TenMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.OneMinute,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.SixtyMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
           ]);
         });
@@ -383,16 +412,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.TenMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.OneMinute,
               hasDocs: false,
+              isSummaryFieldAvailable: false,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.SixtyMinutes,
               hasDocs: true,
+              isSummaryFieldAvailable: true,
             },
           ]);
         });

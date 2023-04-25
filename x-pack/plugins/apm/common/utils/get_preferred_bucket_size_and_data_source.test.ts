@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ApmDataSource } from '../data_source';
+import { ApmDataSourceWithSummary } from '../data_source';
 import { ApmDocumentType } from '../document_type';
 import { RollupInterval } from '../rollup';
 import {
@@ -12,40 +12,47 @@ import {
   intervalToSeconds,
 } from './get_preferred_bucket_size_and_data_source';
 
-const serviceTransactionMetricSources: ApmDataSource[] = [
+const serviceTransactionMetricSources: ApmDataSourceWithSummary[] = [
   {
     documentType: ApmDocumentType.ServiceTransactionMetric,
     rollupInterval: RollupInterval.OneMinute,
+    isSummaryFieldAvailable: true,
   },
   {
     documentType: ApmDocumentType.ServiceTransactionMetric,
     rollupInterval: RollupInterval.TenMinutes,
+    isSummaryFieldAvailable: true,
   },
   {
     documentType: ApmDocumentType.ServiceTransactionMetric,
     rollupInterval: RollupInterval.SixtyMinutes,
+    isSummaryFieldAvailable: true,
   },
 ];
 
-const txMetricSources: ApmDataSource[] = [
+const txMetricSources: ApmDataSourceWithSummary[] = [
   {
     documentType: ApmDocumentType.TransactionMetric,
     rollupInterval: RollupInterval.OneMinute,
+    isSummaryFieldAvailable: true,
   },
   {
     documentType: ApmDocumentType.TransactionMetric,
     rollupInterval: RollupInterval.TenMinutes,
+    isSummaryFieldAvailable: true,
   },
   {
     documentType: ApmDocumentType.TransactionMetric,
     rollupInterval: RollupInterval.SixtyMinutes,
+    isSummaryFieldAvailable: true,
   },
 ];
 
-const txEventSources: ApmDataSource[] = [
+const txEventSources: ApmDataSourceWithSummary[] = [
   {
     documentType: ApmDocumentType.TransactionEvent,
     rollupInterval: RollupInterval.None,
+    isSummaryFieldAvailable: false,
   },
 ];
 

@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { ApmDataSource } from '../../common/data_source';
+import { ApmDataSourceWithSummary } from '../../common/data_source';
 import { ApmDocumentType } from '../../common/document_type';
 import { getBucketSize } from '../../common/utils/get_bucket_size';
 import { getPreferredBucketSizeAndDataSource } from '../../common/utils/get_preferred_bucket_size_and_data_source';
@@ -30,7 +30,7 @@ export function usePreferredDataSourceAndBucketSize<
   type: TDocumentType;
 }): {
   bucketSizeInSeconds: number;
-  source: ApmDataSource<
+  source: ApmDataSourceWithSummary<
     TDocumentType extends ApmDocumentType.ServiceTransactionMetric
       ?
           | ApmDocumentType.ServiceTransactionMetric
@@ -82,7 +82,7 @@ export function usePreferredDataSourceAndBucketSize<
 
     return {
       bucketSizeInSeconds,
-      source: source as ApmDataSource<any>,
+      source: source as ApmDataSourceWithSummary<any>,
     };
   }, [type, start, end, sources, numBuckets]);
 }

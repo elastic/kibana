@@ -139,6 +139,11 @@ export function TransactionsTable({
     type: ApmDocumentType.TransactionMetric,
   });
 
+  const shouldUseDurationSummary =
+    latencyAggregationType !== 'avg'
+      ? false
+      : preferred?.source?.isSummaryFieldAvailable ?? false;
+
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (!latencyAggregationType || !transactionType || !preferred) {
@@ -155,6 +160,7 @@ export function TransactionsTable({
               start,
               end,
               transactionType,
+              useDurationSummary: shouldUseDurationSummary,
               latencyAggregationType:
                 latencyAggregationType as LatencyAggregationType,
               documentType: preferred.source.documentType,
@@ -225,7 +231,8 @@ export function TransactionsTable({
         start &&
         end &&
         transactionType &&
-        latencyAggregationType
+        latencyAggregationType &&
+        preferred
       ) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
@@ -237,8 +244,11 @@ export function TransactionsTable({
                 kuery,
                 start,
                 end,
-                numBuckets: 20,
+                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
                 transactionType,
+                documentType: preferred.source.documentType,
+                rollupInterval: preferred.source.rollupInterval,
+                useDurationSummary: shouldUseDurationSummary,
                 latencyAggregationType:
                   latencyAggregationType as LatencyAggregationType,
                 transactionNames: JSON.stringify(

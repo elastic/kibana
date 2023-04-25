@@ -11,8 +11,10 @@ import moment from 'moment';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { asPercent } from '@kbn/apm-plugin/common/utils/formatters';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 
 type TransactionsGroupsDetailedStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
@@ -50,8 +52,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         query: {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
-          numBuckets: 20,
+          bucketSizeInSeconds: 60,
+          documentType: ApmDocumentType.TransactionMetric,
+          rollupInterval: RollupInterval.OneMinute,
           transactionType: 'request',
+          useDurationSummary: false,
           latencyAggregationType: 'avg' as LatencyAggregationType,
           transactionNames: JSON.stringify(transactionNames),
           environment: 'ENVIRONMENT_ALL',
@@ -117,8 +122,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let metricsStatistics: TransactionsGroupsDetailedStatistics;
         before(async () => {
           [metricsStatistics, transactionsStatistics] = await Promise.all([
-            callApi({ query: { kuery: 'processor.event : "metric"' } }),
-            callApi({ query: { kuery: 'processor.event : "transaction"' } }),
+            callApi({
+              query: {
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.OneMinute,
+              },
+            }),
+            callApi({
+              query: {
+                documentType: ApmDocumentType.TransactionEvent,
+                rollupInterval: RollupInterval.None,
+              },
+            }),
           ]);
         });
 
