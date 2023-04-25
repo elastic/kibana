@@ -26,6 +26,11 @@ export function throwIfNotAcceptableModelName(modelName: string) {
   if (!acceptableModelNames.includes(modelName)) {
     const notFoundError: ElasticsearchResponseError = {
       meta: {
+        body: {
+          error: {
+            type: 'resource_not_found_exception',
+          },
+        },
         statusCode: 404,
       },
       name: 'ResponseError',
