@@ -7,46 +7,44 @@
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { useUserData } from '../../detections/components/user_info';
-import { hasUserCRUDPermission } from '../../common/utils/privileges';
-import { useKibana } from '../../common/lib/kibana';
-import type { RuleSnoozeSettings } from '../rule_management/logic';
-import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../rule_management/api/hooks/use_fetch_rules_snooze_settings';
+import type { RuleObjectId } from '../../../../../common/detection_engine/rule_schema';
+import { useUserData } from '../../../../detections/components/user_info';
+import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../../api/hooks/use_fetch_rules_snooze_settings';
+import { useRuleSnoozeSettings } from './use_rule_snooze_settings';
 
 interface RuleSnoozeBadgeProps {
   /**
-   * Rule's snooze settings, when set to `undefined` considered as a loading state
+   * Rule's SO id (not ruleId)
    */
-  snoozeSettings: RuleSnoozeSettings | undefined;
-  /**
-   * It should represent a user readable error message happened during data snooze settings fetching
-   */
-  error?: string;
+  ruleId: RuleObjectId;
   showTooltipInline?: boolean;
 }
 
 export function RuleSnoozeBadge({
-  snoozeSettings,
-  error,
+  ruleId,
   showTooltipInline = false,
 }: RuleSnoozeBadgeProps): JSX.Element {
   const RulesListNotifyBadge = useKibana().services.triggersActionsUi.getRulesListNotifyBadge;
+  const { snoozeSettings, error } = useRuleSnoozeSettings(ruleId);
   const [{ canUserCRUD }] = useUserData();
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
   const isLoading = !snoozeSettings;
-  const rule = useMemo(() => {
-    return {
+  const rule = useMemo(
+    () => ({
       id: snoozeSettings?.id ?? '',
-      muteAll: snoozeSettings?.mute_all ?? false,
-      activeSnoozes: snoozeSettings?.active_snoozes ?? [],
-      isSnoozedUntil: snoozeSettings?.is_snoozed_until
-        ? new Date(snoozeSettings.is_snoozed_until)
+      muteAll: snoozeSettings?.muteAll ?? false,
+      activeSnoozes: snoozeSettings?.activeSnoozes ?? [],
+      isSnoozedUntil: snoozeSettings?.isSnoozedUntil
+        ? new Date(snoozeSettings.isSnoozedUntil)
         : undefined,
-      snoozeSchedule: snoozeSettings?.snooze_schedule,
+      snoozeSchedule: snoozeSettings?.snoozeSchedule,
       isEditable: hasCRUDPermissions,
-    };
-  }, [snoozeSettings, hasCRUDPermissions]);
+    }),
+    [snoozeSettings, hasCRUDPermissions]
+  );
 
   if (error) {
     return (
