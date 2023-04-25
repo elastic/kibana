@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import ReactDOM, { unmountComponentAtNode } from 'react-dom';
+import { unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
@@ -15,7 +15,7 @@ import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import { KibanaThemeProvider, toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type * as H from 'history';
 
 import type { Case } from '../../../../common';
@@ -26,7 +26,6 @@ import { KibanaContextProvider, KibanaServices } from '../../../common/lib/kiban
 import { getUICapabilities } from '../../../client/helpers/capabilities';
 import CasesProvider from '../../cases_context';
 import { OWNER_INFO } from '../../../../common/constants';
-import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UIActionProps } from './types';
 import AllCasesSelectorModal from '../../all_cases/selector_modal';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
