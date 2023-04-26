@@ -27,7 +27,7 @@ export interface GetSourcererDataView {
 
 export interface SecurityDataView {
   defaultDataView: KibanaDataView;
-  kibanaDataViews: KibanaDataView[];
+  kibanaDataViews: Array<Omit<KibanaDataView, 'fields'>>;
 }
 
 export const createSourcererDataView = async ({

@@ -204,27 +204,18 @@ const ShowPreview = styled(EuiButtonEmpty)`
   bottom: 34px;
 `;
 
-const PREVIEW_LABEL = i18n.translate('xpack.exploratoryView.overview.exploratoryView.preview', {
+const PREVIEW_LABEL = i18n.translate('xpack.exploratoryView.preview', {
   defaultMessage: 'Preview',
 });
 
-const HIDE_CHART_LABEL = i18n.translate(
-  'xpack.exploratoryView.overview.exploratoryView.hideChart',
-  {
-    defaultMessage: 'Hide chart',
-  }
-);
+const HIDE_CHART_LABEL = i18n.translate('xpack.exploratoryView.hideChart', {
+  defaultMessage: 'Hide chart',
+});
 
-const SHOW_CHART_LABEL = i18n.translate(
-  'xpack.exploratoryView.overview.exploratoryView.showChart',
-  {
-    defaultMessage: 'Show chart',
-  }
-);
+const SHOW_CHART_LABEL = i18n.translate('xpack.exploratoryView.showChart', {
+  defaultMessage: 'Show chart',
+});
 
-const LENS_NOT_AVAILABLE = i18n.translate(
-  'xpack.exploratoryView.overview.exploratoryView.lensDisabled',
-  {
-    defaultMessage: 'Lens app is not available, please enable Lens to use exploratory view.',
-  }
-);
+const LENS_NOT_AVAILABLE = i18n.translate('xpack.exploratoryView.lensDisabled', {
+  defaultMessage: 'Lens app is not available, please enable Lens to use exploratory view.',
+});
