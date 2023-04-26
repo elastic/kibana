@@ -95,10 +95,7 @@ const StyledFullHeightContainer = styled.div`
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
-const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
-  clearEventsLoading,
-  clearEventsDeleted,
-}) => {
+const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = () => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
@@ -172,6 +169,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const { filterManager } = data.query;
 
+  const topLevelFilters = useMemo(() => {
+    return [
+      ...filters,
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+    ];
+  }, [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filters]);
+
   const alertPageFilters = useMemo(() => {
     if (arePageFiltersEnabled) {
       return detectionPageFilters;
@@ -230,13 +235,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   );
 
   const alertsDefaultFilters = useMemo(
-    () => [
-      ...filters,
-      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
-      ...(alertPageFilters ?? []),
-    ],
-    [filters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, alertPageFilters]
+    () => [...topLevelFilters, ...(alertPageFilters ?? [])],
+    [topLevelFilters, alertPageFilters]
   );
 
   // AlertsTable manages global filters itself, so not including `filters`
@@ -291,15 +291,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   }, []);
 
   // Callback for when open/closed filter changes
-  const onFilterGroupChangedCallback = useCallback(
-    (newFilterGroup: Status) => {
-      const timelineId = TableId.alertsOnAlertsPage;
-      clearEventsLoading({ id: timelineId });
-      clearEventsDeleted({ id: timelineId });
-      setStatusFilter([newFilterGroup]);
-    },
-    [clearEventsLoading, clearEventsDeleted, setStatusFilter]
-  );
+  const onFilterGroupChangedCallback = useCallback((newFilterGroup: Status) => {}, []);
 
   const areDetectionPageFiltersLoading = useMemo(() => {
     if (arePageFiltersEnabled) {
@@ -350,7 +342,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         <DetectionPageFilterSet
           dataViewId={dataViewId}
           onFilterChange={pageFiltersUpdateHandler}
-          filters={filters}
+          filters={topLevelFilters}
           query={query}
           timeRange={{
             from,
@@ -362,10 +354,10 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         />
       ),
     [
+      topLevelFilters,
       arePageFiltersEnabled,
       dataViewId,
       statusFilter,
-      filters,
       onFilterGroupChangedCallback,
       pageFiltersUpdateHandler,
       showUpdating,
