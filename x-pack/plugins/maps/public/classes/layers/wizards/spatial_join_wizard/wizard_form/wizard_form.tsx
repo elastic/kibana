@@ -6,27 +6,57 @@
  */
 
 import React, { useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
-import { getGeoPointFields } from '../../../../../index_pattern_util';
+import { getGeoFields, getGeoPointFields } from '../../../../../index_pattern_util';
 import { LeftSourcePanel } from './left_source_panel';
+import { RightSourcePanel } from './right_source_panel';
 
 export function WizardForm() {
   const [leftDataView, setLeftDataView] = useState<DataView | undefined>();
   const [leftGeoFields, setLeftGeoFields] = useState<DataViewField[]>([]);
   const [leftGeoField, setLeftGeoField] = useState<string | undefined>();
+  const [rightDataView, setRightDataView] = useState<DataView | undefined>();
+  const [rightGeoFields, setRightGeoFields] = useState<DataViewField[]>([]);
+  const [rightGeoField, setRightGeoField] = useState<string | undefined>();
+
+  function isLeftConfigComplete() {
+    return leftDataView !== undefined && leftGeoField !== undefined;
+  }
+
+  const rightSourcePanel = isLeftConfigComplete()
+    ? <RightSourcePanel
+        dataView={rightDataView}
+        geoField={rightGeoField}
+        geoFields={rightGeoFields}
+        onDataViewSelect={(dataView: DataView) => {
+          setRightDataView(dataView);
+          const geoFields = getGeoFields(dataView.fields);
+          setRightGeoFields(geoFields);
+          setRightGeoField(geoFields.length ? geoFields[0].name : undefined);
+        }}
+        onGeoFieldSelect={setRightGeoField}
+      />
+    : null;
 
   return (
-    <LeftSourcePanel
-      dataView={leftDataView}
-      geoField={leftGeoField}
-      geoFields={leftGeoFields}
-      onDataViewSelect={(dataView: DataView) => {
-        setLeftDataView(dataView);
-        const geoFields = getGeoPointFields(dataView.fields);
-        setLeftGeoFields(geoFields);
-        setLeftGeoField(geoFields.length ? geoFields[0].name : undefined);
-      }}
-      onGeoFieldSelect={setLeftGeoField}
-    />
-  )
+    <>
+      <LeftSourcePanel
+        dataView={leftDataView}
+        geoField={leftGeoField}
+        geoFields={leftGeoFields}
+        onDataViewSelect={(dataView: DataView) => {
+          setLeftDataView(dataView);
+          const geoFields = getGeoPointFields(dataView.fields);
+          setLeftGeoFields(geoFields);
+          setLeftGeoField(geoFields.length ? geoFields[0].name : undefined);
+        }}
+        onGeoFieldSelect={setLeftGeoField}
+      />
+
+      <EuiSpacer size="s" />
+
+      {rightSourcePanel}
+    </>
+  );
 }
