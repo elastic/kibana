@@ -13794,6 +13794,10 @@
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
               {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
               },
@@ -21430,6 +21434,10 @@
               {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
               },
               {
                 "plugin": "ml",
