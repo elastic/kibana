@@ -157,7 +157,7 @@ export const useEngineNav = () => {
         <>
           {hasSchemaErrors && (
             <EuiIcon
-              type="alert"
+              type="warning"
               color="danger"
               className="appSearchNavIcon"
               title={i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.errors', {
@@ -180,7 +180,7 @@ export const useEngineNav = () => {
           )}
           {hasSchemaConflicts && (
             <EuiIcon
-              type="alert"
+              type="warning"
               color="warning"
               className="appSearchNavIcon"
               title={i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.conflicts', {
@@ -191,7 +191,7 @@ export const useEngineNav = () => {
           )}
           {hasIncompleteFields && (
             <EuiIcon
-              type="alert"
+              type="warning"
               color="warning"
               className="appSearchNavIcon"
               title={i18n.translate(
@@ -242,7 +242,7 @@ export const useEngineNav = () => {
         <>
           {invalidBoosts && (
             <EuiIcon
-              type="alert"
+              type="warning"
               color="warning"
               className="appSearchNavIcon"
               title={i18n.translate(
@@ -254,7 +254,7 @@ export const useEngineNav = () => {
           )}
           {unsearchedUnconfirmedFields && (
             <EuiIcon
-              type="alert"
+              type="warning"
               color="warning"
               className="appSearchNavIcon"
               title={i18n.translate(

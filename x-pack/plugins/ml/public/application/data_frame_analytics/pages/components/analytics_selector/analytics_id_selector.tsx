@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { BUILT_IN_MODEL_TAG } from '../../../../../../common/constants/data_frame_analytics';
+import { BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
 import { useTrainedModelsApiService } from '../../../../services/ml_api_service/trained_models';
 import { GetDataFrameAnalyticsResponse } from '../../../../services/ml_api_service/data_frame_analytics';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';

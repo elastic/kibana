@@ -61,6 +61,7 @@ export const MappingErrorPage = () => {
                 values={{
                   docsLink: (
                     <EuiLink
+                      data-test-subj="syntheticsMappingErrorPageDocsLink"
                       href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/troubleshoot-uptime-mapping-issues.html`}
                       target="_blank"
                     >

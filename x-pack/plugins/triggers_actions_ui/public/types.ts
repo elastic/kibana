@@ -23,6 +23,7 @@ import type {
   EuiDataGridRefProps,
   EuiDataGridColumnCellAction,
   EuiDataGridToolBarVisibilityOptions,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
@@ -41,7 +42,6 @@ import {
   SanitizedRule as AlertingSanitizedRule,
   ResolvedSanitizedRule,
   RuleAction,
-  RuleAggregations as AlertingRuleAggregations,
   RuleTaskState,
   AlertSummary as RuleSummary,
   ExecutionDuration,
@@ -103,14 +103,10 @@ type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params
 type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> & {
   ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
 };
-type RuleAggregations = Omit<AlertingRuleAggregations, 'alertExecutionStatus'> & {
-  ruleExecutionStatus: AlertingRuleAggregations['alertExecutionStatus'];
-};
 
 export type {
   Rule,
   RuleAction,
-  RuleAggregations,
   RuleTaskState,
   RuleSummary,
   ExecutionDuration,
@@ -258,6 +254,10 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
   isExperimental?: boolean;
+  subtype?: Array<{ id: string; name: string }>;
+  convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
+  hideInUi?: boolean;
+  modalWidth?: number;
 }
 
 export interface GenericValidationResult<T> {
@@ -378,6 +378,11 @@ export interface RuleTypeParamsExpressionProps<
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
+export type RuleParamsForRules = Record<
+  string,
+  Array<{ label: string; value: string | number | object }>
+>;
+
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
   description: string;
@@ -412,6 +417,7 @@ export interface RuleEditProps<MetaData = Record<string, any>> {
   onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
+  hideInterval?: boolean;
   onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
   ruleType?: RuleType<string, string>;
@@ -427,6 +433,7 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   initialValues?: Partial<Rule>;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
+  hideInterval?: boolean;
   onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
@@ -459,6 +466,7 @@ export enum AlertsField {
   name = 'kibana.alert.rule.name',
   reason = 'kibana.alert.reason',
   uuid = 'kibana.alert.rule.uuid',
+  case_ids = 'kibana.alert.case_ids',
 }
 
 export interface InspectQuery {
@@ -495,7 +503,10 @@ export interface FetchAlertData {
 
 export type AlertsTableProps = {
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
-  casesData: { cases: Map<string, Case>; isLoading: boolean };
+  cases: {
+    data: Map<string, Case>;
+    isLoading: boolean;
+  };
   columns: EuiDataGridColumn[];
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
@@ -599,7 +610,11 @@ export type UseFieldBrowserOptions = (args: UseFieldBrowserOptionsArgs) => Field
 
 export interface AlertsTableConfigurationRegistry {
   id: string;
-  casesFeatureId: string;
+  cases?: {
+    featureId: string;
+    owner: string[];
+    syncAlerts?: boolean;
+  };
   columns: EuiDataGridColumn[];
   useInternalFlyout?: () => {
     header: AlertTableFlyoutComponent;
@@ -616,7 +631,6 @@ export interface AlertsTableConfigurationRegistry {
   };
   useFieldBrowserOptions?: UseFieldBrowserOptions;
   showInspectButton?: boolean;
-  app_id?: string;
 }
 
 export enum BulkActionsVerbs {
@@ -683,13 +697,14 @@ export interface ConnectorServices {
 }
 
 export interface RulesListFilters {
-  searchText: string;
-  types: string[];
   actionTypes: string[];
   ruleExecutionStatuses: string[];
   ruleLastRunOutcomes: string[];
+  ruleParams: Record<string, string | number | object>;
   ruleStatuses: RuleStatus[];
+  searchText: string;
   tags: string[];
+  types: string[];
 }
 
 export type UpdateFiltersProps =
@@ -704,6 +719,10 @@ export type UpdateFiltersProps =
   | {
       filter: 'types' | 'actionTypes' | 'ruleExecutionStatuses' | 'ruleLastRunOutcomes' | 'tags';
       value: string[];
+    }
+  | {
+      filter: 'ruleParams';
+      value: Record<string, string | number | object>;
     };
 
 export interface RulesPageContainerState {
@@ -733,4 +752,10 @@ export interface TableUpdateHandlerArgs {
 
 export interface LazyLoadProps {
   hideLazyLoader?: boolean;
+}
+
+export interface NotifyWhenSelectOptions {
+  isSummaryOption?: boolean;
+  isForEachAlertOption?: boolean;
+  value: EuiSuperSelectOption<RuleNotifyWhenType>;
 }

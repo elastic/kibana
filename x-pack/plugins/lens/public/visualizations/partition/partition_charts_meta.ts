@@ -16,12 +16,8 @@ import {
   IconChartMosaic,
   IconChartWaffle,
 } from '@kbn/chart-icons';
-import {
-  CategoryDisplay,
-  NumberDisplay,
-  SharedPieLayerState,
-  EmptySizeRatios,
-} from '../../../common';
+import { SharedPieLayerState, EmptySizeRatios } from '../../../common/types';
+import { CategoryDisplay, NumberDisplay } from '../../../common/constants';
 import type { PieChartType } from '../../../common/types';
 
 interface PartitionChartMeta {

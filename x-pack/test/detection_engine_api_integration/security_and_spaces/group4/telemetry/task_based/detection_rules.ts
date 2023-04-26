@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createRule,
@@ -24,7 +25,6 @@ import {
   removeTimeFieldsFromTelemetryStats,
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
-import { ELASTIC_SECURITY_RULE_ID } from '../../../../utils/prebuilt_rules/create_prebuilt_rule_saved_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

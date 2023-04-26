@@ -213,6 +213,7 @@ export type InfraSourceIndexField = rt.TypeOf<typeof SourceStatusFieldRuntimeTyp
 export const SourceStatusRuntimeType = rt.type({
   logIndicesExist: rt.boolean,
   metricIndicesExist: rt.boolean,
+  remoteClustersExist: rt.boolean,
   indexFields: rt.array(SourceStatusFieldRuntimeType),
 });
 

@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { estypes } from '@elastic/elasticsearch';
 import { map } from 'rxjs/operators';
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 import { processResponse, processInferenceResult } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getFillMaskOutputComponent } from './fill_mask_output';
-import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../common/constants/trained_models';
 import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 
 const MASK = '[MASK]';
@@ -34,9 +34,10 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
   constructor(
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
-    inputType: INPUT_TYPE
+    inputType: INPUT_TYPE,
+    deploymentId: string
   ) {
-    super(trainedModelsApi, model, inputType);
+    super(trainedModelsApi, model, inputType, deploymentId);
 
     this.initialize([
       this.inputText$.pipe(map((inputText) => inputText.every((t) => t.includes(MASK)))),

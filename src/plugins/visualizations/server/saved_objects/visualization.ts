@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
@@ -14,6 +15,7 @@ export const getVisualizationSavedObjectType = (
   getSearchSourceMigrations: () => MigrateFunctionsObject
 ): SavedObjectsType => ({
   name: 'visualization',
+  indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
@@ -32,16 +34,14 @@ export const getVisualizationSavedObjectType = (
     },
   },
   mappings: {
+    dynamic: false, // declared here to prevent indexing root level attribute fields
     properties: {
       description: { type: 'text' },
       kibanaSavedObjectMeta: {
-        properties: { searchSourceJSON: { type: 'text', index: false } },
+        properties: {},
       },
-      savedSearchRefName: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
-      uiStateJSON: { type: 'text', index: false },
       version: { type: 'integer' },
-      visState: { type: 'text', index: false },
     },
   },
   migrations: () => getAllMigrations(getSearchSourceMigrations()),

@@ -26,7 +26,7 @@ export function DetailViewHeader({
   return (
     <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
       <EuiFlexItem>
-        <EuiLink href={backHref}>
+        <EuiLink data-test-subj="apmDetailViewHeaderLink" href={backHref}>
           <EuiFlexGroup direction="row" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiIcon type="arrowLeft" />

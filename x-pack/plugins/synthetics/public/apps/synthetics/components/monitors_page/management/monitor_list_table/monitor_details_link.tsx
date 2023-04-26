@@ -30,5 +30,9 @@ export const MonitorDetailsLink = ({ monitor }: { monitor: EncryptedSyntheticsSa
     locationId,
   });
 
-  return <EuiLink href={monitorDetailLinkUrl}>{monitor.name}</EuiLink>;
+  return (
+    <EuiLink data-test-subj="syntheticsMonitorDetailsLinkLink" href={monitorDetailLinkUrl}>
+      {monitor.name}
+    </EuiLink>
+  );
 };

@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../utils/kibana_react';
 import { useLicense } from '../../../hooks/use_license';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { paths } from '../../../config';
+import { paths } from '../../../config/paths';
 import illustration from './assets/illustration.svg';
 
 export function SloListWelcomePrompt() {
@@ -92,7 +92,12 @@ export function SloListWelcomePrompt() {
 
                 <EuiFlexItem>
                   <span>
-                    <EuiButton fill color="primary" onClick={handleClickCreateSlo}>
+                    <EuiButton
+                      data-test-subj="o11ySloListWelcomePromptCreateSloButton"
+                      fill
+                      color="primary"
+                      onClick={handleClickCreateSlo}
+                    >
                       {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.buttonLabel', {
                         defaultMessage: 'Create SLO',
                       })}
@@ -164,7 +169,11 @@ export function SloListWelcomePrompt() {
               </span>
             </EuiTitle>
             &nbsp;
-            <EuiLink href="#" target="_blank">
+            <EuiLink
+              data-test-subj="o11ySloListWelcomePromptReadTheDocsLink"
+              href="#"
+              target="_blank"
+            >
               {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.learnMoreLink', {
                 defaultMessage: 'Read the docs',
               })}

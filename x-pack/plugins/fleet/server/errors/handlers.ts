@@ -31,6 +31,7 @@ import {
   PackageFailedVerificationError,
   PackagePolicyNotFoundError,
   FleetUnauthorizedError,
+  PackagePolicyNameExistsError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -77,6 +78,9 @@ const getHTTPResponseCode = (error: FleetError): number => {
   }
   if (error instanceof FleetUnauthorizedError) {
     return 403; // Unauthorized
+  }
+  if (error instanceof PackagePolicyNameExistsError) {
+    return 409; // Conflict
   }
   return 400; // Bad Request
 };

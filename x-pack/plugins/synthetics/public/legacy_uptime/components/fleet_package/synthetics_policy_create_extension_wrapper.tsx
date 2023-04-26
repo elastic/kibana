@@ -8,7 +8,6 @@
 import React, { memo } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { SyntheticsPolicyCreateExtension } from './synthetics_policy_create_extension';
-import { SyntheticsProviders } from './contexts';
 
 /**
  * Exports Synthetics-specific package policy instructions
@@ -16,10 +15,6 @@ import { SyntheticsProviders } from './contexts';
  */
 export const SyntheticsPolicyCreateExtensionWrapper =
   memo<PackagePolicyCreateExtensionComponentProps>(({ newPolicy, onChange }) => {
-    return (
-      <SyntheticsProviders>
-        <SyntheticsPolicyCreateExtension newPolicy={newPolicy} onChange={onChange} />
-      </SyntheticsProviders>
-    );
+    return <SyntheticsPolicyCreateExtension newPolicy={newPolicy} onChange={onChange} />;
   });
 SyntheticsPolicyCreateExtensionWrapper.displayName = 'SyntheticsPolicyCreateExtensionWrapper';

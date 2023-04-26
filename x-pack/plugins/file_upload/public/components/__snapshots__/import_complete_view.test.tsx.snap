@@ -13,7 +13,7 @@ exports[`Should render error when upload fails from elasticsearch request failur
   <EuiCallOut
     color="danger"
     data-test-subj="fileUploadStatusCallout"
-    iconType="alert"
+    iconType="warning"
     title="Unable to upload file"
   >
     <p>
@@ -107,7 +107,7 @@ exports[`Should render error when upload fails from http request timeout 1`] = `
   <EuiCallOut
     color="danger"
     data-test-subj="fileUploadStatusCallout"
-    iconType="alert"
+    iconType="warning"
     title="Unable to upload file"
   >
     <p>

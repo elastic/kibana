@@ -60,7 +60,9 @@ export function combineFieldsAndAggs(
         default:
           // all other aggs take numerical fields
           numericalFields.forEach((f) => {
-            mix(f, a);
+            if (f.aggregatable) {
+              mix(f, a);
+            }
           });
           break;
       }

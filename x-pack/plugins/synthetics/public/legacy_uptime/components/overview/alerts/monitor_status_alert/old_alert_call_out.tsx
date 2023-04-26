@@ -27,7 +27,7 @@ export const OldAlertCallOut: React.FC<Props> = ({ isOldAlert }) => {
             defaultMessage="You may be editing an older alert, some fields may not auto-populate."
           />
         }
-        iconType="alert"
+        iconType="warning"
       />
     </>
   );

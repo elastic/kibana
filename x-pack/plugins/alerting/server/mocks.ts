@@ -30,7 +30,10 @@ const createSetupMock = () => {
     registerType: jest.fn(),
     getSecurityHealth: jest.fn(),
     getConfig: jest.fn(),
-    getFrameworkAlertsEnabled: jest.fn(),
+    frameworkAlerts: {
+      enabled: jest.fn(),
+      getContextInitializationPromise: jest.fn(),
+    },
   };
   return mock;
 };
@@ -77,6 +80,7 @@ export const createAlertFactoryMock = {
       getScheduledActionOptions: jest.fn(),
       unscheduleActions: jest.fn(),
       getState: jest.fn(),
+      getUuid: jest.fn(),
       scheduleActions: jest.fn(),
       replaceState: jest.fn(),
       updateLastScheduledActions: jest.fn(),

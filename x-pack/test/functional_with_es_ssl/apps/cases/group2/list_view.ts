@@ -279,7 +279,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('filtering', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/152925
+    describe.skip('filtering', () => {
       const caseTitle = 'matchme';
       const caseIds: string[] = [];
 
@@ -448,7 +449,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
       });
 
-      describe('assignees filtering', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/152928
+      describe.skip('assignees filtering', () => {
         it('filters cases by the first cases all user assignee', async () => {
           await cases.casesTable.filterByAssignee('all');
           await cases.casesTable.validateCasesTableHasNthRows(1);

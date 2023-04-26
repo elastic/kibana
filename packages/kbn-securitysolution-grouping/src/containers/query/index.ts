@@ -6,111 +6,76 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty } from 'lodash/fp';
-import type { GroupingQueryArgs, GroupingQuery, NamedAggregation } from './types';
-/** The maximum number of items to render */
-export const DEFAULT_STACK_BY_FIELD0_SIZE = 10;
-export const DEFAULT_STACK_BY_FIELD1_SIZE = 10;
-
-const getOptionalSubAggregation = ({
-  stackByMultipleFields1,
-  stackByMultipleFields1Size,
-  stackByMultipleFields1From = 0,
-  stackByMultipleFields1Sort,
-  additionalStatsAggregationsFields1,
-}: {
-  stackByMultipleFields1: string[] | undefined;
-  stackByMultipleFields1Size: number;
-  stackByMultipleFields1From?: number;
-  stackByMultipleFields1Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
-  additionalStatsAggregationsFields1: NamedAggregation[];
-}): NamedAggregation | {} =>
-  stackByMultipleFields1 != null && !isEmpty(stackByMultipleFields1)
-    ? {
-        stackByMultipleFields1: {
-          multi_terms: {
-            terms: stackByMultipleFields1.map((stackByMultipleField1) => ({
-              field: stackByMultipleField1,
-            })),
-          },
-          aggs: {
-            bucket_truncate: {
-              bucket_sort: {
-                sort: stackByMultipleFields1Sort,
-                from: stackByMultipleFields1From,
-                size: stackByMultipleFields1Size,
-              },
-            },
-            ...additionalStatsAggregationsFields1.reduce(
-              (aggObj, subAgg) => Object.assign(aggObj, subAgg),
-              {}
-            ),
-          },
-        },
-      }
-    : {};
+import type { GroupingQueryArgs, GroupingQuery } from './types';
+/** The maximum number of groups to render */
+export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;
 
 // our pagination will be broken if the stackBy field cardinality exceeds 10,000
 // https://github.com/elastic/kibana/issues/151913
 export const MAX_QUERY_SIZE = 10000;
+
+/**
+ * Composes grouping query and aggregations
+ * @param additionalFilters Global filtering applicable to the grouping component.
+ * Array of {@link BoolAgg} to be added to the query
+ * @param from starting timestamp
+ * @param groupByFields array of field names to group by
+ * @param pageNumber starting grouping results page number
+ * @param rootAggregations Top level aggregations to get the groups number or overall groups metrics.
+ * Array of {@link NamedAggregation}
+ * @param runtimeMappings mappings of runtime fields [see runtimeMappings]{@link GroupingQueryArgs.runtimeMappings}
+ * @param size number of grouping results per page
+ * @param sort add one or more sorts on specific fields
+ * @param statsAggregations group level aggregations which correspond to {@link GroupStatsRenderer} configuration
+ * @param to ending timestamp
+ *
+ * @returns query dsl {@link GroupingQuery}
+ */
 export const getGroupingQuery = ({
   additionalFilters = [],
-  additionalAggregationsRoot,
-  additionalStatsAggregationsFields0,
-  additionalStatsAggregationsFields1,
   from,
+  groupByFields,
+  rootAggregations,
   runtimeMappings,
-  stackByMultipleFields0,
-  stackByMultipleFields0Size = DEFAULT_STACK_BY_FIELD0_SIZE,
-  stackByMultipleFields0From,
-  stackByMultipleFields0Sort,
-  stackByMultipleFields1,
-  stackByMultipleFields1Size = DEFAULT_STACK_BY_FIELD1_SIZE,
-  stackByMultipleFields1From,
-  stackByMultipleFields1Sort,
+  size = DEFAULT_GROUP_BY_FIELD_SIZE,
+  pageNumber,
+  sort,
+  statsAggregations,
   to,
 }: GroupingQueryArgs): GroupingQuery => ({
   size: 0,
   aggs: {
-    stackByMultipleFields0: {
-      ...(stackByMultipleFields0.length > 1
+    groupByFields: {
+      ...(groupByFields.length > 1
         ? {
             multi_terms: {
-              terms: stackByMultipleFields0.map((stackByMultipleField0) => ({
-                field: stackByMultipleField0,
+              terms: groupByFields.map((groupByField) => ({
+                field: groupByField,
               })),
               size: MAX_QUERY_SIZE,
             },
           }
         : {
             terms: {
-              field: stackByMultipleFields0[0],
+              field: groupByFields[0],
               size: MAX_QUERY_SIZE,
             },
           }),
       aggs: {
-        ...getOptionalSubAggregation({
-          stackByMultipleFields1,
-          stackByMultipleFields1Size,
-          stackByMultipleFields1From,
-          stackByMultipleFields1Sort,
-          additionalStatsAggregationsFields1,
-        }),
         bucket_truncate: {
           bucket_sort: {
-            sort: stackByMultipleFields0Sort,
-            from: stackByMultipleFields0From,
-            size: stackByMultipleFields0Size,
+            sort,
+            from: pageNumber,
+            size,
           },
         },
-        ...additionalStatsAggregationsFields0.reduce(
-          (aggObj, subAgg) => Object.assign(aggObj, subAgg),
-          {}
-        ),
+        ...(statsAggregations
+          ? statsAggregations.reduce((aggObj, subAgg) => Object.assign(aggObj, subAgg), {})
+          : {}),
       },
     },
-    ...(additionalAggregationsRoot
-      ? additionalAggregationsRoot.reduce((aggObj, subAgg) => Object.assign(aggObj, subAgg), {})
+    ...(rootAggregations
+      ? rootAggregations.reduce((aggObj, subAgg) => Object.assign(aggObj, subAgg), {})
       : {}),
   },
   query: {

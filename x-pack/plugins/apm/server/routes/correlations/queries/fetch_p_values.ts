@@ -15,6 +15,12 @@ import { splitAllSettledPromises, getEventType } from '../utils';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchFailedEventsCorrelationPValues } from './fetch_failed_events_correlation_p_values';
 
+export interface PValuesResponse {
+  failedTransactionsCorrelations: FailedTransactionsCorrelation[];
+  ccsWarning: boolean;
+  fallbackResult?: FailedTransactionsCorrelation;
+}
+
 export const fetchPValues = async ({
   apmEventClient,
   start,
@@ -30,7 +36,7 @@ export const fetchPValues = async ({
   durationMin?: number;
   durationMax?: number;
   fieldCandidates: string[];
-}) => {
+}): Promise<PValuesResponse> => {
   const chartType = LatencyDistributionChartType.failedTransactionsCorrelations;
   const searchMetrics = false; // failed transactions correlations does not search metrics documents
   const eventType = getEventType(chartType, searchMetrics);

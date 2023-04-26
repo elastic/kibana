@@ -16,13 +16,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'header']);
   const screenshotDirectories = ['response_ops_docs', 'stack_alerting'];
+  const ruleName = 'kibana sites - high egress';
 
   describe('index threshold rule', function () {
     it('create rule screenshot', async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await rules.common.clickCreateAlertButton();
-      await testSubjects.setValue('ruleNameInput', 'kibana sites - high egress');
+      await testSubjects.setValue('ruleNameInput', ruleName);
       await testSubjects.click('tagsComboBox');
       await testSubjects.setValue('tagsComboBox', 'sample-data');
       await testSubjects.click('solutionsFilterButton');
@@ -130,12 +131,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
-      /*
-       * const saveButton = await testSubjects.find('saveRuleButton');
-       * await saveButton.click();
-       */
+
+      const saveButton = await testSubjects.find('saveRuleButton');
+      await saveButton.click();
       const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
       await flyOutCancelButton.click();
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.setValue('ruleSearchField', ruleName);
+      const rulesList = await testSubjects.find('rulesList');
+      const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
+      await alertRule.click();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await commonScreenshots.takeScreenshot(
+        'rule-types-index-threshold-example-alerts',
+        screenshotDirectories,
+        1400,
+        1024
+      );
     });
   });
 }

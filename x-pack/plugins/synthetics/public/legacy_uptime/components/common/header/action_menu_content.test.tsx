@@ -38,7 +38,7 @@ describe('ActionMenuContent', () => {
       'Navigate to the "Explore Data" view to visualize Synthetics/User data'
     );
 
-    expect(analyzeAnchor.getAttribute('href')).toContain('/app/observability/exploratory-view');
+    expect(analyzeAnchor.getAttribute('href')).toContain('/app/exploratory-view');
     expect(getByText('Explore data'));
   });
 

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 export function SloListError() {
   return (
     <EuiEmptyPrompt
-      iconType="alert"
+      iconType="warning"
       color="danger"
       title={
         <h2>

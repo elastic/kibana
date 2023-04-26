@@ -406,7 +406,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           />
         }
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         <p>
           <FormattedMessage

@@ -128,7 +128,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
           {ingestionStatus === IngestionStatus.ERROR ? (
             <EuiCallOut
               color="warning"
-              iconType="alert"
+              iconType="warning"
               title={i18n.translate(
                 'xpack.enterpriseSearch.content.indices.connectorScheduling.error.title',
                 { defaultMessage: 'Review your connector configuration for reported errors.' }
@@ -156,7 +156,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
                 'xpack.enterpriseSearch.content.indices.connectorScheduling.configured.description',
                 {
                   defaultMessage:
-                    'Your connector is configured and deployed. Configure a one-time sync by clicking the Sync button, or enable a recurring sync schedule. ',
+                    'Your connector is configured and deployed. Configure a one-time sync by clicking the Sync button, or enable a recurring sync schedule. The connector uses UTC as its timezone. ',
                 }
               )}
             </EuiText>

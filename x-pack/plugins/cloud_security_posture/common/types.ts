@@ -11,6 +11,8 @@ import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './consta
 import { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
+
+export type PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';
 /** number between 1-100 */
 export type Score = number;
 
@@ -59,7 +61,8 @@ export type CspStatusCode =
   | 'unprivileged' // user lacks privileges for the latest findings index
   | 'index-timeout' // index timeout was surpassed since installation
   | 'not-deployed' // no healthy agents were deployed
-  | 'not-installed'; // number of installed csp integrations is 0;
+  | 'not-installed' // number of installed csp integrations is 0;
+  | 'waiting_for_results'; // have healthy agents but no findings at all, assumes data is being indexed for the 1st time
 
 export type IndexStatus =
   | 'not-empty' // Index contains documents
@@ -71,27 +74,23 @@ export interface IndexDetails {
   status: IndexStatus;
 }
 
-interface BaseCspSetupStatus {
-  indicesDetails: IndexDetails[];
-  latestPackageVersion: string;
+export interface BaseCspSetupBothPolicy {
+  status: CspStatusCode;
   installedPackagePolicies: number;
   healthyAgents: number;
+}
+
+export interface BaseCspSetupStatus {
+  indicesDetails: IndexDetails[];
+  latestPackageVersion: string;
+  cspm: BaseCspSetupBothPolicy;
+  kspm: BaseCspSetupBothPolicy;
+  vuln_mgmt: BaseCspSetupBothPolicy;
   isPluginInitialized: boolean;
-  installedPolicyTemplates: CloudSecurityPolicyTemplate[];
+  installedPackageVersion?: string | undefined;
 }
 
-interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {
-  status: Extract<CspStatusCode, 'not-installed'>;
-}
-
-interface CspSetupInstalledStatus extends BaseCspSetupStatus {
-  status: Exclude<CspStatusCode, 'not-installed'>;
-  // if installedPackageVersion == undefined but status != 'not-installed' it means the integration was installed in the past and findings were found
-  // status can be `indexed` but return with undefined package information in this case
-  installedPackageVersion: string | undefined;
-}
-
-export type CspSetupStatus = CspSetupInstalledStatus | CspSetupNotInstalledStatus;
+export type CspSetupStatus = BaseCspSetupStatus;
 
 export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: number };
 

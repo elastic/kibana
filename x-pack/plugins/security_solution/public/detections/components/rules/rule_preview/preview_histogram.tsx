@@ -13,6 +13,7 @@ import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { StatefulEventsViewer } from '../../../../common/components/events_viewer';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import * as i18n from './translations';
@@ -28,7 +29,6 @@ import { BarChart } from '../../../../common/components/charts/barchart';
 import { usePreviewHistogram } from './use_preview_histogram';
 import { getAlertsPreviewDefaultModel } from '../../alerts_table/default_config';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { TableId } from '../../../../../common/types';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { DetailsPanel } from '../../../../timelines/components/side_panel';
@@ -94,7 +94,9 @@ export const PreviewHistogram = ({
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
   const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
 
-  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+  const isAlertsPreviewChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled(
+    'alertsPreviewChartEmbeddablesEnabled'
+  );
   const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
 
   const extraVisualizationOptions = useMemo(
@@ -112,7 +114,7 @@ export const PreviewHistogram = ({
     spaceId,
     indexPattern,
     ruleType,
-    skip: isChartEmbeddablesEnabled,
+    skip: isAlertsPreviewChartEmbeddablesEnabled,
   });
   const license = useLicense();
   const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
@@ -145,7 +147,7 @@ export const PreviewHistogram = ({
     isInitializing,
     refetch,
     previewId,
-    isChartEmbeddablesEnabled,
+    isAlertsPreviewChartEmbeddablesEnabled,
     previewQueryId,
   ]);
 
@@ -193,13 +195,13 @@ export const PreviewHistogram = ({
               id={previewQueryId}
               title={i18n.QUERY_GRAPH_HITS_TITLE}
               titleSize="xs"
-              showInspectButton={!isChartEmbeddablesEnabled}
+              showInspectButton={!isAlertsPreviewChartEmbeddablesEnabled}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             {isLoading ? (
               <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
-            ) : isChartEmbeddablesEnabled ? (
+            ) : isAlertsPreviewChartEmbeddablesEnabled ? (
               <VisualizationEmbeddable
                 applyGlobalQueriesAndFilters={false}
                 extraOptions={extraVisualizationOptions}
@@ -239,7 +241,6 @@ export const PreviewHistogram = ({
         <StatefulEventsViewer
           pageFilters={pageFilters}
           defaultModel={getAlertsPreviewDefaultModel(license)}
-          disableCellActions={true}
           end={extendedEndDate}
           tableId={TableId.rulePreview}
           leadingControlColumns={getPreviewTableControlColumn(1.5)}

@@ -363,6 +363,8 @@ export interface RegistryElasticsearch {
   'ingest_pipeline.name'?: string;
   source_mode?: 'default' | 'synthetic';
   index_mode?: 'time_series';
+  dynamic_dataset?: boolean;
+  dynamic_namespace?: boolean;
 }
 
 export interface RegistryDataStreamProperties {
@@ -378,6 +380,7 @@ export type RegistryVarType =
   | 'integer'
   | 'bool'
   | 'password'
+  | 'select'
   | 'text'
   | 'yaml'
   | 'string'
@@ -390,6 +393,7 @@ export enum RegistryVarsEntryKeys {
   required = 'required',
   show_user = 'show_user',
   multi = 'multi',
+  options = 'options',
   default = 'default',
   os = 'os',
 }
@@ -405,6 +409,7 @@ export interface RegistryVarsEntry {
   [RegistryVarsEntryKeys.required]?: boolean;
   [RegistryVarsEntryKeys.show_user]?: boolean;
   [RegistryVarsEntryKeys.multi]?: boolean;
+  [RegistryVarsEntryKeys.options]?: Array<{ value: string; text: string }>;
   [RegistryVarsEntryKeys.default]?: string | string[] | boolean;
   [RegistryVarsEntryKeys.os]?: {
     [key: string]: {
@@ -448,6 +453,7 @@ export interface IntegrationCardItem {
   id: string;
   categories: string[];
   fromIntegrations?: string;
+  isReauthorizationRequired?: boolean;
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
   showLabels?: boolean;
@@ -468,7 +474,7 @@ export type ExperimentalIndexingFeature =
 
 export interface ExperimentalDataStreamFeature {
   data_stream: string;
-  features: Record<ExperimentalIndexingFeature, boolean>;
+  features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
 }
 
 export interface Installation extends SavedObjectAttributes {
@@ -490,7 +496,7 @@ export interface Installation extends SavedObjectAttributes {
   // TypeScript doesn't like using the `ExperimentalDataStreamFeature` type defined above here
   experimental_data_stream_features?: Array<{
     data_stream: string;
-    features: Record<ExperimentalIndexingFeature, boolean>;
+    features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
   }>;
 }
 
@@ -534,6 +540,7 @@ export type KibanaAssetReference = Pick<SavedObjectReference, 'id'> & {
 };
 export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: ElasticsearchAssetType;
+  deferred?: boolean;
 };
 
 export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {

@@ -7,13 +7,15 @@
 
 import React, { FC } from 'react';
 import { EuiLink } from '@elastic/eui';
-import { Link } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ReactRouterEuiLink } from './react_router_helpers';
 
 interface DetailPageLinkProps {
   /**
    * MonitorId to be used to redirect to detail page
    */
   monitorId: string;
+  configId?: string;
   /**
    * Link parameters usually filter states
    */
@@ -23,19 +25,31 @@ interface DetailPageLinkProps {
 export const MonitorPageLink: FC<DetailPageLinkProps> = ({
   children,
   monitorId,
+  configId,
   linkParameters,
 }) => {
+  const basePath = useKibana().services.http?.basePath.get();
+  if (configId) {
+    return (
+      <EuiLink
+        data-test-subj="syntheticsMonitorPageLinkLink"
+        href={`${basePath}/app/synthetics/monitor/${configId}`}
+      >
+        {children}
+      </EuiLink>
+    );
+  }
+
   const getLocationTo = () => {
     // encode monitorId param as 64 base string to make it a valid URL, since it can be a url
     return linkParameters
       ? `/monitor/${btoa(monitorId)}/${linkParameters}`
       : `/monitor/${btoa(monitorId)}`;
   };
+
   return (
-    <EuiLink>
-      <Link data-test-subj={`monitor-page-link-${monitorId}`} to={getLocationTo()}>
-        {children}
-      </Link>
-    </EuiLink>
+    <ReactRouterEuiLink data-test-subj={`monitor-page-link-${monitorId}`} to={getLocationTo()}>
+      {children}
+    </ReactRouterEuiLink>
   );
 };

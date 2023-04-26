@@ -7,10 +7,10 @@
 
 import { useDataView } from './use_data_view';
 import { renderHook } from '@testing-library/react-hooks';
-import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
+import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
 import { coreMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import { InfraClientStartDeps } from '../../../../types';
+import type { InfraClientStartDeps } from '../../../../types';
 import { CoreStart } from '@kbn/core/public';
 
 jest.mock('@kbn/i18n');
@@ -40,45 +40,56 @@ const mockDataView = {
   toSpec: () => ({}),
 } as jest.Mocked<DataView>;
 
-describe('useHostTable hook', () => {
+describe('useDataView hook', () => {
   beforeEach(() => {
     dataViewMock = {
-      createAndSave: jest.fn(),
+      create: jest.fn(),
       find: jest.fn(),
     } as Partial<DataViewsServicePublic> as jest.Mocked<DataViewsServicePublic>;
 
     mockUseKibana();
   });
 
-  it('should find an existing Data view', async () => {
-    dataViewMock.find.mockReturnValue(Promise.resolve([mockDataView]));
+  it('should create a new ad-hoc data view', async () => {
+    dataViewMock.create.mockReturnValue(Promise.resolve(mockDataView));
     const { result, waitForNextUpdate } = renderHook(() => useDataView(prop));
 
     await waitForNextUpdate();
-    expect(result.current.isDataViewLoading).toEqual(false);
-    expect(result.current.hasFailedLoadingDataView).toEqual(false);
-    expect(result.current.metricsDataView).toEqual(mockDataView);
-  });
-
-  it('should create a new Data view', async () => {
-    dataViewMock.find.mockReturnValue(Promise.resolve([]));
-    dataViewMock.createAndSave.mockReturnValue(Promise.resolve(mockDataView));
-    const { result, waitForNextUpdate } = renderHook(() => useDataView(prop));
-
-    await waitForNextUpdate();
-    expect(result.current.isDataViewLoading).toEqual(false);
-    expect(result.current.hasFailedLoadingDataView).toEqual(false);
-    expect(result.current.metricsDataView).toEqual(mockDataView);
+    expect(result.current.loading).toEqual(false);
+    expect(result.current.hasError).toEqual(false);
+    expect(result.current.dataView).toEqual(mockDataView);
   });
 
   it('should display a toast when it fails to load the data view', async () => {
-    dataViewMock.find.mockReturnValue(Promise.reject());
+    dataViewMock.create.mockReturnValue(Promise.reject());
     const { result, waitForNextUpdate } = renderHook(() => useDataView(prop));
 
     await waitForNextUpdate();
-    expect(result.current.isDataViewLoading).toEqual(false);
-    expect(result.current.hasFailedLoadingDataView).toEqual(true);
-    expect(result.current.metricsDataView).toBeUndefined();
+    expect(result.current.loading).toEqual(false);
+    expect(result.current.hasError).toEqual(true);
+    expect(result.current.dataView).toBeUndefined();
     expect(notificationMock.toasts.addDanger).toBeCalledTimes(1);
+  });
+
+  it('should create a dataview with unique id for metricAlias metrics', async () => {
+    const { waitForNextUpdate } = renderHook(() => useDataView({ metricAlias: 'metrics' }));
+
+    await waitForNextUpdate();
+    expect(dataViewMock.create).toHaveBeenCalledWith({
+      id: 'infra_metrics_212933f0-c55e-5a36-8b13-e724aed2f66d',
+      timeFieldName: '@timestamp',
+      title: 'metrics',
+    });
+  });
+
+  it('should create a dataview with unique id for metricAlias remote-metrics', async () => {
+    const { waitForNextUpdate } = renderHook(() => useDataView({ metricAlias: 'remote-metrics' }));
+
+    await waitForNextUpdate();
+    expect(dataViewMock.create).toHaveBeenCalledWith({
+      id: 'infra_metrics_e40bb657-0351-548e-8e73-093851d9bb6e',
+      timeFieldName: '@timestamp',
+      title: 'remote-metrics',
+    });
   });
 });

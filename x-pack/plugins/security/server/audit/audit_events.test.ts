@@ -52,6 +52,8 @@ describe('#savedObjectEvent', () => {
             "id": "SAVED_OBJECT_ID",
             "type": "dashboard",
           },
+          "unauthorized_spaces": undefined,
+          "unauthorized_types": undefined,
         },
         "message": "User is creating dashboard [id=SAVED_OBJECT_ID]",
       }
@@ -84,6 +86,8 @@ describe('#savedObjectEvent', () => {
             "id": "SAVED_OBJECT_ID",
             "type": "dashboard",
           },
+          "unauthorized_spaces": undefined,
+          "unauthorized_types": undefined,
         },
         "message": "User has created dashboard [id=SAVED_OBJECT_ID]",
       }
@@ -120,6 +124,8 @@ describe('#savedObjectEvent', () => {
             "id": "SAVED_OBJECT_ID",
             "type": "dashboard",
           },
+          "unauthorized_spaces": undefined,
+          "unauthorized_types": undefined,
         },
         "message": "Failed attempt to create dashboard [id=SAVED_OBJECT_ID]",
       }
@@ -227,8 +233,95 @@ describe('#savedObjectEvent', () => {
             "id": "SAVED_OBJECT_ID",
             "type": "dashboard",
           },
+          "unauthorized_spaces": undefined,
+          "unauthorized_types": undefined,
         },
         "message": "User has removed references to dashboard [id=SAVED_OBJECT_ID]",
+      }
+    `);
+  });
+
+  test('can create event with `add_to_spaces` and `delete_from_spaces`', () => {
+    expect(
+      savedObjectEvent({
+        action: AuditAction.UPDATE_OBJECTS_SPACES,
+        savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
+        addToSpaces: ['space1', 'space3', 'space5'],
+        deleteFromSpaces: ['space2', 'space4', 'space6'],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "saved_object_update_objects_spaces",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "change",
+          ],
+        },
+        "kibana": Object {
+          "add_to_spaces": Array [
+            "space1",
+            "space3",
+            "space5",
+          ],
+          "delete_from_spaces": Array [
+            "space2",
+            "space4",
+            "space6",
+          ],
+          "saved_object": Object {
+            "id": "SAVED_OBJECT_ID",
+            "type": "dashboard",
+          },
+          "unauthorized_spaces": undefined,
+          "unauthorized_types": undefined,
+        },
+        "message": "User has updated spaces of dashboard [id=SAVED_OBJECT_ID]",
+      }
+    `);
+  });
+
+  test('can create event with `requested_spaces` and `requested_types`', () => {
+    expect(
+      savedObjectEvent({
+        action: AuditAction.FIND,
+        savedObject: undefined,
+        unauthorizedSpaces: ['space1', 'space2', 'space3'],
+        unauthorizedTypes: ['x', 'y', 'z'],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "saved_object_find",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "access",
+          ],
+        },
+        "kibana": Object {
+          "add_to_spaces": undefined,
+          "delete_from_spaces": undefined,
+          "saved_object": undefined,
+          "unauthorized_spaces": Array [
+            "space1",
+            "space2",
+            "space3",
+          ],
+          "unauthorized_types": Array [
+            "x",
+            "y",
+            "z",
+          ],
+        },
+        "message": "User has accessed saved objects",
       }
     `);
   });

@@ -28,6 +28,7 @@ const VERSION_FIELD = 'kibana.version';
 const ERROR_MESSAGE_FIELD = 'error.message';
 const SCHEDULE_DELAY_FIELD = 'kibana.task.schedule_delay';
 const EXECUTION_UUID_FIELD = 'kibana.action.execution.uuid';
+const EXECUTION_SOURCE_FIELD = 'kibana.action.execution.source';
 
 const Millis2Nanos = 1000 * 1000;
 
@@ -257,6 +258,7 @@ export function getExecutionLogAggregation({
                         SPACE_ID_FIELD,
                         ACTION_NAME_FIELD,
                         ACTION_ID_FIELD,
+                        EXECUTION_SOURCE_FIELD,
                       ],
                     },
                   },
@@ -312,6 +314,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const message =
     status === 'failure' ? `${outcomeMessage} - ${outcomeErrorMessage}` : outcomeMessage;
   const version = outcomeAndMessage.kibana?.version ?? '';
+  const source = outcomeAndMessage.kibana?.action?.execution?.source ?? '';
 
   const spaceIds = outcomeAndMessage?.kibana?.space_ids ?? [];
   const connectorName = outcomeAndMessage?.kibana?.action?.name ?? '';
@@ -324,6 +327,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     status,
     message,
     version,
+    source,
     schedule_delay_ms: scheduleDelayUs / Millis2Nanos,
     space_ids: spaceIds,
     connector_name: connectorName,

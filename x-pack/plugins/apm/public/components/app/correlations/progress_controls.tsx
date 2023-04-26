@@ -56,7 +56,11 @@ export function CorrelationsProgressControls({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {!isRunning && (
-          <EuiButton size="s" onClick={onRefresh}>
+          <EuiButton
+            data-test-subj="apmCorrelationsProgressControlsRefreshButton"
+            size="s"
+            onClick={onRefresh}
+          >
             <FormattedMessage
               id="xpack.apm.correlations.refreshButtonTitle"
               defaultMessage="Refresh"
@@ -64,7 +68,11 @@ export function CorrelationsProgressControls({
           </EuiButton>
         )}
         {isRunning && (
-          <EuiButton size="s" onClick={onCancel}>
+          <EuiButton
+            data-test-subj="apmCorrelationsProgressControlsCancelButton"
+            size="s"
+            onClick={onCancel}
+          >
             <FormattedMessage
               id="xpack.apm.correlations.cancelButtonTitle"
               defaultMessage="Cancel"

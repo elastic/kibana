@@ -6,13 +6,13 @@
  */
 
 import { getPieVisualization } from './visualization';
+import { PieVisualizationState } from '../../../common/types';
 import {
-  PieVisualizationState,
-  PieChartTypes,
   CategoryDisplay,
-  NumberDisplay,
   LegendDisplay,
-} from '../../../common';
+  NumberDisplay,
+  PieChartTypes,
+} from '../../../common/constants';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
@@ -617,10 +617,10 @@ describe('pie_visualization', () => {
       });
     });
 
-    it.each(Object.values(PieChartTypes).filter((type) => type !== 'mosaic'))(
+    it.each(Object.values(PieChartTypes).filter((type) => type !== PieChartTypes.MOSAIC))(
       '%s adds fake dimension',
       (type) => {
-        const state = { ...getExampleState(), type };
+        const state = { ...getExampleState(), shape: type };
         state.layers[0].metrics.push('1', '2');
         state.layers[0].allowMultipleMetrics = true;
         expect(
@@ -644,5 +644,22 @@ describe('pie_visualization', () => {
         ).toBeUndefined();
       }
     );
+  });
+
+  describe('layer settings', () => {
+    describe('hasLayerSettings', () => {
+      it('should have data settings for all partition chart types but mosaic', () => {
+        for (const type of Object.values(PieChartTypes)) {
+          const state = { ...getExampleState(), shape: type };
+          expect(
+            pieVisualization.hasLayerSettings?.({
+              state,
+              frame: mockFrame(),
+              layerId: state.layers[0].layerId,
+            })
+          ).toEqual({ data: type !== PieChartTypes.MOSAIC, appearance: false });
+        }
+      });
+    });
   });
 });

@@ -6,8 +6,8 @@
  */
 
 import { journey, step, expect, before, Page } from '@elastic/synthetics';
-import { byTestId, delay } from '@kbn/observability-plugin/e2e/utils';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { byTestId, delay } from '../../../helpers/utils';
+import { recordVideo } from '../../../helpers/record_video';
 import { makeChecksWithStatus } from '../../../helpers/make_checks';
 import { monitorDetailsPageProvider } from '../../../page_objects/uptime/monitor_details';
 
@@ -48,7 +48,7 @@ journey('MonitorPingRedirects', async ({ page, params }: { page: Page; params: a
     await delay(5000);
   });
 
-  step('go to monitor-management', async () => {
+  step('go to overview page', async () => {
     await monitorDetails.navigateToOverviewPage({
       dateRangeEnd: testMonitor.end,
       dateRangeStart: testMonitor.start,

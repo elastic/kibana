@@ -9,8 +9,13 @@ export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
 
 export const ADD_ENDPOINT_EXCEPTION_BTN = '[data-test-subj="add-endpoint-exception-menu-item"]';
 
-export const ALERT_COUNT_TABLE_FIRST_ROW_COUNT =
-  '[data-test-subj="alertsCountTable"] tr:nth-child(1) td:nth-child(2) .euiTableCellContent__text';
+export const ALERT_COUNT_TABLE_COLUMN = (column: number) =>
+  `[data-test-subj="embeddablePanel"] [data-test-subj="dataGridRowCell"]:nth-child(${column}) [data-test-subj="lnsTableCellContent"]`;
+
+export const ALERT_EMBEDDABLE_PROGRESS_BAR = '[data-test-subj="embeddablePanel"] .euiProgress';
+
+export const ALERT_EMBEDDABLE_EMPTY_PROMPT =
+  '[data-test-subj="embeddablePanel"] [data-test-subj="emptyPlaceholder"]';
 
 export const ALERT_CHECKBOX = '[data-test-subj="bulk-actions-row-cell"].euiCheckbox__input';
 
@@ -27,9 +32,6 @@ export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 export const ALERTS = '[data-test-subj="events-viewer-panel"][data-test-subj="event"]';
 
 export const ALERTS_COUNT = '[data-test-subj="toolbar-alerts-count"]';
-
-export const ALERTS_TREND_SIGNAL_RULE_NAME_PANEL =
-  '[data-test-subj="render-content-kibana.alert.rule.name"]';
 
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
 
@@ -158,6 +160,14 @@ export const SHOW_TOP_N_HEADER =
 export const SHOW_TOP_N_CLOSE_BUTTON = '[data-test-subj="close"]';
 
 export const ALERTS_HISTOGRAM_LEGEND =
-  '[data-test-subj="alerts-histogram-panel"] [data-test-subj="withHoverActionsButton"]';
+  '[data-test-subj="alerts-histogram-panel"] .echLegendItem__action';
 
 export const SELECT_HISTOGRAM = '[data-test-subj="chart-select-trend"]';
+
+export const LEGEND_ACTIONS = {
+  ADD_TO_TIMELINE: (ruleName: string) =>
+    `[data-test-subj="legend-${ruleName}-embeddable_addToTimeline"]`,
+  FILTER_FOR: (ruleName: string) => `[data-test-subj="legend-${ruleName}-filterIn"]`,
+  FILTER_OUT: (ruleName: string) => `[data-test-subj="legend-${ruleName}-filterOut"]`,
+  COPY: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_copyToClipboard"]`,
+};

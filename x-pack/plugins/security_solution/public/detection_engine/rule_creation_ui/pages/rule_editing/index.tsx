@@ -303,12 +303,14 @@ const EditRulePageComponent: FC = () => {
             <StepPanel loading={loading}>
               {actionsStep.data != null && (
                 <StepRuleActions
+                  ruleId={rule?.id}
                   isReadOnlyView={false}
                   isLoading={isLoading}
                   isUpdateView
                   defaultValues={actionsStep.data}
                   setForm={setFormHook}
                   actionMessageParams={actionMessageParams}
+                  summaryActionMessageParams={actionMessageParams}
                   ruleType={rule?.type}
                 />
               )}
@@ -319,6 +321,7 @@ const EditRulePageComponent: FC = () => {
       },
     ],
     [
+      rule?.id,
       rule?.immutable,
       rule?.type,
       loading,
@@ -496,7 +499,7 @@ const EditRulePageComponent: FC = () => {
                         </EuiButton>
                       </HeaderPage>
                       {invalidSteps.length > 0 && (
-                        <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="alert">
+                        <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="warning">
                           <FormattedMessage
                             id="xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription"
                             defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}"

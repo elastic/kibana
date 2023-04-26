@@ -67,6 +67,7 @@ export function EdgeContents({ elementData }: ContentsProps) {
     <EuiFlexItem>
       {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
       <EuiButton
+        data-test-subj="apmEdgeContentsExploreTracesButton"
         href={url}
         fill={true}
         onClick={() => {

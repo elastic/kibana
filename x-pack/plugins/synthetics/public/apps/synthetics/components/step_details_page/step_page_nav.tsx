@@ -57,19 +57,23 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
     checkGroupId: data?.details?.next?.checkGroup,
   });
 
-  if (testRunPage && data?.details?.previous?.checkGroup && data?.details?.next?.checkGroup) {
-    prevHref = getTestRunDetailLink({
-      basePath,
-      monitorId,
-      locationId: selectedLocation?.id,
-      checkGroup: data?.details?.previous?.checkGroup,
-    });
-    nextHref = getTestRunDetailLink({
-      basePath,
-      monitorId,
-      locationId: selectedLocation?.id,
-      checkGroup: data?.details?.next?.checkGroup,
-    });
+  if (testRunPage) {
+    if (data?.details?.previous?.checkGroup) {
+      prevHref = getTestRunDetailLink({
+        basePath,
+        monitorId,
+        locationId: selectedLocation?.id,
+        checkGroup: data?.details?.previous?.checkGroup,
+      });
+    }
+    if (data?.details?.next?.checkGroup) {
+      nextHref = getTestRunDetailLink({
+        basePath,
+        monitorId,
+        locationId: selectedLocation?.id,
+        checkGroup: data?.details?.next?.checkGroup,
+      });
+    }
   }
 
   if (!startedAt) {
@@ -82,6 +86,7 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
       isOpen={isPopoverOpen}
       button={
         <EuiButtonEmpty
+          data-test-subj="syntheticsStepPageNavigationButton"
           style={{ height: 20 }}
           onClick={() => setIsPopoverOpen((prev) => !prev)}
           iconType="arrowDown"
@@ -95,6 +100,7 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            data-test-subj="syntheticsStepPageNavigationButton"
             href={prevHref}
             disabled={!prevHref}
             iconType="arrowLeft"
@@ -110,6 +116,7 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            data-test-subj="syntheticsStepPageNavigationButton"
             href={nextHref}
             disabled={!nextHref}
             iconType="arrowRight"

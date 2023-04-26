@@ -8,7 +8,7 @@
 // @ts-ignore
 import mapSavedObjects from './test_resources/sample_map_saved_objects.json';
 import { LayerStatsCollector } from './layer_stats_collector';
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import type { MapAttributes } from '../content_management';
 
 const expecteds = [
   {
@@ -69,7 +69,7 @@ const expecteds = [
 ];
 
 const testsToRun = mapSavedObjects.map(
-  (savedObject: { attributes: MapSavedObjectAttributes }, index: number) => {
+  (savedObject: { attributes: MapAttributes }, index: number) => {
     const { attributes } = savedObject;
     return [attributes, expecteds[index]] as const;
   }

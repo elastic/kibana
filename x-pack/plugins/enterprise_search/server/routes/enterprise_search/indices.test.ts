@@ -26,7 +26,7 @@ jest.mock(
 jest.mock(
   '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline',
   () => ({
-    createAndReferenceMlInferencePipeline: jest.fn(),
+    preparePipelineAndIndexForMlInference: jest.fn(),
   })
 );
 jest.mock(
@@ -61,7 +61,7 @@ import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { getMlInferenceErrors } from '../../lib/indices/pipelines/ml_inference/get_ml_inference_errors';
 import { fetchMlInferencePipelineHistory } from '../../lib/indices/pipelines/ml_inference/get_ml_inference_pipeline_history';
 import { attachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/attach_ml_pipeline';
-import { createAndReferenceMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline';
+import { preparePipelineAndIndexForMlInference } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline';
 import { deleteMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
 import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
@@ -269,12 +269,49 @@ describe('Enterprise Search Managed Indices', () => {
       mockRouter.shouldThrow(request);
     });
 
-    it('creates an ML inference pipeline', async () => {
-      (createAndReferenceMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+    it('responds with 400 BAD REQUEST with both source/target AND pipeline_definition', async () => {
+      await mockRouter.callRoute({
+        body: {
+          model_id: 'my-model-id',
+          pipeline_name: 'my-pipeline-name',
+          source_field: 'my-source-field',
+          destination_field: 'my-dest-field',
+          pipeline_definition: {
+            processors: [],
+          },
+        },
+        params: { indexName: 'my-index-name' },
+      });
+
+      expect(mockRouter.response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: 400,
+        })
+      );
+    });
+
+    it('responds with 400 BAD REQUEST with none of source/target/model OR pipeline_definition', async () => {
+      await mockRouter.callRoute({
+        body: {
+          pipeline_name: 'my-pipeline-name',
+        },
+        params: { indexName: 'my-index-name' },
+      });
+
+      expect(mockRouter.response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: 400,
+        })
+      );
+    });
+
+    it('creates an ML inference pipeline from model and source_field', async () => {
+      (preparePipelineAndIndexForMlInference as jest.Mock).mockImplementationOnce(() => {
         return Promise.resolve({
-          id: 'ml-inference-my-pipeline-name',
-          created: true,
-          addedToParentPipeline: true,
+          added_to_parent_pipeline: true,
+          created_pipeline: true,
+          mapping_updated: false,
+          pipeline_id: 'ml-inference-my-pipeline-name',
         });
       });
 
@@ -283,12 +320,14 @@ describe('Enterprise Search Managed Indices', () => {
         body: mockRequestBody,
       });
 
-      expect(createAndReferenceMlInferencePipeline).toHaveBeenCalledWith(
+      expect(preparePipelineAndIndexForMlInference).toHaveBeenCalledWith(
         'my-index-name',
         mockRequestBody.pipeline_name,
+        undefined,
         mockRequestBody.model_id,
         mockRequestBody.source_field,
         mockRequestBody.destination_field,
+        undefined,
         undefined,
         mockClient.asCurrentUser
       );
@@ -296,13 +335,58 @@ describe('Enterprise Search Managed Indices', () => {
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {
           created: 'ml-inference-my-pipeline-name',
+          mapping_updated: false,
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+
+    it('creates an ML inference pipeline from pipeline definition', async () => {
+      (preparePipelineAndIndexForMlInference as jest.Mock).mockImplementationOnce(() => {
+        return Promise.resolve({
+          added_to_parent_pipeline: true,
+          created_pipeline: true,
+          mapping_updated: true,
+          pipeline_id: 'ml-inference-my-pipeline-name',
+        });
+      });
+
+      await mockRouter.callRoute({
+        params: { indexName: 'my-index-name' },
+        body: {
+          field_mappings: [],
+          pipeline_definition: {
+            processors: [],
+          },
+          pipeline_name: 'my-pipeline-name',
+        },
+      });
+
+      expect(preparePipelineAndIndexForMlInference).toHaveBeenCalledWith(
+        'my-index-name',
+        mockRequestBody.pipeline_name,
+        {
+          processors: [],
+        },
+        undefined,
+        undefined,
+        undefined,
+        [],
+        undefined,
+        mockClient.asCurrentUser
+      );
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          created: 'ml-inference-my-pipeline-name',
+          mapping_updated: true,
         },
         headers: { 'content-type': 'application/json' },
       });
     });
 
     it('responds with 409 CONFLICT if the pipeline already exists', async () => {
-      (createAndReferenceMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+      (preparePipelineAndIndexForMlInference as jest.Mock).mockImplementationOnce(() => {
         return Promise.reject(new Error(ErrorCode.PIPELINE_ALREADY_EXISTS));
       });
 

@@ -25,12 +25,15 @@ import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { DocLinks } from '@kbn/doc-links';
+import {
+  dataTableActions,
+  dataTableSelectors,
+  tableDefaults,
+  TableId,
+} from '@kbn/securitysolution-data-table';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { FILTER_OPEN, TableId } from '../../../../common/types';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
-import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
@@ -135,7 +138,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const arePageFiltersEnabled = useIsExperimentalFeatureEnabled('alertsPageFiltersEnabled');
 
   // when arePageFiltersEnabled === false
-  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+  const [statusFilter, setStatusFilter] = useState<Status[]>([]);
 
   const updatedAt = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).updated
@@ -173,8 +176,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     if (arePageFiltersEnabled) {
       return detectionPageFilters;
     }
-    return buildAlertStatusFilter(filterGroup);
-  }, [filterGroup, detectionPageFilters, arePageFiltersEnabled]);
+    return buildAlertStatusFilter(statusFilter[0] ?? 'open');
+  }, [statusFilter, detectionPageFilters, arePageFiltersEnabled]);
 
   useEffect(() => {
     if (!detectionPageFilterHandler) return;
@@ -272,6 +275,19 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const pageFiltersUpdateHandler = useCallback((newFilters: Filter[]) => {
     setDetectionPageFilters(newFilters);
+    if (newFilters.length) {
+      const newStatusFilter = newFilters.find(
+        (filter) => filter.meta.key === 'kibana.alert.workflow_status'
+      );
+      if (newStatusFilter) {
+        const status: Status[] = newStatusFilter.meta.params
+          ? (newStatusFilter.meta.params as Status[])
+          : [newStatusFilter.query?.match_phrase['kibana.alert.workflow_status']];
+        setStatusFilter(status);
+      } else {
+        setStatusFilter([]);
+      }
+    }
   }, []);
 
   // Callback for when open/closed filter changes
@@ -280,9 +296,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       const timelineId = TableId.alertsOnAlertsPage;
       clearEventsLoading({ id: timelineId });
       clearEventsDeleted({ id: timelineId });
-      setFilterGroup(newFilterGroup);
+      setStatusFilter([newFilterGroup]);
     },
-    [clearEventsLoading, clearEventsDeleted, setFilterGroup]
+    [clearEventsLoading, clearEventsDeleted, setStatusFilter]
   );
 
   const areDetectionPageFiltersLoading = useMemo(() => {
@@ -313,7 +329,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <AlertsTableFilterGroup
-              status={filterGroup}
+              status={statusFilter[0] ?? 'open'}
               onFilterGroupChanged={onFilterGroupChangedCallback}
             />
           </EuiFlexItem>
@@ -341,14 +357,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             to,
             mode: 'absolute',
           }}
-          chainingSystem="NONE"
+          chainingSystem={'HIERARCHICAL'}
           onInit={setDetectionPageFilterHandler}
         />
       ),
     [
       arePageFiltersEnabled,
       dataViewId,
-      filterGroup,
+      statusFilter,
       filters,
       onFilterGroupChangedCallback,
       pageFiltersUpdateHandler,
@@ -458,7 +474,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer size="l" />
             </Display>
             <GroupedAlertsTable
-              currentAlertStatusFilterValue={filterGroup}
+              currentAlertStatusFilterValue={statusFilter}
               defaultFilters={alertsTableDefaultFilters}
               from={from}
               globalFilters={filters}

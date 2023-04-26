@@ -103,8 +103,7 @@ export const MetricItemIcon = ({
               onMouseLeave={() => {
                 if (isPopoverOpen) {
                   return;
-                }
-                if (timer.current) {
+                } else if (timer.current) {
                   clearTimeout(timer.current);
                 }
               }}
@@ -117,7 +116,12 @@ export const MetricItemIcon = ({
                 }
               }}
             >
-              <EuiButtonIcon iconType="alert" color="danger" size="m" aria-label={ERROR_DETAILS} />
+              <EuiButtonIcon
+                iconType="warning"
+                color="danger"
+                size="m"
+                aria-label={ERROR_DETAILS}
+              />
             </StyledIcon>
           }
           isOpen={configIdByLocation === isPopoverOpen}
@@ -136,10 +140,15 @@ export const MetricItemIcon = ({
             </EuiFlexGroup>
           </EuiPopoverTitle>
           <div style={{ width: '300px' }}>
-            <EuiCallOut title={ping?.error?.message} color="danger" iconType="alert" />
+            <EuiCallOut title={ping?.error?.message} color="danger" iconType="warning" />
           </div>
           <EuiPopoverFooter>
-            <EuiButton fullWidth size="s" href={errorLink}>
+            <EuiButton
+              data-test-subj="syntheticsMetricItemIconButton"
+              fullWidth
+              size="s"
+              href={errorLink}
+            >
               {ERROR_DETAILS}
             </EuiButton>
           </EuiPopoverFooter>

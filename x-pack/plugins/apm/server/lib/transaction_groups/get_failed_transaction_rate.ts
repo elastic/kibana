@@ -10,28 +10,22 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
+import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
 import {
-  EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
-import { EventOutcome } from '../../../common/event_outcome';
+import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { Coordinate } from '../../../typings/timeseries';
-import {
-  getDocumentTypeFilterForTransactions,
-  getProcessorEventForTransactions,
-} from '../helpers/transactions';
-import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
+import { APMEventClient } from '../helpers/create_es_client/create_apm_event_client';
 import {
   calculateFailedTransactionRate,
-  getOutcomeAggregation,
   getFailedTransactionRateTimeSeries,
+  getOutcomeAggregation,
 } from '../helpers/transaction_error_rate';
-import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { APMEventClient } from '../helpers/create_es_client/create_apm_event_client';
-import { ApmDocumentType } from '../../../common/document_type';
 
 export async function getFailedTransactionRate({
   environment,
@@ -40,11 +34,12 @@ export async function getFailedTransactionRate({
   transactionTypes,
   transactionName,
   apmEventClient,
-  searchAggregatedTransactions,
   start,
   end,
-  numBuckets,
   offset,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
 }: {
   environment: string;
   kuery: string;
@@ -52,11 +47,12 @@ export async function getFailedTransactionRate({
   transactionTypes: string[];
   transactionName?: string;
   apmEventClient: APMEventClient;
-  searchAggregatedTransactions: boolean;
   start: number;
   end: number;
-  numBuckets?: number;
   offset?: string;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
 }): Promise<{
   timeseries: Coordinate[];
   average: number | null;
@@ -69,28 +65,18 @@ export async function getFailedTransactionRate({
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    {
-      terms: {
-        [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
-      },
-    },
     { terms: { [TRANSACTION_TYPE]: transactionTypes } },
     ...termQuery(TRANSACTION_NAME, transactionName),
-    ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...rangeQuery(startWithOffset, endWithOffset),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
   ];
 
-  const outcomes = getOutcomeAggregation(
-    searchAggregatedTransactions
-      ? ApmDocumentType.TransactionMetric
-      : ApmDocumentType.TransactionEvent
-  );
+  const outcomes = getOutcomeAggregation(documentType);
 
   const params = {
     apm: {
-      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
+      sources: [{ documentType, rollupInterval }],
     },
     body: {
       track_total_hits: false,
@@ -101,12 +87,7 @@ export async function getFailedTransactionRate({
         timeseries: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: getBucketSizeForAggregatedTransactions({
-              start: startWithOffset,
-              end: endWithOffset,
-              searchAggregatedTransactions,
-              numBuckets,
-            }).intervalString,
+            fixed_interval: `${bucketSizeInSeconds}s`,
             min_doc_count: 0,
             extended_bounds: { min: startWithOffset, max: endWithOffset },
           },

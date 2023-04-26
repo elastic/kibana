@@ -27,6 +27,9 @@
       "path": "../tsconfig.json",
       "force": true
     },
-    "@kbn/rison"
+    "@kbn/rison",
+    "@kbn/datemath",
+    "@kbn/guided-onboarding-plugin",
+    "@kbn/alerting-plugin"
   ]
 }

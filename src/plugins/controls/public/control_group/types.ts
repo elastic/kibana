@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ContainerOutput } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupInput } from '../../common/control_group/types';
@@ -34,6 +35,7 @@ export interface ControlGroupSettings {
     hideWidthSettings?: boolean;
     hideAdditionalSettings?: boolean;
   };
+  fieldFilterPredicate?: (field: DataViewField) => boolean;
 }
 
 export {

@@ -15,10 +15,9 @@
       "embeddable",
       "dataViews",
       "data",
-      "unifiedSearch"
+      "unifiedSearch",
+      "uiActions"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

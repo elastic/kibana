@@ -27,7 +27,7 @@ import { HostsTableType } from '../../store/model';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
-import { TableId } from '../../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../common/lib/kibana');
@@ -72,6 +72,7 @@ const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 jest.mock('../../../../common/components/visualization_actions/actions');
+jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
 
 const myState: State = mockGlobalState;
 const { storage } = createSecuritySolutionStorageMock();

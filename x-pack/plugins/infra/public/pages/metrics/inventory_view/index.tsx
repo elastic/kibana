@@ -25,16 +25,11 @@ import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { SurveyKubernetes } from './components/survey_kubernetes';
+import { NoRemoteCluster } from '../../../components/empty_states';
 
 export const SnapshotPage = () => {
-  const {
-    hasFailedLoadingSource,
-    isLoading,
-    loadSourceFailureMessage,
-    loadSource,
-    source,
-    metricIndicesExist,
-  } = useSourceContext();
+  const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
+
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
   const { source: optionsSource } = useWaffleOptionsContext();
@@ -45,55 +40,57 @@ export const SnapshotPage = () => {
     },
   ]);
 
+  const { metricIndicesExist, remoteClustersExist } = source?.status ?? {};
+
+  if (isLoading && !source) return <SourceLoadingPage />;
+
+  if (!remoteClustersExist) {
+    return <NoRemoteCluster />;
+  }
+
+  if (!metricIndicesExist) {
+    return (
+      <MetricsPageTemplate hasData={metricIndicesExist} data-test-subj="noMetricsIndicesPrompt" />
+    );
+  }
+
+  if (loadSourceFailureMessage)
+    return <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />;
+
   return (
     <EuiErrorBoundary>
-      {isLoading && !source ? (
-        <SourceLoadingPage />
-      ) : metricIndicesExist ? (
-        <>
-          <div className={APP_WRAPPER_CLASS}>
-            <SavedViewProvider
-              shouldLoadDefault={optionsSource === 'default'}
-              viewType={'inventory-view'}
-              defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
-            >
-              <MetricsPageTemplate
-                hasData={metricIndicesExist}
-                pageHeader={{
-                  pageTitle: inventoryTitle,
-                  rightSideItems: [<SavedViews />, <SurveyKubernetes />],
-                }}
-                pageSectionProps={{
-                  contentProps: {
-                    css: css`
-                      ${fullHeightContentStyles};
-                      padding-bottom: 0;
-                    `,
-                  },
-                }}
-              >
-                <SnapshotContainer
-                  render={({ loading, nodes, reload, interval }) => (
-                    <>
-                      <FilterBar interval={interval} />
-                      <LayoutView
-                        loading={loading}
-                        nodes={nodes}
-                        reload={reload}
-                        interval={interval}
-                      />
-                    </>
-                  )}
-                />
-              </MetricsPageTemplate>
-            </SavedViewProvider>
-          </div>
-        </>
-      ) : hasFailedLoadingSource ? (
-        <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />
-      ) : (
-        <MetricsPageTemplate hasData={metricIndicesExist} data-test-subj="noMetricsIndicesPrompt" />
-      )}
+      <div className={APP_WRAPPER_CLASS}>
+        <SavedViewProvider
+          shouldLoadDefault={optionsSource === 'default'}
+          viewType={'inventory-view'}
+          defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
+        >
+          <MetricsPageTemplate
+            hasData={metricIndicesExist}
+            pageHeader={{
+              pageTitle: inventoryTitle,
+              rightSideItems: [<SavedViews />, <SurveyKubernetes />],
+            }}
+            pageSectionProps={{
+              contentProps: {
+                css: css`
+                  ${fullHeightContentStyles};
+                  padding-bottom: 0;
+                `,
+              },
+            }}
+          >
+            <SnapshotContainer
+              render={({ loading, nodes, reload, interval }) => (
+                <>
+                  <FilterBar interval={interval} />
+                  <LayoutView loading={loading} nodes={nodes} reload={reload} interval={interval} />
+                </>
+              )}
+            />
+          </MetricsPageTemplate>
+        </SavedViewProvider>
+      </div>
     </EuiErrorBoundary>
   );
 };

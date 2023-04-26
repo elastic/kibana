@@ -24,12 +24,8 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import {
-  LegendDisplay,
-  PieLayerState,
-  PieVisualizationState,
-  SharedPieLayerState,
-} from '../../../common';
+import { PieLayerState, PieVisualizationState, SharedPieLayerState } from '../../../common/types';
+import { LegendDisplay } from '../../../common/constants';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../../types';
 import {
   ToolbarPopover,
@@ -267,7 +263,10 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         onValueInLegendChange={onValueInLegendChange}
         position={layer.legendPosition}
         onPositionChange={onLegendPositionChange}
-        renderNestedLegendSwitch={!PartitionChartsMeta[state.shape]?.legend.hideNestedLegendSwitch}
+        renderNestedLegendSwitch={
+          !PartitionChartsMeta[state.shape]?.legend.hideNestedLegendSwitch &&
+          layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0) > 1
+        }
         nestedLegend={Boolean(layer.nestedLegend)}
         onNestedLegendChange={onNestedLegendChange}
         shouldTruncate={layer.truncateLegend ?? defaultTruncationValue}

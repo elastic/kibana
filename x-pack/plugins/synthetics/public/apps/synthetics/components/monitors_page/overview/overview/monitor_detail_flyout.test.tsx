@@ -54,7 +54,7 @@ describe('Monitor Detail Flyout', () => {
     const onCloseMock = jest.fn();
     const { getByLabelText } = render(
       <MonitorDetailFlyout
-        configId="test-id"
+        configId="123456"
         id="test-id"
         location="US East"
         locationId="us-east"
@@ -78,7 +78,7 @@ describe('Monitor Detail Flyout', () => {
 
     const { getByText } = render(
       <MonitorDetailFlyout
-        configId="test-id"
+        configId="123456"
         id="test-id"
         location="US East"
         locationId="us-east"
@@ -98,7 +98,7 @@ describe('Monitor Detail Flyout', () => {
 
     const { getByRole } = render(
       <MonitorDetailFlyout
-        configId="test-id"
+        configId="123456"
         id="test-id"
         location="US East"
         locationId="us-east"
@@ -135,7 +135,7 @@ describe('Monitor Detail Flyout', () => {
 
     const { getByRole, getByText, getAllByRole } = render(
       <MonitorDetailFlyout
-        configId="test-id"
+        configId="123456"
         id="test-id"
         location="US East"
         locationId="us-east"

@@ -784,7 +784,7 @@ export const SearchExamplesApp = ({
                 <EuiButtonEmpty
                   size="xs"
                   onClick={() => data.search.session.start()}
-                  iconType="alert"
+                  iconType="warning"
                   data-test-subj="searchExamplesStartSession"
                 >
                   <FormattedMessage
@@ -795,7 +795,7 @@ export const SearchExamplesApp = ({
                 <EuiButtonEmpty
                   size="xs"
                   onClick={() => data.search.session.clear()}
-                  iconType="alert"
+                  iconType="warning"
                   data-test-subj="searchExamplesClearSession"
                 >
                   <FormattedMessage

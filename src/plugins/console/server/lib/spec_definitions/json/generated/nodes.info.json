@@ -16,7 +16,11 @@
     "url_components": {
       "nodes": null,
       "metrics": [
+        "_all",
+        "_none",
+        "aggregations",
         "http",
+        "indices",
         "ingest",
         "jvm",
         "os",

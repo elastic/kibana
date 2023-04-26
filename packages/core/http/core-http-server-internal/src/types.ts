@@ -9,6 +9,7 @@
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type {
   IRouter,
+  IRouterWithVersion,
   RequestHandlerContextBase,
   IContextProvider,
   IAuthHeadersStorage,
@@ -49,7 +50,7 @@ export interface InternalHttpServiceSetup
   createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
     path: string,
     plugin?: PluginOpaqueId
-  ) => IRouter<Context>;
+  ) => IRouterWithVersion<Context>;
   registerRouterAfterListening: (router: IRouter) => void;
   registerStaticDir: (path: string, dirPath: string) => void;
   authRequestHeaders: IAuthHeadersStorage;

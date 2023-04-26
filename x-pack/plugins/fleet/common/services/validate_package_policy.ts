@@ -101,7 +101,7 @@ export const validatePackagePolicy = (
         (policyTemplate.inputs && policyTemplate.inputs.length > 0)
     )
   ) {
-    validationResults.inputs = null;
+    validationResults.inputs = {};
     return validationResults;
   }
 
@@ -199,7 +199,7 @@ export const validatePackagePolicy = (
   });
 
   if (Object.entries(validationResults.inputs!).length === 0) {
-    validationResults.inputs = null;
+    validationResults.inputs = {};
   }
 
   return validationResults;
@@ -332,6 +332,16 @@ export const validatePackagePolicyConfig = (
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidIntegerErrorMessage', {
           defaultMessage: 'Invalid integer',
+        })
+      );
+    }
+  }
+
+  if (varDef.type === 'select' && parsedValue !== undefined) {
+    if (!varDef.options?.map((o) => o.value).includes(parsedValue)) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSelectValueErrorMessage', {
+          defaultMessage: 'Invalid value for select type',
         })
       );
     }

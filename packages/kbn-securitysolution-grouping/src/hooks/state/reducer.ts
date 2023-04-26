@@ -25,41 +25,16 @@ export const initialState: GroupMap = {
 
 const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) => {
   switch (action.type) {
-    case ActionType.updateActiveGroup: {
-      const { id, activeGroup } = action.payload;
+    case ActionType.updateActiveGroups: {
+      const { id, activeGroups } = action.payload;
       return {
         ...state,
         groupById: {
           ...groupsById,
           [id]: {
+            ...defaultGroup,
             ...groupsById[id],
-            activeGroup,
-          },
-        },
-      };
-    }
-    case ActionType.updateGroupActivePage: {
-      const { id, activePage } = action.payload;
-      return {
-        ...state,
-        groupById: {
-          ...groupsById,
-          [id]: {
-            ...groupsById[id],
-            activePage,
-          },
-        },
-      };
-    }
-    case ActionType.updateGroupItemsPerPage: {
-      const { id, itemsPerPage } = action.payload;
-      return {
-        ...state,
-        groupById: {
-          ...groupsById,
-          [id]: {
-            ...groupsById[id],
-            itemsPerPage,
+            activeGroups,
           },
         },
       };
@@ -82,7 +57,7 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
   throw Error(`Unknown grouping action`);
 };
 export const groupsReducerWithStorage = (state: GroupMap, action: Action) => {
-  let groupsInStorage = {};
+  let groupsInStorage: GroupsById = {};
   if (storage) {
     groupsInStorage = getAllGroupsInStorage(storage);
   }

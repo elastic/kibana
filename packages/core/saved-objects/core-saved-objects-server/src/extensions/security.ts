@@ -407,7 +407,12 @@ export interface ISavedObjectsSecurityExtension {
   ) => Promise<CheckAuthorizationResult<A>>;
 
   /**
-   * Performs authorization for the REMOVE_REFERENCES security action
+   * Performs authorization for the REMOVE_REFERENCES security action. Checks for authorization
+   * to delete the object to which references are to be removed. In reality, the operation is an
+   * UPDATE to all objects that reference the given object, but the intended use for the
+   * removeReferencesTo method is to clean up any references to an object which is being deleted
+   * (e.g. deleting a tag).
+   * See discussion here: https://github.com/elastic/kibana/issues/135259#issuecomment-1482515139
    * @param params the namespace and object to authorize
    * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
    */

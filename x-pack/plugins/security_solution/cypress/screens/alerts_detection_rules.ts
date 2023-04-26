@@ -38,6 +38,13 @@ export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
 export const DUPLICATE_RULE_BULK_BTN = '[data-test-subj="duplicateRuleBulk"]';
 
+export const DUPLICATE_WITH_EXCEPTIONS_OPTION = '[data-test-subj="withExceptions"] label';
+
+export const DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION =
+  '[data-test-subj="withExceptionsExcludeExpiredExceptions"] label';
+
+export const DUPLICATE_WITHOUT_EXCEPTIONS_OPTION = '[data-test-subj="withoutExceptions"] label';
+
 export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
@@ -70,6 +77,8 @@ export const SECOND_RULE = 1;
 export const RULE_CHECKBOX = '.euiTableRow .euiCheckbox__input';
 
 export const RULE_NAME = '[data-test-subj="ruleName"]';
+
+export const RULE_LAST_RUN = '[data-test-subj="ruleLastRun"]';
 
 export const RULE_SWITCH = '[data-test-subj="ruleSwitch"]';
 
@@ -142,6 +151,8 @@ export const RULES_SELECTED_TAG = '.euiSelectableListItem[data-test-selected="tr
 export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
 
 export const REFRESH_SETTINGS_POPOVER = '[data-test-subj="refreshSettings-popover"]';
+
+export const REFRESH_RULES_TABLE_BUTTON = '[data-test-subj="refreshRulesAction-linkIcon"]';
 
 export const REFRESH_SETTINGS_SWITCH = '[data-test-subj="refreshSettingsSwitch"]';
 

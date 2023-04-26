@@ -46,5 +46,11 @@ export function ServiceNodeMetricOverviewLink({
     serviceName,
     serviceNodeName,
   });
-  return <EuiLink href={href} {...rest} />;
+  return (
+    <EuiLink
+      data-test-subj="apmServiceNodeMetricOverviewLinkLink"
+      href={href}
+      {...rest}
+    />
+  );
 }

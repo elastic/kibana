@@ -79,7 +79,7 @@ export const APICallFlyout: React.FC<APICallFlyoutProps> = ({
           <EuiLinkTo
             to={generateEncodedPath(ENGINE_TAB_PATH, {
               engineName,
-              tabId: EngineViewTabs.API,
+              tabId: EngineViewTabs.CONNECT,
             })}
             color="primary"
             target="_blank"

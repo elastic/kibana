@@ -19,6 +19,9 @@
       "data",
       "features"
     ],
+    "optionalPlugins": [
+      "licenseManagement"
+    ],
     "requiredBundles": [
       "esUiShared",
       "kibanaReact",

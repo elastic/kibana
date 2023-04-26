@@ -68,6 +68,7 @@ export const MonitorDetailsPanel = ({
   return (
     <PanelWithTitle
       paddingSize="m"
+      margin="none"
       title={MONITOR_DETAILS_LABEL}
       titleLeftAlign
       hasBorder={hasBorder}
@@ -95,6 +96,7 @@ export const MonitorDetailsPanel = ({
           <TitleLabel>{URL_LABEL}</TitleLabel>
           <DescriptionLabel style={{ wordBreak: 'break-all' }}>
             <EuiLink
+              data-test-subj="syntheticsMonitorDetailsPanelLink"
               href={latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS]}
               external
             >
@@ -120,7 +122,7 @@ export const MonitorDetailsPanel = ({
             </>
           )}
           <TitleLabel>{MONITOR_ID_ITEM_TEXT}</TitleLabel>
-          <DescriptionLabel>{configId}</DescriptionLabel>
+          <DescriptionLabel>{monitor.id}</DescriptionLabel>
           <TitleLabel>{MONITOR_TYPE_LABEL}</TitleLabel>
           <DescriptionLabel>
             <MonitorTypeBadge monitor={monitor} />

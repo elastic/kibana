@@ -80,6 +80,11 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/exploratory-view-plugin",
+    "@kbn/logging-mocks",
+    "@kbn/chart-icons",
+    "@kbn/observability-shared-plugin",
   ],
   "exclude": [
     "target/**/*",

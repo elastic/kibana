@@ -6,8 +6,8 @@
  */
 
 import { journey, step, expect, before, after } from '@elastic/synthetics';
-import { byTestId } from '@kbn/observability-plugin/e2e/utils';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { byTestId } from '../../helpers/utils';
+import { recordVideo } from '../../helpers/record_video';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 import { cleanSettings } from './services/settings';
 
@@ -50,6 +50,9 @@ journey('AlertingDefaults', async ({ page, params }) => {
   step(
     'Fill text=Webhook URLCreate a Slack Webhook URL(opens in a new tab or window) >> input[type="text"]',
     async () => {
+      if (await page.isVisible(byTestId('webhookButton'))) {
+        await page.click(byTestId('webhookButton'));
+      }
       await page.fill(
         'text=Webhook URLCreate a Slack Webhook URL(opens in a new tab or window) >> input[type="text"]',
         'https://www.slack.com'

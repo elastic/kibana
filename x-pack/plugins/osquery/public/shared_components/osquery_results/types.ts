@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Ecs } from '../../../common/ecs';
+import type { EcsSecurityExtension } from '@kbn/securitysolution-ecs';
 import type { ActionEdges } from '../../../common/search_strategy';
 
 export interface OsqueryActionResultsProps {
   ruleName?: string[];
-  ecsData: Ecs;
+  ecsData: EcsSecurityExtension;
   actionItems?: ActionEdges;
 }

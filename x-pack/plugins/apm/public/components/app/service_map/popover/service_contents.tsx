@@ -129,14 +129,23 @@ export function ServiceContents({
       </EuiFlexItem>
       <EuiSpacer size="s" />
       <EuiFlexItem>
-        <EuiButton href={detailsUrl} fill={true}>
+        <EuiButton
+          data-test-subj="apmServiceContentsServiceDetailsButton"
+          href={detailsUrl}
+          fill={true}
+        >
           {i18n.translate('xpack.apm.serviceMap.serviceDetailsButtonText', {
             defaultMessage: 'Service Details',
           })}
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton color="success" href={focusUrl} onClick={onFocusClick}>
+        <EuiButton
+          data-test-subj="apmServiceContentsFocusMapButton"
+          color="success"
+          href={focusUrl}
+          onClick={onFocusClick}
+        >
           {i18n.translate('xpack.apm.serviceMap.focusMapButtonText', {
             defaultMessage: 'Focus map',
           })}

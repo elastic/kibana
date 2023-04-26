@@ -5,6 +5,79 @@
     "functions": [
       {
         "parentPluginId": "data",
+        "id": "def-public.getSearchErrorOverrideDisplay",
+        "type": "Function",
+        "tags": [],
+        "label": "getSearchErrorOverrideDisplay",
+        "description": [],
+        "signature": [
+          "({\n  error,\n  application,\n}: { error: Error; application: ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.ApplicationStart",
+            "text": "ApplicationStart"
+          },
+          "; }) => { title: string; body: React.ReactNode; } | undefined"
+        ],
+        "path": "src/plugins/data/public/search/search_interceptor/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.getSearchErrorOverrideDisplay.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  error,\n  application,\n}",
+            "description": [],
+            "path": "src/plugins/data/public/search/search_interceptor/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.getSearchErrorOverrideDisplay.$1.error",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "src/plugins/data/public/search/search_interceptor/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.getSearchErrorOverrideDisplay.$1.application",
+                "type": "Object",
+                "tags": [],
+                "label": "application",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-application-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                    "section": "def-common.ApplicationStart",
+                    "text": "ApplicationStart"
+                  }
+                ],
+                "path": "src/plugins/data/public/search/search_interceptor/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.isEsError",
         "type": "Function",
         "tags": [],
@@ -408,7 +481,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>; getAll: () => { buckets: ",
+              "<any> | undefined; getAll: () => { buckets: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -3136,7 +3209,7 @@
                 "signature": [
                   "{ page?: number | undefined; filter?: any; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; sortField?: string | undefined; fields?: string[] | undefined; preference?: string | undefined; pit?: ",
+                  "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; pit?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -3180,7 +3253,7 @@
                     "section": "def-common.SavedObjectsFindOptionsReference",
                     "text": "SavedObjectsFindOptionsReference"
                   },
-                  "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; }"
+                  "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; migrationVersionCompatibility?: \"raw\" | \"compatible\" | undefined; }"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
                 "deprecated": false,
@@ -7237,9 +7310,7 @@
                   "SearchResponse",
                   "<unknown, Record<string, ",
                   "AggregationsAggregate",
-                  ">>>; history: ",
-                  "SearchRequest",
-                  "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+                  ">>>; setField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -7263,7 +7334,9 @@
                     "section": "def-common.SearchSource",
                     "text": "SearchSource"
                   },
-                  "; removeField: <K extends keyof ",
+                  "; history: ",
+                  "SearchRequest",
+                  "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -7910,6 +7983,30 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
+              "<any>>(name: N, type: T) => void; registerLegacy: <N extends string, T extends (deps: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggTypesDependencies",
+                "text": "AggTypesDependencies"
+              },
+              ") => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
+              },
+              "<any> | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
               "<any>>(name: N, type: T) => void; }"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_types_registry.ts",
@@ -7950,7 +8047,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>; getAll: () => { buckets: ",
+              "<any> | undefined; getAll: () => { buckets: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -11848,23 +11945,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.aggGeoHash",
-        "type": "Function",
-        "tags": [],
-        "label": "aggGeoHash",
-        "description": [],
-        "signature": [
-          "() => FunctionDefinition"
-        ],
-        "path": "src/plugins/data/common/search/aggs/buckets/geo_hash_fn.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.aggGeoTile",
         "type": "Function",
         "tags": [],
@@ -14275,39 +14355,6 @@
           ">"
         ],
         "path": "src/plugins/data/common/search/aggs/metrics/geo_centroid.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.getGeoHashBucketAgg",
-        "type": "Function",
-        "tags": [],
-        "label": "getGeoHashBucketAgg",
-        "description": [],
-        "signature": [
-          "() => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.BucketAggType",
-            "text": "BucketAggType"
-          },
-          "<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IBucketAggConfig",
-            "text": "IBucketAggConfig"
-          },
-          ">"
-        ],
-        "path": "src/plugins/data/common/search/aggs/buckets/geo_hash.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -17588,7 +17635,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>; getAll: () => { buckets: ",
+              "<any> | undefined; getAll: () => { buckets: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -18080,59 +18127,6 @@
                 "text": "ExpressionFunctionDefinition"
               },
               "<\"aggGeoTile\", any, AggArgs, ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggExpressionType",
-                "text": "AggExpressionType"
-              },
-              ", ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExecutionContext",
-                "text": "ExecutionContext"
-              },
-              "<",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Adapters",
-                "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">>"
-            ],
-            "path": "src/plugins/data/common/search/aggs/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggFunctionsMapping.aggGeoHash",
-            "type": "Object",
-            "tags": [],
-            "label": "aggGeoHash",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunctionDefinition",
-                "text": "ExpressionFunctionDefinition"
-              },
-              "<\"aggGeoHash\", any, Arguments, ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -19829,6 +19823,59 @@
                 "text": "ExpressionFunctionDefinition"
               },
               "<\"aggTopMetrics\", any, AggArgs, ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggExpressionType",
+                "text": "AggExpressionType"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggFunctionsMapping.aggRate",
+            "type": "Object",
+            "tags": [],
+            "label": "aggRate",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"aggRate\", any, AggArgs, ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -21661,125 +21708,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.AggParamsGeoHash",
-        "type": "Interface",
-        "tags": [],
-        "label": "AggParamsGeoHash",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.AggParamsGeoHash",
-            "text": "AggParamsGeoHash"
-          },
-          " extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.BaseAggParams",
-            "text": "BaseAggParams"
-          }
-        ],
-        "path": "src/plugins/data/common/search/aggs/buckets/geo_hash.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsGeoHash.field",
-            "type": "string",
-            "tags": [],
-            "label": "field",
-            "description": [],
-            "path": "src/plugins/data/common/search/aggs/buckets/geo_hash.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsGeoHash.autoPrecision",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "autoPrecision",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/geo_hash.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsGeoHash.precision",
-            "type": "number",
-            "tags": [],
-            "label": "precision",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/geo_hash.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsGeoHash.useGeocentroid",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "useGeocentroid",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/geo_hash.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsGeoHash.isFilteredByCollar",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isFilteredByCollar",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/geo_hash.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsGeoHash.boundingBox",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "boundingBox",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.GeoBoundingBox",
-                "text": "GeoBoundingBox"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/geo_hash.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.AggParamsGeoTile",
         "type": "Interface",
         "tags": [],
@@ -22267,26 +22195,6 @@
                 "docId": "kibDataSearchPluginApi",
                 "section": "def-common.AggParamsGeoTile",
                 "text": "AggParamsGeoTile"
-              }
-            ],
-            "path": "src/plugins/data/common/search/aggs/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsMapping.BUCKET_TYPES.GEOHASH_GRID",
-            "type": "Object",
-            "tags": [],
-            "label": "[BUCKET_TYPES.GEOHASH_GRID]",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggParamsGeoHash",
-                "text": "AggParamsGeoHash"
               }
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -24661,6 +24569,30 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
+              "<any>>(name: N, type: T) => void; registerLegacy: <N extends string, T extends (deps: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggTypesDependencies",
+                "text": "AggTypesDependencies"
+              },
+              ") => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.BucketAggType",
+                "text": "BucketAggType"
+              },
+              "<any> | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.MetricAggType",
+                "text": "MetricAggType"
+              },
               "<any>>(name: N, type: T) => void; }"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -24934,7 +24866,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>; getAll: () => { buckets: ",
+              "<any> | undefined; getAll: () => { buckets: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -25060,7 +24992,7 @@
             "label": "fieldFormats",
             "description": [],
             "signature": [
-              "{ has: (id: string) => boolean; deserialize: ",
+              "{ deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -25300,7 +25232,7 @@
                 "section": "def-common.FieldFormatConfig",
                 "text": "FieldFormatConfig"
               },
-              ">) => void; }"
+              ">) => void; has: (id: string) => boolean; }"
             ],
             "path": "src/plugins/data/common/search/aggs/aggs_service.ts",
             "deprecated": false,
@@ -30529,7 +30461,7 @@
                 "section": "def-common.MetricAggType",
                 "text": "MetricAggType"
               },
-              "<any>; getAll: () => { buckets: ",
+              "<any> | undefined; getAll: () => { buckets: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -31813,21 +31745,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.aggGeoHashFnName",
-        "type": "string",
-        "tags": [],
-        "label": "aggGeoHashFnName",
-        "description": [],
-        "signature": [
-          "\"aggGeoHash\""
-        ],
-        "path": "src/plugins/data/common/search/aggs/buckets/geo_hash_fn.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.aggGeoTileFnName",
         "type": "string",
         "tags": [],
@@ -32243,7 +32160,7 @@
             "section": "def-common.MetricAggType",
             "text": "MetricAggType"
           },
-          "<any>; getAll: () => { buckets: ",
+          "<any> | undefined; getAll: () => { buckets: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -32396,6 +32313,30 @@
             "section": "def-common.MetricAggType",
             "text": "MetricAggType"
           },
+          "<any>>(name: N, type: T) => void; registerLegacy: <N extends string, T extends (deps: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggTypesDependencies",
+            "text": "AggTypesDependencies"
+          },
+          ") => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
+          },
+          "<any> | ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
           "<any>>(name: N, type: T) => void; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_types_registry.ts",
@@ -32427,7 +32368,7 @@
             "section": "def-common.MetricAggType",
             "text": "MetricAggType"
           },
-          "<any>; getAll: () => { buckets: ",
+          "<any> | undefined; getAll: () => { buckets: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -34982,9 +34923,7 @@
           "SearchResponse",
           "<unknown, Record<string, ",
           "AggregationsAggregate",
-          ">>>; history: ",
-          "SearchRequest",
-          "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+          ">>>; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -35008,7 +34947,9 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          "; removeField: <K extends keyof ",
+          "; history: ",
+          "SearchRequest",
+          "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",

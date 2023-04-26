@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { API_ENDPOINT, procedureNames } from '../../common';
+import { API_ENDPOINT } from '../../common';
+import { procedureNames } from '../../common/rpc';
 
 import { RpcClient } from './rpc_client';
 
@@ -44,6 +45,7 @@ describe('RpcClient', () => {
     await rpcClient.update({ contentTypeId: 'foo', id: '123', data: {} });
     await rpcClient.delete({ contentTypeId: 'foo', id: '123' });
     await rpcClient.search({ contentTypeId: 'foo', query: {} });
+    await rpcClient.mSearch({ contentTypes: [{ contentTypeId: 'foo' }], query: {} });
 
     Object.values(proceduresSpys).forEach(({ name, spy }) => {
       expect(spy).toHaveBeenCalledWith(`${API_ENDPOINT}/${name}`, { body: expect.any(String) });

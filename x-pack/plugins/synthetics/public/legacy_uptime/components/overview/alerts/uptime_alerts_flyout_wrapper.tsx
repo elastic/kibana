@@ -31,7 +31,7 @@ export const UptimeAlertsFlyoutWrapperComponent = ({
   );
   const AddAlertFlyout = useMemo(
     () =>
-      triggersActionsUi.getAddAlertFlyout({
+      triggersActionsUi.getAddRuleFlyout({
         consumer: 'uptime',
         onClose: onCloseAlertFlyout,
         ruleTypeId: alertTypeId,

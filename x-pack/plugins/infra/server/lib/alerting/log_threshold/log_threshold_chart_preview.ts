@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  ExecutionTimeRange,
   GroupedSearchQueryResponse,
   GroupedSearchQueryResponseRT,
   isOptimizedGroupedSearchQueryResponse,
@@ -35,7 +36,8 @@ export async function getChartPreviewData(
   resolvedLogView: ResolvedLogView,
   callWithRequest: KibanaFramework['callWithRequest'],
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
-  buckets: number
+  buckets: number,
+  executionTimeRange?: ExecutionTimeRange
 ) {
   const { indices, timestampField, runtimeMappings } = resolvedLogView;
   const { groupBy, timeSize, timeUnit } = alertParams;
@@ -47,11 +49,10 @@ export async function getChartPreviewData(
     timeSize: timeSize * buckets,
   };
 
-  const executionTimestamp = Date.now();
   const { rangeFilter } = buildFiltersFromCriteria(
     expandedAlertParams,
     timestampField,
-    executionTimestamp
+    executionTimeRange
   );
 
   const query = isGrouped
@@ -60,14 +61,14 @@ export async function getChartPreviewData(
         timestampField,
         indices,
         runtimeMappings,
-        executionTimestamp
+        executionTimeRange
       )
     : getUngroupedESQuery(
         expandedAlertParams,
         timestampField,
         indices,
         runtimeMappings,
-        executionTimestamp
+        executionTimeRange
       );
 
   if (!query) {

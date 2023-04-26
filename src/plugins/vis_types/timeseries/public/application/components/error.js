@@ -47,7 +47,7 @@ export function ErrorComponent(props) {
   return (
     <div className="visError">
       <EuiText size="xs" color="subdued">
-        <EuiIcon type="alert" size="m" color="danger" aria-hidden="true" />
+        <EuiIcon type="warning" size="m" color="danger" aria-hidden="true" />
 
         <EuiSpacer size="s" />
 

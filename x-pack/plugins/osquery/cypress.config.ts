@@ -33,5 +33,8 @@ export default defineCypressConfig({
 
   e2e: {
     baseUrl: 'http://localhost:5601',
+    experimentalRunAllSpecs: true,
+    experimentalMemoryManagement: true,
+    numTestsKeptInMemory: 10,
   },
 });

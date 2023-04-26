@@ -11,7 +11,7 @@ import { createApiKey } from './create_api_key';
 
 describe('createApiKey lib function', () => {
   const engineName = 'my-index';
-  const keyName = 'Engine read only key';
+  const keyName = 'Search alias read only key';
 
   const createResponse = {
     api_key: 'ui2lp2axTNmsyakw9tvNnw',
@@ -38,14 +38,14 @@ describe('createApiKey lib function', () => {
     ).resolves.toEqual(createResponse);
 
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
-      name: 'Engine read only key',
+      name: 'Search alias read only key',
       role_descriptors: {
         'my-index-key-role': {
-          applications: [
+          cluster: [],
+          indices: [
             {
-              application: 'enterprise-search',
-              privileges: ['engine:read'],
-              resources: ['engine:my-index'],
+              names: [`${engineName}`],
+              privileges: ['read'],
             },
           ],
         },

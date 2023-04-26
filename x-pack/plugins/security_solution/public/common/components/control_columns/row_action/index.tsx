@@ -9,6 +9,8 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { dataTableActions } from '@kbn/securitysolution-data-table';
+import { RightPanelKey } from '../../../../flyout/right';
 import type {
   SetEventsDeleted,
   SetEventsLoading,
@@ -19,7 +21,6 @@ import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/
 
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
-import { dataTableActions } from '../../../store/data_table';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 type Props = EuiDataGridCellValueElementProps & {
@@ -96,7 +97,16 @@ const RowActionComponent = ({
     };
 
     if (isSecurityFlyoutEnabled) {
-      openFlyout({});
+      openFlyout({
+        right: {
+          id: RightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
+        },
+      });
     } else {
       dispatch(
         dataTableActions.toggleDetailPanel({

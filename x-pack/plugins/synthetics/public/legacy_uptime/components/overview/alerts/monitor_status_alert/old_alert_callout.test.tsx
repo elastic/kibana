@@ -21,7 +21,7 @@ describe('OldAlertCallOut', () => {
           size="m"
         />
         <EuiCallOut
-          iconType="alert"
+          iconType="warning"
           size="s"
           title={
             <FormattedMessage

@@ -49,7 +49,7 @@ describe('SummarySectionAccordion', () => {
     };
 
     wrapper.setProps({ status: 'error' });
-    expect(getIcon().prop('type')).toEqual('crossInACircleFilled');
+    expect(getIcon().prop('type')).toEqual('error');
     expect(getIcon().prop('color')).toEqual('danger');
 
     wrapper.setProps({ status: 'success' });

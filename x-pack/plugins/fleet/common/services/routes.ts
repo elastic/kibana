@@ -83,6 +83,12 @@ export const epmRouteService = {
       pkgVersion
     );
   },
+
+  getReauthorizeTransformsPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS.replace('{pkgName}', pkgName)
+      .replace('{pkgVersion}', pkgVersion)
+      .replace(/\/$/, ''); // trim trailing slash
+  },
 };
 
 export const packagePolicyRouteService = {
@@ -220,6 +226,7 @@ export const agentRouteService = {
       '{fileName}',
       fileName
     ),
+  getAgentsByActionsPath: () => AGENT_API_ROUTES.LIST_PATTERN,
 };
 
 export const outputRoutesService = {

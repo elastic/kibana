@@ -76,7 +76,13 @@ export const MetricRowWithCount = ({
               { defaultMessage: 'Aggregation {name}', values: { name } }
             )}
           >
-            <EuiSelect compressed options={aggOptions} value={agg} onChange={handleAggChange} />
+            <EuiSelect
+              data-test-subj="infraMetricRowWithCountSelect"
+              compressed
+              options={aggOptions}
+              value={agg}
+              onChange={handleAggChange}
+            />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>

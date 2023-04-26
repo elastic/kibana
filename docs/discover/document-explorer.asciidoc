@@ -16,7 +16,7 @@ Hide or resize the chart for a better fit.
 
 * To turn off the display of the chart, click
 image:images/chart-icon.png[icon button for opening Show/Hide chart menu, width=24px]
-to open the *Chart options* menu, and then click *Hide*.
+to open the *Chart options* menu, and then click *Hide chart*.
 
 * To change the chart height, drag the resize handle
 image:images/resize-icon.png[two-line icon for increasing or decreasing the height of the chart, width=24px]
@@ -84,6 +84,7 @@ image::images/document-explorer-multi-field.png[Multi field sort in the document
 
 . To change the sort order, select a field in the pop-up, and then drag it to the new location.
 
+
 [float]
 [[document-explorer-edit-field]]
 ==== Edit a field
@@ -114,20 +115,11 @@ image::images/document-explorer-compare-data.png[Compare data in the document ta
 [[document-explorer-configure-table]]
 ==== Set the number of rows per page
 
-To change the numbers of rows you want to display on each page, use the *Rows per page* menu. By default, the document table displays 100 rows per page.
+To change the numbers of rows you want to display on each page, use the *Rows per page* menu. The default is 100 rows per page.
 
 [role="screenshot"]
 image::images/document-table-rows-per-page.png["Menu with options for setting the number of rows in the document table"]
 
-To customize the default number of rows per page, go to *Stack Managaement > Advanced Settings*
-and search for *rows per page*.
-
-[float]
-[[document-explorer-full-screen]]
-==== View in fullscreen
-
-To toggle the table in and out of fullscreen mode, click the fullscreen icon
-image:images/fullscreen-icon.png[icon to display the document table in fullscreen mode].
 
 [float]
 [[document-explorer-expand-documents]]

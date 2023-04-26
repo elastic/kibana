@@ -14,15 +14,18 @@ import {
 } from '../../../../common/agent_name';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import defaultIcon from '../span_icon/icons/default.svg';
+import cppIcon from './icons/cpp.svg';
+import darkCppIcon from './icons/cpp_dark.svg';
 import dotNetIcon from './icons/dot_net.svg';
 import erlangIcon from './icons/erlang.svg';
+import darkErlangIcon from './icons/erlang_dark.svg';
 import goIcon from './icons/go.svg';
 import iosIcon from './icons/ios.svg';
 import darkIosIcon from './icons/ios_dark.svg';
 import javaIcon from './icons/java.svg';
 import nodeJsIcon from './icons/nodejs.svg';
 import ocamlIcon from './icons/ocaml.svg';
-import openTelemetryIcon from './icons/opentelemetry.svg';
+import openTelemetryIcon from './icons/otel_default.svg';
 import phpIcon from './icons/php.svg';
 import pythonIcon from './icons/python.svg';
 import rubyIcon from './icons/ruby.svg';
@@ -34,6 +37,7 @@ import darkRustIcon from './icons/rust_dark.svg';
 import androidIcon from './icons/android.svg';
 
 const agentIcons: { [key: string]: string } = {
+  cpp: cppIcon,
   dotnet: dotNetIcon,
   erlang: erlangIcon,
   go: goIcon,
@@ -52,6 +56,8 @@ const agentIcons: { [key: string]: string } = {
 
 const darkAgentIcons: { [key: string]: string } = {
   ...agentIcons,
+  cpp: darkCppIcon,
+  erlang: darkErlangIcon,
   ios: darkIosIcon,
   php: darkPhpIcon,
   rum: darkRumJsIcon,

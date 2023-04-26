@@ -54,7 +54,7 @@ export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
   secure: false,
 };
 
-const EMAIL_FOOTER_DIVIDER = '\n\n--\n\n';
+const EMAIL_FOOTER_DIVIDER = '\n\n---\n\n';
 
 const ConfigSchemaProps = {
   service: schema.string({ defaultValue: 'other' }),
@@ -319,10 +319,14 @@ async function executor(
     transport.service = config.service;
   }
 
-  const footerMessage = getFooterMessage({
-    publicBaseUrl,
-    kibanaFooterLink: params.kibanaFooterLink,
-  });
+  let actualMessage = params.message;
+  if (configurationUtilities.enableFooterInEmail()) {
+    const footerMessage = getFooterMessage({
+      publicBaseUrl,
+      kibanaFooterLink: params.kibanaFooterLink,
+    });
+    actualMessage = `${params.message}${EMAIL_FOOTER_DIVIDER}${footerMessage}`;
+  }
 
   const sendEmailOptions: SendEmailOptions = {
     connectorId: actionId,
@@ -335,7 +339,7 @@ async function executor(
     },
     content: {
       subject: params.subject,
-      message: `${params.message}${EMAIL_FOOTER_DIVIDER}${footerMessage}`,
+      message: actualMessage,
     },
     hasAuth: config.hasAuth,
     configurationUtilities,

@@ -6,24 +6,38 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
+import type { Version } from '@kbn/object-versioning';
+import { itemResultSchema } from './common';
+import { versionSchema } from './constants';
 
-import type { ProcedureSchemas } from './types';
+import type { ItemResult, ProcedureSchemas } from './types';
+
+export const getResultSchema = schema.object(
+  {
+    contentTypeId: schema.string(),
+    result: itemResultSchema,
+  },
+  { unknowns: 'forbid' }
+);
 
 export const getSchemas: ProcedureSchemas = {
   in: schema.object(
     {
       contentTypeId: schema.string(),
       id: schema.string({ minLength: 1 }),
+      version: versionSchema,
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }
   ),
-  // --> "out" will be (optionally) specified by each storage layer
-  out: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  out: getResultSchema,
 };
 
-export interface GetIn<T extends string = string, Options extends object = object> {
+export interface GetIn<T extends string = string, Options extends void | object = object> {
   id: string;
   contentTypeId: T;
+  version?: Version;
   options?: Options;
 }
+
+export type GetResult<T = unknown, M = void> = ItemResult<T, M>;

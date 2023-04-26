@@ -14,10 +14,12 @@
         "names": ["logs-osquery_manager*"],
         "privileges": ["read"]
       }
-    ]
+    ],
+    "run_as": []
   },
   "kibana": [
     {
+      "base": [],
       "feature": {
         "discover": ["read"],
         "infrastructure": ["read"],

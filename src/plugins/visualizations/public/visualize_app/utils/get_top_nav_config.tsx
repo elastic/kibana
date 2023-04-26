@@ -312,6 +312,10 @@ export const getTopNavConfig = (
                 embeddableId,
                 vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
                 originatingApp,
+                title: visInstance?.panelTitle || vis.title,
+                visTypeTitle: vis.type.title,
+                description: visInstance?.panelDescription || vis.description,
+                isEmbeddable: Boolean(originatingApp),
               };
               if (navigateToLensConfig) {
                 hideLensBadge();

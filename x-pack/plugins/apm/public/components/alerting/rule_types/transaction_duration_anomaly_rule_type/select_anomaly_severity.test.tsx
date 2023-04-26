@@ -24,7 +24,10 @@ describe('SelectAnomalySeverity', () => {
       />,
       { wrapper: Wrapper }
     );
-    const button = (await result.findAllByText('critical'))[1];
+
+    // SR-only text 'Critical, is selected'
+    // was removed here: https://github.com/elastic/eui/pull/6630#discussion_r1123655995
+    const button = await result.findByText('critical');
 
     button.click();
 

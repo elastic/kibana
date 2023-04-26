@@ -30,18 +30,23 @@ interface ServiceInstanceDetailedStatisticsParams {
   offset?: string;
 }
 
+interface ServiceInstancesDetailedStat {
+  serviceNodeName: string;
+  errorRate?: Coordinate[];
+  latency?: Coordinate[];
+  throughput?: Coordinate[];
+  cpuUsage?: Coordinate[];
+  memoryUsage?: Coordinate[];
+}
+
+export interface ServiceInstancesDetailedStatisticsResponse {
+  currentPeriod: Record<string, ServiceInstancesDetailedStat>;
+  previousPeriod: Record<string, ServiceInstancesDetailedStat>;
+}
+
 async function getServiceInstancesDetailedStatistics(
   params: ServiceInstanceDetailedStatisticsParams
-): Promise<
-  Array<{
-    serviceNodeName: string;
-    errorRate?: Coordinate[];
-    latency?: Coordinate[];
-    throughput?: Coordinate[];
-    cpuUsage?: Coordinate[];
-    memoryUsage?: Coordinate[];
-  }>
-> {
+): Promise<ServiceInstancesDetailedStat[]> {
   return withApmSpan('get_service_instances_detailed_statistics', async () => {
     const [transactionStats, systemMetricStats = []] = await Promise.all([
       getServiceInstancesTransactionStatistics({
@@ -89,7 +94,7 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
   start: number;
   end: number;
   offset?: string;
-}) {
+}): Promise<ServiceInstancesDetailedStatisticsResponse> {
   return withApmSpan(
     'get_service_instances_detailed_statistics_periods',
     async () => {

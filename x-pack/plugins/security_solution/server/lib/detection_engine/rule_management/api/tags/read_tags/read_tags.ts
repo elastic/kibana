@@ -6,6 +6,11 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { RuleTagsAggregationResult } from '@kbn/alerting-plugin/common';
+import {
+  getRuleTagsAggregation,
+  formatRuleTagsAggregationResult,
+} from '@kbn/alerting-plugin/common';
 import { enrichFilterWithRuleTypeMapping } from '../../../logic/search/enrich_filter_with_rule_type_mappings';
 
 // This is a contrived max limit on the number of tags. In fact it can exceed this number and will be truncated to the hardcoded number.
@@ -17,13 +22,14 @@ export const readTags = async ({
   rulesClient: RulesClient;
   perPage?: number;
 }): Promise<string[]> => {
-  const res = await rulesClient.aggregate({
+  const res = await rulesClient.aggregate<RuleTagsAggregationResult>({
     options: {
-      fields: ['tags'],
       filter: enrichFilterWithRuleTypeMapping(undefined),
-      maxTags: EXPECTED_MAX_TAGS,
     },
+    aggs: getRuleTagsAggregation({
+      maxTags: EXPECTED_MAX_TAGS,
+    }),
   });
 
-  return res.ruleTags ?? [];
+  return formatRuleTagsAggregationResult(res).ruleTags;
 };

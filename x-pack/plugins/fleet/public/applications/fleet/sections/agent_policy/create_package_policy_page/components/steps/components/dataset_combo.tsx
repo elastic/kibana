@@ -94,12 +94,13 @@ export const DatasetComboBox: React.FC<{
         })}
         isClearable={false}
         isDisabled={isDisabled}
+        data-test-subj="datasetComboBox"
       />
       {valueAsOption && valueAsOption.value.package !== pkgName && (
         <>
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="warning">
-            <EuiIcon type="alert" />
+            <EuiIcon type="warning" />
             &nbsp;
             <FormattedMessage
               id="xpack.fleet.datasetCombo.warning"

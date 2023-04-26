@@ -37,6 +37,7 @@ import type {
 import {
   CommentType,
   getCaseCommentsUrl,
+  getCasesDeleteFileAttachmentsUrl,
   getCaseDetailsUrl,
   getCaseDetailsMetricsUrl,
   getCasePushUrl,
@@ -51,7 +52,6 @@ import {
   CASE_TAGS_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
-  MAX_DOCS_PER_PAGE,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -161,13 +161,16 @@ export const findCaseUserActions = async (
   params: {
     type: CaseUserActionTypeWithAll;
     sortOrder: 'asc' | 'desc';
+    page: number;
+    perPage: number;
   },
   signal: AbortSignal
 ): Promise<FindCaseUserActions> => {
   const query = {
     types: params.type !== 'all' ? [params.type] : [],
-    sortOrder: params.sortOrder ?? 'asc',
-    perPage: MAX_DOCS_PER_PAGE,
+    sortOrder: params.sortOrder,
+    page: params.page,
+    perPage: params.perPage,
   };
 
   const response = await KibanaServices.get().http.fetch<UserActionFindResponse>(
@@ -397,6 +400,22 @@ export const createAttachments = async (
     }
   );
   return convertCaseToCamelCase(decodeCaseResponse(response));
+};
+
+export const deleteFileAttachments = async ({
+  caseId,
+  fileIds,
+  signal,
+}: {
+  caseId: string;
+  fileIds: string[];
+  signal: AbortSignal;
+}): Promise<void> => {
+  await KibanaServices.get().http.fetch(getCasesDeleteFileAttachmentsUrl(caseId), {
+    method: 'POST',
+    body: JSON.stringify({ ids: fileIds }),
+    signal,
+  });
 };
 
 export const getFeatureIds = async (

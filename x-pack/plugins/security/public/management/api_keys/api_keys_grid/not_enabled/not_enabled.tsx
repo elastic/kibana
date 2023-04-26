@@ -25,7 +25,7 @@ export const NotEnabled: React.FunctionComponent = () => {
         </h2>
       }
       color="danger"
-      iconType="alert"
+      iconType="warning"
       body={
         <p>
           <FormattedMessage

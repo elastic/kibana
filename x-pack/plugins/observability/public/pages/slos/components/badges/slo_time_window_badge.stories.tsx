@@ -8,17 +8,22 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
+import { EuiFlexGroup } from '@elastic/eui';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { SloTimeWindowBadge as Component, Props } from './slo_time_window_badge';
 import { buildSlo } from '../../../../data/slo/slo';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/Badges/SloTimeWindowBadge',
+  title: 'app/SLO/Badges/SloTimeWindowBadge',
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
+const Template: ComponentStory<typeof Component> = (props: Props) => (
+  <EuiFlexGroup>
+    <Component {...props} />
+  </EuiFlexGroup>
+);
 
 export const With7DaysRolling = Template.bind({});
 With7DaysRolling.args = { slo: buildSlo({ timeWindow: { duration: '7d', isRolling: true } }) };

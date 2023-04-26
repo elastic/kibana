@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { SimpleSavedObject, SavedObjectAttributes } from '@kbn/core/public';
-import type { FinderAttributes } from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectCommon, FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 
-export interface SavedSearchesAttributes extends SavedObjectAttributes {
+export interface SavedSearchesAttributes extends SavedObjectCommon {
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
 }
 
-export const showSavedObject = (savedObject: SimpleSavedObject<FinderAttributes>) => {
-  const so = savedObject as unknown as SimpleSavedObject<SavedSearchesAttributes>;
+export const showSavedObject = (savedObject: SavedObjectCommon<FinderAttributes>) => {
+  const so = savedObject as unknown as SavedObjectCommon<SavedSearchesAttributes>;
   return !so.attributes.isTextBasedQuery && !so.attributes.usesAdHocDataView;
 };

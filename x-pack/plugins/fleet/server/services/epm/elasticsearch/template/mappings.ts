@@ -58,7 +58,6 @@ export function keyword(field: Field): Properties {
     fieldProps.normalizer = field.normalizer;
   }
   if (field.dimension) {
-    fieldProps.time_series_dimension = field.dimension;
     delete fieldProps.ignore_above;
   }
 

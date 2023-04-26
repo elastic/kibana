@@ -91,10 +91,6 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.management.addControl', {
         defaultMessage: 'Add control',
       }),
-    getManageButtonTitle: () =>
-      i18n.translate('controls.controlGroup.management.buttonTitle', {
-        defaultMessage: 'Settings',
-      }),
     getFlyoutTitle: () =>
       i18n.translate('controls.controlGroup.management.flyoutTitle', {
         defaultMessage: 'Control settings',

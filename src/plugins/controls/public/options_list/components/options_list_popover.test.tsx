@@ -13,10 +13,12 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 
-import { OptionsListPopover, OptionsListPopoverProps } from './options_list_popover';
-import { OptionsListComponentState, OptionsListReduxState } from '../types';
-import { mockOptionsListReduxEmbeddableTools } from '../../../common/mocks';
+import { mockOptionsListEmbeddable } from '../../../common/mocks';
 import { ControlOutput, OptionsListEmbeddableInput } from '../..';
+import { OptionsListComponentState, OptionsListReduxState } from '../types';
+import { OptionsListEmbeddableContext } from '../embeddable/options_list_embeddable';
+import { OptionsListPopover, OptionsListPopoverProps } from './options_list_popover';
+import { pluginServices } from '../../services';
 
 describe('Options list popover', () => {
   const defaultProps = {
@@ -35,16 +37,16 @@ describe('Options list popover', () => {
 
   async function mountComponent(options?: Partial<MountOptions>) {
     const compProps = { ...defaultProps, ...(options?.popoverProps ?? {}) };
-    const mockReduxEmbeddableTools = await mockOptionsListReduxEmbeddableTools({
+    const optionsListEmbeddable = await mockOptionsListEmbeddable({
       componentState: options?.componentState ?? {},
       explicitInput: options?.explicitInput ?? {},
       output: options?.output ?? {},
     } as Partial<OptionsListReduxState>);
 
     return mountWithIntl(
-      <mockReduxEmbeddableTools.Wrapper>
+      <OptionsListEmbeddableContext.Provider value={optionsListEmbeddable}>
         <OptionsListPopover {...compProps} />
-      </mockReduxEmbeddableTools.Wrapper>
+      </OptionsListEmbeddableContext.Provider>
     );
   }
 
@@ -290,6 +292,9 @@ describe('Options list popover', () => {
   });
 
   test('ensure warning icon shows up when testAllowExpensiveQueries = false', async () => {
+    pluginServices.getServices().optionsList.getAllowExpensiveQueries = jest.fn(() =>
+      Promise.resolve(false)
+    );
     const popover = await mountComponent({
       componentState: {
         field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec,

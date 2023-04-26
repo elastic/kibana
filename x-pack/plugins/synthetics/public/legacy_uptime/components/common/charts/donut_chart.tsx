@@ -75,8 +75,8 @@ export const DonutChart = ({ height, down, up }: DonutChartProps) => {
                 groupByRollup: (d: Datum) => d.label,
                 nodeLabel: (d: Datum) => d,
                 shape: {
-                  fillColor: (d: Datum) => {
-                    return d.dataName === 'Down' ? danger : gray;
+                  fillColor: (dataName) => {
+                    return dataName === 'Down' ? danger : gray;
                   },
                 },
               },

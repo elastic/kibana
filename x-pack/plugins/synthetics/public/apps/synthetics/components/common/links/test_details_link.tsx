@@ -37,6 +37,7 @@ export const TestDetailsLink = ({
 
   return isBrowserMonitor ? (
     <EuiLink
+      data-test-subj="syntheticsTestDetailsLinkLink"
       href={getTestRunDetailLink({
         basePath,
         checkGroup: ping.monitor.check_group,

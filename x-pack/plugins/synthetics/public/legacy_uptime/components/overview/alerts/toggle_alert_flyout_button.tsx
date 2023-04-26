@@ -75,7 +75,11 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
     'aria-label': ToggleFlyoutTranslations.navigateToAlertingUIAriaLabel,
     'data-test-subj': 'xpack.synthetics.navigateToAlertingUi',
     name: (
-      <EuiLink color="text" href={manageRulesUrl.href}>
+      <EuiLink
+        data-test-subj="syntheticsToggleAlertFlyoutButtonComponentManageRulesLink"
+        color="text"
+        href={manageRulesUrl.href}
+      >
         <FormattedMessage
           id="xpack.synthetics.navigateToAlertingButton.content"
           defaultMessage="Manage rules"

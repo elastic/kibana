@@ -31,8 +31,9 @@
     "@kbn/datemath",
     "@kbn/field-formats-plugin",
     "@kbn/i18n-react",
-    "@kbn/ace",
     "@kbn/shared-ux-router",
+    "@kbn/license-management-plugin",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",

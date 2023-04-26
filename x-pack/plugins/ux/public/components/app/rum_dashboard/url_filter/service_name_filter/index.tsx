@@ -66,6 +66,7 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
 
   return (
     <EuiSelect
+      data-test-subj="uxServiceNameFilterSelect"
       fullWidth
       prepend={i18n.translate('xpack.ux.localFilters.titles.webApplication', {
         defaultMessage: 'Web application',

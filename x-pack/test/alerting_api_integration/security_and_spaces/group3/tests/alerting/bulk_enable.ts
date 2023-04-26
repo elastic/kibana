@@ -83,6 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
                     consumer: 'alertsFixture',
                     throttle: '1m',
                     alertTypeId: 'test.noop',
+                    apiKeyCreatedByUser: false,
                     apiKeyOwner: response.body.rules[0].apiKeyOwner,
                     createdBy: 'elastic',
                     updatedBy: response.body.rules[0].updatedBy,
@@ -95,6 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
                     snoozeSchedule: [],
                     updatedAt: response.body.rules[0].updatedAt,
                     createdAt: response.body.rules[0].createdAt,
+                    revision: 0,
                     scheduledTaskId: response.body.rules[0].scheduledTaskId,
                     executionStatus: {
                       lastDuration: 0,

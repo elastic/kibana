@@ -122,6 +122,9 @@ describe('BuilderEntryItem', () => {
     expect(wrapper.find('.euiFormHelpText.euiFormRow__text').at(0).text()).toEqual(
       i18n.CUSTOM_COMBOBOX_OPTION_TEXT
     );
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).props()).toEqual(
+      expect.objectContaining({ acceptsCustomOptions: true })
+    );
   });
 
   test('it does not render custom option text when "allowCustomOptions" is "true" and it is a nested entry', () => {
@@ -154,6 +157,44 @@ describe('BuilderEntryItem', () => {
     );
 
     expect(wrapper.find('.euiFormHelpText.euiFormRow__text').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).props()).toEqual(
+      expect.objectContaining({ acceptsCustomOptions: false })
+    );
+  });
+
+  test('it does not render custom option text when "allowCustomOptions" is "false"', () => {
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isOperator,
+          parent: undefined,
+          value: '1234',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="detection"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel
+        allowCustomOptions={false}
+      />
+    );
+
+    expect(wrapper.find('.euiFormHelpText.euiFormRow__text').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).props()).toEqual(
+      expect.objectContaining({ acceptsCustomOptions: false })
+    );
   });
 
   test('it render mapping issues warning text when field has mapping conflicts', () => {

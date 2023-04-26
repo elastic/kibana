@@ -27,6 +27,7 @@ import {
 import { RuleRunMetrics } from '../rule_run_metrics_store';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { TaskRunnerTimerSpan } from '../../task_runner/task_runner_timer';
+import { schema } from '@kbn/config-schema';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();
@@ -42,6 +43,9 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   producer: 'alerts',
   ruleTaskTimeout: '1m',
+  validate: {
+    params: schema.any(),
+  },
 };
 
 const context: RuleContextOpts = {
@@ -51,6 +55,7 @@ const context: RuleContextOpts = {
   spaceId: 'test-space',
   executionId: 'abcd-efgh-ijklmnop',
   taskScheduledAt: new Date('2020-01-01T00:00:00.000Z'),
+  ruleRevision: 0,
 };
 
 const contextWithScheduleDelay = { ...context, taskScheduleDelay: 7200000 };
@@ -59,6 +64,7 @@ const contextWithName = { ...contextWithScheduleDelay, ruleName: 'my-super-cool-
 const alert = {
   action: EVENT_LOG_ACTIONS.activeInstance,
   id: 'aaabbb',
+  uuid: 'u-u-i-d',
   message: `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup';`,
   group: 'aGroup',
   state: {
@@ -67,6 +73,7 @@ const alert = {
     duration: '2343252346',
   },
   flapping: false,
+  maintenanceWindowIds: ['window-id1', 'window-id2'],
 };
 
 const action = {
@@ -274,6 +281,51 @@ describe('AlertingEventLogger', () => {
           },
         },
         message: 'rule failed!',
+      });
+    });
+  });
+
+  describe('setMaintenanceWindowIds()', () => {
+    test('should throw error if alertingEventLogger has not been initialized', () => {
+      expect(() =>
+        alertingEventLogger.setMaintenanceWindowIds([])
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
+    });
+
+    test('should throw error if event is null', () => {
+      alertingEventLogger.initialize(context);
+      expect(() =>
+        alertingEventLogger.setMaintenanceWindowIds([])
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
+    });
+
+    it('should update event maintenance window IDs correctly', () => {
+      alertingEventLogger.initialize(context);
+      alertingEventLogger.start();
+      alertingEventLogger.setMaintenanceWindowIds([]);
+
+      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            maintenance_window_ids: [],
+          },
+        },
+      });
+
+      alertingEventLogger.setMaintenanceWindowIds(['test-id-1', 'test-id-2']);
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            maintenance_window_ids: ['test-id-1', 'test-id-2'],
+          },
+        },
       });
     });
   });
@@ -1067,6 +1119,7 @@ describe('createAlertRecord', () => {
     expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(contextWithName.ruleType.id);
     expect(record.kibana?.alert?.rule?.consumer).toEqual(contextWithName.consumer);
     expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(contextWithName.executionId);
+    expect(record.kibana?.alert?.maintenance_window_ids).toEqual(alert.maintenanceWindowIds);
     expect(record.kibana?.alerting?.instance_id).toEqual(alert.id);
     expect(record.kibana?.alerting?.action_group_id).toEqual(alert.group);
     expect(record.kibana?.saved_objects).toEqual([
@@ -1089,6 +1142,7 @@ describe('createAlertRecord', () => {
     expect(record.event?.provider).toBeUndefined();
     expect(record.event?.outcome).toBeUndefined();
     expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
+    expect(record.kibana?.alert?.uuid).toBe(alert.uuid);
     expect(record.kibana?.server_uuid).toBeUndefined();
     expect(record.kibana?.task).toBeUndefined();
     expect(record.kibana?.version).toBeUndefined();

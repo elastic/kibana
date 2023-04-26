@@ -30,9 +30,9 @@ export function firstNonNullValue<T>(valueOrCollection: ECSField<T>): T | undefi
   }
 }
 
-export const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);
+export const defaultUnit = (n: number) => i18n.DEFAULT_UNIT(n);
 
-const LOCAL_STORAGE_GROUPING_KEY = 'groups';
+export const LOCAL_STORAGE_GROUPING_KEY = 'groups';
 export const getAllGroupsInStorage = (storage: Storage): GroupsById => {
   const allGroups = storage.getItem(LOCAL_STORAGE_GROUPING_KEY);
   if (!allGroups) {
