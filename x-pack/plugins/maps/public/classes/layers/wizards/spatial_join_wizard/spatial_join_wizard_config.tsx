@@ -9,15 +9,18 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../../common/constants';
 import { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
+import { WizardForm } from './wizard_form';
 
 export const spatialJoinWizardConfig: LayerWizard = {
   id: WIZARD_ID.SPATIAL_JOIN,
   order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
-  description: '',
+  description: i18n.translate('xpack.maps.spatialJoinWizard.description', {
+    defaultMessage: 'Join by location',
+  }),
   icon: null,
   renderWizard: (renderWizardArguments: RenderWizardArguments) => {
-    return null;
+    return <WizardForm/>;
   },
   title: i18n.translate('xpack.maps.spatialJoinWizard.title', {
     defaultMessage: 'Spatial join',
