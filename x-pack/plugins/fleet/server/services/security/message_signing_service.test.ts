@@ -123,6 +123,24 @@ describe('MessageSigningService', () => {
       expect(rotateKeyPairResponse).toEqual({ success: true });
     });
 
+    it('does not generate key pair on rotation if no key pair exists', async () => {
+      const errorMessage = 'No key pair!';
+      mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
+      // mock delete to throw no key pair found error
+      jest
+        .spyOn(messageSigningService, 'removeKeyPair' as any)
+        .mockReturnValue(Promise.resolve(errorMessage));
+
+      const rotateKeyPairResponse = await messageSigningService.rotateKeyPair();
+
+      // can't delete key pair if none exists
+      expect(soClientMock.delete).not.toBeCalled();
+      // doesn't create new key pair
+      expect(soClientMock.create).not.toBeCalled();
+      // returns error message that no key pair found
+      expect(rotateKeyPairResponse).toEqual({ error: errorMessage });
+    });
+
     it('does not generate key pair if one exists', async () => {
       mockCreatePointInTimeFinderAsInternalUser([keyPairObj]);
 
