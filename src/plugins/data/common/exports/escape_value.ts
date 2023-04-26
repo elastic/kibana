@@ -21,17 +21,32 @@ type RawValue = string | object | null | undefined;
  *
  * See OWASP: https://www.owasp.org/index.php/CSV_Injection.
  */
-export function createEscapeValue(
-  quoteValues: boolean,
-  escapeFormulas: boolean
-): (val: RawValue) => string {
+export function createEscapeValue({
+  csvSeparator,
+  quoteValues,
+  escapeFormulaValues,
+}: {
+  csvSeparator: string;
+  quoteValues: boolean;
+  escapeFormulaValues: boolean;
+}): (val: RawValue) => string {
   return function escapeValue(val: RawValue) {
     if (val && typeof val === 'string') {
-      const formulasEscaped = escapeFormulas && cellHasFormulas(val) ? "'" + val : val;
-      if (quoteValues && nonAlphaNumRE.test(formulasEscaped)) {
-        return `"${formulasEscaped.replace(allDoubleQuoteRE, '""')}"`;
+      const formulasEscaped = escapeFormulaValues && cellHasFormulas(val) ? "'" + val : val;
+      if (quoteValues) {
+        if (nonAlphaNumRE.test(formulasEscaped)) {
+          return `"${formulasEscaped.replace(allDoubleQuoteRE, '""')}"`;
+        }
+        // string with the separator already inside need to be wrapped in quotes
+        // i.e. string with csvSeparator char in it like free text or some number formatting (1143 => 1,143)
+        if (val.includes(csvSeparator)) {
+          return `"${val}"`;
+        }
       }
     }
-    return val == null ? '' : val.toString();
+    // raw multi-terms are stringified as T1,T2,T3 so check if the final value contains the
+    // csv separator before returning (usually for raw values)
+    const stringVal = val == null ? '' : val.toString();
+    return quoteValues && stringVal.includes(csvSeparator) ? `"${stringVal}"` : stringVal;
   };
 }

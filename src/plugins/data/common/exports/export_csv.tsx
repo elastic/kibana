@@ -27,7 +27,7 @@ export function datatableToCSV(
   { columns, rows }: Datatable,
   { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions
 ) {
-  const escapeValues = createEscapeValue(quoteValues, escapeFormulaValues);
+  const escapeValues = createEscapeValue({ csvSeparator, quoteValues, escapeFormulaValues });
   // Build the header row by its names
   const header = columns.map((col) => escapeValues(col.name));
 

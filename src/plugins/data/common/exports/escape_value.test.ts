@@ -13,7 +13,11 @@ describe('escapeValue', function () {
   describe('quoteValues is true', function () {
     let escapeValue: (val: string) => string;
     beforeEach(function () {
-      escapeValue = createEscapeValue(true, false);
+      escapeValue = createEscapeValue({
+        csvSeparator: ',',
+        quoteValues: true,
+        escapeFormulaValues: false,
+      });
     });
 
     it('should escape value with spaces', function () {
@@ -48,7 +52,11 @@ describe('escapeValue', function () {
   describe('quoteValues is false', function () {
     let escapeValue: (val: string) => string;
     beforeEach(function () {
-      escapeValue = createEscapeValue(false, false);
+      escapeValue = createEscapeValue({
+        csvSeparator: ',',
+        quoteValues: false,
+        escapeFormulaValues: false,
+      });
     });
 
     it('should return the value unescaped', function () {
@@ -57,11 +65,15 @@ describe('escapeValue', function () {
     });
   });
 
-  describe('escapeValues', () => {
+  describe('escapeFormulaValues', () => {
     describe('when true', () => {
       let escapeValue: (val: string) => string;
       beforeEach(function () {
-        escapeValue = createEscapeValue(true, true);
+        escapeValue = createEscapeValue({
+          csvSeparator: ',',
+          quoteValues: true,
+          escapeFormulaValues: true,
+        });
       });
 
       ['@', '+', '-', '='].forEach((badChar) => {
@@ -76,7 +88,11 @@ describe('escapeValue', function () {
     describe('when false', () => {
       let escapeValue: (val: string) => string;
       beforeEach(function () {
-        escapeValue = createEscapeValue(true, false);
+        escapeValue = createEscapeValue({
+          csvSeparator: ',',
+          quoteValues: true,
+          escapeFormulaValues: false,
+        });
       });
 
       ['@', '+', '-', '='].forEach((badChar) => {
@@ -84,6 +100,26 @@ describe('escapeValue', function () {
           expect(escapeValue(`${badChar}cmd|' /C calc'!A0`)).to.be(`"${badChar}cmd|' /C calc'!A0"`);
         });
       });
+    });
+  });
+
+  describe('csvSeparator', () => {
+    it('should escape when text contains the separator char with quotes enabled', () => {
+      const escapeValue = createEscapeValue({
+        csvSeparator: ';',
+        quoteValues: true,
+        escapeFormulaValues: false,
+      });
+      expect(escapeValue('a;b')).to.be('"a;b"');
+    });
+
+    it('should not escape when text contains the separator char if quotes are disabled', () => {
+      const escapeValue = createEscapeValue({
+        csvSeparator: ';',
+        quoteValues: false,
+        escapeFormulaValues: false,
+      });
+      expect(escapeValue('a;b')).to.be('a;b');
     });
   });
 });
