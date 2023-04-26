@@ -570,22 +570,29 @@ export const UPCOMING = i18n.translate('xpack.alerting.maintenanceWindows.upcomi
 });
 
 export const UPGRADE_TO_PLATINUM = i18n.translate(
-  'xpack.alerting.maintenanceWindows.callout.updateToPlatinumTitle',
+  'xpack.alerting.maintenanceWindows.licenseCallout.updgradeToPlatinumTitle',
   {
-    defaultMessage: 'To access maintenance windows, you must upgrade your license',
+    defaultMessage: 'Maintenance Windows are a subscription feature.',
   }
 );
 
-export const LINK_APPROPRIATE_LICENSE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.callout.appropriateLicense',
+export const UPGRADE_TO_PLATINUM_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.licenseCallout.upgradeToPlatinumSubtitle',
   {
-    defaultMessage: 'subscription level',
+    defaultMessage: 'Select an option to unlock it.',
   }
 );
 
-export const LINK_CLOUD_DEPLOYMENT = i18n.translate(
-  'xpack.alerting.maintenanceWindows.callout.cloudDeploymentLink',
+export const UPGRADE_SUBSCRIPTION = i18n.translate(
+  'xpack.alerting.maintenanceWindows.licenseCallout.upgradeSubscription',
   {
-    defaultMessage: 'cloud deployment',
+    defaultMessage: 'Upgrade subscription',
+  }
+);
+
+export const START_TRIAL = i18n.translate(
+  'xpack.alerting.maintenanceWindows.licenseCallout.startTrial',
+  {
+    defaultMessage: 'Start trial',
   }
 );

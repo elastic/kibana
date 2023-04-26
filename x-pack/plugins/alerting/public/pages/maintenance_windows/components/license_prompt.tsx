@@ -6,40 +6,64 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiPageTemplate } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageTemplate,
+  EuiText,
+} from '@elastic/eui';
 import * as i18n from '../translations';
+import { useKibana } from '../../../utils/kibana_react';
 
 const title = <h2 data-test-subj="license-prompt-title">{i18n.UPGRADE_TO_PLATINUM}</h2>;
-const body = (
-  <FormattedMessage
-    data-test-subj="license-prompt-body"
-    defaultMessage="Use a {cloud}, start a trial, or upgrade your {appropriateLicense}."
-    id="xpack.alerting.maintenanceWindows.callout.message"
-    values={{
-      appropriateLicense: (
-        <EuiLink
-          data-test-subj="license-prompt-appropriate"
-          href="https://www.elastic.co/subscriptions"
-          target="_blank"
-        >
-          {i18n.LINK_APPROPRIATE_LICENSE}
-        </EuiLink>
-      ),
-      cloud: (
-        <EuiLink
-          data-test-subj="license-prompt-cloud"
-          href="https://www.elastic.co/cloud/elasticsearch-service/signup"
-          target="_blank"
-        >
-          {i18n.LINK_CLOUD_DEPLOYMENT}
-        </EuiLink>
-      ),
-    }}
-  />
-);
 
 export const LicensePrompt = React.memo(() => {
-  return <EuiPageTemplate.EmptyPrompt iconType="gear" title={title} body={body} />;
+  const { application } = useKibana().services;
+
+  return (
+    <EuiPageTemplate.EmptyPrompt
+      title={title}
+      body={
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <EuiText color="subdued">
+              <p>{i18n.UPGRADE_TO_PLATINUM_SUBTITLE}</p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="license-prompt-upgrade"
+                  key="upgrade-subscription-button"
+                  target="_blank"
+                  href="https://www.elastic.co/subscriptions"
+                >
+                  {i18n.UPGRADE_SUBSCRIPTION}
+                </EuiButtonEmpty>
+                ,
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  data-test-subj="license-prompt-trial"
+                  key="start-trial-button"
+                  target="_blank"
+                  href={application.getUrlForApp('management', {
+                    path: 'stack/license_management/home',
+                  })}
+                >
+                  {i18n.START_TRIAL}
+                </EuiButton>
+                ,
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    />
+  );
 });
 LicensePrompt.displayName = 'LicensePrompt';

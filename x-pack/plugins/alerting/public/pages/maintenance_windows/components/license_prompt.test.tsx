@@ -21,7 +21,7 @@ describe('LicensePrompt', () => {
     const result = appMockRenderer.render(<LicensePrompt />);
 
     expect(result.getByTestId('license-prompt-title')).toBeInTheDocument();
-    expect(result.getByTestId('license-prompt-appropriate')).toBeInTheDocument();
-    expect(result.getByTestId('license-prompt-cloud')).toBeInTheDocument();
+    expect(result.getByTestId('license-prompt-upgrade')).toBeInTheDocument();
+    expect(result.getByTestId('license-prompt-trial')).toBeInTheDocument();
   });
 });
