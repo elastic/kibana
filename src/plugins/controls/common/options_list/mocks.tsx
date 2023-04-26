@@ -21,13 +21,13 @@ const mockOptionsListComponentState = {
   ...getDefaultComponentState(),
   field: undefined,
   totalCardinality: 0,
-  availableOptions: {
-    woof: { doc_count: 100 },
-    bark: { doc_count: 75 },
-    meow: { doc_count: 50 },
-    quack: { doc_count: 25 },
-    moo: { doc_count: 5 },
-  },
+  availableOptions: [
+    { value: 'woof', docCount: 100 },
+    { value: 'bark', docCount: 75 },
+    { value: 'meow', docCount: 50 },
+    { value: 'quack', docCount: 25 },
+    { value: 'moo', docCount: 5 },
+  ],
   invalidSelections: [],
   validSelections: [],
 } as OptionsListComponentState;
