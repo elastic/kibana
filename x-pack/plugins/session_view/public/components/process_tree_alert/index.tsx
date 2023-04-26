@@ -15,6 +15,7 @@ import {
   EuiToolTip,
   EuiPanel,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_ICONS } from '../../../common/constants';
 import {
   ProcessEvent,
@@ -78,6 +79,7 @@ export const ProcessTreeAlert = ({
   const processEventAlertCategory = category ?? ProcessEventAlertCategory.process;
   const alertCategoryDetailDisplayText = getAlertCategoryDisplayText(alert, category);
   const alertIconTooltipContent = getAlertIconTooltipContent(processEventAlertCategory);
+  const eventType = Array.isArray(event?.type) ? event?.type?.[0] : event?.type;
 
   return (
     <div key={uuid} css={styles.alert} data-id={uuid}>
@@ -136,6 +138,13 @@ export const ProcessTreeAlert = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiBadge css={styles.actionBadge}>{event?.action}</EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {eventType === 'denied' && (
+            <EuiBadge css={styles.actionBadge} color="danger">
+              <FormattedMessage id="xpack.sessionView.blockedBadge" defaultMessage="Blocked" />
+            </EuiBadge>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

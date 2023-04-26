@@ -30,7 +30,9 @@ export const getCustomTableColumns = (): Array<
   {
     field: 'indexFieldType',
     name: i18n.INDEX_MAPPING_TYPE,
-    render: (indexFieldType: string) => <EuiCode>{indexFieldType}</EuiCode>,
+    render: (indexFieldType: string) => (
+      <EuiCode data-test-subj="indexFieldType">{indexFieldType}</EuiCode>
+    ),
     sortable: true,
     truncateText: false,
     width: '50%',
@@ -50,8 +52,12 @@ export const getEcsCompliantTableColumns = (): Array<
   {
     field: 'type',
     name: i18n.ECS_MAPPING_TYPE,
-    render: (type: string) =>
-      type != null ? <CodeSuccess>{type}</CodeSuccess> : <EuiCode>{EMPTY_PLACEHOLDER}</EuiCode>,
+    render: (type: string | undefined) =>
+      type != null ? (
+        <CodeSuccess data-test-subj="type">{type}</CodeSuccess>
+      ) : (
+        <EuiCode data-test-subj="typePlaceholder">{EMPTY_PLACEHOLDER}</EuiCode>
+      ),
     sortable: true,
     truncateText: false,
     width: '25%',
@@ -69,8 +75,12 @@ export const getEcsCompliantTableColumns = (): Array<
   {
     field: 'description',
     name: i18n.ECS_DESCRIPTION,
-    render: (description: string) =>
-      description != null ? description : <EuiCode>{EMPTY_PLACEHOLDER}</EuiCode>,
+    render: (description: string | undefined) =>
+      description != null ? (
+        <span data-test-subj="description">{description}</span>
+      ) : (
+        <EuiCode data-test-subj="emptyPlaceholder">{EMPTY_PLACEHOLDER}</EuiCode>
+      ),
     sortable: false,
     truncateText: false,
     width: '25%',

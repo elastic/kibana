@@ -73,7 +73,7 @@ import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/co
 export interface ITelemetryReceiver {
   start(
     core?: CoreStart,
-    kibanaIndex?: string,
+    getIndexForType?: (type: string) => string,
     alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient,
@@ -185,7 +185,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private esClient?: ElasticsearchClient;
   private exceptionListClient?: ExceptionListClient;
   private soClient?: SavedObjectsClientContract;
-  private kibanaIndex?: string;
+  private getIndexForType?: (type: string) => string;
   private alertsIndex?: string;
   private clusterInfo?: ESClusterInfo;
   private processTreeFetcher?: Fetcher;
@@ -198,13 +198,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   public async start(
     core?: CoreStart,
-    kibanaIndex?: string,
+    getIndexForType?: (type: string) => string,
     alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient,
     packageService?: PackageService
   ) {
-    this.kibanaIndex = kibanaIndex;
+    this.getIndexForType = getIndexForType;
     this.alertsIndex = alertsIndex;
     this.agentClient = endpointContextService?.getInternalFleetServices().agent;
     this.agentPolicyService = endpointContextService?.getInternalFleetServices().agentPolicy;
@@ -493,7 +493,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `${this.kibanaIndex}*`,
+      index: this.getIndexForType?.('alert'),
       ignore_unavailable: true,
       body: {
         size: this.maxRecords,
@@ -924,7 +924,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
     const exceptionListQuery: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `${this.kibanaIndex}*`,
+      index: this.getIndexForType?.('exception-list'),
       ignore_unavailable: true,
       body: {
         size: 0, // no query results required - only aggregation quantity
@@ -944,7 +944,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
     const indicatorMatchRuleQuery: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `${this.kibanaIndex}*`,
+      index: this.getIndexForType?.('alert'),
       ignore_unavailable: true,
       body: {
         size: 0,

@@ -34,7 +34,7 @@ export const DocumentCountChart: FC<Props> = ({
   const chartPointsSplitLabel = i18n.translate(
     'xpack.aiops.logCategorization.chartPointsSplitLabel',
     {
-      defaultMessage: 'Selected category',
+      defaultMessage: 'Selected pattern',
     }
   );
   const chartPoints = useMemo(() => {

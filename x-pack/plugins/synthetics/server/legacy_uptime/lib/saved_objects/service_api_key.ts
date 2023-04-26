@@ -72,7 +72,7 @@ const getSyntheticsServiceAPIKey = async (server: UptimeServerSetup) => {
   }
 };
 
-const setSyntheticsServiceApiKey = async (
+export const setSyntheticsServiceApiKey = async (
   soClient: SavedObjectsClientContract,
   apiKey: SyntheticsServiceApiKey
 ) => {

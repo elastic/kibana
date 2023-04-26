@@ -6,15 +6,14 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import numeral from '@elastic/numeral';
 import { sortBy } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import { CheckAll } from './check_all';
+import { CheckStatus } from '../check_status';
 import { ERROR, INDEX, PATTERN } from '../errors_viewer/translations';
 import { ERRORS } from '../errors_popover/translations';
-import { EMPTY_STAT } from '../../../helpers';
 import {
   getDataQualitySummaryMarkdownComment,
   getErrorsMarkdownTable,
@@ -23,8 +22,8 @@ import {
   getSummaryTableMarkdownHeader,
   getSummaryTableMarkdownRow,
 } from '../../index_properties/markdown/helpers';
-import { getSummaryTableItems } from '../../pattern/helpers';
-import { TakeActionMenu } from './take_action_menu';
+import { defaultSort, getSummaryTableItems } from '../../pattern/helpers';
+import { Actions } from './actions';
 import type {
   DataQualityCheckResult,
   ErrorSummary,
@@ -32,6 +31,7 @@ import type {
   OnCheckCompleted,
   PatternRollup,
 } from '../../../types';
+import { getSizeInBytes } from '../../../helpers';
 
 const SummaryActionsFlexGroup = styled(EuiFlexGroup)`
   gap: ${({ theme }) => theme.eui.euiSizeS};
@@ -43,10 +43,12 @@ export const getResultsSortedByDocsCount = (
   results != null ? sortBy('docsCount', Object.values(results)).reverse() : [];
 
 export const getAllMarkdownCommentsFromResults = ({
+  formatBytes,
   formatNumber,
   patternIndexNames,
   patternRollup,
 }: {
+  formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   patternIndexNames: Record<string, string[]>;
   patternRollup: PatternRollup;
@@ -60,6 +62,8 @@ export const getAllMarkdownCommentsFromResults = ({
     pattern: patternRollup.pattern,
     patternDocsCount: patternRollup.docsCount ?? 0,
     results: patternRollup.results,
+    sortByColumn: defaultSort.sort.field,
+    sortByDirection: defaultSort.sort.direction,
     stats: patternRollup.stats,
   });
 
@@ -69,11 +73,13 @@ export const getAllMarkdownCommentsFromResults = ({
 
     return getSummaryTableMarkdownRow({
       docsCount: item.docsCount,
+      formatBytes,
       formatNumber,
       ilmPhase: item.ilmPhase,
       indexName: item.indexName,
       incompatible: result?.incompatible,
       patternDocsCount: patternRollup.docsCount ?? 0,
+      sizeInBytes: getSizeInBytes({ indexName: item.indexName, stats: patternRollup.stats }),
     }).trim();
   });
 
@@ -89,10 +95,12 @@ export const getAllMarkdownCommentsFromResults = ({
 };
 
 export const getAllMarkdownComments = ({
+  formatBytes,
   formatNumber,
   patternIndexNames,
   patternRollups,
 }: {
+  formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   patternIndexNames: Record<string, string[]>;
   patternRollups: Record<string, PatternRollup>;
@@ -108,10 +116,12 @@ export const getAllMarkdownComments = ({
     (acc, pattern) => [
       ...acc,
       getPatternSummaryMarkdownComment({
+        formatBytes,
         formatNumber,
         patternRollup: patternRollups[pattern],
       }),
       ...getAllMarkdownCommentsFromResults({
+        formatBytes,
         formatNumber,
         patternRollup: patternRollups[pattern],
         patternIndexNames,
@@ -121,13 +131,14 @@ export const getAllMarkdownComments = ({
   );
 };
 
-interface Props {
+export interface Props {
   addSuccessToast: (toast: { title: string }) => void;
   canUserCreateAndReadCases: () => boolean;
-  defaultNumberFormat: string;
+  formatBytes: (value: number | undefined) => string;
+  formatNumber: (value: number | undefined) => string;
   errorSummary: ErrorSummary[];
   ilmPhases: string[];
-  incrementCheckAllIndiciesChecked: () => void;
+  lastChecked: string;
   onCheckCompleted: OnCheckCompleted;
   openCreateCaseFlyout: ({
     comments,
@@ -139,51 +150,54 @@ interface Props {
   patternIndexNames: Record<string, string[]>;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
-  setCheckAllIndiciesChecked: (checkAllIndiciesChecked: number) => void;
-  setCheckAllTotalIndiciesToCheck: (checkAllTotalIndiciesToCheck: number) => void;
-  setIndexToCheck: (indexToCheck: IndexToCheck | null) => void;
+  setLastChecked: (lastChecked: string) => void;
   totalDocsCount: number | undefined;
   totalIncompatible: number | undefined;
   totalIndices: number | undefined;
   totalIndicesChecked: number | undefined;
+  sizeInBytes: number | undefined;
 }
 
 const SummaryActionsComponent: React.FC<Props> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
-  defaultNumberFormat,
+  formatBytes,
+  formatNumber,
   errorSummary,
   ilmPhases,
-  incrementCheckAllIndiciesChecked,
+  lastChecked,
   onCheckCompleted,
   openCreateCaseFlyout,
   patternIndexNames,
   patternRollups,
   patterns,
+  setLastChecked,
   totalDocsCount,
-  setCheckAllIndiciesChecked,
-  setCheckAllTotalIndiciesToCheck,
-  setIndexToCheck,
   totalIncompatible,
   totalIndices,
   totalIndicesChecked,
+  sizeInBytes,
 }) => {
-  const formatNumber = useCallback(
-    (value: number | undefined): string =>
-      value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT,
-    [defaultNumberFormat]
-  );
+  const [indexToCheck, setIndexToCheck] = useState<IndexToCheck | null>(null);
+  const [checkAllIndiciesChecked, setCheckAllIndiciesChecked] = useState<number>(0);
+  const [checkAllTotalIndiciesToCheck, setCheckAllTotalIndiciesToCheck] = useState<number>(0);
+  const incrementCheckAllIndiciesChecked = useCallback(() => {
+    setCheckAllIndiciesChecked((current) => current + 1);
+  }, []);
 
   const getMarkdownComments = useCallback(
     (): string[] => [
       getDataQualitySummaryMarkdownComment({
+        formatBytes,
         formatNumber,
         totalDocsCount,
         totalIncompatible,
         totalIndices,
         totalIndicesChecked,
+        sizeInBytes,
       }),
       ...getAllMarkdownComments({
+        formatBytes,
         formatNumber,
         patternIndexNames,
         patternRollups,
@@ -197,9 +211,11 @@ const SummaryActionsComponent: React.FC<Props> = ({
     ],
     [
       errorSummary,
+      formatBytes,
       formatNumber,
       patternIndexNames,
       patternRollups,
+      sizeInBytes,
       totalDocsCount,
       totalIncompatible,
       totalIndices,
@@ -208,30 +224,46 @@ const SummaryActionsComponent: React.FC<Props> = ({
   );
 
   return (
-    <SummaryActionsFlexGroup alignItems="center" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <CheckAll
-          defaultNumberFormat={defaultNumberFormat}
-          ilmPhases={ilmPhases}
-          incrementCheckAllIndiciesChecked={incrementCheckAllIndiciesChecked}
-          onCheckCompleted={onCheckCompleted}
-          patternIndexNames={patternIndexNames}
-          patterns={patterns}
-          setCheckAllIndiciesChecked={setCheckAllIndiciesChecked}
-          setCheckAllTotalIndiciesToCheck={setCheckAllTotalIndiciesToCheck}
-          setIndexToCheck={setIndexToCheck}
-        />
-      </EuiFlexItem>
+    <>
+      <SummaryActionsFlexGroup data-test-subj="summaryActions" direction="column" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <CheckAll
+            formatBytes={formatBytes}
+            formatNumber={formatNumber}
+            ilmPhases={ilmPhases}
+            incrementCheckAllIndiciesChecked={incrementCheckAllIndiciesChecked}
+            onCheckCompleted={onCheckCompleted}
+            patternIndexNames={patternIndexNames}
+            patterns={patterns}
+            setCheckAllIndiciesChecked={setCheckAllIndiciesChecked}
+            setCheckAllTotalIndiciesToCheck={setCheckAllTotalIndiciesToCheck}
+            setIndexToCheck={setIndexToCheck}
+          />
+        </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <TakeActionMenu
-          addSuccessToast={addSuccessToast}
-          canUserCreateAndReadCases={canUserCreateAndReadCases}
-          getMarkdownComments={getMarkdownComments}
-          openCreateCaseFlyout={openCreateCaseFlyout}
-        />
-      </EuiFlexItem>
-    </SummaryActionsFlexGroup>
+        <EuiFlexItem grow={false}>
+          <CheckStatus
+            addSuccessToast={addSuccessToast}
+            checkAllIndiciesChecked={checkAllIndiciesChecked}
+            checkAllTotalIndiciesToCheck={checkAllTotalIndiciesToCheck}
+            errorSummary={errorSummary}
+            indexToCheck={indexToCheck}
+            lastChecked={lastChecked}
+            setLastChecked={setLastChecked}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <Actions
+            addSuccessToast={addSuccessToast}
+            canUserCreateAndReadCases={canUserCreateAndReadCases}
+            getMarkdownComments={getMarkdownComments}
+            ilmPhases={ilmPhases}
+            openCreateCaseFlyout={openCreateCaseFlyout}
+          />
+        </EuiFlexItem>
+      </SummaryActionsFlexGroup>
+    </>
   );
 };
 
