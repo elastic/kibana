@@ -64,6 +64,7 @@ const createStartContractMock = () => {
     getChromeStyle$: jest.fn(),
     setChromeStyle: jest.fn(),
     setProjectNavigation: jest.fn(),
+    replaceProjectSideNav: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));

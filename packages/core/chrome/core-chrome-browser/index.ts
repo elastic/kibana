@@ -29,4 +29,7 @@ export type {
   ChromeStart,
   ChromeStyle,
   ChromeUserBanner,
+  ChromeProjectNavigationLink,
+  ChromeProjectNavigation,
+  ChromeProjectNavigationNode,
 } from './src';

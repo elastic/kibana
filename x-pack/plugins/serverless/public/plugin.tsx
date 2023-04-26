@@ -33,7 +33,7 @@ export class ServerlessPlugin implements Plugin<ServerlessPluginSetup, Serverles
 
     return {
       setServerlessNavigation: (navigation: JSX.Element) =>
-        core.chrome.setProjectNavigation(navigation),
+        core.chrome.replaceProjectSideNav(navigation),
     };
   }
 
