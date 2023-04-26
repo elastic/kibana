@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EntityFieldType } from '@kbn/ml-anomaly-utils';
+import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
 import { Entity } from './entity_control';
 import { UiPartitionFieldConfig } from '../series_controls/series_controls';
 
@@ -29,7 +29,7 @@ interface EntityConfigProps {
   entity: Entity;
   isModelPlotEnabled: boolean;
   config: UiPartitionFieldConfig;
-  onConfigChange: (fieldType: EntityFieldType, config: Partial<UiPartitionFieldConfig>) => void;
+  onConfigChange: (fieldType: MlEntityFieldType, config: Partial<UiPartitionFieldConfig>) => void;
 }
 
 export const EntityConfig: FC<EntityConfigProps> = ({

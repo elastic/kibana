@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectProps } from
 import { debounce } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { useStorage } from '@kbn/ml-local-storage';
-import type { EntityFieldType } from '@kbn/ml-anomaly-utils';
+import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
 import { EntityControl } from '../entity_control';
 import { mlJobService } from '../../../services/job_service';
 import { Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs';
@@ -52,7 +52,7 @@ export type UiPartitionFieldConfig = Exclude<PartitionFieldConfig, undefined>;
  * Provides default fields configuration.
  */
 const getDefaultFieldConfig = (
-  fieldTypes: EntityFieldType[],
+  fieldTypes: MlEntityFieldType[],
   isAnomalousOnly: boolean,
   applyTimeRange: boolean
 ): UiPartitionFieldsConfig => {
@@ -250,7 +250,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
         // we need to change it for all the other fields
         for (const c in updatedResultConfig) {
           if (updatedResultConfig.hasOwnProperty(c)) {
-            updatedResultConfig[c as EntityFieldType]!.anomalousOnly =
+            updatedResultConfig[c as MlEntityFieldType]!.anomalousOnly =
               updatedFieldConfig.anomalousOnly;
           }
         }
@@ -261,7 +261,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
         // we need to change it for all the other fields
         for (const c in updatedResultConfig) {
           if (updatedResultConfig.hasOwnProperty(c)) {
-            updatedResultConfig[c as EntityFieldType]!.applyTimeRange =
+            updatedResultConfig[c as MlEntityFieldType]!.applyTimeRange =
               updatedFieldConfig.applyTimeRange;
           }
         }

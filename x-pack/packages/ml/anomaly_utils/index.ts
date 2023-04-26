@@ -55,7 +55,7 @@ export { getSeverityColor } from './get_severity_color';
 export { getSeverityType } from './get_severity_type';
 
 export type {
-  EntityFieldType,
+  MlEntityFieldType,
   MlInfluencer,
   MLAnomalyDoc,
   MlAnomalyCategorizerStatsDoc,

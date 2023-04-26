@@ -475,9 +475,9 @@ export interface MlAnomalyCategorizerStatsDoc {
  * Union type for entity field types.
  *
  * @export
- * @typedef {EntityFieldType}
+ * @typedef {MlEntityFieldType}
  */
-export type EntityFieldType = 'partition_field' | 'over_field' | 'by_field';
+export type MlEntityFieldType = 'partition_field' | 'over_field' | 'by_field';
 
 /**
  * The type of the anomaly result, such as bucket, influencer or record.
