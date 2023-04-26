@@ -241,21 +241,21 @@ _meta:
       ],
     });
 
-    await installTransforms(
-      {
+    await installTransforms({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
       } as unknown as RegistryPackage,
-      [
+      paths: [
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
       ],
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     // Stop and delete previously installed transforms
     expect(esClient.transform.stopTransform.mock.calls).toEqual([
@@ -516,21 +516,21 @@ _meta:
       ],
     });
 
-    await installTransforms(
-      {
+    await installTransforms({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
       } as unknown as RegistryPackage,
-      [
+      paths: [
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
       ],
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     // Stop and delete previously installed transforms
     expect(esClient.transform.stopTransform.mock.calls).toEqual([
@@ -798,20 +798,20 @@ _meta:
       ],
     });
 
-    await installTransforms(
-      {
+    await installTransforms({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
       } as unknown as RegistryPackage,
-      [
+      paths: [
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
       ],
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     // Stop and delete previously installed transforms
     expect(esClient.transform.stopTransform.mock.calls).toEqual([
@@ -1015,21 +1015,21 @@ _meta:
       } as unknown as SavedObject<Installation>)
     );
 
-    await installTransforms(
-      {
+    await installTransforms({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
       } as unknown as RegistryPackage,
-      [
+      paths: [
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
       ],
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es,
-      authorizationHeader
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+      authorizationHeader,
+    });
 
     expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
     // Does not start transform because start is set to false in manifest.yml
@@ -1108,20 +1108,20 @@ _meta:
       })
     );
 
-    await installTransforms(
-      {
+    await installTransforms({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
       } as unknown as RegistryPackage,
-      [
+      paths: [
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
       ],
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     expect(esClient.indices.create.mock.calls).toEqual([]);
 
@@ -1189,21 +1189,21 @@ _meta:
       } as unknown as SavedObject<Installation>)
     );
 
-    await installTransforms(
-      {
+    await installTransforms({
+      installablePackage: {
         name: 'endpoint',
         version: '0.16.0-dev.0',
       } as unknown as RegistryPackage,
-      [
+      paths: [
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
       ],
       esClient,
       savedObjectsClient,
-      loggerMock.create(),
-      previousInstallation.installed_es
-    );
+      logger: loggerMock.create(),
+      esReferences: previousInstallation.installed_es,
+    });
 
     // Transform from old version is neither stopped nor deleted
     expect(esClient.transform.stopTransform.mock.calls).toEqual([]);

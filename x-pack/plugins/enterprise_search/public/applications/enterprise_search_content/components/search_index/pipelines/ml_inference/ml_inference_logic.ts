@@ -66,6 +66,7 @@ import {
   sortModels,
   sortSourceFields,
 } from '../../../shared/ml_inference/utils';
+import { PipelinesLogic } from '../pipelines_logic';
 
 import {
   AddInferencePipelineFormErrors,
@@ -227,6 +228,8 @@ export const MLInferenceLogic = kea<
         'apiSuccess as attachApiSuccess',
         'makeRequest as makeAttachPipelineRequest',
       ],
+      PipelinesLogic,
+      ['closeAddMlInferencePipelineModal as closeAddMlInferencePipelineModal'],
     ],
     values: [
       CachedFetchIndexApiLogic,
@@ -348,6 +351,20 @@ export const MLInferenceLogic = kea<
             selectedSourceFields: [],
           };
         },
+        closeAddMlInferencePipelineModal: () => ({
+          configuration: {
+            ...EMPTY_PIPELINE_CONFIGURATION,
+          },
+          indexName: '',
+          step: AddInferencePipelineSteps.Configuration,
+        }),
+        createApiSuccess: () => ({
+          configuration: {
+            ...EMPTY_PIPELINE_CONFIGURATION,
+          },
+          indexName: '',
+          step: AddInferencePipelineSteps.Configuration,
+        }),
         removeFieldFromMapping: (modal, { fieldName }) => {
           const {
             configuration: { fieldMappings },

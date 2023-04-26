@@ -33,11 +33,10 @@ import { SecurityPageName } from '../../app/types';
 import { getGroupByFieldsOnClick } from '../../common/components/alerts_treemap/lib/helpers';
 import { useTheme } from '../../common/components/charts/common';
 import { HeaderPage } from '../../common/components/header_page';
-import type { BadgeOptions } from '../../common/components/header_page/types';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { useLocalStorage } from '../../common/components/local_storage';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
+import { DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import {
   useGetUserCasesPermissions,
@@ -50,11 +49,6 @@ import { useSignalIndex } from '../../detections/containers/detection_engine/ale
 import * as i18n from './translations';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
-
-const badgeOptions: BadgeOptions = {
-  beta: true,
-  text: i18n.BETA,
-};
 
 const comboBoxStyle: React.CSSProperties = {
   width: '322px',
@@ -141,6 +135,7 @@ const DataQualityComponent: React.FC = () => {
     },
     [toasts]
   );
+  const [defaultBytesFormat] = useUiSetting$<string>(DEFAULT_BYTES_FORMAT);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const labelInputId = useGeneratedHtmlId({ prefix: 'labelInput' });
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>(defaultOptions);
@@ -210,11 +205,7 @@ const DataQualityComponent: React.FC = () => {
       {indicesExist ? (
         <>
           <SecuritySolutionPageWrapper data-test-subj="ecsDataQualityDashboardPage">
-            <HeaderPage
-              badgeOptions={badgeOptions}
-              subtitle={subtitle}
-              title={i18n.DATA_QUALITY_TITLE}
-            >
+            <HeaderPage subtitle={subtitle} title={i18n.DATA_QUALITY_TITLE}>
               <EuiToolTip content={INDEX_LIFECYCLE_MANAGEMENT_PHASES}>
                 <FormControlLayout prepend={ilmFormLabel}>
                   <EuiComboBox
@@ -236,6 +227,7 @@ const DataQualityComponent: React.FC = () => {
               <DataQualityPanel
                 addSuccessToast={addSuccessToast}
                 canUserCreateAndReadCases={canUserCreateAndReadCases}
+                defaultBytesFormat={defaultBytesFormat}
                 defaultNumberFormat={defaultNumberFormat}
                 getGroupByFieldsOnClick={getGroupByFieldsOnClick}
                 ilmPhases={ilmPhases}

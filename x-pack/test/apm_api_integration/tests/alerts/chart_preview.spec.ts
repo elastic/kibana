@@ -83,6 +83,61 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ).to.equal(true);
     });
 
+    it('transaction_error_rate with transaction name', async () => {
+      const options = {
+        params: {
+          query: {
+            start,
+            end,
+            serviceName: 'opbeans-java',
+            transactionName: 'APIRestController#product',
+            transactionType: 'request',
+            environment: 'ENVIRONMENT_ALL',
+            interval: '5m',
+          },
+        },
+      };
+
+      const response = await apmApiClient.readUser({
+        endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
+        ...options,
+      });
+
+      expect(response.status).to.be(200);
+      expect(response.body.errorRateChartPreview[0]).to.eql({
+        x: 1627974600000,
+        y: 1,
+      });
+    });
+
+    it('transaction_error_rate with nonexistent transaction name', async () => {
+      const options = {
+        params: {
+          query: {
+            start,
+            end,
+            serviceName: 'opbeans-java',
+            transactionName: 'foo',
+            transactionType: 'request',
+            environment: 'ENVIRONMENT_ALL',
+            interval: '5m',
+          },
+        },
+      };
+
+      const response = await apmApiClient.readUser({
+        endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
+        ...options,
+      });
+
+      expect(response.status).to.be(200);
+      expect(
+        response.body.errorRateChartPreview.every(
+          (item: { x: number; y: number | null }) => item.y === null
+        )
+      ).to.equal(true);
+    });
+
     it('error_count (with data)', async () => {
       const options = getOptions();
       options.params.query.transactionType = undefined;

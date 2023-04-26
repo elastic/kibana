@@ -23,7 +23,6 @@ export enum DisplayType {
   NUMERIC = 'numeric',
   TOGGLE = 'toggle',
   DROPDOWN = 'dropdown',
-  CHECKBOX = 'checkbox',
 }
 
 export interface ConnectorConfigProperties {
@@ -36,6 +35,7 @@ export interface ConnectorConfigProperties {
   required: boolean;
   sensitive: boolean;
   tooltip: string;
+  ui_restrictions: string[];
   value: string | number | boolean | null;
 }
 

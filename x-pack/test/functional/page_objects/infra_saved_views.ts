@@ -65,13 +65,13 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     },
 
     async getCreateSavedViewModal() {
-      return await testSubjects.find('savedViews-createModal');
+      return await testSubjects.find('savedViews-upsertModal');
     },
 
     async createNewSavedView(name: string) {
-      await testSubjects.setValue('savedViewViweName', name);
+      await testSubjects.setValue('savedViewName', name);
       await testSubjects.click('createSavedViewButton');
-      await testSubjects.missingOrFail('savedViews-createModal');
+      await testSubjects.missingOrFail('savedViews-upsertModal');
     },
 
     async ensureViewIsLoaded(name: string) {

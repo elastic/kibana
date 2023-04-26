@@ -9,7 +9,10 @@ import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../../lib';
 import { verifyAccessAndContext } from '../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../types';
+import {
+  AlertingRequestHandlerContext,
+  INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
+} from '../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../common';
 
 const paramSchema = schema.object({
@@ -22,7 +25,7 @@ export const deleteMaintenanceWindowRoute = (
 ) => {
   router.delete(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/{id}`,
+      path: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/{id}`,
       validate: {
         params: paramSchema,
       },
@@ -32,6 +35,8 @@ export const deleteMaintenanceWindowRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
+        licenseState.ensureLicenseForMaintenanceWindow();
+
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
         const { id } = req.params;
         await maintenanceWindowClient.delete({ id });

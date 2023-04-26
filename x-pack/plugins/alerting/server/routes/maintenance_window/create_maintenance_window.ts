@@ -14,19 +14,17 @@ import {
   RewriteRequestCase,
   rewriteMaintenanceWindowRes,
 } from '../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../types';
-import { MaintenanceWindowSOProperties, MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../common';
+import {
+  AlertingRequestHandlerContext,
+  INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
+} from '../../types';
+import { MaintenanceWindowCreateBody, MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../common';
 
 const bodySchema = schema.object({
   title: schema.string(),
   duration: schema.number(),
   r_rule: rRuleSchema,
 });
-
-type MaintenanceWindowCreateBody = Omit<
-  MaintenanceWindowSOProperties,
-  'events' | 'expirationDate' | 'enabled' | 'archived'
->;
 
 export const rewriteQueryReq: RewriteRequestCase<MaintenanceWindowCreateBody> = ({
   r_rule: rRule,
@@ -42,7 +40,7 @@ export const createMaintenanceWindowRoute = (
 ) => {
   router.post(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window`,
+      path: INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
       validate: {
         body: bodySchema,
       },
@@ -52,6 +50,8 @@ export const createMaintenanceWindowRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
+        licenseState.ensureLicenseForMaintenanceWindow();
+
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
         const maintenanceWindow = await maintenanceWindowClient.create(rewriteQueryReq(req.body));
         return res.ok({

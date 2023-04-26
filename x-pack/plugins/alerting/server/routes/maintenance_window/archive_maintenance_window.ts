@@ -9,7 +9,10 @@ import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../../lib';
 import { verifyAccessAndContext, rewritePartialMaintenanceBodyRes } from '../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../types';
+import {
+  AlertingRequestHandlerContext,
+  INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
+} from '../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../common';
 
 const paramSchema = schema.object({
@@ -26,7 +29,7 @@ export const archiveMaintenanceWindowRoute = (
 ) => {
   router.post(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/{id}/_archive`,
+      path: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/{id}/_archive`,
       validate: {
         params: paramSchema,
         body: bodySchema,
@@ -37,6 +40,8 @@ export const archiveMaintenanceWindowRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
+        licenseState.ensureLicenseForMaintenanceWindow();
+
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
         const { id } = req.params;
         const { archive } = req.body;
