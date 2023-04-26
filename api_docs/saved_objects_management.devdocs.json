@@ -308,7 +308,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ">) => React.ReactNode) | undefined; width?: string | undefined; field: (string & {}) | keyof ",
+              ">) => React.ReactNode) | undefined; field: (string & {}) | keyof ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",
@@ -316,7 +316,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              "; headers?: string | undefined; height?: string | number | undefined; readOnly?: boolean | undefined; dataType?: ",
+              "; width?: string | undefined; headers?: string | undefined; height?: string | number | undefined; readOnly?: boolean | undefined; dataType?: ",
               "EuiTableDataType",
               " | undefined; align?: ",
               "HorizontalAlignment",
