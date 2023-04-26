@@ -195,23 +195,23 @@ export function HeaderControl({ isLoading, slo }: Props) {
             </EuiContextMenuItem>,
           ]
             .concat(
-              !!slo && isApmIndicatorType(slo.indicator.type)
-                ? 
-                    <EuiContextMenuItem
-                      key="exploreInApm"
-                      icon="bullseye"
-                      onClick={handleNavigateToApm}
-                      data-test-subj="sloDetailsHeaderControlPopoverExploreInApm"
-                    >
-                      {i18n.translate(
-                        'xpack.observability.slos.sloDetails.headerControl.exploreInApm',
-                        {
-                          defaultMessage: 'Service details',
-                        }
-                      )}
-                    </EuiContextMenuItem>
-                  
-                : []
+              !!slo && isApmIndicatorType(slo.indicator.type) ? (
+                <EuiContextMenuItem
+                  key="exploreInApm"
+                  icon="bullseye"
+                  onClick={handleNavigateToApm}
+                  data-test-subj="sloDetailsHeaderControlPopoverExploreInApm"
+                >
+                  {i18n.translate(
+                    'xpack.observability.slos.sloDetails.headerControl.exploreInApm',
+                    {
+                      defaultMessage: 'Service details',
+                    }
+                  )}
+                </EuiContextMenuItem>
+              ) : (
+                []
+              )
             )
             .concat(
               <EuiContextMenuItem
