@@ -431,7 +431,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/apm/readme.md[apm]
-|undefined
+|This plugin provides access to App Monitoring features provided by Elastic. It allows you to monitor your software services and applications in real-time; visualize detailed performance information on your services, identify and analyze errors, and monitor host-level and APM agent-specific metrics like JVM and Go runtime metrics.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/asset_manager/README.md[assetManager]
@@ -639,6 +639,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability/README.md[observability]
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_onboarding/README.md[observabilityOnboarding]
+|This plugin provides an onboarding framework for observability solutions: Logs and APM.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_shared/README.md[observabilityShared]

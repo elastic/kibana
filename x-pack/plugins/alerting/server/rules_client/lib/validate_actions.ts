@@ -154,7 +154,6 @@ export async function validateActions(
         ) {
           actionWithInvalidTimeframe.push(action);
         }
-        // alertsFilter time range filter's start time can't be before end time
         if (alertsFilter.timeframe.hours) {
           if (
             validateHours(alertsFilter.timeframe.hours.start) ||

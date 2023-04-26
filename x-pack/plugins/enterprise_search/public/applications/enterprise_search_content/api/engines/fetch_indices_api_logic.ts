@@ -30,7 +30,7 @@ export const fetchIndices = async ({
   const { http } = HttpLogic.values;
   const route = '/internal/enterprise_search/indices';
   const query = {
-    page: 1,
+    from: 0,
     return_hidden_indices: false,
     search_query: searchQuery || null,
     size: INDEX_SEARCH_PAGE_SIZE,

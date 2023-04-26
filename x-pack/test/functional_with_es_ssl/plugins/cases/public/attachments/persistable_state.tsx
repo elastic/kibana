@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import {
+import type {
+  AttachmentActionType,
   PersistableStateAttachmentType,
   PersistableStateAttachmentViewProps,
 } from '@kbn/cases-plugin/public/client/attachment_framework/types';
@@ -50,7 +51,13 @@ export const getPersistableStateAttachmentRegular = (
     event: 'added an embeddable',
     timelineAvatar: 'casesApp',
     getActions: () => [
-      { label: 'See attachment', onClick: () => {}, isPrimary: true, iconType: 'arrowRight' },
+      {
+        type: 'button' as AttachmentActionType.BUTTON,
+        label: 'See attachment',
+        onClick: () => {},
+        isPrimary: true,
+        iconType: 'arrowRight',
+      },
     ],
     children: getLazyComponent(EmbeddableComponent),
   }),

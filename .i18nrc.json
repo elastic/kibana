@@ -80,6 +80,7 @@
     "savedObjects": "src/plugins/saved_objects",
     "savedObjectsFinder": "src/plugins/saved_objects_finder",
     "savedObjectsManagement": "src/plugins/saved_objects_management",
+    "securitySolutionDataTable": "packages/kbn-securitysolution-data-table",
     "server": "src/legacy/server",
     "share": "src/plugins/share",
     "sharedUXPackages": "packages/shared-ux",

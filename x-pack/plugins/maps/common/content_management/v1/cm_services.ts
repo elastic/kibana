@@ -134,4 +134,11 @@ export const serviceDefinition: ServicesDefinition = {
       },
     },
   },
+  mSearch: {
+    out: {
+      result: {
+        schema: mapSavedObjectSchema,
+      },
+    },
+  },
 };

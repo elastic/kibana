@@ -9,13 +9,16 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { useDispatch } from 'react-redux';
 
-import { TableId } from '../../../../common/types';
+import {
+  dataTableActions,
+  dataTableSelectors,
+  tableDefaults,
+  TableId,
+} from '@kbn/securitysolution-data-table';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../use_url_state';
 import type { FlyoutUrlState } from './types';
-import { dataTableActions, dataTableSelectors } from '../../store/data_table';
 import { useShallowEqualSelector } from '../use_selector';
-import { tableDefaults } from '../../store/data_table/defaults';
 
 export const useInitFlyoutFromUrlParam = () => {
   const [urlDetails, setUrlDetails] = useState<FlyoutUrlState | null>(null);

@@ -99,7 +99,11 @@ export const createRuntimeServices = async ({
   };
 };
 
-const buildUrlWithCredentials = (url: string, username: string, password: string): string => {
+export const buildUrlWithCredentials = (
+  url: string,
+  username: string,
+  password: string
+): string => {
   const newUrl = new URL(url);
 
   newUrl.username = username;

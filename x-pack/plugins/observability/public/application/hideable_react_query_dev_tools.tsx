@@ -12,7 +12,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 export function HideableReactQueryDevTools() {
   const [isHidden, setIsHidden] = useState(false);
 
-  return !isHidden ? (
+  return !isHidden && process.env.NODE_ENV === 'development' ? (
     <div>
       <EuiButtonIcon
         data-test-subj="o11yHideableReactQueryDevToolsButton"

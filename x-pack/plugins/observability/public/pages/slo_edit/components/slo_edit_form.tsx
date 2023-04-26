@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import {
   EuiButton,
   EuiCheckbox,
@@ -17,12 +17,14 @@ import {
   EuiSteps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { CreateSLOInput, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
 import { useShowSections } from '../hooks/use_show_sections';
+import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { useSectionFormValidation } from '../helpers/use_section_form_validation';
 import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
 import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
@@ -53,7 +55,21 @@ export function SloEditForm({ slo }: Props) {
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
 
+  const history = useHistory();
   const { search } = useLocation();
+
+  const { data: rules, isInitialLoading } = useFetchRulesForSlo({
+    sloIds: slo?.id ? [slo.id] : undefined,
+  });
+
+  const urlStateStorage = createKbnUrlStateStorage({
+    history,
+    useHash: false,
+    useHashQuery: false,
+  });
+
+  const urlParams = urlStateStorage.get<CreateSLOInput>('_a');
+
   const searchParams = new URLSearchParams(search);
 
   const isEditMode = slo !== undefined;
@@ -65,8 +81,14 @@ export function SloEditForm({ slo }: Props) {
     setIsAddRuleFlyoutOpen(true);
   }
 
+  useEffect(() => {
+    if (isEditMode && rules && rules[slo.id].length && isCreateRuleCheckboxChecked) {
+      setIsCreateRuleCheckboxChecked(false);
+    }
+  }, [isCreateRuleCheckboxChecked, isEditMode, rules, slo]);
+
   const methods = useForm({
-    defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
+    defaultValues: { ...SLO_EDIT_FORM_DEFAULT_VALUES, ...urlParams },
     values: transformSloResponseToCreateSloInput(slo),
     mode: 'all',
   });
@@ -200,6 +222,7 @@ export function SloEditForm({ slo }: Props) {
             <EuiCheckbox
               id="createNewRuleCheckbox"
               checked={isCreateRuleCheckboxChecked}
+              disabled={isInitialLoading}
               data-test-subj="createNewRuleCheckbox"
               label={
                 <>

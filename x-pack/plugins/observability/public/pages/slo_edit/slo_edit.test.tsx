@@ -7,6 +7,7 @@
 
 import React from 'react';
 import Router from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 import { waitFor, fireEvent, screen } from '@testing-library/dom';
 import { cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,6 +19,7 @@ import { useFetchIndices } from '../../hooks/use_fetch_indices';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useCreateSlo } from '../../hooks/slo/use_create_slo';
 import { useUpdateSlo } from '../../hooks/slo/use_update_slo';
+import { useFetchApmSuggestions } from '../../hooks/slo/use_fetch_apm_suggestions';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { buildSlo } from '../../data/slo/slo';
 import { paths } from '../../config/paths';
@@ -34,6 +36,7 @@ jest.mock('../../hooks/use_fetch_indices');
 jest.mock('../../hooks/slo/use_fetch_slo_details');
 jest.mock('../../hooks/slo/use_create_slo');
 jest.mock('../../hooks/slo/use_update_slo');
+jest.mock('../../hooks/slo/use_fetch_apm_suggestions');
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -47,6 +50,7 @@ const useFetchIndicesMock = useFetchIndices as jest.Mock;
 const useFetchSloMock = useFetchSloDetails as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useUpdateSloMock = useUpdateSlo as jest.Mock;
+const useFetchApmSuggestionsMock = useFetchApmSuggestions as jest.Mock;
 
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
@@ -294,6 +298,64 @@ describe('SLO Edit Page', () => {
           }
         `);
       });
+
+      it('prefills the form with values when URL Search parameters are passed', () => {
+        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
+
+        const history = createBrowserHistory();
+        history.push(
+          '/slos/create?_a=(name:%27prefilledSloName%27,indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration))'
+        );
+        jest.spyOn(Router, 'useHistory').mockReturnValue(history);
+        jest
+          .spyOn(Router, 'useLocation')
+          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+
+        useFetchSloMock.mockReturnValue({ isLoading: false, slo: undefined });
+
+        useFetchApmSuggestionsMock.mockReturnValue({
+          suggestions: ['cartService'],
+          isLoading: false,
+        });
+
+        useFetchIndicesMock.mockReturnValue({
+          isLoading: false,
+          indices: [{ name: 'some-index' }],
+        });
+
+        useCreateSloMock.mockReturnValue({
+          mutateAsync: jest.fn(),
+          isLoading: false,
+          isSuccess: false,
+          isError: false,
+        });
+
+        useUpdateSloMock.mockReturnValue({
+          mutateAsync: jest.fn(),
+          isLoading: false,
+          isSuccess: false,
+          isError: false,
+        });
+
+        render(<SloEditPage />);
+
+        expect(screen.queryByTestId('slosEditPage')).toBeTruthy();
+        expect(screen.queryByTestId('sloForm')).toBeTruthy();
+
+        expect(screen.queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
+        // Show default values from the kql indicator
+        expect(screen.queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(
+          'sli.apm.transactionDuration'
+        );
+
+        expect(screen.queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
+        expect(screen.queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
+
+        expect(screen.queryByTestId('apmLatencyServiceSelector')).toHaveTextContent('cartService');
+        expect(screen.queryByTestId('apmLatencyEnvironmentSelector')).toHaveTextContent('prod');
+
+        expect(screen.queryByTestId('sloFormNameInput')).toHaveValue('prefilledSloName');
+      });
     });
 
     describe('when a sloId route param is provided', () => {
@@ -398,6 +460,81 @@ describe('SLO Edit Page', () => {
         fireEvent.click(screen.queryByTestId('sloFormSubmitButton')!);
 
         expect(mockUpdate).toMatchInlineSnapshot(`[MockFunction]`);
+      });
+
+      it('does not prefill the form with URL Search parameters when they are passed', () => {
+        const slo = buildSlo({ id: '123' });
+
+        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
+
+        const history = createBrowserHistory();
+        history.push(
+          '/slos/create?_a=(name:%27prefilledSloName%27,indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration))'
+        );
+        jest.spyOn(Router, 'useHistory').mockReturnValue(history);
+        jest
+          .spyOn(Router, 'useLocation')
+          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+
+        useFetchSloMock.mockReturnValue({ isLoading: false, slo });
+
+        useFetchApmSuggestionsMock.mockReturnValue({
+          suggestions: ['cartService'],
+          isLoading: false,
+        });
+
+        useFetchIndicesMock.mockReturnValue({
+          isLoading: false,
+          indices: [{ name: 'some-index' }],
+        });
+
+        useCreateSloMock.mockReturnValue({
+          mutateAsync: jest.fn(),
+          isLoading: false,
+          isSuccess: false,
+          isError: false,
+        });
+
+        useUpdateSloMock.mockReturnValue({
+          mutateAsync: jest.fn(),
+          isLoading: false,
+          isSuccess: false,
+          isError: false,
+        });
+
+        render(<SloEditPage />);
+
+        // all sections are visible
+        expect(screen.queryByTestId('sloEditFormIndicatorSection')).toBeTruthy();
+        expect(screen.queryByTestId('sloEditFormObjectiveSection')).toBeTruthy();
+        expect(screen.queryByTestId('sloEditFormDescriptionSection')).toBeTruthy();
+
+        expect(screen.queryByTestId('sloFormIndicatorTypeSelect')).toHaveValue(slo.indicator.type);
+        expect(screen.queryByTestId('indexSelectionSelectedValue')).toHaveTextContent(
+          slo.indicator.params.index!
+        );
+        expect(screen.queryByTestId('customKqlIndicatorFormQueryFilterInput')).toHaveValue(
+          slo.indicator.type === 'sli.kql.custom' ? slo.indicator.params.filter : ''
+        );
+        expect(screen.queryByTestId('customKqlIndicatorFormGoodQueryInput')).toHaveValue(
+          slo.indicator.type === 'sli.kql.custom' ? slo.indicator.params.good : ''
+        );
+        expect(screen.queryByTestId('customKqlIndicatorFormTotalQueryInput')).toHaveValue(
+          slo.indicator.type === 'sli.kql.custom' ? slo.indicator.params.total : ''
+        );
+
+        expect(screen.queryByTestId('sloFormBudgetingMethodSelect')).toHaveValue(
+          slo.budgetingMethod
+        );
+        expect(screen.queryByTestId('sloFormTimeWindowDurationSelect')).toHaveValue(
+          slo.timeWindow.duration
+        );
+        expect(screen.queryByTestId('sloFormObjectiveTargetInput')).toHaveValue(
+          slo.objective.target * 100
+        );
+
+        expect(screen.queryByTestId('sloFormNameInput')).toHaveValue(slo.name);
+        expect(screen.queryByTestId('sloFormDescriptionTextArea')).toHaveValue(slo.description);
       });
     });
 

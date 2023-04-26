@@ -4956,6 +4956,42 @@ describe('_applyIndexPrivileges()', () => {
     expect(streamOut).toEqual(inputStream);
   });
 
+  it('should apply dynamic_dataset', () => {
+    const packageStream = createPackageStream();
+    packageStream.elasticsearch = { dynamic_dataset: true };
+    const inputStream = createInputStream();
+    const expectedStream = {
+      ...inputStream,
+      data_stream: {
+        ...inputStream.data_stream,
+        elasticsearch: {
+          dynamic_dataset: true,
+        },
+      },
+    };
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(expectedStream);
+  });
+
+  it('should apply dynamic_namespace', () => {
+    const packageStream = createPackageStream();
+    packageStream.elasticsearch = { dynamic_namespace: true };
+    const inputStream = createInputStream();
+    const expectedStream = {
+      ...inputStream,
+      data_stream: {
+        ...inputStream.data_stream,
+        elasticsearch: {
+          dynamic_namespace: true,
+        },
+      },
+    };
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(expectedStream);
+  });
+
   it('should not apply privileges if all privileges are forbidden', () => {
     const forbiddenPrivileges = ['write', 'delete', 'delete_index', 'all'];
     const packageStream = createPackageStream(forbiddenPrivileges);

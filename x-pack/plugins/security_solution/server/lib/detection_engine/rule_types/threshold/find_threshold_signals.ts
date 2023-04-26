@@ -30,6 +30,7 @@ import type {
 } from './types';
 import { shouldFilterByCardinality } from './utils';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { getMaxSignalsWarning } from '../utils/utils';
 
 interface FindThresholdSignalsParams {
   from: string;
@@ -70,6 +71,7 @@ export const findThresholdSignals = async ({
   buckets: ThresholdBucket[];
   searchDurations: string[];
   searchErrors: string[];
+  warnings: string[];
 }> => {
   // Leaf aggregations used below
   let sortKeys;
@@ -78,6 +80,7 @@ export const findThresholdSignals = async ({
     searchDurations: [],
     searchErrors: [],
   };
+  const warnings: string[] = [];
 
   const includeCardinalityFilter = shouldFilterByCardinality(threshold);
 
@@ -166,8 +169,13 @@ export const findThresholdSignals = async ({
     }
   }
 
+  if (buckets.length > maxSignals) {
+    warnings.push(getMaxSignalsWarning());
+  }
+
   return {
     buckets: buckets.slice(0, maxSignals),
     ...searchAfterResults,
+    warnings,
   };
 };

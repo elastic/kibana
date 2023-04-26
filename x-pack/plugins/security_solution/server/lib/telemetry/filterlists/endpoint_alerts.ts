@@ -22,6 +22,7 @@ const baseAllowlistFields: AllowlistFields = {
   uptime: true,
   Ext: {
     ancestry: true,
+    api: true,
     architecture: true,
     code_signature: true,
     dll: true,

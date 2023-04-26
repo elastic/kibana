@@ -49,7 +49,6 @@ import {
   type XYDataLayerConfig,
   type SeriesType,
   type PersistedState,
-  type XYAnnotationLayerConfig,
   visualizationTypes,
 } from './types';
 import {
@@ -103,12 +102,8 @@ import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
-import {
-  createAnnotationActions,
-  IGNORE_GLOBAL_FILTERS_ACTION_ID,
-  KEEP_GLOBAL_FILTERS_ACTION_ID,
-} from './annotations/actions';
 import { IgnoredGlobalFiltersEntries } from './info_badges';
+import { LayerSettings } from './layer_settings';
 
 const XY_ID = 'lnsXY';
 export const getXyVisualization = ({
@@ -263,31 +258,27 @@ export const getXyVisualization = ({
     ];
   },
 
-  getSupportedActionsForLayer(layerId, state) {
-    const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
-    const layer = state.layers[layerIndex];
-    const actions = [];
-    if (isAnnotationsLayer(layer)) {
-      actions.push(...createAnnotationActions({ state, layerIndex, layer }));
-    }
-    return actions;
+  getSupportedActionsForLayer() {
+    return [];
+  },
+
+  hasLayerSettings({ state, layerId: currentLayerId }) {
+    const layer = state.layers?.find(({ layerId }) => layerId === currentLayerId);
+    return { data: Boolean(layer && isAnnotationsLayer(layer)), appearance: false };
+  },
+
+  renderLayerSettings(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <LayerSettings {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
   },
 
   onLayerAction(layerId, actionId, state) {
-    if ([IGNORE_GLOBAL_FILTERS_ACTION_ID, KEEP_GLOBAL_FILTERS_ACTION_ID].includes(actionId)) {
-      return {
-        ...state,
-        layers: state.layers.map((layer) =>
-          layer.layerId === layerId
-            ? {
-                ...layer,
-                ignoreGlobalFilters: !(layer as XYAnnotationLayerConfig).ignoreGlobalFilters,
-              }
-            : layer
-        ),
-      };
-    }
-
     return state;
   },
 

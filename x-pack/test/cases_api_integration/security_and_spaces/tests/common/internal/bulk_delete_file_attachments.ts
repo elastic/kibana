@@ -121,15 +121,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('fails to delete a file when the file does not exist', async () => {
-        await bulkDeleteFileAttachments({
-          supertest,
-          caseId: postedCase.id,
-          fileIds: ['abc'],
-          expectedHttpCode: 404,
-        });
-      });
-
       it('returns a 400 when the fileIds is an empty array', async () => {
         await bulkDeleteFileAttachments({
           supertest,
@@ -252,6 +243,17 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
         });
         await deleteAllCaseItems(es);
+      });
+
+      it('returns a 204 when the file does not exist', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        await bulkDeleteFileAttachments({
+          supertest,
+          caseId: postedCase.id,
+          fileIds: ['abc'],
+          expectedHttpCode: 204,
+        });
       });
 
       it('deletes a file when the owner is not formatted as an array of strings', async () => {
@@ -410,6 +412,37 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
         });
         await deleteAllCaseItems(es);
+      });
+
+      it('deletes the attachment even when the file does not exist', async () => {
+        const postedCase = await createCase(
+          supertest,
+          getPostCaseRequest({ owner: 'securitySolution' })
+        );
+
+        const caseWithAttachments = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            getFilesAttachmentReq({
+              externalReferenceId: 'abc',
+              owner: 'securitySolution',
+            }),
+          ],
+        });
+
+        await bulkDeleteFileAttachments({
+          supertest,
+          caseId: postedCase.id,
+          fileIds: ['abc'],
+        });
+
+        await getComment({
+          supertest,
+          caseId: postedCase.id,
+          commentId: caseWithAttachments.comments![0].id,
+          expectedHttpCode: 404,
+        });
       });
 
       it('deletes a single file', async () => {

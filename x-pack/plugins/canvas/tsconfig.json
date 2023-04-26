@@ -80,6 +80,7 @@
     "@kbn/shared-ux-button-toolbar",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/saved-objects-management-plugin",
+    "@kbn/core-saved-objects-server",
   ],
   "exclude": [
     "target/**/*",

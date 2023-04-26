@@ -17,14 +17,15 @@ import type {
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
+import { DataQualityDetails } from './data_quality_details';
 import { DataQualitySummary } from '../data_quality_summary';
-import { Pattern } from '../pattern';
 import { useResultsRollup } from '../../use_results_rollup';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
   canUserCreateAndReadCases: () => boolean;
-  defaultNumberFormat: string;
+  formatBytes: (value: number | undefined) => string;
+  formatNumber: (value: number | undefined) => string;
   getGroupByFieldsOnClick: (
     elements: Array<
       | FlameElementEvent
@@ -55,7 +56,8 @@ interface Props {
 const BodyComponent: React.FC<Props> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
-  defaultNumberFormat,
+  formatBytes,
+  formatNumber,
   getGroupByFieldsOnClick,
   ilmPhases,
   lastChecked,
@@ -72,6 +74,7 @@ const BodyComponent: React.FC<Props> = ({
     totalIncompatible,
     totalIndices,
     totalIndicesChecked,
+    totalSizeInBytes,
     updatePatternIndexNames,
     updatePatternRollup,
   } = useResultsRollup({ ilmPhases, patterns });
@@ -82,7 +85,8 @@ const BodyComponent: React.FC<Props> = ({
         <DataQualitySummary
           addSuccessToast={addSuccessToast}
           canUserCreateAndReadCases={canUserCreateAndReadCases}
-          defaultNumberFormat={defaultNumberFormat}
+          formatBytes={formatBytes}
+          formatNumber={formatNumber}
           ilmPhases={ilmPhases}
           lastChecked={lastChecked}
           openCreateCaseFlyout={openCreateCaseFlyout}
@@ -94,30 +98,29 @@ const BodyComponent: React.FC<Props> = ({
           totalIncompatible={totalIncompatible}
           totalIndices={totalIndices}
           totalIndicesChecked={totalIndicesChecked}
+          totalSizeInBytes={totalSizeInBytes}
           onCheckCompleted={onCheckCompleted}
         />
         <EuiSpacer size="l" />
       </EuiFlexItem>
 
-      {patterns.map((pattern, i) => (
-        <EuiFlexItem grow={false} key={pattern}>
-          <Pattern
-            addSuccessToast={addSuccessToast}
-            canUserCreateAndReadCases={canUserCreateAndReadCases}
-            defaultNumberFormat={defaultNumberFormat}
-            getGroupByFieldsOnClick={getGroupByFieldsOnClick}
-            ilmPhases={ilmPhases}
-            indexNames={patternIndexNames[pattern]}
-            openCreateCaseFlyout={openCreateCaseFlyout}
-            pattern={pattern}
-            patternRollup={patternRollups[pattern]}
-            theme={theme}
-            updatePatternIndexNames={updatePatternIndexNames}
-            updatePatternRollup={updatePatternRollup}
-          />
-          {i !== patterns.length - 1 ? <EuiSpacer size="s" /> : null}
-        </EuiFlexItem>
-      ))}
+      <EuiFlexItem>
+        <DataQualityDetails
+          addSuccessToast={addSuccessToast}
+          canUserCreateAndReadCases={canUserCreateAndReadCases}
+          formatBytes={formatBytes}
+          formatNumber={formatNumber}
+          getGroupByFieldsOnClick={getGroupByFieldsOnClick}
+          ilmPhases={ilmPhases}
+          openCreateCaseFlyout={openCreateCaseFlyout}
+          patterns={patterns}
+          patternIndexNames={patternIndexNames}
+          patternRollups={patternRollups}
+          theme={theme}
+          updatePatternIndexNames={updatePatternIndexNames}
+          updatePatternRollup={updatePatternRollup}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

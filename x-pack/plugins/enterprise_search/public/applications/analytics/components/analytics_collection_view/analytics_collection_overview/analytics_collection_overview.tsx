@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,13 +18,13 @@ import { FilterBy, getFormulaByFilter } from '../../../utils/get_formula_by_filt
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_template';
 
-import { AnalyticsCollectionExploreTable } from '../analytics_collection_explore_table/analytics_collection_explore_table';
-
+import { AnalyticsCollectionNoEventsCallout } from '../analytics_collection_no_events_callout/analytics_collection_no_events_callout';
 import { AnalyticsCollectionToolbar } from '../analytics_collection_toolbar/analytics_collection_toolbar';
 import { AnalyticsCollectionToolbarLogic } from '../analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
 import { AnalyticsCollectionChartWithLens } from './analytics_collection_chart';
 import { AnalyticsCollectionViewMetricWithLens } from './analytics_collection_metric';
+import { AnalyticsCollectionOverviewTable } from './analytics_collection_overview_table';
 
 const filters = [
   {
@@ -90,6 +90,9 @@ export const AnalyticsCollectionOverview: React.FC<AnalyticsCollectionOverviewPr
         rightSideItems: [<AnalyticsCollectionToolbar />],
       }}
     >
+      <AnalyticsCollectionNoEventsCallout analyticsCollection={analyticsCollection} />
+      <EuiSpacer />
+
       <EuiFlexGroup direction="column">
         <EuiFlexGroup gutterSize="m">
           {filters.map(({ name, id }) => (
@@ -103,7 +106,7 @@ export const AnalyticsCollectionOverview: React.FC<AnalyticsCollectionOverviewPr
 
                 setFilterBy(id);
               }}
-              dataViewQuery={analyticsCollection.events_datastream}
+              collection={analyticsCollection}
               timeRange={timeRange}
               searchSessionId={searchSessionId}
               getFormula={getFormulaByFilter.bind(null, id)}
@@ -113,7 +116,7 @@ export const AnalyticsCollectionOverview: React.FC<AnalyticsCollectionOverviewPr
 
         <AnalyticsCollectionChartWithLens
           id={'analytics-collection-chart-' + analyticsCollection.name}
-          dataViewQuery={analyticsCollection.events_datastream}
+          collection={analyticsCollection}
           timeRange={timeRange}
           setTimeRange={setTimeRange}
           searchSessionId={searchSessionId}
@@ -121,7 +124,7 @@ export const AnalyticsCollectionOverview: React.FC<AnalyticsCollectionOverviewPr
           setSelectedChart={setFilterBy}
         />
 
-        <AnalyticsCollectionExploreTable filterBy={filterBy} />
+        <AnalyticsCollectionOverviewTable filterBy={filterBy} />
       </EuiFlexGroup>
     </EnterpriseSearchAnalyticsPageTemplate>
   );

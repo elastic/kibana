@@ -118,7 +118,9 @@ describe('Output form validation', () => {
         '9F:0A:10:41:14:57:AD:DE:39:82:EF:01:DF:20:D2:E7:AA:53:A8:EF:29:C5:0B:CB:FA:3F:3E:93:AE:BF:63:1B'
       );
 
-      expect(res).toEqual(['CA trusted fingerprint should be a base64 CA sha256 fingerprint']);
+      expect(res).toEqual([
+        'CA trusted fingerprint should be valid HEX encoded SHA-256 of a CA certificate',
+      ]);
     });
   });
 });
