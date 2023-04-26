@@ -16,24 +16,60 @@ import { getSeverityTypes } from './get_severity_types';
 import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from './types';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_rule';
 
+/**
+ * Enum of entity field types
+ * @export
+ * @enum {number}
+ */
 export enum ENTITY_FIELD_TYPE {
   BY = 'by',
   OVER = 'over',
   PARTITON = 'partition',
 }
 
+/**
+ * Custom enum of entity field operations
+ * @type {{ readonly ADD: "+"; readonly REMOVE: "-"; }}
+ */
 export const ENTITY_FIELD_OPERATIONS = {
   ADD: '+',
   REMOVE: '-',
 } as const;
 
+/**
+ * Union type of entity field operations
+ * @export
+ * @typedef {EntityFieldOperation}
+ */
 export type EntityFieldOperation =
   typeof ENTITY_FIELD_OPERATIONS[keyof typeof ENTITY_FIELD_OPERATIONS];
 
+/**
+ * Interface of an entity field
+ * @export
+ * @interface EntityField
+ * @typedef {EntityField}
+ */
 export interface EntityField {
+  /**
+   * The field name
+   * @type {string}
+   */
   fieldName: string;
+  /**
+   * The field value
+   * @type {(string | number | undefined)}
+   */
   fieldValue: string | number | undefined;
+  /**
+   * Optional field type
+   * @type {?ENTITY_FIELD_TYPE}
+   */
   fieldType?: ENTITY_FIELD_TYPE;
+  /**
+   * Optional entity field operation
+   * @type {?EntityFieldOperation}
+   */
   operation?: EntityFieldOperation;
 }
 
@@ -282,6 +318,11 @@ export function isRuleSupported(record: MlAnomalyRecordDoc): boolean {
  * function_description field of anomaly records.
  */
 export const aggregationTypeTransform = {
+  /**
+   * transform from ML to ES agg type
+   * @param {string} oldAggType
+   * @returns {string}
+   */
   toES(oldAggType: string): string {
     let newAggType = oldAggType;
 
@@ -295,6 +336,11 @@ export const aggregationTypeTransform = {
 
     return newAggType;
   },
+  /**
+   * transform from ES to ML agg type
+   * @param {string} oldAggType
+   * @returns {string}
+   */
   toML(oldAggType: string): string {
     let newAggType = oldAggType;
 
