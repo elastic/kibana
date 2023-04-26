@@ -134,6 +134,55 @@ jest.mock('../../common/lib/kibana', () => {
         ...original.useKibana().services,
         data: {
           ...original.useKibana().services.data,
+          dataViews: {
+            get: jest
+              .fn()
+              .mockImplementation(
+                async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
+                  Promise.resolve({
+                    id: dataViewId,
+                    matchedIndices: refreshFields
+                      ? ['hello', 'world', 'refreshed']
+                      : ['hello', 'world'],
+                    fields: [
+                      {
+                        name: 'bytes',
+                        type: 'number',
+                        esTypes: ['long'],
+                        aggregatable: true,
+                        searchable: true,
+                        count: 10,
+                        readFromDocValues: true,
+                        scripted: false,
+                        isMapped: true,
+                      },
+                      {
+                        name: 'ssl',
+                        type: 'boolean',
+                        esTypes: ['boolean'],
+                        aggregatable: true,
+                        searchable: true,
+                        count: 20,
+                        readFromDocValues: true,
+                        scripted: false,
+                        isMapped: true,
+                      },
+                      {
+                        name: '@timestamp',
+                        type: 'date',
+                        esTypes: ['date'],
+                        aggregatable: true,
+                        searchable: true,
+                        count: 30,
+                        readFromDocValues: true,
+                        scripted: false,
+                        isMapped: true,
+                      },
+                    ],
+                    getIndexPattern: () => 'hello*,world*,refreshed*',
+                  })
+              ),
+          },
           query: {
             ...original.useKibana().services.data.query,
             filterManager: mockedFilterManager,
