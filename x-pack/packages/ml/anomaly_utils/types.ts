@@ -32,12 +32,12 @@ export interface Influencer {
 export type MLAnomalyDoc = MlAnomalyRecordDoc;
 
 /**
- * RecordForInfluencer, an alias based on MlAnomalyRecordDoc.
+ * MlRecordForInfluencer, an alias based on MlAnomalyRecordDoc.
  *
  * @export
- * @typedef {RecordForInfluencer}
+ * @typedef {MlRecordForInfluencer}
  */
-export type RecordForInfluencer = MlAnomalyRecordDoc;
+export type MlRecordForInfluencer = MlAnomalyRecordDoc;
 
 /**
  * Anomaly record document. Records contain the detailed analytical results.

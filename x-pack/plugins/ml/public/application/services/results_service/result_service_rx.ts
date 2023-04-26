@@ -20,7 +20,7 @@ import type { ErrorType } from '@kbn/ml-error-utils';
 import {
   aggregationTypeTransform,
   type EntityField,
-  type RecordForInfluencer,
+  type MlRecordForInfluencer,
 } from '@kbn/ml-anomaly-utils';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
@@ -657,8 +657,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       latestMs: number,
       maxResults: number,
       influencersFilterQuery: InfluencersFilterQuery
-    ): Observable<{ records: RecordForInfluencer[]; success: boolean }> {
-      const obj = { success: true, records: [] as RecordForInfluencer[] };
+    ): Observable<{ records: MlRecordForInfluencer[]; success: boolean }> {
+      const obj = { success: true, records: [] as MlRecordForInfluencer[] };
 
       // Build the criteria to use in the bool filter part of the request.
       // Add criteria for the time range, record score, plus any specified job IDs.

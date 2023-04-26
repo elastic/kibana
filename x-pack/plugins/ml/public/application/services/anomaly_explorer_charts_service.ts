@@ -11,7 +11,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { EntityField, RecordForInfluencer } from '@kbn/ml-anomaly-utils';
+import type { EntityField, MlRecordForInfluencer } from '@kbn/ml-anomaly-utils';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { InfluencersFilterQuery } from '../../../common/types/es_client';
 import type { SeriesConfigWithMetadata } from '../../../common/types/results';
@@ -75,7 +75,7 @@ export class AnomalyExplorerChartsService {
     influencers: EntityField[] = [],
     selectedCells: AppStateSelectedCells | undefined | null,
     influencersFilterQuery: InfluencersFilterQuery
-  ): Observable<RecordForInfluencer[]> {
+  ): Observable<MlRecordForInfluencer[]> {
     if (!selectedCells && influencers.length === 0 && influencersFilterQuery === undefined) {
       of([]);
     }
@@ -91,12 +91,12 @@ export class AnomalyExplorerChartsService {
         influencersFilterQuery
       )
       .pipe(
-        mapObservable((resp): RecordForInfluencer[] => {
+        mapObservable((resp): MlRecordForInfluencer[] => {
           if (isPopulatedObject(selectedCells) || influencersFilterQuery !== undefined) {
             return resp.records;
           }
 
-          return [] as RecordForInfluencer[];
+          return [] as MlRecordForInfluencer[];
         })
       );
   }

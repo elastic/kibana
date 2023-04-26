@@ -22,7 +22,7 @@ import {
   getEntityFieldList,
   type EntityField,
   type Influencer,
-  type RecordForInfluencer,
+  type MlRecordForInfluencer,
 } from '@kbn/ml-anomaly-utils';
 
 import {
@@ -111,7 +111,7 @@ export interface AnomaliesTableData {
   jobIds: string[];
 }
 
-export interface ChartRecord extends RecordForInfluencer {
+export interface ChartRecord extends MlRecordForInfluencer {
   function: string;
 }
 

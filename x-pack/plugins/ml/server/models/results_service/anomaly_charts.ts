@@ -18,7 +18,7 @@ import {
   isMultiBucketAnomaly,
   type EntityField,
 } from '@kbn/ml-anomaly-utils';
-import type { MlAnomalyRecordDoc, RecordForInfluencer } from '@kbn/ml-anomaly-utils';
+import type { MlAnomalyRecordDoc, MlRecordForInfluencer } from '@kbn/ml-anomaly-utils';
 import type { MlClient } from '../../lib/ml_client';
 import { isRuntimeMappings } from '../../../common';
 import type {
@@ -454,7 +454,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
   function processRecordsForDisplay(
     combinedJobRecords: Record<string, MlJob>,
-    anomalyRecords: RecordForInfluencer[]
+    anomalyRecords: MlRecordForInfluencer[]
   ): { records: ChartRecord[]; errors: Record<string, Set<string>> | undefined } {
     // Aggregate the anomaly data by detector, and entity (by/over/partition).
     if (anomalyRecords.length === 0) {
@@ -1819,7 +1819,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     latestMs: number,
     maxResults: number,
     influencersFilterQuery?: InfluencersFilterQuery
-  ): Promise<RecordForInfluencer[]> {
+  ): Promise<MlRecordForInfluencer[]> {
     // Build the criteria to use in the bool filter part of the request.
     // Add criteria for the time range, record score, plus any specified job IDs.
     const boolCriteria: estypes.QueryDslBoolQuery['must'] = [
@@ -1895,7 +1895,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       });
     }
 
-    const response = await mlClient.anomalySearch<estypes.SearchResponse<RecordForInfluencer>>(
+    const response = await mlClient.anomalySearch<estypes.SearchResponse<MlRecordForInfluencer>>(
       {
         body: {
           size: maxResults !== undefined ? maxResults : 100,

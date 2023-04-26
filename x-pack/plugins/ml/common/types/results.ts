@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { LineAnnotationDatum, RectAnnotationDatum } from '@elastic/charts';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import type { EntityField, RecordForInfluencer } from '@kbn/ml-anomaly-utils';
+import type { EntityField, MlRecordForInfluencer } from '@kbn/ml-anomaly-utils';
 import type { Datafeed, JobId, ModelSnapshot } from './anomaly_detection_jobs';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 
@@ -114,7 +114,7 @@ export interface InfoTooltip {
   entityFields: EntityField[];
 }
 
-export interface ChartRecord extends RecordForInfluencer {
+export interface ChartRecord extends MlRecordForInfluencer {
   function: string;
 }
 
