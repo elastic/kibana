@@ -8,13 +8,20 @@
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import moment from 'moment';
-import { runTaskFnFactory } from '@kbn/reporting-export-types/server/export_types/csv_searchsource_immediate';
-import { JobParamsDownloadCSV } from '@kbn/reporting-export-types/common/types/csv_searchsource_immediate';
-import type { ReportingCore } from '@kbn/reporting-plugin/server';
-import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '@kbn/reporting-plugin/common/constants';
-import { PassThroughStream } from '@kbn/reporting-plugin/server/lib';
-import { authorizedUserPreRouting, getCounters } from '@kbn/reporting-plugin/server/routes/lib';
+import type { ReportingCore } from '../..';
+import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
+import { PassThroughStream } from '../../lib';
+import { authorizedUserPreRouting, getCounters } from '../lib';
+import { runTaskFnFactory } from './execute_job';
+
+export interface JobParamsDownloadCSV {
+  browserTimezone: string;
+  title: string;
+  searchSource: SerializedSearchSourceFields;
+  columns?: string[];
+}
 
 const API_BASE_URL_V1 = '/api/reporting/v1';
 const API_BASE_GENERATE_V1 = `${API_BASE_URL_V1}/generate`;

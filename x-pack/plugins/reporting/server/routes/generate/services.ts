@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { registerJobGenerationRoutes } from './generate_from_jobparams';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/server';
+
+export const [getFieldFormats, setFieldFormats] =
+  createGetterSetter<FieldFormatsStart>('FieldFormats');

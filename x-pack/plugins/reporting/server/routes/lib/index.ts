@@ -12,4 +12,5 @@ export { getCounters } from './get_counter';
 export type { Counters } from './get_counter';
 
 export { handleUnavailable, RequestHandler } from './request_handler';
+export type { JobParamsPDFDeprecated } from './request_handler';
 export { jobsQueryFactory } from './jobs_query';

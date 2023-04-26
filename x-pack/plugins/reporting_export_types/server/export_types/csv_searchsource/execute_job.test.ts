@@ -22,7 +22,10 @@ import { Writable } from 'stream';
 import type { ReportingCore } from '@kbn/reporting-plugin/server';
 import { CancellationToken } from '@kbn/reporting-common';
 import { runTaskFnFactory } from './execute_job';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
+import {
+  createMockConfigSchema,
+  createMockReportingCore,
+} from '@kbn/reporting-plugin/server/test_helpers';
 
 const logger = loggingSystemMock.createLogger();
 const encryptionKey = 'tetkey';

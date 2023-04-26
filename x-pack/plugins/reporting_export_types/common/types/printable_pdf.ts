@@ -5,21 +5,11 @@
  * 2.0.
  */
 
+import { BasePayload } from '@kbn/reporting-plugin/common/types';
+import { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/routes/lib';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import type { BaseParams, BasePayload } from '../base';
-
-interface BaseParamsPDF {
-  layout: LayoutParams;
-  relativeUrls: string[];
-  isDeprecated?: boolean;
-}
 
 // Job params: structure of incoming user request data, after being parsed from RISON
-
-/**
- * @deprecated
- */
-export type JobParamsPDFDeprecated = BaseParamsPDF & BaseParams;
 
 /**
  * @deprecated

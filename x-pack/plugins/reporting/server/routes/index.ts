@@ -8,10 +8,8 @@
 import type { Logger } from '@kbn/core/server';
 import { ReportingCore } from '..';
 import { registerDeprecationsRoutes } from './deprecations/deprecations';
-import {
-  registerGenerateCsvFromSavedObjectImmediate,
-  registerJobGenerationRoutes,
-} from './generate';
+import { registerJobGenerationRoutes } from './generate';
+import { registerGenerateCsvFromSavedObjectImmediate } from './generate/csv_searchsource_immediate';
 import { registerJobInfoRoutes } from './management';
 
 export function registerRoutes(reporting: ReportingCore, logger: Logger) {

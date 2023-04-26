@@ -9,11 +9,17 @@ import moment from 'moment';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
 import { checkParamsVersion, cryptoFactory } from '../../lib';
 import { Report } from '../../lib/store';
-import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
+import type {
+  BaseParams,
+  BasePayload,
+  ReportingRequestHandlerContext,
+  ReportingUser,
+} from '../../types';
 import { Counters } from './get_counter';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
@@ -183,3 +189,29 @@ export class RequestHandler {
     });
   }
 }
+
+interface BaseParamsPDF {
+  layout: LayoutParams;
+  relativeUrls: string[];
+  isDeprecated?: boolean;
+}
+
+// Job params: structure of incoming user request data, after being parsed from RISON
+
+/**
+ * @deprecated
+ */
+export type JobAppParamsPDF = Omit<JobParamsPDFDeprecated, 'browserTimezone' | 'version'>;
+
+/**
+ * Structure of stored job data provided by create_job
+ */
+export interface TaskPayloadPDF extends BasePayload {
+  layout: LayoutParams;
+  forceNow?: string;
+  objects: Array<{ relativeUrl: string }>;
+}
+/**
+ * @deprecated
+ */
+export type JobParamsPDFDeprecated = BaseParamsPDF & BaseParams;

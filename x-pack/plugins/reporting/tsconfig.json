@@ -37,7 +37,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/generate-csv",
     "@kbn/reporting-common",
-    "@kbn/reporting-export-types",
   ],
   "exclude": [
     "target/**/*",
