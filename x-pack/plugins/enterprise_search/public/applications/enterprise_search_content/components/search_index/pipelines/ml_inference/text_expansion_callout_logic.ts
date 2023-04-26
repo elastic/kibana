@@ -8,6 +8,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../../../common/types/api';
+import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import {
   CreateTextExpansionModelApiLogic,
   CreateTextExpansionModelApiLogicActions,
@@ -18,7 +19,6 @@ import {
   FetchTextExpansionModelApiLogicActions,
   FetchTextExpansionModelResponse,
 } from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
-import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 
 // On page load: call Get API
 // - If no model -> Deploy button
