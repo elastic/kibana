@@ -21,12 +21,17 @@ import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import * as i18n from '../user_actions/translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
+import type { EditableMarkdownRefObject, EuiMarkdownEditorRef } from '../markdown_editor';
 import { EditableMarkdown, ScrollableMarkdown } from '../markdown_editor';
 import type { Case } from '../../containers/types';
 import type { OnUpdateFields } from '../case_view/types';
 import { schema } from './schema';
 
 const DESCRIPTION_ID = 'description';
+
+export interface DescriptionMarkdownRefObject extends EditableMarkdownRefObject {
+  editor: EuiMarkdownEditorRef | null;
+}
 export interface DescriptionProps {
   caseData: Case;
   isLoadingDescription: boolean;
@@ -73,6 +78,13 @@ const getDraftDescription = (
   return sessionStorage.getItem(draftStorageKey);
 };
 
+const isSetCommentRef = (
+  ref: EditableMarkdownRefObject | null | undefined
+): ref is EditableMarkdownRefObject => {
+  const commentRef = ref as EditableMarkdownRefObject;
+  return commentRef?.setComment != null;
+};
+
 export const Description = ({
   caseData,
   onUpdateField,
@@ -82,6 +94,8 @@ export const Description = ({
   const [isEditable, setIsEditable] = useState<boolean>(false);
 
   const descriptionRef = useRef(null);
+  const descriptionMarkdownRef = useRef<DescriptionMarkdownRefObject | null>(null);
+
   const { euiTheme } = useEuiTheme();
   const { appId, permissions } = useCasesContext();
 
@@ -89,6 +103,7 @@ export const Description = ({
     clearDraftComment: clearLensDraftComment,
     draftComment: lensDraftComment,
     hasIncomingLensState,
+    openLensModal,
   } = useLensDraftComment();
 
   const handleOnChangeEditable = useCallback(() => {
@@ -117,6 +132,20 @@ export const Description = ({
     setIsEditable(true);
   }
 
+  if (
+    isSetCommentRef(descriptionMarkdownRef.current) &&
+    descriptionMarkdownRef.current.editor?.textarea &&
+    lensDraftComment &&
+    lensDraftComment?.commentId === DESCRIPTION_ID
+  ) {
+    descriptionMarkdownRef.current.setComment(lensDraftComment.comment);
+    if (hasIncomingLensState) {
+      openLensModal({ editorRef: descriptionMarkdownRef.current?.editor });
+    } else {
+      clearLensDraftComment();
+    }
+  }
+
   const hasUnsavedChanges =
     draftDescription && draftDescription !== caseData.description && !isLoadingDescription;
 
@@ -131,6 +160,7 @@ export const Description = ({
       editorRef={descriptionRef}
       fieldName="content"
       formSchema={schema}
+      ref={descriptionMarkdownRef}
     />
   ) : (
     <Panel hasShadow={false} hasBorder={true} data-test-subj="description">
