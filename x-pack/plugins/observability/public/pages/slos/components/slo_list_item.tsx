@@ -97,7 +97,7 @@ export function SloListItem({
   };
 
   const handleNavigateToRules = async () => {
-    const locator = locators.get<RulesParams>(rulesLocatorID);
+    const locator = locators.get<{ poop: string }>(rulesLocatorID);
 
     if (slo?.id) {
       locator?.navigate(
