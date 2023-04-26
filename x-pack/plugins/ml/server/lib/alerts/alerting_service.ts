@@ -21,7 +21,7 @@ import {
   getEntityFieldValue,
   type MlAnomalyRecordDoc,
   type MlAnomalyResultType,
-  ANOMALY_RESULT_TYPE,
+  ML_ANOMALY_RESULT_TYPE,
 } from '@kbn/ml-anomaly-utils';
 import { MlClient } from '../ml_client';
 import {
@@ -80,7 +80,7 @@ export function buildExplorerUrl(
   type: MlAnomalyResultType,
   r?: AlertExecutionResult
 ): string {
-  const isInfluencerResult = type === ANOMALY_RESULT_TYPE.INFLUENCER;
+  const isInfluencerResult = type === ML_ANOMALY_RESULT_TYPE.INFLUENCER;
 
   /**
    * Disabled until Anomaly Explorer page is fixed and properly
@@ -154,9 +154,9 @@ export function buildExplorerUrl(
  * Mapping for result types and corresponding score fields.
  */
 const resultTypeScoreMapping = {
-  [ANOMALY_RESULT_TYPE.BUCKET]: 'anomaly_score',
-  [ANOMALY_RESULT_TYPE.RECORD]: 'record_score',
-  [ANOMALY_RESULT_TYPE.INFLUENCER]: 'influencer_score',
+  [ML_ANOMALY_RESULT_TYPE.BUCKET]: 'anomaly_score',
+  [ML_ANOMALY_RESULT_TYPE.RECORD]: 'record_score',
+  [ML_ANOMALY_RESULT_TYPE.INFLUENCER]: 'influencer_score',
 };
 
 /**
@@ -233,16 +233,16 @@ export function alertingServiceProvider(
     severity: number,
     useInitialScore?: boolean
   ) => {
-    const influencerScoreField = getScoreFields(ANOMALY_RESULT_TYPE.INFLUENCER, useInitialScore);
-    const recordScoreField = getScoreFields(ANOMALY_RESULT_TYPE.RECORD, useInitialScore);
-    const bucketScoreField = getScoreFields(ANOMALY_RESULT_TYPE.BUCKET, useInitialScore);
+    const influencerScoreField = getScoreFields(ML_ANOMALY_RESULT_TYPE.INFLUENCER, useInitialScore);
+    const recordScoreField = getScoreFields(ML_ANOMALY_RESULT_TYPE.RECORD, useInitialScore);
+    const bucketScoreField = getScoreFields(ML_ANOMALY_RESULT_TYPE.BUCKET, useInitialScore);
 
     return {
       influencer_results: {
         filter: {
           range: {
             [influencerScoreField]: {
-              gte: resultType === ANOMALY_RESULT_TYPE.INFLUENCER ? severity : 0,
+              gte: resultType === ML_ANOMALY_RESULT_TYPE.INFLUENCER ? severity : 0,
             },
           },
         },
@@ -278,7 +278,7 @@ export function alertingServiceProvider(
         filter: {
           range: {
             [recordScoreField]: {
-              gte: resultType === ANOMALY_RESULT_TYPE.RECORD ? severity : 0,
+              gte: resultType === ML_ANOMALY_RESULT_TYPE.RECORD ? severity : 0,
             },
           },
         },
@@ -321,7 +321,7 @@ export function alertingServiceProvider(
           },
         },
       },
-      ...(resultType === ANOMALY_RESULT_TYPE.BUCKET
+      ...(resultType === ML_ANOMALY_RESULT_TYPE.BUCKET
         ? {
             bucket_results: {
               filter: {
@@ -438,7 +438,7 @@ export function alertingServiceProvider(
             typical: typical?.map((t) => formatter(t)),
             actual: actual?.map((a) => formatter(a)),
             score: Math.floor(
-              h._source[getScoreFields(ANOMALY_RESULT_TYPE.RECORD, useInitialScore)]
+              h._source[getScoreFields(ML_ANOMALY_RESULT_TYPE.RECORD, useInitialScore)]
             ),
             unique_key: getRecordKey(h._source),
           };
@@ -447,7 +447,7 @@ export function alertingServiceProvider(
           return {
             ...h._source,
             score: Math.floor(
-              h._source[getScoreFields(ANOMALY_RESULT_TYPE.INFLUENCER, useInitialScore)]
+              h._source[getScoreFields(ML_ANOMALY_RESULT_TYPE.INFLUENCER, useInitialScore)]
             ),
             unique_key: `${h._source.timestamp}_${h._source.influencer_field_name}_${h._source.influencer_field_value}`,
           };
@@ -522,7 +522,7 @@ export function alertingServiceProvider(
             },
             {
               terms: {
-                result_type: Object.values(ANOMALY_RESULT_TYPE) as string[],
+                result_type: Object.values(ML_ANOMALY_RESULT_TYPE) as string[],
               },
             },
             ...(params.includeInterim
@@ -677,7 +677,7 @@ export function alertingServiceProvider(
             },
             {
               terms: {
-                result_type: Object.values(ANOMALY_RESULT_TYPE) as string[],
+                result_type: Object.values(ML_ANOMALY_RESULT_TYPE) as string[],
               },
             },
             {

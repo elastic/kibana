@@ -34,7 +34,7 @@ export const SEVERITY_COLOR_RAMP = [
  * Custom enum for anomaly result type
  * @type {{ readonly BUCKET: "bucket"; readonly RECORD: "record"; readonly INFLUENCER: "influencer"; }}
  */
-export const ANOMALY_RESULT_TYPE = {
+export const ML_ANOMALY_RESULT_TYPE = {
   BUCKET: 'bucket',
   RECORD: 'record',
   INFLUENCER: 'influencer',

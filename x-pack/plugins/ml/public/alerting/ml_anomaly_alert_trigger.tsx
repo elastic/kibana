@@ -11,7 +11,7 @@ import useMount from 'react-use/lib/useMount';
 import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
-import { ANOMALY_RESULT_TYPE, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import { ML_ANOMALY_RESULT_TYPE, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import { JobSelectorControl } from './job_selector';
 import { useMlKibana } from '../application/contexts/kibana';
 import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
@@ -87,11 +87,11 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   }, [jobsAndGroupIds]);
 
   const availableResultTypes = useMemo(() => {
-    if (jobConfigs.length === 0) return Object.values(ANOMALY_RESULT_TYPE);
+    if (jobConfigs.length === 0) return Object.values(ML_ANOMALY_RESULT_TYPE);
 
     return (jobConfigs ?? []).some((v) => Boolean(v.analysis_config?.influencers?.length))
-      ? Object.values(ANOMALY_RESULT_TYPE)
-      : [ANOMALY_RESULT_TYPE.BUCKET, ANOMALY_RESULT_TYPE.RECORD];
+      ? Object.values(ML_ANOMALY_RESULT_TYPE)
+      : [ML_ANOMALY_RESULT_TYPE.BUCKET, ML_ANOMALY_RESULT_TYPE.RECORD];
   }, [jobConfigs]);
 
   useEffect(
@@ -109,7 +109,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       setRuleProperty('params', {
         // Set defaults
         severity: ML_ANOMALY_THRESHOLD.CRITICAL,
-        resultType: ANOMALY_RESULT_TYPE.BUCKET,
+        resultType: ML_ANOMALY_RESULT_TYPE.BUCKET,
         includeInterim: false,
         // Preserve job selection
         jobSelection,

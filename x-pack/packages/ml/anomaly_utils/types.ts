@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PARTITION_FIELDS, ANOMALY_RESULT_TYPE } from './constants';
+import { PARTITION_FIELDS, ML_ANOMALY_RESULT_TYPE } from './constants';
 import type { KibanaUrlConfig } from './custom_urls';
 
 /**
@@ -482,4 +482,5 @@ export type EntityFieldType = 'partition_field' | 'over_field' | 'by_field';
 /**
  * The type of the anomaly result, such as bucket, influencer or record.
  */
-export type MlAnomalyResultType = typeof ANOMALY_RESULT_TYPE[keyof typeof ANOMALY_RESULT_TYPE];
+export type MlAnomalyResultType =
+  typeof ML_ANOMALY_RESULT_TYPE[keyof typeof ML_ANOMALY_RESULT_TYPE];

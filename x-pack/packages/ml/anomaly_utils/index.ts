@@ -27,7 +27,7 @@ export {
 } from './anomaly_utils';
 
 export {
-  ANOMALY_RESULT_TYPE,
+  ML_ANOMALY_RESULT_TYPE,
   PARTITION_FIELD_VALUE,
   PARTITION_FIELDS,
   JOB_ID,
