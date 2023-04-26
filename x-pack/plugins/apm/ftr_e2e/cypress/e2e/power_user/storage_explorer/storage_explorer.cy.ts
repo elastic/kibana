@@ -140,12 +140,6 @@ describe('Storage Explorer', () => {
       });
     });
 
-    it('when clicking the refresh button', () => {
-      cy.wait(mainAliasNames);
-      cy.contains('Refresh').click();
-      cy.wait(mainAliasNames);
-    });
-
     it('when selecting a different time range and clicking the update button', () => {
       cy.wait(mainAliasNames);
 
@@ -154,9 +148,6 @@ describe('Storage Explorer', () => {
         moment(timeRange.rangeTo).subtract(5, 'm').toISOString()
       );
       cy.contains('Update').click();
-      cy.wait(mainAliasNames);
-
-      cy.contains('Refresh').click();
       cy.wait(mainAliasNames);
     });
 

@@ -104,8 +104,7 @@ export const MetricItemIcon = ({
               onMouseLeave={() => {
                 if (isPopoverOpen) {
                   return;
-                }
-                if (timer.current) {
+                } else if (timer.current) {
                   clearTimeout(timer.current);
                 }
               }}

@@ -5,28 +5,20 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import type { Subscription } from 'rxjs';
 import { useDispatch } from 'react-redux';
 import memoizeOne from 'memoize-one';
-import { omit, pick } from 'lodash/fp';
-import type {
-  BrowserField,
-  IndexField,
-  IndexFieldsStrategyRequest,
-  IndexFieldsStrategyResponse,
-} from '@kbn/timelines-plugin/common';
-import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '@kbn/timelines-plugin/common';
-import type { FieldSpec } from '@kbn/data-plugin/common';
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import type { BrowserField } from '@kbn/timelines-plugin/common';
+import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
+import type { DataViewFieldBase } from '@kbn/es-query';
+
 import { useKibana } from '../../lib/kibana';
-import { useAppToasts } from '../../hooks/use_app_toasts';
 import { sourcererActions } from '../../store/sourcerer';
-import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getSourcererDataView } from '../sourcerer/get_sourcerer_data_view';
-import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
-import { APP_UI_ID } from '../../../../common/constants';
+import * as i18n from './translations';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export type IndexFieldSearch = (param: {
   dataViewId: string;
@@ -41,8 +33,14 @@ type DangerCastForBrowserFieldsMutation = Record<
   Omit<BrowserField, 'fields'> & { fields: Record<string, BrowserField> }
 >;
 interface DataViewInfo {
+  /**
+   * @deprecated use fields list on dataview / "indexPattern"
+   * about to use browserFields? Reconsider! Maybe you can accomplish
+   * everything you need via the `fields` property on the data view
+   * you are working with? Or perhaps you need a description for a
+   * particular field? Consider using the EcsFlat module from `@kbn/ecs`
+   */
   browserFields: DangerCastForBrowserFieldsMutation;
-  indexFields: FieldSpec[];
 }
 
 /**
@@ -50,31 +48,30 @@ interface DataViewInfo {
  * VERY mutatious on purpose to improve the performance of the transform.
  */
 export const getDataViewStateFromIndexFields = memoizeOne(
-  (_title: string, fields: IndexField[], _includeUnmapped: boolean = false): DataViewInfo => {
+  (
+    _title: string,
+    fields: DataViewFieldBase[],
+    _includeUnmapped: boolean = false
+  ): DataViewInfo => {
     // Adds two dangerous casts to allow for mutations within this function
     type DangerCastForMutation = Record<string, {}>;
 
     return fields.reduce<DataViewInfo>(
       (acc, field) => {
         // mutate browserFields
-        if (acc.browserFields[field.category] == null) {
-          (acc.browserFields as DangerCastForMutation)[field.category] = {};
+        const category = getCategory(field.name);
+        if (acc.browserFields[category] == null) {
+          (acc.browserFields as DangerCastForMutation)[category] = {};
         }
-        if (acc.browserFields[field.category].fields == null) {
-          acc.browserFields[field.category].fields = {};
+        if (acc.browserFields[category].fields == null) {
+          acc.browserFields[category].fields = {};
         }
-        acc.browserFields[field.category].fields[field.name] = field as unknown as BrowserField;
-
-        // mutate indexFields
-        acc.indexFields.push(
-          pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
-        );
+        acc.browserFields[category].fields[field.name] = field as unknown as BrowserField;
 
         return acc;
       },
       {
         browserFields: {},
-        indexFields: [],
       }
     );
   },
@@ -91,8 +88,7 @@ export const useDataView = (): {
   const abortCtrl = useRef<Record<string, AbortController>>({});
   const searchSubscription$ = useRef<Record<string, Subscription>>({});
   const dispatch = useDispatch();
-  const { addError, addWarning } = useAppToasts();
-  const { startTracking } = useTrackHttpRequest();
+  const { addError } = useAppToasts();
 
   const setLoading = useCallback(
     ({ id, loading }: { id: string; loading: boolean }) => {
@@ -108,97 +104,31 @@ export const useDataView = (): {
       cleanCache = false,
       skipScopeUpdate = false,
     }) => {
-      const unsubscribe = () => {
-        searchSubscription$.current[dataViewId]?.unsubscribe();
-        searchSubscription$.current = omit(dataViewId, searchSubscription$.current);
-        abortCtrl.current = omit(dataViewId, abortCtrl.current);
-      };
-
       const asyncSearch = async () => {
-        abortCtrl.current = {
-          ...abortCtrl.current,
-          [dataViewId]: new AbortController(),
-        };
-        setLoading({ id: dataViewId, loading: true });
-
-        const { endTracking } = startTracking({ name: `${APP_UI_ID} indexFieldsSearch` });
-
-        if (needToBeInit) {
-          const dataView = await getSourcererDataView(dataViewId, data.dataViews);
-          dispatch(sourcererActions.setDataView(dataView));
-        }
-
-        return new Promise<void>((resolve) => {
-          const subscription = data.search
-            .search<IndexFieldsStrategyRequest<'dataView'>, IndexFieldsStrategyResponse>(
-              {
-                dataViewId,
-                onlyCheckIfIndicesExist: false,
-              },
-              {
-                abortSignal: abortCtrl.current[dataViewId].signal,
-                strategy: 'indexFields',
-              }
-            )
-            .subscribe({
-              next: async (response) => {
-                if (isCompleteResponse(response)) {
-                  endTracking('success');
-
-                  const patternString = response.indicesExist.sort().join();
-                  if (needToBeInit && scopeId && !skipScopeUpdate) {
-                    dispatch(
-                      sourcererActions.setSelectedDataView({
-                        id: scopeId,
-                        selectedDataViewId: dataViewId,
-                        selectedPatterns: response.indicesExist,
-                      })
-                    );
-                  }
-
-                  if (cleanCache) {
-                    getDataViewStateFromIndexFields.clear();
-                  }
-                  const dataViewInfo = getDataViewStateFromIndexFields(
-                    patternString,
-                    response.indexFields
-                  );
-
-                  dispatch(
-                    sourcererActions.setDataView({
-                      ...dataViewInfo,
-                      id: dataViewId,
-                      loading: false,
-                      runtimeMappings: response.runtimeMappings,
-                    })
-                  );
-                } else if (isErrorResponse(response)) {
-                  endTracking('invalid');
-                  setLoading({ id: dataViewId, loading: false });
-                  addWarning(i18n.ERROR_BEAT_FIELDS);
-                }
-                unsubscribe();
-                resolve();
-              },
-              error: (msg) => {
-                endTracking('error');
-                if (msg.message === DELETED_SECURITY_SOLUTION_DATA_VIEW) {
-                  // reload app if security solution data view is deleted
-                  return location.reload();
-                }
-                setLoading({ id: dataViewId, loading: false });
-                addError(msg, {
-                  title: i18n.FAIL_BEAT_FIELDS,
-                });
-                unsubscribe();
-                resolve();
-              },
-            });
-          searchSubscription$.current = {
-            ...searchSubscription$.current,
-            [dataViewId]: subscription,
+        try {
+          abortCtrl.current = {
+            ...abortCtrl.current,
+            [dataViewId]: new AbortController(),
           };
-        });
+          setLoading({ id: dataViewId, loading: true });
+
+          const dataView = await getSourcererDataView(dataViewId, data.dataViews, cleanCache);
+
+          if (needToBeInit && scopeId && !skipScopeUpdate) {
+            dispatch(
+              sourcererActions.setSelectedDataView({
+                id: scopeId,
+                selectedDataViewId: dataViewId,
+                selectedPatterns: dataView.patternList,
+              })
+            );
+          }
+          dispatch(sourcererActions.setDataView({ ...dataView, loading: false }));
+        } catch (exc) {
+          addError(exc?.message, {
+            title: i18n.ERROR_INDEX_FIELDS_SEARCH,
+          });
+        }
       };
       if (searchSubscription$.current[dataViewId]) {
         searchSubscription$.current[dataViewId].unsubscribe();
@@ -208,17 +138,8 @@ export const useDataView = (): {
       }
       return asyncSearch();
     },
-    [addError, addWarning, data.search, dispatch, setLoading, startTracking, data.dataViews]
+    [setLoading, data.dataViews, dispatch, addError]
   );
-
-  useEffect(() => {
-    return () => {
-      Object.values(searchSubscription$.current).forEach((subscription) =>
-        subscription.unsubscribe()
-      );
-      Object.values(abortCtrl.current).forEach((signal) => signal.abort());
-    };
-  }, []);
 
   return { indexFieldsSearch };
 };

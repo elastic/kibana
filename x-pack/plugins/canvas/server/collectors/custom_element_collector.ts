@@ -141,12 +141,13 @@ export function summarizeCustomElements(
 }
 
 const customElementCollector: TelemetryCollector = async function customElementCollector(
-  kibanaIndex,
+  getIndexForType,
   esClient
 ) {
+  const index = await getIndexForType(CUSTOM_ELEMENT_TYPE);
   const customElementParams = {
     size: 10000,
-    index: kibanaIndex,
+    index,
     ignore_unavailable: true,
     filter_path: [`hits.hits._source.${CUSTOM_ELEMENT_TYPE}.content`],
     body: { query: { bool: { filter: { term: { type: CUSTOM_ELEMENT_TYPE } } } } },

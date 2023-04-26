@@ -24,6 +24,7 @@ export const convertFromMaintenanceWindowToForm = (
     title: maintenanceWindow.title,
     startDate,
     endDate: endDate.toISOString(),
+    timezone: [maintenanceWindow.rRule.tzid],
     recurring,
   };
   if (!recurring) return form;

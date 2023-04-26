@@ -691,7 +691,8 @@ describe('AlertsTable.BulkActions', () => {
           ).toBeTruthy();
         });
 
-        describe('and clear the selection is clicked', () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/154970
+        describe.skip('and clear the selection is clicked', () => {
           it('should turn off the toolbar', async () => {
             const props = {
               ...tablePropsWithBulkActions,

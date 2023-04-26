@@ -21,6 +21,7 @@ const {
   applyDeltaToColumnWidth,
   changeViewMode,
   removeColumn,
+  toggleDetailPanel,
   updateColumnOrder,
   updateColumns,
   updateColumnWidth,
@@ -46,6 +47,7 @@ const tableActionTypes = [
   updateShowBuildingBlockAlertsFilter.type,
   updateTotalCount.type,
   updateIsLoading.type,
+  toggleDetailPanel.type,
 ];
 
 export const createDataTableLocalStorageEpic =

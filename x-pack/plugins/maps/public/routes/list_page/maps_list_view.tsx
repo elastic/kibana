@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, memo } from 'react';
+import React, { useCallback, memo, useEffect } from 'react';
 import type { SavedObjectsFindOptionsReference, ScopedHistory } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -72,8 +72,14 @@ function MapsListViewComp({ history }: Props) {
   const listingLimit = getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = getUiSettings().get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
-  getCoreChrome().docTitle.change(APP_NAME);
-  getCoreChrome().setBreadcrumbs([{ text: APP_NAME }]);
+  // TLDR; render should be side effect free
+  //
+  // setBreadcrumbs fires observables which cause state changes in ScreenReaderRouteAnnouncements.
+  // wrap chrome updates in useEffect to avoid potentially causing state changes in other component during render phase.
+  useEffect(() => {
+    getCoreChrome().docTitle.change(APP_NAME);
+    getCoreChrome().setBreadcrumbs([{ text: APP_NAME }]);
+  }, []);
 
   const findMaps = useCallback(
     async (
