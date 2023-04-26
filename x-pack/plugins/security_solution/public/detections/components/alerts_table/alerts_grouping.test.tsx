@@ -236,7 +236,7 @@ describe('GroupedAlertsTable', () => {
               },
               countSeveritySubAggregation: { cardinality: { field: 'kibana.alert.severity' } },
               hostsCountAggregation: { cardinality: { field: 'host.name' } },
-              nullGroup: { missing: { field: 'kibana.alert.rule.name' } },
+              description: { terms: { field: 'kibana.alert.rule.description', size: 1 } },
               ruleTags: { terms: { field: 'kibana.alert.rule.tags' } },
               severitiesSubAggregation: { terms: { field: 'kibana.alert.severity' } },
               unitsCount: { cardinality: { field: 'kibana.alert.uuid' } },
@@ -246,7 +246,7 @@ describe('GroupedAlertsTable', () => {
               size: 10000,
               terms: [
                 { field: 'kibana.alert.rule.name', missing: '-' },
-                { field: 'kibana.alert.rule.description', missing: '-' },
+                { field: 'kibana.alert.rule.name', missing: '--' },
               ],
             },
           },

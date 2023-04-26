@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { getFieldTypeMissingValues } from './helpers';
 import { GroupingBucket } from '../..';
 import { RawBucket } from '../../..';
 import type { GroupingQueryArgs, GroupingQuery } from './types';
@@ -57,11 +58,16 @@ export const getGroupingQuery = ({
         terms: [
           {
             field: groupByField,
-            missing: '-',
+            // the AggregationsMultiTermLookup type is wrong in the elasticsearch node package
+            // see linked slack thread to find out when we can remove these ts ignores
+            // https://urle.me/eAq
+            // @ts-ignore
+            missing: getFieldTypeMissingValues(selectedGroupEsTypes)[0],
           },
           {
             field: groupByField,
-            missing: '--',
+            // @ts-ignore
+            missing: getFieldTypeMissingValues(selectedGroupEsTypes)[1],
           },
         ],
         size: MAX_QUERY_SIZE,

@@ -8,7 +8,7 @@
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
-export function getFieldTypeMissingValues(esType: string[]) {
+export function getFieldTypeMissingValues(esType: string[]): [number, number] | [string, string] {
   const knownType: ES_FIELD_TYPES = esType[0] as ES_FIELD_TYPES;
   switch (knownType) {
     case ES_FIELD_TYPES.BYTE:

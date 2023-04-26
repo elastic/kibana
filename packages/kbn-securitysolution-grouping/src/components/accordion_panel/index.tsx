@@ -23,7 +23,7 @@ interface GroupPanelProps<T> {
   groupingLevel?: number;
   isLoading: boolean;
   isNullGroup?: boolean;
-  nullGroupMessage: string;
+  nullGroupMessage?: string;
   onGroupClose: () => void;
   onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket<T>) => void;
   renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
@@ -37,7 +37,7 @@ const DefaultGroupPanelRenderer = ({
 }: {
   isNullGroup: boolean;
   title: string;
-  nullGroupMessage: string;
+  nullGroupMessage?: string;
 }) => (
   <div>
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -46,7 +46,7 @@ const DefaultGroupPanelRenderer = ({
           <h4 className="eui-textTruncate">{title}</h4>
         </EuiTitle>
       </EuiFlexItem>
-      {isNullGroup && (
+      {isNullGroup && nullGroupMessage && (
         <EuiFlexItem grow={false} data-test-subj="null-group-icon">
           <EuiIconTip content={nullGroupMessage} position="right" />
         </EuiFlexItem>
