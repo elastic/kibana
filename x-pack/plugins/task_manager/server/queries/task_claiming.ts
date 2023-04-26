@@ -297,6 +297,7 @@ export class TaskClaiming {
     const { taskTypesToClaim = [] } = groupBy(this.definitions.getAllTypes(), (type) =>
       taskTypes.has(type) && !this.isTaskTypeExcluded(type) ? 'taskTypesToClaim' : 'taskTypesToSkip'
     );
+
     const queryForScheduledTasks = mustBeAllOf(
       // Task must be enabled
       EnabledTask,
