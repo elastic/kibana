@@ -5760,6 +5760,22 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-server.MessageSigningServiceInterface.rotateKeyPair",
+            "type": "Function",
+            "tags": [],
+            "label": "rotateKeyPair",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-server.MessageSigningServiceInterface.sign",
             "type": "Function",
             "tags": [],

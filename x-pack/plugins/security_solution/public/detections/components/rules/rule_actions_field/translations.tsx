@@ -27,3 +27,25 @@ export const FORM_CUSTOM_FREQUENCY_OPTION = i18n.translate(
     defaultMessage: 'Custom frequency',
   }
 );
+
+export const FORM_SUMMARY_BODY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.body.summary.message',
+  {
+    defaultMessage: 'Rule {ruleName} generated {signalsCount} alerts',
+    values: {
+      ruleName: '{{context.rule.name}}',
+      signalsCount: '{{state.signals_count}}',
+    },
+  }
+);
+
+export const FORM_FOR_EACH_ALERT_BODY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.body.forEachAlert.message',
+  {
+    defaultMessage: 'Rule {ruleName} generated alert {alertId}',
+    values: {
+      ruleName: '{{context.rule.name}}',
+      alertId: '{{alert.id}}',
+    },
+  }
+);
