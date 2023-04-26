@@ -40,14 +40,14 @@ export function updateSavedSearch(
     savedSearch.searchSource.setField('index', dataView);
     savedSearch.usesAdHocDataView = !dataView.isPersisted();
   }
-  if (useFilterAndQueryServices || !state) {
+  if (useFilterAndQueryServices) {
     savedSearch.searchSource
-      .setField('query', services.data.query.queryString.getQuery() || null)
-      .setField('filter', services.data.query.filterManager.getFilters() || []);
+      .setField('query', services.data.query.queryString.getQuery())
+      .setField('filter', services.data.query.filterManager.getFilters());
   } else {
     savedSearch.searchSource
-      .setField('query', state.query)
-      .setField('filter', cloneDeep(state.filters) || []);
+      .setField('query', state?.query ?? undefined)
+      .setField('filter', state?.filters ? cloneDeep(state.filters) : []);
   }
   if (state) {
     savedSearch.columns = state.columns || [];

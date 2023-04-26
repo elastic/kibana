@@ -145,7 +145,7 @@ export function getSavedSearchContainer({
         state: newAppState,
         services,
       },
-      true
+      false
     );
     return set(nextSavedSearchToSet);
   };

@@ -58,6 +58,7 @@ export const loadSavedSearch = async (
   if (!useAppState) {
     appStateContainer.set({});
   }
+
   // Update saved search by a given app state (in URL)
   if (appState) {
     if (savedSearchId && appState.index) {
