@@ -8,6 +8,7 @@
 
 import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
+import pLimit from 'p-limit';
 
 import { BlobStorageService } from '../blob_storage_service';
 import { InternalFileShareService } from '../file_share_service';
@@ -20,10 +21,14 @@ import type {
   CreateFileArgs,
   UpdateFileArgs,
   DeleteFileArgs,
+  BulkDeleteFilesArgs,
   FindFileArgs,
   GetByIdArgs,
 } from './file_action_types';
 import { createFileClient, FileClientImpl } from '../file_client/file_client';
+
+const bulkDeleteConcurrency = pLimit(10);
+
 /**
  * Service containing methods for working with files.
  *
@@ -62,6 +67,14 @@ export class InternalFileService {
   public async deleteFile({ id }: DeleteFileArgs): Promise<void> {
     const file = await this.getById({ id });
     await file.delete();
+  }
+
+  public async bulkDeleteFiles({
+    ids,
+  }: BulkDeleteFilesArgs): Promise<Array<PromiseSettledResult<void>>> {
+    const promises = ids.map((id) => bulkDeleteConcurrency(() => this.deleteFile({ id })));
+    const result = await Promise.allSettled(promises);
+    return result;
   }
 
   private async get(id: string) {
