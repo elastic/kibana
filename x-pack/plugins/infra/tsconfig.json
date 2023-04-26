@@ -63,6 +63,7 @@
     "@kbn/observability-alert-details",
     "@kbn/observability-shared-plugin",
     "@kbn/ui-theme",
+    "@kbn/infra-plugin",
   ],
   "exclude": ["target/**/*"]
 }
