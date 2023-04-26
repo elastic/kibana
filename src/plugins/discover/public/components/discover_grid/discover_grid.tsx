@@ -20,6 +20,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiDataGridRefProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -27,6 +28,7 @@ import { Filter } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ToastsStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { css } from '@emotion/react';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -525,6 +527,15 @@ export const DiscoverGrid = ({
     onUpdateRowHeight,
   });
 
+  // Ensure the data grid has a higher z-index than other elements
+  // on the page (for example, when embedded in a dashboard panel)
+  const { euiTheme } = useEuiTheme();
+  const gridCss = css`
+    .euiDataGrid--fullScreen {
+      z-index: ${euiTheme.levels.modal};
+    }
+  `;
+
   if (!rowCount && isLoading) {
     return (
       <div className="euiDataGrid__loading">
@@ -588,6 +599,7 @@ export const DiscoverGrid = ({
             'dscDiscoverGrid__table',
             isPlainRecord ? 'dscDiscoverGrid__textLanguageMode' : 'dscDiscoverGrid__documentsMode'
           )}
+          css={gridCss}
         >
           <EuiDataGridMemoized
             aria-describedby={randomId}

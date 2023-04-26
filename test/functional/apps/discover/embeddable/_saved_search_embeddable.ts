@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import expect from '@kbn/expect';
+import { ElementClickInterceptedError } from 'selenium-webdriver/lib/error';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -138,6 +139,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
       await testSubjects.missingOrFail('embeddableError');
       expect(await PageObjects.discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
+    });
+
+    it('should display correctly in full screen mode', async () => {
+      await addSearchEmbeddableToDashboard();
+      await testSubjects.click('dataGridFullScreenButton');
+      const [windowWidth, windowHeight] = await browser.execute(() => [
+        window.innerWidth,
+        window.innerHeight,
+      ]);
+      const docTable = await dataGrid.getTable();
+      const { width: gridWidth, height: gridHeight } = await docTable.getSize();
+      expect(gridWidth).to.be(windowWidth);
+      expect(gridHeight).to.be(windowHeight);
+      // Clicking the add button should fail because full screen mode should hide it
+      let addButtonVisible = true;
+      const addButton = await testSubjects.find('dashboardAddPanelButton');
+      try {
+        await addButton.click();
+      } catch (e) {
+        addButtonVisible = !(e instanceof ElementClickInterceptedError);
+      }
+      expect(addButtonVisible).to.be(false);
     });
   });
 }

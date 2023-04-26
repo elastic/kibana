@@ -129,6 +129,10 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       onResizeStop={onLayoutChange}
       isResizable={!expandedPanelId}
       isDraggable={!expandedPanelId}
+      // CSS transforms break dashboard panels that use position: fixed,
+      // for example the saved search embeddable full screen mode
+      // https://github.com/elastic/kibana/issues/151499
+      useCSSTransforms={false}
       rowHeight={DASHBOARD_GRID_HEIGHT}
       margin={useMargins ? [DASHBOARD_MARGIN_SIZE, DASHBOARD_MARGIN_SIZE] : [0, 0]}
       draggableHandle={'.embPanel--dragHandle'}
