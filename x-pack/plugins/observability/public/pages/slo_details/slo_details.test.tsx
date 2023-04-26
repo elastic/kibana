@@ -49,6 +49,7 @@ const useCapabilitiesMock = useCapabilities as jest.Mock;
 
 const mockNavigate = jest.fn();
 const mockBasePathPrepend = jest.fn();
+const mockLocator = jest.fn();
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -64,6 +65,13 @@ const mockKibana = () => {
         toasts: {
           addSuccess: jest.fn(),
           addError: jest.fn(),
+        },
+      },
+      share: {
+        url: {
+          locators: {
+            get: mockLocator,
+          },
         },
       },
       triggersActionsUi: {
@@ -222,6 +230,13 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
     expect(screen.queryByTestId('sloDetailsHeaderControlPopoverDelete')).toBeTruthy();
+
+    const manageRulesButton = screen.queryByTestId('sloDetailsHeaderControlPopoverManageRules');
+    expect(manageRulesButton).toBeTruthy();
+
+    fireEvent.click(manageRulesButton!);
+
+    expect(mockLocator).toBeCalled();
   });
 
   it('renders the Overview tab by default', async () => {
