@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 
 import type { Rule } from '../../rule_management/logic/types';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
-import { useKibana } from '../../../common/lib/kibana';
 import { useFetchIndex } from '../../../common/containers/source';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 export interface ReturnUseFetchExceptionFlyoutData {
   isLoading: boolean;
@@ -24,32 +24,18 @@ export interface ReturnUseFetchExceptionFlyoutData {
  *
  */
 export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExceptionFlyoutData => {
-  const { spaces } = useKibana().services;
-  const [activeSpaceId, setActiveSpaceId] = useState('');
+  const { dataViewId } = useSourcererDataView();
   const isSingleRule = useMemo(() => rules != null && rules.length === 1, [rules]);
   const isMLRule = useMemo(
     () => rules != null && isSingleRule && rules[0].type === 'machine_learning',
     [isSingleRule, rules]
   );
 
-  useEffect(() => {
-    const fetchAndSetActiveSpace = async () => {
-      if (spaces) {
-        const aSpace = await spaces.getActiveSpace();
-        setActiveSpaceId(aSpace.id);
-      }
-    };
-    fetchAndSetActiveSpace();
-  }, [spaces]);
-
   // If data view is defined, it superceeds use of rule defined index patterns.
   // If no rule is available, use fields from default data view id.
   const memoDataViewId = useMemo(
-    () =>
-      rules != null && isSingleRule
-        ? rules[0].data_view_id || null
-        : `security-solution-${activeSpaceId}`,
-    [isSingleRule, rules, activeSpaceId]
+    () => (rules != null && isSingleRule ? rules[0].data_view_id || null : dataViewId),
+    [rules, isSingleRule, dataViewId]
   );
 
   const memoNonDataViewIndexPatterns = useMemo(
