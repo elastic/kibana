@@ -23,7 +23,7 @@ import {
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
-import { CaseSeveritySavedObject, CaseStatusSavedObject } from '../../common/types/case';
+import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
 
 describe('case transforms', () => {
   describe('transformUpdateResponseToExternalModel', () => {
@@ -200,10 +200,10 @@ describe('case transforms', () => {
     });
 
     it.each([
-      [CaseSeveritySavedObject.LOW, CaseSeverity.LOW],
-      [CaseSeveritySavedObject.MEDIUM, CaseSeverity.MEDIUM],
-      [CaseSeveritySavedObject.HIGH, CaseSeverity.HIGH],
-      [CaseSeveritySavedObject.CRITICAL, CaseSeverity.CRITICAL],
+      [CasePersistedSeverity.LOW, CaseSeverity.LOW],
+      [CasePersistedSeverity.MEDIUM, CaseSeverity.MEDIUM],
+      [CasePersistedSeverity.HIGH, CaseSeverity.HIGH],
+      [CasePersistedSeverity.CRITICAL, CaseSeverity.CRITICAL],
     ])(
       'properly converts "%s" severity to corresponding external value "%s"',
       (internalSeverityValue, expectedSeverityValue) => {
@@ -222,9 +222,9 @@ describe('case transforms', () => {
     );
 
     it.each([
-      [CaseStatusSavedObject.OPEN, CaseStatuses.open],
-      [CaseStatusSavedObject.IN_PROGRESS, CaseStatuses['in-progress']],
-      [CaseStatusSavedObject.CLOSED, CaseStatuses.closed],
+      [CasePersistedStatus.OPEN, CaseStatuses.open],
+      [CasePersistedStatus.IN_PROGRESS, CaseStatuses['in-progress']],
+      [CasePersistedStatus.CLOSED, CaseStatuses.closed],
     ])(
       'properly converts "%s" status to corresponding ES Value "%s"',
       (internalStatusValue, expectedStatusValue) => {
@@ -387,10 +387,10 @@ describe('case transforms', () => {
     });
 
     it.each([
-      [CaseSeverity.LOW, CaseSeveritySavedObject.LOW],
-      [CaseSeverity.MEDIUM, CaseSeveritySavedObject.MEDIUM],
-      [CaseSeverity.HIGH, CaseSeveritySavedObject.HIGH],
-      [CaseSeverity.CRITICAL, CaseSeveritySavedObject.CRITICAL],
+      [CaseSeverity.LOW, CasePersistedSeverity.LOW],
+      [CaseSeverity.MEDIUM, CasePersistedSeverity.MEDIUM],
+      [CaseSeverity.HIGH, CasePersistedSeverity.HIGH],
+      [CaseSeverity.CRITICAL, CasePersistedSeverity.CRITICAL],
     ])(
       'properly converts "%s" severity to corresponding ES Value "%s"',
       (externalSeverityValue, expectedSeverityValue) => {
@@ -410,9 +410,9 @@ describe('case transforms', () => {
     });
 
     it.each([
-      [CaseStatuses.open, CaseStatusSavedObject.OPEN],
-      [CaseStatuses['in-progress'], CaseStatusSavedObject.IN_PROGRESS],
-      [CaseStatuses.closed, CaseStatusSavedObject.CLOSED],
+      [CaseStatuses.open, CasePersistedStatus.OPEN],
+      [CaseStatuses['in-progress'], CasePersistedStatus.IN_PROGRESS],
+      [CaseStatuses.closed, CasePersistedStatus.CLOSED],
     ])(
       'properly converts "%s" status to corresponding ES Value "%s"',
       (externalStatusValue, expectedStatusValue) => {
@@ -501,10 +501,10 @@ describe('case transforms', () => {
     });
 
     it.each([
-      [CaseSeveritySavedObject.LOW, CaseSeverity.LOW],
-      [CaseSeveritySavedObject.MEDIUM, CaseSeverity.MEDIUM],
-      [CaseSeveritySavedObject.HIGH, CaseSeverity.HIGH],
-      [CaseSeveritySavedObject.CRITICAL, CaseSeverity.CRITICAL],
+      [CasePersistedSeverity.LOW, CaseSeverity.LOW],
+      [CasePersistedSeverity.MEDIUM, CaseSeverity.MEDIUM],
+      [CasePersistedSeverity.HIGH, CaseSeverity.HIGH],
+      [CasePersistedSeverity.CRITICAL, CaseSeverity.CRITICAL],
     ])(
       'properly converts "%s" severity to corresponding external value "%s"',
       (internalSeverityValue, expectedSeverityValue) => {
@@ -529,9 +529,9 @@ describe('case transforms', () => {
     });
 
     it.each([
-      [CaseStatusSavedObject.OPEN, CaseStatuses.open],
-      [CaseStatusSavedObject.IN_PROGRESS, CaseStatuses['in-progress']],
-      [CaseStatusSavedObject.CLOSED, CaseStatuses.closed],
+      [CasePersistedStatus.OPEN, CaseStatuses.open],
+      [CasePersistedStatus.IN_PROGRESS, CaseStatuses['in-progress']],
+      [CasePersistedStatus.CLOSED, CaseStatuses.closed],
     ])(
       'properly converts "%s" status to corresponding external value "%s"',
       (internalStatusValue, expectedStatusValue) => {

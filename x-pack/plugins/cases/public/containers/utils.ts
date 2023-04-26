@@ -21,6 +21,8 @@ import type {
   SingleCaseMetricsResponse,
   User,
   CaseUserActionStatsResponse,
+  Case,
+  Cases,
 } from '../../common/api';
 import {
   CaseRt,
@@ -34,7 +36,7 @@ import {
   SingleCaseMetricsResponseRt,
   CaseUserActionStatsResponseRt,
 } from '../../common/api';
-import type { CaseUI, CasesUI, FilterOptions, UpdateByKey } from './types';
+import type { CaseUI, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
@@ -47,7 +49,7 @@ export const covertToSnakeCase = (obj: Record<string, unknown>) =>
 
 export const createToasterPlainError = (message: string) => new ToasterError([message]);
 
-export const decodeCaseResponse = (respCase?: CaseUI) =>
+export const decodeCaseResponse = (respCase?: Case) =>
   pipe(CaseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseResolveResponse = (respCase?: CaseResolveResponse) =>
@@ -62,7 +64,7 @@ export const decodeSingleCaseMetricsResponse = (respCase?: SingleCaseMetricsResp
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-export const decodeCasesResponse = (respCase?: CasesUI) =>
+export const decodeCasesResponse = (respCase?: Cases) =>
   pipe(CasesRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseConfigurationsResponse = (respCase?: CasesConfigurationsResponse) => {

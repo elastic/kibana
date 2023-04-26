@@ -36,7 +36,7 @@ import {
   getSolutionValues,
 } from './utils';
 import type { CasePersistedAttributes } from '../../common/types/case';
-import { CaseStatusSavedObject } from '../../common/types/case';
+import { CasePersistedStatus } from '../../common/types/case';
 
 export const getLatestCasesDates = async ({
   savedObjectsClient,
@@ -94,12 +94,12 @@ export const getCasesTelemetryData = async ({
         total: casesRes.total,
         ...getCountsFromBuckets(aggregationsBuckets.counts),
         status: {
-          open: findValueInBuckets(aggregationsBuckets.status, CaseStatusSavedObject.OPEN),
+          open: findValueInBuckets(aggregationsBuckets.status, CasePersistedStatus.OPEN),
           inProgress: findValueInBuckets(
             aggregationsBuckets.status,
-            CaseStatusSavedObject.IN_PROGRESS
+            CasePersistedStatus.IN_PROGRESS
           ),
-          closed: findValueInBuckets(aggregationsBuckets.status, CaseStatusSavedObject.CLOSED),
+          closed: findValueInBuckets(aggregationsBuckets.status, CasePersistedStatus.CLOSED),
         },
         syncAlertsOn: findValueInBuckets(aggregationsBuckets.syncAlerts, 1),
         syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),

@@ -26,8 +26,8 @@ import {
 } from './user_actions/connector_id';
 import { CASE_TYPE_INDIVIDUAL } from './constants';
 import { pipeMigrations } from './utils';
-import type { ConnectorFieldsSavedObject } from '../../common/types/case';
-import { CaseSeveritySavedObject, CaseStatusSavedObject } from '../../common/types/case';
+import type { CasePersistedConnectorFields } from '../../common/types/case';
+import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -38,7 +38,7 @@ interface SanitizedCaseConnector {
     id: string;
     name: string | null;
     type: string | null;
-    fields: null | ConnectorFieldsSavedObject;
+    fields: null | CasePersistedConnectorFields;
   };
 }
 
@@ -138,10 +138,10 @@ export const addAssignees = (
 export const convertSeverity = (
   doc: SavedObjectUnsanitizedDoc<CaseAttributes>
 ): SavedObjectSanitizedDoc<
-  Omit<CaseAttributes, 'severity'> & { severity: CaseSeveritySavedObject }
+  Omit<CaseAttributes, 'severity'> & { severity: CasePersistedSeverity }
 > => {
   const severity =
-    SEVERITY_EXTERNAL_TO_ESMODEL[doc.attributes.severity] ?? CaseSeveritySavedObject.LOW;
+    SEVERITY_EXTERNAL_TO_ESMODEL[doc.attributes.severity] ?? CasePersistedSeverity.LOW;
   return {
     ...doc,
     attributes: { ...doc.attributes, severity },
@@ -151,8 +151,8 @@ export const convertSeverity = (
 
 export const convertStatus = (
   doc: SavedObjectUnsanitizedDoc<CaseAttributes>
-): SavedObjectSanitizedDoc<Omit<CaseAttributes, 'status'> & { status: CaseStatusSavedObject }> => {
-  const status = STATUS_EXTERNAL_TO_ESMODEL[doc.attributes?.status] ?? CaseStatusSavedObject.OPEN;
+): SavedObjectSanitizedDoc<Omit<CaseAttributes, 'status'> & { status: CasePersistedStatus }> => {
+  const status = STATUS_EXTERNAL_TO_ESMODEL[doc.attributes?.status] ?? CasePersistedStatus.OPEN;
   return {
     ...doc,
     attributes: { ...doc.attributes, status },

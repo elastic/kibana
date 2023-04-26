@@ -50,7 +50,7 @@ import type {
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
 } from '../../common/types/case';
-import { CaseStatusSavedObject } from '../../common/types/case';
+import { CasePersistedStatus } from '../../common/types/case';
 import type {
   GetCaseIdsByAlertIdArgs,
   GetCaseIdsByAlertIdAggs,
@@ -220,9 +220,9 @@ export class CasesService {
 
     const statusBuckets = CasesService.getStatusBuckets(cases.aggregations?.statuses.buckets);
     return {
-      open: statusBuckets?.get(CaseStatusSavedObject.OPEN) ?? 0,
-      'in-progress': statusBuckets?.get(CaseStatusSavedObject.IN_PROGRESS) ?? 0,
-      closed: statusBuckets?.get(CaseStatusSavedObject.CLOSED) ?? 0,
+      open: statusBuckets?.get(CasePersistedStatus.OPEN) ?? 0,
+      'in-progress': statusBuckets?.get(CasePersistedStatus.IN_PROGRESS) ?? 0,
+      closed: statusBuckets?.get(CasePersistedStatus.CLOSED) ?? 0,
     };
   }
 

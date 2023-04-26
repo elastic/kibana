@@ -9,20 +9,20 @@ import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { CaseAttributes } from '../../../common/api';
 import type { User, UserProfile } from './user';
 
-export enum CaseSeveritySavedObject {
+export enum CasePersistedSeverity {
   LOW = 0,
   MEDIUM = 10,
   HIGH = 20,
   CRITICAL = 30,
 }
 
-export enum CaseStatusSavedObject {
+export enum CasePersistedStatus {
   OPEN = 0,
   IN_PROGRESS = 10,
   CLOSED = 20,
 }
 
-export interface CaseExternalServiceSavedObject {
+export interface CasePersistedExternalService {
   connector_name: string;
   external_id: string;
   external_title: string;
@@ -31,15 +31,15 @@ export interface CaseExternalServiceSavedObject {
   pushed_by: User;
 }
 
-export type ConnectorFieldsSavedObject = Array<{
+export type CasePersistedConnectorFields = Array<{
   key: string;
   value: unknown;
 }>;
 
-export interface ConnectorSavedObject {
+export interface CasePersistedConnector {
   name: string;
   type: string;
-  fields: ConnectorFieldsSavedObject | null;
+  fields: CasePersistedConnectorFields | null;
 }
 
 export interface CasePersistedAttributes {
@@ -48,14 +48,14 @@ export interface CasePersistedAttributes {
   closed_by: User | null;
   created_at: string;
   created_by: User;
-  connector: ConnectorSavedObject;
+  connector: CasePersistedConnector;
   description: string;
   duration: number | null;
-  external_service: CaseExternalServiceSavedObject | null;
+  external_service: CasePersistedExternalService | null;
   owner: string;
   settings: { syncAlerts: boolean };
-  severity: CaseSeveritySavedObject;
-  status: CaseStatusSavedObject;
+  severity: CasePersistedSeverity;
+  status: CasePersistedStatus;
   tags: string[];
   title: string;
   total_alerts: number;

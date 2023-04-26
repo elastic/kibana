@@ -29,8 +29,8 @@ import {
   CaseUserActionAttributesWithoutConnectorId,
 } from '@kbn/cases-plugin/common/api';
 import {
-  CaseSeveritySavedObject,
-  CaseStatusSavedObject,
+  CasePersistedSeverity,
+  CasePersistedStatus,
 } from '@kbn/cases-plugin/server/common/types/case';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
@@ -214,8 +214,8 @@ const expectExportToHaveCaseSavedObject = (
   expect(createdCaseSO.attributes.connector.name).to.eql(caseRequest.connector.name);
   expect(createdCaseSO.attributes.connector.fields).to.eql([]);
   expect(createdCaseSO.attributes.settings).to.eql(caseRequest.settings);
-  expect(createdCaseSO.attributes.status).to.eql(CaseStatusSavedObject.OPEN);
-  expect(createdCaseSO.attributes.severity).to.eql(CaseSeveritySavedObject.LOW);
+  expect(createdCaseSO.attributes.status).to.eql(CasePersistedStatus.OPEN);
+  expect(createdCaseSO.attributes.severity).to.eql(CasePersistedSeverity.LOW);
   expect(createdCaseSO.attributes.duration).to.eql(null);
   expect(createdCaseSO.attributes.tags).to.eql(caseRequest.tags);
 };

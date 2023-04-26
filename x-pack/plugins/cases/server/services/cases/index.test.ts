@@ -44,7 +44,7 @@ import {
 import { AttachmentService } from '../attachments';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type { CaseSavedObjectTransformed, CasePersistedAttributes } from '../../common/types/case';
-import { CaseSeveritySavedObject, CaseStatusSavedObject } from '../../common/types/case';
+import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
 
 const createUpdateSOResponse = ({
   connector,
@@ -54,8 +54,8 @@ const createUpdateSOResponse = ({
 }: {
   connector?: ESCaseConnectorWithId;
   externalService?: CaseFullExternalService;
-  severity?: CaseSeveritySavedObject;
-  status?: CaseStatusSavedObject;
+  severity?: CasePersistedSeverity;
+  status?: CasePersistedStatus;
 } = {}): SavedObjectsUpdateResponse<CasePersistedAttributes> => {
   const references: SavedObjectReference[] = createSavedObjectReferences({
     connector,
@@ -502,10 +502,10 @@ describe('CasesService', () => {
       });
 
       it.each([
-        [CaseSeverity.LOW, CaseSeveritySavedObject.LOW],
-        [CaseSeverity.MEDIUM, CaseSeveritySavedObject.MEDIUM],
-        [CaseSeverity.HIGH, CaseSeveritySavedObject.HIGH],
-        [CaseSeverity.CRITICAL, CaseSeveritySavedObject.CRITICAL],
+        [CaseSeverity.LOW, CasePersistedSeverity.LOW],
+        [CaseSeverity.MEDIUM, CasePersistedSeverity.MEDIUM],
+        [CaseSeverity.HIGH, CasePersistedSeverity.HIGH],
+        [CaseSeverity.CRITICAL, CasePersistedSeverity.CRITICAL],
       ])(
         'properly converts "%s" severity to corresponding ES value on updating SO',
         async (patchParamsSeverity, expectedSeverity) => {
@@ -527,9 +527,9 @@ describe('CasesService', () => {
       );
 
       it.each([
-        [CaseStatuses.open, CaseStatusSavedObject.OPEN],
-        [CaseStatuses['in-progress'], CaseStatusSavedObject.IN_PROGRESS],
-        [CaseStatuses.closed, CaseStatusSavedObject.CLOSED],
+        [CaseStatuses.open, CasePersistedStatus.OPEN],
+        [CaseStatuses['in-progress'], CasePersistedStatus.IN_PROGRESS],
+        [CaseStatuses.closed, CasePersistedStatus.CLOSED],
       ])(
         'properly converts "%s" status to corresponding ES value on updating SO',
         async (patchParamsStatus, expectedStatus) => {
@@ -602,10 +602,10 @@ describe('CasesService', () => {
         const patchResults = unsecuredSavedObjectsClient.bulkUpdate.mock
           .calls[0][0] as unknown as Array<SavedObject<CasePersistedAttributes>>;
 
-        expect(patchResults[0].attributes.severity).toEqual(CaseSeveritySavedObject.LOW);
-        expect(patchResults[1].attributes.severity).toEqual(CaseSeveritySavedObject.MEDIUM);
-        expect(patchResults[2].attributes.severity).toEqual(CaseSeveritySavedObject.HIGH);
-        expect(patchResults[3].attributes.severity).toEqual(CaseSeveritySavedObject.CRITICAL);
+        expect(patchResults[0].attributes.severity).toEqual(CasePersistedSeverity.LOW);
+        expect(patchResults[1].attributes.severity).toEqual(CasePersistedSeverity.MEDIUM);
+        expect(patchResults[2].attributes.severity).toEqual(CasePersistedSeverity.HIGH);
+        expect(patchResults[3].attributes.severity).toEqual(CasePersistedSeverity.CRITICAL);
       });
 
       it('properly converts status to corresponding ES value on bulk updating SO', async () => {
@@ -649,9 +649,9 @@ describe('CasesService', () => {
         const patchResults = unsecuredSavedObjectsClient.bulkUpdate.mock
           .calls[0][0] as unknown as Array<SavedObject<CasePersistedAttributes>>;
 
-        expect(patchResults[0].attributes.status).toEqual(CaseStatusSavedObject.OPEN);
-        expect(patchResults[1].attributes.status).toEqual(CaseStatusSavedObject.IN_PROGRESS);
-        expect(patchResults[2].attributes.status).toEqual(CaseStatusSavedObject.CLOSED);
+        expect(patchResults[0].attributes.status).toEqual(CasePersistedStatus.OPEN);
+        expect(patchResults[1].attributes.status).toEqual(CasePersistedStatus.IN_PROGRESS);
+        expect(patchResults[2].attributes.status).toEqual(CasePersistedStatus.CLOSED);
       });
     });
 
@@ -870,10 +870,10 @@ describe('CasesService', () => {
       });
 
       it.each([
-        [CaseSeverity.LOW, CaseSeveritySavedObject.LOW],
-        [CaseSeverity.MEDIUM, CaseSeveritySavedObject.MEDIUM],
-        [CaseSeverity.HIGH, CaseSeveritySavedObject.HIGH],
-        [CaseSeverity.CRITICAL, CaseSeveritySavedObject.CRITICAL],
+        [CaseSeverity.LOW, CasePersistedSeverity.LOW],
+        [CaseSeverity.MEDIUM, CasePersistedSeverity.MEDIUM],
+        [CaseSeverity.HIGH, CasePersistedSeverity.HIGH],
+        [CaseSeverity.CRITICAL, CasePersistedSeverity.CRITICAL],
       ])(
         'properly converts "%s" severity to corresponding ES value on creating SO',
         async (postParamsSeverity, expectedSeverity) => {
@@ -896,9 +896,9 @@ describe('CasesService', () => {
       );
 
       it.each([
-        [CaseStatuses.open, CaseStatusSavedObject.OPEN],
-        [CaseStatuses['in-progress'], CaseStatusSavedObject.IN_PROGRESS],
-        [CaseStatuses.closed, CaseStatusSavedObject.CLOSED],
+        [CaseStatuses.open, CasePersistedStatus.OPEN],
+        [CaseStatuses['in-progress'], CasePersistedStatus.IN_PROGRESS],
+        [CaseStatuses.closed, CasePersistedStatus.CLOSED],
       ])(
         'properly converts "%s" status to corresponding ES value on creating SO',
         async (postParamsStatus, expectedStatus) => {
@@ -987,15 +987,15 @@ describe('CasesService', () => {
       it('properly converts the severity field to the corresponding external value in the bulkPatch response', async () => {
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
-            createCaseSavedObjectResponse({ overrides: { severity: CaseSeveritySavedObject.LOW } }),
+            createCaseSavedObjectResponse({ overrides: { severity: CasePersistedSeverity.LOW } }),
             createCaseSavedObjectResponse({
-              overrides: { severity: CaseSeveritySavedObject.MEDIUM },
+              overrides: { severity: CasePersistedSeverity.MEDIUM },
             }),
             createCaseSavedObjectResponse({
-              overrides: { severity: CaseSeveritySavedObject.HIGH },
+              overrides: { severity: CasePersistedSeverity.HIGH },
             }),
             createCaseSavedObjectResponse({
-              overrides: { severity: CaseSeveritySavedObject.CRITICAL },
+              overrides: { severity: CasePersistedSeverity.CRITICAL },
             }),
           ],
         });
@@ -1018,11 +1018,11 @@ describe('CasesService', () => {
       it('properly converts the status field to the corresponding external value in the bulkPatch response', async () => {
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
-            createCaseSavedObjectResponse({ overrides: { status: CaseStatusSavedObject.OPEN } }),
+            createCaseSavedObjectResponse({ overrides: { status: CasePersistedStatus.OPEN } }),
             createCaseSavedObjectResponse({
-              overrides: { status: CaseStatusSavedObject.IN_PROGRESS },
+              overrides: { status: CasePersistedStatus.IN_PROGRESS },
             }),
-            createCaseSavedObjectResponse({ overrides: { status: CaseStatusSavedObject.CLOSED } }),
+            createCaseSavedObjectResponse({ overrides: { status: CasePersistedStatus.CLOSED } }),
           ],
         });
 
@@ -1301,10 +1301,10 @@ describe('CasesService', () => {
       });
 
       it.each([
-        [CaseSeveritySavedObject.LOW, CaseSeverity.LOW],
-        [CaseSeveritySavedObject.MEDIUM, CaseSeverity.MEDIUM],
-        [CaseSeveritySavedObject.HIGH, CaseSeverity.HIGH],
-        [CaseSeveritySavedObject.CRITICAL, CaseSeverity.CRITICAL],
+        [CasePersistedSeverity.LOW, CaseSeverity.LOW],
+        [CasePersistedSeverity.MEDIUM, CaseSeverity.MEDIUM],
+        [CasePersistedSeverity.HIGH, CaseSeverity.HIGH],
+        [CasePersistedSeverity.CRITICAL, CaseSeverity.CRITICAL],
       ])(
         'properly converts "%s" severity to corresponding external value in the patch response',
         async (internalSeverityValue, expectedSeverity) => {
@@ -1323,9 +1323,9 @@ describe('CasesService', () => {
       );
 
       it.each([
-        [CaseStatusSavedObject.OPEN, CaseStatuses.open],
-        [CaseStatusSavedObject.IN_PROGRESS, CaseStatuses['in-progress']],
-        [CaseStatusSavedObject.CLOSED, CaseStatuses.closed],
+        [CasePersistedStatus.OPEN, CaseStatuses.open],
+        [CasePersistedStatus.IN_PROGRESS, CaseStatuses['in-progress']],
+        [CasePersistedStatus.CLOSED, CaseStatuses.closed],
       ])(
         'properly converts "%s" status to corresponding external value in the patch response',
         async (internalStatusValue, expectedStatus) => {
@@ -1376,10 +1376,10 @@ describe('CasesService', () => {
       });
 
       it.each([
-        [CaseSeveritySavedObject.LOW, CaseSeverity.LOW],
-        [CaseSeveritySavedObject.MEDIUM, CaseSeverity.MEDIUM],
-        [CaseSeveritySavedObject.HIGH, CaseSeverity.HIGH],
-        [CaseSeveritySavedObject.CRITICAL, CaseSeverity.CRITICAL],
+        [CasePersistedSeverity.LOW, CaseSeverity.LOW],
+        [CasePersistedSeverity.MEDIUM, CaseSeverity.MEDIUM],
+        [CasePersistedSeverity.HIGH, CaseSeverity.HIGH],
+        [CasePersistedSeverity.CRITICAL, CaseSeverity.CRITICAL],
       ])(
         'properly converts "%s" severity to corresponding external value in the post response',
         async (internalSeverityValue, expectedSeverity) => {
@@ -1397,9 +1397,9 @@ describe('CasesService', () => {
       );
 
       it.each([
-        [CaseStatusSavedObject.OPEN, CaseStatuses.open],
-        [CaseStatusSavedObject.IN_PROGRESS, CaseStatuses['in-progress']],
-        [CaseStatusSavedObject.CLOSED, CaseStatuses.closed],
+        [CasePersistedStatus.OPEN, CaseStatuses.open],
+        [CasePersistedStatus.IN_PROGRESS, CaseStatuses['in-progress']],
+        [CasePersistedStatus.CLOSED, CaseStatuses.closed],
       ])(
         'properly converts "%s" status to corresponding external value in the post response',
         async (internalStatusValue, expectedStatus) => {
@@ -1469,10 +1469,10 @@ describe('CasesService', () => {
       });
 
       it.each([
-        [CaseSeveritySavedObject.LOW, CaseSeverity.LOW],
-        [CaseSeveritySavedObject.MEDIUM, CaseSeverity.MEDIUM],
-        [CaseSeveritySavedObject.HIGH, CaseSeverity.HIGH],
-        [CaseSeveritySavedObject.CRITICAL, CaseSeverity.CRITICAL],
+        [CasePersistedSeverity.LOW, CaseSeverity.LOW],
+        [CasePersistedSeverity.MEDIUM, CaseSeverity.MEDIUM],
+        [CasePersistedSeverity.HIGH, CaseSeverity.HIGH],
+        [CasePersistedSeverity.CRITICAL, CaseSeverity.CRITICAL],
       ])(
         'includes the properly converted "%s" severity field in the result',
         async (severity, expectedSeverity) => {
@@ -1488,9 +1488,9 @@ describe('CasesService', () => {
       );
 
       it.each([
-        [CaseStatusSavedObject.OPEN, CaseStatuses.open],
-        [CaseStatusSavedObject.IN_PROGRESS, CaseStatuses['in-progress']],
-        [CaseStatusSavedObject.CLOSED, CaseStatuses.closed],
+        [CasePersistedStatus.OPEN, CaseStatuses.open],
+        [CasePersistedStatus.IN_PROGRESS, CaseStatuses['in-progress']],
+        [CasePersistedStatus.CLOSED, CaseStatuses.closed],
       ])(
         'includes the properly converted "%s" status field in the result',
         async (status, expectedStatus) => {
@@ -1548,16 +1548,16 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({
-              overrides: { severity: CaseSeveritySavedObject.LOW },
+              overrides: { severity: CasePersistedSeverity.LOW },
             }),
             createCaseSavedObjectResponse({
-              overrides: { severity: CaseSeveritySavedObject.MEDIUM },
+              overrides: { severity: CasePersistedSeverity.MEDIUM },
             }),
             createCaseSavedObjectResponse({
-              overrides: { severity: CaseSeveritySavedObject.HIGH },
+              overrides: { severity: CasePersistedSeverity.HIGH },
             }),
             createCaseSavedObjectResponse({
-              overrides: { severity: CaseSeveritySavedObject.CRITICAL },
+              overrides: { severity: CasePersistedSeverity.CRITICAL },
             }),
           ],
         });
@@ -1573,13 +1573,13 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({
-              overrides: { status: CaseStatusSavedObject.OPEN },
+              overrides: { status: CasePersistedStatus.OPEN },
             }),
             createCaseSavedObjectResponse({
-              overrides: { status: CaseStatusSavedObject.IN_PROGRESS },
+              overrides: { status: CasePersistedStatus.IN_PROGRESS },
             }),
             createCaseSavedObjectResponse({
-              overrides: { status: CaseStatusSavedObject.CLOSED },
+              overrides: { status: CasePersistedStatus.CLOSED },
             }),
           ],
         });
@@ -1711,10 +1711,10 @@ describe('CasesService', () => {
       });
 
       it.each([
-        [CaseSeveritySavedObject.LOW, CaseSeverity.LOW],
-        [CaseSeveritySavedObject.MEDIUM, CaseSeverity.MEDIUM],
-        [CaseSeveritySavedObject.HIGH, CaseSeverity.HIGH],
-        [CaseSeveritySavedObject.CRITICAL, CaseSeverity.CRITICAL],
+        [CasePersistedSeverity.LOW, CaseSeverity.LOW],
+        [CasePersistedSeverity.MEDIUM, CaseSeverity.MEDIUM],
+        [CasePersistedSeverity.HIGH, CaseSeverity.HIGH],
+        [CasePersistedSeverity.CRITICAL, CaseSeverity.CRITICAL],
       ])(
         'includes the properly converted "%s" severity field in the result',
         async (internalSeverityValue, expectedSeverity) => {
@@ -1729,9 +1729,9 @@ describe('CasesService', () => {
       );
 
       it.each([
-        [CaseStatusSavedObject.OPEN, CaseStatuses.open],
-        [CaseStatusSavedObject.IN_PROGRESS, CaseStatuses['in-progress']],
-        [CaseStatusSavedObject.CLOSED, CaseStatuses.closed],
+        [CasePersistedStatus.OPEN, CaseStatuses.open],
+        [CasePersistedStatus.IN_PROGRESS, CaseStatuses['in-progress']],
+        [CasePersistedStatus.CLOSED, CaseStatuses.closed],
       ])(
         'includes the properly converted "%s" status field in the result',
         async (internalStatusValue, expectedStatus) => {

@@ -21,7 +21,7 @@ import {
   constructSearch,
   convertSortField,
 } from './utils';
-import { CaseSeveritySavedObject, CaseStatusSavedObject } from '../common/types/case';
+import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
 
 describe('utils', () => {
   describe('convertSortField', () => {
@@ -401,9 +401,9 @@ describe('utils', () => {
     });
 
     it.each([
-      [CaseStatuses.open, CaseStatusSavedObject.OPEN],
-      [CaseStatuses['in-progress'], CaseStatusSavedObject.IN_PROGRESS],
-      [CaseStatuses.closed, CaseStatusSavedObject.CLOSED],
+      [CaseStatuses.open, CasePersistedStatus.OPEN],
+      [CaseStatuses['in-progress'], CasePersistedStatus.IN_PROGRESS],
+      [CaseStatuses.closed, CasePersistedStatus.CLOSED],
     ])('creates a filter for status "%s"', (status, expectedStatus) => {
       expect(constructQueryOptions({ status }).filter).toMatchInlineSnapshot(`
         Object {
@@ -426,10 +426,10 @@ describe('utils', () => {
     });
 
     it.each([
-      [CaseSeverity.LOW, CaseSeveritySavedObject.LOW],
-      [CaseSeverity.MEDIUM, CaseSeveritySavedObject.MEDIUM],
-      [CaseSeverity.HIGH, CaseSeveritySavedObject.HIGH],
-      [CaseSeverity.CRITICAL, CaseSeveritySavedObject.CRITICAL],
+      [CaseSeverity.LOW, CasePersistedSeverity.LOW],
+      [CaseSeverity.MEDIUM, CasePersistedSeverity.MEDIUM],
+      [CaseSeverity.HIGH, CasePersistedSeverity.HIGH],
+      [CaseSeverity.CRITICAL, CasePersistedSeverity.CRITICAL],
     ])('creates a filter for severity "%s"', (severity, expectedSeverity) => {
       expect(constructQueryOptions({ severity }).filter).toMatchInlineSnapshot(`
         Object {

@@ -18,11 +18,11 @@ import { CaseSeverity, CaseStatuses, ConnectorTypes, NONE_CONNECTOR_ID } from '.
 import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { getNoneCaseConnector } from '../common/utils';
 import type {
-  CaseExternalServiceSavedObject,
+  CasePersistedExternalService,
   CasePersistedAttributes,
-  ConnectorFieldsSavedObject,
+  CasePersistedConnectorFields,
 } from '../common/types/case';
-import { CaseSeveritySavedObject, CaseStatusSavedObject } from '../common/types/case';
+import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
 
 /**
  * This is only a utility interface to help with constructing test cases. After the migration, the ES format will no longer
@@ -32,7 +32,7 @@ export interface ESCaseConnectorWithId {
   id: string;
   name: string;
   type: ConnectorTypes;
-  fields: ConnectorFieldsSavedObject | null;
+  fields: CasePersistedConnectorFields | null;
 }
 
 /**
@@ -109,11 +109,11 @@ export const basicESCaseFields: CasePersistedAttributes = {
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
-  severity: CaseSeveritySavedObject.LOW,
+  severity: CasePersistedSeverity.LOW,
   duration: null,
   description: 'This is a brand new case of a bad meanie defacing data',
   title: 'Super Bad Security Issue',
-  status: CaseStatusSavedObject.OPEN,
+  status: CasePersistedStatus.OPEN,
   tags: ['defacement'],
   updated_at: '2019-11-25T21:54:48.952Z',
   updated_by: {
@@ -184,7 +184,7 @@ export const createCaseSavedObjectResponse = ({
     fields: connector?.fields ?? null,
   };
 
-  let restExternalService: CaseExternalServiceSavedObject | null = null;
+  let restExternalService: CasePersistedExternalService | null = null;
   if (externalService !== null) {
     const { connector_id: ignored, ...rest } = externalService ?? {
       connector_name: '.jira',
