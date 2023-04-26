@@ -30,7 +30,7 @@ export interface MessageSigningServiceInterface {
   generateKeyPair(
     providedPassphrase?: string
   ): Promise<{ privateKey: string; publicKey: string; passphrase: string }>;
-  rotateKeyPair(): Promise<boolean>;
+  rotateKeyPair(): Promise<{ error?: Error; success?: true }>;
   sign(message: Buffer | Record<string, unknown>): Promise<{ data: Buffer; signature: string }>;
   getPublicKey(): Promise<string>;
 }
@@ -135,23 +135,38 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     return publicKey;
   }
 
-  public async rotateKeyPair(): Promise<boolean> {
-    const isRemoved = await this.removeKeyPair();
-    if (isRemoved) {
-      await this.generateKeyPair();
-      return true;
+  public async rotateKeyPair(): Promise<{ error?: Error; success?: true }> {
+    const removeKeyPairResponse = await this.removeKeyPair();
+    if (removeKeyPairResponse === true) {
+      try {
+        await this.generateKeyPair();
+        // TODO: Apply changes to all policies
+        return { success: true };
+      } catch (error) {
+        return { error: Error(`No new key pair generated: ${error.message}`) };
+      }
     }
-    return false;
-    // TODO: Apply changes to all policies
+    return { error: removeKeyPairResponse };
   }
 
-  private async removeKeyPair(): Promise<boolean> {
-    const currentKeyPair = await this.getCurrentKeyPairObj();
-    if (currentKeyPair) {
+  private async removeKeyPair(): Promise<true | Error> {
+    let currentKeyPair: Awaited<ReturnType<typeof this.getCurrentKeyPairObj>>;
+    try {
+      currentKeyPair = await this.getCurrentKeyPairObj();
+    } catch (error) {
+      return Error(`Error fetching current key pair: ${error.message}`);
+    }
+
+    if (!currentKeyPair) {
+      return Error('No key pair found!');
+    }
+
+    try {
       await this.soClient.delete(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, currentKeyPair.id);
       return true;
+    } catch (error) {
+      return Error(`Error deleting current key pair: ${error.message}`);
     }
-    return false;
   }
 
   private get soClient() {

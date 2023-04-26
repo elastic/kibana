@@ -14,7 +14,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 
 import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAppContextStartContractMock } from '../../mocks';
-import { appContextService } from '../app_context';
+import { appContextService } from '..';
 
 import {
   type MessageSigningServiceInterface,
@@ -120,7 +120,7 @@ describe('MessageSigningService', () => {
         passphrase: expect.any(String),
       });
 
-      expect(rotateKeyPairResponse).toEqual(true);
+      expect(rotateKeyPairResponse).toEqual({ success: true });
     });
 
     it('does not generate key pair if one exists', async () => {
