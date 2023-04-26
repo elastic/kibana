@@ -20,8 +20,10 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { APP_SEARCH_PLUGIN } from '../../../../../../../common/constants';
+import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../../../common/constants';
 import { KibanaLogic } from '../../../../../shared/kibana';
+
+import { ENGINES_PATH } from '../../../../routes';
 
 import { CreateEngineMenuItem } from './create_engine_menu_item';
 import { SearchEnginesPopoverLogic } from './search_engines_popover_logic';
@@ -52,7 +54,7 @@ export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
           onClick={toggleSearchEnginesPopover}
         >
           {i18n.translate('xpack.enterpriseSearch.content.index.searchEngines.label', {
-            defaultMessage: 'Search engines',
+            defaultMessage: 'Search Applications',
           })}
         </EuiButton>
       }
@@ -64,15 +66,18 @@ export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
             data-telemetry-id={`entSearchContent-${ingestionMethod}-header-searchEngines-viewEngines`}
             icon="eye"
             onClick={() => {
-              KibanaLogic.values.navigateToUrl(APP_SEARCH_PLUGIN.URL, {
-                shouldNotCreateHref: true,
-              });
+              KibanaLogic.values.navigateToUrl(
+                ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
+                {
+                  shouldNotCreateHref: true,
+                }
+              );
             }}
           >
             <EuiText>
               <p>
                 {i18n.translate('xpack.enterpriseSearch.content.index.searchEngines.viewEngines', {
-                  defaultMessage: 'View App Search engines',
+                  defaultMessage: 'View Search Applications',
                 })}
               </p>
             </EuiText>
@@ -82,7 +87,7 @@ export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
               content={i18n.translate(
                 'xpack.enterpriseSearch.content.index.searchEngines.createEngineDisabledTooltip',
                 {
-                  defaultMessage: 'You cannot create engines from hidden indices.',
+                  defaultMessage: 'You cannot create search applications from hidden indices.',
                 }
               )}
             >

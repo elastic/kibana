@@ -6,6 +6,12 @@
  */
 
 import type { CellAction, CellActionExecutionContext, CellActionFactory } from '@kbn/cell-actions';
+import type { QueryOperator } from '../../common/types';
+export interface AndFilter {
+  field: string;
+  value: string | string[];
+  operator?: QueryOperator;
+}
 
 export interface SecurityMetadata extends Record<string, unknown> {
   /**
@@ -35,6 +41,11 @@ export interface SecurityMetadata extends Record<string, unknown> {
      */
     component: string;
   };
+  /**
+   * `metadata.andFilters` is used by the addToTimelineAction to add
+   * an "and" query to the main data provider
+   */
+  andFilters?: AndFilter[];
 }
 
 export interface SecurityCellActionExecutionContext extends CellActionExecutionContext {
@@ -42,13 +53,15 @@ export interface SecurityCellActionExecutionContext extends CellActionExecutionC
 }
 export type SecurityCellAction = CellAction<SecurityCellActionExecutionContext>;
 
-// All security cell actions names
-export type SecurityCellActionName =
-  | 'filterIn'
-  | 'filterOut'
-  | 'addToTimeline'
-  | 'showTopN'
-  | 'copyToClipboard'
-  | 'toggleColumn';
+export interface SecurityCellActions {
+  filterIn?: CellActionFactory;
+  filterOut?: CellActionFactory;
+  addToTimeline?: CellActionFactory;
+  addToNewTimeline?: CellActionFactory;
+  showTopN?: CellActionFactory;
+  copyToClipboard?: CellActionFactory;
+  toggleColumn?: CellActionFactory;
+}
 
-export type SecurityCellActions = Record<SecurityCellActionName, CellActionFactory>;
+// All security cell actions names
+export type SecurityCellActionName = keyof SecurityCellActions;

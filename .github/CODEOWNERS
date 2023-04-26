@@ -88,6 +88,7 @@ packages/content-management/content_editor @elastic/appex-sharedux
 examples/content_management_examples @elastic/appex-sharedux
 src/plugins/content_management @elastic/appex-sharedux
 packages/content-management/table_list @elastic/appex-sharedux
+packages/kbn-content-management-utils @elastic/kibana-data-discovery
 examples/controls_example @elastic/kibana-presentation
 src/plugins/controls @elastic/kibana-presentation
 src/core @elastic/kibana-core
@@ -285,6 +286,9 @@ packages/core/usage-data/core-usage-data-base-server-internal @elastic/kibana-co
 packages/core/usage-data/core-usage-data-server @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-internal @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-mocks @elastic/kibana-core
+packages/core/user-settings/core-user-settings-server @elastic/platform-security
+packages/core/user-settings/core-user-settings-server-internal @elastic/platform-security
+packages/core/user-settings/core-user-settings-server-mocks @elastic/platform-security
 x-pack/plugins/cross_cluster_replication @elastic/platform-deployment-management
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
@@ -455,6 +459,7 @@ src/plugins/maps_ems @elastic/kibana-gis
 x-pack/plugins/maps @elastic/kibana-gis
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/date_picker @elastic/ml-ui
+x-pack/packages/ml/error_utils @elastic/ml-ui
 x-pack/packages/ml/is_defined @elastic/ml-ui
 x-pack/packages/ml/is_populated_object @elastic/ml-ui
 x-pack/packages/ml/local_storage @elastic/ml-ui
@@ -477,6 +482,7 @@ x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
 x-pack/packages/observability/alert_details @elastic/actionable-observability
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
+x-pack/plugins/observability_onboarding @elastic/apm-ui
 x-pack/plugins/observability @elastic/actionable-observability
 x-pack/plugins/observability_shared @elastic/actionable-observability
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
@@ -683,6 +689,7 @@ src/plugins/unified_search @elastic/kibana-visualizations
 x-pack/plugins/upgrade_assistant @elastic/platform-deployment-management
 x-pack/plugins/drilldowns/url_drilldown @elastic/kibana-app-services
 src/plugins/url_forwarding @elastic/kibana-visualizations
+packages/kbn-url-state @elastic/security-threat-hunting-investigations
 src/plugins/usage_collection @elastic/kibana-core
 test/plugin_functional/plugins/usage_collection @elastic/kibana-core
 packages/kbn-user-profile-components @elastic/kibana-security
@@ -773,21 +780,20 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 
 ### Observability Plugins
 
-# Observability Shared
-/x-pack/plugins/observability/public/components/shared/date_picker/ @elastic/uptime
+# Observability Shared App
+x-pack/plugins/observability_shared @elastic/observability-ui
 
-# Unified Observability - on hold due to team capacity shortage
-# For now, if you're changing these pages, get a review from someone who understand the changes
-# /x-pack/plugins/observability/public/context @elastic/unified-observability
-# /x-pack/test/observability_functional @elastic/unified-observability
+# Observability App
+x-pack/plugins/observability @elastic/actionable-observability
 
-# Home/Overview/Landing Pages
-/x-pack/plugins/observability/public/pages/home @elastic/observability-ui
-/x-pack/plugins/observability/public/pages/landing @elastic/observability-ui
-/x-pack/plugins/observability/public/pages/overview @elastic/observability-ui
+# Observability App > Overview page
+x-pack/plugins/observability/public/pages/overview @elastic/observability-ui
 
-# Actionable Observability
-/x-pack/test/observability_functional @elastic/actionable-observability
+# Observability App > Alert Details
+x-pack/packages/observability/alert_details @elastic/actionable-observability
+
+# Observability App > Functional Tests
+x-pack/test/observability_functional @elastic/actionable-observability
 
 # Observability robots
 /.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots

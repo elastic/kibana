@@ -410,7 +410,9 @@ export class EndpointDocGenerator extends BaseDataGenerator {
 
   private createHostData(): CommonHostInfo {
     const { agent, elastic, host, Endpoint } = this.metadataGenerator.generate({
-      Endpoint: { policy: { applied: this.randomChoice(APPLIED_POLICIES) } },
+      Endpoint: {
+        policy: { applied: this.randomChoice(APPLIED_POLICIES) },
+      },
     });
 
     return { agent, elastic, host, Endpoint };

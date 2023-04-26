@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { ErrorType } from '@kbn/ml-error-utils';
 import { Job, JobStats, IndicesOptions } from './anomaly_detection_jobs';
 import { RuntimeMappings } from './fields';
 import { ES_AGGREGATION } from '../constants/aggregation_types';
-import { ErrorType } from '../util/errors';
 
 export interface MlJobsResponse {
   jobs: Job[];

@@ -16,14 +16,17 @@ import type {
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { ErrorEmptyPrompt } from '../error_empty_prompt';
 import {
+  defaultSort,
   getIlmExplainPhaseCounts,
   getIlmPhase,
+  getPageIndex,
   getSummaryTableItems,
+  MIN_PAGE_SIZE,
   shouldCreateIndexNames,
   shouldCreatePatternRollup,
 } from './helpers';
@@ -33,6 +36,7 @@ import {
   getTotalDocsCount,
   getTotalPatternIncompatible,
   getTotalPatternIndicesChecked,
+  getTotalSizeInBytes,
 } from '../../helpers';
 import { IndexProperties } from '../index_properties';
 import { LoadingEmptyPrompt } from '../loading_empty_prompt';
@@ -41,7 +45,7 @@ import { RemoteClustersCallout } from '../remote_clusters_callout';
 import { SummaryTable } from '../summary_table';
 import { getSummaryTableColumns } from '../summary_table/helpers';
 import * as i18n from './translations';
-import type { PatternRollup } from '../../types';
+import type { PatternRollup, SelectedIndex, SortConfig } from '../../types';
 import { useIlmExplain } from '../../use_ilm_explain';
 import { useStats } from '../../use_stats';
 
@@ -55,7 +59,8 @@ const EMPTY_INDEX_NAMES: string[] = [];
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
   canUserCreateAndReadCases: () => boolean;
-  defaultNumberFormat: string;
+  formatBytes: (value: number | undefined) => string;
+  formatNumber: (value: number | undefined) => string;
   getGroupByFieldsOnClick: (
     elements: Array<
       | FlameElementEvent
@@ -80,6 +85,8 @@ interface Props {
   }) => void;
   pattern: string;
   patternRollup: PatternRollup | undefined;
+  selectedIndex: SelectedIndex | null;
+  setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
   theme: Theme;
   updatePatternIndexNames: ({
     indexNames,
@@ -94,17 +101,25 @@ interface Props {
 const PatternComponent: React.FC<Props> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
-  defaultNumberFormat,
+  formatBytes,
+  formatNumber,
   getGroupByFieldsOnClick,
   indexNames,
   ilmPhases,
   openCreateCaseFlyout,
   pattern,
   patternRollup,
+  selectedIndex,
+  setSelectedIndex,
   theme,
   updatePatternIndexNames,
   updatePatternRollup,
 }) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [sorting, setSorting] = useState<SortConfig>(defaultSort);
+  const [pageIndex, setPageIndex] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(MIN_PAGE_SIZE);
+
   const { error: statsError, loading: loadingStats, stats } = useStats(pattern);
   const { error: ilmExplainError, loading: loadingIlmExplain, ilmExplain } = useIlmExplain(pattern);
 
@@ -129,7 +144,8 @@ const PatternComponent: React.FC<Props> = ({
               <IndexProperties
                 addSuccessToast={addSuccessToast}
                 canUserCreateAndReadCases={canUserCreateAndReadCases}
-                defaultNumberFormat={defaultNumberFormat}
+                formatBytes={formatBytes}
+                formatNumber={formatNumber}
                 docsCount={getDocsCount({ stats, indexName })}
                 getGroupByFieldsOnClick={getGroupByFieldsOnClick}
                 ilmPhase={ilmExplain != null ? getIlmPhase(ilmExplain[indexName]) : undefined}
@@ -148,7 +164,8 @@ const PatternComponent: React.FC<Props> = ({
     [
       addSuccessToast,
       canUserCreateAndReadCases,
-      defaultNumberFormat,
+      formatBytes,
+      formatNumber,
       getGroupByFieldsOnClick,
       ilmExplain,
       itemIdToExpandedRowMap,
@@ -171,9 +188,20 @@ const PatternComponent: React.FC<Props> = ({
         pattern,
         patternDocsCount: patternRollup?.docsCount ?? 0,
         results: patternRollup?.results,
+        sortByColumn: sorting.sort.field,
+        sortByDirection: sorting.sort.direction,
         stats,
       }),
-    [ilmExplain, indexNames, pattern, patternRollup, stats]
+    [
+      ilmExplain,
+      indexNames,
+      pattern,
+      patternRollup?.docsCount,
+      patternRollup?.results,
+      sorting.sort.direction,
+      sorting.sort.field,
+      stats,
+    ]
   );
 
   useEffect(() => {
@@ -196,6 +224,10 @@ const PatternComponent: React.FC<Props> = ({
         indices: getIndexNames({ stats, ilmExplain, ilmPhases }).length,
         pattern,
         results: undefined,
+        sizeInBytes: getTotalSizeInBytes({
+          indexNames: getIndexNames({ stats, ilmExplain, ilmPhases }),
+          stats,
+        }),
         stats,
       });
     }
@@ -212,18 +244,49 @@ const PatternComponent: React.FC<Props> = ({
     updatePatternRollup,
   ]);
 
+  useEffect(() => {
+    if (selectedIndex?.pattern === pattern) {
+      const selectedPageIndex = getPageIndex({
+        indexName: selectedIndex.indexName,
+        items,
+        pageSize,
+      });
+
+      if (selectedPageIndex != null) {
+        setPageIndex(selectedPageIndex);
+      }
+
+      if (itemIdToExpandedRowMap[selectedIndex.indexName] == null) {
+        toggleExpanded(selectedIndex.indexName); // expand the selected index
+      }
+
+      containerRef.current?.scrollIntoView();
+      setSelectedIndex(null);
+    }
+  }, [
+    itemIdToExpandedRowMap,
+    items,
+    pageSize,
+    pattern,
+    selectedIndex,
+    setSelectedIndex,
+    toggleExpanded,
+  ]);
+
   return (
-    <EuiPanel hasBorder={false} hasShadow={false}>
+    <EuiPanel data-test-subj={`${pattern}PatternPanel`} hasBorder={false} hasShadow={false}>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem grow={false}>
           <PatternSummary
-            defaultNumberFormat={defaultNumberFormat}
+            formatBytes={formatBytes}
+            formatNumber={formatNumber}
             incompatible={getTotalPatternIncompatible(patternRollup?.results)}
             indices={indexNames?.length}
             indicesChecked={getTotalPatternIndicesChecked(patternRollup)}
             ilmExplainPhaseCounts={ilmExplainPhaseCounts}
             pattern={pattern}
             patternDocsCount={patternRollup?.docsCount ?? 0}
+            patternSizeInBytes={patternRollup?.sizeInBytes ?? 0}
           />
           <EuiSpacer />
         </EuiFlexItem>
@@ -242,19 +305,27 @@ const PatternComponent: React.FC<Props> = ({
         {loading && <LoadingEmptyPrompt loading={i18n.LOADING_STATS} />}
 
         {!loading && error == null && (
-          <SummaryTable
-            defaultNumberFormat={defaultNumberFormat}
-            getTableColumns={getSummaryTableColumns}
-            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            items={items}
-            toggleExpanded={toggleExpanded}
-          />
+          <div ref={containerRef}>
+            <SummaryTable
+              formatBytes={formatBytes}
+              formatNumber={formatNumber}
+              getTableColumns={getSummaryTableColumns}
+              itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+              items={items}
+              pageIndex={pageIndex}
+              pageSize={pageSize}
+              pattern={pattern}
+              setPageIndex={setPageIndex}
+              setPageSize={setPageSize}
+              setSorting={setSorting}
+              toggleExpanded={toggleExpanded}
+              sorting={sorting}
+            />
+          </div>
         )}
       </EuiFlexGroup>
     </EuiPanel>
   );
 };
-
-PatternComponent.displayName = 'PatternComponent';
 
 export const Pattern = React.memo(PatternComponent);

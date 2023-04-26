@@ -9,4 +9,4 @@
 export const PLUGIN_ID = 'guidedOnboarding';
 export const PLUGIN_NAME = 'guidedOnboarding';
 
-export const API_BASE_PATH = '/api/guided_onboarding';
+export const API_BASE_PATH = '/internal/guided_onboarding';

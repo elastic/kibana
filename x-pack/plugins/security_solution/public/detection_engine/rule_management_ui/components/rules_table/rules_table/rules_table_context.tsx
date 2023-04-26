@@ -40,8 +40,18 @@ import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
 
 interface RulesSnoozeSettings {
-  data: Record<string, RuleSnoozeSettings>; // The key is a rule SO's id (not ruleId)
+  /**
+   * A map object using rule SO's id (not ruleId) as keys and snooze settings as values
+   */
+  data: Record<string, RuleSnoozeSettings>;
+  /**
+   * Sets to true during the first data loading
+   */
   isLoading: boolean;
+  /**
+   * Sets to true during data loading
+   */
+  isFetching: boolean;
   isError: boolean;
 }
 
@@ -290,6 +300,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const {
     data: rulesSnoozeSettings,
     isLoading: isSnoozeSettingsLoading,
+    isFetching: isSnoozeSettingsFetching,
     isError: isSnoozeSettingsFetchError,
     refetch: refetchSnoozeSettings,
   } = useFetchRulesSnoozeSettings(
@@ -349,6 +360,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         rulesSnoozeSettings: {
           data: rulesSnoozeSettingsMap,
           isLoading: isSnoozeSettingsLoading,
+          isFetching: isSnoozeSettingsFetching,
           isError: isSnoozeSettingsFetchError,
         },
         pagination: {
@@ -382,6 +394,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     rules,
     rulesSnoozeSettings,
     isSnoozeSettingsLoading,
+    isSnoozeSettingsFetching,
     isSnoozeSettingsFetchError,
     page,
     perPage,

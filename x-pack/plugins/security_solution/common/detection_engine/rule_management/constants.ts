@@ -7,5 +7,6 @@
 
 export enum DuplicateOptions {
   withExceptions = 'withExceptions',
+  withExceptionsExcludeExpiredExceptions = 'withExceptionsExcludeExpiredExceptions',
   withoutExceptions = 'withoutExceptions',
 }
