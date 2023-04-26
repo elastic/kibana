@@ -11,7 +11,6 @@ import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem } from '@elastic/
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InventoryView } from '../../../common/inventory_views';
 import { SavedViewManageViewsFlyout } from './manage_views_flyout';
-import { SavedViewListModal } from './view_list_modal';
 import { useBoolean } from '../../hooks/use_boolean';
 import { UpsertViewModal } from './upsert_modal';
 

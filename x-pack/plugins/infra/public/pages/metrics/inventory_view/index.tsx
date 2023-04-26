@@ -65,9 +65,9 @@ export const SnapshotPage = () => {
           pageSectionProps={{
             contentProps: {
               css: css`
-                  ${fullHeightContentStyles};
-                  padding-bottom: 0;
-                `,
+                ${fullHeightContentStyles};
+                padding-bottom: 0;
+              `,
             },
           }}
         >
