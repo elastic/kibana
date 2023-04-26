@@ -15,11 +15,11 @@ export {
   LEGACY_DASHBOARD_APP_ID,
 } from './dashboard_constants';
 export {
+  type DashboardAPI,
+  type AwaitingDashboardAPI,
+  DashboardRenderer,
   DASHBOARD_CONTAINER_TYPE,
-  type DashboardContainer,
   type DashboardCreationOptions,
-  LazyDashboardContainerRenderer,
-  useDashboardContainerContext,
 } from './dashboard_container';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 

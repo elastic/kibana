@@ -9,7 +9,15 @@ import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiSwitch, EuiTitle } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiSwitch,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -27,7 +35,7 @@ import { OverviewLogic } from './overview.logic';
 
 export const GenerateApiKeyPanel: React.FC = () => {
   const { apiKey, isGenerateModalOpen } = useValues(OverviewLogic);
-  const { indexName, ingestionMethod } = useValues(IndexViewLogic);
+  const { indexName, ingestionMethod, isHiddenIndex } = useValues(IndexViewLogic);
   const { closeGenerateModal } = useActions(OverviewLogic);
   const { defaultPipeline } = useValues(SettingsLogic);
 
@@ -41,11 +49,29 @@ export const GenerateApiKeyPanel: React.FC = () => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiPanel hasBorder>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem>
-                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                  <EuiFlexItem>
-                    {indexName[0] !== '.' && (
+            {isHiddenIndex ? (
+              <EuiEmptyPrompt
+                body={
+                  <p>
+                    {i18n.translate('xpack.enterpriseSearch.content.overview.emptyPrompt.body', {
+                      defaultMessage:
+                        'We do not recommend adding documents to an externally managed index.',
+                    })}
+                  </p>
+                }
+                title={
+                  <h2>
+                    {i18n.translate('xpack.enterpriseSearch.content.overview.emptyPrompt.title', {
+                      defaultMessage: 'Index managed externally',
+                    })}
+                  </h2>
+                }
+              />
+            ) : (
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem>
+                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                    <EuiFlexItem>
                       <EuiTitle size="s">
                         <h2>
                           {i18n.translate(
@@ -54,45 +80,42 @@ export const GenerateApiKeyPanel: React.FC = () => {
                           )}
                         </h2>
                       </EuiTitle>
-                    )}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiSwitch
-                      data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKey-optimizedRequest`}
-                      onChange={(event) => setOptimizedRequest(event.target.checked)}
-                      label={i18n.translate(
-                        'xpack.enterpriseSearch.content.overview.optimizedRequest.label',
-                        { defaultMessage: 'View Enterprise Search optimized request' }
-                      )}
-                      checked={optimizedRequest}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-                      <EuiFlexItem>
-                        <ClientLibrariesPopover />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <ManageKeysPopover />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              {indexName[0] !== '.' && (
-                <>
-                  <EuiSpacer />
-                  <EuiFlexItem>
-                    <CurlRequest
-                      apiKey={apiKey}
-                      document={DOCUMENTS_API_JSON_EXAMPLE}
-                      indexName={indexName}
-                      pipeline={optimizedRequest ? defaultPipeline : undefined}
-                    />
-                  </EuiFlexItem>
-                </>
-              )}
-            </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiSwitch
+                        data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKey-optimizedRequest`}
+                        onChange={(event) => setOptimizedRequest(event.target.checked)}
+                        label={i18n.translate(
+                          'xpack.enterpriseSearch.content.overview.optimizedRequest.label',
+                          { defaultMessage: 'View Enterprise Search optimized request' }
+                        )}
+                        checked={optimizedRequest}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+                        <EuiFlexItem>
+                          <ClientLibrariesPopover />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <ManageKeysPopover />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+
+                <EuiSpacer />
+                <EuiFlexItem>
+                  <CurlRequest
+                    apiKey={apiKey}
+                    document={DOCUMENTS_API_JSON_EXAMPLE}
+                    indexName={indexName}
+                    pipeline={optimizedRequest ? defaultPipeline : undefined}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>

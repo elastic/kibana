@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { EntityAnalyticsRiskScores } from '.';
-import type { UserRiskScore } from '../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
 import type { SeverityCount } from '../../../../explore/components/risk_score/severity/types';
 import { useRiskScore, useRiskScoreKpi } from '../../../../explore/containers/risk_score';
@@ -146,17 +145,17 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       expect(queryByTestId('entity_analytics_content')).not.toBeInTheDocument();
     });
 
-    it('renders alerts count', () => {
+    it('renders alerts count', async () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
       mockUseRiskScoreKpi.mockReturnValue({
         severityCount: mockSeverityCount,
         loading: false,
       });
       const alertsCount = 999;
-      const data: UserRiskScore[] = [
+      const data = [
         {
           '@timestamp': '1234567899',
-          user: {
+          [riskEntity]: {
             name: 'testUsermame',
             risk: {
               rule_risks: [],
@@ -176,10 +175,12 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
         </TestProviders>
       );
 
-      expect(queryByTestId('risk-score-alerts')).toHaveTextContent(alertsCount.toString());
+      await waitFor(() => {
+        expect(queryByTestId('risk-score-alerts')).toHaveTextContent(alertsCount.toString());
+      });
     });
 
-    it('navigates to alerts page with filters when alerts count is clicked', () => {
+    it('navigates to alerts page with filters when alerts count is clicked', async () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
       mockUseRiskScoreKpi.mockReturnValue({
         severityCount: mockSeverityCount,
@@ -211,13 +212,15 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
 
       fireEvent.click(getByTestId('risk-score-alerts'));
 
-      expect(mockOpenAlertsPageWithFilters.mock.calls[0][0]).toEqual([
-        {
-          title: riskEntity === RiskScoreEntity.host ? 'Host' : 'User',
-          fieldName: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
-          selectedOptions: [name],
-        },
-      ]);
+      await waitFor(() => {
+        expect(mockOpenAlertsPageWithFilters.mock.calls[0][0]).toEqual([
+          {
+            title: riskEntity === RiskScoreEntity.host ? 'Host' : 'User',
+            fieldName: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+            selectedOptions: [name],
+          },
+        ]);
+      });
     });
   }
 );

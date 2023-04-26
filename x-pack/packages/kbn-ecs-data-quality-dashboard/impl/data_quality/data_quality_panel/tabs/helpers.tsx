@@ -14,6 +14,7 @@ import type {
   WordCloudElementEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
+import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { EuiBadge } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
@@ -35,6 +36,7 @@ import { getFillColor } from './summary_tab/helpers';
 import * as i18n from '../index_properties/translations';
 import { SummaryTab } from './summary_tab';
 import type { EnrichedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../types';
+import { getSizeInBytes } from '../../helpers';
 
 export const getMissingTimestampComment = (): string =>
   getMarkdownComment({
@@ -48,7 +50,7 @@ ${i18n.PAGES_MAY_NOT_DISPLAY_EVENTS}
 
 export const showMissingTimestampCallout = (
   enrichedFieldMetadata: EnrichedFieldMetadata[]
-): boolean => enrichedFieldMetadata.length === 0;
+): boolean => !enrichedFieldMetadata.some((x) => x.name === '@timestamp');
 
 export const getEcsCompliantColor = (partitionedFieldMetadata: PartitionedFieldMetadata): string =>
   showMissingTimestampCallout(partitionedFieldMetadata.ecsCompliant)
@@ -58,8 +60,9 @@ export const getEcsCompliantColor = (partitionedFieldMetadata: PartitionedFieldM
 export const getTabs = ({
   addSuccessToast,
   addToNewCaseDisabled,
-  defaultNumberFormat,
   docsCount,
+  formatBytes,
+  formatNumber,
   getGroupByFieldsOnClick,
   ilmPhase,
   indexName,
@@ -68,11 +71,13 @@ export const getTabs = ({
   pattern,
   patternDocsCount,
   setSelectedTabId,
+  stats,
   theme,
 }: {
   addSuccessToast: (toast: { title: string }) => void;
   addToNewCaseDisabled: boolean;
-  defaultNumberFormat: string;
+  formatBytes: (value: number | undefined) => string;
+  formatNumber: (value: number | undefined) => string;
   docsCount: number;
   getGroupByFieldsOnClick: (
     elements: Array<
@@ -94,6 +99,7 @@ export const getTabs = ({
   pattern: string;
   patternDocsCount: number;
   setSelectedTabId: (tabId: string) => void;
+  stats: Record<string, IndicesStatsIndicesStats> | null;
   theme: Theme;
 }) => [
   {
@@ -101,7 +107,8 @@ export const getTabs = ({
       <SummaryTab
         addSuccessToast={addSuccessToast}
         addToNewCaseDisabled={addToNewCaseDisabled}
-        defaultNumberFormat={defaultNumberFormat}
+        formatBytes={formatBytes}
+        formatNumber={formatNumber}
         docsCount={docsCount}
         getGroupByFieldsOnClick={getGroupByFieldsOnClick}
         ilmPhase={ilmPhase}
@@ -111,6 +118,7 @@ export const getTabs = ({
         pattern={pattern}
         patternDocsCount={patternDocsCount}
         setSelectedTabId={setSelectedTabId}
+        sizeInBytes={getSizeInBytes({ indexName, stats })}
         theme={theme}
       />
     ),
@@ -127,13 +135,15 @@ export const getTabs = ({
       <IncompatibleTab
         addSuccessToast={addSuccessToast}
         addToNewCaseDisabled={addToNewCaseDisabled}
-        defaultNumberFormat={defaultNumberFormat}
         docsCount={docsCount}
+        formatBytes={formatBytes}
+        formatNumber={formatNumber}
         ilmPhase={ilmPhase}
         indexName={indexName}
         onAddToNewCase={onAddToNewCase}
         partitionedFieldMetadata={partitionedFieldMetadata}
         patternDocsCount={patternDocsCount}
+        sizeInBytes={getSizeInBytes({ indexName, stats })}
       />
     ),
     id: INCOMPATIBLE_TAB_ID,
@@ -148,12 +158,14 @@ export const getTabs = ({
     content: (
       <CustomTab
         addSuccessToast={addSuccessToast}
-        defaultNumberFormat={defaultNumberFormat}
         docsCount={docsCount}
+        formatBytes={formatBytes}
+        formatNumber={formatNumber}
         ilmPhase={ilmPhase}
         indexName={indexName}
         partitionedFieldMetadata={partitionedFieldMetadata}
         patternDocsCount={patternDocsCount}
+        sizeInBytes={getSizeInBytes({ indexName, stats })}
       />
     ),
     id: 'customTab',

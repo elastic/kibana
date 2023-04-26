@@ -15,9 +15,9 @@ export const websiteSearchGuideId = 'websiteSearch';
 export const databaseSearchGuideId = 'databaseSearch';
 
 const apiMethods = {
-  [appSearchGuideId]: INGESTION_METHOD_IDS.api,
-  [databaseSearchGuideId]: INGESTION_METHOD_IDS.native_connector,
-  [websiteSearchGuideId]: INGESTION_METHOD_IDS.crawler,
+  [appSearchGuideId]: INGESTION_METHOD_IDS.API,
+  [databaseSearchGuideId]: INGESTION_METHOD_IDS.CONNECTOR,
+  [websiteSearchGuideId]: INGESTION_METHOD_IDS.CRAWLER,
 };
 
 export type EnterpriseSearchGuideIds =

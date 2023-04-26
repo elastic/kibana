@@ -24,12 +24,11 @@ import {
   OWNER_INFO,
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
-import type { AlertInfo, CaseSavedObject, FileAttachmentRequest } from './types';
+import type { AlertInfo, FileAttachmentRequest } from './types';
 
 import type {
-  CaseAttributes,
   CasePostRequest,
-  CaseResponse,
+  Case,
   CasesFindResponse,
   CommentAttributes,
   CommentRequest,
@@ -56,6 +55,7 @@ import {
   getLensVisualizations,
 } from '../../common/utils/markdown_plugins/utils';
 import { dedupAssignees } from '../client/cases/utils';
+import type { CaseSavedObjectTransformed, CaseTransformedAttributes } from './types/case';
 
 /**
  * Default sort field for querying saved objects.
@@ -73,7 +73,7 @@ export const transformNewCase = ({
 }: {
   user: User;
   newCase: CasePostRequest;
-}): CaseAttributes => ({
+}): CaseTransformedAttributes => ({
   ...newCase,
   duration: null,
   severity: newCase.severity ?? CaseSeverity.LOW,
@@ -97,7 +97,7 @@ export const transformCases = ({
   perPage,
   total,
 }: {
-  casesMap: Map<string, CaseResponse>;
+  casesMap: Map<string, Case>;
   countOpenCases: number;
   countInProgressCases: number;
   countClosedCases: number;
@@ -120,11 +120,11 @@ export const flattenCaseSavedObject = ({
   totalComment = comments.length,
   totalAlerts = 0,
 }: {
-  savedObject: CaseSavedObject;
+  savedObject: CaseSavedObjectTransformed;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
-}): CaseResponse => ({
+}): Case => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),

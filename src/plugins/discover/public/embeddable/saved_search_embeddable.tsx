@@ -198,12 +198,19 @@ export class SavedSearchEmbeddable
 
     this.searchProps!.isLoading = true;
 
+    const wasAlreadyRendered = this.getOutput().rendered;
+
     this.updateOutput({
       ...this.getOutput(),
       loading: true,
       rendered: false,
       error: undefined,
     });
+
+    if (wasAlreadyRendered && this.node) {
+      // to show a loading indicator during a refetch, we need to rerender here
+      this.render(this.node);
+    }
 
     const parentContext = this.input.executionContext;
     const child: KibanaExecutionContext = {

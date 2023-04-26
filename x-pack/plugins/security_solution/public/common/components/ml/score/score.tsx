@@ -26,7 +26,7 @@ export const ScoreComponent = ({
 
   return (
     <SecurityCellActions
-      mode={CellActionsMode.HOVER}
+      mode={CellActionsMode.HOVER_DOWN}
       field={{
         name: score.entityName,
         value: score.entityValue,

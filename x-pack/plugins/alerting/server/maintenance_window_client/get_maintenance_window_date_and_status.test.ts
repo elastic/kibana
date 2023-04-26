@@ -69,6 +69,16 @@ describe('getMaintenanceWindowDateAndStatus', () => {
     expect(result.eventEndTime).toEqual('2023-03-25T01:00:00.000Z');
     expect(result.status).toEqual('archived');
 
+    result = getMaintenanceWindowDateAndStatus({
+      events: [],
+      dateToCompare: new Date(),
+      expirationDate: moment().subtract(1, 'minute').toDate(),
+    });
+
+    expect(result.eventStartTime).toEqual(null);
+    expect(result.eventEndTime).toEqual(null);
+    expect(result.status).toEqual('archived');
+
     jest.useFakeTimers().setSystemTime(new Date('2023-03-28T00:30:00.000Z'));
     result = getMaintenanceWindowDateAndStatus({
       events,

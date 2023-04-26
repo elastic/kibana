@@ -518,6 +518,20 @@
           },
           {
             "parentPluginId": "infra",
+            "id": "def-server.InfraConfig.logs",
+            "type": "Object",
+            "tags": [],
+            "label": "logs",
+            "description": [],
+            "signature": [
+              "{ app_target: \"discover\" | \"logs-ui\"; }"
+            ],
+            "path": "x-pack/plugins/infra/common/plugin_config_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "infra",
             "id": "def-server.InfraConfig.sources",
             "type": "Object",
             "tags": [],
@@ -644,6 +658,20 @@
       "deprecated": false,
       "trackAdoption": false,
       "children": [
+        {
+          "parentPluginId": "infra",
+          "id": "def-server.InfraPluginStart.inventoryViews",
+          "type": "Object",
+          "tags": [],
+          "label": "inventoryViews",
+          "description": [],
+          "signature": [
+            "InventoryViewsServiceStart"
+          ],
+          "path": "x-pack/plugins/infra/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
         {
           "parentPluginId": "infra",
           "id": "def-server.InfraPluginStart.logViews",
