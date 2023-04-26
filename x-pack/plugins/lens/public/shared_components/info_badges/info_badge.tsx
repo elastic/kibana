@@ -44,63 +44,38 @@ export function InfoBadge({
         margin: ${euiTheme.size.base} 0 0;
       `}
     >
-      <EuiFlexGroup justifyContent={hasColor ? 'center' : 'spaceBetween'} gutterSize="s">
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         {hasColor ? (
           <EuiFlexItem grow={false}>
             <EuiIcon
               color={hasSingleColor ? palette[0] : undefined}
               type={iconType}
-              css={css`
-                margin-top: ${euiTheme.size.xxs};
-              `}
               data-test-subj={`${dataTestSubjPrefix}-${index}-icon`}
             />
           </EuiFlexItem>
         ) : null}
-        <EuiFlexItem grow={Boolean(palette)}>
+        <EuiFlexItem>
           <EuiText size="s" data-test-subj={`${dataTestSubjPrefix}-${index}-title`}>
             {title}
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            padding-right: 0;
-          `}
-        >
-          {children}
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{children}</EuiFlexItem>
       </EuiFlexGroup>
       {hasMultipleColors ? (
-        <EuiFlexGroup
-          justifyContent={'center'}
-          gutterSize="s"
+        <div
           css={css`
             margin-top: ${euiTheme.size.xs};
             overflow-y: hidden;
+            height: ${euiTheme.size.xs};
+            margin-left: ${euiTheme.size.l};
           `}
         >
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              height: ${euiTheme.size.xs};
-            `}
-          >
-            <EuiIcon type="empty" />
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={Boolean(palette)}
-            css={css`
-              height: ${euiTheme.size.xs};
-            `}
-          >
-            <EuiColorPaletteDisplay
-              size="xs"
-              palette={palette}
-              data-test-subj={`${dataTestSubjPrefix}-${index}-palette`}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <EuiColorPaletteDisplay
+            size="xs"
+            palette={palette}
+            data-test-subj={`${dataTestSubjPrefix}-${index}-palette`}
+          />
+        </div>
       ) : null}
     </li>
   );

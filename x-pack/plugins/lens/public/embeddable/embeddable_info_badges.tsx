@@ -70,20 +70,13 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
     >
       <div>
         {messages.map(({ shortMessage, longMessage }, index) => {
-          const isFirstItem = index === 0;
-          const isLastItem = index === messages.length - 1;
-          let bottomPadding = isFirstItem ? 0 : euiTheme.size.s;
-          if (isLastItem) {
-            bottomPadding = euiTheme.size.base;
-          }
           return (
             <>
-              {index ? <EuiHorizontalRule margin="s" /> : null}
+              {index ? <EuiHorizontalRule margin="none" /> : null}
               <aside
                 key={`${shortMessage}-${index}`}
                 css={css`
-                  padding: ${!isFirstItem ? 0 : euiTheme.size.base} ${euiTheme.size.base}
-                    ${bottomPadding};
+                  padding: ${euiTheme.size.base};
                 `}
               >
                 <EuiTitle size="xxs" css={css`color=${euiTheme.colors.title}`}>
