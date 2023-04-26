@@ -51,6 +51,7 @@
     }
   },
   "task": {
+    "dynamic": false,
     "properties": {
       "taskType": {
         "type": "keyword"
@@ -59,9 +60,6 @@
         "type": "date"
       },
       "runAt": {
-        "type": "date"
-      },
-      "startedAt": {
         "type": "date"
       },
       "retryAt": {
@@ -81,18 +79,6 @@
         "type": "integer"
       },
       "status": {
-        "type": "keyword"
-      },
-      "traceparent": {
-        "type": "text"
-      },
-      "params": {
-        "type": "text"
-      },
-      "state": {
-        "type": "text"
-      },
-      "user": {
         "type": "keyword"
       },
       "scope": {
@@ -146,6 +132,7 @@
     }
   },
   "url": {
+    "dynamic": false,
     "properties": {
       "slug": {
         "type": "text",
@@ -155,27 +142,11 @@
           }
         }
       },
-      "accessCount": {
-        "type": "long"
-      },
       "accessDate": {
         "type": "date"
       },
       "createDate": {
         "type": "date"
-      },
-      "url": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword",
-            "ignore_above": 2048
-          }
-        }
-      },
-      "locatorJSON": {
-        "type": "text",
-        "index": false
       }
     }
   },
@@ -209,6 +180,7 @@
     }
   },
   "space": {
+    "dynamic": false,
     "properties": {
       "name": {
         "type": "text",
@@ -218,25 +190,6 @@
             "ignore_above": 2048
           }
         }
-      },
-      "description": {
-        "type": "text"
-      },
-      "initials": {
-        "type": "keyword"
-      },
-      "color": {
-        "type": "keyword"
-      },
-      "disabledFeatures": {
-        "type": "keyword"
-      },
-      "imageUrl": {
-        "type": "text",
-        "index": false
-      },
-      "_reserved": {
-        "type": "boolean"
       }
     }
   },
@@ -523,32 +476,8 @@
     }
   },
   "telemetry": {
-    "properties": {
-      "enabled": {
-        "type": "boolean"
-      },
-      "sendUsageFrom": {
-        "type": "keyword"
-      },
-      "lastReported": {
-        "type": "date"
-      },
-      "lastVersionChecked": {
-        "type": "keyword"
-      },
-      "userHasSeenNotice": {
-        "type": "boolean"
-      },
-      "reportFailureCount": {
-        "type": "integer"
-      },
-      "reportFailureVersion": {
-        "type": "keyword"
-      },
-      "allowChangingOptInStatus": {
-        "type": "boolean"
-      }
-    }
+    "dynamic": false,
+    "properties": {}
   },
   "file": {
     "dynamic": false,
@@ -603,6 +532,7 @@
     }
   },
   "action": {
+    "dynamic": false,
     "properties": {
       "name": {
         "type": "text",
@@ -614,135 +544,47 @@
       },
       "actionTypeId": {
         "type": "keyword"
-      },
-      "isMissingSecrets": {
-        "type": "boolean"
-      },
-      "config": {
-        "enabled": false,
-        "type": "object"
-      },
-      "secrets": {
-        "type": "binary"
       }
     }
   },
   "action_task_params": {
-    "properties": {
-      "actionId": {
-        "type": "keyword"
-      },
-      "consumer": {
-        "type": "keyword"
-      },
-      "params": {
-        "enabled": false,
-        "type": "object"
-      },
-      "apiKey": {
-        "type": "binary"
-      },
-      "executionId": {
-        "type": "keyword"
-      },
-      "relatedSavedObjects": {
-        "enabled": false,
-        "type": "object"
-      }
-    }
+    "dynamic": false,
+    "properties": {}
   },
   "connector_token": {
+    "dynamic": false,
     "properties": {
       "connectorId": {
         "type": "keyword"
       },
       "tokenType": {
         "type": "keyword"
-      },
-      "token": {
-        "type": "binary"
-      },
-      "expiresAt": {
-        "type": "date"
-      },
-      "createdAt": {
-        "type": "date"
-      },
-      "updatedAt": {
-        "type": "date"
       }
     }
   },
   "query": {
+    "dynamic": false,
     "properties": {
       "title": {
         "type": "text"
       },
       "description": {
         "type": "text"
-      },
-      "query": {
-        "properties": {
-          "language": {
-            "type": "keyword"
-          },
-          "query": {
-            "type": "keyword",
-            "index": false
-          }
-        }
-      },
-      "filters": {
-        "dynamic": false,
-        "properties": {}
-      },
-      "timefilter": {
-        "dynamic": false,
-        "properties": {}
       }
     }
   },
   "kql-telemetry": {
-    "properties": {
-      "optInCount": {
-        "type": "long"
-      },
-      "optOutCount": {
-        "type": "long"
-      }
-    }
+    "dynamic": false,
+    "properties": {}
   },
   "search-session": {
+    "dynamic": false,
     "properties": {
       "sessionId": {
         "type": "keyword"
       },
-      "name": {
-        "type": "keyword"
-      },
       "created": {
         "type": "date"
-      },
-      "expires": {
-        "type": "date"
-      },
-      "appId": {
-        "type": "keyword"
-      },
-      "locatorId": {
-        "type": "keyword"
-      },
-      "initialState": {
-        "dynamic": false,
-        "properties": {}
-      },
-      "restoreState": {
-        "dynamic": false,
-        "properties": {}
-      },
-      "idMapping": {
-        "dynamic": false,
-        "properties": {}
       },
       "realmType": {
         "type": "keyword"
@@ -752,12 +594,6 @@
       },
       "username": {
         "type": "keyword"
-      },
-      "version": {
-        "type": "keyword"
-      },
-      "isCanceled": {
-        "type": "boolean"
       }
     }
   },
@@ -777,6 +613,7 @@
     }
   },
   "alert": {
+    "dynamic": false,
     "properties": {
       "enabled": {
         "type": "boolean"
@@ -810,6 +647,7 @@
         "type": "keyword"
       },
       "actions": {
+        "dynamic": false,
         "type": "nested",
         "properties": {
           "group": {
@@ -820,26 +658,6 @@
           },
           "actionTypeId": {
             "type": "keyword"
-          },
-          "params": {
-            "dynamic": false,
-            "properties": {}
-          },
-          "frequency": {
-            "properties": {
-              "summary": {
-                "index": false,
-                "type": "boolean"
-              },
-              "notifyWhen": {
-                "index": false,
-                "type": "keyword"
-              },
-              "throttle": {
-                "index": false,
-                "type": "keyword"
-              }
-            }
           }
         }
       },
@@ -872,12 +690,6 @@
       "updatedAt": {
         "type": "date"
       },
-      "apiKey": {
-        "type": "binary"
-      },
-      "apiKeyOwner": {
-        "type": "keyword"
-      },
       "throttle": {
         "type": "keyword"
       },
@@ -890,33 +702,10 @@
       "mutedInstanceIds": {
         "type": "keyword"
       },
-      "meta": {
-        "properties": {
-          "versionApiKeyLastmodified": {
-            "type": "keyword"
-          }
-        }
-      },
       "monitoring": {
         "properties": {
           "run": {
             "properties": {
-              "history": {
-                "properties": {
-                  "duration": {
-                    "type": "long"
-                  },
-                  "success": {
-                    "type": "boolean"
-                  },
-                  "timestamp": {
-                    "type": "date"
-                  },
-                  "outcome": {
-                    "type": "keyword"
-                  }
-                }
-              },
               "calculated_metrics": {
                 "properties": {
                   "p50": {
@@ -966,6 +755,9 @@
           }
         }
       },
+      "revision": {
+        "type": "long"
+      },
       "snoozeSchedule": {
         "type": "nested",
         "properties": {
@@ -978,66 +770,8 @@
           "skipRecurrences": {
             "type": "date",
             "format": "strict_date_time"
-          },
-          "rRule": {
-            "type": "nested",
-            "properties": {
-              "freq": {
-                "type": "keyword"
-              },
-              "dtstart": {
-                "type": "date",
-                "format": "strict_date_time"
-              },
-              "tzid": {
-                "type": "keyword"
-              },
-              "until": {
-                "type": "date",
-                "format": "strict_date_time"
-              },
-              "count": {
-                "type": "long"
-              },
-              "interval": {
-                "type": "long"
-              },
-              "wkst": {
-                "type": "keyword"
-              },
-              "byweekday": {
-                "type": "keyword"
-              },
-              "bymonth": {
-                "type": "short"
-              },
-              "bysetpos": {
-                "type": "long"
-              },
-              "bymonthday": {
-                "type": "short"
-              },
-              "byyearday": {
-                "type": "short"
-              },
-              "byweekno": {
-                "type": "short"
-              },
-              "byhour": {
-                "type": "long"
-              },
-              "byminute": {
-                "type": "long"
-              },
-              "bysecond": {
-                "type": "long"
-              }
-            }
           }
         }
-      },
-      "nextRun": {
-        "type": "date"
       },
       "executionStatus": {
         "properties": {
@@ -1083,12 +817,6 @@
           "outcomeOrder": {
             "type": "float"
           },
-          "warning": {
-            "type": "text"
-          },
-          "outcomeMsg": {
-            "type": "text"
-          },
           "alertsCount": {
             "properties": {
               "active": {
@@ -1123,148 +851,45 @@
     }
   },
   "rules-settings": {
+    "dynamic": false,
     "properties": {
       "flapping": {
-        "properties": {
-          "enabled": {
-            "type": "boolean",
-            "index": false
-          },
-          "lookBackWindow": {
-            "type": "long",
-            "index": false
-          },
-          "statusChangeThreshold": {
-            "type": "long",
-            "index": false
-          },
-          "createdBy": {
-            "type": "keyword",
-            "index": false
-          },
-          "updatedBy": {
-            "type": "keyword",
-            "index": false
-          },
-          "createdAt": {
-            "type": "date",
-            "index": false
-          },
-          "updatedAt": {
-            "type": "date",
-            "index": false
-          }
-        }
+        "properties": {}
+      }
+    }
+  },
+  "maintenance-window": {
+    "dynamic": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "events": {
+        "type": "date_range",
+        "format": "epoch_millis||strict_date_optional_time"
       }
     }
   },
   "search": {
+    "dynamic": false,
     "properties": {
-      "columns": {
-        "type": "keyword",
-        "index": false,
-        "doc_values": false
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      }
+    }
+  },
+  "tag": {
+    "properties": {
+      "name": {
+        "type": "text"
       },
       "description": {
         "type": "text"
       },
-      "viewMode": {
-        "type": "keyword",
-        "index": false,
-        "doc_values": false
-      },
-      "hideChart": {
-        "type": "boolean",
-        "index": false,
-        "doc_values": false
-      },
-      "isTextBasedQuery": {
-        "type": "boolean",
-        "index": false,
-        "doc_values": false
-      },
-      "usesAdHocDataView": {
-        "type": "boolean",
-        "index": false,
-        "doc_values": false
-      },
-      "hideAggregatedPreview": {
-        "type": "boolean",
-        "index": false,
-        "doc_values": false
-      },
-      "hits": {
-        "type": "integer",
-        "index": false,
-        "doc_values": false
-      },
-      "kibanaSavedObjectMeta": {
-        "properties": {
-          "searchSourceJSON": {
-            "type": "text",
-            "index": false
-          }
-        }
-      },
-      "sort": {
-        "type": "keyword",
-        "index": false,
-        "doc_values": false
-      },
-      "title": {
-        "type": "text"
-      },
-      "grid": {
-        "dynamic": false,
-        "properties": {}
-      },
-      "version": {
-        "type": "integer"
-      },
-      "rowHeight": {
-        "type": "text"
-      },
-      "timeRestore": {
-        "type": "boolean",
-        "index": false,
-        "doc_values": false
-      },
-      "timeRange": {
-        "dynamic": false,
-        "properties": {
-          "from": {
-            "type": "keyword",
-            "index": false,
-            "doc_values": false
-          },
-          "to": {
-            "type": "keyword",
-            "index": false,
-            "doc_values": false
-          }
-        }
-      },
-      "refreshInterval": {
-        "dynamic": false,
-        "properties": {
-          "pause": {
-            "type": "boolean",
-            "index": false,
-            "doc_values": false
-          },
-          "value": {
-            "type": "integer",
-            "index": false,
-            "doc_values": false
-          }
-        }
-      },
-      "rowsPerPage": {
-        "type": "integer",
-        "index": false,
-        "doc_values": false
-      },
-      "breakdownField": {
+      "color": {
         "type": "text"
       }
     }
@@ -1302,129 +927,20 @@
       }
     }
   },
-  "tag": {
-    "properties": {
-      "name": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "color": {
-        "type": "text"
-      }
-    }
-  },
   "visualization": {
+    "dynamic": false,
     "properties": {
       "description": {
         "type": "text"
       },
       "kibanaSavedObjectMeta": {
-        "properties": {
-          "searchSourceJSON": {
-            "type": "text",
-            "index": false
-          }
-        }
-      },
-      "savedSearchRefName": {
-        "type": "keyword",
-        "index": false,
-        "doc_values": false
+        "properties": {}
       },
       "title": {
         "type": "text"
       },
-      "uiStateJSON": {
-        "type": "text",
-        "index": false
-      },
       "version": {
         "type": "integer"
-      },
-      "visState": {
-        "type": "text",
-        "index": false
-      }
-    }
-  },
-  "canvas-element": {
-    "dynamic": false,
-    "properties": {
-      "name": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        }
-      },
-      "help": {
-        "type": "text"
-      },
-      "content": {
-        "type": "text"
-      },
-      "image": {
-        "type": "text"
-      },
-      "@timestamp": {
-        "type": "date"
-      },
-      "@created": {
-        "type": "date"
-      }
-    }
-  },
-  "canvas-workpad": {
-    "dynamic": false,
-    "properties": {
-      "name": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        }
-      },
-      "@timestamp": {
-        "type": "date"
-      },
-      "@created": {
-        "type": "date"
-      }
-    }
-  },
-  "canvas-workpad-template": {
-    "dynamic": false,
-    "properties": {
-      "name": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        }
-      },
-      "help": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        }
-      },
-      "tags": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        }
-      },
-      "template_key": {
-        "type": "keyword"
       }
     }
   },
@@ -1535,12 +1051,8 @@
         "type": "keyword"
       },
       "state": {
-        "type": "flattened"
-      },
-      "expression": {
-        "index": false,
-        "doc_values": false,
-        "type": "keyword"
+        "dynamic": false,
+        "properties": {}
       }
     }
   },
@@ -1587,6 +1099,7 @@
     }
   },
   "cases-comments": {
+    "dynamic": false,
     "properties": {
       "comment": {
         "type": "text"
@@ -1599,17 +1112,6 @@
       },
       "actions": {
         "properties": {
-          "targets": {
-            "type": "nested",
-            "properties": {
-              "hostname": {
-                "type": "keyword"
-              },
-              "endpointId": {
-                "type": "keyword"
-              }
-            }
-          },
           "type": {
             "type": "keyword"
           }
@@ -1618,35 +1120,12 @@
       "alertId": {
         "type": "keyword"
       },
-      "index": {
-        "type": "keyword"
-      },
       "created_at": {
         "type": "date"
       },
       "created_by": {
         "properties": {
-          "full_name": {
-            "type": "keyword"
-          },
           "username": {
-            "type": "keyword"
-          },
-          "email": {
-            "type": "keyword"
-          },
-          "profile_uid": {
-            "type": "keyword"
-          }
-        }
-      },
-      "externalReferenceId": {
-        "type": "keyword"
-      },
-      "externalReferenceStorage": {
-        "dynamic": false,
-        "properties": {
-          "type": {
             "type": "keyword"
           }
         }
@@ -1654,156 +1133,41 @@
       "externalReferenceAttachmentTypeId": {
         "type": "keyword"
       },
-      "externalReferenceMetadata": {
-        "dynamic": false,
-        "properties": {}
-      },
       "persistableStateAttachmentTypeId": {
         "type": "keyword"
-      },
-      "persistableStateAttachmentState": {
-        "dynamic": false,
-        "properties": {}
       },
       "pushed_at": {
         "type": "date"
       },
-      "pushed_by": {
-        "properties": {
-          "username": {
-            "type": "keyword"
-          },
-          "full_name": {
-            "type": "keyword"
-          },
-          "email": {
-            "type": "keyword"
-          },
-          "profile_uid": {
-            "type": "keyword"
-          }
-        }
-      },
-      "rule": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "name": {
-            "type": "keyword"
-          }
-        }
-      },
       "updated_at": {
         "type": "date"
-      },
-      "updated_by": {
-        "properties": {
-          "username": {
-            "type": "keyword"
-          },
-          "full_name": {
-            "type": "keyword"
-          },
-          "email": {
-            "type": "keyword"
-          },
-          "profile_uid": {
-            "type": "keyword"
-          }
-        }
       }
     }
   },
   "cases-configure": {
+    "dynamic": false,
     "properties": {
       "created_at": {
         "type": "date"
-      },
-      "created_by": {
-        "properties": {
-          "email": {
-            "type": "keyword"
-          },
-          "username": {
-            "type": "keyword"
-          },
-          "full_name": {
-            "type": "keyword"
-          },
-          "profile_uid": {
-            "type": "keyword"
-          }
-        }
-      },
-      "connector": {
-        "properties": {
-          "name": {
-            "type": "text"
-          },
-          "type": {
-            "type": "keyword"
-          },
-          "fields": {
-            "properties": {
-              "key": {
-                "type": "text"
-              },
-              "value": {
-                "type": "text"
-              }
-            }
-          }
-        }
       },
       "closure_type": {
         "type": "keyword"
       },
       "owner": {
         "type": "keyword"
-      },
-      "updated_at": {
-        "type": "date"
-      },
-      "updated_by": {
-        "properties": {
-          "email": {
-            "type": "keyword"
-          },
-          "username": {
-            "type": "keyword"
-          },
-          "full_name": {
-            "type": "keyword"
-          },
-          "profile_uid": {
-            "type": "keyword"
-          }
-        }
       }
     }
   },
   "cases-connector-mappings": {
+    "dynamic": false,
     "properties": {
-      "mappings": {
-        "properties": {
-          "source": {
-            "type": "keyword"
-          },
-          "target": {
-            "type": "keyword"
-          },
-          "action_type": {
-            "type": "keyword"
-          }
-        }
-      },
       "owner": {
         "type": "keyword"
       }
     }
   },
   "cases": {
+    "dynamic": false,
     "properties": {
       "assignees": {
         "properties": {
@@ -1966,6 +1330,7 @@
     }
   },
   "cases-user-actions": {
+    "dynamic": false,
     "properties": {
       "action": {
         "type": "keyword"
@@ -1975,16 +1340,7 @@
       },
       "created_by": {
         "properties": {
-          "email": {
-            "type": "keyword"
-          },
           "username": {
-            "type": "keyword"
-          },
-          "full_name": {
-            "type": "keyword"
-          },
-          "profile_uid": {
             "type": "keyword"
           }
         }
@@ -2032,6 +1388,85 @@
   "cases-telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "canvas-element": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "help": {
+        "type": "text"
+      },
+      "content": {
+        "type": "text"
+      },
+      "image": {
+        "type": "text"
+      },
+      "@timestamp": {
+        "type": "date"
+      },
+      "@created": {
+        "type": "date"
+      }
+    }
+  },
+  "canvas-workpad": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "@timestamp": {
+        "type": "date"
+      },
+      "@created": {
+        "type": "date"
+      }
+    }
+  },
+  "canvas-workpad-template": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "help": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "tags": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "template_key": {
+        "type": "keyword"
+      }
+    }
   },
   "ingest_manager_settings": {
     "properties": {
@@ -2267,6 +1702,9 @@
           },
           "version": {
             "type": "keyword"
+          },
+          "deferred": {
+            "type": "boolean"
           }
         }
       },
@@ -2595,6 +2033,39 @@
       }
     }
   },
+  "slo": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "indicator": {
+        "properties": {
+          "type": {
+            "type": "keyword"
+          },
+          "params": {
+            "type": "flattened"
+          }
+        }
+      },
+      "budgetingMethod": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "tags": {
+        "type": "keyword"
+      }
+    }
+  },
   "ml-job": {
     "properties": {
       "job_id": {
@@ -2806,6 +2277,24 @@
       },
       "enabled": {
         "type": "boolean"
+      },
+      "alert": {
+        "properties": {
+          "status": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "throttling": {
+        "properties": {
+          "label": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },
@@ -2898,9 +2387,6 @@
   "security-rule": {
     "dynamic": false,
     "properties": {
-      "name": {
-        "type": "keyword"
-      },
       "rule_id": {
         "type": "keyword"
       },
@@ -3213,110 +2699,28 @@
       }
     }
   },
-  "endpoint:user-artifact": {
-    "properties": {
-      "identifier": {
-        "type": "keyword"
-      },
-      "compressionAlgorithm": {
-        "type": "keyword",
-        "index": false
-      },
-      "encryptionAlgorithm": {
-        "type": "keyword",
-        "index": false
-      },
-      "encodedSha256": {
-        "type": "keyword"
-      },
-      "encodedSize": {
-        "type": "long",
-        "index": false
-      },
-      "decodedSha256": {
-        "type": "keyword",
-        "index": false
-      },
-      "decodedSize": {
-        "type": "long",
-        "index": false
-      },
-      "created": {
-        "type": "date",
-        "index": false
-      },
-      "body": {
-        "type": "binary"
-      }
-    }
-  },
   "endpoint:user-artifact-manifest": {
+    "dynamic": false,
     "properties": {
-      "created": {
-        "type": "date",
-        "index": false
-      },
       "schemaVersion": {
         "type": "keyword"
       },
-      "semanticVersion": {
-        "type": "keyword",
-        "index": false
-      },
       "artifacts": {
-        "type": "nested",
-        "properties": {
-          "policyId": {
-            "type": "keyword",
-            "index": false
-          },
-          "artifactId": {
-            "type": "keyword",
-            "index": false
-          }
-        }
+        "type": "nested"
       }
     }
   },
   "security-solution-signals-migration": {
+    "dynamic": false,
     "properties": {
       "sourceIndex": {
         "type": "keyword"
       },
-      "destinationIndex": {
-        "type": "keyword",
-        "index": false
+      "updated": {
+        "type": "date"
       },
       "version": {
         "type": "long"
-      },
-      "error": {
-        "type": "text",
-        "index": false
-      },
-      "taskId": {
-        "type": "keyword",
-        "index": false
-      },
-      "status": {
-        "type": "keyword",
-        "index": false
-      },
-      "created": {
-        "type": "date",
-        "index": false
-      },
-      "createdBy": {
-        "type": "text",
-        "index": false
-      },
-      "updated": {
-        "type": "date",
-        "index": false
-      },
-      "updatedBy": {
-        "type": "text",
-        "index": false
       }
     }
   },
@@ -3348,22 +2752,6 @@
       },
       "status": {
         "type": "integer"
-      }
-    }
-  },
-  "upgrade-assistant-telemetry": {
-    "properties": {
-      "features": {
-        "properties": {
-          "deprecation_logging": {
-            "properties": {
-              "enabled": {
-                "type": "boolean",
-                "null_value": true
-              }
-            }
-          }
-        }
       }
     }
   },

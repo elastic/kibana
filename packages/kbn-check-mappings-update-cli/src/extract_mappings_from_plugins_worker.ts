@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable @kbn/imports/no_boundary_crossing */
 import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
-import { mergeTypes } from '@kbn/core-saved-objects-migration-server-internal';
+import { set } from '@kbn/safer-lodash-set';
+import { buildTypesMappings } from '@kbn/core-saved-objects-migration-server-internal';
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
-import { set } from 'lodash';
 import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 
 export interface Result {
@@ -44,7 +45,7 @@ export interface Result {
   await root.preboot();
   const { savedObjects } = await root.setup();
   const result: Result = {
-    mappings: mergeTypes(savedObjects.getTypeRegistry().getAllTypes()),
+    mappings: buildTypesMappings(savedObjects.getTypeRegistry().getAllTypes()),
   };
   process.send(result);
 })().catch((error) => {
