@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @kbn/imports/no_boundary_crossing */
 import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { set } from '@kbn/safer-lodash-set';
 import { buildTypesMappings } from '@kbn/core-saved-objects-migration-server-internal';
