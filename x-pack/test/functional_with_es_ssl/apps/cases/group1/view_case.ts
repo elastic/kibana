@@ -58,7 +58,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         const newComment = await find.byCssSelector(
-          '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
+          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
       });
@@ -207,7 +207,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           // validate user action
           const newComment = await find.byCssSelector(
-            '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
+            '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
           );
           expect(await newComment.getVisibleText()).equal('Test comment from automation');
         });
@@ -244,7 +244,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           // validate user action
           const newComment = await find.byCssSelector(
-            '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
+            '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
           );
           expect(await newComment.getVisibleText()).equal('Test comment from automation');
         });
@@ -266,7 +266,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           // validate user action
           const newComment = await find.byCssSelector(
-            '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
+            '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
           );
           expect(await newComment.getVisibleText()).equal('Test comment from automation');
         });
@@ -291,7 +291,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await header.waitUntilLoadingHasFinished();
 
           const editCommentTextArea = await find.byCssSelector(
-            '[data-test-subj*="user-action-markdown-form"] textarea.euiMarkdownEditorTextArea'
+            '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
           );
 
           await header.waitUntilLoadingHasFinished();
@@ -307,18 +307,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         it('shows unsaved description message when page is refreshed', async () => {
-          await testSubjects.click('editable-description-edit-icon');
+          await testSubjects.click('description-edit-icon');
 
           await header.waitUntilLoadingHasFinished();
 
           const editCommentTextArea = await find.byCssSelector(
-            '[data-test-subj*="user-action-markdown-form"] textarea.euiMarkdownEditorTextArea'
+            '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
           );
 
           await header.waitUntilLoadingHasFinished();
 
           await editCommentTextArea.focus();
           await editCommentTextArea.type('Edited description');
+
+          await header.waitUntilLoadingHasFinished();
 
           await browser.refresh();
 

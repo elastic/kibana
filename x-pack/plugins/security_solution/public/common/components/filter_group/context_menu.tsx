@@ -7,6 +7,7 @@
 
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { TEST_IDS } from './constants';
 import { useFilterGroupInternalContext } from './hooks/use_filters';
 import {
   CONTEXT_MENU_RESET,
@@ -84,9 +85,11 @@ export const FilterGroupContextMenu = () => {
   const resetButton = useMemo(
     () => (
       <EuiContextMenuItem
+        key="reset"
         icon="eraser"
+        aria-label={CONTEXT_MENU_RESET}
         onClick={withContextMenuAction(resetSelection)}
-        data-test-subj="filter-group__context--reset"
+        data-test-subj={TEST_IDS.CONTEXT_MENU.RESET}
         toolTipContent={CONTEXT_MENU_RESET_TOOLTIP}
       >
         {CONTEXT_MENU_RESET}
@@ -98,15 +101,15 @@ export const FilterGroupContextMenu = () => {
   const editControlsButton = useMemo(
     () => (
       <EuiContextMenuItem
+        key="edit"
         icon={isViewMode ? 'pencil' : 'minusInCircle'}
+        aria-label={isViewMode ? EDIT_CONTROLS : DISCARD_CHANGES}
         onClick={
           isViewMode
             ? withContextMenuAction(switchToEditMode)
             : withContextMenuAction(discardChangesHandler)
         }
-        data-test-subj={
-          isViewMode ? `filter_group__context--edit` : `filter_group__context--discard`
-        }
+        data-test-subj={isViewMode ? TEST_IDS.CONTEXT_MENU.EDIT : TEST_IDS.CONTEXT_MENU.DISCARD}
       >
         {isViewMode ? EDIT_CONTROLS : DISCARD_CHANGES}
       </EuiContextMenuItem>
@@ -121,7 +124,7 @@ export const FilterGroupContextMenu = () => {
 
   return (
     <EuiPopover
-      id="filter-group__context-menu"
+      id={TEST_IDS.CONTEXT_MENU.MENU}
       button={
         <EuiButtonIcon
           aria-label={FILTER_GROUP_MENU}
@@ -129,7 +132,7 @@ export const FilterGroupContextMenu = () => {
           size="s"
           iconType="boxesHorizontal"
           onClick={toggleContextMenu}
-          data-test-subj="filter-group__context"
+          data-test-subj={TEST_IDS.CONTEXT_MENU.BTN}
         />
       }
       isOpen={isContextMenuVisible}
