@@ -22,6 +22,7 @@ import { useKibanaContextForPlugin } from './use_kibana';
 import { useUrlState } from '../utils/use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
+import { MetricsSourceConfigurationResponse } from '@kbn/infra-plugin/common/metrics_sources';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 interface MutationContext {
@@ -77,8 +78,8 @@ export const useInventoryViews = () => {
     placeholderData: null,
   });
 
-  const { mutate: setDefaultViewById } = useMutation<void, ServerError, string, MutationContext>({
-    mutationFn: async (id) => void updateSourceConfiguration({ inventoryDefaultView: id }),
+  const { mutate: setDefaultViewById } = useMutation<MetricsSourceConfigurationResponse, ServerError, string, MutationContext>({
+    mutationFn: (id) => updateSourceConfiguration({ inventoryDefaultView: id }),
     /**
      * To provide a quick feedback, we perform an optimistic update on the list
      * when updating the default view.

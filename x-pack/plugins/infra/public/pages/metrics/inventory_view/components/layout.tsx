@@ -126,8 +126,7 @@ export const Layout = React.memo(
        * TODO: Should refactor this in the future to make it more clear where all the view state is coming
        * from and it's precedence [query params, localStorage, defaultView, out of the box view]
        */
-      /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    }, [reload, shouldLoadDefault]);
+    }, [currentView, reload, shouldLoadDefault]);
 
     useEffect(() => {
       setShowLoading(true);
