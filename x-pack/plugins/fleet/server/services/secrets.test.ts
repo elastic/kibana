@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2[0].
+ */
+
 import type { NewPackagePolicy, PackageInfo } from '../types';
 
 import { extractSecretVarsFromPackagePolicy } from './secrets';
@@ -14,7 +21,7 @@ describe('extractSecretVarsFromPackagePolicy', () => {
     const mockIntegrationPackage = {
       name: 'mock-package',
       title: 'Mock package',
-      version: '0.0.0',
+      version: '0[0].0',
       description: 'description',
       type: 'integration',
       status: 'not_installed',
@@ -114,11 +121,11 @@ describe('extractSecretVarsFromPackagePolicy', () => {
 
       expect(extractSecretVarsFromPackagePolicy(packagePolicy, mockIntegrationPackage)).toEqual([
         {
-          path: 'inputs.0.vars.input-secret-1',
+          path: 'inputs[0].vars.input-secret-1',
           value: { value: 'input-secret-1-val' },
         },
         {
-          path: 'inputs.0.vars.input-secret-2',
+          path: 'inputs[0].vars.input-secret-2',
           value: { value: 'input-secret-2-val' },
         },
       ]);
@@ -151,11 +158,11 @@ describe('extractSecretVarsFromPackagePolicy', () => {
 
       expect(extractSecretVarsFromPackagePolicy(packagePolicy, mockIntegrationPackage)).toEqual([
         {
-          path: 'inputs.0.streams.0.vars.stream-secret-1',
+          path: 'inputs[0].streams[0].vars.stream-secret-1',
           value: { value: 'stream-secret-1-value' },
         },
         {
-          path: 'inputs.0.streams.0.vars.stream-secret-2',
+          path: 'inputs[0].streams[0].vars.stream-secret-2',
           value: { value: 'stream-secret-2-value' },
         },
       ]);
@@ -350,14 +357,14 @@ describe('extractSecretVarsFromPackagePolicy', () => {
           },
         },
         {
-          path: 'inputs.0.vars.password',
+          path: 'inputs[0].vars.password',
           value: {
             type: 'text',
             value: 'billing_input_password',
           },
         },
         {
-          path: 'inputs.0.streams.0.vars.password',
+          path: 'inputs[0].streams[0].vars.password',
           value: {
             type: 'text',
             value: 'billing_stream_password',
@@ -423,25 +430,25 @@ describe('extractSecretVarsFromPackagePolicy', () => {
           },
         },
         {
-          path: 'inputs.0.vars.password',
+          path: 'inputs[0].vars.password',
           value: {
             value: 'cloudtrail_httpjson_input_password',
           },
         },
         {
-          path: 'inputs.0.streams.0.vars.password',
+          path: 'inputs[0].streams[0].vars.password',
           value: {
             value: 'cloudtrail_httpjson_stream_password',
           },
         },
         {
-          path: 'inputs.1.vars.password',
+          path: 'inputs[1].vars.password',
           value: {
             value: 'cloudtrail_s3_input_password',
           },
         },
         {
-          path: 'inputs.1.streams.0.vars.password',
+          path: 'inputs[1].streams[0].vars.password',
           value: {
             value: 'cloudtrail_s3_stream_password',
           },
@@ -545,13 +552,13 @@ describe('extractSecretVarsFromPackagePolicy', () => {
         )
       ).toEqual([
         {
-          path: 'inputs.0.streams.0.vars.secret-1',
+          path: 'inputs[0].streams[0].vars.secret-1',
           value: {
             value: 'secret-1-value',
           },
         },
         {
-          path: 'inputs.0.streams.0.vars.secret-2',
+          path: 'inputs[0].streams[0].vars.secret-2',
           value: {
             value: 'secret-2-value',
           },

@@ -642,6 +642,119 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    it.only('Should correctly create secrets', async () => {
+      // create mock .secrets index for testing
+      if (await es.indices.exists({ index: '.fleet-test-secrets' })) {
+        await es.indices.delete({ index: '.fleet-test-secrets' });
+      }
+      await es.indices.create({
+        index: '.fleet-test-secrets',
+        body: {
+          mappings: {
+            properties: {
+              value: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      });
+
+      const { body: createResBody } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `secrets-${Date.now()}`,
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          inputs: {
+            'secrets-test_input': {
+              enabled: true,
+              vars: {
+                input_var_secret: 'input_secret_val',
+              },
+              streams: {
+                'secrets.log': {
+                  enabled: true,
+                  vars: {
+                    stream_var_secret: 'stream_secret_val',
+                  },
+                },
+              },
+            },
+          },
+          vars: {
+            package_var_secret: 'package_secret_val',
+          },
+          package: {
+            name: 'secrets',
+            version: '1.0.0',
+          },
+        })
+        .expect(200);
+
+      const createdPackagePolicy = createResBody.item;
+      const packageVarId = createdPackagePolicy.vars.package_var_secret.value.id;
+      expect(packageVarId).to.be.an('string');
+      const inputVarId = createdPackagePolicy.inputs[0].vars.input_var_secret.value.id;
+      expect(inputVarId).to.be.an('string');
+      const streamVarId = createdPackagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.id;
+      expect(streamVarId).to.be.an('string');
+
+      const expectedCompiledStream = {
+        'config.version': 2,
+        package_var_secret: `$elastic.co.secret{${packageVarId}}`,
+        input_var_secret: `$elastic.co.secret{${inputVarId}}`,
+        stream_var_secret: `$elastic.co.secret{${streamVarId}}`,
+      };
+      expect(createdPackagePolicy.inputs[0].streams[0].compiled_stream).to.eql(
+        expectedCompiledStream
+      );
+      expect(createdPackagePolicy.vars.package_var_secret.value.isSecretRef).to.eql(true);
+      expect(createdPackagePolicy.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(true);
+      expect(
+        createdPackagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef
+      ).to.eql(true);
+
+      const { body: getPolicyResBody } = await supertest
+        .get(`/api/fleet/package_policies/${createResBody.item.id}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      const packagePolicy = getPolicyResBody.item;
+      expect(packagePolicy.inputs[0].streams[0].compiled_stream).to.eql(expectedCompiledStream);
+      expect(packagePolicy.vars.package_var_secret.value.isSecretRef).to.eql(true);
+      expect(packagePolicy.vars.package_var_secret.value.id).eql(packageVarId);
+      expect(packagePolicy.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(true);
+      expect(packagePolicy.inputs[0].vars.input_var_secret.value.id).eql(inputVarId);
+      expect(packagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef).to.eql(
+        true
+      );
+      expect(packagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.id).eql(streamVarId);
+
+      const searchRes = await es.search({
+        index: '.fleet-test-secrets',
+        body: {
+          query: {
+            ids: {
+              values: [packageVarId, inputVarId, streamVarId],
+            },
+          },
+        },
+      });
+
+      expect(searchRes.hits.hits.length).to.eql(3);
+
+      const secretValuesById = searchRes.hits.hits.reduce((acc: any, secret: any) => {
+        acc[secret._id] = secret._source.value;
+        return acc;
+      }, {});
+      expect(secretValuesById[packageVarId]).to.eql('package_secret_val');
+      expect(secretValuesById[inputVarId]).to.eql('input_secret_val');
+      expect(secretValuesById[streamVarId]).to.eql('stream_secret_val');
+    });
+
     describe('Package verification', () => {
       const uninstallPackage = async (pkg: string, version: string) => {
         await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');

@@ -44,6 +44,15 @@ interface SecretPath {
   value: PackagePolicyConfigRecordEntry;
 }
 
+// This will be removed once the secrets index PR is merged into elasticsearch
+function getSecretsIndex() {
+  const testIndex = appContextService.getConfig()?.developer?.testSecretsIndex;
+  if (testIndex) {
+    return testIndex;
+  }
+  return SECRETS_INDEX;
+}
+
 // TODO: QUESTION do we need audit logging in this service?
 export async function createSecrets(opts: {
   esClient: ElasticsearchClient;
@@ -53,14 +62,13 @@ export async function createSecrets(opts: {
   const logger = appContextService.getLogger();
   const body = values.flatMap((value) => [
     {
-      create: { _index: SECRETS_INDEX },
+      create: { _index: getSecretsIndex() },
     },
     { value },
   ]);
   let res: BulkResponse;
   try {
     res = await esClient.bulk({
-      index: SECRETS_INDEX,
       body,
     });
 
@@ -74,7 +82,7 @@ export async function createSecrets(opts: {
       value: values[i],
     }));
   } catch (e) {
-    const msg = `Error creating secrets in ${SECRETS_INDEX} index: ${e}`;
+    const msg = `Error creating secrets in ${getSecretsIndex()} index: ${e}`;
     logger.error(msg);
     throw new FleetError(msg);
   }
@@ -88,12 +96,12 @@ export async function deleteSecret(opts: {
   let res: DeleteResponse;
   try {
     res = await esClient.delete({
-      index: SECRETS_INDEX,
+      index: getSecretsIndex(),
       id,
     });
   } catch (e) {
     const logger = appContextService.getLogger();
-    const msg = `Error deleting secret '${id}' from ${SECRETS_INDEX} index: ${e}`;
+    const msg = `Error deleting secret '${id}' from ${getSecretsIndex()} index: ${e}`;
     logger.error(msg);
     throw new FleetError(msg);
   }
@@ -119,12 +127,14 @@ export async function extractAndWriteSecrets(opts: {
   });
 
   const policyWithSecretRefs = JSON.parse(JSON.stringify(packagePolicy));
-
   secretPaths.forEach((secretPath, i) => {
-    set(policyWithSecretRefs, secretPath.path, makeVarSecretRef(secrets[i].id));
+    set(policyWithSecretRefs, secretPath.path + '.value', makeVarSecretRef(secrets[i].id));
   });
 
-  return { packagePolicy, secret_references: secrets.map(({ id }) => ({ id })) };
+  return {
+    packagePolicy: policyWithSecretRefs,
+    secret_references: secrets.map(({ id }) => ({ id })),
+  };
 }
 
 function makeVarSecretRef(id: string): VarSecretReference {
@@ -225,7 +235,7 @@ function _extractInputSecretPaths(
       inputVars.forEach(([name, configEntry]) => {
         if (inputSecretVarDefsByPolicyTemplateAndType[inputKey]?.[name]) {
           currentInputVarPaths.push({
-            path: `inputs.${inputIndex}.vars.${name}`,
+            path: `inputs[${inputIndex}].vars.${name}`,
             value: configEntry,
           });
         }
@@ -240,7 +250,7 @@ function _extractInputSecretPaths(
           Object.entries(stream.vars || {}).forEach(([name, configEntry]) => {
             if (streamVarDefs[name]) {
               currentInputVarPaths.push({
-                path: `inputs.${inputIndex}.streams.${streamIndex}.vars.${name}`,
+                path: `inputs[${inputIndex}].streams[${streamIndex}].vars.${name}`,
                 value: configEntry,
               });
             }

@@ -23,7 +23,6 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
   }
 
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
-
   const yamlFromCompiledTemplate = safeLoad(compiledTemplate, {});
 
   // Hack to keep empty string ('') values around in the end yaml because
@@ -90,6 +89,8 @@ function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateSt
       const yamlKeyPlaceholder = `##${key}##`;
       varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
+    } else if (recordEntry.value.isSecretRef) {
+      varPart[lastKeyPart] = `$elastic.co.secret{${recordEntry.value.id}}`;
     } else {
       varPart[lastKeyPart] = recordEntry.value;
     }

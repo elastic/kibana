@@ -194,79 +194,78 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await requireUniqueName(soClient, enrichedPackagePolicy);
     }
 
-    let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
+    if (!enrichedPackagePolicy.package?.name) {
+      throw new Error('package.name is required');
+    }
+
+    if (!options?.skipEnsureInstalled) {
+      await ensureInstalledPackage({
+        esClient,
+        spaceId: options?.spaceId || DEFAULT_SPACE_ID,
+        savedObjectsClient: soClient,
+        pkgName: enrichedPackagePolicy.package.name,
+        pkgVersion: enrichedPackagePolicy.package.version,
+        force: options?.force,
+        authorizationHeader,
+      });
+    }
+
+    // Handle component template/mappings updates for experimental features, e.g. synthetic source
+    await handleExperimentalDatastreamFeatureOptIn({
+      soClient,
+      esClient,
+      packagePolicy: enrichedPackagePolicy,
+    });
+
+    const pkgInfo =
+      options?.packageInfo ??
+      (await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: enrichedPackagePolicy.package.name,
+        pkgVersion: enrichedPackagePolicy.package.version,
+        prerelease: true,
+      }));
+
+    // Check if it is a limited package, and if so, check that the corresponding agent policy does not
+    // already contain a package policy for this package
+    if (isPackageLimited(pkgInfo)) {
+      if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
+        throw new FleetError(
+          `Unable to create integration policy. Integration '${pkgInfo.name}' already exists on this agent policy.`
+        );
+      }
+    }
+    validatePackagePolicyOrThrow(enrichedPackagePolicy, pkgInfo);
+
+    const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
+    if (secretsStorageEnabled) {
+      const secretsRes = await extractAndWriteSecrets({
+        packagePolicy: enrichedPackagePolicy,
+        packageInfo: pkgInfo,
+        esClient,
+      });
+
+      enrichedPackagePolicy = secretsRes.packagePolicy;
+      secretReferences = secretsRes.secret_references;
+    }
     // Add ids to stream
     const packagePolicyId = options?.id || uuidv4();
     let inputs: PackagePolicyInput[] = enrichedPackagePolicy.inputs.map((input) =>
       assignStreamIdToInput(packagePolicyId, input)
     );
+    inputs = await _compilePackagePolicyInputs(pkgInfo, enrichedPackagePolicy.vars || {}, inputs);
 
-    // Make sure the associated package is installed
-    if (enrichedPackagePolicy.package?.name) {
-      if (!options?.skipEnsureInstalled) {
-        await ensureInstalledPackage({
-          esClient,
-          spaceId: options?.spaceId || DEFAULT_SPACE_ID,
-          savedObjectsClient: soClient,
-          pkgName: enrichedPackagePolicy.package.name,
-          pkgVersion: enrichedPackagePolicy.package.version,
-          force: options?.force,
-          authorizationHeader,
-        });
-      }
+    const elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
-      // Handle component template/mappings updates for experimental features, e.g. synthetic source
-      await handleExperimentalDatastreamFeatureOptIn({
+    if (pkgInfo.type === 'input') {
+      await installAssetsForInputPackagePolicy({
         soClient,
         esClient,
+        pkgInfo,
         packagePolicy: enrichedPackagePolicy,
+        force: !!options?.force,
+        logger,
       });
-
-      const pkgInfo =
-        options?.packageInfo ??
-        (await getPackageInfo({
-          savedObjectsClient: soClient,
-          pkgName: enrichedPackagePolicy.package.name,
-          pkgVersion: enrichedPackagePolicy.package.version,
-          prerelease: true,
-        }));
-
-      // Check if it is a limited package, and if so, check that the corresponding agent policy does not
-      // already contain a package policy for this package
-      if (isPackageLimited(pkgInfo)) {
-        if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
-          throw new FleetError(
-            `Unable to create integration policy. Integration '${pkgInfo.name}' already exists on this agent policy.`
-          );
-        }
-      }
-      validatePackagePolicyOrThrow(enrichedPackagePolicy, pkgInfo);
-
-      const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
-      if (secretsStorageEnabled) {
-        const secretsRes = await extractAndWriteSecrets({
-          packagePolicy: enrichedPackagePolicy,
-          packageInfo: pkgInfo,
-          esClient,
-        });
-
-        enrichedPackagePolicy = secretsRes.packagePolicy;
-        secretReferences = secretsRes.secret_references;
-      }
-      inputs = await _compilePackagePolicyInputs(pkgInfo, enrichedPackagePolicy.vars || {}, inputs);
-
-      elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
-
-      if (pkgInfo.type === 'input') {
-        await installAssetsForInputPackagePolicy({
-          soClient,
-          esClient,
-          pkgInfo,
-          packagePolicy: enrichedPackagePolicy,
-          force: !!options?.force,
-          logger,
-        });
-      }
     }
 
     const isoDate = new Date().toISOString();
@@ -278,7 +277,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           ? { package: omit(enrichedPackagePolicy.package, 'experimental_data_stream_features') }
           : {}),
         inputs,
-        ...(elasticsearchPrivileges && { elasticsearch: { privileges: elasticsearchPrivileges } }),
+        ...(pkgInfo.elasticsearch?.privileges && {
+          elasticsearch: { privileges: elasticsearchPrivileges },
+        }),
         secret_references: secretReferences,
         revision: 1,
         created_at: isoDate,
