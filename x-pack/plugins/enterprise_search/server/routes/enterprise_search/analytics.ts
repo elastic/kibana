@@ -51,12 +51,25 @@ export function registerAnalyticsRoutes({
   router.get(
     {
       path: '/internal/enterprise_search/analytics/collections',
-      validate: {},
+      validate: {
+        query: schema.object({
+          query: schema.maybe(schema.string()),
+        }),
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const collections = await fetchAnalyticsCollections(client);
-      return response.ok({ body: collections });
+      try {
+        const query = request.query.query && request.query.query + '*';
+        const collections = await fetchAnalyticsCollections(client, query);
+        return response.ok({ body: collections });
+      } catch (error) {
+        if ((error as Error).message === ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND) {
+          return response.ok({ body: [] });
+        }
+
+        throw error;
+      }
     })
   );
 

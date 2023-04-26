@@ -220,14 +220,22 @@ export interface FetchRulesProps {
 
 export interface RuleSnoozeSettings {
   id: string;
+  muteAll: boolean;
+  snoozeSchedule?: RuleSnooze;
+  activeSnoozes?: string[];
+  isSnoozedUntil?: Date;
+}
+
+interface RuleSnoozeSettingsResponse {
+  id: string;
   mute_all: boolean;
   snooze_schedule?: RuleSnooze;
   active_snoozes?: string[];
   is_snoozed_until?: string;
 }
 
-export interface RulesSnoozeSettingsResponse {
-  data: RuleSnoozeSettings[];
+export interface RulesSnoozeSettingsBatchResponse {
+  data: RuleSnoozeSettingsResponse[];
 }
 
 export type SortingOptions = t.TypeOf<typeof SortingOptions>;

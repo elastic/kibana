@@ -59,6 +59,7 @@ export const OverviewStatusCodec = t.interface({
   downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   pendingConfigs: t.record(t.string, OverviewPendingStatusMetaDataCodec),
   enabledMonitorQueryIds: t.array(t.string),
+  disabledMonitorQueryIds: t.array(t.string),
   allIds: t.array(t.string),
 });
 
