@@ -9,11 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getSeverity } from '@kbn/ml-anomaly-utils/get_severity';
+import { ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { getSeverityColor } from '../../../../../common/anomaly_detection';
-import {
-  ANOMALY_SEVERITY,
-  ANOMALY_THRESHOLD,
-} from '../../../../../common/ml_constants';
 import { ServiceAnomalyTimeseries } from '../../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { APMChartSpec } from '../../../../../typings/timeseries';
 

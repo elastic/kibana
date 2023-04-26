@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { registerAnomalyRuleType } from './register_anomaly_rule_type';
-import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
+import { ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import * as GetServiceAnomalies from '../../../service_map/get_service_anomalies';
 import { createRuleTypeMocks } from '../../test_utils';

@@ -14,7 +14,8 @@ import type {
 } from '@kbn/observability-plugin/common';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
-import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../ml_constants';
+import { ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import {
   ERROR_GROUP_ID,
   SERVICE_ENVIRONMENT,

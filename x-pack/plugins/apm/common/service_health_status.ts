@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { ANOMALY_SEVERITY } from './ml_constants';
+import { ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
 export enum ServiceHealthStatus {
   healthy = 'healthy',

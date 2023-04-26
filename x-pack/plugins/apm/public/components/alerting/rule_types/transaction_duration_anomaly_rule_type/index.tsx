@@ -11,8 +11,8 @@ import React, { useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import { ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import {
   EnvironmentField,

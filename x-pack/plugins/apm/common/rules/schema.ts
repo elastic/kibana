@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { ANOMALY_SEVERITY } from '../ml_constants';
+import { ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { AggregationType, ApmRuleType } from './apm_rule_types';
 
 export const errorCountParamsSchema = schema.object({
