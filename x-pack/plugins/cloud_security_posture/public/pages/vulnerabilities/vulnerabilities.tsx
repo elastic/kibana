@@ -53,7 +53,7 @@ export const Vulnerabilities = () => {
   const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
   const getSetupStatus = useCspSetupStatusApi();
 
-  if (getSetupStatus?.data?.vuln_mgmt.status !== 'indexed') return <NoVulnerabilitiesStates />;
+  if (getSetupStatus?.data?.vuln_mgmt?.status !== 'indexed') return <NoVulnerabilitiesStates />;
 
   if (error) {
     return <ErrorCallout error={error as Error} />;
@@ -247,12 +247,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         if (!vulnerabilityRow.vulnerability.severity) {
           return null;
         }
-        return (
-          <SeverityStatusBadge
-            score={vulnerabilityRow.vulnerability.score?.base}
-            status={vulnerabilityRow.vulnerability.severity}
-          />
-        );
+        return <SeverityStatusBadge status={vulnerabilityRow.vulnerability.severity} />;
       }
       if (columnId === vulnerabilitiesColumns.package_version) {
         return (

@@ -48,6 +48,7 @@ import {
   GroupByOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/rule_schema';
 import { stepActionsDefaultValue } from '../../../../detections/components/rules/step_rule_actions';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
@@ -447,6 +448,9 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
                   ruleFields.groupByRadioSelection === GroupByOptions.PerTimePeriod
                     ? ruleFields.groupByDuration
                     : undefined,
+                missing_fields_strategy:
+                  ruleFields.suppressionMissingFields ||
+                  DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
               },
             }
           : {}),
