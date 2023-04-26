@@ -36,6 +36,17 @@ jest.mock('../../../../components', () => {
   };
 });
 
+jest.mock('../../../../../../hooks/use_locator', () => {
+  return {
+    useDashboardLocator: jest.fn().mockImplementation(() => {
+      return {
+        id: 'DASHBOARD_APP_LOCATOR',
+        getRedirectUrl: jest.fn().mockResolvedValue('app/dashboards#/view/elastic_agent-a0002'),
+      };
+    }),
+  };
+});
+
 const TestComponent = (props: any) => (
   <KibanaContextProvider services={coreMock.createStart()}>
     <ConfigContext.Provider value={{ agents: { enabled: true, elasticsearch: {} }, enabled: true }}>

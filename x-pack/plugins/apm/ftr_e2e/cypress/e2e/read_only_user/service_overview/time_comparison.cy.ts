@@ -121,7 +121,7 @@ describe('Service overview: Time Comparison', () => {
       '2021-10-20T00:00:00.000Z'
     );
 
-    cy.getByTestSubj('superDatePickerApplyTimeButton').click();
+    cy.getByTestSubj('querySubmitButton').click();
 
     cy.getByTestSubj('comparisonSelect').should('have.value', '864000000ms');
     cy.getByTestSubj('comparisonSelect').should(

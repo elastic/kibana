@@ -44,6 +44,14 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsView-flyout-apm-services-link');
     },
 
+    async clickAddMetadataFilter() {
+      return testSubjects.click('hostsView-flyout-metadata-add-filter');
+    },
+
+    async clickRemoveMetadataFilter() {
+      return testSubjects.click('hostsView-flyout-metadata-remove-filter');
+    },
+
     async getHostsLandingPageDisabled() {
       const container = await testSubjects.find('hostView-no-enable-access');
       const containerText = await container.getVisibleText();
@@ -142,6 +150,17 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return tabTitle.getVisibleText();
     },
 
+    async getAppliedFilter() {
+      const filter = await testSubjects.find(
+        "filter-badge-'host.architecture: arm64' filter filter-enabled filter-key-host.architecture filter-value-arm64 filter-unpinned filter-id-0"
+      );
+      return filter.getVisibleText();
+    },
+
+    async getRemoveFilterExist() {
+      return testSubjects.exists('hostsView-flyout-metadata-remove-filter');
+    },
+
     async getProcessesTabContentTitle(index: number) {
       const processesListElements = await testSubjects.findAll('infraProcessesSummaryTableItem');
       return processesListElements[index].findByCssSelector('dt');
@@ -222,6 +241,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     async typeInQueryBar(query: string) {
       const queryBar = await this.getQueryBar();
 
+      await queryBar.clearValueWithKeyboard();
       return queryBar.type(query);
     },
 
@@ -229,6 +249,52 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       await this.typeInQueryBar(query);
 
       await testSubjects.click('querySubmitButton');
+    },
+
+    // Pagination
+    getPageNumberButton(pageNumber: number) {
+      return testSubjects.find(`pagination-button-${pageNumber - 1}`);
+    },
+
+    getPageSizeSelector() {
+      return testSubjects.find('tablePaginationPopoverButton');
+    },
+
+    getPageSizeOption(pageSize: number) {
+      return testSubjects.find(`tablePagination-${pageSize}-rows`);
+    },
+
+    async changePageSize(pageSize: number) {
+      const pageSizeSelector = await this.getPageSizeSelector();
+      await pageSizeSelector.click();
+      const pageSizeOption = await this.getPageSizeOption(pageSize);
+      await pageSizeOption.click();
+    },
+
+    async paginateTo(pageNumber: number) {
+      const paginationButton = await this.getPageNumberButton(pageNumber);
+      await paginationButton.click();
+    },
+
+    // Sorting
+    getDiskLatencyHeader() {
+      return testSubjects.find('tableHeaderCell_diskLatency_4');
+    },
+
+    getTitleHeader() {
+      return testSubjects.find('tableHeaderCell_title_1');
+    },
+
+    async sortByDiskLatency() {
+      const diskLatency = await this.getDiskLatencyHeader();
+      const button = await testSubjects.findDescendant('tableHeaderSortButton', diskLatency);
+      return button.click();
+    },
+
+    async sortByTitle() {
+      const titleHeader = await this.getTitleHeader();
+      const button = await testSubjects.findDescendant('tableHeaderSortButton', titleHeader);
+      return button.click();
     },
   };
 }

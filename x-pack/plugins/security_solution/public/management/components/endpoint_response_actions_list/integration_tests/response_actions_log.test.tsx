@@ -652,10 +652,14 @@ describe('Response actions history', () => {
       });
 
       it('should contain expected output accordions for `execute` action WITH execute operation privilege', async () => {
-        const actionDetails = await getActionListMock({ actionCount: 1, commands: ['execute'] });
+        const actionListApiResponse = await getActionListMock({
+          actionCount: 1,
+          agentIds: ['agent-a'],
+          commands: ['execute'],
+        });
         useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
-          data: actionDetails,
+          data: actionListApiResponse,
         });
 
         mockUseGetFileInfo = {
@@ -669,17 +673,7 @@ describe('Response actions history', () => {
           isFetched: true,
           error: null,
           data: {
-            data: {
-              ...apiMocks.responseProvider.actionDetails({
-                path: `/api/endpoint/action/${actionDetails.data[0].id}`,
-              }).data,
-              outputs: {
-                [actionDetails.data[0].agents[0]]: {
-                  content: {},
-                  type: 'json',
-                },
-              },
-            },
+            data: actionListApiResponse.data[0],
           },
         };
 
@@ -714,7 +708,11 @@ describe('Response actions history', () => {
         });
         useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
-          data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
+          data: await getActionListMock({
+            actionCount: 1,
+            commands: ['execute'],
+            agentIds: ['agent-a'],
+          }),
         });
 
         render();
@@ -723,10 +721,7 @@ describe('Response actions history', () => {
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
         userEvent.click(expandButton);
 
-        const executeAccordions = getByTestId(
-          `${testPrefix}-actionsLogTray-executeResponseOutput-output`
-        );
-        expect(executeAccordions).toBeTruthy();
+        expect(getByTestId(`${testPrefix}-actionsLogTray-executeResponseOutput-output`));
       });
 
       it('should not contain full output download link in expanded row for `execute` action WITHOUT Actions Log privileges', async () => {
@@ -796,6 +791,10 @@ describe('Response actions history', () => {
   });
 
   describe('Action status ', () => {
+    beforeEach(() => {
+      apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
+    });
+
     const expandRows = () => {
       const { getAllByTestId } = renderResult;
 
@@ -805,58 +804,84 @@ describe('Response actions history', () => {
       return outputs;
     };
 
-    it('shows completed status badge for successfully completed actions', async () => {
-      useGetEndpointActionListMock.mockReturnValue({
-        ...getBaseMockedActionList(),
-        data: await getActionListMock({ actionCount: 2 }),
-      });
-      render();
+    it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+      'shows completed status badge for successfully completed %s actions',
+      async (command) => {
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({ actionCount: 2, commands: [command] }),
+        });
+        if (command === 'get-file' || command === 'execute') {
+          mockUseGetFileInfo = {
+            isFetching: false,
+            error: null,
+            data: apiMocks.responseProvider.fileInfo(),
+          };
+        }
 
-      const outputs = expandRows();
-      expect(outputs.map((n) => n.textContent)).toEqual([
-        'isolate completed successfully',
-        'isolate completed successfully',
-      ]);
-      expect(
-        renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
-      ).toEqual(['Successful', 'Successful']);
-    });
+        render();
 
-    it('shows Failed status badge for failed actions', async () => {
-      useGetEndpointActionListMock.mockReturnValue({
-        ...getBaseMockedActionList(),
-        data: await getActionListMock({ actionCount: 2, wasSuccessful: false, status: 'failed' }),
-      });
-      render();
+        const outputs = expandRows();
+        expect(outputs.map((n) => n.textContent)).toEqual([
+          expect.stringContaining(`${command} completed successfully`),
+          expect.stringContaining(`${command} completed successfully`),
+        ]);
+        expect(
+          renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
+        ).toEqual(['Successful', 'Successful']);
+      }
+    );
 
-      const outputs = expandRows();
-      expect(outputs.map((n) => n.textContent)).toEqual(['isolate failed', 'isolate failed']);
-      expect(
-        renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
-      ).toEqual(['Failed', 'Failed']);
-    });
+    it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+      'shows Failed status badge for failed %s actions',
+      async (command) => {
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({
+            actionCount: 2,
+            commands: [command],
+            wasSuccessful: false,
+            status: 'failed',
+          }),
+        });
+        render();
 
-    it('shows Failed status badge for expired actions', async () => {
-      useGetEndpointActionListMock.mockReturnValue({
-        ...getBaseMockedActionList(),
-        data: await getActionListMock({
-          actionCount: 2,
-          isCompleted: false,
-          isExpired: true,
-          status: 'failed',
-        }),
-      });
-      render();
+        const outputs = expandRows();
+        expect(outputs.map((n) => n.textContent)).toEqual([
+          `${command} failed`,
+          `${command} failed`,
+        ]);
+        expect(
+          renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
+        ).toEqual(['Failed', 'Failed']);
+      }
+    );
 
-      const outputs = expandRows();
-      expect(outputs.map((n) => n.textContent)).toEqual([
-        'isolate failed: action expired',
-        'isolate failed: action expired',
-      ]);
-      expect(
-        renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
-      ).toEqual(['Failed', 'Failed']);
-    });
+    it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+      'shows Failed status badge for expired %s actions',
+      async (command) => {
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({
+            actionCount: 2,
+            commands: [command],
+            isCompleted: false,
+            isExpired: true,
+            status: 'failed',
+          }),
+        });
+        render();
+
+        const outputs = expandRows();
+        expect(outputs.map((n) => n.textContent)).toEqual([
+          `${command} failed: action expired`,
+          `${command} failed: action expired`,
+        ]);
+        expect(
+          renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
+        ).toEqual(['Failed', 'Failed']);
+      }
+    );
 
     it('shows Pending status badge for pending actions', async () => {
       useGetEndpointActionListMock.mockReturnValue({

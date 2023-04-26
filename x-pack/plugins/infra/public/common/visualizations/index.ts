@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { CPU, Load, Memory, MemoryAvailable, RX, TX, DiskIORead, DiskIOWrite } from './lens/hosts';
+export type {
+  HostsLensFormulas,
+  LineChartOptions,
+  LensChartConfig,
+  LensLineChartConfig,
+  MetricChartOptions,
+  HostsLensMetricChartFormulas,
+  HostsLensLineChartFormulas,
+  LensOptions,
+  LensAttributes,
+} from './types';
 
-export { buildLensAttributes } from './lens/lens_visualization';
+export { hostLensFormulas, visualizationTypes } from './constants';
 
-export const hostMetricsLensAttributes = {
-  cpu: CPU,
-  load: Load,
-  memory: Memory,
-  memoryAvailable: MemoryAvailable,
-  rx: RX,
-  tx: TX,
-  diskIORead: DiskIORead,
-  diskIOWrite: DiskIOWrite,
-};
-
-export type HostLensAttributesTypes = keyof typeof hostMetricsLensAttributes;
+export { buildLensAttributes } from './lens/build_lens_attributes';

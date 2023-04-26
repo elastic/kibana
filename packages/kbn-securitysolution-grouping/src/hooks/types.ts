@@ -8,35 +8,21 @@
 
 // action types
 export enum ActionType {
-  updateActiveGroup = 'UPDATE_ACTIVE_GROUP',
-  updateGroupActivePage = 'UPDATE_GROUP_ACTIVE_PAGE',
-  updateGroupItemsPerPage = 'UPDATE_GROUP_ITEMS_PER_PAGE',
+  updateActiveGroups = 'UPDATE_ACTIVE_GROUPS',
   updateGroupOptions = 'UPDATE_GROUP_OPTIONS',
 }
 
-export interface UpdateActiveGroup {
-  type: ActionType.updateActiveGroup;
-  payload: { activeGroup: string; id: string };
+export interface UpdateActiveGroups {
+  type: ActionType.updateActiveGroups;
+  payload: { activeGroups: string[]; id: string };
 }
 
-export interface UpdateGroupActivePage {
-  type: ActionType.updateGroupActivePage;
-  payload: { activePage: number; id: string };
-}
-export interface UpdateGroupItemsPerPage {
-  type: ActionType.updateGroupItemsPerPage;
-  payload: { itemsPerPage: number; id: string };
-}
 export interface UpdateGroupOptions {
   type: ActionType.updateGroupOptions;
   payload: { newOptionList: GroupOption[]; id: string };
 }
 
-export type Action =
-  | UpdateActiveGroup
-  | UpdateGroupActivePage
-  | UpdateGroupItemsPerPage
-  | UpdateGroupOptions;
+export type Action = UpdateActiveGroups | UpdateGroupOptions;
 
 // state
 
@@ -46,10 +32,8 @@ export interface GroupOption {
 }
 
 export interface GroupModel {
-  activeGroup: string;
+  activeGroups: string[];
   options: GroupOption[];
-  activePage: number;
-  itemsPerPage: number;
 }
 
 export interface GroupsById {
@@ -73,8 +57,6 @@ export interface Storage<T = any, S = void> {
 export const EMPTY_GROUP_BY_ID: GroupsById = {};
 
 export const defaultGroup: GroupModel = {
-  activePage: 0,
-  itemsPerPage: 25,
-  activeGroup: 'none',
+  activeGroups: ['none'],
   options: [],
 };

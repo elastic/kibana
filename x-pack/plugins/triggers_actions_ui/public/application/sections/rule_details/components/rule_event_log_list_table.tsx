@@ -610,6 +610,20 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         ),
         isSortable: getIsColumnSortable('timed_out'),
       },
+      {
+        id: 'maintenance_window_ids',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.maintenanceWindowIds',
+          {
+            defaultMessage: 'Maintenance windows',
+          }
+        ),
+        actions: {
+          showSortAsc: false,
+          showSortDesc: false,
+        },
+        isSortable: getIsColumnSortable('maintenance_window_ids'),
+      },
     ],
     [getPaginatedRowIndex, onFlyoutOpen, onFilterChange, hasRuleNames, showFromAllSpaces, logs]
   );

@@ -6,7 +6,10 @@
  */
 
 import { lazy } from 'react';
-import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type {
+  AttachmentActionType,
+  ExternalReferenceAttachmentType,
+} from '@kbn/cases-plugin/public/client/attachment_framework/types';
 
 const AttachmentContentLazy = lazy(() => import('./external_references_content'));
 
@@ -18,7 +21,13 @@ export const getExternalReferenceAttachmentRegular = (): ExternalReferenceAttach
     event: 'added a chart',
     timelineAvatar: 'casesApp',
     getActions: () => [
-      { label: 'See attachment', onClick: () => {}, isPrimary: true, iconType: 'arrowRight' },
+      {
+        type: 'button' as AttachmentActionType.BUTTON,
+        label: 'See attachment',
+        onClick: () => {},
+        isPrimary: true,
+        iconType: 'arrowRight',
+      },
     ],
     children: AttachmentContentLazy,
   }),

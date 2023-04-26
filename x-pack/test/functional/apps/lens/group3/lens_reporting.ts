@@ -24,8 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/154958
-  describe.skip('lens reporting', () => {
+  describe('lens reporting', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/reporting'
@@ -60,6 +59,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.reporting.clickGenerateReportButton();
       const url = await PageObjects.reporting.getReportURL(60000);
       expect(url).to.be.ok();
+      if (await testSubjects.exists('toastCloseButton')) {
+        await testSubjects.click('toastCloseButton');
+      }
     });
 
     for (const type of ['PNG', 'PDF'] as const) {
@@ -101,6 +103,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.reporting.clickGenerateReportButton();
           const url = await PageObjects.reporting.getReportURL(60000);
           expect(url).to.be.ok();
+          if (await testSubjects.exists('toastCloseButton')) {
+            await testSubjects.click('toastCloseButton');
+          }
         });
 
         it(`should show a warning message for curl reporting of unsaved visualizations`, async () => {
@@ -126,6 +131,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it(`should produce a valid URL for reporting`, async () => {
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.getReportURL(60000);
+          if (await testSubjects.exists('toastCloseButton')) {
+            await testSubjects.click('toastCloseButton');
+          }
           // navigate to the reporting page
           await PageObjects.common.navigateToUrl('management', '/insightsAndAlerting');
           await testSubjects.click('reporting');

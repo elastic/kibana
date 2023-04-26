@@ -39,7 +39,7 @@ describe('SubmitButton', () => {
   it('it renders', async () => {
     const result = appMockRenderer.render(
       <MockHookWrapperComponent>
-        <SubmitButton />
+        <SubmitButton isLoading={false} />
       </MockHookWrapperComponent>
     );
 
@@ -49,7 +49,7 @@ describe('SubmitButton', () => {
   it('it submits', async () => {
     const result = appMockRenderer.render(
       <MockHookWrapperComponent>
-        <SubmitButton />
+        <SubmitButton isLoading={false} />
       </MockHookWrapperComponent>
     );
 
@@ -60,7 +60,7 @@ describe('SubmitButton', () => {
   it('it disables when submitting', async () => {
     const result = appMockRenderer.render(
       <MockHookWrapperComponent>
-        <SubmitButton />
+        <SubmitButton isLoading={false} />
       </MockHookWrapperComponent>
     );
 

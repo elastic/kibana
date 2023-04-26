@@ -9,6 +9,7 @@ import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../co
 
 import {
   ConnectorStatus,
+  DisplayType,
   FilteringPolicy,
   FilteringRuleRule,
   FilteringValidationState,
@@ -34,13 +35,17 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       api_key_id: null,
       configuration: {
         foo: {
-          display: 'textbox',
+          default_value: '',
+          depends_on: [],
+          display: DisplayType.TEXTBOX,
           key: 'foo',
           label: 'bar',
           options: [],
           order: 1,
           required: false,
           sensitive: false,
+          tooltip: '',
+          ui_restrictions: [],
           value: 'barbar',
         },
       },
@@ -141,13 +146,17 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       api_key_id: null,
       configuration: {
         foo: {
-          display: 'textbox',
+          default_value: '',
+          depends_on: [],
+          display: DisplayType.TEXTBOX,
           key: 'foo',
           label: 'bar',
           options: [],
           order: 1,
           required: false,
           sensitive: false,
+          tooltip: '',
+          ui_restrictions: [],
           value: 'barbar',
         },
       },

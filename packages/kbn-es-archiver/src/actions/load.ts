@@ -14,6 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { ES_CLIENT_HEADERS } from '../client_headers';
 
 import {
@@ -24,7 +25,7 @@ import {
   createParseArchiveStreams,
   createCreateIndexStream,
   createIndexDocRecordsStream,
-  migrateKibanaIndex,
+  migrateSavedObjectIndices,
   Progress,
   createDefaultSpace,
 } from '../lib';
@@ -104,14 +105,15 @@ export async function loadAction({
     }
   );
 
-  // If we affected the Kibana index, we need to ensure it's migrated...
-  if (Object.keys(result).some((k) => k.startsWith('.kibana'))) {
-    await migrateKibanaIndex(kbnClient);
+  // If we affected saved objects indices, we need to ensure they are migrated...
+  if (Object.keys(result).some((k) => k.startsWith(MAIN_SAVED_OBJECT_INDEX))) {
+    await migrateSavedObjectIndices(kbnClient);
     log.debug('[%s] Migrated Kibana index after loading Kibana data', name);
 
     if (kibanaPluginIds.includes('spaces')) {
-      await createDefaultSpace({ client, index: '.kibana' });
-      log.debug('[%s] Ensured that default space exists in .kibana', name);
+      // WARNING affected by #104081. Assumes 'spaces' saved objects are stored in MAIN_SAVED_OBJECT_INDEX
+      await createDefaultSpace({ client, index: MAIN_SAVED_OBJECT_INDEX });
+      log.debug(`[%s] Ensured that default space exists in ${MAIN_SAVED_OBJECT_INDEX}`, name);
     }
   }
 
