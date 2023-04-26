@@ -13,8 +13,8 @@ import { throttle } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import {
-  type EntityField,
-  type EntityFieldOperation,
+  type MlEntityField,
+  type MlEntityFieldOperation,
   ML_ANOMALY_THRESHOLD,
 } from '@kbn/ml-anomaly-utils';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
@@ -74,7 +74,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
       embeddableContext.getInput().severityThreshold ?? ML_ANOMALY_THRESHOLD.WARNING
     )
   );
-  const [selectedEntities, setSelectedEntities] = useState<EntityField[] | undefined>();
+  const [selectedEntities, setSelectedEntities] = useState<MlEntityField[] | undefined>();
   const [{ uiSettings }, { data: dataServices, share, uiActions, charts: chartsService }] =
     services;
   const { timefilter } = dataServices.query.timefilter;
@@ -165,9 +165,9 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   const addEntityFieldFilter = (
     fieldName: string,
     fieldValue: string,
-    operation: EntityFieldOperation
+    operation: MlEntityFieldOperation
   ) => {
-    const entity: EntityField = {
+    const entity: MlEntityField = {
       fieldName,
       fieldValue,
       operation,

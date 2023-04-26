@@ -19,7 +19,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import {
   aggregationTypeTransform,
-  type EntityField,
+  type MlEntityField,
   type MlRecordForInfluencer,
 } from '@kbn/ml-anomaly-utils';
 import { Dictionary } from '../../../../common/types/common';
@@ -651,7 +651,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
     // Pass an empty array or ['*'] to search over all job IDs.
     getRecordsForInfluencer$(
       jobIds: string[],
-      influencers: EntityField[],
+      influencers: MlEntityField[],
       threshold: number,
       earliestMs: number,
       latestMs: number,

@@ -9,7 +9,7 @@ import { each, find, get, filter } from 'lodash';
 
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import type { EntityField } from '@kbn/ml-anomaly-utils';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import { ml } from '../services/ml_api_service';
 import {
   isModelPlotChartableForDetector,
@@ -24,7 +24,7 @@ import { Job } from '../../../common/types/anomaly_detection_jobs';
 function getMetricData(
   job: Job,
   detectorIndex: number,
-  entityFields: EntityField[],
+  entityFields: MlEntityField[],
   earliestMs: number,
   latestMs: number,
   intervalMs: number,

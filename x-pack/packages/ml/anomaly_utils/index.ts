@@ -21,8 +21,8 @@ export {
   isMultiBucketAnomaly,
   showActualForFunction,
   showTypicalForFunction,
-  type EntityField,
-  type EntityFieldOperation,
+  type MlEntityField,
+  type MlEntityFieldOperation,
   ML_ENTITY_FIELD_OPERATIONS,
 } from './anomaly_utils';
 

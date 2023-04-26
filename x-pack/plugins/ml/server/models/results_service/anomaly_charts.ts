@@ -16,7 +16,7 @@ import {
   aggregationTypeTransform,
   getEntityFieldList,
   isMultiBucketAnomaly,
-  type EntityField,
+  type MlEntityField,
 } from '@kbn/ml-anomaly-utils';
 import type { MlAnomalyRecordDoc, MlRecordForInfluencer } from '@kbn/ml-anomaly-utils';
 import type { MlClient } from '../../lib/ml_client';
@@ -130,7 +130,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
   async function fetchMetricData(
     index: string,
-    entityFields: EntityField[],
+    entityFields: MlEntityField[],
     query: object | undefined,
     metricFunction: string | null, // ES aggregation name
     metricFieldName: string | undefined,
@@ -1440,8 +1440,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
   async function getEventDistributionData(
     index: string,
-    splitField: EntityField | undefined | null,
-    filterField: EntityField | undefined | null,
+    splitField: MlEntityField | undefined | null,
+    filterField: MlEntityField | undefined | null,
     query: any,
     metricFunction: string | undefined | null, // ES aggregation name
     metricFieldName: string | undefined,
@@ -1646,7 +1646,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
   }
 
   async function getRecordsForCriteriaChart(config: SeriesConfigWithMetadata, range: ChartRange) {
-    let criteria: EntityField[] = [];
+    let criteria: MlEntityField[] = [];
     criteria.push({ fieldName: 'detector_index', fieldValue: config.detectorIndex });
     criteria = criteria.concat(config.entityFields);
 
@@ -1813,7 +1813,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
   async function getRecordsForInfluencer(
     jobIds: string[],
-    influencers: EntityField[],
+    influencers: MlEntityField[],
     threshold: number,
     earliestMs: number,
     latestMs: number,
@@ -1934,7 +1934,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
    */
   async function getAnomalyChartsData(options: {
     jobIds: string[];
-    influencers: EntityField[];
+    influencers: MlEntityField[];
     threshold: number;
     earliestMs: number;
     latestMs: number;

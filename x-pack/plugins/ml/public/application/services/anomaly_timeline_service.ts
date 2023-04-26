@@ -9,7 +9,7 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import { TimefilterContract, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { EntityField } from '@kbn/ml-anomaly-utils';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import {
   getBoundsRoundedToInterval,
   TimeBuckets,
@@ -260,7 +260,7 @@ export class AnomalyTimelineService {
     perPage: number,
     fromPage: number,
     bucketInterval: TimeBucketsInterval,
-    selectionInfluencers: EntityField[],
+    selectionInfluencers: MlEntityField[],
     influencersFilterQuery: InfluencersFilterQuery
   ) {
     const selectedJobIds = selectedJobs.map((d) => d.id);

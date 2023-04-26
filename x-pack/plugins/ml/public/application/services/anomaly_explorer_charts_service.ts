@@ -11,7 +11,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { EntityField, MlRecordForInfluencer } from '@kbn/ml-anomaly-utils';
+import type { MlEntityField, MlRecordForInfluencer } from '@kbn/ml-anomaly-utils';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { InfluencersFilterQuery } from '../../../common/types/es_client';
 import type { SeriesConfigWithMetadata } from '../../../common/types/results';
@@ -72,7 +72,7 @@ export class AnomalyExplorerChartsService {
     jobIds: string[],
     earliestMs: number,
     latestMs: number,
-    influencers: EntityField[] = [],
+    influencers: MlEntityField[] = [],
     selectedCells: AppStateSelectedCells | undefined | null,
     influencersFilterQuery: InfluencersFilterQuery
   ): Observable<MlRecordForInfluencer[]> {
@@ -107,7 +107,7 @@ export class AnomalyExplorerChartsService {
     selectedEarliestMs: number,
     selectedLatestMs: number,
     influencerFilterQuery?: InfluencersFilterQuery,
-    influencers?: EntityField[],
+    influencers?: MlEntityField[],
     severity = 0,
     maxSeries?: number
   ): Observable<ExplorerChartsData> {

@@ -9,7 +9,7 @@
 
 import { useMemo } from 'react';
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
-import type { EntityField } from '@kbn/ml-anomaly-utils';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 
 import {
   type MlAnomalyRecordDoc,
@@ -44,7 +44,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
     jobIds: string[],
     criteriaFields: string[],
-    influencers: EntityField[],
+    influencers: MlEntityField[],
     aggregationInterval: string,
     threshold: number,
     earliestMs: number,
@@ -183,7 +183,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
 
   getAnomalyCharts$(
     jobIds: string[],
-    influencers: EntityField[],
+    influencers: MlEntityField[],
     threshold: number,
     earliestMs: number,
     latestMs: number,

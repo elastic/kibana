@@ -21,7 +21,7 @@ import { ML_DETECTUR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_
  * @export
  * @enum {number}
  */
-export enum ENTITY_FIELD_TYPE {
+export enum ML_ENTITY_FIELD_TYPE {
   BY = 'by',
   OVER = 'over',
   PARTITON = 'partition',
@@ -39,18 +39,18 @@ export const ML_ENTITY_FIELD_OPERATIONS = {
 /**
  * Union type of entity field operations
  * @export
- * @typedef {EntityFieldOperation}
+ * @typedef {MlEntityFieldOperation}
  */
-export type EntityFieldOperation =
+export type MlEntityFieldOperation =
   typeof ML_ENTITY_FIELD_OPERATIONS[keyof typeof ML_ENTITY_FIELD_OPERATIONS];
 
 /**
  * Interface of an entity field
  * @export
- * @interface EntityField
- * @typedef {EntityField}
+ * @interface MlEntityField
+ * @typedef {MlEntityField}
  */
-export interface EntityField {
+export interface MlEntityField {
   /**
    * The field name
    * @type {string}
@@ -63,14 +63,14 @@ export interface EntityField {
   fieldValue: string | number | undefined;
   /**
    * Optional field type
-   * @type {?ENTITY_FIELD_TYPE}
+   * @type {?ML_ENTITY_FIELD_TYPE}
    */
-  fieldType?: ENTITY_FIELD_TYPE;
+  fieldType?: ML_ENTITY_FIELD_TYPE;
   /**
    * Optional entity field operation
-   * @type {?EntityFieldOperation}
+   * @type {?MlEntityFieldOperation}
    */
-  operation?: EntityFieldOperation;
+  operation?: MlEntityFieldOperation;
 }
 
 // List of function descriptions for which actual values from record level results should be displayed.
@@ -233,13 +233,13 @@ export function getEntityFieldValue(record: MlAnomalyRecordDoc): string | number
  * of objects in the form { fieldName: airline, fieldValue: AAL, fieldType: partition }
  * @param record - anomaly record result for which to obtain the entity field list.
  */
-export function getEntityFieldList(record: MlAnomalyRecordDoc): EntityField[] {
-  const entityFields: EntityField[] = [];
+export function getEntityFieldList(record: MlAnomalyRecordDoc): MlEntityField[] {
+  const entityFields: MlEntityField[] = [];
   if (record.partition_field_name !== undefined) {
     entityFields.push({
       fieldName: record.partition_field_name,
       fieldValue: record.partition_field_value,
-      fieldType: ENTITY_FIELD_TYPE.PARTITON,
+      fieldType: ML_ENTITY_FIELD_TYPE.PARTITON,
     });
   }
 
@@ -247,7 +247,7 @@ export function getEntityFieldList(record: MlAnomalyRecordDoc): EntityField[] {
     entityFields.push({
       fieldName: record.over_field_name,
       fieldValue: record.over_field_value,
-      fieldType: ENTITY_FIELD_TYPE.OVER,
+      fieldType: ML_ENTITY_FIELD_TYPE.OVER,
     });
   }
 
@@ -258,7 +258,7 @@ export function getEntityFieldList(record: MlAnomalyRecordDoc): EntityField[] {
     entityFields.push({
       fieldName: record.by_field_name,
       fieldValue: record.by_field_value,
-      fieldType: ENTITY_FIELD_TYPE.BY,
+      fieldType: ML_ENTITY_FIELD_TYPE.BY,
     });
   }
 

@@ -17,7 +17,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { FilterStateStore } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { EntityField } from '@kbn/ml-anomaly-utils';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
@@ -283,7 +283,7 @@ export function getPartitioningFieldNames(job: CombinedJob, detectorIndex: numbe
 export function isModelPlotEnabled(
   job: Job,
   detectorIndex: number,
-  entityFields?: EntityField[]
+  entityFields?: MlEntityField[]
 ): boolean {
   // Check if model_plot_config is enabled.
   let isEnabled = job.model_plot_config?.enabled ?? false;

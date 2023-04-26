@@ -20,7 +20,7 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
   getEntityFieldList,
-  type EntityField,
+  type MlEntityField,
   type MlInfluencer,
   type MlRecordForInfluencer,
 } from '@kbn/ml-anomaly-utils';
@@ -211,7 +211,7 @@ export async function loadFilteredTopInfluencers(
     uniqValuesByName[fieldName] = uniq(fieldValues);
   });
 
-  const filterInfluencers: EntityField[] = [];
+  const filterInfluencers: MlEntityField[] = [];
   Object.keys(uniqValuesByName).forEach((fieldName) => {
     // Find record influencers with the same field name as the clicked on cell(s).
     const matchingFieldName = influencers.find((influencer) => {
@@ -324,7 +324,7 @@ export function getSelectionTimeRange(
 export function getSelectionInfluencers(
   selectedCells: AppStateSelectedCells | undefined | null,
   fieldName: string
-): EntityField[] {
+): MlEntityField[] {
   if (
     !!selectedCells &&
     selectedCells.type !== SWIMLANE_TYPE.OVERALL &&
