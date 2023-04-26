@@ -22,7 +22,7 @@ export const NameInput = ({
 }) => {
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.lens.indexPattern.columnLabel', {
+      label={i18n.translate('visualizationUiComponents.nameInput.columnLabel', {
         defaultMessage: 'Name',
         description: 'Name of a column of data',
       })}

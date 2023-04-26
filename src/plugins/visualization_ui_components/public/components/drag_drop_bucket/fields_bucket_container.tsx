@@ -42,18 +42,24 @@ export const FieldsBucketContainer = ({
       <EuiFlexGroup direction={'row'} gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false} {...(draggableProvided?.dragHandleProps ?? {})}>
           <TooltipWrapper
-            tooltipContent={i18n.translate('xpack.lens.fieldsBucketContainer.dragHandleDisabled', {
-              defaultMessage: 'Reordering requires more than one item.',
-            })}
+            tooltipContent={i18n.translate(
+              'visualizationUiComponents.fieldsBucketContainer.dragHandleDisabled',
+              {
+                defaultMessage: 'Reordering requires more than one item.',
+              }
+            )}
             condition={isNotDraggable ?? true}
           >
             <EuiIcon
               size="s"
               color={euiTheme.colors[isNotDraggable ? 'disabled' : 'text']}
               type="grab"
-              aria-label={i18n.translate('xpack.lens.fieldsBucketContainer.dragToReorder', {
-                defaultMessage: 'Drag to reorder',
-              })}
+              aria-label={i18n.translate(
+                'visualizationUiComponents.fieldsBucketContainer.dragToReorder',
+                {
+                  defaultMessage: 'Drag to reorder',
+                }
+              )}
               data-test-subj={`${dataTestSubj}-dragToReorder-${idx}`}
             />
           </TooltipWrapper>
@@ -64,7 +70,7 @@ export const FieldsBucketContainer = ({
         <EuiFlexItem grow={false}>
           <TooltipWrapper
             tooltipContent={i18n.translate(
-              'xpack.lens.fieldsBucketContainer.deleteButtonDisabled',
+              'visualizationUiComponents.fieldsBucketContainer.deleteButtonDisabled',
               {
                 defaultMessage: 'A minimum of one item is required.',
               }

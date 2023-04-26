@@ -20,13 +20,13 @@ import {
 import { TooltipWrapper } from './tooltip_wrapper';
 
 const tooltipContent = {
-  auto: i18n.translate('xpack.lens.configPanel.color.tooltip.auto', {
+  auto: i18n.translate('visualizationUiComponents.colorPicker.tooltip.auto', {
     defaultMessage: 'Lens automatically picks colors for you unless you specify a custom color.',
   }),
-  custom: i18n.translate('xpack.lens.configPanel.color.tooltip.custom', {
+  custom: i18n.translate('visualizationUiComponents.colorPicker.tooltip.custom', {
     defaultMessage: 'Clear the custom color to return to “Auto” mode.',
   }),
-  disabled: i18n.translate('xpack.lens.configPanel.color.tooltip.disabled', {
+  disabled: i18n.translate('visualizationUiComponents.colorPicker.tooltip.disabled', {
     defaultMessage:
       'You are unable to apply custom colors to individual series when the layer includes a "Break down by" field.',
   }),
@@ -108,7 +108,7 @@ export const ColorPicker = ({
 
   const inputLabel =
     label ??
-    i18n.translate('xpack.lens.xyChart.seriesColor.label', {
+    i18n.translate('visualizationUiComponents.colorPicker.seriesColor.label', {
       defaultMessage: 'Series color',
     });
 
@@ -123,7 +123,7 @@ export const ColorPicker = ({
       disabled={disabled}
       placeholder={
         defaultColor?.toUpperCase() ||
-        i18n.translate('xpack.lens.xyChart.seriesColor.auto', {
+        i18n.translate('visualizationUiComponents.colorPicker.seriesColor.auto', {
           defaultMessage: 'Auto',
         })
       }

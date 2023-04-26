@@ -101,7 +101,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
         compressed
         isClearable={false}
         data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
-        placeholder={i18n.translate('xpack.lens.fieldPicker.fieldPlaceholder', {
+        placeholder={i18n.translate('visualizationUiComponents.fieldPicker.fieldPlaceholder', {
           defaultMessage: 'Select a field',
         })}
         options={styledOptions}

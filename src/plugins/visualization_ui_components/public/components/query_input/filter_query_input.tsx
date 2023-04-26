@@ -23,7 +23,7 @@ import { useDebouncedValue } from '../debounced_value';
 import { QueryInput, validateQuery } from '.';
 import type { QueryInputServices } from '.';
 
-const filterByLabel = i18n.translate('xpack.lens.indexPattern.filterBy.label', {
+const filterByLabel = i18n.translate('visualizationUiComponents.filterQueryInput.label', {
   defaultMessage: 'Filter by',
 });
 
@@ -113,14 +113,20 @@ export function FilterQueryInput({
                         setFilterPopoverOpen(!filterPopoverOpen);
                       }}
                       color={isInputFilterValid ? 'text' : 'danger'}
-                      title={i18n.translate('xpack.lens.indexPattern.filterBy.clickToEdit', {
-                        defaultMessage: 'Click to edit',
-                      })}
+                      title={i18n.translate(
+                        'visualizationUiComponents.filterQueryInput.clickToEdit',
+                        {
+                          defaultMessage: 'Click to edit',
+                        }
+                      )}
                     >
                       {inputFilter?.query ||
-                        i18n.translate('xpack.lens.indexPattern.filterBy.emptyFilterQuery', {
-                          defaultMessage: '(empty)',
-                        })}
+                        i18n.translate(
+                          'visualizationUiComponents.filterQueryInput.emptyFilterQuery',
+                          {
+                            defaultMessage: '(empty)',
+                          }
+                        )}
                     </EuiLink>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -146,6 +152,9 @@ export function FilterQueryInput({
                 isInvalid={!isQueryInputValid}
                 onSubmit={() => {}}
                 data-test-subj={dataTestSubj}
+                appName={i18n.translate('xpack.lens.queryInput.appName', {
+                  defaultMessage: 'Lens',
+                })}
                 services={queryInputServices}
               />
             </EuiFormRow>

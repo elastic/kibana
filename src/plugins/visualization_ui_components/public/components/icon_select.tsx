@@ -98,7 +98,7 @@ export function IconSelectSetting<Icon extends string = string>({
     <EuiFormRow
       display="columnCompressed"
       fullWidth
-      label={i18n.translate('xpack.lens.xyChart.lineMarker.icon', {
+      label={i18n.translate('visualizationUiComponents.iconSelect.label', {
         defaultMessage: 'Icon decoration',
       })}
     >

@@ -41,6 +41,7 @@ export const QueryInput = ({
   disableAutoFocus,
   ['data-test-subj']: dataTestSubj,
   placeholder,
+  appName,
   services: { data, uiSettings, http, notifications, docLinks, storage, unifiedSearch, dataViews },
 }: {
   value: Query;
@@ -51,6 +52,7 @@ export const QueryInput = ({
   disableAutoFocus?: boolean;
   'data-test-subj'?: string;
   placeholder?: string;
+  appName: string;
   services: QueryInputServices;
 }) => {
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
@@ -77,19 +79,17 @@ export const QueryInput = ({
       placeholder={
         placeholder ??
         (inputValue.language === 'kuery'
-          ? i18n.translate('xpack.lens.indexPattern.filters.queryPlaceholderKql', {
+          ? i18n.translate('visualizationUiComponents.queryInput.queryPlaceholderKql', {
               defaultMessage: '{example}',
               values: { example: 'method : "GET" or status : "404"' },
             })
-          : i18n.translate('xpack.lens.indexPattern.filters.queryPlaceholderLucene', {
+          : i18n.translate('visualizationUiComponents.queryInput.queryPlaceholderLucene', {
               defaultMessage: '{example}',
               values: { example: 'method:GET OR status:404' },
             }))
       }
       languageSwitcherPopoverAnchorPosition="rightDown"
-      appName={i18n.translate('xpack.lens.queryInput.appName', {
-        defaultMessage: 'Lens',
-      })}
+      appName={appName}
       deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage, dataViews }}
     />
   );
