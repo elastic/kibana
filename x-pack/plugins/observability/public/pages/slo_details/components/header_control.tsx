@@ -196,7 +196,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
           ]
             .concat(
               !!slo && isApmIndicatorType(slo.indicator.type)
-                ? [
+                ? 
                     <EuiContextMenuItem
                       key="exploreInApm"
                       icon="bullseye"
@@ -209,8 +209,8 @@ export function HeaderControl({ isLoading, slo }: Props) {
                           defaultMessage: 'Service details',
                         }
                       )}
-                    </EuiContextMenuItem>,
-                  ]
+                    </EuiContextMenuItem>
+                  
                 : []
             )
             .concat(
