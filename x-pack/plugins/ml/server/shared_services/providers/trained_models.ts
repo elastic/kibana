@@ -39,6 +39,9 @@ export interface TrainedModelsProvider {
     updateTrainedModelDeployment(
       params: UpdateTrainedModelDeploymentRequest
     ): Promise<UpdateTrainedModelDeploymentResponse>;
+    putTrainedModel(
+      params: estypes.MlPutTrainedModelRequest
+    ): Promise<estypes.MlPutTrainedModelResponse>;
   };
 }
 
@@ -98,9 +101,17 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
         async updateTrainedModelDeployment(params: UpdateTrainedModelDeploymentRequest) {
           return await guards
             .isFullLicense()
-            .hasMlCapabilities(['canStartStopTrainedModels'])
+            .hasMlCapabilities(['canCreateTrainedModels'])
             .ok(async ({ mlClient }) => {
               return mlClient.updateTrainedModelDeployment(params);
+            });
+        },
+        async putTrainedModel(params: estypes.MlPutTrainedModelRequest) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canCreateTrainedModels'])
+            .ok(async ({ mlClient }) => {
+              return mlClient.putTrainedModel(params);
             });
         },
       };
