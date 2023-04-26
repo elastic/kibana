@@ -11,7 +11,6 @@ import type { InfraClientCoreSetup } from '../types';
 import type { LogsLocatorParams } from './logs_locator';
 import { DISCOVER_APP_TARGET } from '../../common/constants';
 import { findInventoryFields } from '../../common/inventory_models';
-import { getLocationToDiscover } from './helpers';
 
 const NODE_LOGS_LOCATOR_ID = 'NODE_LOGS_LOCATOR';
 
@@ -33,6 +32,7 @@ export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLoca
   constructor(protected readonly deps: NodeLogsLocatorDependencies) {}
 
   public readonly getLocation = async (params: NodeLogsLocatorParams) => {
+    const { parseSearchString, getLocationToDiscover } = await import('./helpers');
     const { nodeType, nodeId, filter, timeRange } = params;
     const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
     const query = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
@@ -41,7 +41,6 @@ export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLoca
       return await getLocationToDiscover({ core: this.deps.core, timeRange, filter });
     }
 
-    const { parseSearchString } = await import('./helpers');
     const searchString = parseSearchString({ ...params, filter: query });
 
     return {

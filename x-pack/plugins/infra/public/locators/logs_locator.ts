@@ -9,7 +9,6 @@ import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { InfraClientCoreSetup, QueryTimeRange } from '../types';
 import { DISCOVER_APP_TARGET } from '../../common/constants';
-import { getLocationToDiscover } from './helpers';
 
 const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 
@@ -37,13 +36,13 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
   constructor(protected readonly deps: LogsLocatorDependencies) {}
 
   public readonly getLocation = async (params: LogsLocatorParams) => {
+    const { parseSearchString, getLocationToDiscover } = await import('./helpers');
     const { filter, timeRange } = params;
 
     if (this.deps.appTarget === DISCOVER_APP_TARGET) {
       return await getLocationToDiscover({ core: this.deps.core, timeRange, filter });
     }
 
-    const { parseSearchString } = await import('./helpers');
     const searchString = parseSearchString(params);
 
     return {
