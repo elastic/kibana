@@ -6,7 +6,7 @@
  */
 
 import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
-import type { SeverityType } from './anomaly_severity';
+import type { MlSeverityType } from './anomaly_severity';
 import { getSeverityTypes } from './get_severity_types';
 
 /**
@@ -14,7 +14,7 @@ import { getSeverityTypes } from './get_severity_types';
  * for the supplied normalized anomaly score (a value between 0 and 100).
  * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
  */
-export function getSeverity(normalizedScore: number): SeverityType {
+export function getSeverity(normalizedScore: number): MlSeverityType {
   const severityTypesList = getSeverityTypes();
 
   if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {

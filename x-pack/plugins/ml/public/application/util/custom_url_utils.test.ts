@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   MlAnomalyRecordDoc,
   MlCustomUrlAnomalyRecordDoc,
   MlKibanaUrlConfig,
-  UrlConfig,
+  MlUrlConfig,
 } from '@kbn/ml-anomaly-utils';
 
 import {
@@ -116,12 +116,12 @@ describe('ML - custom URL utils', () => {
       "dashboards#/view/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:lucene,query:'airline:\"$airline$\"'))",
   };
 
-  const TEST_OTHER_URL: UrlConfig = {
+  const TEST_OTHER_URL: MlUrlConfig = {
     url_name: 'Show airline',
     url_value: 'http://airlinecodes.info/airline-code-$airline$',
   };
 
-  const TEST_OTHER_URL_NO_TOKENS: UrlConfig = {
+  const TEST_OTHER_URL_NO_TOKENS: MlUrlConfig = {
     url_name: 'Show docs',
     url_value: 'https://www.elastic.co/guide/index.html',
   };
@@ -203,7 +203,7 @@ describe('ML - custom URL utils', () => {
         ...TEST_DOC,
         method: ['POST'],
       };
-      const TEST_MULTIPLE_NON_QUERY_TOKENS: UrlConfig = {
+      const TEST_MULTIPLE_NON_QUERY_TOKENS: MlUrlConfig = {
         url_name: 'no_query',
         url_value: `dashboards#/view/b3ad9930-db86-11e9-b5d5-e3a9ca224c61?_g=(filters:!(),time:(from:'2018-12-17T00:00:00.000Z',mode:absolute,to:'2018-12-17T09:00:00.000Z'))&_a=(description:'',filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'7e06e310-dae4-11e9-8260-995f99197467',key:method,negate:!f,params:(query:$method$),type:phrase,value:$method$),query:(match:(method:(query:$method$,type:phrase))))))`,
       };
@@ -241,7 +241,7 @@ describe('ML - custom URL utils', () => {
         referer: ['http://www.example.com/wp-admin/post.php?post=51&action=edit'],
         method: 'POST',
       };
-      const TEST_MULTIPLE_NON_QUERY_TOKENS: UrlConfig = {
+      const TEST_MULTIPLE_NON_QUERY_TOKENS: MlUrlConfig = {
         url_name: 'massive_url',
         url_value: `discover#/11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61-b3ad9930-db86-11e9-b5d5-e3a9ca224c61?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'7e06e310-dae4-11e9-8260-995f99197467',key:method,negate:!f,params:(query:$method$),type:phrase,value:$method$),query:(match:(method:(query:$method$,type:phrase))))),index:'7e06e310-dae4-11e9-8260-995f99197467',interval:auto,query:(language:kuery,query:'clientip:$clientip$ and action:$action$ and referer:$referer$'),sort:!(!('@timestamp',desc)))`,
       };
@@ -589,7 +589,7 @@ describe('ML - custom URL utils', () => {
     });
 
     test('returns expected URL with preserving custom filter', () => {
-      const urlWithCustomFilter: UrlConfig = {
+      const urlWithCustomFilter: MlUrlConfig = {
         url_name: 'URL with a custom filter',
         url_value: `discover#/?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:subSystem.keyword,negate:!f,params:(query:JDBC),type:phrase),query:(match_phrase:(subSystem.keyword:JDBC)))),index:'eap_wls_server_12c*,*:eap_wls_server_12c*',query:(language:kuery,query:'wlscluster.keyword:"$wlscluster.keyword$"'))`,
       };

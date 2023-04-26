@@ -28,7 +28,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type { UrlConfig } from '@kbn/ml-anomaly-utils';
+import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 
 import { useMlKibana, useMlApiContext } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
@@ -63,7 +63,7 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
   const [mmlValidationError, setMmlValidationError] = useState<string | undefined>();
   const [maxNumThreads, setMaxNumThreads] = useState<number | undefined>(config.max_num_threads);
   const [activeTabId, setActiveTabId] = useState<string>('job-details');
-  const [customUrls, setCustomUrls] = useState<UrlConfig[]>([]);
+  const [customUrls, setCustomUrls] = useState<MlUrlConfig[]>([]);
   const [analyticsJob, setAnalyticsJob] = useState<DataFrameAnalyticsConfig | undefined>();
 
   const {

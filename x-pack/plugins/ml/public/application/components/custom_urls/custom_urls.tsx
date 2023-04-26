@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import type { UrlConfig } from '@kbn/ml-anomaly-utils';
+import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import { MlKibanaReactContextValue } from '../../contexts/kibana';
 import { CustomUrlEditor, CustomUrlList } from './custom_url_editor';
 import {
@@ -48,7 +48,7 @@ import { isDataFrameAnalyticsConfigs } from '../../../../common/types/data_frame
 const MAX_NUMBER_DASHBOARDS = 1000;
 
 interface CustomUrlsState {
-  customUrls: UrlConfig[];
+  customUrls: MlUrlConfig[];
   dashboards: Array<{ id: string; title: string }>;
   dataViewListItems: DataViewListItem[];
   editorOpen: boolean;

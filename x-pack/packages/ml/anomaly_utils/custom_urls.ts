@@ -15,7 +15,7 @@ import type { MlAnomalyRecordDoc } from './types';
  * @interface BaseUrlConfig
  * @typedef {BaseUrlConfig}
  */
-export interface BaseUrlConfig {
+interface BaseUrlConfig {
   /**
    * The url name of the configuration.
    * @type {string}
@@ -64,9 +64,9 @@ export interface MlKibanaUrlConfigWithTimeRange extends BaseUrlConfig {
  * Union type of different custom URL configurations
  *
  * @export
- * @typedef {UrlConfig}
+ * @typedef {MlUrlConfig}
  */
-export type UrlConfig = BaseUrlConfig | MlKibanaUrlConfig;
+export type MlUrlConfig = BaseUrlConfig | MlKibanaUrlConfig;
 
 /**
  * Extended interface of MlAnomalyRecordDoc to include time range information.

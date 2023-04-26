@@ -11,7 +11,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
-import { UrlConfig } from '@kbn/ml-anomaly-utils';
+import { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import {
@@ -717,12 +717,12 @@ export class JobCreator {
     return this._getCustomSetting('created_by') as CREATED_BY_LABEL | null;
   }
 
-  public set customUrls(customUrls: UrlConfig[] | null) {
+  public set customUrls(customUrls: MlUrlConfig[] | null) {
     this._setCustomSetting('custom_urls', customUrls);
   }
 
-  public get customUrls(): UrlConfig[] | null {
-    return this._getCustomSetting('custom_urls') as UrlConfig[] | null;
+  public get customUrls(): MlUrlConfig[] | null {
+    return this._getCustomSetting('custom_urls') as MlUrlConfig[] | null;
   }
 
   public get formattedJobJson() {

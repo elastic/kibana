@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { EsErrorBody } from '@kbn/ml-error-utils';
-import type { UrlConfig } from '@kbn/ml-anomaly-utils';
+import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
 
 export interface DeleteDataFrameAnalyticsWithIndexStatus {
@@ -59,7 +59,7 @@ export interface ClassificationAnalysis {
 
 export type AnalysisConfig = estypes.MlDataframeAnalysisContainer;
 export interface DataFrameAnalyticsMeta {
-  custom_urls?: UrlConfig[];
+  custom_urls?: MlUrlConfig[];
   [key: string]: any;
 }
 export interface DataFrameAnalyticsConfig

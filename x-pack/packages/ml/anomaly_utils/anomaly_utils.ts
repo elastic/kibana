@@ -10,7 +10,7 @@
  * to extract information for display in dashboards.
  */
 
-import type { SeverityType } from './anomaly_severity';
+import type { MlSeverityType } from './anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 import { getSeverityTypes } from './get_severity_types';
 import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from './types';
@@ -117,7 +117,7 @@ export function isCategorizationAnomaly(anomaly: MlAnomaliesTableRecord): boolea
  * less than 3 are assigned a severity of 'low'.
  * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
  */
-export function getSeverityWithLow(normalizedScore: number): SeverityType {
+export function getSeverityWithLow(normalizedScore: number): MlSeverityType {
   const severityTypesList = getSeverityTypes();
 
   if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {

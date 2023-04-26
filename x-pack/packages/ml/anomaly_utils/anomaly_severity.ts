@@ -42,7 +42,7 @@ export enum ML_ANOMALY_SEVERITY {
   UNKNOWN = 'unknown',
 }
 
-export interface SeverityType {
+export interface MlSeverityType {
   id: ML_ANOMALY_SEVERITY;
   label: string;
 }

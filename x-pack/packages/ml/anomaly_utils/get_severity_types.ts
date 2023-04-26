@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type SeverityType, ML_ANOMALY_SEVERITY } from './anomaly_severity';
+import { type MlSeverityType, ML_ANOMALY_SEVERITY } from './anomaly_severity';
 
-let severityTypes: Record<string, SeverityType>;
+let severityTypes: Record<string, MlSeverityType>;
 
 export function getSeverityTypes() {
   if (severityTypes) {

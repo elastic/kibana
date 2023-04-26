@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
-import type { UrlConfig } from '@kbn/ml-anomaly-utils';
+import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import { CustomUrlSettings, isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
 import { type DataFrameAnalyticsConfig } from '../../../../../common/types/data_frame_analytics';
@@ -64,7 +64,7 @@ function getLinkToOptions() {
 interface CustomUrlEditorProps {
   customUrl: CustomUrlSettings | undefined;
   setEditCustomUrl: (url: CustomUrlSettings) => void;
-  savedCustomUrls: UrlConfig[];
+  savedCustomUrls: MlUrlConfig[];
   dashboards: Array<{ id: string; title: string }>;
   dataViewListItems: DataViewListItem[];
   showTimeRangeSelector?: boolean;

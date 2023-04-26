@@ -20,7 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { UrlConfig, MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
+import type { MlUrlConfig, MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
 import { useMlKibana } from '../../../contexts/kibana';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
@@ -42,8 +42,8 @@ function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
 
 export interface CustomUrlListProps {
   job: Job | DataFrameAnalyticsConfig;
-  customUrls: UrlConfig[];
-  onChange: (customUrls: UrlConfig[]) => void;
+  customUrls: MlUrlConfig[];
+  onChange: (customUrls: MlUrlConfig[]) => void;
 }
 
 /*

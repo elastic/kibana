@@ -13,7 +13,7 @@ import rison, { type RisonValue } from '@kbn/rison';
 import { TimeRange } from '@kbn/es-query';
 import type {
   MlAnomalyRecordDoc,
-  UrlConfig,
+  MlUrlConfig,
   MlKibanaUrlConfig,
   MlCustomUrlAnomalyRecordDoc,
 } from '@kbn/ml-anomaly-utils';
@@ -28,7 +28,7 @@ const TIME_RANGE_AUTO = 'auto';
 // Replaces the $ delimited tokens in the url_value of the custom URL configuration
 // with values from the supplied document.
 export function replaceTokensInDFAUrlValue(
-  customUrlConfig: UrlConfig | MlKibanaUrlConfig,
+  customUrlConfig: MlUrlConfig | MlKibanaUrlConfig,
   doc: DataGridItem,
   timeRange?: TimeRange
 ) {
@@ -49,7 +49,7 @@ export function replaceTokensInDFAUrlValue(
 // Replaces the $ delimited tokens in the url_value of the custom URL configuration
 // with values from the supplied document.
 export function replaceTokensInUrlValue(
-  customUrlConfig: UrlConfig | MlKibanaUrlConfig,
+  customUrlConfig: MlUrlConfig | MlKibanaUrlConfig,
   jobBucketSpanSecs: number,
   doc: MlAnomalyRecordDoc | Record<string, unknown>,
   timeFieldName: 'timestamp' | string
@@ -88,7 +88,7 @@ export function replaceTokensInUrlValue(
 // Returns the URL to open from the supplied config, with any dollar delimited tokens
 // substituted from the supplied anomaly record.
 export function getUrlForRecord(
-  urlConfig: UrlConfig | MlKibanaUrlConfig,
+  urlConfig: MlUrlConfig | MlKibanaUrlConfig,
   record: MlCustomUrlAnomalyRecordDoc | DataGridItem
 ) {
   if (isKibanaUrl(urlConfig) === true) {
@@ -104,7 +104,7 @@ export function getUrlForRecord(
 // object which indicates whether it is opening a Kibana page running on the same server.
 // `url` is the URL with any dollar delimited tokens from the urlConfig
 // having been substituted with values from an anomaly record.
-export function openCustomUrlWindow(url: string, urlConfig: UrlConfig, basePath: string) {
+export function openCustomUrlWindow(url: string, urlConfig: MlUrlConfig, basePath: string) {
   // Run through a regex to test whether the url_value starts with a protocol scheme.
   if (/^(?:[a-z]+:)?\/\//i.test(urlConfig.url_value) === false) {
     // If `url` is a relative path, we need to prefix the base path.
@@ -132,7 +132,7 @@ export function openCustomUrlWindow(url: string, urlConfig: UrlConfig, basePath:
 // recognize modules or with custom UI in the custom URL builder we'd
 // need to add the solution here. Manually created custom URLs for other
 // solution pages need to be prefixed with `app/` in the custom URL builder.
-function isKibanaUrl(urlConfig: UrlConfig) {
+function isKibanaUrl(urlConfig: MlUrlConfig) {
   const urlValue = urlConfig.url_value;
   return (
     // HashRouter based plugins
@@ -255,7 +255,10 @@ const getQueryStringResultProvider =
  * Builds a Kibana dashboard or Discover URL from the supplied config, with any
  * dollar delimited tokens substituted from the supplied anomaly record.
  */
-function buildKibanaUrl(urlConfig: UrlConfig, record: MlCustomUrlAnomalyRecordDoc | DataGridItem) {
+function buildKibanaUrl(
+  urlConfig: MlUrlConfig,
+  record: MlCustomUrlAnomalyRecordDoc | DataGridItem
+) {
   const urlValue = urlConfig.url_value;
 
   const isLuceneQueryLanguage = urlValue.includes('language:lucene');

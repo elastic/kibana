@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { ML_ANOMALY_SEVERITY } from './anomaly_severity';
+export { type MlSeverityType, ML_ANOMALY_SEVERITY } from './anomaly_severity';
 export { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 export { ML_SEVERITY_COLORS } from './severity_colors';
 
@@ -24,6 +24,7 @@ export {
   type MlEntityField,
   type MlEntityFieldOperation,
   ML_ENTITY_FIELD_OPERATIONS,
+  ML_ENTITY_FIELD_TYPE,
 } from './anomaly_utils';
 
 export {
@@ -38,7 +39,7 @@ export {
   isMlKibanaUrlConfigWithTimeRange,
   type MlCustomUrlAnomalyRecordDoc,
   type MlKibanaUrlConfig,
-  type UrlConfig,
+  type MlUrlConfig,
 } from './custom_urls';
 
 export {
