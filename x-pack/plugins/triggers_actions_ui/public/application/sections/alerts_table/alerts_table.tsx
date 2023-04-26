@@ -42,6 +42,12 @@ const GridStyles: EuiDataGridStyle = {
   fontSize: 's',
 };
 
+const getCellActionsStub = {
+  getCellActions: () => null,
+  visibleCellActions: undefined,
+  disabledCellActions: [],
+};
+
 const basicRenderCellValue = ({
   data,
   columnId,
@@ -349,11 +355,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       renderCellValue,
       showAlertStatusWithFlapping,
     ]
-  );
-
-  const getCellActionsStub = useMemo(
-    () => ({ getCellActions: () => null, visibleCellActions: undefined, disabledCellActions: [] }),
-    []
   );
 
   const { getCellActions, visibleCellActions, disabledCellActions } = props.alertsTableConfiguration
