@@ -503,7 +503,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('generates max signals warning when circuit breaker is hit', async () => {
-      const rule: ThreatMatchRuleCreateProps = { ...createThreatMatchRule(), max_signals: 88 }; // Query generates 88 alerts with current esArchive
+      const rule: ThreatMatchRuleCreateProps = { ...createThreatMatchRule(), max_signals: 87 }; // Query generates 88 alerts with current esArchive
       const { logs } = await previewRule({ supertest, rule });
       expect(logs[0].warnings).contain(getMaxSignalsWarning());
     });
