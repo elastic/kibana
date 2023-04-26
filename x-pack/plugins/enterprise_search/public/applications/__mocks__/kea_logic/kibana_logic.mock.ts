@@ -35,7 +35,6 @@ export const mockKibanaValues = {
   guidedOnboarding: {},
   history: mockHistory,
   isCloud: false,
-  isSidebarEnabled: true,
   lens: {
     EmbeddableComponent: jest.fn(),
     stateHelperApi: jest.fn().mockResolvedValue({

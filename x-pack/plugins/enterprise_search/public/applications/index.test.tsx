@@ -37,7 +37,6 @@ describe('renderApp', () => {
       licensing: licensingMock.createStart(),
       security: securityMock.createStart(),
     },
-    isSidebarEnabled: true,
   } as any;
   const pluginData = {
     config: {},
