@@ -316,10 +316,6 @@ export const getXyVisualization = ({
     );
   },
 
-  onLayerAction(layerId, actionId, state) {
-    return state;
-  },
-
   onIndexPatternChange(state, indexPatternId, layerId) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];

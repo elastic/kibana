@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
@@ -46,13 +46,19 @@ export const getColor = (
 
 export const MetricItem = ({
   monitor,
-  averageDuration,
+  medianDuration,
+  maxDuration,
+  minDuration,
+  avgDuration,
   data,
   onClick,
 }: {
   monitor: MonitorOverviewItem;
   data: Array<{ x: number; y: number }>;
-  averageDuration: number;
+  medianDuration: number;
+  avgDuration: number;
+  minDuration: number;
+  maxDuration: number;
   onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
 }) => {
   const [isMouseOver, setIsMouseOver] = useState(false);
@@ -119,15 +125,42 @@ export const MetricItem = ({
                 {
                   title: monitor.name,
                   subtitle: locationName,
-                  value: averageDuration,
+                  value: medianDuration,
                   trendShape: MetricTrendShape.Area,
                   trend: data,
                   extra: (
-                    <span>
-                      {i18n.translate('xpack.synthetics.overview.duration.label', {
-                        defaultMessage: 'Duration Avg.',
-                      })}
-                    </span>
+                    <EuiFlexGroup
+                      alignItems="center"
+                      gutterSize="xs"
+                      justifyContent="flexEnd"
+                      // empty title to prevent default title from showing
+                      title=""
+                    >
+                      <EuiFlexItem grow={false}>
+                        {i18n.translate('xpack.synthetics.overview.duration.label', {
+                          defaultMessage: 'Duration',
+                        })}
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          title={i18n.translate('xpack.synthetics.overview.duration.description', {
+                            defaultMessage: 'Median duration of last 24 checks',
+                          })}
+                          content={i18n.translate(
+                            'xpack.synthetics.overview.duration.description.values',
+                            {
+                              defaultMessage: 'Avg: {avg}, Min: {min}, Max: {max}',
+                              values: {
+                                avg: formatDuration(avgDuration, { noSpace: true }),
+                                min: formatDuration(minDuration, { noSpace: true }),
+                                max: formatDuration(maxDuration, { noSpace: true }),
+                              },
+                            }
+                          )}
+                          position="top"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   ),
                   valueFormatter: (d: number) => formatDuration(d),
                   color: getColor(theme, monitor.isEnabled, status),

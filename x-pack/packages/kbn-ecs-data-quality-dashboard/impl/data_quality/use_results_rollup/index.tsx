@@ -17,6 +17,7 @@ import {
   getTotalIncompatible,
   getTotalIndices,
   getTotalIndicesChecked,
+  getTotalSizeInBytes,
   onPatternRollupUpdated,
   updateResultOnCheckCompleted,
 } from './helpers';
@@ -31,6 +32,7 @@ interface UseResultsRollup {
   totalIncompatible: number | undefined;
   totalIndices: number | undefined;
   totalIndicesChecked: number | undefined;
+  totalSizeInBytes: number | undefined;
   updatePatternIndexNames: ({
     indexNames,
     pattern,
@@ -58,6 +60,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
     () => getTotalIndicesChecked(patternRollups),
     [patternRollups]
   );
+  const totalSizeInBytes = useMemo(() => getTotalSizeInBytes(patternRollups), [patternRollups]);
 
   const updatePatternIndexNames = useCallback(
     ({ indexNames, pattern }: { indexNames: string[]; pattern: string }) => {
@@ -72,12 +75,14 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
   const onCheckCompleted: OnCheckCompleted = useCallback(
     ({
       error,
+      formatBytes,
       formatNumber,
       indexName,
       partitionedFieldMetadata,
       pattern,
     }: {
       error: string | null;
+      formatBytes: (value: number | undefined) => string;
       formatNumber: (value: number | undefined) => string;
       indexName: string;
       partitionedFieldMetadata: PartitionedFieldMetadata | null;
@@ -86,6 +91,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
       setPatternRollups((current) =>
         updateResultOnCheckCompleted({
           error,
+          formatBytes,
           formatNumber,
           indexName,
           partitionedFieldMetadata,
@@ -111,6 +117,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
     totalIncompatible,
     totalIndices,
     totalIndicesChecked,
+    totalSizeInBytes,
     updatePatternIndexNames,
     updatePatternRollup,
   };

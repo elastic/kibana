@@ -14,5 +14,11 @@ export {
   TableListViewKibanaProvider,
 } from './src';
 
-export type { UserContentCommonSchema, TableListTab, TableListTabParentProps } from './src';
+export type {
+  UserContentCommonSchema,
+  TableListTab,
+  TableListTabParentProps,
+  RowActions,
+} from './src';
+
 export type { TableListViewKibanaDependencies } from './src/services';

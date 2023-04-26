@@ -12,11 +12,11 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import type { Tag } from '../types';
 import { useServices } from '../services';
-import type { UserContentCommonSchema, TableListProps as TableListProps } from '../table_list_view';
+import type { UserContentCommonSchema, TableListViewProps } from '../table_list_view';
 import { TagBadge } from './tag_badge';
 
 type InheritedProps<T extends UserContentCommonSchema> = Pick<
-  TableListProps<T>,
+  TableListViewProps<T>,
   'onClickTitle' | 'getDetailViewLink' | 'id'
 >;
 interface Props<T extends UserContentCommonSchema> extends InheritedProps<T> {

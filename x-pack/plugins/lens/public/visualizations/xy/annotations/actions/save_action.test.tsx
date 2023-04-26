@@ -167,6 +167,7 @@ describe('annotation group save action', () => {
           onTitleDuplicate: () => {},
         },
         dataViews,
+        goToAnnotationLibrary: () => {},
       };
     };
 

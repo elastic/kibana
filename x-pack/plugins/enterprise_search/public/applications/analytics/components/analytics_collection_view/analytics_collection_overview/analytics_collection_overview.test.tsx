@@ -38,6 +38,7 @@ const mockValues = {
 };
 
 const mockActions = {
+  analyticsEventsExist: jest.fn(),
   fetchAnalyticsCollection: jest.fn(),
   fetchAnalyticsCollectionDataViewId: jest.fn(),
   analyticsEventsExist: jest.fn(),
@@ -92,7 +93,7 @@ describe('AnalyticsOverView', () => {
     );
     expect(wrapper?.find(AnalyticsCollectionChartWithLens)).toHaveLength(1);
     expect(wrapper?.find(AnalyticsCollectionChartWithLens).props()).toEqual({
-      dataViewQuery: 'analytics-events-example',
+      collection: mockValues.analyticsCollection,
       id: 'analytics-collection-chart-Analytics-Collection-1',
       searchSessionId: 'session-id',
       selectedChart: 'Searches',

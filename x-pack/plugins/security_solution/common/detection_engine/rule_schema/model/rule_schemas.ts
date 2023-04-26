@@ -119,6 +119,8 @@ export const baseSchema = buildRuleSchemas({
     output_index: AlertsIndex,
     namespace: AlertsIndexNamespace,
     meta: RuleMetadata,
+    // Throttle
+    throttle: RuleActionThrottle,
   },
   defaultable: {
     // Main attributes
@@ -134,7 +136,6 @@ export const baseSchema = buildRuleSchemas({
     to: RuleIntervalTo,
     // Rule actions
     actions: RuleActionArray,
-    throttle: RuleActionThrottle,
     // Rule exceptions
     exceptions_list: ExceptionListArray,
     // Misc attributes

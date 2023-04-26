@@ -82,7 +82,7 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
  * consuming component stories.
  */
 export const getStoryArgTypes = () => ({
-  tableListTitle: {
+  title: {
     control: {
       type: 'text',
     },

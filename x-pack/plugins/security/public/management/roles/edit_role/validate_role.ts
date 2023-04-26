@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
-import type { Role, RoleIndexPrivilege } from '../../../../common/model';
+import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../../common/model';
 
 interface RoleValidatorOptions {
   shouldValidate?: boolean;
@@ -97,32 +97,145 @@ export class RoleValidator {
       );
     }
 
-    const areIndicesValid =
-      role.elasticsearch.indices
-        .map((indexPriv) => this.validateIndexPrivilege(indexPriv))
-        .find((result: RoleValidationResult) => result.isInvalid) == null;
+    const areIndicesInvalid = role.elasticsearch.indices.reduce((isInvalid, indexPriv) => {
+      if (
+        this.validateIndexPrivilegeNamesField(indexPriv).isInvalid ||
+        this.validateIndexPrivilegePrivilegesField(indexPriv).isInvalid
+      ) {
+        return true;
+      }
+      return isInvalid;
+    }, false);
 
-    if (areIndicesValid) {
-      return valid();
+    if (areIndicesInvalid) {
+      return invalid();
     }
-    return invalid();
+
+    return valid();
   }
 
-  public validateIndexPrivilege(indexPrivilege: RoleIndexPrivilege): RoleValidationResult {
+  public validateRemoteIndexPrivileges(role: Role): RoleValidationResult {
     if (!this.shouldValidate) {
       return valid();
     }
 
-    if (indexPrivilege.names.length && !indexPrivilege.privileges.length) {
+    if (!role.elasticsearch.remote_indices) {
+      return valid();
+    }
+
+    if (!Array.isArray(role.elasticsearch.remote_indices)) {
+      throw new TypeError(
+        i18n.translate('xpack.security.management.editRole.validateRole.indicesTypeErrorMessage', {
+          defaultMessage: 'Expected {elasticIndices} to be an array',
+          values: {
+            elasticIndices: '"role.elasticsearch.remote_indices"',
+          },
+        })
+      );
+    }
+
+    const areRemoteIndicesInvalid = role.elasticsearch.remote_indices.reduce(
+      (isInvalid, indexPriv) => {
+        if (
+          this.validateRemoteIndexPrivilegeClustersField(indexPriv).isInvalid ||
+          this.validateIndexPrivilegeNamesField(indexPriv).isInvalid ||
+          this.validateIndexPrivilegePrivilegesField(indexPriv).isInvalid
+        ) {
+          return true;
+        }
+        return isInvalid;
+      },
+      false
+    );
+
+    if (areRemoteIndicesInvalid) {
+      return invalid();
+    }
+
+    return valid();
+  }
+
+  public validateRemoteIndexPrivilegeClustersField(
+    indexPrivilege: RoleRemoteIndexPrivilege
+  ): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    // Ignore if all other fields are empty
+    if (!indexPrivilege.names.length && !indexPrivilege.privileges.length) {
+      return valid();
+    }
+
+    if (!indexPrivilege.clusters || !indexPrivilege.clusters.length) {
       return invalid(
         i18n.translate(
-          'xpack.security.management.editRole.validateRole.onePrivilegeRequiredWarningMessage',
+          'xpack.security.management.editRole.validateRole.oneRemoteClusterRequiredWarningMessage',
           {
-            defaultMessage: 'At least one privilege is required',
+            defaultMessage: 'Enter or select at least one remote cluster',
           }
         )
       );
     }
+
+    return valid();
+  }
+
+  public validateIndexPrivilegeNamesField(
+    indexPrivilege: RoleIndexPrivilege | RoleRemoteIndexPrivilege
+  ): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    // Ignore if all other fields are empty
+    if (
+      (!('clusters' in indexPrivilege) || !indexPrivilege.clusters.length) &&
+      !indexPrivilege.privileges.length
+    ) {
+      return valid();
+    }
+
+    if (!indexPrivilege.names.length) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRole.validateRole.oneIndexRequiredWarningMessage',
+          {
+            defaultMessage: 'Enter or select at least one index pattern',
+          }
+        )
+      );
+    }
+
+    return valid();
+  }
+
+  public validateIndexPrivilegePrivilegesField(
+    indexPrivilege: RoleIndexPrivilege | RoleRemoteIndexPrivilege
+  ): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    // Ignore if all other fields are empty
+    if (
+      (!('clusters' in indexPrivilege) || !indexPrivilege.clusters.length) &&
+      !indexPrivilege.names.length
+    ) {
+      return valid();
+    }
+
+    if (!indexPrivilege.privileges.length) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRole.validateRole.onePrivilegeRequiredWarningMessage',
+          {
+            defaultMessage: 'Enter or select at least one action',
+          }
+        )
+      );
+    }
+
     return valid();
   }
 
@@ -198,9 +311,15 @@ export class RoleValidator {
   public validateForSave(role: Role): RoleValidationResult {
     const { isInvalid: isNameInvalid } = this.validateRoleName(role);
     const { isInvalid: areIndicesInvalid } = this.validateIndexPrivileges(role);
+    const { isInvalid: areRemoteIndicesInvalid } = this.validateRemoteIndexPrivileges(role);
     const { isInvalid: areSpacePrivilegesInvalid } = this.validateSpacePrivileges(role);
 
-    if (isNameInvalid || areIndicesInvalid || areSpacePrivilegesInvalid) {
+    if (
+      isNameInvalid ||
+      areIndicesInvalid ||
+      areRemoteIndicesInvalid ||
+      areSpacePrivilegesInvalid
+    ) {
       return invalid();
     }
 

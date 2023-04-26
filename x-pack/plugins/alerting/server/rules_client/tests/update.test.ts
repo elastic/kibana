@@ -171,6 +171,14 @@ describe('update()', () => {
         return { state: {} };
       },
       producer: 'alerts',
+      validate: {
+        params: { validate: (params) => params },
+      },
+    });
+    (migrateLegacyActions as jest.Mock).mockResolvedValue({
+      hasLegacyActions: false,
+      resultedActions: [],
+      resultedReferences: [],
     });
     (migrateLegacyActions as jest.Mock).mockResolvedValue({
       hasLegacyActions: false,
@@ -748,6 +756,9 @@ describe('update()', () => {
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -1643,6 +1654,9 @@ describe('update()', () => {
           return { state: {} };
         },
         producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
       });
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
         id: alertId,

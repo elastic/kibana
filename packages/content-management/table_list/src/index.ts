@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { TableList, TableListView } from './table_list_view';
+export { TableListView, TableList } from './table_list_view';
 
 export type {
   TableListViewProps,
@@ -21,3 +21,5 @@ export {
 } from './tabbed_table_list_view';
 
 export { TableListViewProvider, TableListViewKibanaProvider } from './services';
+
+export type { RowActions } from './types';

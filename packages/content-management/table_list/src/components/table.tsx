@@ -18,7 +18,9 @@ import {
   Direction,
   Query,
   Search,
+  type EuiTableSelectionType,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { useServices } from '../services';
 import type { Action } from '../actions';
@@ -27,6 +29,7 @@ import type {
   TableListProps,
   UserContentCommonSchema,
 } from '../table_list_view';
+import type { TableItemsRowActions } from '../types';
 import { TableSortSelect } from './table_sort_select';
 import { TagFilterPanel } from './tag_filter_panel';
 import { useTagFilterPanel } from './use_tag_filter_panel';
@@ -52,6 +55,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   tableColumns: Array<EuiBasicTableColumn<T>>;
   hasUpdatedAtMetadata: boolean;
   deleteItems: TableListProps<T>['deleteItems'];
+  tableItemsRowActions: TableItemsRowActions;
   renderCreateButton: () => React.ReactElement | undefined;
   onSortChange: (column: SortColumnField, direction: Direction) => void;
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
@@ -72,6 +76,7 @@ export function Table<T extends UserContentCommonSchema>({
   entityName,
   entityNamePlural,
   tagsToTableItemMap,
+  tableItemsRowActions,
   deleteItems,
   renderCreateButton,
   tableCaption,
@@ -108,13 +113,32 @@ export function Table<T extends UserContentCommonSchema>({
     );
   }, [deleteItems, dispatch, entityName, entityNamePlural, selectedIds.length]);
 
-  const selection = deleteItems
-    ? {
+  const selection = useMemo<EuiTableSelectionType<T> | undefined>(() => {
+    if (deleteItems) {
+      return {
         onSelectionChange: (obj: T[]) => {
           dispatch({ type: 'onSelectionChange', data: obj });
         },
-      }
-    : undefined;
+        selectable: (obj) => {
+          const actions = tableItemsRowActions[obj.id];
+          return actions?.delete?.enabled !== false;
+        },
+        selectableMessage: (selectable, obj) => {
+          if (!selectable) {
+            const actions = tableItemsRowActions[obj.id];
+            return (
+              actions?.delete?.reason ??
+              i18n.translate('contentManagement.tableList.actionsDisabledLabel', {
+                defaultMessage: 'Actions disabled for this item',
+              })
+            );
+          }
+          return '';
+        },
+        initialSelected: [],
+      };
+    }
+  }, [deleteItems, dispatch, tableItemsRowActions]);
 
   const {
     isPopoverOpen,
@@ -218,6 +242,7 @@ export function Table<T extends UserContentCommonSchema>({
       data-test-subj="itemsInMemTable"
       rowHeader="attributes.title"
       tableCaption={tableCaption}
+      isSelectable
     />
   );
 }

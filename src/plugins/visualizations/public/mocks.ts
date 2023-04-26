@@ -34,6 +34,7 @@ const createSetupContract = (): VisualizationsSetup => ({
   registerAlias: jest.fn(),
   hideTypes: jest.fn(),
   visEditorsRegistry: { registerDefault: jest.fn(), register: jest.fn(), get: jest.fn() },
+  listingViewRegistry: { add: jest.fn() },
 });
 
 const createStartContract = (): VisualizationsStart => ({

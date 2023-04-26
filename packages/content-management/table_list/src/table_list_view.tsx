@@ -50,6 +50,7 @@ import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
+import { RowActions, TableItemsRowActions } from './types';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -75,6 +76,11 @@ export interface TableListViewProps<T extends UserContentCommonSchema = UserCont
   headingId?: string;
   /** An optional id for the listing. Used to generate unique data-test-subj. Default: "userContent" */
   id?: string;
+  /**
+   * Configuration of the table row item actions. Disable specific action for a table row item.
+   * Currently only the "delete" ite action can be disabled.
+   */
+  rowItemActions?: (obj: T) => RowActions | undefined;
   children?: ReactNode | undefined;
   findItems(
     searchQuery: string,
@@ -126,6 +132,7 @@ export type TableListProps<T extends UserContentCommonSchema = UserContentCommon
   | 'getDetailViewLink'
   | 'onClickTitle'
   | 'id'
+  | 'rowItemActions'
   | 'contentEditor'
   | 'titleColumnName'
   | 'withoutPageTemplateWrapper'
@@ -249,7 +256,18 @@ const urlStateSerializer = (updated: {
   return updatedQueryParams;
 };
 
-const TableListComp = function TableListComp<T extends UserContentCommonSchema>({
+const tableColumnMetadata = {
+  title: {
+    field: 'attributes.title',
+    name: 'Name, description, tags',
+  },
+  updatedAt: {
+    field: 'updatedAt',
+    name: 'Last updated',
+  },
+} as const;
+
+function TableListComp<T extends UserContentCommonSchema>({
   tableCaption,
   entityName,
   entityNamePlural,
@@ -260,6 +278,7 @@ const TableListComp = function TableListComp<T extends UserContentCommonSchema>(
   urlStateEnabled = true,
   customTableColumn,
   emptyPrompt,
+  rowItemActions,
   findItems,
   createItem,
   editItem,
@@ -401,7 +420,6 @@ const TableListComp = function TableListComp<T extends UserContentCommonSchema>(
             response,
           },
         });
-        onInitialFetchReturned();
       }
     } catch (err) {
       dispatch({
@@ -409,7 +427,7 @@ const TableListComp = function TableListComp<T extends UserContentCommonSchema>(
         data: err,
       });
     }
-  }, [searchQueryParser, searchQuery.text, findItems, onInitialFetchReturned]);
+  }, [searchQueryParser, findItems, searchQuery.text]);
 
   useEffect(() => {
     fetchItems();
@@ -472,7 +490,7 @@ const TableListComp = function TableListComp<T extends UserContentCommonSchema>(
   const tableColumns = useMemo(() => {
     const columns: Array<EuiBasicTableColumn<T>> = [
       {
-        field: 'attributes.title',
+        field: tableColumnMetadata.title.field,
         name:
           titleColumnName ??
           i18n.translate('contentManagement.tableList.mainColumnName', {
@@ -506,7 +524,7 @@ const TableListComp = function TableListComp<T extends UserContentCommonSchema>(
 
     if (hasUpdatedAtMetadata) {
       columns.push({
-        field: 'updatedAt',
+        field: tableColumnMetadata.updatedAt.field,
         name: i18n.translate('contentManagement.tableList.lastUpdatedColumnTitle', {
           defaultMessage: 'Last updated',
         }),
@@ -604,6 +622,15 @@ const TableListComp = function TableListComp<T extends UserContentCommonSchema>(
     return selectedIds.map((selectedId) => itemsById[selectedId]);
   }, [selectedIds, itemsById]);
 
+  const tableItemsRowActions = useMemo(() => {
+    return items.reduce<TableItemsRowActions>((acc, item) => {
+      return {
+        ...acc,
+        [item.id]: rowItemActions ? rowItemActions(item) : undefined,
+      };
+    }, {});
+  }, [items, rowItemActions]);
+
   // ------------
   // Callbacks
   // ------------
@@ -665,8 +692,17 @@ const TableListComp = function TableListComp<T extends UserContentCommonSchema>(
       } = {};
 
       if (criteria.sort) {
+        // We need to serialise the field as the <EuiInMemoryTable /> return either (1) the field _name_ (e.g. "Last updated")
+        // when changing the "Rows per page" select value or (2) the field _value_ (e.g. "updatedAt") when clicking the column title
+        let fieldSerialized: unknown = criteria.sort.field;
+        if (fieldSerialized === tableColumnMetadata.title.name) {
+          fieldSerialized = tableColumnMetadata.title.field;
+        } else if (fieldSerialized === tableColumnMetadata.updatedAt.name) {
+          fieldSerialized = tableColumnMetadata.updatedAt.field;
+        }
+
         data.sort = {
-          field: criteria.sort.field as SortColumnField,
+          field: fieldSerialized as SortColumnField,
           direction: criteria.sort.direction,
         };
       }
@@ -869,16 +905,26 @@ const TableListComp = function TableListComp<T extends UserContentCommonSchema>(
     };
   }, []);
 
+  const PageTemplate = useMemo<typeof KibanaPageTemplate>(() => {
+    return withoutPageTemplateWrapper
+      ? ((({
+          children: _children,
+          'data-test-subj': dataTestSubj,
+        }: {
+          children: React.ReactNode;
+          ['data-test-subj']?: string;
+        }) => (
+          <div data-test-subj={dataTestSubj}>{_children}</div>
+        )) as unknown as typeof KibanaPageTemplate)
+      : KibanaPageTemplate;
+  }, [withoutPageTemplateWrapper]);
+
   // ------------
   // Render
   // ------------
   if (!hasInitialFetchReturned) {
     return null;
   }
-
-  const PageTemplate = withoutPageTemplateWrapper
-    ? (React.Fragment as unknown as typeof KibanaPageTemplate)
-    : KibanaPageTemplate;
 
   if (!showFetchError && hasNoItems) {
     return (
@@ -925,6 +971,7 @@ const TableListComp = function TableListComp<T extends UserContentCommonSchema>(
           tableColumns={tableColumns}
           hasUpdatedAtMetadata={hasUpdatedAtMetadata}
           tableSort={tableSort}
+          tableItemsRowActions={tableItemsRowActions}
           pagination={pagination}
           selectedIds={selectedIds}
           entityName={entityName}
@@ -954,7 +1001,7 @@ const TableListComp = function TableListComp<T extends UserContentCommonSchema>(
       </div>
     </>
   );
-};
+}
 
 export const TableList = React.memo(TableListComp) as typeof TableListComp;
 
@@ -976,6 +1023,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
   deleteItems,
   getDetailViewLink,
   onClickTitle,
+  rowItemActions,
   id: listingId,
   contentEditor,
   children,
@@ -1018,6 +1066,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
           createItem={createItem}
           editItem={editItem}
           deleteItems={deleteItems}
+          rowItemActions={rowItemActions}
           getDetailViewLink={getDetailViewLink}
           onClickTitle={onClickTitle}
           id={listingId}
