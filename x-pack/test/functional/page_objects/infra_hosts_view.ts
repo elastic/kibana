@@ -95,7 +95,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return cellContent.getVisibleText();
     },
 
-    async getMetricsTrendContainer() {
+    async getKPIContainer() {
       return testSubjects.find('hostsView-metricsTrend');
     },
 
@@ -112,14 +112,20 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       await metricsTab.click();
     },
 
-    async getAllMetricsTrendTiles() {
-      const container = await this.getMetricsTrendContainer();
+    async getAllKPITiles() {
+      const container = await this.getKPIContainer();
       return container.findAllByCssSelector('[data-test-subj*="hostsView-metricsTrend-"]');
     },
 
-    async getMetricsTrendTileValue(type: string) {
-      const container = await this.getMetricsTrendContainer();
-      const element = await container.findByTestSubject(`hostsView-metricsTrend-${type}`);
+    async isKPITileLoaded(type: string) {
+      const element = await testSubjects.find(`hostsView-metricsTrend-${type}`);
+      return Boolean(
+        await element.findByCssSelector('.echChartStatus[data-ech-render-complete=true]')
+      );
+    },
+
+    async getKPITileValue(type: string) {
+      const element = await testSubjects.find(`hostsView-metricsTrend-${type}`);
       const div = await element.findByClassName('echMetricText__value');
       return await div.getAttribute('title');
     },

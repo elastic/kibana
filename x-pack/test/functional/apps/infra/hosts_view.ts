@@ -359,7 +359,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('KPI tiles', () => {
         it('should render 5 metrics trend tiles', async () => {
-          const hosts = await pageObjects.infraHostsView.getAllMetricsTrendTiles();
+          const hosts = await pageObjects.infraHostsView.getAllKPITiles();
           expect(hosts.length).to.equal(5);
         });
 
@@ -371,10 +371,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'rx', value: 'N/A' },
         ].forEach(({ metric, value }) => {
           it(`${metric} tile should show ${value}`, async () => {
-            await retry.try(async () => {
-              const tileValue = await pageObjects.infraHostsView.getMetricsTrendTileValue(metric);
-              expect(tileValue).to.eql(value);
-            });
+            await retry.waitFor(
+              'wait for chart to load',
+              async () => await pageObjects.infraHostsView.isKPITileLoaded(metric)
+            );
+
+            const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
+            expect(tileValue).to.eql(value);
           });
         });
       });
@@ -503,7 +506,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'tx', value: 'N/A' },
               { metric: 'rx', value: 'N/A' },
             ].map(async ({ metric, value }) => {
-              const tileValue = await pageObjects.infraHostsView.getMetricsTrendTileValue(metric);
+              await retry.waitFor(
+                'wait for chart to load',
+                async () => await pageObjects.infraHostsView.isKPITileLoaded(metric)
+              );
+
+              const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
               expect(tileValue).to.eql(value);
             })
           );
