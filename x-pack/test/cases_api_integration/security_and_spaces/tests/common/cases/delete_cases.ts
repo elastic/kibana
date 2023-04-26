@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
 import { MAX_DOCS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
 import {

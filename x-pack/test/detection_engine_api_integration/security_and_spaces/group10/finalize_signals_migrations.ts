@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 
 import {
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,

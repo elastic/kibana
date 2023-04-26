@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common/search_strategy';

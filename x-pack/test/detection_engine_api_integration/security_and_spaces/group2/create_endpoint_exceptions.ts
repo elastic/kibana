@@ -6,7 +6,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 
 import type SuperTest from 'supertest';
 import {

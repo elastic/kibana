@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import dateMath from '@kbn/datemath';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import moment from 'moment';
 import { set } from '@kbn/safer-lodash-set';
 import { v4 as uuidv4 } from 'uuid';

@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 
 import {
   CreateExceptionListSchema,
