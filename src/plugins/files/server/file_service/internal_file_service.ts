@@ -81,16 +81,41 @@ export class InternalFileService {
     }
   }
 
-  private async bulkGet(ids: string[]): Promise<IFile[]> {
+  private async bulkGet(
+    ids: string[],
+    {
+      throwIfNotFound = true,
+      format = 'array',
+    }: { throwIfNotFound?: boolean; format?: BulkGetByIdArgs['format'] } = {}
+  ): Promise<Array<IFile | null> | { [id: string]: IFile | null }> {
     try {
       const metadatas = await this.metadataClient.bulkGet({ ids });
-      const result = metadatas.map(({ id, metadata }) => {
-        if (metadata.Status === 'DELETED') {
-          throw new FileNotFoundError('File has been deleted');
+      const result = metadatas.map((fileMetadata) => {
+        const notFound = !fileMetadata || !fileMetadata.metadata;
+        const deleted = fileMetadata?.metadata?.Status === 'DELETED';
+
+        if (notFound || deleted) {
+          if (!throwIfNotFound) {
+            return null;
+          }
+          throw new FileNotFoundError(
+            deleted ? 'File has been deleted' : `File [${fileMetadata?.id}] not found`
+          );
         }
+
+        const { id, metadata } = fileMetadata;
         return this.toFile(id, metadata, metadata.FileKind);
       });
-      return result;
+
+      return format === 'array'
+        ? result
+        : ids.reduce<{ [id: string]: IFile | null }>(
+            (acc, id, i) => ({
+              ...acc,
+              [id]: result[i],
+            }),
+            {}
+          );
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw new FileNotFoundError('Files not found');
@@ -104,8 +129,24 @@ export class InternalFileService {
     return await this.get(id);
   }
 
-  public async bulkGetById({ ids }: BulkGetByIdArgs): Promise<IFile[]> {
-    return await this.bulkGet(ids);
+  public async bulkGetById(
+    args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound?: true }
+  ): Promise<IFile[]>;
+  public async bulkGetById(
+    args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound?: true; format: 'map' }
+  ): Promise<{ [id: string]: IFile }>;
+  public async bulkGetById(
+    args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound: false }
+  ): Promise<Array<IFile | null>>;
+  public async bulkGetById(
+    args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound: false; format: 'map' }
+  ): Promise<{ [id: string]: IFile | null }>;
+  public async bulkGetById({
+    ids,
+    throwIfNotFound,
+    format,
+  }: BulkGetByIdArgs): Promise<Array<IFile | null> | { [id: string]: IFile | null }> {
+    return await this.bulkGet(ids, { throwIfNotFound, format });
   }
 
   public getFileKind(id: string): FileKind {
