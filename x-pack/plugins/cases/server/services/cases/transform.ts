@@ -33,11 +33,8 @@ import {
   transformESConnectorToExternalModel,
 } from '../transform';
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
-import type {
-  CasePersistedExternalService,
-  CasePersistedAttributes,
-  CaseTransformedAttributes,
-} from '../../common/types/case';
+import type { CasePersistedAttributes, CaseTransformedAttributes } from '../../common/types/case';
+import type { ExternalServicePersisted } from '../../common/types/external_service';
 
 export function transformUpdateResponsesToExternalModels(
   response: SavedObjectsBulkUpdateResponse<CasePersistedAttributes>
@@ -229,7 +226,7 @@ export function transformSavedObjectToExternalModel(
 function transformESExternalService(
   // this type needs to match that of CaseFullExternalService except that it does not include the connector_id, see: x-pack/plugins/cases/common/api/cases/case.ts
   // that's why it can be null here
-  externalService: CasePersistedExternalService | null | undefined,
+  externalService: ExternalServicePersisted | null | undefined,
   references: SavedObjectReference[] | undefined
 ): CaseFullExternalService | null {
   const connectorIdRef = findConnectorIdReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, references);

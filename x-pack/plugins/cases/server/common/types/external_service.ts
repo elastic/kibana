@@ -7,7 +7,7 @@
 
 import type { User } from './user';
 
-export interface ExternalService {
+export interface ExternalServicePersisted {
   connector_name: string;
   external_id: string;
   external_title: string;

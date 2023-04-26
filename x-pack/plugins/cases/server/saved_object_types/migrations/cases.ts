@@ -26,7 +26,7 @@ import {
 } from './user_actions/connector_id';
 import { CASE_TYPE_INDIVIDUAL } from './constants';
 import { pipeMigrations } from './utils';
-import type { CasePersistedConnectorFields } from '../../common/types/case';
+import type { ConnectorPersistedFields } from '../../common/types/connectors';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
 
 interface UnsanitizedCaseConnector {
@@ -38,7 +38,7 @@ interface SanitizedCaseConnector {
     id: string;
     name: string | null;
     type: string | null;
-    fields: null | CasePersistedConnectorFields;
+    fields: null | ConnectorPersistedFields;
   };
 }
 

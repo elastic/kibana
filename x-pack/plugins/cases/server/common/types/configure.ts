@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ConnectorPersistedAttributes } from './connectors';
+import type { ConnectorPersisted } from './connectors';
 import type { User } from './user';
 
 export interface ConfigurePersistedAttributes {
-  connector: ConnectorPersistedAttributes;
+  connector: ConnectorPersisted;
   closure_type: string;
   owner: string;
   created_at: string;

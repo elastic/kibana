@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-export type ConnectorFieldsPersistedAttributes = Array<{
+export type ConnectorPersistedFields = Array<{
   key: string;
   value: unknown;
 }>;
 
-export interface ConnectorPersistedAttributes {
+export interface ConnectorPersisted {
   name: string;
   type: string;
-  fields: ConnectorFieldsPersistedAttributes | null;
+  fields: ConnectorPersistedFields | null;
 }

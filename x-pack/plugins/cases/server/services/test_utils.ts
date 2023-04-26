@@ -17,9 +17,10 @@ import type {
 import { CaseSeverity, CaseStatuses, ConnectorTypes, NONE_CONNECTOR_ID } from '../../common/api';
 import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { getNoneCaseConnector } from '../common/utils';
-import type { ConnectorFieldsPersistedAttributes } from '../common/types/connectors';
-import type { CasePersistedExternalService, CasePersistedAttributes } from '../common/types/case';
+import type { ConnectorPersistedFields } from '../common/types/connectors';
+import type { CasePersistedAttributes } from '../common/types/case';
 import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
+import type { ExternalServicePersisted } from '../common/types/external_service';
 
 /**
  * This is only a utility interface to help with constructing test cases. After the migration, the ES format will no longer
@@ -29,7 +30,7 @@ export interface ESCaseConnectorWithId {
   id: string;
   name: string;
   type: ConnectorTypes;
-  fields: ConnectorFieldsPersistedAttributes | null;
+  fields: ConnectorPersistedFields | null;
 }
 
 /**
@@ -181,7 +182,7 @@ export const createCaseSavedObjectResponse = ({
     fields: connector?.fields ?? null,
   };
 
-  let restExternalService: CasePersistedExternalService | null = null;
+  let restExternalService: ExternalServicePersisted | null = null;
   if (externalService !== null) {
     const { connector_id: ignored, ...rest } = externalService ?? {
       connector_name: '.jira',

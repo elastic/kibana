@@ -33,8 +33,7 @@ export const getMappings = async (
       },
     });
 
-    // casting because types conflict because of the literal strings
-    return myConnectorMappings.saved_objects as SavedObjectsFindResponse<ConnectorMappings>['saved_objects'];
+    return myConnectorMappings.saved_objects;
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve mapping connector id: ${connector.id} type: ${connector.type}: ${error}`,
