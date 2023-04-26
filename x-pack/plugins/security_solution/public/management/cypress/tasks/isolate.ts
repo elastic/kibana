@@ -112,16 +112,15 @@ export const filterOutEndpoints = (endpointHostname: string): void => {
 };
 
 export const createAgentPolicyTask = (
-  version: string,
-  cb: (response: IndexedFleetEndpointPolicyResponse) => void
-) => {
+  version: string
+): Cypress.Chainable<IndexedFleetEndpointPolicyResponse> => {
   const policyName = `Reassign ${Math.random().toString(36).substring(2, 7)}`;
 
-  cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
+  return cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
     policyName,
     endpointPackageVersion: version,
     agentPolicyName: policyName,
-  }).then(cb);
+  });
 };
 
 export const filterOutIsolatedHosts = (): void => {

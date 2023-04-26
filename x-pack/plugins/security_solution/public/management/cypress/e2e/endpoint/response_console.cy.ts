@@ -7,7 +7,6 @@
 
 import type { Agent } from '@kbn/fleet-plugin/common';
 import {
-  checkReturnedProcessesTable,
   inputConsoleCommand,
   openResponseConsoleFromEndpointList,
   performCommandInputChecks,
@@ -36,7 +35,7 @@ describe('Response console', () => {
     login();
   });
 
-  describe('Isolate command', () => {
+  describe('User journey for Isolate command: isolate and release an endpoint', () => {
     let response: IndexedFleetEndpointPolicyResponse;
     let initialAgentData: Agent;
 
@@ -45,11 +44,11 @@ describe('Response console', () => {
         initialAgentData = agentData;
       });
 
-      getEndpointIntegrationVersion().then((version) => {
-        createAgentPolicyTask(version, (data) => {
+      getEndpointIntegrationVersion().then((version) =>
+        createAgentPolicyTask(version).then((data) => {
           response = data;
-        });
-      });
+        })
+      );
     });
 
     after(() => {
@@ -68,6 +67,7 @@ describe('Response console', () => {
       performCommandInputChecks('isolate');
       submitCommand();
       waitForCommandToBeExecuted();
+      waitForEndpointListPageToBeLoaded(endpointHostname);
       checkEndpointListForOnlyIsolatedHosts();
     });
 
@@ -83,7 +83,7 @@ describe('Response console', () => {
     });
   });
 
-  describe('Processes command', () => {
+  describe('User journey for Processes commands: list, kill and suspend process.', () => {
     let response: IndexedFleetEndpointPolicyResponse;
     let initialAgentData: Agent;
     let cronPID: string;
@@ -94,11 +94,11 @@ describe('Response console', () => {
         initialAgentData = agentData;
       });
 
-      getEndpointIntegrationVersion().then((version) => {
-        createAgentPolicyTask(version, (data) => {
+      getEndpointIntegrationVersion().then((version) =>
+        createAgentPolicyTask(version).then((data) => {
           response = data;
-        });
-      });
+        })
+      );
     });
 
     after(() => {
@@ -117,11 +117,20 @@ describe('Response console', () => {
       submitCommand();
       cy.contains('Action pending.').should('exist');
       cy.getByTestSubj('getProcessesSuccessCallout', { timeout: 120000 }).within(() => {
-        checkReturnedProcessesTable()
-          .find('td')
+        ['USER', 'PID', 'ENTITY ID', 'COMMAND'].forEach((header) => {
+          cy.contains(header);
+        });
+
+        cy.get('tbody > tr').should('have.length.greaterThan', 0);
+        cy.get('tbody > tr > td').should('contain', '/usr/sbin/cron');
+        cy.get('tbody > tr > td')
           .contains('/usr/sbin/cron')
-          .then((td) => {
-            cronPID = td.parents('tr').find('td').eq(1).find('span').text();
+          .parents('td')
+          .siblings('td')
+          .eq(1)
+          .find('span')
+          .then((span) => {
+            cronPID = span.text();
           });
       });
     });
@@ -137,14 +146,17 @@ describe('Response console', () => {
       submitCommand();
 
       cy.getByTestSubj('getProcessesSuccessCallout', { timeout: 120000 }).within(() => {
-        cy.get('tbody')
-          .find('td')
+        cy.get('tbody > tr > td')
           .contains('/usr/sbin/cron')
-          .then((td) => {
-            newCronPID = td.parents('tr').find('td').eq(1).find('span').text();
-            expect(newCronPID).to.not.equal(cronPID);
+          .parents('td')
+          .siblings('td')
+          .eq(1)
+          .find('span')
+          .then((span) => {
+            newCronPID = span.text();
           });
       });
+      expect(newCronPID).to.not.equal(cronPID);
     });
 
     it('"suspend-process --pid" - should suspend a process', () => {

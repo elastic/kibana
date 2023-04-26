@@ -9,45 +9,44 @@ import { closeAllToasts } from './close_all_toasts';
 import { APP_ENDPOINTS_PATH } from '../../../../common/constants';
 import Chainable = Cypress.Chainable;
 
-export const waitForEndpointListPageToBeLoaded = (endpointHostname: string) => {
+export const waitForEndpointListPageToBeLoaded = (endpointHostname: string): void => {
   cy.visit(APP_ENDPOINTS_PATH);
   closeAllToasts();
   cy.contains(endpointHostname).should('exist');
 };
-export const openResponseConsoleFromEndpointList = () => {
+export const openResponseConsoleFromEndpointList = (): void => {
   cy.getByTestSubj('endpointTableRowActions').first().click();
   cy.contains('Respond').click();
 };
 
-export const inputConsoleCommand = (command: string) => {
+export const inputConsoleCommand = (command: string): void => {
   cy.getByTestSubj('endpointResponseActionsConsole-inputCapture').click().type(command);
 };
 
-export const clearConsoleCommandInput = () => {
+export const clearConsoleCommandInput = (): void => {
   cy.getByTestSubj('endpointResponseActionsConsole-inputCapture')
     .click()
     .type(`{selectall}{backspace}`);
 };
 
-export const selectCommandFromHelpMenu = (command: string) => {
+export const selectCommandFromHelpMenu = (command: string): void => {
   cy.getByTestSubj('endpointResponseActionsConsole-header-helpButton').click();
   cy.getByTestSubj(
     `endpointResponseActionsConsole-commandList-Responseactions-${command}-addToInput`
   ).click();
 };
 
-export const checkInputForCommandPresence = (command: string) => {
+export const checkInputForCommandPresence = (command: string): void => {
   cy.getByTestSubj('endpointResponseActionsConsole-cmdInput-leftOfCursor')
     .invoke('text')
-    .then((text) => text.trim())
-    .should('eq', command);
+    .should('eq', `${command} `); // command in the cli input is followed by a space
 };
 
-export const submitCommand = () => {
+export const submitCommand = (): void => {
   cy.getByTestSubj('endpointResponseActionsConsole-inputTextSubmitButton').click();
 };
 
-export const waitForCommandToBeExecuted = () => {
+export const waitForCommandToBeExecuted = (): void => {
   cy.contains('Action pending.').should('exist');
   cy.contains('Action completed.', { timeout: 120000 }).should('exist');
 };
