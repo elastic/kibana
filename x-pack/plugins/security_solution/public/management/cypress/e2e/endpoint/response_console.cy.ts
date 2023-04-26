@@ -35,7 +35,7 @@ describe('Response console', () => {
     login();
   });
 
-  describe('Isolate command', () => {
+  describe('User journey for Isolate command: isolate and release an endpoint', () => {
     let response: IndexedFleetEndpointPolicyResponse;
     let initialAgentData: Agent;
 
@@ -82,7 +82,7 @@ describe('Response console', () => {
     });
   });
 
-  describe('Processes command', () => {
+  describe('User journey for Processes commands: list, kill and suspend process.', () => {
     let response: IndexedFleetEndpointPolicyResponse;
     let initialAgentData: Agent;
     let cronPID: string;
