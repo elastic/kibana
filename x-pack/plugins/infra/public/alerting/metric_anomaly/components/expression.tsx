@@ -15,9 +15,9 @@ import {
   RuleTypeParamsExpressionProps,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
-import { ML_ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { SubscriptionSplashPrompt } from '../../../components/subscription_splash_content';

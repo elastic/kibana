@@ -5,31 +5,8 @@
  * 2.0.
  */
 
-export enum ML_ANOMALY_SEVERITY {
-  CRITICAL = 'critical',
-  MAJOR = 'major',
-  MINOR = 'minor',
-  WARNING = 'warning',
-  LOW = 'low',
-  UNKNOWN = 'unknown',
-}
-
-export enum ML_ANOMALY_THRESHOLD {
-  CRITICAL = 75,
-  MAJOR = 50,
-  MINOR = 25,
-  WARNING = 3,
-  LOW = 0,
-}
-
-export const ML_SEVERITY_COLORS = {
-  CRITICAL: '#fe5050',
-  MAJOR: '#fba740',
-  MINOR: '#fdec25',
-  WARNING: '#8bc8fb',
-  LOW: '#d2e9f7',
-  BLANK: '#ffffff',
-};
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 
 export const getSeverityCategoryForScore = (score: number): ML_ANOMALY_SEVERITY | undefined => {
   if (score >= ML_ANOMALY_THRESHOLD.CRITICAL) {

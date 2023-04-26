@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { InfraRequestHandlerContext } from '../../types';
 import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
 import { fetchMlJob, MappedAnomalyHit, InfluencerFilter } from './common';
-import { getJobId, metricsK8SJobTypes, ML_ANOMALY_THRESHOLD } from '../../../common/infra_ml';
+import { getJobId, metricsK8SJobTypes } from '../../../common/infra_ml';
 import { Sort, Pagination } from '../../../common/http_api/infra_ml';
 import type { MlSystem, MlAnomalyDetectors } from '../../types';
 import { isMlPrivilegesError } from './errors';
