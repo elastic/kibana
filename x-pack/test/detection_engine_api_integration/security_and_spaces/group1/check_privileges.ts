@@ -58,7 +58,10 @@ export default ({ getService }: FtrProviderContext) => {
       ];
       indexTestCases.forEach((index) => {
         it(`for KQL rule with index param: ${index}`, async () => {
-          const rule = getRuleForSignalTesting(index);
+          const rule = {
+            ...getRuleForSignalTesting(index),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
           await createUserAndRole(getService, ROLES.detections_admin);
           const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
             user: ROLES.detections_admin,

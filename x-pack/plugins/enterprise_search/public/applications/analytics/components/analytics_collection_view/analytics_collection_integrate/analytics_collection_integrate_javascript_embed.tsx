@@ -63,11 +63,15 @@ export const javascriptEmbedSteps = (webClientSrc: string, analyticsConfig: Anal
             )}
           </p>
           <EuiCodeBlock language="html" isCopyable>
-            {`<script type="text/javascript">window.elasticAnalytics.createTracker({
+            {`<script type="text/javascript">
+window.elasticAnalytics.createTracker({
   endpoint: "${analyticsConfig.endpoint}",
   collectionName: "${analyticsConfig.collectionName}",
-  apiKey: "${analyticsConfig.apiKey}"
-});</script>`}
+  apiKey: "${analyticsConfig.apiKey}",
+  // Optional: sampling rate percentage: 0-1, 0 = no events, 1 = all events
+  // sampling: 1,
+});
+</script>`}
           </EuiCodeBlock>
         </EuiText>
       </>
