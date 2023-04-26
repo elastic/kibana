@@ -108,7 +108,7 @@ export class CasesService {
     alertId,
     filter,
   }: GetCaseIdsByAlertIdArgs): Promise<
-    SavedObjectsFindResponse<CommentAttributes, GetCaseIdsByAlertIdAggs>
+    SavedObjectsFindResponse<{ owner: string }, GetCaseIdsByAlertIdAggs>
   > {
     try {
       this.log.debug(`Attempting to GET all cases for alert id ${alertId}`);
@@ -118,7 +118,7 @@ export class CasesService {
       ]);
 
       const response = await this.unsecuredSavedObjectsClient.find<
-        CommentAttributes,
+        { owner: string },
         GetCaseIdsByAlertIdAggs
       >({
         type: CASE_COMMENT_SAVED_OBJECT,
@@ -140,7 +140,7 @@ export class CasesService {
    * Extracts the case IDs from the alert aggregation
    */
   public static getCaseIDsFromAlertAggs(
-    result: SavedObjectsFindResponse<CommentAttributes, GetCaseIdsByAlertIdAggs>
+    result: SavedObjectsFindResponse<unknown, GetCaseIdsByAlertIdAggs>
   ): string[] {
     return result.aggregations?.references.caseIds.buckets.map((b) => b.key) ?? [];
   }
@@ -338,6 +338,8 @@ export class CasesService {
     }
   }
 
+  // TODO: This should probably be moved into the client since it is after the transform has
+  // occurred within the attachment service
   private async getAllComments({
     id,
     options,
@@ -367,6 +369,8 @@ export class CasesService {
     }
   }
 
+  // TODO: This should probably be moved into the client since it is after the transform has
+  // occurred within the attachment service
   /**
    * Default behavior is to retrieve all comments that adhere to a given filter (if one is included).
    * to override this pass in the either the page or perPage options.
