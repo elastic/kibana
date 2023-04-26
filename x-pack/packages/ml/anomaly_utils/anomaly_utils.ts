@@ -31,7 +31,7 @@ export enum ENTITY_FIELD_TYPE {
  * Custom enum of entity field operations
  * @type {{ readonly ADD: "+"; readonly REMOVE: "-"; }}
  */
-export const ENTITY_FIELD_OPERATIONS = {
+export const ML_ENTITY_FIELD_OPERATIONS = {
   ADD: '+',
   REMOVE: '-',
 } as const;
@@ -42,7 +42,7 @@ export const ENTITY_FIELD_OPERATIONS = {
  * @typedef {EntityFieldOperation}
  */
 export type EntityFieldOperation =
-  typeof ENTITY_FIELD_OPERATIONS[keyof typeof ENTITY_FIELD_OPERATIONS];
+  typeof ML_ENTITY_FIELD_OPERATIONS[keyof typeof ML_ENTITY_FIELD_OPERATIONS];
 
 /**
  * Interface of an entity field

@@ -23,7 +23,7 @@ export {
   showTypicalForFunction,
   type EntityField,
   type EntityFieldOperation,
-  ENTITY_FIELD_OPERATIONS,
+  ML_ENTITY_FIELD_OPERATIONS,
 } from './anomaly_utils';
 
 export {

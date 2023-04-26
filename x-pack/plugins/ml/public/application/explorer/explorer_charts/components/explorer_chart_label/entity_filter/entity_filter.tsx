@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ENTITY_FIELD_OPERATIONS, EntityFieldOperation } from '@kbn/ml-anomaly-utils';
+import { ML_ENTITY_FIELD_OPERATIONS, EntityFieldOperation } from '@kbn/ml-anomaly-utils';
 import { blurButtonOnClick } from '../../../../../util/component_utils';
 import './_entity_filter.scss';
 
@@ -43,7 +43,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
             onFilter({
               influencerFieldName,
               influencerFieldValue,
-              action: ENTITY_FIELD_OPERATIONS.ADD,
+              action: ML_ENTITY_FIELD_OPERATIONS.ADD,
             });
           })}
           iconType="plusInCircle"
@@ -68,7 +68,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
             onFilter({
               influencerFieldName,
               influencerFieldValue,
-              action: ENTITY_FIELD_OPERATIONS.REMOVE,
+              action: ML_ENTITY_FIELD_OPERATIONS.REMOVE,
             });
           })}
           iconType="minusInCircle"
