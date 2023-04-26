@@ -168,7 +168,7 @@ ML screenshot generation tests are located in `x-pack/test/screenshot_creation/a
 
 ## Shared functions
 
-Note: We are in the process of moving shared code to packages, for example `@kbn/ml-common`. We'll update the docs accordingly once this work is done.
+Note: We are in the process of moving shared code to packages, for example `@kbn/ml-anomaly-utils`. We'll update the docs accordingly once this work is done.
 
 You can find the ML shared functions in the following files in GitHub:
 
