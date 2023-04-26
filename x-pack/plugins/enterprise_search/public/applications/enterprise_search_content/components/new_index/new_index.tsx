@@ -103,6 +103,7 @@ export const NewIndex: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="entSearchContent-newIndexPage-continueButton"
                   color="primary"
                   disabled={
                     !Object.values(INGESTION_METHOD_IDS as Record<string, string>).includes(

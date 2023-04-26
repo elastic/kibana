@@ -88,7 +88,12 @@ export const ConnectorConfigurationForm = () => {
         return hasDependencies ? (
           dependenciesSatisfied(dependencies, dependencyLookup) ? (
             <EuiPanel color="subdued" borderRadius="none">
-              <EuiFormRow label={rowLabel} key={key} helpText={helpText}>
+              <EuiFormRow
+                data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
+                label={rowLabel}
+                key={key}
+                helpText={helpText}
+              >
                 <ConnectorConfigurationField configEntry={configEntry} />
               </EuiFormRow>
             </EuiPanel>
@@ -96,7 +101,12 @@ export const ConnectorConfigurationForm = () => {
             <></>
           )
         ) : (
-          <EuiFormRow label={rowLabel} key={key} helpText={helpText}>
+          <EuiFormRow
+            data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
+            label={rowLabel}
+            key={key}
+            helpText={helpText}
+          >
             <ConnectorConfigurationField configEntry={configEntry} />
           </EuiFormRow>
         );
@@ -105,6 +115,7 @@ export const ConnectorConfigurationForm = () => {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="entSearchContent-connector-configuration-saveConfiguration"
               data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
               type="submit"
               isLoading={status === Status.LOADING}

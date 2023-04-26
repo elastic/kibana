@@ -109,6 +109,7 @@ export const NewIndexCard: React.FC<NewIndexCardProps> = ({ onSelect, isSelected
 
   return (
     <EuiCard
+      data-test-subj="entSearch-content-newIndexCard-cardBody"
       hasBorder
       icon={<EuiIcon type={icon} size="xxl" />}
       title={title}
@@ -118,6 +119,7 @@ export const NewIndexCard: React.FC<NewIndexCardProps> = ({ onSelect, isSelected
           <EuiBadge color="hollow">{footer.label}</EuiBadge>
           <EuiSpacer size="m" />
           <EuiButton
+            data-test-subj={`entSearchContent-newIndexCard-button-${type}`}
             fullWidth
             onClick={onSelect}
             color={isSelected ? 'success' : 'primary'}

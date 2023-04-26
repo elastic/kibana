@@ -117,6 +117,7 @@ export const SelectConnector: React.FC = () => {
             <EuiFlexItem grow={false}>
               <span>
                 <EuiButton
+                  data-test-subj="entSearchContent-connector-selectConnector-selectAndConfigure"
                   data-telemetry-id="entSearchContent-connector-selectConnector-selectAndConfigure"
                   disabled={!selectedConnector}
                   fill

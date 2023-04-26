@@ -29,8 +29,9 @@ export const CrawlerTotalStats: React.FC = () => {
   const documentCount = indexData?.count ?? 0;
   const hideStats = isLoading || isError;
 
-  const stats: EuiStatProps[] = [
+  const stats: EuiStatProps[] & { 'data-test-subj'?: string } = [
     {
+      'data-test-subj': 'entSearchContent-indexOverview-totalStats-ingestionType',
       description: i18n.translate(
         'xpack.enterpriseSearch.content.searchIndex.totalStats.ingestionTypeCardLabel',
         {

@@ -98,6 +98,7 @@ export const SearchIndex: React.FC = () => {
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
     {
       content: <SearchIndexOverview />,
+      'data-test-subj': 'entSearchContent-index-overview-tab',
       id: SearchIndexTabId.OVERVIEW,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.overviewTabLabel', {
         defaultMessage: 'Overview',
