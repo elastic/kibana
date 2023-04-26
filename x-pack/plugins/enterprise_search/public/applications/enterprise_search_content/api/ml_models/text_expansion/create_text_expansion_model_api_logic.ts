@@ -16,7 +16,7 @@ export interface CreateTextExpansionModelResponse {
 }
 
 export const createTextExpansionModel = async (): Promise<CreateTextExpansionModelResponse> => {
-  const route = `/internal/enterprise_search/ml/models/${ELSER_MODEL_ID}/deploy`;
+  const route = `/internal/enterprise_search/ml/models/${ELSER_MODEL_ID}`;
   return await HttpLogic.values.http.post<CreateTextExpansionModelResponse>(route, {
     body: undefined,
   });
