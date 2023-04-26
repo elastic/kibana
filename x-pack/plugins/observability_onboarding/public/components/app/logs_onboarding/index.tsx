@@ -19,7 +19,7 @@ import { HorizontalSteps } from './wizard/horizontal_steps';
 import { PageTitle } from './wizard/page_title';
 import { breadcrumbsApp } from '../../../application/app';
 
-export function LogsOnboarding({ animated = true }: { animated?: boolean }) {
+export function LogsOnboarding() {
   useBreadcrumbs(
     [
       {
@@ -31,23 +31,7 @@ export function LogsOnboarding({ animated = true }: { animated?: boolean }) {
     ],
     breadcrumbsApp
   );
-
-  if (animated) {
-    return <AnimatedTransitionsWizard />;
-  }
-  return <StillTransitionsWizard />;
-}
-
-function StillTransitionsWizard() {
-  return (
-    <WizardProvider>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <WizardStep />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </WizardProvider>
-  );
+  return <AnimatedTransitionsWizard />;
 }
 
 const TRANSITION_DURATION = 180;
