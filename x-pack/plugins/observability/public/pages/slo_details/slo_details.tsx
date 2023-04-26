@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useIsMutating } from '@tanstack/react-query';
 import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -44,6 +45,8 @@ export function SloDetailsPage() {
 
   const { isLoading, slo } = useFetchSloDetails({ sloId, shouldRefetch: isAutoRefreshing });
 
+  const isDeleting = Boolean(useIsMutating(['deleteSlo', slo?.id]));
+
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
   const isSloNotFound = !isLoading && slo === undefined;
@@ -66,7 +69,7 @@ export function SloDetailsPage() {
         rightSideItems: [
           <HeaderControl isLoading={isLoading} slo={slo} />,
           <AutoRefreshButton
-            disabled={isLoading}
+            disabled={isLoading || isDeleting}
             isAutoRefreshing={isAutoRefreshing}
             onClick={handleToggleAutoRefresh}
           />,

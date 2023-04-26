@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
+import { useIsMutating } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
@@ -18,6 +19,12 @@ import { paths } from '../../../config/paths';
 import { useKibana } from '../../../utils/kibana_react';
 import { ObservabilityAppServices } from '../../../application/types';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
+import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
+import {
+  transformSloResponseToCreateSloInput,
+  transformValuesToCreateSLOInput,
+} from '../../slo_edit/helpers/process_slo_form_values';
+import { SloDeleteConfirmationModal } from '../../slos/components/slo_delete_confirmation_modal';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
@@ -31,8 +38,13 @@ export function HeaderControl({ isLoading, slo }: Props) {
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana<ObservabilityAppServices>().services;
   const { hasWriteCapabilities } = useCapabilities();
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
+  const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
+
+  const { mutate: cloneSlo } = useCloneSlo();
+  const isDeleting = Boolean(useIsMutating(['deleteSlo', slo?.id]));
 
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
   const closePopover = () => setIsPopoverOpen(false);
@@ -85,6 +97,30 @@ export function HeaderControl({ isLoading, slo }: Props) {
     }
   };
 
+  const handleClone = () => {
+    if (slo) {
+      const newSlo = transformValuesToCreateSLOInput(
+        transformSloResponseToCreateSloInput({ ...slo, name: `[Copy] ${slo.name}` })!
+      );
+
+      cloneSlo({ slo: newSlo, idToCopyFrom: slo.id });
+      setIsPopoverOpen(false);
+    }
+  };
+
+  const handleDelete = () => {
+    setDeleteConfirmationModalOpen(true);
+    setIsPopoverOpen(false);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmationModalOpen(false);
+  };
+
+  const handleDeleteSuccess = () => {
+    navigateToUrl(basePath.prepend(paths.observability.slos));
+  };
+
   return (
     <>
       <EuiPopover
@@ -97,7 +133,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
             iconType="arrowDown"
             iconSize="s"
             onClick={handleActionsClick}
-            disabled={isLoading || !slo}
+            disabled={isLoading || isDeleting || !slo}
           >
             {i18n.translate('xpack.observability.slo.sloDetails.headerControl.actions', {
               defaultMessage: 'Actions',
@@ -108,11 +144,12 @@ export function HeaderControl({ isLoading, slo }: Props) {
         closePopover={closePopover}
       >
         <EuiContextMenuPanel
-          size="s"
+          size="m"
           items={[
             <EuiContextMenuItem
               key="edit"
               disabled={!hasWriteCapabilities}
+              icon="pencil"
               onClick={handleEdit}
               data-test-subj="sloDetailsHeaderControlPopoverEdit"
             >
@@ -123,6 +160,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
             <EuiContextMenuItem
               key="createBurnRateRule"
               disabled={!hasWriteCapabilities}
+              icon="bell"
               onClick={handleOpenRuleFlyout}
               data-test-subj="sloDetailsHeaderControlPopoverCreateRule"
             >
@@ -136,6 +174,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
             <EuiContextMenuItem
               key="manageRules"
               disabled={!hasWriteCapabilities}
+              icon="gear"
               onClick={handleNavigateToRules}
               data-test-subj="sloDetailsHeaderControlPopoverManageRules"
             >
@@ -143,24 +182,50 @@ export function HeaderControl({ isLoading, slo }: Props) {
                 defaultMessage: 'Manage rules',
               })}
             </EuiContextMenuItem>,
-          ].concat(
-            !!slo && isApmIndicatorType(slo.indicator.type)
-              ? [
-                  <EuiContextMenuItem
-                    key="exploreInApm"
-                    onClick={handleNavigateToApm}
-                    data-test-subj="sloDetailsHeaderControlPopoverExploreInApm"
-                  >
-                    {i18n.translate(
-                      'xpack.observability.slos.sloDetails.headerControl.exploreInApm',
-                      {
-                        defaultMessage: 'Explore in APM',
-                      }
-                    )}
-                  </EuiContextMenuItem>,
-                ]
-              : []
-          )}
+          ]
+            .concat(
+              !!slo && isApmIndicatorType(slo.indicator.type)
+                ? [
+                    <EuiContextMenuItem
+                      key="exploreInApm"
+                      icon="bullseye"
+                      onClick={handleNavigateToApm}
+                      data-test-subj="sloDetailsHeaderControlPopoverExploreInApm"
+                    >
+                      {i18n.translate(
+                        'xpack.observability.slos.sloDetails.headerControl.exploreInApm',
+                        {
+                          defaultMessage: 'Service details',
+                        }
+                      )}
+                    </EuiContextMenuItem>,
+                  ]
+                : []
+            )
+            .concat(
+              <EuiContextMenuItem
+                key="clone"
+                disabled={!hasWriteCapabilities}
+                icon="copy"
+                onClick={handleClone}
+                data-test-subj="sloActionsClone"
+              >
+                {i18n.translate('xpack.observability.slo.slo.item.actions.clone', {
+                  defaultMessage: 'Clone',
+                })}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="delete"
+                icon="trash"
+                disabled={!hasWriteCapabilities}
+                onClick={handleDelete}
+                data-test-subj="sloActionsDelete"
+              >
+                {i18n.translate('xpack.observability.slo.slo.item.actions.delete', {
+                  defaultMessage: 'Delete',
+                })}
+              </EuiContextMenuItem>
+            )}
         />
       </EuiPopover>
 
@@ -171,6 +236,14 @@ export function HeaderControl({ isLoading, slo }: Props) {
           canChangeTrigger={false}
           onClose={onCloseRuleFlyout}
           initialValues={{ name: `${slo.name} burn rate`, params: { sloId: slo.id } }}
+        />
+      ) : null}
+
+      {slo && isDeleteConfirmationModalOpen ? (
+        <SloDeleteConfirmationModal
+          slo={slo}
+          onCancel={handleDeleteCancel}
+          onSuccess={handleDeleteSuccess}
         />
       ) : null}
     </>
