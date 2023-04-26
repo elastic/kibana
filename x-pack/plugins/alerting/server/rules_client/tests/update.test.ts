@@ -180,11 +180,6 @@ describe('update()', () => {
       resultedActions: [],
       resultedReferences: [],
     });
-    (migrateLegacyActions as jest.Mock).mockResolvedValue({
-      hasLegacyActions: false,
-      resultedActions: [],
-      resultedReferences: [],
-    });
   });
 
   test('updates given parameters', async () => {
