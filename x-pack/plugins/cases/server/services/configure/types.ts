@@ -6,12 +6,12 @@
  */
 
 import type { CasesConfigureAttributes } from '../../../common/api';
-import type { ESCaseConnector } from '..';
+import type { CasePersistedConnector } from '../../common/types/case';
 
 /**
  * This type should only be used within the configure service. It represents how the configure saved object will be layed
  * out in ES.
  */
 export type ESCasesConfigureAttributes = Omit<CasesConfigureAttributes, 'connector'> & {
-  connector: ESCaseConnector;
+  connector: CasePersistedConnector;
 };

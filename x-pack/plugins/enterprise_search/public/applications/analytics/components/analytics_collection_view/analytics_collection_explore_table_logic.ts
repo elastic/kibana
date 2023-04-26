@@ -16,7 +16,10 @@ import {
 
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
-import { AnalyticsCollectionDataViewLogic } from './analytics_collection_data_view_logic';
+import {
+  AnalyticsCollectionDataViewLogic,
+  AnalyticsCollectionDataViewLogicValues,
+} from './analytics_collection_data_view_logic';
 
 import {
   getBaseSearchTemplate,
@@ -33,9 +36,13 @@ import {
   TopReferrersTable,
   WorsePerformersTable,
 } from './analytics_collection_explore_table_types';
-import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
+import {
+  AnalyticsCollectionToolbarLogic,
+  AnalyticsCollectionToolbarLogicValues,
+} from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
 const BASE_PAGE_SIZE = 10;
+const SEARCH_COOLDOWN = 200;
 
 export interface Sorting<T extends ExploreTableItem = ExploreTableItem> {
   direction: 'asc' | 'desc';
@@ -80,7 +87,7 @@ const tablesParams: {
     ) =>
       getBaseSearchTemplate(
         aggregationFieldName,
-        { search, timeRange },
+        { search, timeRange, eventType: 'search' },
         {
           searches: {
             terms: {
@@ -122,7 +129,7 @@ const tablesParams: {
     ) =>
       getBaseSearchTemplate(
         aggregationFieldName,
-        { search, timeRange },
+        { search, timeRange, eventType: 'search' },
         {
           formula: {
             aggs: {
@@ -169,7 +176,7 @@ const tablesParams: {
     ) =>
       getBaseSearchTemplate(
         aggregationFieldName,
-        { search, timeRange },
+        { search, timeRange, eventType: 'search_click' },
         {
           formula: {
             aggs: {
@@ -216,7 +223,7 @@ const tablesParams: {
     ) =>
       getBaseSearchTemplate(
         aggregationFieldName,
-        { search, timeRange },
+        { search, timeRange, eventType: 'page_view' },
         {
           formula: {
             aggs: {
@@ -243,13 +250,16 @@ const tablesParams: {
 };
 
 export interface AnalyticsCollectionExploreTableLogicValues {
+  dataView: AnalyticsCollectionDataViewLogicValues['dataView'];
   isLoading: boolean;
   items: ExploreTableItem[];
   pageIndex: number;
   pageSize: number;
   search: string;
+  searchSessionId: AnalyticsCollectionToolbarLogicValues['searchSessionId'];
   selectedTable: ExploreTables | null;
   sorting: Sorting | null;
+  timeRange: AnalyticsCollectionToolbarLogicValues['timeRange'];
   totalItemsCount: number;
 }
 
@@ -282,14 +292,26 @@ export const AnalyticsCollectionExploreTableLogic = kea<
     setSelectedTable: (id, sorting) => ({ id, sorting }),
     setTotalItemsCount: (count) => ({ count }),
   },
+  connect: {
+    actions: [AnalyticsCollectionToolbarLogic, ['setTimeRange', 'setSearchSessionId']],
+    values: [
+      AnalyticsCollectionDataViewLogic,
+      ['dataView'],
+      AnalyticsCollectionToolbarLogic,
+      ['timeRange', 'searchSessionId'],
+    ],
+  },
   listeners: ({ actions, values }) => {
     const fetchItems = () => {
       if (values.selectedTable === null || !(values.selectedTable in tablesParams)) {
+        actions.setItems([]);
+        actions.setTotalItemsCount(0);
+
         return;
       }
 
       const { requestParams, parseResponse } = tablesParams[values.selectedTable] as TableParams;
-      const timeRange = AnalyticsCollectionToolbarLogic.values.timeRange;
+      const timeRange = values.timeRange;
 
       const search$ = KibanaLogic.values.data.search
         .search(
@@ -301,8 +323,8 @@ export const AnalyticsCollectionExploreTableLogic = kea<
             timeRange,
           }),
           {
-            indexPattern: AnalyticsCollectionDataViewLogic.values.dataView || undefined,
-            sessionId: AnalyticsCollectionToolbarLogic.values.searchSessionId,
+            indexPattern: values.dataView || undefined,
+            sessionId: values.searchSessionId,
           }
         )
         .subscribe({
@@ -323,13 +345,16 @@ export const AnalyticsCollectionExploreTableLogic = kea<
 
     return {
       onTableChange: fetchItems,
-      setSearch: fetchItems,
+      setSearch: async (_, breakpoint) => {
+        await breakpoint(SEARCH_COOLDOWN);
+        fetchItems();
+      },
+      setSearchSessionId: fetchItems,
       setSelectedTable: fetchItems,
-      [AnalyticsCollectionToolbarLogic.actionTypes.setTimeRange]: fetchItems,
-      [AnalyticsCollectionToolbarLogic.actionTypes.setSearchSessionId]: fetchItems,
+      setTimeRange: fetchItems,
     };
   },
-  path: ['enterprise_search', 'analytics', 'collections', 'explore', 'table'],
+  path: ['enterprise_search', 'analytics', 'collection', 'explore', 'table'],
   reducers: () => ({
     isLoading: [
       false,
@@ -337,10 +362,10 @@ export const AnalyticsCollectionExploreTableLogic = kea<
         onTableChange: () => true,
         setItems: () => false,
         setSearch: () => true,
+        setSearchSessionId: () => true,
         setSelectedTable: () => true,
         setTableState: () => true,
-        [AnalyticsCollectionToolbarLogic.actionTypes.setTimeRange]: () => true,
-        [AnalyticsCollectionToolbarLogic.actionTypes.setSearchSessionId]: () => true,
+        setTimeRange: () => true,
       },
     ],
     items: [[], { setItems: (_, { items }) => items }],

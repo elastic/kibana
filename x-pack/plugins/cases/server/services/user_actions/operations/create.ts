@@ -12,8 +12,8 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { get, isEmpty } from 'lodash';
+import type { CaseSavedObjectTransformed } from '../../../common/types/case';
 import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
-import type { CaseSavedObject } from '../../../common/types';
 import { arraysDifference } from '../../../client/utils';
 import { isUserActionType } from '../../../../common/utils/user_actions';
 import type {
@@ -58,7 +58,7 @@ type CreatePayloadFunction<Item, ActionType extends ActionTypeValues> = (
 ) => UserActionParameters<ActionType>['payload'];
 
 interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
-  originalCases: CaseSavedObject[];
+  originalCases: CaseSavedObjectTransformed[];
   updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
   user: User;
 }

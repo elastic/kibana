@@ -9,8 +9,6 @@ import { EcsVersion } from '@kbn/ecs';
 
 import { getIncompatiableFieldsInSameFamilyCount } from '../callouts/incompatible_callout/helpers';
 import {
-  ECS_FIELD_REFERENCE_URL,
-  ECS_REFERENCE_URL,
   getSummaryMarkdownComment,
   getIncompatibleMappingsMarkdownTableRows,
   getIncompatibleValuesMarkdownTableRows,
@@ -18,7 +16,6 @@ import {
   getMarkdownTable,
   getSummaryTableMarkdownComment,
   getTabCountsMarkdownComment,
-  MAPPING_URL,
 } from '../../index_properties/markdown/helpers';
 import { getFillColor } from '../summary_tab/helpers';
 import * as i18n from '../../index_properties/translations';
@@ -106,18 +103,22 @@ ${
 
 export const getAllIncompatibleMarkdownComments = ({
   docsCount,
+  formatBytes,
   formatNumber,
   ilmPhase,
   indexName,
   partitionedFieldMetadata,
   patternDocsCount,
+  sizeInBytes,
 }: {
   docsCount: number;
+  formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   patternDocsCount: number;
+  sizeInBytes: number | undefined;
 }): string[] => {
   const incompatibleMappings = getIncompatibleMappings(partitionedFieldMetadata.incompatible);
   const incompatibleValues = getIncompatibleValues(partitionedFieldMetadata.incompatible);
@@ -134,20 +135,16 @@ export const getAllIncompatibleMarkdownComments = ({
       : '';
 
   return [
-    getSummaryMarkdownComment({
-      ecsFieldReferenceUrl: ECS_FIELD_REFERENCE_URL,
-      ecsReferenceUrl: ECS_REFERENCE_URL,
-      incompatible: partitionedFieldMetadata.incompatible.length,
-      indexName,
-      mappingUrl: MAPPING_URL,
-    }),
+    getSummaryMarkdownComment(indexName),
     getSummaryTableMarkdownComment({
       docsCount,
+      formatBytes,
       formatNumber,
       ilmPhase,
       indexName,
       partitionedFieldMetadata,
       patternDocsCount,
+      sizeInBytes,
     }),
     getTabCountsMarkdownComment(partitionedFieldMetadata),
     incompatibleFieldsMarkdownComment,

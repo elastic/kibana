@@ -23,6 +23,8 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpo
 import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
 import { INSUFFICIENT_PRIVILEGES_FOR_COMMAND } from '../../../../../common/translations';
 import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
+import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/experimental_features_service');
@@ -177,6 +179,38 @@ describe('When using execute action from response actions console', () => {
     await waitFor(() => {
       expect(renderResult.getByTestId('executeSuccess').textContent).toEqual(
         'Command execution was successful.Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+      );
+    });
+  });
+
+  it.each(
+    Object.keys(endpointActionResponseCodes).filter((key) => key.startsWith('ra_execute_error'))
+  )('should display known error message for response failure: %s', async (errorCode) => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'execute',
+        errors: ['some error happen in endpoint'],
+        wasSuccessful: false,
+        outputs: {
+          'agent-a': {
+            content: {
+              code: errorCode,
+            },
+          },
+        },
+      }),
+    });
+
+    const { getByTestId } = await render();
+    enterConsoleCommand(renderResult, 'execute --command="ls -l"');
+
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('execute-actionFailure')).toHaveTextContent(
+        endpointActionResponseCodes[errorCode]
       );
     });
   });

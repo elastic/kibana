@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-export const SyntheticsParamCode = t.intersection([
+export const SyntheticsParamSOCodec = t.intersection([
   t.interface({
     key: t.string,
     value: t.string,
@@ -19,4 +19,18 @@ export const SyntheticsParamCode = t.intersection([
   }),
 ]);
 
-export type SyntheticsParam = t.TypeOf<typeof SyntheticsParamCode>;
+export type SyntheticsParamSO = t.TypeOf<typeof SyntheticsParamSOCodec>;
+
+export const SyntheticsParamRequestCodec = t.intersection([
+  t.interface({
+    key: t.string,
+    value: t.string,
+  }),
+  t.partial({
+    description: t.string,
+    tags: t.array(t.string),
+    share_across_spaces: t.boolean,
+  }),
+]);
+
+export type SyntheticsParamRequest = t.TypeOf<typeof SyntheticsParamRequestCodec>;

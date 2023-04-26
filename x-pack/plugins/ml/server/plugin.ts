@@ -252,7 +252,11 @@ export class MlServerPlugin
     }
 
     if (plugins.usageCollection) {
-      registerCollector(plugins.usageCollection, coreSetup.savedObjects.getKibanaIndex());
+      const getIndexForType = (type: string) =>
+        coreSetup
+          .getStartServices()
+          .then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
+      registerCollector(plugins.usageCollection, getIndexForType);
     }
 
     if (plugins.cases) {
