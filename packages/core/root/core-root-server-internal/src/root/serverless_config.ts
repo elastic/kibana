@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf, Type } from '@kbn/config-schema';
 import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 // Config validation for how to run Kibana in Serverless mode.
@@ -16,8 +16,14 @@ import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 // If we even decide to extend this further, and converting it into an object,
 // BWC can be ensured by adding the object definition as another alternative to `schema.oneOf`.
 
+export const VALID_SERVERLESS_PROJECT_TYPES = ['es', 'oblt', 'security'];
+
 const serverlessConfigSchema = schema.maybe(
-  schema.oneOf([schema.literal('es'), schema.literal('oblt'), schema.literal('security')])
+  schema.oneOf(
+    VALID_SERVERLESS_PROJECT_TYPES.map((projectName) => schema.literal(projectName)) as [
+      Type<typeof VALID_SERVERLESS_PROJECT_TYPES[number]> // This cast is needed because it's different to Type<T>[] :sight:
+    ]
+  )
 );
 
 export type ServerlessConfigType = TypeOf<typeof serverlessConfigSchema>;

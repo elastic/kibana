@@ -14,6 +14,7 @@ import { CriticalError } from '@kbn/core-base-server-internal';
 import { resolve } from 'path';
 import { getConfigDirectory } from '@kbn/utils';
 import { statSync } from 'fs';
+import { VALID_SERVERLESS_PROJECT_TYPES } from './root/serverless_config';
 import { Root } from './root';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 
@@ -54,7 +55,10 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   // Hack to load the extra serverless config files if `serverless: {projectType}` is found in it.
   const rawConfig = await firstValueFrom(rawConfigService.getConfig$());
   const serverlessProjectType = rawConfig?.serverless;
-  if (serverlessProjectType) {
+  if (
+    typeof serverlessProjectType === 'string' &&
+    VALID_SERVERLESS_PROJECT_TYPES.includes(serverlessProjectType)
+  ) {
     const extendedConfigs = [
       ...['serverless.yml', `serverless.${serverlessProjectType}.yml`]
         .map((name) => resolve(getConfigDirectory(), name))
