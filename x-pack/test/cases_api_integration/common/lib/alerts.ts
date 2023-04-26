@@ -34,7 +34,10 @@ export const createSecuritySolutionAlerts = async (
   log: ToolingLog,
   numberOfSignals: number = 1
 ): Promise<estypes.SearchResponse<DetectionAlert & RiskEnrichmentFields>> => {
-  const rule = getRuleForSignalTesting(['auditbeat-*']);
+  const rule = {
+    ...getRuleForSignalTesting(['auditbeat-*']),
+    query: 'process.executable: "/usr/bin/sudo"',
+  };
   const { id } = await createRule(supertest, log, rule);
   await waitForRuleSuccess({ supertest, log, id });
   await waitForSignalsToBePresent(supertest, log, numberOfSignals, [id]);
