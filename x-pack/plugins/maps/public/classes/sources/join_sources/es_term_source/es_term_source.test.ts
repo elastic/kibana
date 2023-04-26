@@ -5,25 +5,27 @@
  * 2.0.
  */
 
+import { AGG_TYPE } from '../../../../../common/constants';
+import type { BucketProperties, PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { ESTermSource, extractPropertiesMap } from './es_term_source';
 
-jest.mock('../../layers/vector_layer', () => {});
+jest.mock('../../../layers/vector_layer', () => {});
 
 const termFieldName = 'myTermField';
 const sumFieldName = 'myFieldGettingSummed';
 const metricExamples = [
   {
-    type: 'sum',
+    type: AGG_TYPE.SUM,
     field: sumFieldName,
     label: 'my custom label',
   },
   {
     // metric config is invalid beause field is missing
-    type: 'max',
+    type: AGG_TYPE.MAX,
   },
   {
     // metric config is valid because "count" metric does not need to provide field
-    type: 'count',
+    type: AGG_TYPE.COUNT,
     label: '', // should ignore empty label fields
   },
 ];
@@ -81,7 +83,7 @@ describe('extractPropertiesMap', () => {
   };
   const countPropName = '__kbnjoin__count__1234';
 
-  let propertiesMap;
+  let propertiesMap: PropertiesMap = new Map<string, BucketProperties>();
   beforeAll(() => {
     propertiesMap = extractPropertiesMap(responseWithNumberTypes, countPropName);
   });
@@ -93,17 +95,17 @@ describe('extractPropertiesMap', () => {
 
   it('should extract count property', () => {
     const properties = propertiesMap.get('109');
-    expect(properties[countPropName]).toBe(1130);
+    expect(properties?.[countPropName]).toBe(1130);
   });
 
   it('should extract min property', () => {
     const properties = propertiesMap.get('109');
-    expect(properties[minPropName]).toBe(36);
+    expect(properties?.[minPropName]).toBe(36);
   });
 
   it('should extract property with value of "0"', () => {
     const properties = propertiesMap.get('62');
-    expect(properties[minPropName]).toBe(0);
+    expect(properties?.[minPropName]).toBe(0);
   });
 });
 
