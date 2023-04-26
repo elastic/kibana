@@ -21,6 +21,21 @@ export interface TrainedModelsProvider {
     getTrainedModelsStats(
       params: estypes.MlGetTrainedModelsStatsRequest
     ): Promise<estypes.MlGetTrainedModelsStatsResponse>;
+    startTrainedModelDeployment(
+      params: estypes.MlStartTrainedModelDeploymentRequest
+    ): Promise<estypes.MlStartTrainedModelDeploymentResponse>;
+    stopTrainedModelDeployment(
+      params: estypes.MlStopTrainedModelDeploymentRequest
+    ): Promise<estypes.MlStopTrainedModelDeploymentResponse>;
+    inferTrainedModel(
+      params: estypes.MlInferTrainedModelRequest
+    ): Promise<estypes.MlInferTrainedModelResponse>;
+    deleteTrainedModel(
+      params: estypes.MlDeleteTrainedModelRequest
+    ): Promise<estypes.MlDeleteTrainedModelResponse>;
+    updateTrainedModelDeployment(
+      params: UpdateTrainedModelDeploymentRequest
+    ): Promise<{ acknowledge: boolean }>;
   };
 }
 
