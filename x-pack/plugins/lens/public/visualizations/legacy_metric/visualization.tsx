@@ -264,6 +264,10 @@ export const getLegacyMetricVisualization = ({
     }
   },
 
+  getMainPalette({ palette }) {
+    return palette;
+  },
+
   toExpression: (state, datasourceLayers, attributes, datasourceExpressionsByLayers) =>
     toExpression(
       paletteService,

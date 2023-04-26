@@ -898,7 +898,7 @@ export interface SuggestionRequest<T = unknown> {
    * State is only passed if the visualization is active.
    */
   state?: T;
-  mainPalette?: PaletteOutput;
+  mainPalette?: PaletteOutput<unknown>;
   isFromContext?: boolean;
   /**
    * The visualization needs to know which table is being suggested
@@ -1037,7 +1037,7 @@ export interface Visualization<T = unknown, P = T> {
    */
   getUsedDataViews?: (state?: T) => string[];
 
-  getMainPalette?: (state: T) => undefined | PaletteOutput;
+  getMainPalette?: (state: T) => undefined | PaletteOutput<unknown>;
 
   /**
    * Supported triggers of this visualization type when embedded somewhere

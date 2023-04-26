@@ -64,7 +64,7 @@ export function getSuggestions({
   visualizeTriggerFieldContext?: VisualizeFieldContext | VisualizeEditorContext;
   activeData?: Record<string, Datatable>;
   dataViews: DataViewsState;
-  mainPalette?: PaletteOutput;
+  mainPalette?: PaletteOutput<unknown>;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
@@ -231,7 +231,7 @@ function getVisualizationSuggestions(
   datasourceSuggestion: DatasourceSuggestion & { datasourceId: string },
   currentVisualizationState: unknown,
   subVisualizationId?: string,
-  mainPalette?: PaletteOutput,
+  mainPalette?: PaletteOutput<unknown>,
   isFromContext?: boolean,
   activeData?: Record<string, Datatable>
 ) {

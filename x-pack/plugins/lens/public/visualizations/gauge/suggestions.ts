@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { GaugeShape } from '@kbn/expression-gauge-plugin/common';
+import { GaugeColorModes, GaugeShape } from '@kbn/expression-gauge-plugin/common';
 import {
   GaugeShapes,
   GaugeTicksPositions,
@@ -14,6 +14,7 @@ import {
 } from '@kbn/expression-gauge-plugin/common';
 import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import type { TableSuggestion, Visualization } from '../../types';
 import type { GaugeVisualizationState } from './constants';
 
@@ -29,6 +30,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
   state,
   keptLayerIds,
   subVisualizationId,
+  mainPalette,
 }) => {
   const isGauge = Boolean(
     state && (state.minAccessor || state.maxAccessor || state.goalAccessor || state.metricAccessor)
@@ -61,6 +63,8 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
       layerType: LayerTypes.DATA,
       ticksPosition: GaugeTicksPositions.AUTO,
       labelMajorMode: GaugeLabelMajorModes.AUTO,
+      colorMode: Boolean(mainPalette) ? GaugeColorModes.PALETTE : GaugeColorModes.NONE,
+      palette: mainPalette as PaletteOutput<CustomPaletteParams>,
     },
     title: i18n.translate('xpack.lens.gauge.gaugeLabel', {
       defaultMessage: 'Gauge',

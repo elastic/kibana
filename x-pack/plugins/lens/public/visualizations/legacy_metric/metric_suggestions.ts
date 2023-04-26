@@ -7,6 +7,7 @@
 
 import { IconChartMetric } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../../types';
 import type { LegacyMetricState } from '../../../common/types';
 import { legacyMetricSupportedTypes } from './visualization';
@@ -20,6 +21,7 @@ export function getSuggestions({
   table,
   state,
   keptLayerIds,
+  mainPalette,
 }: SuggestionRequest<LegacyMetricState>): Array<VisualizationSuggestion<LegacyMetricState>> {
   // We only render metric charts for single-row queries. We require a single, numeric column.
   if (
@@ -39,10 +41,13 @@ export function getSuggestions({
     return [];
   }
 
-  return [getSuggestion(table)];
+  return [getSuggestion(table, mainPalette as PaletteOutput<CustomPaletteParams>)];
 }
 
-function getSuggestion(table: TableSuggestion): VisualizationSuggestion<LegacyMetricState> {
+function getSuggestion(
+  table: TableSuggestion,
+  palette?: PaletteOutput<CustomPaletteParams>
+): VisualizationSuggestion<LegacyMetricState> {
   const col = table.columns[0];
   const title = table.label || col.operation.label;
 
@@ -54,6 +59,8 @@ function getSuggestion(table: TableSuggestion): VisualizationSuggestion<LegacyMe
       layerId: table.layerId,
       accessor: col.columnId,
       layerType: LayerTypes.DATA,
+      colorMode: palette ? 'Background' : 'None',
+      palette,
     },
   };
 }

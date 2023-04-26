@@ -10,7 +10,7 @@ import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
+import { PaletteRegistry, CUSTOM_PALETTE, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -112,10 +112,19 @@ export const getDatatableVisualization = ({
     );
   },
 
+  getMainPalette({ columns }) {
+    const columnsWithColoring = columns.filter(({ palette }) => palette);
+    if (!columnsWithColoring.length || columnsWithColoring.length > 1) {
+      return;
+    }
+    return columnsWithColoring[0].palette;
+  },
+
   getSuggestions({
     table,
     state,
     keptLayerIds,
+    mainPalette,
   }: SuggestionRequest<DatatableVisualizationState>): Array<
     VisualizationSuggestion<DatatableVisualizationState>
   > {
@@ -168,6 +177,10 @@ export const getDatatableVisualization = ({
         ? 0.5
         : 1;
 
+    const canApplyPalette =
+      Boolean(mainPalette) &&
+      table.columns.filter(({ operation }) => !operation.isBucketed).length === 1;
+
     return [
       {
         title,
@@ -181,6 +194,10 @@ export const getDatatableVisualization = ({
             ...(oldColumnSettings[col.columnId] || {}),
             isTransposed: usesTransposing && columnIndex < lastTransposedColumnIndex,
             columnId: col.columnId,
+            colorMode: canApplyPalette ? 'cell' : 'none',
+            palette: canApplyPalette
+              ? (mainPalette as PaletteOutput<CustomPaletteParams>)
+              : undefined,
           })),
         },
         previewIcon: IconChartDatatable,

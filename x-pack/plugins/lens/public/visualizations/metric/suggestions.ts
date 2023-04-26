@@ -7,6 +7,7 @@
 
 import { IconChartMetric } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import type { TableSuggestion, Visualization } from '../../types';
 import { metricLabel, MetricVisualizationState, supportedDataTypes } from './visualization';
 
@@ -20,6 +21,7 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
   table,
   state,
   keptLayerIds,
+  mainPalette,
 }) => {
   const isActive = Boolean(state);
 
@@ -57,6 +59,7 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
       ...state,
       layerId: table.layerId,
       layerType: LayerTypes.DATA,
+      palette: mainPalette as PaletteOutput<CustomPaletteParams>,
     },
     title: metricLabel,
     previewIcon: IconChartMetric,

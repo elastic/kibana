@@ -233,6 +233,10 @@ export const getGaugeVisualization = ({
   },
   getSuggestions,
 
+  getMainPalette({ palette }) {
+    return palette;
+  },
+
   getConfiguration({ state, frame }) {
     const hasColoring = Boolean(state.colorMode !== 'none' && state.palette?.params?.stops);
 

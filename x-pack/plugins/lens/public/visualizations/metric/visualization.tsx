@@ -373,6 +373,10 @@ export const getMetricVisualization = ({
     };
   },
 
+  getMainPalette({ palette }) {
+    return palette;
+  },
+
   getSuggestions,
 
   initialize(addNewLayer, state, mainPalette) {
