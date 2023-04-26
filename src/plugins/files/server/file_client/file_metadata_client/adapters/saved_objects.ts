@@ -65,12 +65,22 @@ export class SavedObjectsFileMetadataClient implements FileMetadataClient {
     };
   }
 
-  async bulkGet({ ids }: BulkGetArg): Promise<FileDescriptor[]> {
+  async bulkGet(arg: { ids: string[]; throwIfNotFound?: true }): Promise<FileDescriptor[]>;
+  async bulkGet({ ids, throwIfNotFound }: BulkGetArg): Promise<Array<FileDescriptor | null>> {
     const result = await this.soClient.bulkGet(ids.map((id) => ({ id, type: this.soType })));
-    return result.saved_objects.map((so) => ({
-      id: so.id,
-      metadata: so.attributes as FileDescriptor['metadata'],
-    }));
+    return result.saved_objects.map((so) => {
+      if (so.error) {
+        if (throwIfNotFound) {
+          throw new Error(`File [${so.id}] not found`);
+        }
+        return null;
+      }
+
+      return {
+        id: so.id,
+        metadata: so.attributes as FileDescriptor['metadata'],
+      };
+    });
   }
 
   async find({ page, perPage, ...filterArgs }: FindFileArgs = {}): Promise<{

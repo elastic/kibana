@@ -89,7 +89,7 @@ export class InternalFileService {
     }: { throwIfNotFound?: boolean; format?: BulkGetByIdArgs['format'] } = {}
   ): Promise<Array<IFile | null> | { [id: string]: IFile | null }> {
     try {
-      const metadatas = await this.metadataClient.bulkGet({ ids });
+      const metadatas = await this.metadataClient.bulkGet({ ids, throwIfNotFound: false });
       const result = metadatas.map((fileMetadata) => {
         const notFound = !fileMetadata || !fileMetadata.metadata;
         const deleted = fileMetadata?.metadata?.Status === 'DELETED';
@@ -117,9 +117,6 @@ export class InternalFileService {
             {}
           );
     } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw new FileNotFoundError('Files not found');
-      }
       this.logger.error(`Could not retrieve files: ${e}`);
       throw e;
     }

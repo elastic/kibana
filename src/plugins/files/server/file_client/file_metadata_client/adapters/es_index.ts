@@ -124,8 +124,18 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
     };
   }
 
-  async bulkGet({ ids }: BulkGetArg): Promise<FileDescriptor[]> {
-    const promises = ids.map((id) => bulkGetConcurrency(() => this.get({ id })));
+  async bulkGet(arg: { ids: string[]; throwIfNotFound?: true }): Promise<FileDescriptor[]>;
+  async bulkGet({ ids, throwIfNotFound }: BulkGetArg): Promise<Array<FileDescriptor | null>> {
+    const promises = ids.map((id) =>
+      bulkGetConcurrency(() =>
+        this.get({ id }).catch((e) => {
+          if (throwIfNotFound) {
+            throw e;
+          }
+          return null;
+        })
+      )
+    );
     const result = await Promise.all(promises);
     return result;
   }

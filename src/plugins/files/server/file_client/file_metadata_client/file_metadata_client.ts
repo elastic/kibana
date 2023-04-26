@@ -71,6 +71,11 @@ export interface BulkGetArg {
    * Unique IDs of file metadata
    */
   ids: string[];
+  /**
+   * Flag to indicate if an Error is thrown if any of the file id is not found. If set to `false`, "null" will be returned.
+   * @default true
+   */
+  throwIfNotFound?: boolean;
 }
 
 export interface DeleteArg {
@@ -113,7 +118,10 @@ export interface FileMetadataClient {
    *
    * @param arg - Arguments to bulk retrieve file metadata
    */
-  bulkGet(arg: BulkGetArg): Promise<FileDescriptor[]>;
+  bulkGet(arg: { ids: string[]; throwIfNotFound?: true }): Promise<FileDescriptor[]>;
+  bulkGet(
+    arg: BulkGetArg | { ids: string[]; throwIfNotFound: false }
+  ): Promise<Array<FileDescriptor | null>>;
 
   /**
    * The file metadata to update
