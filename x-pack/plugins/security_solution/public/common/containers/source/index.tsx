@@ -8,7 +8,6 @@
 import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { DataViewBase } from '@kbn/es-query';
 import type { BrowserField, BrowserFields, IndexField } from '@kbn/timelines-plugin/common';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
@@ -42,7 +41,11 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: FieldSpec[], _includeUnmapped: boolean = false): DataViewBase =>
+  (
+    title: string,
+    fields: FieldSpec[],
+    _includeUnmapped: boolean = false
+  ): { fields: FieldSpec[]; title: string } =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
@@ -110,7 +113,7 @@ interface FetchIndexReturn {
   browserFields: BrowserFields;
   indexes: string[];
   indexExists: boolean;
-  indexPatterns: DataViewBase;
+  indexPatterns: { title: string; fields: FieldSpec[] };
   dataView: DataView | undefined;
 }
 

@@ -10,7 +10,6 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
-import type { DataViewBase } from '@kbn/es-query';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import type {
   RuleStepProps,
@@ -43,7 +42,6 @@ import { RiskScoreField } from '../risk_score_mapping';
 import { AutocompleteField } from '../autocomplete_field';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useRuleIndices } from '../../../../detection_engine/rule_management/logic/use_rule_indices';
 
 const CommonUseField = getUseField({ component: Field });
@@ -78,8 +76,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   setForm,
   onRuleDataChange,
 }) => {
-  const { data } = useKibana().services;
-
   const isThreatMatchRuleValue = useMemo(
     () => isThreatMatchRule(defineRuleData?.ruleType),
     [defineRuleData]
@@ -95,9 +91,10 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
 
-  const { ruleIndices } = useRuleIndices(
+  const { ruleIndicesOrDvId } = useRuleIndices(
     defineRuleData?.machineLearningJobId,
-    defineRuleData?.index
+    defineRuleData?.index,
+    defineRuleData?.dataViewId
   );
 
   /**
@@ -106,29 +103,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
    * 3. useEffect if indexIndexPattern is updated and dataView from rule form is empty
    */
 
-  const [indexPatternLoading, { indexPatterns: indexIndexPattern }] = useFetchIndex(ruleIndices);
-
-  const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPattern);
-
-  useEffect(() => {
-    if (
-      defineRuleData?.index != null &&
-      (defineRuleData?.dataViewId === '' || defineRuleData?.dataViewId == null)
-    ) {
-      setIndexPattern(indexIndexPattern);
-    }
-  }, [defineRuleData?.dataViewId, defineRuleData?.index, indexIndexPattern]);
-
-  useEffect(() => {
-    const fetchSingleDataView = async () => {
-      if (defineRuleData?.dataViewId != null && defineRuleData?.dataViewId !== '') {
-        const dv = await data.dataViews.get(defineRuleData?.dataViewId);
-        setIndexPattern(dv);
-      }
-    };
-
-    fetchSingleDataView();
-  }, [data.dataViews, defineRuleData, indexIndexPattern, setIndexPattern]);
+  const [indexPatternLoading, { indexPatterns: dataView }] = useFetchIndex(ruleIndicesOrDvId);
 
   const { form } = useForm<AboutStepRule>({
     defaultValue: initialState,
@@ -248,7 +223,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 idAria: 'detectionEngineStepAboutRuleSeverityField',
                 isDisabled: isLoading || indexPatternLoading,
                 options: severityOptions,
-                indices: indexPattern,
+                indices: dataView,
               }}
             />
           </EuiFlexItem>
@@ -261,7 +236,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleRiskScore',
                 idAria: 'detectionEngineStepAboutRuleRiskScore',
                 isDisabled: isLoading || indexPatternLoading,
-                indices: indexPattern,
+                indices: dataView,
               }}
             />
           </EuiFlexItem>
@@ -403,7 +378,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverride',
                 fieldType: 'string',
                 idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
-                indices: indexPattern,
+                indices: dataView,
                 isDisabled: isLoading || indexPatternLoading,
                 placeholder: '',
               }}
@@ -416,7 +391,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleTimestampOverride',
                 fieldType: 'date',
                 idAria: 'detectionEngineStepAboutRuleTimestampOverride',
-                indices: indexPattern,
+                indices: dataView,
                 isDisabled: isLoading || indexPatternLoading,
                 placeholder: '',
               }}

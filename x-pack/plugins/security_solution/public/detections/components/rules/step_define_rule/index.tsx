@@ -28,7 +28,6 @@ import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 
 import type { SavedQuery } from '@kbn/data-plugin/public';
-import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
 import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
@@ -36,7 +35,6 @@ import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { useKibana } from '../../../../common/lib/kibana';
 import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
 import {
   filterRuleFieldsForType,
@@ -80,7 +78,6 @@ import {
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
 import { ThreatMatchInput } from '../threatmatch_input';
-import type { BrowserField } from '../../../../common/containers/source';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../schedule_item_form';
@@ -149,7 +146,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
-  const [dataViewTitle, setDataViewTitle] = useState<string>();
   const license = useLicense();
 
   const { form } = useForm<DefineStepRule>({
@@ -291,35 +287,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
   const previousRuleType = usePrevious(ruleType);
-  const [isIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
-    useFetchIndex(index);
-  const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
-
-  const { data } = useKibana().services;
-
-  // Why do we need this? to ensure the query bar auto-suggest gets the latest updates
-  // when the index pattern changes
-  // when we select new dataView
-  // when we choose some other dataSourceType
-  useEffect(() => {
-    if (dataSourceType === DataSourceType.IndexPatterns) {
-      if (!isIndexPatternLoading) {
-        setIndexPattern(initIndexPattern);
-      }
-    }
-
-    if (dataSourceType === DataSourceType.DataView) {
-      const fetchDataView = async () => {
-        if (dataViewId != null) {
-          const dv = await data.dataViews.get(dataViewId);
-          setDataViewTitle(dv.title);
-          setIndexPattern(dv);
-        }
-      };
-
-      fetchDataView();
-    }
-  }, [dataSourceType, isIndexPatternLoading, data, dataViewId, initIndexPattern]);
+  const [isIndexPatternLoading, { browserFields, indexPatterns: indexPattern, dataView }] =
+    useFetchIndex(dataViewId ?? index);
 
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = useCallback(
@@ -335,7 +304,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [form]
   );
 
-  const [aggFields, setAggregatableFields] = useState<BrowserField[]>([]);
+  const [aggFields, setAggregatableFields] = useState<FieldSpec[]>([]);
 
   useEffect(() => {
     const { fields } = indexPattern;
@@ -348,10 +317,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
      * We will need to determine where these types are defined and
      * figure out where the discrepency is.
      */
-    setAggregatableFields(aggregatableFields(fields as BrowserField[]));
+    setAggregatableFields(aggregatableFields(fields));
   }, [indexPattern]);
 
-  const termsAggregationFields: BrowserField[] = useMemo(
+  const termsAggregationFields: FieldSpec[] = useMemo(
     () => getTermsAggregationFields(aggFields),
     [aggFields]
   );
@@ -503,7 +472,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ({ threatMapping }) => (
       <ThreatMatchInput
         handleResetThreatIndices={handleResetThreatIndices}
-        indexPatterns={indexPattern}
+        indexPatterns={dataView ?? indexPattern}
         threatBrowserFields={threatBrowserFields}
         threatIndexModified={threatIndexModified}
         threatIndexPatterns={threatIndexPatterns}
@@ -514,6 +483,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ),
     [
       handleResetThreatIndices,
+      dataView,
       indexPattern,
       threatBrowserFields,
       threatIndexModified,
@@ -596,12 +566,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     () => [
       {
         id: DataSourceType.IndexPatterns,
-        label: i18nCore.translate(
-          'xpack.securitySolution.ruleDefine.indexTypeSelect.indexPattern',
-          {
-            defaultMessage: 'Index Patterns',
-          }
-        ),
+        label: i18nCore.translate('xpack.securitySolution.ruleDefine.indexTypeSelect.dataView', {
+          defaultMessage: 'Index Patterns',
+        }),
         iconType: dataSourceType === DataSourceType.IndexPatterns ? 'checkInCircleFilled' : 'empty',
         'data-test-subj': `rule-index-toggle-${DataSourceType.IndexPatterns}`,
       },
@@ -740,7 +707,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           {
             browserFields,
             idAria: 'detectionEngineStepDefineRuleQueryBar',
-            indexPattern,
+            indexPattern: dataView,
             isDisabled: isLoading || formShouldLoadQueryDynamically || timelineQueryLoading,
             resetToSavedQuery: formShouldLoadQueryDynamically,
             isLoading: isIndexPatternLoading || timelineQueryLoading,
@@ -759,7 +726,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       handleOpenTimelineSearch,
       formShouldLoadQueryDynamically,
       browserFields,
-      indexPattern,
+      dataView,
       isLoading,
       timelineQueryLoading,
       isIndexPatternLoading,
@@ -779,37 +746,37 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const optionsData = useMemo(
     () =>
-      isEmpty(indexPattern.fields)
+      isEmpty(dataView?.fields)
         ? {
             keywordFields: [],
             dateFields: [],
             nonDateFields: [],
           }
         : {
-            keywordFields: (indexPattern.fields as FieldSpec[])
+            keywordFields: (dataView?.fields as FieldSpec[])
               .filter((f) => f.esTypes?.includes('keyword'))
               .map((f) => ({ label: f.name })),
-            dateFields: indexPattern.fields
+            dateFields: dataView?.fields
               .filter((f) => f.type === 'date')
               .map((f) => ({ label: f.name })),
-            nonDateFields: indexPattern.fields
+            nonDateFields: dataView?.fields
               .filter((f) => f.type !== 'date')
               .map((f) => ({ label: f.name })),
           },
-    [indexPattern]
+    [dataView]
   );
 
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(initialState);
 
   if (dataSourceType === DataSourceType.DataView) {
-    dataForDescription.dataViewTitle = dataViewTitle;
+    dataForDescription.dataViewTitle = dataView?.getIndexPattern();
   }
 
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
-        indexPatterns={indexPattern}
+        indexPatterns={dataView}
         schema={filterRuleFieldsForType(schema, ruleType)}
         data={filterRuleFieldsForType(dataForDescription, ruleType)}
       />
@@ -858,7 +825,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
                     isLoading: isIndexPatternLoading,
-                    indexPattern,
+                    dataView,
                     showFilterBar: true,
                     // isLoading: indexPatternsLoading,
                     dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',

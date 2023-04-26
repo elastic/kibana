@@ -6,8 +6,7 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataViewFieldBase } from '@kbn/es-query';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import { EMPTY_BROWSER_FIELDS, EMPTY_INDEX_FIELDS } from '@kbn/timelines-plugin/common';
 import type { SecuritySolutionDataViewBase } from '../../types';
@@ -68,7 +67,7 @@ export interface SourcererDataView extends KibanaDataView {
    * @deprecated use sourcererDataView.fields
    * comes from dataView.fields.toSpec() */
   indexFields: SecuritySolutionDataViewBase['fields'];
-  fields: DataViewFieldBase[];
+  fields: FieldSpec[];
   /** set when data view fields are fetched */
   loading: boolean;
   /**

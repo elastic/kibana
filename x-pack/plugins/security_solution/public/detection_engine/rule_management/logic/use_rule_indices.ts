@@ -8,17 +8,21 @@
 import { useMemo } from 'react';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
 
-export const useRuleIndices = (machineLearningJobId?: string[], defaultRuleIndices?: string[]) => {
+export const useRuleIndices = (
+  machineLearningJobId?: string[],
+  defaultRuleIndices?: string[],
+  defaultRuleDataViewId?: string
+): { mlJobLoading: boolean; ruleIndicesOrDvId: string[] | string } => {
   const memoMlJobIds = useMemo(() => machineLearningJobId ?? [], [machineLearningJobId]);
   const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
 
-  const memoRuleIndices = useMemo(() => {
+  const memoRuleIndicesOrDvId = useMemo(() => {
     if (jobs.length > 0) {
       return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
     } else {
-      return defaultRuleIndices ?? [];
+      return defaultRuleDataViewId ?? defaultRuleIndices;
     }
-  }, [jobs, defaultRuleIndices]);
+  }, [jobs, defaultRuleDataViewId, defaultRuleIndices]);
 
-  return { mlJobLoading, ruleIndices: memoRuleIndices };
+  return { mlJobLoading, ruleIndicesOrDvId: memoRuleIndicesOrDvId ?? [] };
 };

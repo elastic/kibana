@@ -18,6 +18,7 @@ import { mockHistory, Router } from '../../../../common/mock/router';
 import { render, act, fireEvent } from '@testing-library/react';
 import { resolveTimeline } from '../../../../timelines/containers/api';
 import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
+import { createStubDataView } from '@kbn/data-plugin/common/stubs';
 
 jest.mock('../../../../timelines/containers/api');
 jest.mock('../../../../common/lib/kibana', () => {
@@ -49,6 +50,8 @@ jest.mock('../../../../timelines/containers/all', () => {
   };
 });
 
+const dvStub = createStubDataView({ spec: { title: 'title' } });
+
 describe('QueryBarDefineRule', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -75,7 +78,7 @@ describe('QueryBarDefineRule', () => {
           <QueryBarDefineRule
             browserFields={{}}
             isLoading={false}
-            indexPattern={{ fields: [], title: 'title' }}
+            indexPattern={dvStub}
             onCloseTimelineSearch={jest.fn()}
             openTimelineSearch={true}
             dataTestSubj="query-bar-define-rule"
@@ -98,7 +101,7 @@ describe('QueryBarDefineRule', () => {
             <QueryBarDefineRule
               browserFields={{}}
               isLoading={false}
-              indexPattern={{ fields: [], title: 'title' }}
+              indexPattern={dvStub}
               onCloseTimelineSearch={jest.fn()}
               openTimelineSearch={true}
               dataTestSubj="query-bar-define-rule"
@@ -124,7 +127,7 @@ describe('QueryBarDefineRule', () => {
           <QueryBarDefineRule
             browserFields={{}}
             isLoading={false}
-            indexPattern={{ fields: [], title: 'title' }}
+            indexPattern={dvStub}
             onCloseTimelineSearch={jest.fn()}
             openTimelineSearch={true}
             dataTestSubj="query-bar-define-rule"

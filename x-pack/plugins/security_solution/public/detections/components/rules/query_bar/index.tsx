@@ -9,9 +9,10 @@ import { EuiFormRow, EuiMutationObserver } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-plugin/common';
 
 import type { BrowserFields } from '../../../../common/containers/source';
 import { OpenTimelineModal } from '../../../../timelines/components/open_timeline/open_timeline_modal';
@@ -36,7 +37,7 @@ export interface QueryBarDefineRuleProps {
   field: FieldHook;
   idAria: string;
   isLoading: boolean;
-  indexPattern: DataViewBase;
+  indexPattern: DataView;
   onCloseTimelineSearch: () => void;
   openTimelineSearch: boolean;
   resizeParentContainer?: (height: number) => void;
