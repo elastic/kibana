@@ -19,6 +19,7 @@ import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
 import {
   AnalyticsCollectionDataViewLogic,
+  AnalyticsCollectionDataViewLogicActions,
   AnalyticsCollectionDataViewLogicValues,
 } from './analytics_collection_data_view_logic';
 
@@ -341,6 +342,7 @@ export interface AnalyticsCollectionExploreTableLogicActions {
     sort?: Sorting;
   };
   reset(): void;
+  setDataView: AnalyticsCollectionDataViewLogicActions['setDataView'];
   setItems(items: ExploreTableItem[]): { items: ExploreTableItem[] };
   setSearch(search: string): { search: string };
   setSelectedTable(
