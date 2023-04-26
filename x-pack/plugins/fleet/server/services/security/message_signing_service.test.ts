@@ -15,6 +15,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '..';
+import { MessageSigningError } from '../../../common/errors';
 
 import {
   type MessageSigningServiceInterface,
@@ -108,7 +109,7 @@ describe('MessageSigningService', () => {
     it('can correctly rotate existing key pair', async () => {
       mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
 
-      const rotateKeyPairResponse = await messageSigningService.rotateKeyPair();
+      await messageSigningService.rotateKeyPair();
 
       expect(soClientMock.delete).toBeCalledWith(
         MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
@@ -119,8 +120,6 @@ describe('MessageSigningService', () => {
         public_key: expect.any(String),
         passphrase: expect.any(String),
       });
-
-      expect(rotateKeyPairResponse).toEqual(undefined);
     });
 
     it('does not generate key pair on rotation if no key pair exists', async () => {
@@ -130,14 +129,45 @@ describe('MessageSigningService', () => {
         .spyOn(messageSigningService, 'removeKeyPair' as any)
         .mockReturnValue(Promise.resolve(false));
 
-      const rotateKeyPairResponse = await messageSigningService.rotateKeyPair();
+      await messageSigningService.rotateKeyPair();
 
       // can't delete key pair if none exists
       expect(soClientMock.delete).not.toBeCalled();
       // doesn't create new key pair
       expect(soClientMock.create).not.toBeCalled();
-      // returns undefined
-      expect(rotateKeyPairResponse).toEqual(undefined);
+    });
+
+    it('throws getCurrentKeyPairObj error if any on rotate', async () => {
+      mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
+      // mock delete to return false
+      jest
+        .spyOn(messageSigningService, 'getCurrentKeyPairObj' as any)
+        .mockRejectedValue(Error('foo'));
+
+      const response = messageSigningService.rotateKeyPair();
+      await expect(response).rejects.toThrowError(
+        'Error rotating key pair: Error fetching current key pair: foo'
+      );
+    });
+
+    it('throws soClient error if any on rotate', async () => {
+      mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
+      // mock delete to return false
+      soClientMock.delete.mockRejectedValue(Error('foo'));
+
+      const response = messageSigningService.rotateKeyPair();
+      await expect(response).rejects.toThrowError(
+        'Error rotating key pair: Error deleting current key pair: foo'
+      );
+    });
+
+    it('throws generateKeyPair error if any on rotate', async () => {
+      mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
+      // mock delete to return false
+      messageSigningService.generateKeyPair = jest.fn().mockRejectedValue(Error('foo'));
+
+      const response = messageSigningService.rotateKeyPair();
+      await expect(response).rejects.toThrowError('Error rotating key pair: foo');
     });
 
     it('does not generate key pair if one exists', async () => {
