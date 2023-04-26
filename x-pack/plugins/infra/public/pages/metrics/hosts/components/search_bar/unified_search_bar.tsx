@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { METRICS_APP_DATA_TEST_SUBJ } from '../../../../../apps/metrics_app';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
