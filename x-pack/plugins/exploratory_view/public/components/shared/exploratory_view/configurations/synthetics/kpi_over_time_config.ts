@@ -109,8 +109,8 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
       },
       {
         label: 'Monitor Complete',
-        id: 'state.up',
-        field: 'state.up',
+        id: 'monitor_complete',
+        field: 'state.id',
         columnType: OPERATION_COLUMN,
         columnFilters: [
           {

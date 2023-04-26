@@ -47,7 +47,7 @@ export const MonitorCompleteSparklines = (props: Props) => {
             'observer.geo.name': [selectedLocation.label],
           },
           dataType: 'synthetics',
-          selectedMetricField: 'state.id',
+          selectedMetricField: 'monitor_complete',
           name: COMPLETE_LABEL,
           color: euiTheme.colors.success,
           operationType: 'unique_count',
