@@ -12,14 +12,19 @@ import { constant, identity } from 'fp-ts/lib/function';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { InventoryView } from '../../common/inventory_views';
 import { useKibanaContextForPlugin } from './use_kibana';
 import { useUrlState } from '../utils/use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
 
+type ServerError = IHttpFetchError<ResponseErrorBody>;
+
 const queryKeys = {
   find: ['inventory-views-find'] as const,
-  get: (id?: string) => ['inventory-views-get', id].filter(Boolean),
+  get: ['inventory-views-get'] as const,
+  getById: (id: string) => ['inventory-views-get', id] as const,
 };
 
 export const useInventoryViews = () => {
@@ -50,7 +55,7 @@ export const useInventoryViews = () => {
     queryFn: () => inventoryViews.findInventoryViews(),
     enabled: false, // We will manually fetch the list when necessary
     placeholderData: [], // Use a default empty array instead of undefined
-    onError: (error) => notify.getViewFailure(error.response.message),
+    onError: (error: ServerError) => notify.getViewFailure(error.body?.message ?? error.message),
     onSuccess: (data) => {
       const prefix = data.length >= 1000 ? 'over' : 'under';
       trackMetric({ metric: `${prefix}_1000_saved_objects_for_inventory_view` });
@@ -58,9 +63,9 @@ export const useInventoryViews = () => {
   });
 
   const { data: currentView, isFetching: isFetchingCurrentView } = useQuery({
-    queryKey: queryKeys.get(currentViewId),
+    queryKey: queryKeys.getById(currentViewId),
     queryFn: ({ queryKey: [, id] }) => inventoryViews.getInventoryView(id),
-    onError: (error) => notify.getViewFailure(error.response.message),
+    onError: (error: ServerError) => notify.getViewFailure(error.body?.message ?? error.message),
     placeholderData: null,
   });
 
@@ -76,19 +81,19 @@ export const useInventoryViews = () => {
      */
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.find }); // 1
-      const previousViews = queryClient.getQueryData(queryKeys.find); // 2
+      const previousViews = queryClient.getQueryData<InventoryView[]>(queryKeys.find); // 2
       const updatedViews = getListWithUpdatedDefault(id, previousViews); // 3
       queryClient.setQueryData(queryKeys.find, updatedViews);
       return { previousViews }; // 4
     },
     // If the mutation fails, use the context returned from onMutate to roll back
-    onError: (error, _id, context) => {
-      notify.setDefaultViewFailure(error.response.message);
+    onError: (error: ServerError, _id, context: { previousViews: InventoryView[] }) => {
+      notify.setDefaultViewFailure(error.body?.message ?? error.message);
       queryClient.setQueryData(queryKeys.find, context.previousViews);
     },
     // Always refetch after error or success:
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.get() }); // Invalidate all single views cache entries
+      queryClient.invalidateQueries({ queryKey: queryKeys.get }); // Invalidate all single views cache entries
     },
     onSettled: () => {
       fetchViews(); // Always invalidate views list cache and refetch views on success/error
@@ -96,25 +101,24 @@ export const useInventoryViews = () => {
   });
 
   const { mutate: createView, isLoading: isCreatingView } = useMutation({
-    mutationFn: (attributes /* TODO: add type */) => inventoryViews.createInventoryView(attributes),
-    onError: (error) => {
-      notify.upsertViewFailure(error.response.message);
+    mutationFn: (attributes) => inventoryViews.createInventoryView(attributes),
+    onError: (error: ServerError) => {
+      notify.upsertViewFailure(error.body?.message ?? error.message);
     },
-    onSuccess: (createdView) => {
-      queryClient.setQueryData(queryKeys.get(createdView.id), createdView); // Store in cache created view
+    onSuccess: (createdView: InventoryView) => {
+      queryClient.setQueryData(queryKeys.getById(createdView.id), createdView); // Store in cache created view
       switchViewById(createdView.id); // Update current view and url state
       fetchViews(); // Invalidate views list cache and refetch views
     },
   });
 
   const { mutate: updateViewById, isLoading: isUpdatingView } = useMutation({
-    mutationFn: ({ id, attributes } /* TODO: add type */) =>
-      inventoryViews.updateInventoryView(id, attributes),
+    mutationFn: ({ id, attributes }) => inventoryViews.updateInventoryView(id, attributes),
     onError: (error) => {
-      notify.upsertViewFailure(error.response.message);
+      notify.upsertViewFailure(error.body?.message);
     },
-    onSuccess: (updatedView) => {
-      queryClient.setQueryData(queryKeys.get(updatedView.id), updatedView); // Store in cache updated view
+    onSuccess: (updatedView: InventoryView) => {
+      queryClient.setQueryData(queryKeys.getById(updatedView.id), updatedView); // Store in cache updated view
       fetchViews(); // Invalidate views list cache and refetch views
     },
   });
@@ -132,7 +136,7 @@ export const useInventoryViews = () => {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.find }); // 1
 
-      const previousViews = queryClient.getQueryData(queryKeys.find); // 2
+      const previousViews = queryClient.getQueryData<InventoryView[]>(queryKeys.find); // 2
 
       const updatedViews = getListWithoutDeletedView(id, previousViews); // 3
       queryClient.setQueryData(queryKeys.find, updatedViews);
@@ -155,7 +159,7 @@ export const useInventoryViews = () => {
   });
 
   return {
-    // Values about views list
+    // Values
     views,
     currentView,
     // Actions about updating view
@@ -185,7 +189,7 @@ const decodeUrlState = (value: unknown) => {
 /**
  * Helpers
  */
-const getListWithUpdatedDefault = (id: string, views) => {
+const getListWithUpdatedDefault = (id: string, views: InventoryView[] = []) => {
   return views.map((view) => ({
     ...view,
     attributes: {
@@ -195,6 +199,6 @@ const getListWithUpdatedDefault = (id: string, views) => {
   }));
 };
 
-const getListWithoutDeletedView = (id: string, views) => {
+const getListWithoutDeletedView = (id: string, views: InventoryView[] = []) => {
   return views.filter((view) => view.id !== id);
 };
