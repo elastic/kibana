@@ -726,6 +726,7 @@
     "@kbn/utility-types-jest": "link:packages/kbn-utility-types-jest",
     "@kbn/utils": "link:packages/kbn-utils",
     "@kbn/ux-plugin": "link:x-pack/plugins/ux",
+    "@kbn/v8-profiler-examples-plugin": "link:examples/v8_profiler_examples",
     "@kbn/vis-default-editor-plugin": "link:src/plugins/vis_default_editor",
     "@kbn/vis-type-gauge-plugin": "link:src/plugins/vis_types/gauge",
     "@kbn/vis-type-heatmap-plugin": "link:src/plugins/vis_types/heatmap",

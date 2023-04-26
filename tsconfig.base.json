@@ -1466,6 +1466,8 @@
       "@kbn/utils/*": ["packages/kbn-utils/*"],
       "@kbn/ux-plugin": ["x-pack/plugins/ux"],
       "@kbn/ux-plugin/*": ["x-pack/plugins/ux/*"],
+      "@kbn/v8-profiler-examples-plugin": ["examples/v8_profiler_examples"],
+      "@kbn/v8-profiler-examples-plugin/*": ["examples/v8_profiler_examples/*"],
       "@kbn/validate-next-docs-cli": ["packages/kbn-validate-next-docs-cli"],
       "@kbn/validate-next-docs-cli/*": ["packages/kbn-validate-next-docs-cli/*"],
       "@kbn/vis-default-editor-plugin": ["src/plugins/vis_default_editor"],

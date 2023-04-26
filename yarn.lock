@@ -5772,6 +5772,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/v8-profiler-examples-plugin@link:examples/v8_profiler_examples":
+  version "0.0.0"
+  uid ""
+
 "@kbn/validate-next-docs-cli@link:packages/kbn-validate-next-docs-cli":
   version "0.0.0"
   uid ""
