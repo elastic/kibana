@@ -7,10 +7,7 @@
     "id": "synthetics",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "uptime"
-    ],
+    "configPath": ["xpack", "uptime"],
     "requiredPlugins": [
       "actions",
       "alerting",
@@ -24,6 +21,7 @@
       "inspector",
       "licensing",
       "observability",
+      "observabilityShared",
       "ruleRegistry",
       "security",
       "share",
@@ -33,15 +31,7 @@
       "unifiedSearch",
       "bfetch"
     ],
-    "optionalPlugins": [
-      "cloud",
-      "data",
-      "fleet",
-      "home",
-      "ml",
-      "spaces",
-      "telemetry"
-    ],
+    "optionalPlugins": ["cloud", "data", "fleet", "home", "ml", "spaces", "telemetry"],
     "requiredBundles": [
       "data",
       "unifiedSearch",

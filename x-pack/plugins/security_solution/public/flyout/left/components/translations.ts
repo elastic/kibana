@@ -13,3 +13,10 @@ export const ANALYZER_ERROR_MESSAGE = i18n.translate(
     defaultMessage: 'analyzer',
   }
 );
+
+export const SESSION_VIEW_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.sessionViewErrorTitle',
+  {
+    defaultMessage: 'session view',
+  }
+);

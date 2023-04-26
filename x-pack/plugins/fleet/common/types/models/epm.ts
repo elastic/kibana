@@ -363,6 +363,8 @@ export interface RegistryElasticsearch {
   'ingest_pipeline.name'?: string;
   source_mode?: 'default' | 'synthetic';
   index_mode?: 'time_series';
+  dynamic_dataset?: boolean;
+  dynamic_namespace?: boolean;
 }
 
 export interface RegistryDataStreamProperties {
@@ -451,6 +453,7 @@ export interface IntegrationCardItem {
   id: string;
   categories: string[];
   fromIntegrations?: string;
+  isReauthorizationRequired?: boolean;
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
   showLabels?: boolean;
@@ -537,6 +540,7 @@ export type KibanaAssetReference = Pick<SavedObjectReference, 'id'> & {
 };
 export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: ElasticsearchAssetType;
+  deferred?: boolean;
 };
 
 export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {

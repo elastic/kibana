@@ -9,12 +9,16 @@ import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export function ExplainLogRateSpikesPageProvider({ getService }: FtrProviderContext) {
+export function ExplainLogRateSpikesPageProvider({
+  getService,
+  getPageObject,
+}: FtrProviderContext) {
   const browser = getService('browser');
   const elasticChart = getService('elasticChart');
   const ml = getService('ml');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const header = getPageObject('header');
 
   return {
     async assertTimeRangeSelectorSectionExists() {
@@ -29,6 +33,42 @@ export function ExplainLogRateSpikesPageProvider({ getService }: FtrProviderCont
           `Expected total document count to be '${expectedFormattedTotalDocCount}' (got '${docCount}')`
         );
       });
+    },
+
+    async assertSamplingProbability(expectedFormattedSamplingProbability: string) {
+      await retry.tryForTime(5000, async () => {
+        const samplingProbability = await testSubjects.getVisibleText('aiopsSamplingProbability');
+        expect(samplingProbability).to.eql(
+          expectedFormattedSamplingProbability,
+          `Expected total document count to be '${expectedFormattedSamplingProbability}' (got '${samplingProbability}')`
+        );
+      });
+    },
+
+    async setQueryInput(query: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        const aiopsQueryInput = await testSubjects.find('aiopsQueryInput');
+
+        await aiopsQueryInput.clearValueWithKeyboard();
+        const queryBarEmpty = await aiopsQueryInput.getVisibleText();
+        expect(queryBarEmpty).to.eql(
+          '',
+          `Expected query bar to be emptied, got '${queryBarEmpty}'`
+        );
+
+        await aiopsQueryInput.type(query);
+        await aiopsQueryInput.pressKeys(browser.keys.ENTER);
+        await header.waitUntilLoadingHasFinished();
+        const queryBarText = await aiopsQueryInput.getVisibleText();
+        expect(queryBarText).to.eql(
+          query,
+          `Expected query bar text to be '${query}' (got '${queryBarText}')`
+        );
+      });
+    },
+
+    async assertSamplingProbabilityMissing() {
+      await testSubjects.missingOrFail('aiopsSamplingProbability');
     },
 
     async clickUseFullDataButton(expectedFormattedTotalDocCount: string) {
@@ -199,9 +239,11 @@ export function ExplainLogRateSpikesPageProvider({ getService }: FtrProviderCont
     },
 
     async assertProgressTitle(expectedProgressTitle: string) {
-      await testSubjects.existOrFail('aiopProgressTitle');
-      const currentProgressTitle = await testSubjects.getVisibleText('aiopProgressTitle');
-      expect(currentProgressTitle).to.be(expectedProgressTitle);
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail('aiopProgressTitle');
+        const currentProgressTitle = await testSubjects.getVisibleText('aiopProgressTitle');
+        expect(currentProgressTitle).to.be(expectedProgressTitle);
+      });
     },
 
     async navigateToIndexPatternSelection() {

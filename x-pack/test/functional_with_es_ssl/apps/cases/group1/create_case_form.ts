@@ -51,7 +51,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       expect(await title.getVisibleText()).equal(caseTitle);
 
       // validate description
-      const description = await testSubjects.find('user-action-markdown');
+      const description = await testSubjects.find('scrollable-markdown');
       expect(await description.getVisibleText()).equal('test description');
 
       // validate tag exists

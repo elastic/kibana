@@ -125,11 +125,9 @@ export default function ({ getService }: FtrProviderContext) {
             },
           };
         }
-        await transform.api.createTransform(
-          testData.originalConfig.id,
-          testData.originalConfig,
-          testData.expected.healthStatus === TRANSFORM_HEALTH.yellow
-        );
+        await transform.api.createTransform(testData.originalConfig.id, testData.originalConfig, {
+          deferValidation: testData.expected.healthStatus === TRANSFORM_HEALTH.yellow,
+        });
       }
       await transform.testResources.setKibanaTimeZoneToUTC();
       await transform.securityUI.loginAsTransformPowerUser();
