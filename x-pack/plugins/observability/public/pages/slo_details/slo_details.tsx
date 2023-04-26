@@ -70,7 +70,7 @@ export function SloDetailsPage() {
             isAutoRefreshing={isAutoRefreshing}
             onClick={handleToggleAutoRefresh}
           />,
-          <FeedbackButton />,
+          <FeedbackButton disabled={isLoading || isDeleting} />,
         ],
         bottomBorder: false,
       }}
