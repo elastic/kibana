@@ -30,6 +30,7 @@ import {
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
@@ -154,6 +155,13 @@ export const alertFieldMap = {
     format: 'epoch_millis||strict_date_optional_time',
     array: false,
     required: false,
+  },
+  [ALERT_URL]: {
+    type: 'keyword',
+    array: false,
+    index: false,
+    required: false,
+    ignore_above: 2048,
   },
   [ALERT_UUID]: {
     type: 'keyword',

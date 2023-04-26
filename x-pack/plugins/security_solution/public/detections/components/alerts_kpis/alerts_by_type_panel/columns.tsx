@@ -56,7 +56,7 @@ export const getAlertsTypeTableColumns = (
               <EuiHealth color={ALERT_TYPE_COLOR[type as AlertType]}>
                 <EuiText grow={false} size="xs">
                   <SecurityCellActions
-                    mode={CellActionsMode.HOVER}
+                    mode={CellActionsMode.HOVER_DOWN}
                     visibleCellActions={4}
                     showActionTooltips
                     triggerId={SecurityCellActionsTrigger.DEFAULT}

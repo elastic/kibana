@@ -34,6 +34,7 @@ jest.mock('../utils/get_list_client', () => ({
 describe('Custom Query Alerts', () => {
   const mocks = createRuleTypeMocks();
   const licensing = licensingMock.createSetup();
+  const publicBaseUrl = 'http://somekibanabaseurl.com';
 
   const { dependencies, executor, services } = mocks;
   const { alerting, lists, logger, ruleDataClient } = dependencies;
@@ -44,6 +45,7 @@ describe('Custom Query Alerts', () => {
     ruleDataClient,
     ruleExecutionLoggerFactory: () => Promise.resolve(ruleExecutionLogMock.forExecutors.create()),
     version: '8.3',
+    publicBaseUrl,
   });
   const eventsTelemetry = createMockTelemetryEventsSender(true);
 

@@ -8,6 +8,7 @@
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import '../../../../common/mock/formatted_relative';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -15,6 +16,7 @@ import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import type { OpenTimelineResult, TimelineResultNote } from '../types';
 import { NotePreviews } from '.';
 
+jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector');
 
 jest.mock('react-redux', () => {
@@ -30,6 +32,7 @@ describe('NotePreviews', () => {
   let note1updated: number;
   let note2updated: number;
   let note3updated: number;
+  let queryClient: QueryClient;
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
@@ -37,12 +40,23 @@ describe('NotePreviews', () => {
     note2updated = moment(note1updated).add(1, 'minute').valueOf();
     note3updated = moment(note2updated).add(1, 'minute').valueOf();
     (useDeepEqualSelector as jest.Mock).mockReset();
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
   });
 
   test('it renders a note preview for each note when isModal is false', () => {
     const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
-    const wrapper = mountWithIntl(<NotePreviews notes={hasNotes[0].notes} />);
+    const wrapper = mountWithIntl(
+      <QueryClientProvider client={queryClient}>
+        <NotePreviews notes={hasNotes[0].notes} />
+      </QueryClientProvider>
+    );
 
     hasNotes[0].notes?.forEach(({ savedObjectId }) => {
       expect(wrapper.find(`[data-test-subj="note-preview-${savedObjectId}"]`).exists()).toBe(true);
@@ -52,7 +66,11 @@ describe('NotePreviews', () => {
   test('it renders a note preview for each note when isModal is true', () => {
     const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
-    const wrapper = mountWithIntl(<NotePreviews notes={hasNotes[0].notes} />);
+    const wrapper = mountWithIntl(
+      <QueryClientProvider client={queryClient}>
+        <NotePreviews notes={hasNotes[0].notes} />
+      </QueryClientProvider>
+    );
 
     hasNotes[0].notes?.forEach(({ savedObjectId }) => {
       expect(wrapper.find(`[data-test-subj="note-preview-${savedObjectId}"]`).exists()).toBe(true);
@@ -81,7 +99,11 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(<NotePreviews notes={nonUniqueNotes} />);
+    const wrapper = mountWithIntl(
+      <QueryClientProvider client={queryClient}>
+        <NotePreviews notes={nonUniqueNotes} />
+      </QueryClientProvider>
+    );
 
     expect(wrapper.find('div.euiCommentEvent__headerUsername').at(1).text()).toEqual('bob');
   });
@@ -108,7 +130,11 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(<NotePreviews notes={nonUniqueNotes} />);
+    const wrapper = mountWithIntl(
+      <QueryClientProvider client={queryClient}>
+        <NotePreviews notes={nonUniqueNotes} />
+      </QueryClientProvider>
+    );
 
     expect(wrapper.find('div.euiCommentEvent__headerUsername').at(2).text()).toEqual('bob');
   });
@@ -134,7 +160,11 @@ describe('NotePreviews', () => {
       },
     ];
 
-    const wrapper = mountWithIntl(<NotePreviews notes={nonUniqueNotes} />);
+    const wrapper = mountWithIntl(
+      <QueryClientProvider client={queryClient}>
+        <NotePreviews notes={nonUniqueNotes} />{' '}
+      </QueryClientProvider>
+    );
 
     expect(wrapper.find('div.euiCommentEvent__headerUsername').at(2).text()).toEqual('bob');
   });
@@ -144,7 +174,9 @@ describe('NotePreviews', () => {
     (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
 
     const wrapper = mountWithIntl(
-      <NotePreviews notes={[]} showTimelineDescription timelineId="test-timeline-id" />
+      <QueryClientProvider client={queryClient}>
+        <NotePreviews notes={[]} showTimelineDescription timelineId="test-timeline-id" />
+      </QueryClientProvider>
     );
 
     expect(wrapper.find('[data-test-subj="note-preview-description"]').first().text()).toContain(
@@ -156,8 +188,59 @@ describe('NotePreviews', () => {
     const timeline = mockTimelineResults[0];
     (useDeepEqualSelector as jest.Mock).mockReturnValue({ ...timeline, description: undefined });
 
-    const wrapper = mountWithIntl(<NotePreviews notes={[]} />);
+    const wrapper = mountWithIntl(
+      <QueryClientProvider client={queryClient}>
+        <NotePreviews notes={[]} />
+      </QueryClientProvider>
+    );
 
     expect(wrapper.find('[data-test-subj="note-preview-description"]').exists()).toBe(false);
+  });
+
+  test('it should disable the delete note button if the savedObjectId is falsy', () => {
+    const timeline = mockTimelineResults[0];
+    (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+
+    const wrapper = mountWithIntl(
+      <QueryClientProvider client={queryClient}>
+        <NotePreviews
+          notes={[
+            {
+              note: 'disabled delete',
+              updated: note2updated,
+              updatedBy: 'alice',
+            },
+          ]}
+          showTimelineDescription
+          timelineId="test-timeline-id"
+        />
+      </QueryClientProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="delete-note"] button').prop('disabled')).toBeTruthy();
+  });
+
+  test('it should enable the delete button if the savedObjectId exists', () => {
+    const timeline = mockTimelineResults[0];
+    (useDeepEqualSelector as jest.Mock).mockReturnValue(timeline);
+
+    const wrapper = mountWithIntl(
+      <QueryClientProvider client={queryClient}>
+        <NotePreviews
+          notes={[
+            {
+              note: 'enabled delete',
+              savedObjectId: 'test-id',
+              updated: note2updated,
+              updatedBy: 'alice',
+            },
+          ]}
+          showTimelineDescription
+          timelineId="test-timeline-id"
+        />
+      </QueryClientProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="delete-note"] button').prop('disabled')).toBeFalsy();
   });
 });

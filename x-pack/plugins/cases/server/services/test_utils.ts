@@ -16,10 +16,10 @@ import type {
 } from '../../common/api';
 import { CaseSeverity, CaseStatuses, ConnectorTypes, NONE_CONNECTOR_ID } from '../../common/api';
 import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import type { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './cases/types';
-import { ESCaseSeverity, ESCaseStatus } from './cases/types';
 import { getNoneCaseConnector } from '../common/utils';
 import type { ConnectorFieldsPersistedAttributes } from '../common/types/connectors';
+import type { CasePersistedExternalService, CasePersistedAttributes } from '../common/types/case';
+import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
 
 /**
  * This is only a utility interface to help with constructing test cases. After the migration, the ES format will no longer
@@ -97,7 +97,7 @@ export const createExternalService = (
   ...overrides,
 });
 
-export const basicESCaseFields: ESCaseAttributes = {
+export const basicESCaseFields: CasePersistedAttributes = {
   closed_at: null,
   closed_by: null,
   created_at: '2019-11-25T21:54:48.952Z',
@@ -106,11 +106,11 @@ export const basicESCaseFields: ESCaseAttributes = {
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
-  severity: ESCaseSeverity.LOW,
+  severity: CasePersistedSeverity.LOW,
   duration: null,
   description: 'This is a brand new case of a bad meanie defacing data',
   title: 'Super Bad Security Issue',
-  status: ESCaseStatus.OPEN,
+  status: CasePersistedStatus.OPEN,
   tags: ['defacement'],
   updated_at: '2019-11-25T21:54:48.952Z',
   updated_by: {
@@ -167,9 +167,9 @@ export const createCaseSavedObjectResponse = ({
 }: {
   connector?: ESCaseConnectorWithId;
   externalService?: CaseFullExternalService;
-  overrides?: Partial<ESCaseAttributes>;
+  overrides?: Partial<CasePersistedAttributes>;
   caseId?: string;
-} = {}): SavedObject<ESCaseAttributes> => {
+} = {}): SavedObject<CasePersistedAttributes> => {
   const references: SavedObjectReference[] = createSavedObjectReferences({
     connector,
     externalService,
@@ -181,7 +181,7 @@ export const createCaseSavedObjectResponse = ({
     fields: connector?.fields ?? null,
   };
 
-  let restExternalService: ExternalServicesWithoutConnectorId | null = null;
+  let restExternalService: CasePersistedExternalService | null = null;
   if (externalService !== null) {
     const { connector_id: ignored, ...rest } = externalService ?? {
       connector_name: '.jira',

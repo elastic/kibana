@@ -7,6 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { countDownES } from './count_down_es';
 
 export const downgradeImmutableRule = async (
@@ -18,7 +19,7 @@ export const downgradeImmutableRule = async (
     async () => {
       return es.updateByQuery(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           refresh: true,
           wait_for_completion: true,
           body: {

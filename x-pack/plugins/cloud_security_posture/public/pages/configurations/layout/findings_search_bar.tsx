@@ -21,12 +21,16 @@ type SearchBarQueryProps = Pick<FindingsBaseURLQuery, 'query' | 'filters'>;
 interface FindingsSearchBarProps {
   setQuery(v: Partial<SearchBarQueryProps>): void;
   loading: boolean;
+  placeholder?: string;
 }
 
 export const FindingsSearchBar = ({
   dataView,
   loading,
   setQuery,
+  placeholder = i18n.translate('xpack.csp.findings.searchBar.searchPlaceholder', {
+    defaultMessage: 'Search findings (eg. rule.section : "API Server" )',
+  }),
 }: FindingsSearchBarProps & { dataView: DataView }) => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -49,9 +53,7 @@ export const FindingsSearchBar = ({
         indexPatterns={[dataView]}
         onQuerySubmit={setQuery}
         onFiltersUpdated={(value: Filter[]) => setQuery({ filters: value })}
-        placeholder={i18n.translate('xpack.csp.findings.searchBar.searchPlaceholder', {
-          defaultMessage: 'Search findings (eg. rule.section : "API Server" )',
-        })}
+        placeholder={placeholder}
       />
     </div>
   );

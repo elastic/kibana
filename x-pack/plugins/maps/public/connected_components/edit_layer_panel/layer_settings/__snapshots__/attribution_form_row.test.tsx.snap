@@ -76,11 +76,7 @@ exports[`Should render edit form row when attribution not provided 1`] = `
           onClick={[Function]}
           size="xs"
         >
-          <FormattedMessage
-            defaultMessage="Clear"
-            id="xpack.maps.attribution.clearBtnLabel"
-            values={Object {}}
-          />
+          Clear
         </EuiButtonEmpty>
       </div>
     </div>

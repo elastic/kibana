@@ -12,7 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
 import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
-import { CaseResponse, CommentType } from '@kbn/cases-plugin/common';
+import { Case, CommentType } from '@kbn/cases-plugin/common';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import {
   getRuleForSignalTesting,
@@ -31,12 +31,16 @@ import { postCaseReq } from './mock';
 
 export const createSecuritySolutionAlerts = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
-  log: ToolingLog
+  log: ToolingLog,
+  numberOfSignals: number = 1
 ): Promise<estypes.SearchResponse<DetectionAlert & RiskEnrichmentFields>> => {
-  const rule = getRuleForSignalTesting(['auditbeat-*']);
+  const rule = {
+    ...getRuleForSignalTesting(['auditbeat-*']),
+    query: 'process.executable: "/usr/bin/sudo"',
+  };
   const { id } = await createRule(supertest, log, rule);
   await waitForRuleSuccess({ supertest, log, id });
-  await waitForSignalsToBePresent(supertest, log, 1, [id]);
+  await waitForSignalsToBePresent(supertest, log, numberOfSignals, [id]);
   const signals = await getSignalsByIds(supertest, log, [id]);
 
   return signals;
@@ -195,7 +199,7 @@ export const createCaseAndAttachAlert = async ({
   owner: string;
   alerts: Alerts;
   getAlerts: (alerts: Alerts) => Promise<Array<Record<string, unknown>>>;
-}): Promise<CaseResponse[]> => {
+}): Promise<Case[]> => {
   const cases = await Promise.all(
     [...Array(totalCases).keys()].map((index) =>
       createCase(
