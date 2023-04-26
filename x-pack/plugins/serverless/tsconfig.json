@@ -16,9 +16,10 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
-    "@kbn/core-http-browser",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/utils",
+    "@kbn/serverless-project-switcher",
+    "@kbn/serverless-types",
   ]
 }
