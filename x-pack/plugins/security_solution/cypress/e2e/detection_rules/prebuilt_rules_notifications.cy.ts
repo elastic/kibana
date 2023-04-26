@@ -29,48 +29,55 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     deleteAlertsAndRules();
     esArchiverResetKibana();
 
-    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-
     // Prevent the installation of the package
     // `security_detection_engine` from Fleet
     cy.intercept('POST', '/api/fleet/epm/packages/_bulk?prerelease=true', {}).as(
       'getPrebuiltRules'
     );
-    createNewRuleAsset(
-      '.kibana',
-      createRuleAssetSavedObject({
-        name: 'Test rule 13333',
-        rule_id: '000047bb-b27a-47ec-8b62-ef1a5d2c9e19',
-        tags: ['test-tag-2'],
-      })
-    );
+    createNewRuleAsset({
+      rule: createRuleAssetSavedObject({
+        name: 'Test rule 1',
+        rule_id: 'rule_1',
+      }),
+    });
+    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
   });
 
-  it('should not show any notifications for installation or update of prebuilt rules, if there are none', () => {
-    waitForRulesTableToBeLoaded();
-    cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
-    cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('not.exist');
-    cy.get(UPDATE_PREBUILT_RULES_CALLOUT).should('not.exist');
+  describe('Rules installation notification when no rules have been installed', () => {
+    beforeEach(() => {
+      waitForRulesTableToBeLoaded();
+    });
+    it('should notify user about prebuilt rules package available for installation', () => {
+      cy.get(LOAD_PREBUILT_RULES_BTN).should('be.visible');
+      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('be.visible');
+    });
   });
 
-  it('should notify user about prebuilt rules package available for installation', () => {
-    waitForRulesTableToBeLoaded();
-    cy.get(LOAD_PREBUILT_RULES_BTN, { timeout: 300000 }).should('be.visible');
+  describe('No notifications', () => {
+    it('should display no install or update notifications when latest rules are installed', () => {
+      // Install current available rules
+      installAvailableRules();
+  
+      waitForRulesTableToBeLoaded();
+
+      // Assert that there are no installation or update notifications
+      cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
+      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('not.exist');
+      cy.get(UPDATE_PREBUILT_RULES_CALLOUT).should('not.exist');
+    });
   });
 
-  describe('Rule installation notification when rules already installed', () => {
+  describe('Rule installation notification when at least one rule already installed', () => {
     beforeEach(() => {
       installAvailableRules();
       // Create new rule asset with a different rule_id as the one that was
-      // installed before in order to trigger the installation process
-      createNewRuleAsset(
-        '.kibana',
-        createRuleAssetSavedObject({
-          name: 'Test rule 5555',
-          rule_id: '111147bb-b27a-47ec-8b62-ef1a5d342e19',
-          tags: ['test-tag-2'],
-        })
-      );
+      // installed before in order to trigger the installation notification
+      createNewRuleAsset({
+        rule: createRuleAssetSavedObject({
+          name: 'Test rule 2',
+          rule_id: 'rule_2',
+        }),
+      });
       waitForRulesTableToBeLoaded();
     });
     it('should notify user about prebuilt rules package available for installation', () => {
@@ -82,20 +89,17 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     beforeEach(() => {
       installAvailableRules();
       // Create new rule asset with the same rule_id as the one that was installed
-      // but with a higher version, in order to trigger the update process
-      createNewRuleAsset(
-        '.kibana',
-        createRuleAssetSavedObject({
-          name: 'Upgraded - Test rule 13333',
-          rule_id: '000047bb-b27a-47ec-8b62-ef1a5d2c9e19',
-          tags: ['test-tag-2'],
+      // but with a higher version, in order to trigger the update notification
+      createNewRuleAsset({
+        rule: createRuleAssetSavedObject({
+          name: 'Test rule 1.1 (updated)',
+          rule_id: 'rule_1',
           version: 2,
-        })
-      );
+        }),
+      });
       waitForRulesTableToBeLoaded();
     });
-    it('should notify user about prebuilt rules package available for installation', () => {
-      cy.wait(5000);
+    it('should notify user about prebuilt rules package available for update', () => {
       cy.get(UPDATE_PREBUILT_RULES_CALLOUT).should('be.visible');
     });
   });

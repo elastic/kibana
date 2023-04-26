@@ -45,7 +45,13 @@ export const SAMPLE_PREBUILT_RULE = createRuleAssetSavedObject({
   enabled: true,
 });
 
-export const createNewRuleAsset = (index: string, rule = SAMPLE_PREBUILT_RULE) => {
+export const createNewRuleAsset = ({
+  index = '.kibana_security_solution',
+  rule = SAMPLE_PREBUILT_RULE,
+}: {
+  index?: string;
+  rule?: typeof SAMPLE_PREBUILT_RULE;
+}) => {
   const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_doc/security-rule:${
     rule['security-rule'].rule_id
   }`;

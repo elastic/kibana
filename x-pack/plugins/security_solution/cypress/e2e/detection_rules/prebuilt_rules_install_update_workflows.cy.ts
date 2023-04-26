@@ -80,8 +80,8 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         'getPrebuiltRules'
       );
       // Create two mock rules
-      createNewRuleAsset('.kibana', RULE_1);
-      createNewRuleAsset('.kibana', RULE_2);
+      createNewRuleAsset({rule: RULE_1});
+      createNewRuleAsset({rule: RULE_2});
       waitForRulesTableToBeLoaded();
     });
 
@@ -135,10 +135,10 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         'getPrebuiltRules'
       );
       // Create a new rule and install it
-      createNewRuleAsset('.kibana', OUTDATED_RULE);
+      createNewRuleAsset({ rule: OUTDATED_RULE });
       installAvailableRules();
       // Create a second version of the rule, making it available for update
-      createNewRuleAsset('.kibana', UPDATED_RULE);
+      createNewRuleAsset({ rule: UPDATED_RULE });
       waitForRulesTableToBeLoaded();
     });
 
