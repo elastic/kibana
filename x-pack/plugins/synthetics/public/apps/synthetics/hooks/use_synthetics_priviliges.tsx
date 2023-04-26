@@ -131,7 +131,7 @@ const LicenseExpired = () => {
           data-test-subj="apmInvalidLicenseNotificationManageYourLicenseButton"
           href={basePath + '/app/management/stack/license_management'}
         >
-          {i18n.translate('xpack.apm.invalidLicense.licenseManagementLink', {
+          {i18n.translate('xpack.synthetics.invalidLicense.licenseManagementLink', {
             defaultMessage: 'Manage your license',
           })}
         </EuiButton>,
