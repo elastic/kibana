@@ -15,6 +15,8 @@ import type {
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
+import { MessageSigningError } from '../../../common/errors';
+
 import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { appContextService } from '../app_context';
 
@@ -141,7 +143,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       }
       await this.generateKeyPair();
     } catch (error) {
-      throw Error(`Error rotating key pair: ${error.message}`);
+      throw new MessageSigningError(`Error rotating key pair: ${error.message}`, error);
     }
   }
 
@@ -153,14 +155,14 @@ export class MessageSigningService implements MessageSigningServiceInterface {
         return false;
       }
     } catch (error) {
-      throw Error(`Error fetching current key pair: ${error.message}`);
+      throw new MessageSigningError(`Error fetching current key pair: ${error.message}`, error);
     }
 
     try {
       await this.soClient.delete(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, currentKeyPair.id);
       return true;
     } catch (error) {
-      throw Error(`Error deleting current key pair: ${error.message}`);
+      throw new MessageSigningError(`Error deleting current key pair: ${error.message}`, error);
     }
   }
 
