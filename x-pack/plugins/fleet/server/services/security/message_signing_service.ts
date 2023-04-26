@@ -40,15 +40,13 @@ export class MessageSigningService implements MessageSigningServiceInterface {
 
   constructor(private esoClient: EncryptedSavedObjectsClient) {}
 
-  public get isEncryptionAvailable(): boolean {
+  public get isEncryptionAvailable(): MessageSigningServiceInterface['isEncryptionAvailable'] {
     return appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt ?? false;
   }
 
-  public async generateKeyPair(providedPassphrase?: string): Promise<{
-    privateKey: string;
-    publicKey: string;
-    passphrase: string;
-  }> {
+  public async generateKeyPair(
+    providedPassphrase?: string
+  ): ReturnType<MessageSigningServiceInterface['generateKeyPair']> {
     const existingKeyPair = await this.checkForExistingKeyPair();
     if (existingKeyPair) {
       return existingKeyPair;
@@ -96,7 +94,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
 
   public async sign(
     message: Buffer | Record<string, unknown>
-  ): Promise<{ data: Buffer; signature: string }> {
+  ): ReturnType<MessageSigningServiceInterface['sign']> {
     const { privateKey: serializedPrivateKey, passphrase } = await this.generateKeyPair();
 
     const msgBuffer = Buffer.isBuffer(message)
@@ -125,7 +123,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     };
   }
 
-  public async getPublicKey(): Promise<string> {
+  public async getPublicKey(): ReturnType<MessageSigningServiceInterface['getPublicKey']> {
     const { publicKey } = await this.generateKeyPair();
 
     if (!publicKey) {
@@ -135,7 +133,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     return publicKey;
   }
 
-  public async rotateKeyPair(): Promise<void> {
+  public async rotateKeyPair(): ReturnType<MessageSigningServiceInterface['rotateKeyPair']> {
     try {
       const removeKeyPairResponse = await this.removeKeyPair();
       if (!removeKeyPairResponse) {
@@ -166,7 +164,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     }
   }
 
-  private get soClient() {
+  private get soClient(): SavedObjectsClientContract {
     if (this._soClient) {
       return this._soClient;
     }
