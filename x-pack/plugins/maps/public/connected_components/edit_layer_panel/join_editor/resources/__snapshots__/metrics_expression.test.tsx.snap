@@ -46,6 +46,7 @@ exports[`Should render default props 1`] = `
     <MetricsEditor
       allowMultipleMetrics={true}
       fields={Array []}
+      isJoin={true}
       metrics={
         Array [
           Object {
@@ -105,6 +106,7 @@ exports[`Should render metrics expression for metrics 1`] = `
     <MetricsEditor
       allowMultipleMetrics={true}
       fields={Array []}
+      isJoin={true}
       metrics={
         Array [
           Object {

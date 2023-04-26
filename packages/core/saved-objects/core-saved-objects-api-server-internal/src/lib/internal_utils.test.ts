@@ -18,6 +18,7 @@ import {
   normalizeNamespace,
   rawDocExistsInNamespace,
   rawDocExistsInNamespaces,
+  setManaged,
 } from './internal_utils';
 
 describe('#getBulkOperationError', () => {
@@ -99,6 +100,7 @@ describe('#getSavedObjectFromSource', () => {
   const originId = 'originId';
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const updated_at = 'updatedAt';
+  const managed = false;
 
   function createRawDoc(
     type: string,
@@ -115,6 +117,7 @@ describe('#getSavedObjectFromSource', () => {
         migrationVersion,
         coreMigrationVersion,
         typeMigrationVersion,
+        managed,
         originId,
         updated_at,
         ...namespaceAttrs,
@@ -131,6 +134,7 @@ describe('#getSavedObjectFromSource', () => {
       attributes,
       coreMigrationVersion,
       typeMigrationVersion,
+      managed,
       id,
       migrationVersion,
       namespaces: expect.anything(), // see specific test cases below
@@ -404,5 +408,28 @@ describe('#getCurrentTime', () => {
 
   it('returns the current time', () => {
     expect(getCurrentTime()).toEqual('2021-09-10T21:00:00.000Z');
+  });
+});
+
+describe('#setManaged', () => {
+  it('returns false if no arguments are provided', () => {
+    expect(setManaged({})).toEqual(false);
+  });
+
+  it('returns false if only one argument is provided as false', () => {
+    expect(setManaged({ optionsManaged: false })).toEqual(false);
+    expect(setManaged({ objectManaged: false })).toEqual(false);
+  });
+
+  it('returns true if only one argument is provided as true', () => {
+    expect(setManaged({ optionsManaged: true })).toEqual(true);
+    expect(setManaged({ objectManaged: true })).toEqual(true);
+  });
+
+  it('overrides objectManaged with optionsManaged', () => {
+    expect(setManaged({ optionsManaged: false, objectManaged: true })).toEqual(false);
+    expect(setManaged({ optionsManaged: true, objectManaged: false })).toEqual(true);
+    expect(setManaged({ optionsManaged: false, objectManaged: false })).toEqual(false);
+    expect(setManaged({ optionsManaged: true, objectManaged: true })).toEqual(true);
   });
 });

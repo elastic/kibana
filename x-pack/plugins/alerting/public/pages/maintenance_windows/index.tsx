@@ -26,12 +26,16 @@ import { MaintenanceWindowsList } from './components/maintenance_windows_list';
 import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 import { ExperimentalBadge } from './components/page_header';
+import { useLicense } from '../../hooks/use_license';
+import { LicensePrompt } from './components/license_prompt';
 
 export const MaintenanceWindowsPage = React.memo(() => {
   const { docLinks } = useKibana().services;
+  const { isAtLeastPlatinum } = useLicense();
+
   const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
 
-  const { isLoading, maintenanceWindows } = useFindMaintenanceWindows();
+  const { isLoading, maintenanceWindows, refetch } = useFindMaintenanceWindows();
 
   useBreadcrumbs(AlertingDeepLinkId.maintenanceWindows);
 
@@ -39,7 +43,10 @@ export const MaintenanceWindowsPage = React.memo(() => {
     navigateToCreateMaintenanceWindow();
   }, [navigateToCreateMaintenanceWindow]);
 
+  const refreshData = useCallback(() => refetch(), [refetch]);
+
   const showEmptyPrompt = !isLoading && maintenanceWindows.length === 0;
+  const hasLicense = isAtLeastPlatinum();
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
@@ -64,7 +71,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
             <p>{i18n.MAINTENANCE_WINDOWS_DESCRIPTION}</p>
           </EuiText>
         </EuiPageHeaderSection>
-        {!showEmptyPrompt ? (
+        {!showEmptyPrompt && hasLicense ? (
           <EuiPageHeaderSection>
             <EuiButton onClick={handleClickCreate} iconType="plusInCircle" fill>
               {i18n.CREATE_NEW_BUTTON}
@@ -72,12 +79,18 @@ export const MaintenanceWindowsPage = React.memo(() => {
           </EuiPageHeaderSection>
         ) : null}
       </EuiPageHeader>
-      {showEmptyPrompt ? (
+      {!hasLicense ? (
+        <LicensePrompt />
+      ) : showEmptyPrompt ? (
         <EmptyPrompt onClickCreate={handleClickCreate} docLinks={docLinks.links} />
       ) : (
         <>
           <EuiSpacer size="xl" />
-          <MaintenanceWindowsList loading={isLoading} items={maintenanceWindows} />
+          <MaintenanceWindowsList
+            refreshData={refreshData}
+            loading={isLoading}
+            items={maintenanceWindows}
+          />
         </>
       )}
     </>

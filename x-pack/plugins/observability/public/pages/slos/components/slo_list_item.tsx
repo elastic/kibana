@@ -34,10 +34,11 @@ import {
   transformValuesToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
 import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
-import { sloFeatureId } from '../../../../common';
+import { rulesLocatorID, sloFeatureId } from '../../../../common';
 import { paths } from '../../../config/paths';
 import type { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
+import type { RulesParams } from '../../../locators/rules';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse;
@@ -57,6 +58,9 @@ export function SloListItem({
   const {
     application: { navigateToUrl },
     http: { basePath },
+    share: {
+      url: { locators },
+    },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
@@ -90,6 +94,19 @@ export function SloListItem({
 
   const handleSavedRule = async () => {
     queryClient.invalidateQueries(['fetchRulesForSlo']);
+  };
+
+  const handleNavigateToRules = async () => {
+    const locator = locators.get<RulesParams>(rulesLocatorID);
+
+    locator?.navigate(
+      {
+        params: { sloId: slo.id },
+      },
+      {
+        replace: true,
+      }
+    );
   };
 
   const handleClone = () => {
@@ -167,12 +184,12 @@ export function SloListItem({
                 onClick={handleClickActions}
               />
             }
-            panelPaddingSize="none"
+            panelPaddingSize="m"
             closePopover={handleClickActions}
             isOpen={isActionsPopoverOpen}
           >
             <EuiContextMenuPanel
-              size="s"
+              size="m"
               items={[
                 <EuiContextMenuItem
                   key="view"
@@ -203,7 +220,18 @@ export function SloListItem({
                   data-test-subj="sloActionsCreateRule"
                 >
                   {i18n.translate('xpack.observability.slo.slo.item.actions.createRule', {
-                    defaultMessage: 'Create Alert rule',
+                    defaultMessage: 'Create new alert rule',
+                  })}
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  key="manageRules"
+                  icon="gear"
+                  disabled={!hasWriteCapabilities}
+                  onClick={handleNavigateToRules}
+                  data-test-subj="sloActionsManageRules"
+                >
+                  {i18n.translate('xpack.observability.slo.slo.item.actions.manageRules', {
+                    defaultMessage: 'Manage rules',
                   })}
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem

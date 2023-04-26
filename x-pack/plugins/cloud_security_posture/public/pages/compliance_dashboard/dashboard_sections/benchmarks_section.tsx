@@ -12,7 +12,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elas
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type {
   Cluster,
   ComplianceDashboardData,
@@ -33,6 +32,7 @@ import {
   DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID,
   DASHBOARD_TABLE_HEADER_SCORE_TEST_ID,
 } from '../test_subjects';
+import { ComplianceScoreChart } from '../compliance_charts/compliance_score_chart';
 
 const CLUSTER_DEFAULT_SORT_ORDER = 'asc';
 
@@ -175,7 +175,7 @@ export const BenchmarksSection = ({
             `}
             data-test-subj={DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID}
           >
-            <CloudPostureScoreChart
+            <ComplianceScoreChart
               compact
               id={`${cluster.meta.assetIdentifierId}_score_chart`}
               data={cluster.stats}

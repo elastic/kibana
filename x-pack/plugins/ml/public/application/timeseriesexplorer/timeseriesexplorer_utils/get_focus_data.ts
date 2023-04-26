@@ -7,9 +7,9 @@
 
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { ml } from '../../services/ml_api_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
-import { extractErrorMessage } from '../../../../common/util/errors';
 import { mlTimeSeriesSearchService } from '../timeseries_search_service';
 import { mlResultsService, CriteriaField } from '../../services/results_service';
 import { Job } from '../../../../common/types/anomaly_detection_jobs';

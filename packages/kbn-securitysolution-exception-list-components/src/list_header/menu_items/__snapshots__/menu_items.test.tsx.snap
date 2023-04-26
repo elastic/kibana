@@ -535,6 +535,26 @@ Object {
                     <span
                       class="euiContextMenu__icon"
                       color="inherit"
+                      data-euiicon-type="copy"
+                    />
+                    <span
+                      class="euiContextMenuItem__text"
+                    >
+                      Duplicate exception list
+                    </span>
+                  </span>
+                </button>
+                <button
+                  class="euiContextMenuItem euiContextMenuItem--small"
+                  data-test-subj="MenuActionsActionItem3"
+                  type="button"
+                >
+                  <span
+                    class="euiContextMenu__itemLayout"
+                  >
+                    <span
+                      class="euiContextMenu__icon"
+                      color="inherit"
                       data-euiicon-type="trash"
                     />
                     <span
@@ -671,7 +691,7 @@ Object {
 }
 `;
 
-exports[`MenuItems should render delete action disabled 1`] = `
+exports[`MenuItems should render delete action disabled when "canUserEditList" is "false" 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -807,6 +827,27 @@ Object {
                 <button
                   class="euiContextMenuItem euiContextMenuItem--small euiContextMenuItem-isDisabled"
                   data-test-subj="MenuActionsActionItem2"
+                  disabled=""
+                  type="button"
+                >
+                  <span
+                    class="euiContextMenu__itemLayout"
+                  >
+                    <span
+                      class="euiContextMenu__icon"
+                      color="inherit"
+                      data-euiicon-type="copy"
+                    />
+                    <span
+                      class="euiContextMenuItem__text"
+                    >
+                      Duplicate exception list
+                    </span>
+                  </span>
+                </button>
+                <button
+                  class="euiContextMenuItem euiContextMenuItem--small euiContextMenuItem-isDisabled"
+                  data-test-subj="MenuActionsActionItem3"
                   disabled=""
                   type="button"
                 >

@@ -44,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
                 migrationVersion: resp.body.saved_object.migrationVersion,
                 coreMigrationVersion: '8.8.0',
                 typeMigrationVersion: resp.body.saved_object.typeMigrationVersion,
+                managed: resp.body.saved_object.managed,
                 attributes: {
                   title: 'Count of requests',
                   description: '',
@@ -66,6 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
             });
             expect(resp.body.saved_object.migrationVersion).to.be.ok();
             expect(resp.body.saved_object.typeMigrationVersion).to.be.ok();
+            expect(resp.body.saved_object.managed).to.not.be.ok();
           }));
 
       describe('doc does not exist', () => {

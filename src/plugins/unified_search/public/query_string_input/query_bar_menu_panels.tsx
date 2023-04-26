@@ -63,7 +63,7 @@ export const strings = {
     }),
   getLoadOtherFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.loadOtherFilterSetLabel', {
-      defaultMessage: 'Load a different query',
+      defaultMessage: 'Load query',
     }),
   getLoadCurrentFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.loadCurrentFilterSetLabel', {
@@ -71,7 +71,7 @@ export const strings = {
     }),
   getSaveAsNewFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.saveAsNewFilterSetLabel', {
-      defaultMessage: 'Save as new',
+      defaultMessage: 'Save query',
     }),
   getSaveFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.saveFilterSetLabel', {
@@ -88,7 +88,7 @@ export const strings = {
     }),
   getSavedQueryPopoverSaveChangesButtonText: () =>
     i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonText', {
-      defaultMessage: 'Save changes',
+      defaultMessage: 'Update query',
     }),
   getSavedQueryPopoverSaveAsNewButtonAriaLabel: () =>
     i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel', {
@@ -100,7 +100,7 @@ export const strings = {
     }),
   getSaveCurrentFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.saveCurrentFilterSetLabel', {
-      defaultMessage: 'Save current query',
+      defaultMessage: 'Save as new',
     }),
   getApplyAllFiltersButtonLabel: () =>
     i18n.translate('unifiedSearch.filter.options.applyAllFiltersButtonLabel', {
@@ -237,10 +237,6 @@ export function QueryBarMenuPanels({
       to: dateRangeTo || defaultTimeSetting.to,
     };
   };
-
-  const handleSaveAsNew = useCallback(() => {
-    setRenderedComponent('saveAsNewForm');
-  }, [setRenderedComponent]);
 
   const handleSave = useCallback(() => {
     setRenderedComponent('saveForm');
@@ -413,38 +409,17 @@ export function QueryBarMenuPanels({
             </EuiFlexItem>
             {savedQuery && savedQueryHasChanged && Boolean(showSaveQuery) && hasFiltersOrQuery && (
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup
-                  direction="row"
-                  gutterSize="s"
-                  alignItems="center"
-                  justifyContent="center"
-                  responsive={false}
-                  wrap={false}
+                <EuiButton
+                  size="s"
+                  fill
+                  onClick={handleSave}
+                  aria-label={strings.getSavedQueryPopoverSaveChangesButtonAriaLabel(
+                    savedQuery?.attributes.title
+                  )}
+                  data-test-subj="saved-query-management-save-changes-button"
                 >
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      size="s"
-                      fill
-                      onClick={handleSave}
-                      aria-label={strings.getSavedQueryPopoverSaveChangesButtonAriaLabel(
-                        savedQuery?.attributes.title
-                      )}
-                      data-test-subj="saved-query-management-save-changes-button"
-                    >
-                      {strings.getSavedQueryPopoverSaveChangesButtonText()}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      size="s"
-                      onClick={handleSaveAsNew}
-                      aria-label={strings.getSavedQueryPopoverSaveAsNewButtonAriaLabel()}
-                      data-test-subj="saved-query-management-save-as-new-button"
-                    >
-                      {strings.getSavedQueryPopoverSaveAsNewButtonText()}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                  {strings.getSavedQueryPopoverSaveChangesButtonText()}
+                </EuiButton>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
