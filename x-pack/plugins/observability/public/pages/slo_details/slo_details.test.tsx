@@ -182,6 +182,42 @@ describe('SLO Details Page', () => {
     expect(screen.queryByTestId('sloDetailsHeaderControlPopoverCreateRule')).toBeTruthy();
   });
 
+  it("renders a 'Manage rules' button under actions menu", async () => {
+    const slo = buildSlo();
+    useParamsMock.mockReturnValue(slo.id);
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+    expect(screen.queryByTestId('sloDetailsHeaderControlPopoverManageRules')).toBeTruthy();
+  });
+
+  it("renders a 'Clone' button under actions menu", async () => {
+    const slo = buildSlo();
+    useParamsMock.mockReturnValue(slo.id);
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+    expect(screen.queryByTestId('sloDetailsHeaderControlPopoverClone')).toBeTruthy();
+  });
+
+  it("renders a 'Delete' button under actions menu", async () => {
+    const slo = buildSlo();
+    useParamsMock.mockReturnValue(slo.id);
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+    expect(screen.queryByTestId('sloDetailsHeaderControlPopoverDelete')).toBeTruthy();
+  });
+
   it('renders the Overview tab by default', async () => {
     const slo = buildSlo();
     useParamsMock.mockReturnValue(slo.id);

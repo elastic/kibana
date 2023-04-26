@@ -208,7 +208,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
                 disabled={!hasWriteCapabilities}
                 icon="copy"
                 onClick={handleClone}
-                data-test-subj="sloActionsClone"
+                data-test-subj="sloDetailsHeaderControlPopoverClone"
               >
                 {i18n.translate('xpack.observability.slo.slo.item.actions.clone', {
                   defaultMessage: 'Clone',
@@ -219,7 +219,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
                 icon="trash"
                 disabled={!hasWriteCapabilities}
                 onClick={handleDelete}
-                data-test-subj="sloActionsDelete"
+                data-test-subj="sloDetailsHeaderControlPopoverDelete"
               >
                 {i18n.translate('xpack.observability.slo.slo.item.actions.delete', {
                   defaultMessage: 'Delete',

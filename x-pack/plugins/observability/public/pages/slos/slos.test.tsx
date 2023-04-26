@@ -226,6 +226,31 @@ describe('SLOs Page', () => {
         expect(mockGetAddRuleFlyout).toBeCalled();
       });
 
+      it('allows managing rules for an SLO', async () => {
+        useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
+
+        useFetchHistoricalSummaryMock.mockReturnValue({
+          isLoading: false,
+          sloHistoricalSummaryResponse: historicalSummaryData,
+        });
+
+        await act(async () => {
+          render(<SlosPage />);
+        });
+
+        screen.getAllByLabelText('Actions').at(0)?.click();
+
+        await waitForEuiPopoverOpen();
+
+        const button = screen.getByTestId('sloActionsManageRules');
+
+        expect(button).toBeTruthy();
+
+        button.click();
+
+        expect(mockNavigate).toBeCalled();
+      });
+
       it('allows deleting an SLO', async () => {
         useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
 
