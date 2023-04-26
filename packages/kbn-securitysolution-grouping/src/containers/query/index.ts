@@ -17,8 +17,6 @@ export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;
 // https://github.com/elastic/kibana/issues/151913
 export const MAX_QUERY_SIZE = 10000;
 
-// @ts-ignore
-// @ts-ignore
 /**
  * Composes grouping query and aggregations
  * @param additionalFilters Global filtering applicable to the grouping component.
@@ -108,6 +106,11 @@ export const getGroupingQuery = ({
   _source: false,
 });
 
+/**
+ * Parses the grouping query response to add the isNullGroup
+ * flag to the buckets and to format the bucket keys
+ * @param buckets buckets returned from the grouping query
+ */
 export const parseGroupingQuery = <T>(
   buckets: Array<RawBucket<T>>
 ): Array<RawBucket<T> & GroupingBucket> =>
