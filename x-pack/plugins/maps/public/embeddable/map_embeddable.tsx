@@ -811,8 +811,8 @@ export class MapEmbeddable
         loading: isLoading,
         rendered: !isLoading,
         // do not surface layer errors as output.error
-        // output.error blocks entire embeddable display
-        // while layer errors are better surfaced in legend
+        // output.error blocks entire embeddable display and prevents map from displaying
+        // layer errors are better surfaced in legend while still keeping the map usable
       });
     }
   }
