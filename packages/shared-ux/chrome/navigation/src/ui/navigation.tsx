@@ -48,7 +48,7 @@ export const Navigation = (props: NavigationProps) => {
       loadingCount === 0 ? (
         <EuiHeaderLogo
           iconType="logoElastic"
-          aria-label={strings.headerLogoAriaText}
+          aria-label={strings.headerLogoAriaLabel}
           onClick={navigateHome}
           data-test-subj="nav-header-logo"
         />
