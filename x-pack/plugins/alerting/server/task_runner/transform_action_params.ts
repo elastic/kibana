@@ -6,6 +6,7 @@
  */
 
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { mapKeys, snakeCase } from 'lodash/fp';
 import {
   RuleActionParams,
   AlertInstanceState,
@@ -24,6 +25,7 @@ interface TransformActionParamsOptions {
   spaceId: string;
   tags?: string[];
   alertInstanceId: string;
+  alertUuid: string;
   alertActionGroup: string;
   alertActionGroupName: string;
   actionParams: RuleActionParams;
@@ -64,6 +66,7 @@ export function transformActionParams({
   spaceId,
   tags,
   alertInstanceId,
+  alertUuid,
   alertActionGroup,
   alertActionGroupName,
   context,
@@ -101,6 +104,7 @@ export function transformActionParams({
     },
     alert: {
       id: alertInstanceId,
+      uuid: alertUuid,
       actionGroup: alertActionGroup,
       actionGroupName: alertActionGroupName,
       flapping,
@@ -140,6 +144,19 @@ export function transformSummaryActionParams({
   const variables = {
     kibanaBaseUrl,
     date: new Date().toISOString(),
+    // For backwards compatibility with security solutions rules
+    context: {
+      alerts: alerts.all.data ?? [],
+      results_link: ruleUrl,
+      rule: mapKeys(snakeCase, {
+        ...rule.params,
+        name: rule.name,
+        id: rule.id,
+      }),
+    },
+    state: {
+      signals_count: alerts.all.count ?? 0,
+    },
     rule: {
       params: rule.params,
       id: rule.id,

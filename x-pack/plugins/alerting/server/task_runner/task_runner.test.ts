@@ -16,6 +16,7 @@ import {
   RuleExecutionStatusWarningReasons,
   Rule,
   RuleAction,
+  MaintenanceWindow,
 } from '../types';
 import { ConcreteTaskInstance, isUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -77,7 +78,9 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { rulesSettingsClientMock } from '../rules_settings_client.mock';
+import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
+import { getMockMaintenanceWindow } from '../maintenance_window_client/methods/test_helpers';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -130,6 +133,7 @@ describe('Task Runner', () => {
     dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
   } as DataViewsServerPluginStart;
   const alertsService = alertsServiceMock.create();
+  const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -167,6 +171,7 @@ describe('Task Runner', () => {
       },
     },
     getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
+    getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
   };
 
   const ephemeralTestParams: Array<
@@ -203,6 +208,7 @@ describe('Task Runner', () => {
       });
     savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
     elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValue([]);
     taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);
     taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
       actionsClient
@@ -216,6 +222,9 @@ describe('Task Runner', () => {
     );
     taskRunnerFactoryInitializerParams.getRulesSettingsClientWithRequest.mockReturnValue(
       rulesSettingsClientMock.create()
+    );
+    taskRunnerFactoryInitializerParams.getMaintenanceWindowClientWithRequest.mockReturnValue(
+      maintenanceWindowClient
     );
     mockedRuleTypeSavedObject.monitoring!.run.history = [];
     mockedRuleTypeSavedObject.monitoring!.run.calculated_metrics.success_ratio = 0;
@@ -601,6 +610,104 @@ describe('Task Runner', () => {
       }
     }
   );
+
+  test('skips alert notification if there are active maintenance windows', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
+      }
+    );
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
+    );
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce([
+      {
+        ...getMockMaintenanceWindow(),
+        id: 'test-id-1',
+      } as MaintenanceWindow,
+      {
+        ...getMockMaintenanceWindow(),
+        id: 'test-id-2',
+      } as MaintenanceWindow,
+    ]);
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    await taskRunner.run();
+    expect(actionsClient.ephemeralEnqueuedExecution).toHaveBeenCalledTimes(0);
+
+    expect(logger.debug).toHaveBeenCalledTimes(7);
+    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
+    expect(logger.debug).nthCalledWith(
+      2,
+      `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+    );
+    expect(logger.debug).nthCalledWith(
+      3,
+      `no scheduling of actions for rule test:1: '${RULE_NAME}': has active maintenance windows test-id-1,test-id-2.`
+    );
+    expect(logger.debug).nthCalledWith(
+      4,
+      'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+    );
+    expect(logger.debug).nthCalledWith(
+      5,
+      'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}'
+    );
+    expect(logger.debug).nthCalledWith(
+      6,
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
+    );
+    expect(logger.debug).nthCalledWith(
+      7,
+      'Updating rule task for test rule with id 1 - {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"} - {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}'
+    );
+
+    const maintenanceWindowIds = ['test-id-1', 'test-id-2'];
+
+    testAlertingEventLogCalls({
+      activeAlerts: 1,
+      newAlerts: 1,
+      status: 'active',
+      logAlert: 2,
+      maintenanceWindowIds,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      1,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.newInstance,
+        group: 'default',
+        state: { start: DATE_1970, duration: '0' },
+        maintenanceWindowIds,
+      })
+    );
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      2,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.activeInstance,
+        group: 'default',
+        state: { start: DATE_1970, duration: '0' },
+        maintenanceWindowIds,
+      })
+    );
+
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+  });
 
   test.each(ephemeralTestParams)(
     'skips firing actions for active alert if alert is muted %s',
@@ -2654,6 +2761,7 @@ describe('Task Runner', () => {
         alertInstances: {
           '1': {
             meta: {
+              uuid: expect.any(String),
               lastScheduledActions: {
                 date: new Date(DATE_1970),
                 group: 'default',
@@ -2820,6 +2928,7 @@ describe('Task Runner', () => {
         alertInstances: {
           '1': {
             meta: {
+              uuid: expect.any(String),
               lastScheduledActions: {
                 date: new Date(DATE_1970),
                 group: 'default',
@@ -2835,6 +2944,7 @@ describe('Task Runner', () => {
           },
           '2': {
             meta: {
+              uuid: expect.any(String),
               lastScheduledActions: {
                 date: new Date(DATE_1970),
                 group: 'default',
@@ -3006,6 +3116,7 @@ describe('Task Runner', () => {
     errorMessage = 'GENERIC ERROR MESSAGE',
     executionStatus = 'succeeded',
     setRuleName = true,
+    maintenanceWindowIds,
     logAlert = 0,
     logAction = 0,
     hasReachedAlertLimit = false,
@@ -3019,6 +3130,7 @@ describe('Task Runner', () => {
     generatedActions?: number;
     executionStatus?: 'succeeded' | 'failed' | 'not-reached';
     setRuleName?: boolean;
+    maintenanceWindowIds?: string[];
     logAlert?: number;
     logAction?: number;
     errorReason?: string;
@@ -3033,6 +3145,11 @@ describe('Task Runner', () => {
       expect(alertingEventLogger.setRuleName).not.toHaveBeenCalled();
     }
     expect(alertingEventLogger.getStartAndDuration).toHaveBeenCalled();
+    if (maintenanceWindowIds?.length) {
+      expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith(
+        maintenanceWindowIds
+      );
+    }
     if (status === 'error') {
       expect(alertingEventLogger.done).toHaveBeenCalledWith({
         metrics: null,

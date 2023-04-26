@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { isEmpty } from 'lodash/fp';
@@ -169,6 +170,17 @@ export const getIconFromType = (type: string | null | undefined) => {
 };
 
 export const getEmptyValue = () => '—';
+
+export const getCategory = (fieldName: string) => {
+  const fieldNameArray = fieldName?.split('.');
+  if (fieldNameArray?.length === 1) {
+    return 'base';
+  }
+  return fieldNameArray?.[0] ?? '(unknown)';
+};
+
+export const getDescription = (fieldName: string, ecsFlat: Record<string, EcsMetadata>) =>
+  ecsFlat[fieldName]?.description ?? '';
 
 /** Returns example text, or an empty string if the field does not have an example */
 export const getExampleText = (example: string | number | null | undefined): string =>

@@ -62,6 +62,7 @@ interface State {
   absoluteUrl: string;
   layoutId: string;
   objectType: string;
+  isCreatingReportJob: boolean;
 }
 
 class ReportingPanelContentUi extends Component<Props, State> {
@@ -78,6 +79,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
       absoluteUrl: this.getAbsoluteReportGenerationUrl(props),
       layoutId: '',
       objectType,
+      isCreatingReportJob: false,
     };
   }
 
@@ -135,7 +137,13 @@ class ReportingPanelContentUi extends Component<Props, State> {
     return (
       <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
         {(copy) => (
-          <EuiButton color={isUnsaved ? 'warning' : 'primary'} fullWidth onClick={copy} size="s">
+          <EuiButton
+            color={isUnsaved ? 'warning' : 'primary'}
+            fullWidth
+            onClick={copy}
+            size="s"
+            data-test-subj="shareReportingCopyURL"
+          >
             <FormattedMessage
               id="xpack.reporting.panelContent.copyUrlButtonLabel"
               defaultMessage="Copy POST URL"
@@ -200,6 +208,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             defaultMessage: 'Advanced options',
           })}
           paddingSize="none"
+          data-test-subj="shareReportingAdvancedOptionsButton"
         >
           <EuiSpacer size="s" />
           <EuiText size="s">
@@ -220,12 +229,13 @@ class ReportingPanelContentUi extends Component<Props, State> {
   private renderGenerateReportButton = (isDisabled: boolean) => {
     return (
       <EuiButton
-        disabled={isDisabled}
+        disabled={isDisabled || this.state.isCreatingReportJob}
         fullWidth
         fill
         onClick={this.createReportingJob}
         data-test-subj="generateReportButton"
         size="s"
+        isLoading={this.state.isCreatingReportJob}
       >
         <FormattedMessage
           id="xpack.reporting.panelContent.generateButtonLabel"
@@ -273,6 +283,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
       this.props.getJobParams()
     );
 
+    this.setState({ isCreatingReportJob: true });
+
     return this.props.apiClient
       .createReportingJob(this.props.reportType, decoratedJobParams)
       .then(() => {
@@ -306,6 +318,9 @@ class ReportingPanelContentUi extends Component<Props, State> {
         if (this.props.onClose) {
           this.props.onClose();
         }
+        if (this.mounted) {
+          this.setState({ isCreatingReportJob: false });
+        }
       })
       .catch((error) => {
         this.props.toasts.addError(error, {
@@ -318,6 +333,9 @@ class ReportingPanelContentUi extends Component<Props, State> {
             <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
           ) as unknown as string,
         });
+        if (this.mounted) {
+          this.setState({ isCreatingReportJob: false });
+        }
       });
   };
 }

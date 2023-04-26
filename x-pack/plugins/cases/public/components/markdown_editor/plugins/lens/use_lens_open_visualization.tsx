@@ -9,6 +9,8 @@ import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+
+import { AttachmentActionType } from '../../../../client/attachment_framework/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   parseCommentString,
@@ -42,6 +44,7 @@ export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
     actionConfig: !lensVisualization.length
       ? null
       : {
+          type: AttachmentActionType.BUTTON as const,
           iconType: 'lensApp',
           label: i18n.translate(
             'xpack.cases.markdownEditor.plugins.lens.openVisualizationButtonLabel',

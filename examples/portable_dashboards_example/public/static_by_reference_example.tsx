@@ -11,15 +11,9 @@ import { css } from '@emotion/react';
 
 import { buildPhraseFilter, Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  LazyDashboardContainerRenderer,
-  DashboardCreationOptions,
-} from '@kbn/dashboard-plugin/public';
+import { DashboardRenderer, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { EuiCode, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
-
-const DashboardContainerRenderer = withSuspense(LazyDashboardContainerRenderer);
 
 export const StaticByReferenceExample = ({
   dashboardId,
@@ -50,7 +44,7 @@ export const StaticByReferenceExample = ({
           overflow-y: auto;
         `}
       >
-        <DashboardContainerRenderer
+        <DashboardRenderer
           savedObjectId={dashboardId}
           getCreationOptions={async () => {
             const field = dataView.getFieldByName('machine.os.keyword');
@@ -61,12 +55,9 @@ export const StaticByReferenceExample = ({
             if (field) {
               filter = buildPhraseFilter(field, 'win xp', dataView);
               filter.meta.negate = true;
-              creationOptions = { ...creationOptions, overrideInput: { filters: [filter] } };
+              creationOptions = { ...creationOptions, initialInput: { filters: [filter] } };
             }
             return creationOptions; // if can't find the field, then just return no special creation options
-          }}
-          onDashboardContainerLoaded={(container) => {
-            return; // this example is static, so don't need to do anything with the dashboard container
           }}
         />
       </EuiPanel>

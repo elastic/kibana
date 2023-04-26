@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useParams, Switch } from 'react-router-dom';
+import { useParams, Redirect, Switch } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
@@ -15,31 +15,30 @@ import { Route } from '@kbn/shared-ux-router';
 import { Status } from '../../../../../common/types/api';
 
 import { KibanaLogic } from '../../../shared/kibana';
-import { ENGINE_PATH, EngineViewTabs } from '../../routes';
+import {
+  ENGINE_PATH,
+  SEARCH_APPLICATION_CONTENT_PATH,
+  SEARCH_APPLICATION_CONNECT_PATH,
+  EngineViewTabs,
+  SearchApplicationConnectTabs,
+  SearchApplicationContentTabs,
+} from '../../routes';
 
 import { DeleteEngineModal } from '../engines/delete_engine_modal';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
-import { EngineAPI } from './engine_api/engine_api';
+import { EngineConnect } from './engine_connect/engine_connect';
 import { EngineError } from './engine_error';
-import { EngineIndices } from './engine_indices';
-import { EngineOverview } from './engine_overview';
-import { EngineSchema } from './engine_schema';
 import { EngineSearchPreview } from './engine_search_preview/engine_search_preview';
-import { EngineViewHeaderActions } from './engine_view_header_actions';
 import { EngineViewLogic } from './engine_view_logic';
 import { EngineHeaderDocsAction } from './header_docs_action';
+import { SearchApplicationContent } from './search_application_content';
 
 export const EngineView: React.FC = () => {
   const { fetchEngine, closeDeleteEngineModal } = useActions(EngineViewLogic);
-  const {
-    engineName,
-    fetchEngineApiError,
-    fetchEngineApiStatus,
-    isDeleteModalVisible,
-    isLoadingEngine,
-  } = useValues(EngineViewLogic);
-  const { tabId = EngineViewTabs.OVERVIEW } = useParams<{
+  const { engineName, fetchEngineApiError, fetchEngineApiStatus, isDeleteModalVisible } =
+    useValues(EngineViewLogic);
+  const { tabId = EngineViewTabs.PREVIEW } = useParams<{
     tabId?: string;
   }>();
   const { renderHeaderActions } = useValues(KibanaLogic);
@@ -73,31 +72,33 @@ export const EngineView: React.FC = () => {
       <Switch>
         <Route
           exact
-          path={`${ENGINE_PATH}/${EngineViewTabs.OVERVIEW}`}
-          component={EngineOverview}
-        />
-        <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.INDICES}`} component={EngineIndices} />
-        <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.SCHEMA}`} component={EngineSchema} />
-        <Route exact path={`${ENGINE_PATH}/${EngineViewTabs.API}`} component={EngineAPI} />
-        <Route
-          exact
           path={`${ENGINE_PATH}/${EngineViewTabs.PREVIEW}`}
           component={EngineSearchPreview}
         />
-        <Route // TODO: remove this route when all engine view routes are implemented, replace with a 404 route
-          render={() => (
-            <EnterpriseSearchEnginesPageTemplate
-              pageChrome={[engineName]}
-              pageViewTelemetry={tabId}
-              pageHeader={{
-                pageTitle: tabId,
-                rightSideItems: [<EngineViewHeaderActions />],
-              }}
-              engineName={engineName}
-              isLoading={isLoadingEngine}
-            />
-          )}
+        <Route path={SEARCH_APPLICATION_CONTENT_PATH} component={SearchApplicationContent} />
+        <Redirect
+          from={`${ENGINE_PATH}/${EngineViewTabs.CONTENT}`}
+          to={`${ENGINE_PATH}/${EngineViewTabs.CONTENT}/${SearchApplicationContentTabs.INDICES}`}
         />
+        <Route path={SEARCH_APPLICATION_CONNECT_PATH} component={EngineConnect} />
+        <Redirect
+          from={`${ENGINE_PATH}/${EngineViewTabs.CONNECT}`}
+          to={`${ENGINE_PATH}/${EngineViewTabs.CONNECT}/${SearchApplicationConnectTabs.API}`}
+        />
+        <Route>
+          <EnterpriseSearchEnginesPageTemplate
+            isEmptyState
+            pageChrome={[engineName]}
+            pageViewTelemetry={tabId}
+            pageHeader={{
+              pageTitle: engineName,
+              rightSideItems: [],
+            }}
+            engineName={engineName}
+          >
+            <EngineError notFound />
+          </EnterpriseSearchEnginesPageTemplate>
+        </Route>
       </Switch>
     </>
   );

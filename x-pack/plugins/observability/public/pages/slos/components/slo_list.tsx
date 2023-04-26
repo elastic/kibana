@@ -26,7 +26,7 @@ export function SloList({ autoRefresh }: Props) {
   const [activePage, setActivePage] = useState(0);
 
   const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<SortType>('name');
+  const [sort, setSort] = useState<SortType>('creationTime');
   const [indicatorTypeFilter, setIndicatorTypeFilter] = useState<FilterType[]>([]);
 
   const { isLoading, isError, sloList, refetch } = useFetchSloList({

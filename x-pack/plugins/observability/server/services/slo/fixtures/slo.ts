@@ -64,6 +64,7 @@ export const createKQLCustomIndicator = (
     filter: 'labels.groupId: group-3',
     good: 'latency < 300',
     total: '',
+    timestampField: 'log_timestamp',
     ...params,
   },
 });

@@ -38,5 +38,6 @@
     "@kbn/repo-file-maps",
     "@kbn/get-repo-files",
     "@kbn/import-locator",
+    "@kbn/journeys",
   ]
 }

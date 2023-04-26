@@ -37,6 +37,7 @@ export async function mountManagementSection(
     core,
     config,
     services: {
+      uiSettings: coreSetup.uiSettings,
       httpService,
       uiMetricService: services.uiMetricService,
       i18n,

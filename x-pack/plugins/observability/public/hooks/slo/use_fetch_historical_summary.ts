@@ -21,10 +21,13 @@ export interface UseFetchHistoricalSummaryResponse {
 
 export interface Params {
   sloIds: string[];
+  shouldRefetch?: boolean;
 }
 
+const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 export function useFetchHistoricalSummary({
   sloIds = [],
+  shouldRefetch,
 }: Params): UseFetchHistoricalSummaryResponse {
   const { http } = useKibana().services;
 
@@ -45,6 +48,7 @@ export function useFetchHistoricalSummary({
         // ignore error
       }
     },
+    refetchInterval: shouldRefetch ? LONG_REFETCH_INTERVAL : undefined,
     refetchOnWindowFocus: false,
   });
 

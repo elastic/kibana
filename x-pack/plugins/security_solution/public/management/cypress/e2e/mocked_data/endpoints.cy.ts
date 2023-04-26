@@ -5,16 +5,29 @@
  * 2.0.
  */
 
+import type { ReturnTypeFromChainable } from '../../types';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
-import { runEndpointLoaderScript } from '../../tasks/run_endpoint_loader';
 
 describe('Endpoints page', () => {
+  let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
+
   before(() => {
-    runEndpointLoaderScript();
+    indexEndpointHosts().then((indexEndpoints) => {
+      endpointData = indexEndpoints;
+    });
   });
 
   beforeEach(() => {
     login();
+  });
+
+  after(() => {
+    if (endpointData) {
+      endpointData.cleanup();
+      // @ts-expect-error ignore setting to undefined
+      endpointData = undefined;
+    }
   });
 
   it('Loads the endpoints page', () => {

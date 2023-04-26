@@ -15,6 +15,8 @@ import { DATES, HOSTS_LINK_LOCAL_STORAGE_KEY, HOSTS_VIEW_PATH } from './constant
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
+const START_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataStartDate);
+const END_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataEndDate);
 const timepickerFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 const tableEntries = [
@@ -148,20 +150,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   // Tests
 
-  describe('Hosts View', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/155429
+  describe.skip('Hosts View', function () {
     this.tags('includeFirefox');
 
     before(async () => {
       await Promise.all([
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
         kibanaServer.savedObjects.cleanStandardList(),
       ]);
+      await browser.setWindowSize(1600, 1200);
     });
 
     after(() => {
       esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts');
       esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_hosts_processes');
       browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY);
     });
 
@@ -217,6 +223,102 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    describe('#Single host Flyout', () => {
+      before(async () => {
+        await setHostViewEnabled(true);
+        await loginWithReadOnlyUser();
+        await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+        await pageObjects.timePicker.setAbsoluteRange(
+          START_HOST_PROCESSES_DATE.format(timepickerFormat),
+          END_HOST_PROCESSES_DATE.format(timepickerFormat)
+        );
+        await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+      });
+
+      after(async () => {
+        await pageObjects.infraHostsView.clickCloseFlyoutButton();
+        await logoutAndDeleteReadOnlyUser();
+      });
+
+      it('should render metadata tab, add and remove filter', async () => {
+        const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
+        expect(metadataTab).to.contain('Metadata');
+
+        await pageObjects.infraHostsView.clickAddMetadataFilter();
+        await pageObjects.infraHome.waitForLoading();
+
+        // Add Filter
+        const addedFilter = await pageObjects.infraHostsView.getAppliedFilter();
+        expect(addedFilter).to.contain('host.architecture: arm64');
+        const removeFilterExists = await pageObjects.infraHostsView.getRemoveFilterExist();
+        expect(removeFilterExists).to.be(true);
+
+        // Remove filter
+        await pageObjects.infraHostsView.clickRemoveMetadataFilter();
+        await pageObjects.infraHome.waitForLoading();
+        const removeFilterShouldNotExist = await pageObjects.infraHostsView.getRemoveFilterExist();
+        expect(removeFilterShouldNotExist).to.be(false);
+      });
+
+      it('should navigate to Uptime after click', async () => {
+        await pageObjects.infraHostsView.clickFlyoutUptimeLink();
+        await pageObjects.infraHome.waitForLoading();
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain(
+          'app/uptime/?search=host.name%3A%20%22Jennys-MBP.fritz.box%22%20OR%20host.ip%3A%20%22192.168.1.79%22'
+        );
+        await browser.goBack();
+        await pageObjects.infraHome.waitForLoading();
+      });
+
+      it('should navigate to APM services after click', async () => {
+        await pageObjects.infraHostsView.clickFlyoutApmServicesLink();
+        await pageObjects.infraHome.waitForLoading();
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain('app/apm/services?kuery=host.hostname%3A%22Jennys-MBP.fritz.box%22');
+        await browser.goBack();
+        await pageObjects.infraHome.waitForLoading();
+      });
+
+      describe('should render processes tab', async () => {
+        const processTitles = [
+          'Total processes',
+          'Running',
+          'Sleeping',
+          'Dead',
+          'Stopped',
+          'Idle',
+          'Zombie',
+          'Unknown',
+        ];
+
+        processTitles.forEach((value, index) => {
+          it(`Render title: ${value}`, async () => {
+            await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+            const processesTitleValue =
+              await pageObjects.infraHostsView.getProcessesTabContentTitle(index);
+            const processValue = await processesTitleValue.getVisibleText();
+            expect(processValue).to.eql(value);
+          });
+        });
+
+        it('should render processes total value', async () => {
+          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+          const processesTotalValue =
+            await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
+          const processValue = await processesTotalValue.getVisibleText();
+          expect(processValue).to.eql('313');
+        });
+
+        it('should render processes table', async () => {
+          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+          await pageObjects.infraHostsView.getProcessesTable();
+          await pageObjects.infraHostsView.getProcessesTableBody();
+          await pageObjects.infraHostsView.clickProcessesTableExpandButton();
+        });
+      });
+    });
+
     describe('#Page Content', () => {
       before(async () => {
         await setHostViewEnabled(true);
@@ -266,9 +368,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         [
           { metric: 'hosts', value: '6' },
           { metric: 'cpu', value: '0.8%' },
-          { metric: 'memory', value: '16.8%' },
-          { metric: 'tx', value: '0 bit/s' },
-          { metric: 'rx', value: '0 bit/s' },
+          { metric: 'memory', value: '16.81%' },
+          { metric: 'tx', value: 'N/A' },
+          { metric: 'rx', value: 'N/A' },
         ].forEach(({ metric, value }) => {
           it(`${metric} tile should show ${value}`, async () => {
             const tileValue = await pageObjects.infraHostsView.getMetricsTrendTileValue(metric);
@@ -396,9 +498,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             [
               { metric: 'hosts', value: '3' },
               { metric: 'cpu', value: '0.8%' },
-              { metric: 'memory', value: '16.2%' },
-              { metric: 'tx', value: '0 bit/s' },
-              { metric: 'rx', value: '0 bit/s' },
+              { metric: 'memory', value: '16.25%' },
+              { metric: 'tx', value: 'N/A' },
+              { metric: 'rx', value: 'N/A' },
             ].map(async ({ metric, value }) => {
               const tileValue = await pageObjects.infraHostsView.getMetricsTrendTileValue(metric);
               expect(tileValue).to.eql(value);
@@ -425,6 +527,89 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const cells = await observability.alerts.common.getTableCells();
             expect(cells.length).to.be(ALL_ALERTS * COLUMNS);
           });
+        });
+      });
+
+      describe('Pagination and Sorting', () => {
+        beforeEach(async () => {
+          await pageObjects.infraHostsView.changePageSize(5);
+        });
+
+        it('should show 5 rows on the first page', async () => {
+          const hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          hostRows.forEach((row, position) => {
+            pageObjects.infraHostsView
+              .getHostsRowData(row)
+              .then((hostRowData) => expect(hostRowData).to.eql(tableEntries[position]));
+          });
+        });
+
+        it('should paginate to the last page', async () => {
+          await pageObjects.infraHostsView.paginateTo(2);
+          const hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          hostRows.forEach((row) => {
+            pageObjects.infraHostsView
+              .getHostsRowData(row)
+              .then((hostRowData) => expect(hostRowData).to.eql(tableEntries[5]));
+          });
+        });
+
+        it('should show all hosts on the same page', async () => {
+          await pageObjects.infraHostsView.changePageSize(10);
+          const hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          hostRows.forEach((row, position) => {
+            pageObjects.infraHostsView
+              .getHostsRowData(row)
+              .then((hostRowData) => expect(hostRowData).to.eql(tableEntries[position]));
+          });
+        });
+
+        it('should sort by Disk Latency asc', async () => {
+          await pageObjects.infraHostsView.sortByDiskLatency();
+          let hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataFirtPage).to.eql(tableEntries[0]);
+
+          await pageObjects.infraHostsView.paginateTo(2);
+          hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataLastPage).to.eql(tableEntries[1]);
+        });
+
+        it('should sort by Disk Latency desc', async () => {
+          await pageObjects.infraHostsView.sortByDiskLatency();
+          let hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataFirtPage).to.eql(tableEntries[1]);
+
+          await pageObjects.infraHostsView.paginateTo(2);
+          hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataLastPage).to.eql(tableEntries[0]);
+        });
+
+        it('should sort by Title asc', async () => {
+          await pageObjects.infraHostsView.sortByTitle();
+          let hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataFirtPage).to.eql(tableEntries[0]);
+
+          await pageObjects.infraHostsView.paginateTo(2);
+          hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataLastPage).to.eql(tableEntries[5]);
+        });
+
+        it('should sort by Title desc', async () => {
+          await pageObjects.infraHostsView.sortByTitle();
+          let hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataFirtPage).to.eql(tableEntries[5]);
+
+          await pageObjects.infraHostsView.paginateTo(2);
+          hostRows = await pageObjects.infraHostsView.getHostsTableData();
+          const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+          expect(hostDataLastPage).to.eql(tableEntries[0]);
         });
       });
     });

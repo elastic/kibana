@@ -60,6 +60,8 @@ useDeleteSloMock.mockReturnValue({ mutate: mockDeleteSlo });
 const mockNavigate = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
+const mockLocator = jest.fn();
+const mockGetAddRuleFlyout = jest.fn().mockReturnValue(() => <div>Add rule flyout</div>);
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -77,6 +79,14 @@ const mockKibana = () => {
           addError: mockAddError,
         },
       },
+      share: {
+        url: {
+          locators: {
+            get: mockLocator,
+          },
+        },
+      },
+      triggersActionsUi: { getAddRuleFlyout: mockGetAddRuleFlyout },
       uiSettings: {
         get: (settings: string) => {
           if (settings === 'dateFormat') return 'YYYY-MM-DD';
@@ -197,6 +207,56 @@ describe('SLOs Page', () => {
         button.click();
 
         expect(mockNavigate).toBeCalled();
+      });
+
+      it('allows creating a new rule for an SLO', async () => {
+        useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
+
+        useFetchHistoricalSummaryMock.mockReturnValue({
+          isLoading: false,
+          sloHistoricalSummaryResponse: historicalSummaryData,
+        });
+
+        await act(async () => {
+          render(<SlosPage />);
+        });
+
+        screen.getAllByLabelText('Actions').at(0)?.click();
+
+        await waitForEuiPopoverOpen();
+
+        const button = screen.getByTestId('sloActionsCreateRule');
+
+        expect(button).toBeTruthy();
+
+        button.click();
+
+        expect(mockGetAddRuleFlyout).toBeCalled();
+      });
+
+      it('allows managing rules for an SLO', async () => {
+        useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
+
+        useFetchHistoricalSummaryMock.mockReturnValue({
+          isLoading: false,
+          sloHistoricalSummaryResponse: historicalSummaryData,
+        });
+
+        await act(async () => {
+          render(<SlosPage />);
+        });
+
+        screen.getAllByLabelText('Actions').at(0)?.click();
+
+        await waitForEuiPopoverOpen();
+
+        const button = screen.getByTestId('sloActionsManageRules');
+
+        expect(button).toBeTruthy();
+
+        button.click();
+
+        expect(mockLocator).toBeCalled();
       });
 
       it('allows deleting an SLO', async () => {

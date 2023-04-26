@@ -15,6 +15,11 @@ import { CellActionsProvider } from '../context/cell_actions_context';
 const TRIGGER_ID = 'test-trigger-id';
 const FIELD = { name: 'name', value: '123', type: 'text' };
 
+jest.mock('./hover_actions_popover', () => ({
+  HoverActionsPopover: jest.fn((props) => (
+    <span data-test-subj="hoverActionsPopover">{props.anchorPosition}</span>
+  )),
+}));
 describe('CellActions', () => {
   it('renders', async () => {
     const getActionsPromise = Promise.resolve([]);
@@ -54,13 +59,13 @@ describe('CellActions', () => {
     expect(queryByTestId('inlineActions')).toBeInTheDocument();
   });
 
-  it('renders HoverActionsPopover when mode is HOVER', async () => {
+  it('renders HoverActionsPopover when mode is HOVER_DOWN', async () => {
     const getActionsPromise = Promise.resolve([]);
     const getActions = () => getActionsPromise;
 
-    const { queryByTestId } = render(
+    const { getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <CellActions mode={CellActionsMode.HOVER} triggerId={TRIGGER_ID} field={FIELD}>
+        <CellActions mode={CellActionsMode.HOVER_DOWN} triggerId={TRIGGER_ID} field={FIELD}>
           Field value
         </CellActions>
       </CellActionsProvider>
@@ -70,6 +75,27 @@ describe('CellActions', () => {
       await getActionsPromise;
     });
 
-    expect(queryByTestId('hoverActionsPopover')).toBeInTheDocument();
+    expect(getByTestId('hoverActionsPopover')).toBeInTheDocument();
+    expect(getByTestId('hoverActionsPopover')).toHaveTextContent('downCenter');
+  });
+
+  it('renders HoverActionsPopover when mode is HOVER_RIGHT', async () => {
+    const getActionsPromise = Promise.resolve([]);
+    const getActions = () => getActionsPromise;
+
+    const { getByTestId } = render(
+      <CellActionsProvider getTriggerCompatibleActions={getActions}>
+        <CellActions mode={CellActionsMode.HOVER_RIGHT} triggerId={TRIGGER_ID} field={FIELD}>
+          Field value
+        </CellActions>
+      </CellActionsProvider>
+    );
+
+    await act(async () => {
+      await getActionsPromise;
+    });
+
+    expect(getByTestId('hoverActionsPopover')).toBeInTheDocument();
+    expect(getByTestId('hoverActionsPopover')).toHaveTextContent('rightCenter');
   });
 });

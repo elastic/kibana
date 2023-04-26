@@ -306,6 +306,111 @@
       },
       {
         "parentPluginId": "exploratoryView",
+        "id": "def-public.FieldValueSelection",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldValueSelection",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FieldValueSelectionProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "exploratoryView",
+            "id": "def-public.FieldValueSelection.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FieldValueSelectionProps"
+            ],
+            "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "exploratoryView",
+        "id": "def-public.FieldValueSuggestions",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldValueSuggestions",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FieldValueSuggestionsProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "exploratoryView",
+            "id": "def-public.FieldValueSuggestions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FieldValueSuggestionsProps"
+            ],
+            "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "exploratoryView",
+        "id": "def-public.FilterValueLabel",
+        "type": "Function",
+        "tags": [],
+        "label": "FilterValueLabel",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FilterValueLabelProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "exploratoryView",
+            "id": "def-public.FilterValueLabel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FilterValueLabelProps"
+            ],
+            "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "exploratoryView",
         "id": "def-public.formatAlertEvaluationValue",
         "type": "Function",
         "tags": [],
@@ -444,6 +549,41 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "exploratoryView",
+        "id": "def-public.getCoreVitalsComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "getCoreVitalsComponent",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "CoreVitalProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "exploratoryView",
+            "id": "def-public.getCoreVitalsComponent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "CoreVitalProps"
+            ],
+            "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -761,6 +901,41 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "exploratoryView",
+        "id": "def-public.SelectableUrlList",
+        "type": "Function",
+        "tags": [],
+        "label": "SelectableUrlList",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "SelectableUrlListProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "exploratoryView",
+            "id": "def-public.SelectableUrlList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "SelectableUrlListProps"
+            ],
+            "path": "x-pack/plugins/exploratory_view/public/components/shared/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1585,7 +1760,7 @@
             "label": "align",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
+              "\"left\" | \"right\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -1704,66 +1879,6 @@
                 "section": "def-public.DataPublicPluginSetup",
                 "text": "DataPublicPluginSetup"
               }
-            ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "exploratoryView",
-            "id": "def-public.ExploratoryViewPublicPluginsSetup.observability",
-            "type": "Object",
-            "tags": [],
-            "label": "observability",
-            "description": [],
-            "signature": [
-              "{ dashboard: { register: <T extends ",
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.ObservabilityFetchDataPlugins",
-                "text": "ObservabilityFetchDataPlugins"
-              },
-              ">({ appName, fetchData, hasData, }: { appName: T; } & ",
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.DataHandler",
-                "text": "DataHandler"
-              },
-              "<T>) => void; }; observabilityRuleTypeRegistry: { register: (type: ",
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.ObservabilityRuleTypeModel",
-                "text": "ObservabilityRuleTypeModel"
-              },
-              "<any>) => void; getFormatter: (typeId: string) => ",
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.ObservabilityRuleTypeFormatter",
-                "text": "ObservabilityRuleTypeFormatter"
-              },
-              " | undefined; list: () => string[]; }; navigation: { registerSections: (sections$: ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.NavigationSection",
-                "text": "NavigationSection"
-              },
-              "[]>) => void; }; useRulesLink: (options?: ",
-              "Options",
-              ") => ",
-              "LinkProps",
-              "; }"
             ],
             "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
             "deprecated": false,
@@ -2077,63 +2192,33 @@
           },
           {
             "parentPluginId": "exploratoryView",
-            "id": "def-public.ExploratoryViewPublicPluginsStart.observability",
+            "id": "def-public.ExploratoryViewPublicPluginsStart.observabilityShared",
             "type": "Object",
             "tags": [],
-            "label": "observability",
+            "label": "observabilityShared",
             "description": [],
             "signature": [
-              "{ observabilityRuleTypeRegistry: { register: (type: ",
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.ObservabilityRuleTypeModel",
-                "text": "ObservabilityRuleTypeModel"
-              },
-              "<any>) => void; getFormatter: (typeId: string) => ",
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.ObservabilityRuleTypeFormatter",
-                "text": "ObservabilityRuleTypeFormatter"
-              },
-              " | undefined; list: () => string[]; }; navigation: { PageTemplate: (pageTemplateProps: ",
+              "{ navigation: { PageTemplate: (pageTemplateProps: ",
               "WrappedPageTemplateProps",
-              ") => JSX.Element; }; createExploratoryViewUrl: ({ reportType, allSeries }: { reportType: ",
-              "ReportViewType",
-              "; allSeries: ",
+              ") => JSX.Element; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
               {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.AllSeries",
-                "text": "AllSeries"
-              },
-              "; }, baseHref?: string, appId?: string) => string; getAppDataView: (appId: ",
-              "AppDataType",
-              ", indexPattern?: string | undefined) => Promise<",
-              {
-                "pluginId": "dataViews",
+                "pluginId": "@kbn/core-application-browser",
                 "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.AppDeepLink",
+                "text": "AppDeepLink"
               },
-              " | null | undefined>; ExploratoryViewEmbeddable: (props: ",
+              "[]; updater$: ",
+              "Subject",
+              "<",
               {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.ExploratoryEmbeddableProps",
-                "text": "ExploratoryEmbeddableProps"
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.AppUpdater",
+                "text": "AppUpdater"
               },
-              ") => JSX.Element | null; useRulesLink: (options?: ",
-              "Options",
-              ") => ",
-              "LinkProps",
-              "; }"
+              ">; }) => void; }"
             ],
             "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
             "deprecated": false,

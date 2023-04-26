@@ -156,6 +156,9 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   autoRecoverAlerts: true,
+  validate: {
+    params: { validate: (params) => params },
+  },
 };
 
 export const mockRunNowResponse = {
@@ -233,7 +236,13 @@ export const mockTaskInstance = () => ({
   ownerId: null,
 });
 
-export const generateAlertOpts = ({ action, group, state, id }: GeneratorParams = {}) => {
+export const generateAlertOpts = ({
+  action,
+  group,
+  state,
+  id,
+  maintenanceWindowIds = [],
+}: GeneratorParams = {}) => {
   id = id ?? '1';
   let message: string = '';
   switch (action) {
@@ -250,10 +259,12 @@ export const generateAlertOpts = ({ action, group, state, id }: GeneratorParams 
   return {
     action,
     id,
+    uuid: expect.any(String),
     message,
     state,
     ...(group ? { group } : {}),
     flapping: false,
+    maintenanceWindowIds,
   };
 };
 
@@ -355,6 +366,7 @@ export const generateAlertInstance = (
 ) => ({
   [String(id)]: {
     meta: {
+      uuid: expect.any(String),
       lastScheduledActions: {
         date: new Date(DATE_1970),
         group: 'default',
@@ -397,6 +409,7 @@ export const mockAAD = {
         execution: { uuid: 'c35db7cc-5bf7-46ea-b43f-b251613a5b72' },
         name: 'test-rule',
         producer: 'infrastructure',
+        revision: 0,
         rule_type_id: 'metrics.alert.threshold',
         uuid: '0de91960-7643-11ed-b719-bb9db8582cb6',
         tags: [],

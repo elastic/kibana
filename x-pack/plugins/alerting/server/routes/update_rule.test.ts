@@ -53,8 +53,8 @@ describe('updateRuleRoute', () => {
           query: {
             kql: 'name:test',
             dsl: '{"must": {"term": { "name": "test" }}}',
+            filters: [],
           },
-          timeframe: null,
         },
       },
     ],
@@ -123,9 +123,9 @@ describe('updateRuleRoute', () => {
                 "alertsFilter": Object {
                   "query": Object {
                     "dsl": "{\\"must\\": {\\"term\\": { \\"name\\": \\"test\\" }}}",
+                    "filters": Array [],
                     "kql": "name:test",
                   },
-                  "timeframe": null,
                 },
                 "group": "default",
                 "id": "2",

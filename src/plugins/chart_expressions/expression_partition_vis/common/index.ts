@@ -26,6 +26,7 @@ export {
 } from './expression_functions';
 
 export type {
+  AllowedPartitionOverrides,
   ExpressionValuePartitionLabels,
   PieVisExpressionFunctionDefinition,
   TreemapVisExpressionFunctionDefinition,

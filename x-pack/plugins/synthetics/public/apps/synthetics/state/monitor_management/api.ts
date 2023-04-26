@@ -12,7 +12,7 @@ import {
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
-import { API_URLS } from '../../../../../common/constants';
+import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { DecryptedSyntheticsMonitorSavedObject } from '../../../../../common/types';
 
 export const createMonitorAPI = async ({
@@ -45,4 +45,14 @@ export const fetchServiceAPIKey = async (): Promise<{
   apiKey: { encoded: string };
 }> => {
   return await apiService.get(API_URLS.SYNTHETICS_APIKEY);
+};
+
+export const deletePackagePolicy = async (
+  packagePolicyId: string
+): Promise<{
+  apiKey: { encoded: string };
+}> => {
+  return await apiService.delete(
+    SYNTHETICS_API_URLS.DELETE_PACKAGE_POLICY.replace('{packagePolicyId}', packagePolicyId)
+  );
 };

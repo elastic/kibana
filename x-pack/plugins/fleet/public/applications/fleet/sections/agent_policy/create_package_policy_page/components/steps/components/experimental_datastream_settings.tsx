@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiLink,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -185,21 +186,56 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiSwitch
-            checked={newExperimentalIndexingFeature.tsdb ?? false}
-            data-test-subj="packagePolicyEditor.tsdbExperimentalFeature.switch"
-            label={
-              <FormattedMessage
-                id="xpack.fleet.packagePolicyEditor.experimentalFeatures.TSDBLabel"
-                defaultMessage="Time-series indexing (TSDB)"
-              />
-            }
-            onChange={(e) => {
-              onIndexingSettingChange({
-                tsdb: e.target.checked,
-              });
-            }}
-          />
+          {isTimeSeriesEnabledByDefault ? (
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  checked={newExperimentalIndexingFeature.tsdb ?? false}
+                  disabled={true}
+                  data-test-subj="packagePolicyEditor.tsdbExperimentalFeature.switchTooltip"
+                  label={
+                    <FormattedMessage
+                      id="xpack.fleet.packagePolicyEditor.experimentalFeatures.TSDBLabel"
+                      defaultMessage="Time-series database (TSDB) indexing"
+                    />
+                  }
+                  onChange={(e) => {
+                    onIndexingSettingChange({
+                      tsdb: e.target.checked,
+                    });
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.fleet.packagePolicyEditor.experimentalFeatures.tooltip',
+                    {
+                      defaultMessage: 'TSDB indexing is enabled by the integration',
+                    }
+                  )}
+                  position="right"
+                  data-test-subj="foo"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            <EuiSwitch
+              checked={newExperimentalIndexingFeature.tsdb ?? false}
+              data-test-subj="packagePolicyEditor.tsdbExperimentalFeature.switch"
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.packagePolicyEditor.experimentalFeatures.TSDBLabel"
+                  defaultMessage="Time-series database (TSDB) indexing"
+                />
+              }
+              onChange={(e) => {
+                onIndexingSettingChange({
+                  tsdb: e.target.checked,
+                });
+              }}
+            />
+          )}
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSwitch

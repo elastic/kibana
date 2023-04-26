@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiContextMenuPanel } from '@elastic/eui';
+import { EuiContextMenuPanel, useEuiTheme } from '@elastic/eui';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 
@@ -18,11 +18,15 @@ import { AddTimeSliderControlButton } from './add_time_slider_control_button';
 import { EditControlGroupButton } from './edit_control_group_button';
 
 export function ControlsToolbarButton({ controlGroup }: { controlGroup: ControlGroupContainer }) {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <ToolbarPopover
       ownFocus
-      label={getControlButtonTitle()}
+      repositionOnScroll
       panelPaddingSize="none"
+      label={getControlButtonTitle()}
+      zIndex={Number(euiTheme.levels.header) - 1}
       data-test-subj="dashboard-controls-menu-button"
     >
       {({ closePopover }: { closePopover: () => void }) => (

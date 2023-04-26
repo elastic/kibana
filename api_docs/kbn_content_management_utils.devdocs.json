@@ -1,0 +1,1201 @@
+{
+  "id": "@kbn/content-management-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.ContentManagementCrudTypes",
+        "type": "Interface",
+        "tags": [
+          "argument",
+          "argument"
+        ],
+        "label": "ContentManagementCrudTypes",
+        "description": [
+          "\nTypes used by content management storage"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-common.ContentManagementCrudTypes",
+            "text": "ContentManagementCrudTypes"
+          },
+          "<ContentType, Attributes, CreateOptions, UpdateOptions, SearchOptions>"
+        ],
+        "path": "packages/kbn-content-management-utils/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.Item",
+            "type": "Object",
+            "tags": [],
+            "label": "Item",
+            "description": [
+              "\nComplete saved object"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadata",
+                "text": "SOWithMetadata"
+              },
+              "<Attributes>"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.PartialItem",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "PartialItem",
+            "description": [
+              "\nPartial saved object, used as output for update"
+            ],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadata",
+                "text": "SOWithMetadata"
+              },
+              "<Attributes>, \"references\" | \"attributes\"> & { attributes: Partial<Attributes>; references: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.Reference",
+                "text": "Reference"
+              },
+              "[] | undefined; }"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.CreateOptions",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "CreateOptions",
+            "description": [
+              "\nCreate options"
+            ],
+            "signature": [
+              "CreateOptions"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.UpdateOptions",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "UpdateOptions",
+            "description": [
+              "\nUpdate options"
+            ],
+            "signature": [
+              "UpdateOptions"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.SearchOptions",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "SearchOptions",
+            "description": [
+              "\nSearch options"
+            ],
+            "signature": [
+              "SearchOptions"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.GetIn",
+            "type": "Object",
+            "tags": [],
+            "label": "GetIn",
+            "description": [
+              "\nGet item params"
+            ],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.GetIn",
+                "text": "GetIn"
+              },
+              "<ContentType, object>"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.GetOut",
+            "type": "Object",
+            "tags": [],
+            "label": "GetOut",
+            "description": [
+              "\nGet item result"
+            ],
+            "signature": [
+              "{ item: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadata",
+                "text": "SOWithMetadata"
+              },
+              "<Attributes>; meta: { outcome: \"conflict\" | \"exactMatch\" | \"aliasMatch\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.CreateIn",
+            "type": "Object",
+            "tags": [],
+            "label": "CreateIn",
+            "description": [
+              "\nCreate item params"
+            ],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.CreateIn",
+                "text": "CreateIn"
+              },
+              "<ContentType, Attributes, CreateOptions>"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.CreateOut",
+            "type": "Object",
+            "tags": [],
+            "label": "CreateOut",
+            "description": [
+              "\nCreate item result"
+            ],
+            "signature": [
+              "{ item: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadata",
+                "text": "SOWithMetadata"
+              },
+              "<Attributes>; }"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.SearchIn",
+            "type": "Object",
+            "tags": [],
+            "label": "SearchIn",
+            "description": [
+              "\nSearch item params"
+            ],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.SearchIn",
+                "text": "SearchIn"
+              },
+              "<ContentType, SearchOptions>"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.SearchOut",
+            "type": "Object",
+            "tags": [],
+            "label": "SearchOut",
+            "description": [
+              "\nSearch item result"
+            ],
+            "signature": [
+              "{ hits: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.SOWithMetadata",
+                "text": "SOWithMetadata"
+              },
+              "<Attributes>[]; pagination: { total: number; cursor?: string | undefined; }; }"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.UpdateIn",
+            "type": "Object",
+            "tags": [],
+            "label": "UpdateIn",
+            "description": [
+              "\nUpdate item params"
+            ],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.UpdateIn",
+                "text": "UpdateIn"
+              },
+              "<ContentType, Attributes, UpdateOptions>"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.UpdateOut",
+            "type": "Object",
+            "tags": [],
+            "label": "UpdateOut",
+            "description": [
+              "\nUpdate item result"
+            ],
+            "signature": [
+              "{ item: PartialItem<Attributes>; }"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.DeleteIn",
+            "type": "Object",
+            "tags": [],
+            "label": "DeleteIn",
+            "description": [
+              "\nDelete item params"
+            ],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.DeleteIn",
+                "text": "DeleteIn"
+              },
+              "<ContentType, object>"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.ContentManagementCrudTypes.DeleteOut",
+            "type": "Object",
+            "tags": [],
+            "label": "DeleteOut",
+            "description": [
+              "\nDelete item result"
+            ],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.DeleteResult",
+                "text": "DeleteResult"
+              }
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.Reference",
+        "type": "Interface",
+        "tags": [],
+        "label": "Reference",
+        "description": [],
+        "path": "packages/kbn-content-management-utils/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.Reference.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.Reference.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.Reference.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.SavedObjectCreateOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectCreateOptions",
+        "description": [
+          "Saved Object create options - Pick and Omit to customize"
+        ],
+        "path": "packages/kbn-content-management-utils/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectCreateOptions.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "(not recommended) Specify an id for the document"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectCreateOptions.overwrite",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "overwrite",
+            "description": [
+              "Overwrite existing documents (defaults to false)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectCreateOptions.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "\nAn opaque version number which changes on each successful write operation.\nCan be used in conjunction with `overwrite` for implementing optimistic concurrency control."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectCreateOptions.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [
+              "Array of referenced saved objects."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.Reference",
+                "text": "Reference"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectCreateOptions.refresh",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "refresh",
+            "description": [
+              "The Elasticsearch Refresh setting for this operation"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectCreateOptions.initialNamespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "initialNamespaces",
+            "description": [
+              "\nOptional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in\n{@link SavedObjectsCreateOptions}.\n\n* For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,\n  including the \"All spaces\" identifier (`'*'`).\n* For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only\n  be used to specify a single space, and the \"All spaces\" identifier (`'*'`) is not allowed.\n* For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.SavedObjectSearchOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectSearchOptions",
+        "description": [
+          "Saved Object search options - Pick and Omit to customize"
+        ],
+        "path": "packages/kbn-content-management-utils/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [
+              "the page of results to return"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.perPage",
+            "type": "number",
+            "tags": [],
+            "label": "perPage",
+            "description": [
+              "the number of objects per page"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.sortField",
+            "type": "string",
+            "tags": [],
+            "label": "sortField",
+            "description": [
+              "which field to sort by"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.sortOrder",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sortOrder",
+            "description": [
+              "sort order, ascending or descending"
+            ],
+            "signature": [
+              "SortOrder",
+              " | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [
+              "\nAn array of fields to include in the results"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.search",
+            "type": "string",
+            "tags": [],
+            "label": "search",
+            "description": [
+              "Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String `query` argument for more information"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.searchFields",
+            "type": "Array",
+            "tags": [],
+            "label": "searchFields",
+            "description": [
+              "The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.searchAfter",
+            "type": "Array",
+            "tags": [],
+            "label": "searchAfter",
+            "description": [
+              "\nUse the sort values from the previous page to retrieve the next page of results."
+            ],
+            "signature": [
+              "SortResults",
+              " | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.rootSearchFields",
+            "type": "Array",
+            "tags": [],
+            "label": "rootSearchFields",
+            "description": [
+              "\nThe fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not\nbe modified. If used in conjunction with `searchFields`, both are concatenated together."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.hasReference",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasReference",
+            "description": [
+              "\nSearch for documents having a reference to the specified objects.\nUse `hasReferenceOperator` to specify the operator to use when searching for multiple references."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsFindOptionsReference",
+                "text": "SavedObjectsFindOptionsReference"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsFindOptionsReference",
+                "text": "SavedObjectsFindOptionsReference"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.hasReferenceOperator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasReferenceOperator",
+            "description": [
+              "\nThe operator to use when searching by multiple references using the `hasReference` option. Defaults to `OR`"
+            ],
+            "signature": [
+              "\"AND\" | \"OR\" | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.hasNoReference",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasNoReference",
+            "description": [
+              "\nSearch for documents *not* having a reference to the specified objects.\nUse `hasNoReferenceOperator` to specify the operator to use when searching for multiple references."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsFindOptionsReference",
+                "text": "SavedObjectsFindOptionsReference"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsFindOptionsReference",
+                "text": "SavedObjectsFindOptionsReference"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.hasNoReferenceOperator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasNoReferenceOperator",
+            "description": [
+              "\nThe operator to use when searching by multiple references using the `hasNoReference` option. Defaults to `OR`"
+            ],
+            "signature": [
+              "\"AND\" | \"OR\" | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.defaultSearchOperator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultSearchOperator",
+            "description": [
+              "\nThe search operator to use with the provided filter. Defaults to `OR`"
+            ],
+            "signature": [
+              "\"AND\" | \"OR\" | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.filter",
+            "type": "Any",
+            "tags": [],
+            "label": "filter",
+            "description": [
+              "filter string for the search query"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.aggs",
+            "type": "Object",
+            "tags": [
+              "alpha"
+            ],
+            "label": "aggs",
+            "description": [
+              "\nA record of aggregations to perform.\nThe API currently only supports a limited set of metrics and bucket aggregation types.\nAdditional aggregation types can be contributed to Core.\n"
+            ],
+            "signature": [
+              "Record<string, ",
+              "AggregationsAggregationContainer",
+              "> | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [
+              "array of namespaces to search"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectSearchOptions.pit",
+            "type": "Object",
+            "tags": [],
+            "label": "pit",
+            "description": [
+              "\nSearch against a specific Point In Time (PIT) that you've opened with {@link SavedObjectsClient.openPointInTimeForType}."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsPitParams",
+                "text": "SavedObjectsPitParams"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.SavedObjectUpdateOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectUpdateOptions",
+        "description": [
+          "Saved Object update options  - Pick and Omit to customize"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-common.SavedObjectUpdateOptions",
+            "text": "SavedObjectUpdateOptions"
+          },
+          "<Attributes>"
+        ],
+        "path": "packages/kbn-content-management-utils/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectUpdateOptions.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [
+              "Array of referenced saved objects."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.Reference",
+                "text": "Reference"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectUpdateOptions.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectUpdateOptions.refresh",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "refresh",
+            "description": [
+              "The Elasticsearch Refresh setting for this operation"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.MutatingOperationRefreshSetting",
+                "text": "MutatingOperationRefreshSetting"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectUpdateOptions.upsert",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "upsert",
+            "description": [
+              "If specified, will be used to perform an upsert if the object doesn't exist"
+            ],
+            "signature": [
+              "Attributes | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SavedObjectUpdateOptions.retryOnConflict",
+            "type": "number",
+            "tags": [],
+            "label": "retryOnConflict",
+            "description": [
+              "\nThe Elasticsearch `retry_on_conflict` setting for this operation.\nDefaults to `0` when `version` is provided, `3` otherwise."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.SOWithMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "SOWithMetadata",
+        "description": [
+          "\nSaved object with metadata"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-common.SOWithMetadata",
+            "text": "SOWithMetadata"
+          },
+          "<Attributes>"
+        ],
+        "path": "packages/kbn-content-management-utils/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOWithMetadata.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOWithMetadata.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOWithMetadata.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOWithMetadata.createdAt",
+            "type": "string",
+            "tags": [],
+            "label": "createdAt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOWithMetadata.updatedAt",
+            "type": "string",
+            "tags": [],
+            "label": "updatedAt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOWithMetadata.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "{ error: string; message: string; statusCode: number; metadata?: Record<string, unknown> | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOWithMetadata.attributes",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "Attributes"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOWithMetadata.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.Reference",
+                "text": "Reference"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOWithMetadata.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-common.SOWithMetadata.originId",
+            "type": "string",
+            "tags": [],
+            "label": "originId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-content-management-utils/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-common.GetResultSO",
+        "type": "Type",
+        "tags": [],
+        "label": "GetResultSO",
+        "description": [
+          "Return value for Saved Object get, T is item returned"
+        ],
+        "signature": [
+          "{ item: T; meta: { outcome: \"conflict\" | \"exactMatch\" | \"aliasMatch\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
+        ],
+        "path": "packages/kbn-content-management-utils/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -59,8 +59,8 @@ export function StackTracesView() {
       return fetchTopN({
         http,
         type: topNType,
-        timeFrom: new Date(timeRange.start).getTime() / 1000,
-        timeTo: new Date(timeRange.end).getTime() / 1000,
+        timeFrom: timeRange.inSeconds.start,
+        timeTo: timeRange.inSeconds.end,
         kuery,
       }).then((response: TopNResponse) => {
         const totalCount = response.TotalCount;
@@ -76,7 +76,7 @@ export function StackTracesView() {
         };
       });
     },
-    [topNType, timeRange.start, timeRange.end, fetchTopN, kuery]
+    [topNType, timeRange.inSeconds.start, timeRange.inSeconds.end, fetchTopN, kuery]
   );
 
   const { data } = state;

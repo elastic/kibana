@@ -68,6 +68,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   auditLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -415,6 +417,7 @@ describe('create()', () => {
         ],
         "alertTypeId": "123",
         "apiKey": null,
+        "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -636,6 +639,7 @@ describe('create()', () => {
         ],
         "alertTypeId": "123",
         "apiKey": null,
+        "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -1087,6 +1091,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
@@ -1228,6 +1233,9 @@ describe('create()', () => {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
     const data = getMockData({
       params: ruleParams,
@@ -1297,6 +1305,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
@@ -1408,6 +1417,9 @@ describe('create()', () => {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
     const data = getMockData({
       params: ruleParams,
@@ -1477,6 +1489,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         legacyId: null,
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
@@ -1650,6 +1663,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -1787,6 +1801,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -1924,6 +1939,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -2083,6 +2099,7 @@ describe('create()', () => {
         ],
         apiKeyOwner: null,
         apiKey: null,
+        apiKeyCreatedByUser: null,
         legacyId: null,
         createdBy: 'elastic',
         updatedBy: 'elastic',
@@ -2562,6 +2579,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -2667,6 +2685,9 @@ describe('create()', () => {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
     const createdAttributes = {
       ...data,
@@ -2735,6 +2756,9 @@ describe('create()', () => {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
 
     const data = getMockData({ schedule: { interval: '1s' } });
@@ -2768,6 +2792,9 @@ describe('create()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
 
@@ -2858,6 +2885,9 @@ describe('create()', () => {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
 
     const data = getMockData({
@@ -2903,6 +2933,9 @@ describe('create()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
 
@@ -2963,6 +2996,9 @@ describe('create()', () => {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
 
     const data = getMockData({
@@ -3009,7 +3045,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to validate actions due to the following error: Action throttle cannot be shorter than the schedule interval of 3h: default (1h), group2 (3m)"`
+      `"Failed to validate actions due to the following error: Action frequency cannot be shorter than the schedule interval of 3h: default (1h), group2 (3m)"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -3039,6 +3075,9 @@ describe('create()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
+      },
+      validate: {
+        params: { validate: (params) => params },
       },
     }));
 
@@ -3083,7 +3122,7 @@ describe('create()', () => {
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Failed to validate actions due to the following 2 errors:
       - Actions missing frequency parameters: group3
-      - Action throttle cannot be shorter than the schedule interval of 3h: default (1h), group2 (3m)"
+      - Action frequency cannot be shorter than the schedule interval of 3h: default (1h), group2 (3m)"
     `);
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -3231,6 +3270,9 @@ describe('create()', () => {
         injectReferences: jest.fn(),
       },
       getSummarizedAlerts: jest.fn().mockResolvedValue({}),
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
 
     const data = getMockData({
@@ -3280,6 +3322,9 @@ describe('create()', () => {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     }));
 
     const data = getMockData({
@@ -3298,7 +3343,7 @@ describe('create()', () => {
             throttle: null,
           },
           alertsFilter: {
-            query: { kql: 'test:1' },
+            query: { kql: 'test:1', filters: [] },
           },
         },
       ],
@@ -3308,5 +3353,138 @@ describe('create()', () => {
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('calls the authentication API key function if the user is authenticated using an api key', async () => {
+    const data = getMockData();
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        actions: [],
+        scheduledTaskId: 'task-123',
+      },
+      references: [
+        {
+          id: '1',
+          name: 'action_0',
+          type: 'action',
+        },
+      ],
+    });
+    await rulesClient.create({ data });
+
+    expect(rulesClientParams.isAuthenticationTypeAPIKey).toHaveBeenCalledTimes(1);
+    expect(rulesClientParams.getAuthenticationAPIKey).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        actions: [
+          {
+            actionRef: 'action_0',
+            group: 'default',
+            actionTypeId: 'test',
+            params: { foo: true },
+            uuid: '151',
+          },
+        ],
+        alertTypeId: '123',
+        consumer: 'bar',
+        name: 'abc',
+        legacyId: null,
+        params: { bar: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        apiKeyOwner: 'elastic',
+        apiKeyCreatedByUser: true,
+        createdBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        enabled: true,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
+        schedule: { interval: '1m' },
+        throttle: null,
+        notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
+        mutedInstanceIds: [],
+        tags: ['foo'],
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+          error: null,
+          warning: null,
+        },
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
+        running: false,
+      },
+      {
+        id: 'mock-saved-object-id',
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+      }
+    );
+  });
+
+  test('throws error and does not add API key to invalidatePendingApiKey SO when create saved object fails if the user is authenticated using an api key', async () => {
+    const data = getMockData();
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Test failure"`
+    );
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: [] },
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 });

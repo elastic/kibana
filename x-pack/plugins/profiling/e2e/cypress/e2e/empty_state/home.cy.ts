@@ -32,5 +32,6 @@ describe('Home page with empty state', () => {
     cy.contains('Binary');
     cy.contains('DEB Package');
     cy.contains('RPM Package');
+    cy.contains('Upload Symbols');
   });
 });

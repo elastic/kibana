@@ -8,7 +8,7 @@
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { statSync } from 'fs';
+import { statSync, copyFileSync, existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
@@ -29,7 +29,7 @@ function getServerlessProjectMode(opts) {
     return null;
   }
 
-  if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless)) {
+  if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless) || opts.serverless === true) {
     return opts.serverless;
   }
 
@@ -78,16 +78,66 @@ const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 /**
+ * @param {string} name The config file name
+ * @returns {boolean} Whether the file exists
+ */
+function configFileExists(name) {
+  const path = resolve(getConfigDirectory(), name);
+  try {
+    return statSync(path).isFile();
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return false;
+    }
+
+    throw err;
+  }
+}
+
+/**
+ * @returns {boolean} Whether the distribution can run in Serverless mode
+ */
+function isServerlessCapableDistribution() {
+  // For now, checking if the `serverless.yml` config file exists should be enough
+  // We could also check the following as well, but I don't think it's necessary:
+  // VALID_SERVERLESS_PROJECT_MODE.some((projectType) => configFileExists(`serverless.${projectType}.yml`))
+  return configFileExists('serverless.yml');
+}
+
+/**
  * @param {string} name
  * @param {string[]} configs
  * @param {'push' | 'unshift'} method
  */
 function maybeAddConfig(name, configs, method) {
-  const path = resolve(getConfigDirectory(), name);
+  if (configFileExists(name)) {
+    configs[method](resolve(getConfigDirectory(), name));
+  }
+}
+
+/**
+ * @param {string} file
+ * @param {'es' | 'security' | 'oblt' | true} mode
+ * @param {string[]} configs
+ * @param {'push' | 'unshift'} method
+ */
+function maybeSetRecentConfig(file, mode, configs, method) {
+  const path = resolve(getConfigDirectory(), file);
+
   try {
-    if (statSync(path).isFile()) {
-      configs[method](path);
+    if (mode === true) {
+      if (!existsSync(path)) {
+        const data = readFileSync(path.replace('recent', 'es'), 'utf-8');
+        writeFileSync(
+          path,
+          `${data}\nxpack.serverless.plugin.developer.projectSwitcher.enabled: true\n`
+        );
+      }
+    } else {
+      copyFileSync(path.replace('recent', mode), path);
     }
+
+    configs[method](path);
   } catch (err) {
     if (err.code === 'ENOENT') {
       return;
@@ -233,8 +283,19 @@ export default function (program) {
       .option(
         '--run-examples',
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
+      );
+  }
+
+  if (isServerlessCapableDistribution()) {
+    command
+      .option(
+        '--serverless',
+        'Start Kibana in the most recent serverless project mode, (default is es)'
       )
-      .option('--serverless <oblt|security|es>', 'Start Kibana in a serverless project mode');
+      .option(
+        '--serverless <oblt|security|es>',
+        'Start Kibana in a specific serverless project mode'
+      );
   }
 
   if (DEV_MODE_SUPPORTED) {
@@ -264,7 +325,7 @@ export default function (program) {
     // we "unshift" .serverless. config so that it only overrides defaults
     if (serverlessMode) {
       maybeAddConfig(`serverless.yml`, configs, 'push');
-      maybeAddConfig(`serverless.${serverlessMode}.yml`, configs, 'unshift');
+      maybeSetRecentConfig('serverless.recent.yml', serverlessMode, configs, 'unshift');
     }
 
     // .dev. configs are "pushed" so that they override all other config files
@@ -272,7 +333,7 @@ export default function (program) {
       maybeAddConfig('kibana.dev.yml', configs, 'push');
       if (serverlessMode) {
         maybeAddConfig(`serverless.dev.yml`, configs, 'push');
-        maybeAddConfig(`serverless.${serverlessMode}.dev.yml`, configs, 'push');
+        maybeSetRecentConfig('serverless.recent.dev.yml', serverlessMode, configs, 'unshift');
       }
     }
 

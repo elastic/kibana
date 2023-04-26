@@ -102,7 +102,7 @@ export const CasesPanel = React.memo<CasesPanelProps>(
 
     const addToExistingCase = useCallback(() => {
       if (userCasesPermissions.update) {
-        selectCaseModal.open({ attachments: caseAttachments });
+        selectCaseModal.open({ getAttachments: () => caseAttachments });
       }
     }, [caseAttachments, selectCaseModal, userCasesPermissions.update]);
 

@@ -13,9 +13,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
 
-  // Failing: See https://github.com/elastic/kibana/issues/154065
-  // Failing: See https://github.com/elastic/kibana/issues/154064
-  describe.skip('choropleth chart', () => {
+  // Test requires access to Elastic Maps Service
+  // Do not skip test if failure is "Test requires access to Elastic Maps Service (EMS). EMS is not available"
+  describe('choropleth chart', () => {
+    before('', async () => {
+      await PageObjects.maps.expectEmsToBeAvailable();
+    });
+
     it('should allow creation of choropleth chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');

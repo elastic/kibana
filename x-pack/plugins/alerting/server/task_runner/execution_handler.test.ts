@@ -21,6 +21,7 @@ import {
   RuleTypeParams,
   RuleTypeState,
   SanitizedRule,
+  GetViewInAppRelativeUrlFnOpts,
 } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
@@ -31,6 +32,7 @@ import { AlertInstanceState, AlertInstanceContext } from '../../common';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import sinon from 'sinon';
 import { mockAAD } from './fixtures';
+import { schema } from '@kbn/config-schema';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
@@ -69,6 +71,9 @@ const ruleType: NormalizedRuleType<
   executor: jest.fn(),
   producer: 'alerts',
   getSummarizedAlerts: getSummarizedAlertsMock,
+  validate: {
+    params: schema.any(),
+  },
 };
 const rule = {
   id: '1',
@@ -80,6 +85,7 @@ const rule = {
     contextVal: 'My other {{context.value}} goes here',
     stateVal: 'My other {{state.value}} goes here',
   },
+  schedule: { interval: '1m' },
   notifyWhen: 'onActiveAlert',
   actions: [
     {
@@ -112,9 +118,11 @@ const defaultExecutionParams = {
   apiKey,
   ruleConsumer: 'rule-consumer',
   executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+  alertUuid: 'uuid-1',
   ruleLabel: 'rule-label',
   request: {} as KibanaRequest,
   alertingEventLogger,
+  previousStartedAt: null,
   taskInstance: {
     params: { spaceId: 'test1', alertId: '1' },
   } as unknown as ConcreteTaskInstance,
@@ -939,7 +947,7 @@ describe('Execution Handler', () => {
                 message:
                   'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
               },
-              alertsFilter: { query: { kql: 'test:1', dsl: '{}' } },
+              alertsFilter: { query: { kql: 'test:1', dsl: '{}', filters: [] } },
             },
           ],
         },
@@ -1324,7 +1332,7 @@ describe('Execution Handler', () => {
                   'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
               },
               alertsFilter: {
-                query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}' },
+                query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}', filters: [] },
               },
             },
           ],
@@ -1343,7 +1351,7 @@ describe('Execution Handler', () => {
       spaceId: 'test1',
       excludedAlertInstanceIds: ['foo'],
       alertsFilter: {
-        query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}' },
+        query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}', filters: [] },
       },
     });
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
@@ -1358,7 +1366,7 @@ describe('Execution Handler', () => {
     getSummarizedAlertsMock.mockResolvedValue({
       new: {
         count: 1,
-        data: [{ ...mockAAD, kibana: { alert: { instance: { id: '1' } } } }],
+        data: [{ ...mockAAD, kibana: { alert: { uuid: '1' } } }],
       },
       ongoing: {
         count: 0,
@@ -1384,7 +1392,7 @@ describe('Execution Handler', () => {
               },
               params: {},
               alertsFilter: {
-                query: { kql: 'kibana.alert.instance.id:1', dsl: '{}' },
+                query: { kql: 'kibana.alert.instance.id:1', dsl: '{}', filters: [] },
               },
             },
           ],
@@ -1404,7 +1412,7 @@ describe('Execution Handler', () => {
       spaceId: 'test1',
       excludedAlertInstanceIds: ['foo'],
       alertsFilter: {
-        query: { kql: 'kibana.alert.instance.id:1', dsl: '{}' },
+        query: { kql: 'kibana.alert.instance.id:1', dsl: '{}', filters: [] },
       },
     });
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith([
@@ -1446,6 +1454,25 @@ describe('Execution Handler', () => {
       ],
     } as unknown as SanitizedRule<RuleTypeParams>;
 
+    const summaryRuleWithUrl = {
+      ...rule,
+      actions: [
+        {
+          id: '1',
+          group: null,
+          actionTypeId: 'test',
+          frequency: {
+            summary: true,
+            notifyWhen: 'onActiveAlert',
+            throttle: null,
+          },
+          params: {
+            val: 'rule url: {{rule.url}}',
+          },
+        },
+      ],
+    } as unknown as SanitizedRule<RuleTypeParams>;
+
     it('populates the rule.url in the action params when the base url and rule id are specified', async () => {
       const execParams = {
         ...defaultExecutionParams,
@@ -1464,6 +1491,55 @@ describe('Execution Handler', () => {
           Object {
             "actionParams": Object {
               "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
+            },
+            "actionTypeId": "test",
+            "ruleId": "1",
+            "spaceId": "test1",
+          },
+        ]
+      `);
+    });
+
+    it('populates the rule.url with start and stop time when available', async () => {
+      clock.reset();
+      clock.tick(90000);
+      getSummarizedAlertsMock.mockResolvedValue({
+        new: {
+          count: 2,
+          data: [
+            mockAAD,
+            {
+              ...mockAAD,
+              '@timestamp': '2022-12-07T15:45:41.4672Z',
+              alert: { instance: { id: 'all' } },
+            },
+          ],
+        },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      });
+      const execParams = {
+        ...defaultExecutionParams,
+        ruleType: {
+          ...ruleType,
+          getViewInAppRelativeUrl: (opts: GetViewInAppRelativeUrlFnOpts<RuleTypeParams>) =>
+            `/app/test/rule/${opts.rule.id}?start=${opts.start ?? 0}&end=${opts.end ?? 0}`,
+        },
+        rule: summaryRuleWithUrl,
+        taskRunnerContext: {
+          ...defaultExecutionParams.taskRunnerContext,
+          kibanaBaseUrl: 'http://localhost:12345',
+        },
+      };
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
+      await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "actionParams": Object {
+              "val": "rule url: http://localhost:12345/s/test1/app/test/rule/1?start=30000&end=90000",
             },
             "actionTypeId": "test",
             "ruleId": "1",

@@ -8,8 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
+import { LISTING_LIMIT_SETTING, PER_PAGE_SETTING } from '@kbn/saved-objects-settings';
 import { ProcedureName } from '../../../common';
 import type { ContentRegistry } from '../../core';
+import { MSearchService } from '../../core/msearch';
 
 import type { RpcService } from '../rpc_service';
 import { getServiceObjectTransformFactory } from '../services_transforms_factory';
@@ -55,6 +57,17 @@ export function initRpcRoutes(
           contentRegistry,
           requestHandlerContext,
           getTransformsFactory: getServiceObjectTransformFactory,
+          mSearchService: new MSearchService({
+            getSavedObjectsClient: async () =>
+              (await requestHandlerContext.core).savedObjects.client,
+            contentRegistry,
+            getConfig: {
+              listingLimit: async () =>
+                (await requestHandlerContext.core).uiSettings.client.get(LISTING_LIMIT_SETTING),
+              perPage: async () =>
+                (await requestHandlerContext.core).uiSettings.client.get(PER_PAGE_SETTING),
+            },
+          }),
         };
         const { name } = request.params as { name: ProcedureName };
 

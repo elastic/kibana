@@ -5,13 +5,21 @@
  * 2.0.
  */
 
+import { URL } from 'url';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { i18n } from '@kbn/i18n';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
-import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
+import type {
+  ActionType as ConnectorType,
+  ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
+  ActionTypeExecutorResult as ConnectorTypeExecutorResult,
+  ExecutorType,
+  ValidatorServices,
+} from '@kbn/actions-plugin/server/types';
 import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
@@ -20,83 +28,115 @@ import {
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
-import type {
-  SlackWebApiExecutorOptions,
-  SlackWebhookExecutorOptions,
-  WebhookParams,
-  SlackExecutorOptions,
-  SlackConnectorType,
-  WebApiParams,
-} from '../../../common/slack/types';
-import {
-  SlackSecretsSchema,
-  SlackParamsSchema,
-  SlackConfigSchema,
-} from '../../../common/slack/schema';
-import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
-import { SLACK_CONNECTOR_NAME } from './translations';
-import { api } from './api';
-import { createExternalService } from './service';
-import { validate } from './validators';
 
-export function getConnectorType(): SlackConnectorType {
+export type SlackConnectorType = ConnectorType<
+  {},
+  ConnectorTypeSecretsType,
+  ActionParamsType,
+  unknown
+>;
+export type SlackConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
+  {},
+  ConnectorTypeSecretsType,
+  ActionParamsType
+>;
+
+// secrets definition
+
+export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
+
+const secretsSchemaProps = {
+  webhookUrl: schema.string(),
+};
+const SecretsSchema = schema.object(secretsSchemaProps);
+
+// params definition
+
+export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+
+const ParamsSchema = schema.object({
+  message: schema.string({ minLength: 1 }),
+});
+
+// connector type definition
+
+export const ConnectorTypeId = '.slack';
+// customizing executor is only used for tests
+export function getConnectorType({
+  executor = slackExecutor,
+}: {
+  executor?: ExecutorType<{}, ConnectorTypeSecretsType, ActionParamsType, unknown>;
+}): SlackConnectorType {
   return {
-    id: SLACK_CONNECTOR_ID,
+    id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
-    name: SLACK_CONNECTOR_NAME,
+    name: i18n.translate('xpack.stackConnectors.slack.title', {
+      defaultMessage: 'Slack',
+    }),
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: {
-        schema: SlackConfigSchema,
-      },
+      config: { schema: schema.object({}, { defaultValue: {} }) },
       secrets: {
-        schema: SlackSecretsSchema,
-        customValidator: validate.secrets,
+        schema: SecretsSchema,
+        customValidator: validateConnectorTypeConfig,
       },
       params: {
-        schema: SlackParamsSchema,
+        schema: ParamsSchema,
       },
-      connector: validate.connector,
     },
     renderParameterTemplates,
-    executor: async (execOptions: SlackExecutorOptions) => {
-      const slackType =
-        !execOptions.config?.type || execOptions.config?.type === 'webhook' ? 'webhook' : 'web_api';
-      validate.validateTypeParamsCombination(slackType, execOptions.params);
-
-      const res =
-        slackType === 'webhook'
-          ? await slackWebhookExecutor(execOptions as SlackWebhookExecutorOptions)
-          : await slackWebApiExecutor(execOptions as SlackWebApiExecutorOptions);
-      return res;
-    },
+    executor,
   };
 }
 
-const renderParameterTemplates = (
-  params: WebhookParams | WebApiParams,
+function renderParameterTemplates(
+  params: ActionParamsType,
   variables: Record<string, unknown>
-) => {
-  if ('message' in params)
-    return { message: renderMustacheString(params.message, variables, 'slack') };
-  if (params.subAction === 'postMessage')
-    return {
-      subAction: params.subAction,
-      subActionParams: {
-        ...params.subActionParams,
-        text: renderMustacheString(params.subActionParams.text, variables, 'slack'),
-      },
-    };
-  return params;
-};
+): ActionParamsType {
+  return {
+    message: renderMustacheString(params.message, variables, 'slack'),
+  };
+}
 
-const slackWebhookExecutor = async (
-  execOptions: SlackWebhookExecutorOptions
-): Promise<ConnectorTypeExecutorResult<unknown>> => {
+function validateConnectorTypeConfig(
+  secretsObject: ConnectorTypeSecretsType,
+  validatorServices: ValidatorServices
+) {
+  const { configurationUtilities } = validatorServices;
+  const configuredUrl = secretsObject.webhookUrl;
+  try {
+    new URL(configuredUrl);
+  } catch (err) {
+    throw new Error(
+      i18n.translate('xpack.stackConnectors.slack.configurationErrorNoHostname', {
+        defaultMessage: 'error configuring slack action: unable to parse host name from webhookUrl',
+      })
+    );
+  }
+
+  try {
+    configurationUtilities.ensureUriAllowed(configuredUrl);
+  } catch (allowListError) {
+    throw new Error(
+      i18n.translate('xpack.stackConnectors.slack.configurationError', {
+        defaultMessage: 'error configuring slack action: {message}',
+        values: {
+          message: allowListError.message,
+        },
+      })
+    );
+  }
+}
+
+// action executor
+
+async function slackExecutor(
+  execOptions: SlackConnectorTypeExecutorOptions
+): Promise<ConnectorTypeExecutorResult<unknown>> {
   const { actionId, secrets, params, configurationUtilities, logger } = execOptions;
 
   let result: IncomingWebhookResult;
@@ -121,7 +161,6 @@ const slackWebhookExecutor = async (
     const webhook = new IncomingWebhook(webhookUrl, {
       agent,
     });
-
     result = await webhook.send(message);
   } catch (err) {
     if (err.original == null || err.original.response == null) {
@@ -174,7 +213,7 @@ const slackWebhookExecutor = async (
   }
 
   return successResult(actionId, result);
-};
+}
 
 function successResult(actionId: string, data: unknown): ConnectorTypeExecutorResult<unknown> {
   return { status: 'ok', data, actionId };
@@ -242,47 +281,3 @@ function retryResultSeconds(
     serviceMessage: message,
   };
 }
-
-const supportedSubActions = ['getChannels', 'postMessage'];
-
-const slackWebApiExecutor = async (
-  execOptions: SlackWebApiExecutorOptions
-): Promise<ConnectorTypeExecutorResult<unknown>> => {
-  const { actionId, params, secrets, configurationUtilities, logger } = execOptions;
-  const subAction = params.subAction;
-
-  if (!api[subAction]) {
-    const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
-    logger.error(errorMessage);
-    throw new Error(errorMessage);
-  }
-
-  if (!supportedSubActions.includes(subAction)) {
-    const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
-    logger.error(errorMessage);
-    throw new Error(errorMessage);
-  }
-
-  const externalService = createExternalService(
-    {
-      secrets,
-    },
-    logger,
-    configurationUtilities
-  );
-
-  if (subAction === 'getChannels') {
-    return await api.getChannels({
-      externalService,
-    });
-  }
-
-  if (subAction === 'postMessage') {
-    return await api.postMessage({
-      externalService,
-      params: params.subActionParams,
-    });
-  }
-
-  return { status: 'ok', data: {}, actionId };
-};

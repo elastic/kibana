@@ -21,6 +21,7 @@ import {
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
   FLEET_PROXY_SAVED_OBJECT_TYPE,
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+  INGEST_SAVED_OBJECT_INDEX,
 } from '../constants';
 
 import {
@@ -55,6 +56,7 @@ import {
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
 import { migratePackagePolicyToV870 } from './migrations/security_solution';
+import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
 
 /*
  * Saved object types and mappings
@@ -66,6 +68,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   // Deprecated
   [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
     name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -86,6 +89,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
     name: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -129,6 +133,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {
     name: OUTPUT_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -162,6 +167,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
     name: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -212,10 +218,12 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       '8.5.0': migratePackagePolicyToV850,
       '8.6.0': migratePackagePolicyToV860,
       '8.7.0': migratePackagePolicyToV870,
+      '8.8.0': migratePackagePolicyToV880,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
     name: PACKAGES_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -239,6 +247,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             id: { type: 'keyword' },
             type: { type: 'keyword' },
             version: { type: 'keyword' },
+            deferred: { type: 'boolean' },
           },
         },
         installed_kibana: {
@@ -283,6 +292,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [ASSETS_SAVED_OBJECT_TYPE]: {
     name: ASSETS_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -302,6 +312,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE]: {
     name: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -315,6 +326,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE]: {
     name: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -331,6 +343,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [FLEET_SERVER_HOST_SAVED_OBJECT_TYPE]: {
     name: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -348,6 +361,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [FLEET_PROXY_SAVED_OBJECT_TYPE]: {
     name: FLEET_PROXY_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -367,6 +381,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   },
   [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE]: {
     name: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+    indexPattern: INGEST_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'agnostic',
     management: {

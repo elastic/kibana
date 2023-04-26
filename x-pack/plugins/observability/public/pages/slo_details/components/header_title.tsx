@@ -18,6 +18,7 @@ export interface Props {
 
 export function HeaderTitle(props: Props) {
   const { isLoading, slo } = props;
+
   if (isLoading) {
     return <EuiLoadingSpinner data-test-subj="loadingTitle" />;
   }
@@ -27,9 +28,11 @@ export function HeaderTitle(props: Props) {
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>{slo.name}</EuiFlexItem>
-      <SloStatusBadge slo={slo} />
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
+        <SloStatusBadge slo={slo} />
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 }

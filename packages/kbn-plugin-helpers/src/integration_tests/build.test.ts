@@ -70,6 +70,7 @@ it('builds a generated plugin into a viable archive', async () => {
     " info deleting the build and target directories
      info running @kbn/optimizer
      │ succ browser bundle created at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public
+     │ info stopping @kbn/optimizer
      info copying assets from \`public/assets\` to build
      info copying server source into the build and converting with babel
      info running yarn to install dependencies

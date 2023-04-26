@@ -85,6 +85,7 @@ export interface ExecutionHandlerOptions<
   ruleConsumer: string;
   executionId: string;
   ruleLabel: string;
+  previousStartedAt: Date | null;
   actionsClient: PublicMethodsOf<ActionsClient>;
 }
 

@@ -132,4 +132,23 @@ describe('useFistLastSeen', () => {
     const { result } = renderUseFirstLastSeen({ order: Direction.desc });
     expect(result.current).toEqual([false, { errorMessage: `Error: ${msg}` }]);
   });
+
+  it('should search with given filter query', () => {
+    const filterQuery = { terms: { test: ['test123'] } };
+    mockUseSearchStrategy.mockImplementation(() => ({
+      loading: false,
+      result: {},
+      search: mockSearch,
+      refetch: jest.fn(),
+      inspect: {},
+    }));
+
+    renderUseFirstLastSeen({ order: Direction.desc, filterQuery });
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filterQuery,
+      })
+    );
+  });
 });

@@ -9,6 +9,7 @@ import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../co
 
 import {
   ConnectorStatus,
+  DisplayType,
   FilteringPolicy,
   FilteringRuleRule,
   FilteringValidationState,
@@ -32,7 +33,22 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
-      configuration: { foo: { label: 'bar', value: 'barbar' } },
+      configuration: {
+        foo: {
+          default_value: '',
+          depends_on: [],
+          display: DisplayType.TEXTBOX,
+          key: 'foo',
+          label: 'bar',
+          options: [],
+          order: 1,
+          required: false,
+          sensitive: false,
+          tooltip: '',
+          ui_restrictions: [],
+          value: 'barbar',
+        },
+      },
       custom_scheduling: {
         foo: {
           configuration_overrides: {},
@@ -102,6 +118,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       language: 'en',
       last_seen: null,
       last_sync_error: null,
+      last_sync_scheduled_at: null,
       last_sync_status: SyncStatus.COMPLETED,
       last_synced: null,
       name: 'connector',
@@ -127,7 +144,22 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
-      configuration: { foo: { label: 'bar', value: 'barbar' } },
+      configuration: {
+        foo: {
+          default_value: '',
+          depends_on: [],
+          display: DisplayType.TEXTBOX,
+          key: 'foo',
+          label: 'bar',
+          options: [],
+          order: 1,
+          required: false,
+          sensitive: false,
+          tooltip: '',
+          ui_restrictions: [],
+          value: 'barbar',
+        },
+      },
       custom_scheduling: {
         foo: {
           configuration_overrides: {},
@@ -197,6 +229,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       language: 'en',
       last_seen: null,
       last_sync_error: null,
+      last_sync_scheduled_at: null,
       last_sync_status: SyncStatus.COMPLETED,
       last_synced: null,
       name: 'crawler',

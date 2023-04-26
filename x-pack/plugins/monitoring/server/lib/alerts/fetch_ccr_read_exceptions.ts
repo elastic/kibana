@@ -162,7 +162,7 @@ export async function fetchCCRReadExceptions(
 
       const { read_exceptions: readExceptions, shard_id: shardId } = ccrStats;
 
-      const leaderIndex = ccrStats.leaderIndex || ccrStats.leader.index;
+      const leaderIndex = ccrStats.leader_index || ccrStats.leader.index;
 
       const { exception: lastReadException } = readExceptions[readExceptions.length - 1];
 

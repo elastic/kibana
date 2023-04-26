@@ -7,8 +7,11 @@
 
 import type { Observable } from 'rxjs';
 import type { ISearchOptions } from '@kbn/data-plugin/common';
-import { ISearchStart } from '@kbn/data-plugin/public';
-import type { FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
+import type { ISearchStart } from '@kbn/data-plugin/public';
+import type {
+  FieldStatsCommonRequestParams,
+  SupportedAggs,
+} from '../../../../../common/types/field_stats';
 import type { FieldStatsError } from '../../../../../common/types/field_stats';
 import type { FieldStats } from '../../../../../common/types/field_stats';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
@@ -26,6 +29,7 @@ export const getFieldsStats = (
     type: string;
     cardinality: number;
     safeFieldName: string;
+    supportedAggs?: SupportedAggs;
   }>,
   options: ISearchOptions
 ): Observable<FieldStats[] | FieldStatsError> | undefined => {

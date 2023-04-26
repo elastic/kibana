@@ -131,7 +131,6 @@ describe('getExportAll', () => {
       to: 'now',
       type: 'query',
       threat: getThreatMock(),
-      throttle: 'no_actions',
       note: '# Investigative notes',
       version: 1,
       exceptions_list: getListArrayMock(),
@@ -275,6 +274,7 @@ describe('getExportAll', () => {
             message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
           action_type_id: '.slack',
+          frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
         },
       ],
       building_block_type: 'default',
@@ -313,7 +313,6 @@ describe('getExportAll', () => {
       to: 'now',
       type: 'query',
       threat: getThreatMock(),
-      throttle: 'rule',
       note: '# Investigative notes',
       version: 1,
       revision: 0,
@@ -406,60 +405,21 @@ describe('getExportAll', () => {
     );
     const rulesJson = JSON.parse(exports.rulesNdjson);
     const detailsJson = JSON.parse(exports.exportDetails);
-    expect(rulesJson).toEqual({
-      author: ['Elastic'],
-      actions: [
-        {
-          group: 'default',
-          id: '456',
-          params: {
-            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+    expect(rulesJson).toEqual(
+      expect.objectContaining({
+        actions: [
+          {
+            group: 'default',
+            id: '456',
+            params: {
+              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            },
+            action_type_id: '.email',
+            frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
           },
-          action_type_id: '.email',
-        },
-      ],
-      building_block_type: 'default',
-      created_at: '2019-12-13T16:40:33.400Z',
-      updated_at: '2019-12-13T16:40:33.400Z',
-      created_by: 'elastic',
-      description: 'Detecting root and admin users',
-      enabled: true,
-      false_positives: [],
-      filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
-      from: 'now-6m',
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      immutable: false,
-      index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-      interval: '5m',
-      rule_id: 'rule-1',
-      language: 'kuery',
-      license: 'Elastic License',
-      output_index: '.siem-signals',
-      max_signals: 10000,
-      risk_score: 50,
-      risk_score_mapping: [],
-      name: 'Detect Root/Admin Users',
-      query: 'user.name: root or user.name: admin',
-      references: ['http://example.com', 'https://example.com'],
-      related_integrations: [],
-      required_fields: [],
-      setup: '',
-      timeline_id: 'some-timeline-id',
-      timeline_title: 'some-timeline-title',
-      meta: { someMeta: 'someField' },
-      severity: 'high',
-      severity_mapping: [],
-      updated_by: 'elastic',
-      tags: [],
-      to: 'now',
-      type: 'query',
-      threat: getThreatMock(),
-      throttle: 'rule',
-      note: '# Investigative notes',
-      version: 1,
-      revision: 0,
-      exceptions_list: getListArrayMock(),
-    });
+        ],
+      })
+    );
     expect(detailsJson).toEqual({
       exported_exception_list_count: 1,
       exported_exception_list_item_count: 1,

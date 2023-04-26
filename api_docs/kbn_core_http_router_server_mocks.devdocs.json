@@ -18,7 +18,41 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-http-router-server-mocks",
+        "id": "def-common.createVersionedRouterMock",
+        "type": "Function",
+        "tags": [],
+        "label": "createVersionedRouterMock",
+        "description": [],
+        "signature": [
+          "() => jest.Mocked<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRouter",
+            "text": "VersionedRouter"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
+          },
+          ">>"
+        ],
+        "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [
@@ -30,7 +64,15 @@
         "label": "RouterMock",
         "description": [],
         "signature": [
-          "{ routerPath: string; get: jest.MockInstance<void, [route: ",
+          "{ versioned: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRouter",
+            "text": "VersionedRouter"
+          },
+          "<any>; routerPath: string; get: jest.MockInstance<void, [route: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -227,8 +269,8 @@
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IRouter",
-            "text": "IRouter"
+            "section": "def-common.IRouterWithVersion",
+            "text": "IRouterWithVersion"
           },
           "<any>"
         ],

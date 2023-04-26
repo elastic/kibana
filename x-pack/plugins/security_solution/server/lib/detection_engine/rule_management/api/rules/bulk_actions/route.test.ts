@@ -17,7 +17,6 @@ import {
   getBulkActionEditRequest,
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
-  getRuleMock,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { performBulkActionRoute } from './route';
@@ -27,20 +26,9 @@ import {
 } from '../../../../../../../common/detection_engine/rule_management/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { readRules } from '../../../logic/crud/read_rules';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
-import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 
 jest.mock('../../../../../machine_learning/authz');
 jest.mock('../../../logic/crud/read_rules', () => ({ readRules: jest.fn() }));
-
-jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');
-  return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
 
 describe('Perform bulk action route', () => {
   const readRulesMock = readRules as jest.Mock;
@@ -55,7 +43,6 @@ describe('Perform bulk action route', () => {
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     performBulkActionRoute(server.router, ml, logger);

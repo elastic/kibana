@@ -263,7 +263,10 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         onValueInLegendChange={onValueInLegendChange}
         position={layer.legendPosition}
         onPositionChange={onLegendPositionChange}
-        renderNestedLegendSwitch={!PartitionChartsMeta[state.shape]?.legend.hideNestedLegendSwitch}
+        renderNestedLegendSwitch={
+          !PartitionChartsMeta[state.shape]?.legend.hideNestedLegendSwitch &&
+          layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0) > 1
+        }
         nestedLegend={Boolean(layer.nestedLegend)}
         onNestedLegendChange={onNestedLegendChange}
         shouldTruncate={layer.truncateLegend ?? defaultTruncationValue}

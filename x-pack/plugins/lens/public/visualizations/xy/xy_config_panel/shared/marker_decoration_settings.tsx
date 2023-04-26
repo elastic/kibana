@@ -12,7 +12,11 @@ import { IconPosition } from '@kbn/expression-xy-plugin/common';
 import { YAxisMode } from '../../types';
 
 import { TooltipWrapper } from '../../../../shared_components';
-import { hasIcon, IconSelect, IconSet } from './icon_select';
+import {
+  hasIcon,
+  IconSelect,
+  IconSet,
+} from '../../../../shared_components/icon_select/icon_select';
 import { idPrefix } from '../dimension_editor';
 
 interface LabelConfigurationOptions {

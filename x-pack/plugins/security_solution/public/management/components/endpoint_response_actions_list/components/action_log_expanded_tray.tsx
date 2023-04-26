@@ -9,11 +9,11 @@ import React, { memo, useMemo } from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { OUTPUT_MESSAGES, EXECUTE_FILE_LINK_TITLE } from '../translations';
+import { OUTPUT_MESSAGES } from '../translations';
 import { getUiCommand } from './hooks';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
-import { ExecuteActionHostResponseOutput } from '../../endpoint_execute_action';
+import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
 import { type ActionDetails, type MaybeImmutable } from '../../../../../common/endpoint/types';
@@ -119,22 +119,14 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
           {action.agents.map((agentId) => (
             <div key={agentId}>
               {OUTPUT_MESSAGES.wasSuccessful(command)}
-              <EuiFlexItem>
-                <ResponseActionFileDownloadLink
-                  action={action}
-                  buttonTitle={EXECUTE_FILE_LINK_TITLE}
-                  canAccessFileDownloadLink={
-                    canAccessEndpointActionsLogManagement || canReadActionsLogManagement
-                  }
-                  data-test-subj={getTestId('getExecuteLink')}
-                  textSize="xs"
-                />
-              </EuiFlexItem>
-              <ExecuteActionHostResponseOutput
+              <ExecuteActionHostResponse
                 action={action}
                 agentId={agentId}
-                data-test-subj={getTestId('executeResponseOutput')}
+                canAccessFileDownloadLink={
+                  canAccessEndpointActionsLogManagement || canReadActionsLogManagement
+                }
                 textSize="xs"
+                data-test-subj={getTestId('actionsLogTray')}
               />
             </div>
           ))}
@@ -160,7 +152,7 @@ export const ActionsLogExpandedTray = memo<{
     () =>
       parameters
         ? Object.entries(parameters).map(([key, value]) => {
-            return `${key}:${value}`;
+            return `${key}: ${value}`;
           })
         : undefined,
     [parameters]

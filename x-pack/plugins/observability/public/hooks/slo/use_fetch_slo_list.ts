@@ -42,7 +42,7 @@ const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 export function useFetchSloList({
   name = '',
   page = 1,
-  sortBy = 'name',
+  sortBy = 'creationTime',
   indicatorTypes = [],
   shouldRefetch,
 }: SLOListParams | undefined = {}): UseFetchSloListResponse {

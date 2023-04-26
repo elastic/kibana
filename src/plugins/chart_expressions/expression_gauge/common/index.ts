@@ -10,6 +10,7 @@ export const PLUGIN_ID = 'expressionGauge';
 export const PLUGIN_NAME = 'expressionGauge';
 
 export type {
+  AllowedGaugeOverrides,
   GaugeExpressionFunctionDefinition,
   GaugeExpressionProps,
   FormatFactory,

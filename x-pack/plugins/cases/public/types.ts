@@ -25,6 +25,9 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type {
+  CaseResponse,
+  CasesBulkGetRequestCertainFields,
+  CasesBulkGetResponseCertainFields,
   CasesByAlertId,
   CasesByAlertIDRequest,
   CasesFindRequest,
@@ -32,6 +35,7 @@ import type {
   CasesStatusRequest,
   CommentRequestAlertType,
   CommentRequestExternalReferenceNoSOType,
+  CommentRequestExternalReferenceSOType,
   CommentRequestPersistableStateType,
   CommentRequestUserType,
 } from '../common/api';
@@ -102,6 +106,10 @@ export interface CasesUiStart {
       find: (query: CasesFindRequest, signal?: AbortSignal) => Promise<Cases>;
       getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal) => Promise<CasesStatus>;
       getCasesMetrics: (query: CasesMetricsRequest, signal?: AbortSignal) => Promise<CasesMetrics>;
+      bulkGet: <Field extends keyof CaseResponse = keyof CaseResponse>(
+        params: CasesBulkGetRequestCertainFields<Field>,
+        signal?: AbortSignal
+      ) => Promise<CasesBulkGetResponseCertainFields<Field>>;
     };
   };
   ui: {
@@ -160,7 +168,8 @@ export type SupportedCaseAttachment =
   | CommentRequestAlertType
   | CommentRequestUserType
   | CommentRequestPersistableStateType
-  | CommentRequestExternalReferenceNoSOType;
+  | CommentRequestExternalReferenceNoSOType
+  | CommentRequestExternalReferenceSOType;
 
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;

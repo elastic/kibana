@@ -116,6 +116,12 @@ export const createStartServicesMock = (
     unifiedSearch,
     data: {
       ...data,
+      dataViews: {
+        create: jest.fn(),
+        getIdsWithTitle: jest.fn(),
+        get: jest.fn(),
+        getIndexPattern: jest.fn(),
+      },
       query: {
         ...data.query,
         savedQueries: {
@@ -172,6 +178,7 @@ export const createStartServicesMock = (
     },
     osquery: {
       OsqueryResults: jest.fn().mockReturnValue(null),
+      fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
     },
     triggersActionsUi,
     cloudExperiments,
