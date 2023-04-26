@@ -57,14 +57,14 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
 
   const baseSuggestion = {
     state: {
+      colorMode: Boolean(mainPalette) ? GaugeColorModes.PALETTE : GaugeColorModes.NONE,
+      palette: mainPalette as PaletteOutput<CustomPaletteParams>,
       ...state,
       shape,
       layerId: table.layerId,
       layerType: LayerTypes.DATA,
       ticksPosition: GaugeTicksPositions.AUTO,
       labelMajorMode: GaugeLabelMajorModes.AUTO,
-      colorMode: Boolean(mainPalette) ? GaugeColorModes.PALETTE : GaugeColorModes.NONE,
-      palette: mainPalette as PaletteOutput<CustomPaletteParams>,
     },
     title: i18n.translate('xpack.lens.gauge.gaugeLabel', {
       defaultMessage: 'Gauge',

@@ -56,10 +56,10 @@ export const getSuggestions: Visualization<MetricVisualizationState>['getSuggest
 
   const baseSuggestion = {
     state: {
+      palette: mainPalette as PaletteOutput<CustomPaletteParams>,
       ...state,
       layerId: table.layerId,
       layerType: LayerTypes.DATA,
-      palette: mainPalette as PaletteOutput<CustomPaletteParams>,
     },
     title: metricLabel,
     previewIcon: IconChartMetric,

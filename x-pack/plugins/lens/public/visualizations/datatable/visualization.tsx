@@ -191,13 +191,13 @@ export const getDatatableVisualization = ({
           layerId: table.layerId,
           layerType: LayerTypes.DATA,
           columns: table.columns.map((col, columnIndex) => ({
-            ...(oldColumnSettings[col.columnId] || {}),
-            isTransposed: usesTransposing && columnIndex < lastTransposedColumnIndex,
-            columnId: col.columnId,
             colorMode: canApplyPalette ? 'cell' : 'none',
             palette: canApplyPalette
               ? (mainPalette as PaletteOutput<CustomPaletteParams>)
               : undefined,
+            ...(oldColumnSettings[col.columnId] || {}),
+            isTransposed: usesTransposing && columnIndex < lastTransposedColumnIndex,
+            columnId: col.columnId,
           })),
         },
         previewIcon: IconChartDatatable,
