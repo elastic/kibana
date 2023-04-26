@@ -85,6 +85,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         cy.get(LOAD_PREBUILT_RULES_BTN).click();
         cy.get(LOAD_PREBUILT_RULES_BTN).should('have.attr', 'disabled');
         cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
+        cy.get(TOASTER).should('be.visible').contains('Installed pre-packaged rules');
 
         /* Assert that correct number of rules were installed from the Fleet package */
         // TODO: For some reason, the number of rules installed is always 3 less than the actual number of rules in the package
@@ -116,6 +117,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       cy.get(LOAD_PREBUILT_RULES_BTN).click();
       cy.get(LOAD_PREBUILT_RULES_BTN).should('have.attr', 'disabled');
       cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
+      cy.get(TOASTER).should('be.visible').contains('Installed pre-packaged rules');
       cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length', 2);
       cy.get(RULES_MANAGEMENT_TABLE).contains(RULE_1['security-rule'].name);
       cy.get(RULES_MANAGEMENT_TABLE).contains(RULE_2['security-rule'].name);
@@ -125,6 +127,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click();
       cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('have.attr', 'disabled');
       cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('not.exist');
+      cy.get(TOASTER).should('be.visible').contains('Installed pre-packaged rules');
       cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length', 2);
       cy.get(RULES_MANAGEMENT_TABLE).contains(RULE_1['security-rule'].name);
       cy.get(RULES_MANAGEMENT_TABLE).contains(RULE_2['security-rule'].name);
