@@ -15,7 +15,6 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '..';
-import { MessageSigningError } from '../../../common/errors';
 
 import {
   type MessageSigningServiceInterface,
