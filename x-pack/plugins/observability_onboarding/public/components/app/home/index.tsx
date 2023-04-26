@@ -5,95 +5,96 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { ComponentType, useRef, useState } from 'react';
 import {
-  FilmstripFrame,
-  FilmstripTransition,
-  TransitionState,
-} from '../../shared/filmstrip_transition';
-import {
-  Provider as WizardProvider,
-  Step as WizardStep,
-} from './logs_onboarding_wizard';
-import { HorizontalSteps } from './logs_onboarding_wizard/horizontal_steps';
-import { PageTitle } from './logs_onboarding_wizard/page_title';
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+  EuiCard,
+  EuiIcon,
+  EuiHorizontalRule,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import { useBreadcrumbs } from '@kbn/observability-plugin/public';
+import React from 'react';
+import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
+import { breadcrumbsApp } from '../../../application/app';
 
-export function Home({ animated = true }: { animated?: boolean }) {
-  if (animated) {
-    return <AnimatedTransitionsWizard />;
-  }
-  return <StillTransitionsWizard />;
-}
+export function Home() {
+  useBreadcrumbs([], breadcrumbsApp);
 
-function StillTransitionsWizard() {
-  return (
-    <WizardProvider>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <WizardStep />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </WizardProvider>
-  );
-}
+  const navigateToKibanaUrl = useKibanaNavigation();
 
-const TRANSITION_DURATION = 180;
-
-function AnimatedTransitionsWizard() {
-  const [transition, setTransition] = useState<TransitionState>('ready');
-  const TransitionComponent = useRef<ComponentType>(() => null);
-
-  function onChangeStep({
-    direction,
-    StepComponent,
-  }: {
-    direction: 'back' | 'next';
-    StepComponent: ComponentType;
-  }) {
-    setTransition(direction);
-    TransitionComponent.current = StepComponent;
-    setTimeout(() => {
-      setTransition('ready');
-    }, TRANSITION_DURATION + 10);
-  }
+  const handleClickLogsOnboarding = () => {
+    navigateToKibanaUrl('/app/observabilityOnboarding/logs');
+  };
 
   return (
-    <WizardProvider
-      transitionDuration={TRANSITION_DURATION}
-      onChangeStep={onChangeStep}
+    <EuiFlexGroup
+      direction="column"
+      alignItems="center"
+      style={{ margin: 'auto', maxWidth: 800 }}
     >
-      <EuiFlexGroup direction="column" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiSpacer size="l" />
-          <PageTitle />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ width: '50%' }}>
-          <HorizontalSteps />
-        </EuiFlexItem>
-        <EuiFlexItem grow={1} style={{ width: '50%' }}>
-          <FilmstripTransition
-            duration={TRANSITION_DURATION}
-            transition={transition}
-          >
-            <FilmstripFrame position="left">
-              {
-                // eslint-disable-next-line react/jsx-pascal-case
-                transition === 'back' ? <TransitionComponent.current /> : null
-              }
-            </FilmstripFrame>
-            <FilmstripFrame position="center">
-              <WizardStep />
-            </FilmstripFrame>
-            <FilmstripFrame position="right">
-              {
-                // eslint-disable-next-line react/jsx-pascal-case
-                transition === 'next' ? <TransitionComponent.current /> : null
-              }
-            </FilmstripFrame>
-          </FilmstripTransition>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </WizardProvider>
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="l" />
+        <EuiTitle size="l">
+          <h1>Get started with Observability</h1>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText color="subdued" style={{ textAlign: 'center' }}>
+          <p>
+            Monitor and gain insights across your cloud-native and distributed
+            systems, bringing together application, infrastructure, and user
+            telemetry data for end-to-end observability on a single platform.
+          </p>
+        </EuiText>
+        <EuiSpacer size="xl" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ width: 400 }}>
+        <EuiCard
+          layout="vertical"
+          icon={<EuiIcon size="xl" type="logoLogging" />}
+          title="Collect and analyse logs"
+          betaBadgeProps={{ label: 'Quick Start' }}
+          description="Choose what logs to collect, and onboard your data in up to 5 minutes to start analysing it straight away."
+          onClick={handleClickLogsOnboarding}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiHorizontalRule margin="l" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>
+            <EuiCard
+              title="Integrations"
+              betaBadgeProps={{ label: 'Integrations' }}
+              description="Explore 300+ ways of ingesting data"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCard
+              title="Setup guide"
+              betaBadgeProps={{ label: 'Setup guide' }}
+              description="Monitor kubernetes clusters"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCard
+              title="Sample data"
+              betaBadgeProps={{ label: 'Sample data' }}
+              description="Explore data, visualizations, and dashboards samples"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty href="/app/observability/overview">
+          Skip for now
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

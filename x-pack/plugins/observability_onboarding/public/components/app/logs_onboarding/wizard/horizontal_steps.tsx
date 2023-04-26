@@ -27,8 +27,8 @@ export function HorizontalSteps() {
     <EuiStepsHorizontal
       steps={[
         {
-          title: 'Name logs',
-          status: getStatus('nameLogs'),
+          title: 'Select logs',
+          status: getStatus('selectLogs'),
           onClick: () => {},
         },
         {
@@ -42,7 +42,7 @@ export function HorizontalSteps() {
           onClick: () => {},
         },
         {
-          title: 'Import data',
+          title: 'Collect logs',
           status: getStatus('importData'),
           onClick: () => {},
         },

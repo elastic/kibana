@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { NameLogs } from './name_logs';
 import { ConfigureLogs } from './configure_logs';
+import { SelectLogs } from './select_logs';
 import { InstallElasticAgent } from './install_elastic_agent';
 import { createWizardContext } from '../../../../context/create_wizard_context';
 import { ImportData } from './import_data';
@@ -45,9 +45,9 @@ const initialState: WizardState = {
 
 const { Provider, Step, useWizard } = createWizardContext({
   initialState,
-  initialStep: 'nameLogs',
+  initialStep: 'selectLogs',
   steps: {
-    nameLogs: NameLogs,
+    selectLogs: SelectLogs,
     configureLogs: ConfigureLogs,
     installElasticAgent: InstallElasticAgent,
     importData: ImportData,

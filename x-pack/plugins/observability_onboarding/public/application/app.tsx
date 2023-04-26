@@ -17,20 +17,28 @@ import {
   KibanaContextProvider,
   KibanaThemeProvider,
   RedirectAppLinks,
-  useKibana,
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
-import { useBreadcrumbs } from '@kbn/observability-plugin/public';
-import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
+// import { useBreadcrumbs } from '@kbn/observability-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
+// import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Redirect, RouteComponentProps, RouteProps } from 'react-router-dom';
-import { Home } from '../components/app/home';
+import {
+  Router,
+  Switch,
+  // Redirect,
+  RouteComponentProps,
+  RouteProps,
+} from 'react-router-dom';
+// import { LogsOnboarding } from '../components/app/logs_onboarding';
+// import { Home } from '../components/app/home';
 import {
   ObservabilityOnboardingPluginSetupDeps,
   ObservabilityOnboardingPluginStartDeps,
 } from '../plugin';
+import { routes } from '../routes';
 
 export type BreadcrumbTitle<
   T extends { [K in keyof T]?: string | undefined } = {}
@@ -49,32 +57,50 @@ export const onBoardingTitle = i18n.translate(
   }
 );
 
-export const onboardingRoutes: RouteDefinition[] = [
-  {
-    exact: true,
-    path: '/',
-    render: () => <Redirect to="/observabilityOnboarding" />,
-    breadcrumb: onBoardingTitle,
-  },
-];
+export const breadcrumbsApp = { id: 'observabilityOnboarding', label: onBoardingTitle };
+
+// export const onboardingRoutes: RouteDefinition[] = [
+//   {
+//     exact: true,
+//     path: '/',
+//     render: () => <Redirect to="/observabilityOnboarding" />,
+//     breadcrumb: onBoardingTitle,
+//   },
+// ];
+
+function App() {
+  return (
+    <>
+      <Switch>
+        {Object.keys(routes).map((key) => {
+          const path = key as keyof typeof routes;
+          const { handler, exact } = routes[path];
+          const Wrapper = () => {
+            return handler();
+          };
+          return (
+            <Route key={path} path={path} exact={exact} component={Wrapper} />
+          );
+        })}
+      </Switch>
+    </>
+  );
+}
 
 function ObservabilityOnboardingApp() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
-  const { http } = useKibana<ObservabilityOnboardingPluginStartDeps>().services;
-  const basePath = http.basePath.get();
-
-  useBreadcrumbs([
-    {
-      text: onBoardingTitle,
-      href: basePath + '/app/observabilityOnboarding',
-    },
-    {
-      text: i18n.translate('xpack.observability_onboarding.breadcrumbs.logs', {
-        defaultMessage: 'Logs',
-      }),
-    },
-  ]);
+  // useBreadcrumbs(
+  //   [
+  //     {
+  //       text: i18n.translate(
+  //         'xpack.observability_onboarding.breadcrumbs.logs',
+  //         { defaultMessage: 'Logs' }
+  //       ),
+  //     },
+  //   ],
+  //   { id: 'observabilityOnboarding', label: 'Onboarding' }
+  // );
 
   return (
     <ThemeProvider
@@ -85,13 +111,11 @@ function ObservabilityOnboardingApp() {
       })}
     >
       <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-        <Home />
+        <App />
       </div>
     </ThemeProvider>
   );
 }
-
-export const observabilityOnboardingRouter = createRouter({});
 
 export function ObservabilityOnboardingAppRoot({
   appMountParameters,
@@ -131,6 +155,12 @@ export function ObservabilityOnboardingAppRoot({
           }}
         >
           <i18nCore.Context>
+            <Router history={history}>
+              <EuiErrorBoundary>
+                <ObservabilityOnboardingApp />
+              </EuiErrorBoundary>
+            </Router>
+            {/*
             <RouterProvider
               history={history}
               router={observabilityOnboardingRouter}
@@ -139,6 +169,7 @@ export function ObservabilityOnboardingAppRoot({
                 <ObservabilityOnboardingApp />
               </EuiErrorBoundary>
             </RouterProvider>
+            */}
           </i18nCore.Context>
         </KibanaThemeProvider>
       </KibanaContextProvider>
