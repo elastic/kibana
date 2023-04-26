@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState, useMemo } from 'react';
 
-import { EuiButtonEmpty, EuiModalFooter, EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty, EuiModalFooter, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody } from '@elastic/eui';
 import { EuiSelectable } from '@elastic/eui';
@@ -17,13 +17,13 @@ import { SavedView } from '../../containers/saved_view/saved_view';
 
 interface Props<ViewState> {
   views: Array<SavedView<ViewState>>;
-  close(): void;
+  onClose(): void;
   setView(viewState: ViewState): void;
   currentView?: ViewState;
 }
 
 export function SavedViewListModal<ViewState extends { id: string; name: string }>({
-  close,
+  onClose,
   views,
   setView,
   currentView,
@@ -36,18 +36,18 @@ export function SavedViewListModal<ViewState extends { id: string; name: string 
 
   const loadView = useCallback(() => {
     if (!options) {
-      close();
+      onClose();
       return;
     }
 
     const selected = options.find((o) => o.checked);
     if (!selected) {
-      close();
+      onClose();
       return;
     }
     setView(views.find((v) => v.id === selected.key)!);
-    close();
-  }, [options, views, setView, close]);
+    onClose();
+  }, [options, views, setView, onClose]);
 
   const defaultOptions = useMemo<EuiSelectableOption[]>(() => {
     return views.map((v) => ({
@@ -58,7 +58,7 @@ export function SavedViewListModal<ViewState extends { id: string; name: string 
   }, [views, currentView]);
 
   return (
-    <EuiModal onClose={close} data-test-subj="savedViews-loadModal">
+    <EuiModal onClose={onClose} data-test-subj="savedViews-loadModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
@@ -69,8 +69,8 @@ export function SavedViewListModal<ViewState extends { id: string; name: string 
       </EuiModalHeader>
       <EuiModalBody>
         <EuiSelectable
-          singleSelection={true}
-          searchable={true}
+          singleSelection
+          searchable
           options={options || defaultOptions}
           onChange={onChange}
           searchProps={{
@@ -79,27 +79,22 @@ export function SavedViewListModal<ViewState extends { id: string; name: string 
             }),
           }}
           listProps={{ bordered: true }}
+          data-test-subj="savedViews-loadList"
         >
           {(list, search) => (
             <>
               {search}
-              <div style={{ marginTop: 20 }} data-test-subj="savedViews-loadList">
-                {list}
-              </div>
+              <EuiSpacer size="m" />
+              {list}
             </>
           )}
         </EuiSelectable>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="cancelSavedViewModal" onClick={close}>
+        <EuiButtonEmpty data-test-subj="cancelSavedViewModal" onClick={onClose}>
           <FormattedMessage defaultMessage="Cancel" id="xpack.infra.openView.cancelButton" />
         </EuiButtonEmpty>
-        <EuiButton
-          fill={true}
-          color={'primary'}
-          data-test-subj="loadSavedViewModal"
-          onClick={loadView}
-        >
+        <EuiButton fill color="primary" data-test-subj="loadSavedViewModal" onClick={loadView}>
           <FormattedMessage defaultMessage="Load view" id="xpack.infra.openView.loadButton" />
         </EuiButton>
       </EuiModalFooter>

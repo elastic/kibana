@@ -15,10 +15,7 @@ import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 
 import { AnyStep } from './journey';
 import { JourneyConfig } from './journey_config';
-
-// These "secret" values are intentionally written in the source. We would make the APM server accept anonymous traffic if we could
-const APM_SERVER_URL = 'https://kibana-ops-e2e-perf.apm.us-central1.gcp.cloud.es.io:443';
-const APM_PUBLIC_TOKEN = 'CTs9y3cvcfq13bQqsB';
+import { JOURNEY_APM_CONFIG } from './journey_apm_config';
 
 export function makeFtrConfigProvider(
   config: JourneyConfig<any>,
@@ -92,33 +89,22 @@ export function makeFtrConfigProvider(
         ],
 
         env: {
-          ELASTIC_APM_ACTIVE: 'true',
-          ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
-          ELASTIC_APM_ENVIRONMENT: process.env.CI ? 'ci' : 'development',
-          ELASTIC_APM_TRANSACTION_SAMPLE_RATE: '1.0',
-          ELASTIC_APM_SERVER_URL: APM_SERVER_URL,
-          ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
-          // capture request body for both errors and request transactions
-          // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#capture-body
-          ELASTIC_APM_CAPTURE_BODY: 'all',
-          // capture request headers
-          // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#capture-headers
-          ELASTIC_APM_CAPTURE_HEADERS: true,
-          // request body with bigger size will be trimmed.
-          // 300_000 is the default of the APM server.
-          // for a body with larger size, we might need to reconfigure the APM server to increase the limit.
-          // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#long-field-max-length
-          ELASTIC_APM_LONG_FIELD_MAX_LENGTH: 300_000,
+          ELASTIC_APM_ACTIVE: JOURNEY_APM_CONFIG.active,
+          ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: JOURNEY_APM_CONFIG.contextPropagationOnly,
+          ELASTIC_APM_ENVIRONMENT: JOURNEY_APM_CONFIG.environment,
+          ELASTIC_APM_TRANSACTION_SAMPLE_RATE: JOURNEY_APM_CONFIG.transactionSampleRate,
+          ELASTIC_APM_SERVER_URL: JOURNEY_APM_CONFIG.serverUrl,
+          ELASTIC_APM_SECRET_TOKEN: JOURNEY_APM_CONFIG.secretToken,
+          ELASTIC_APM_CAPTURE_BODY: JOURNEY_APM_CONFIG.captureBody,
+          ELASTIC_APM_CAPTURE_HEADERS: JOURNEY_APM_CONFIG.captureRequestHeaders,
+          ELASTIC_APM_LONG_FIELD_MAX_LENGTH: JOURNEY_APM_CONFIG.longFieldMaxLength,
           ELASTIC_APM_GLOBAL_LABELS: Object.entries({
             ...config.getExtraApmLabels(),
             testJobId,
             testBuildId,
             journeyName: config.getName(),
             ftrConfig: config.getRepoRelPath(),
-            performancePhase: process.env.TEST_PERFORMANCE_PHASE,
-            branch: process.env.BUILDKITE_BRANCH,
-            gitRev: process.env.BUILDKITE_COMMIT,
-            ciBuildName: process.env.BUILDKITE_PIPELINE_SLUG,
+            ...JOURNEY_APM_CONFIG.globalLabels,
           })
             .flatMap(([key, value]) => (value == null ? [] : `${key}=${value}`))
             .join(','),

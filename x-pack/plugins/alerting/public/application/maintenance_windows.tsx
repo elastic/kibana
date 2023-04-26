@@ -7,7 +7,7 @@
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch } from 'react-router-dom';
+import { Redirect, Router, Switch } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Route } from '@kbn/shared-ux-router';
 import { CoreStart } from '@kbn/core/public';
@@ -22,6 +22,9 @@ import { paths } from '../config';
 const MaintenanceWindowsLazy: React.FC = React.lazy(() => import('../pages/maintenance_windows'));
 const MaintenanceWindowsCreateLazy: React.FC = React.lazy(
   () => import('../pages/maintenance_windows/maintenance_window_create_page')
+);
+const MaintenanceWindowsEditLazy: React.FC = React.lazy(
+  () => import('../pages/maintenance_windows/maintenance_window_edit_page')
 );
 
 const App = React.memo(() => {
@@ -38,6 +41,12 @@ const App = React.memo(() => {
             <MaintenanceWindowsCreateLazy />
           </Suspense>
         </Route>
+        <Route path={paths.alerting.maintenanceWindowsEdit} exact>
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <MaintenanceWindowsEditLazy />
+          </Suspense>
+        </Route>
+        <Redirect from={'/edit'} to="/" />
       </Switch>
     </>
   );

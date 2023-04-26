@@ -17,7 +17,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { generatePath, Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -179,19 +178,10 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
       />
     ),
     render: (complianceScore: FindingsByResourcePage['compliance_score'], data) => (
-      <div
-        css={css`
-          width: 100%;
-          .cspComplianceScoreBarTooltip {
-            width: 100%;
-          }
-        `}
-      >
-        <ComplianceScoreBar
-          totalPassed={data.findings.passed_findings}
-          totalFailed={data.findings.failed_findings}
-        />
-      </div>
+      <ComplianceScoreBar
+        totalPassed={data.findings.passed_findings}
+        totalFailed={data.findings.failed_findings}
+      />
     ),
     dataType: 'number',
   },

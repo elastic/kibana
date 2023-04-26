@@ -56,7 +56,8 @@ export const getAPIKeyForSyntheticsService = async ({
       const hasPermissions =
         indexPermissions.auto_configure &&
         indexPermissions.create_doc &&
-        indexPermissions.view_index_metadata;
+        indexPermissions.view_index_metadata &&
+        indexPermissions.read;
 
       if (!hasPermissions) {
         return { isValid: false, apiKey };
@@ -92,6 +93,7 @@ export const generateAPIKey = async ({
   }
 
   if (uptimePrivileges) {
+    /* Exposed to the user. Must create directly with the user */
     return security.authc.apiKeys?.create(request, {
       name: 'synthetics-api-key (required for project monitors)',
       kibana_role_descriptors: {
@@ -122,7 +124,8 @@ export const generateAPIKey = async ({
     throw new SyntheticsForbiddenError();
   }
 
-  return security.authc.apiKeys?.create(request, {
+  /* Not exposed to the user. May grant as internal user */
+  return security.authc.apiKeys?.grantAsInternalUser(request, {
     name: 'synthetics-api-key (required for monitor management)',
     role_descriptors: {
       synthetics_writer: serviceApiKeyPrivileges,
@@ -160,16 +163,6 @@ export const generateAndSaveServiceAPIKey = async ({
 export const getSyntheticsEnablement = async ({ server }: { server: UptimeServerSetup }) => {
   const { security, config } = server;
 
-  if (!config.service?.manifestUrl) {
-    return {
-      canEnable: true,
-      canManageApiKeys: true,
-      isEnabled: true,
-      isValidApiKey: true,
-      areApiKeysEnabled: true,
-    };
-  }
-
   const [apiKey, hasPrivileges, areApiKeysEnabled] = await Promise.all([
     getAPIKeyForSyntheticsService({ server }),
     hasEnablePermissions(server),
@@ -177,6 +170,17 @@ export const getSyntheticsEnablement = async ({ server }: { server: UptimeServer
   ]);
 
   const { canEnable, canManageApiKeys } = hasPrivileges;
+
+  if (!config.service?.manifestUrl) {
+    return {
+      canEnable: true,
+      canManageApiKeys,
+      isEnabled: true,
+      isValidApiKey: true,
+      areApiKeysEnabled: true,
+    };
+  }
+
   return {
     canEnable,
     canManageApiKeys,
@@ -217,7 +221,7 @@ const hasEnablePermissions = async ({ uptimeEsClient }: UptimeServerSetup) => {
 
   return {
     canManageApiKeys,
-    canEnable: canManageApiKeys && hasClusterPermissions && hasIndexPermissions,
+    canEnable: hasClusterPermissions && hasIndexPermissions,
   };
 };
 

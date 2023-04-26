@@ -99,7 +99,7 @@ describe('FileService', () => {
     return file;
   }
   afterEach(async () => {
-    await Promise.all(disposables.map((file) => file.delete()));
+    await fileService.bulkDelete({ ids: disposables.map((d) => d.id) });
     const { files } = await fileService.find({ kind: [fileKind] });
     expect(files.length).toBe(0);
     disposables = [];
@@ -157,26 +157,39 @@ describe('FileService', () => {
       createDisposableFile({ fileKind, name: 'foo-2' }),
       createDisposableFile({ fileKind, name: 'foo-3' }),
       createDisposableFile({ fileKind, name: 'test-3' }),
+      createDisposableFile({ fileKind: fileKindNonDefault, name: 'foo-1' }),
     ]);
     {
       const { files, total } = await fileService.find({
-        kind: [fileKind],
+        kind: [fileKind, fileKindNonDefault],
         name: ['foo*'],
         perPage: 2,
         page: 1,
       });
       expect(files.length).toBe(2);
-      expect(total).toBe(3);
+      expect(total).toBe(4);
     }
 
     {
       const { files, total } = await fileService.find({
-        kind: [fileKind],
+        kind: [fileKind, fileKindNonDefault],
         name: ['foo*'],
         perPage: 2,
         page: 2,
       });
-      expect(files.length).toBe(1);
+      expect(files.length).toBe(2);
+      expect(total).toBe(4);
+    }
+
+    // Filter out fileKind
+    {
+      const { files, total } = await fileService.find({
+        kindToExclude: [fileKindNonDefault],
+        name: ['foo*'],
+        perPage: 10,
+        page: 1,
+      });
+      expect(files.length).toBe(3); // foo-1 from fileKindNonDefault not returned
       expect(total).toBe(3);
     }
   });
@@ -233,11 +246,30 @@ describe('FileService', () => {
     expect(result3.files.length).toBe(2);
   });
 
-  it('deletes files', async () => {
+  it('deletes a single file', async () => {
     const file = await fileService.create({ fileKind, name: 'test' });
     const result = await fileService.find({ kind: [fileKind] });
     expect(result.files.length).toBe(1);
     await file.delete();
+    expect(await fileService.find({ kind: [fileKind] })).toEqual({ files: [], total: 0 });
+  });
+
+  it('deletes a single file using the bulk method', async () => {
+    const file = await fileService.create({ fileKind, name: 'test' });
+    const result = await fileService.find({ kind: [fileKind] });
+    expect(result.files.length).toBe(1);
+    await fileService.bulkDelete({ ids: [file.id] });
+    expect(await fileService.find({ kind: [fileKind] })).toEqual({ files: [], total: 0 });
+  });
+
+  it('deletes multiple files using the bulk method', async () => {
+    const promises = Array.from({ length: 15 }, (v, i) =>
+      fileService.create({ fileKind, name: 'test ' + i })
+    );
+    const files = await Promise.all(promises);
+    const result = await fileService.find({ kind: [fileKind] });
+    expect(result.files.length).toBe(15);
+    await fileService.bulkDelete({ ids: files.map((file) => file.id) });
     expect(await fileService.find({ kind: [fileKind] })).toEqual({ files: [], total: 0 });
   });
 

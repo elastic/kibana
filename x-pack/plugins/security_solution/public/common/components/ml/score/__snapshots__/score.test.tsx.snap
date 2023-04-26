@@ -10,7 +10,7 @@ exports[`draggable_score renders correctly against snapshot 1`] = `
       "value": "du",
     }
   }
-  mode="hover"
+  mode="hover-down"
   triggerId="security-default-cellActions"
   visibleCellActions={5}
 >
@@ -28,7 +28,7 @@ exports[`draggable_score renders correctly against snapshot when the index is no
       "value": "du",
     }
   }
-  mode="hover"
+  mode="hover-down"
   triggerId="security-default-cellActions"
   visibleCellActions={5}
 >
