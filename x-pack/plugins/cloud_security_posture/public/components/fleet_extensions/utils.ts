@@ -7,7 +7,10 @@
 import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
+  PackageInfo,
   PackagePolicyConfigRecordEntry,
+  RegistryPolicyTemplate,
+  RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
 import merge from 'lodash/merge';
 import {
@@ -21,6 +24,7 @@ import {
   SUPPORTED_CLOUDBEAT_INPUTS,
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
+  VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
 import { DEFAULT_AWS_VARS_GROUP } from './aws_credentials_form';
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
@@ -34,7 +38,8 @@ type PosturePolicyInput =
   | { type: typeof CLOUDBEAT_GCP; policy_template: typeof CSPM_POLICY_TEMPLATE }
   | { type: typeof CLOUDBEAT_AWS; policy_template: typeof CSPM_POLICY_TEMPLATE }
   | { type: typeof CLOUDBEAT_VANILLA; policy_template: typeof KSPM_POLICY_TEMPLATE }
-  | { type: typeof CLOUDBEAT_EKS; policy_template: typeof KSPM_POLICY_TEMPLATE };
+  | { type: typeof CLOUDBEAT_EKS; policy_template: typeof KSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_VULN_MGMT_AWS; policy_template: typeof VULN_MGMT_POLICY_TEMPLATE };
 
 // Extend NewPackagePolicyInput with known string literals for input type and policy template
 export type NewPackagePolicyPostureInput = NewPackagePolicyInput & PosturePolicyInput;
@@ -120,6 +125,40 @@ export const getPosturePolicy = (
     posture: { value: getPostureType(inputType) },
   }),
 });
+
+type RegistryPolicyTemplateWithInputs = RegistryPolicyTemplate & {
+  inputs: Array<{
+    vars?: RegistryVarsEntry[];
+  }>;
+};
+// type guard for checking inputs
+export const hasPolicyTemplateInputs = (
+  policyTemplate: RegistryPolicyTemplate
+): policyTemplate is RegistryPolicyTemplateWithInputs => {
+  return policyTemplate.hasOwnProperty('inputs');
+};
+
+export const getVulnMgmtCloudFormationDefaultValue = (packageInfo: PackageInfo): string => {
+  if (!packageInfo.policy_templates) return '';
+
+  const vulnMgmtPolicyTemplate = packageInfo.policy_templates.find(
+    (p) => p.name === VULN_MGMT_POLICY_TEMPLATE
+  );
+  if (!vulnMgmtPolicyTemplate) return '';
+
+  const vulnMgmtInputs =
+    hasPolicyTemplateInputs(vulnMgmtPolicyTemplate) && vulnMgmtPolicyTemplate.inputs;
+
+  if (!vulnMgmtInputs) return '';
+
+  const cloudFormationTemplate = vulnMgmtInputs.reduce((acc, input): string => {
+    if (!input.vars) return acc;
+    const template = input.vars.find((v) => v.name === 'cloud_formation_template')?.default;
+    return template ? String(template) : acc;
+  }, '');
+
+  return cloudFormationTemplate;
+};
 
 /**
  * Input vars that are hidden from the user
