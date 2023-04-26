@@ -33,6 +33,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN,
   KIBANA_NAVBAR_ALERTS_PAGE,
   KIBANA_NAVBAR_CASES_PAGE,
@@ -140,6 +141,16 @@ export const toggleOverviewTabDescriptionSection = () =>
 export const toggleOverviewTabInsightsSection = () =>
   cy
     .get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_SECTION_HEADER)
+    .scrollIntoView()
+    .should('be.visible')
+    .click();
+
+/**
+ * Toggle the Overview tab visualizations section in the document details expandable flyout right section
+ */
+export const toggleOverviewTabVisualizationsSection = () =>
+  cy
+    .get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_HEADER)
     .scrollIntoView()
     .should('be.visible')
     .click();

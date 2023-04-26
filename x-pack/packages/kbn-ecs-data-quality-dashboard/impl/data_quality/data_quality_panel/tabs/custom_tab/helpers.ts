@@ -10,14 +10,11 @@ import { euiThemeVars } from '@kbn/ui-theme';
 
 import { FIELD, INDEX_MAPPING_TYPE } from '../../../compare_fields_table/translations';
 import {
-  ECS_FIELD_REFERENCE_URL,
-  ECS_REFERENCE_URL,
   getSummaryMarkdownComment,
   getCustomMarkdownTableRows,
   getMarkdownComment,
   getMarkdownTable,
   getTabCountsMarkdownComment,
-  MAPPING_URL,
   getSummaryTableMarkdownComment,
 } from '../../index_properties/markdown/helpers';
 import * as i18n from '../../index_properties/translations';
@@ -50,33 +47,33 @@ export const getCustomColor = (partitionedFieldMetadata: PartitionedFieldMetadat
 
 export const getAllCustomMarkdownComments = ({
   docsCount,
+  formatBytes,
   formatNumber,
   ilmPhase,
   indexName,
   partitionedFieldMetadata,
   patternDocsCount,
+  sizeInBytes,
 }: {
   docsCount: number;
+  formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   patternDocsCount: number;
+  sizeInBytes: number | undefined;
 }): string[] => [
-  getSummaryMarkdownComment({
-    ecsFieldReferenceUrl: ECS_FIELD_REFERENCE_URL,
-    ecsReferenceUrl: ECS_REFERENCE_URL,
-    incompatible: partitionedFieldMetadata.incompatible.length,
-    indexName,
-    mappingUrl: MAPPING_URL,
-  }),
+  getSummaryMarkdownComment(indexName),
   getSummaryTableMarkdownComment({
     docsCount,
+    formatBytes,
     formatNumber,
     ilmPhase,
     indexName,
     partitionedFieldMetadata,
     patternDocsCount,
+    sizeInBytes,
   }),
   getTabCountsMarkdownComment(partitionedFieldMetadata),
   getCustomMarkdownComment({

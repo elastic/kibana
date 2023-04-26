@@ -12,14 +12,12 @@ import { ActionVariables, REQUIRED_ACTION_VARIABLES, CONTEXT_ACTION_VARIABLES } 
 
 export type OmitMessageVariablesType = 'all' | 'keepContext';
 
-// return a "flattened" list of action variables for an alertType
-export function transformActionVariables(
-  actionVariables: ActionVariables,
-  omitMessageVariables?: OmitMessageVariablesType,
-  isSummaryAction?: boolean
+function transformProvidedActionVariables(
+  actionVariables?: ActionVariables,
+  omitMessageVariables?: OmitMessageVariablesType
 ): ActionVariable[] {
-  if (isSummaryAction) {
-    return getSummaryAlertActionVariables();
+  if (!actionVariables) {
+    return [];
   }
 
   const filteredActionVariables: ActionVariables = omitMessageVariables
@@ -28,7 +26,6 @@ export function transformActionVariables(
       : pick(actionVariables, [...REQUIRED_ACTION_VARIABLES, ...CONTEXT_ACTION_VARIABLES])
     : actionVariables;
 
-  const alwaysProvidedVars = getAlwaysProvidedActionVariables();
   const paramsVars = prefixKeys(filteredActionVariables.params, 'params.');
   const contextVars = filteredActionVariables.context
     ? prefixKeys(filteredActionVariables.context, 'context.')
@@ -37,7 +34,31 @@ export function transformActionVariables(
     ? prefixKeys(filteredActionVariables.state, 'state.')
     : [];
 
-  return alwaysProvidedVars.concat(contextVars, paramsVars, stateVars);
+  return contextVars.concat(paramsVars, stateVars);
+}
+
+// return a "flattened" list of action variables for an alertType
+export function transformActionVariables(
+  actionVariables: ActionVariables,
+  summaryActionVariables?: ActionVariables,
+  omitMessageVariables?: OmitMessageVariablesType,
+  isSummaryAction?: boolean
+): ActionVariable[] {
+  if (isSummaryAction) {
+    const alwaysProvidedVars = getSummaryAlertActionVariables();
+    const transformedActionVars = transformProvidedActionVariables(
+      summaryActionVariables,
+      omitMessageVariables
+    );
+    return alwaysProvidedVars.concat(transformedActionVars);
+  }
+
+  const alwaysProvidedVars = getAlwaysProvidedActionVariables();
+  const transformedActionVars = transformProvidedActionVariables(
+    actionVariables,
+    omitMessageVariables
+  );
+  return alwaysProvidedVars.concat(transformedActionVars);
 }
 
 export enum AlertProvidedActionVariables {

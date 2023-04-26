@@ -25,8 +25,8 @@ export const useStdErrorLogs = ({
           bool: {
             filter: [
               {
-                term: {
-                  'synthetics.type': 'stderr',
+                terms: {
+                  'synthetics.type': ['stderr', 'stdout'],
                 },
               },
               ...(monitorId

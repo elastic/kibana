@@ -25,15 +25,6 @@ export const CHECKING = (index: string) =>
     defaultMessage: 'Checking {index}',
   });
 
-export const COLLAPSE_BUTTON_LABEL = (collapsed: boolean) =>
-  collapsed
-    ? i18n.translate('ecsDataQualityDashboard.collapseButtonLabelOpen', {
-        defaultMessage: 'Open',
-      })
-    : i18n.translate('ecsDataQualityDashboard.collapseButtonLabelClosed', {
-        defaultMessage: 'Closed',
-      });
-
 export const COLD_DESCRIPTION = i18n.translate('ecsDataQualityDashboard.coldDescription', {
   defaultMessage:
     'The index is no longer being updated and is queried infrequently. The information still needs to be searchable, but it’s okay if those queries are slower.',
@@ -80,24 +71,12 @@ export const ECS_VERSION = i18n.translate('ecsDataQualityDashboard.ecsVersionSta
   defaultMessage: 'ECS version',
 });
 
-export const ERROR_LOADING_ECS_METADATA = (details: string) =>
-  i18n.translate('ecsDataQualityDashboard.errorLoadingEcsMetadataLabel', {
-    values: { details },
-    defaultMessage: 'Error loading ECS metadata: {details}',
-  });
-
 export const ERROR_LOADING_ECS_METADATA_TITLE = i18n.translate(
   'ecsDataQualityDashboard.emptyErrorPrompt.errorLoadingEcsMetadataTitle',
   {
     defaultMessage: 'Unable to load ECS metadata',
   }
 );
-
-export const ERROR_LOADING_ECS_VERSION = (details: string) =>
-  i18n.translate('ecsDataQualityDashboard.errorLoadingEcsVersionLabel', {
-    values: { details },
-    defaultMessage: 'Error loading ECS version: {details}',
-  });
 
 export const ERROR_LOADING_ECS_VERSION_TITLE = i18n.translate(
   'ecsDataQualityDashboard.emptyErrorPrompt.errorLoadingEcsVersionTitle',
@@ -213,6 +192,10 @@ export const SELECT_ONE_OR_MORE_ILM_PHASES: string = i18n.translate(
     defaultMessage: 'Select one or more ILM phases',
   }
 );
+
+export const INDEX_SIZE_TOOLTIP = i18n.translate('ecsDataQualityDashboard.indexSizeTooltip', {
+  defaultMessage: 'The size of the primary index (does not include replicas)',
+});
 
 export const TECHNICAL_PREVIEW = i18n.translate('ecsDataQualityDashboard.technicalPreviewBadge', {
   defaultMessage: 'Technical preview',
