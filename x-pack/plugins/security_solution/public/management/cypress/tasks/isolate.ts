@@ -111,7 +111,9 @@ export const filterOutEndpoints = (endpointHostname: string): void => {
   });
 };
 
-export const createAgentPolicyTask = (version: string) => {
+export const createAgentPolicyTask = (
+  version: string
+): Cypress.Chainable<IndexedFleetEndpointPolicyResponse> => {
   const policyName = `Reassign ${Math.random().toString(36).substring(2, 7)}`;
 
   return cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
