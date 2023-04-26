@@ -63,6 +63,8 @@ export const updateMaintenanceWindowRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
+        licenseState.ensureLicenseForMaintenanceWindow();
+
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
         const maintenanceWindow = await maintenanceWindowClient.update({
           id: req.params.id,
