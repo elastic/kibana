@@ -43,6 +43,7 @@ function renderActions({ agent, agentPolicy }: { agent: Agent; agentPolicy?: Age
 
   return { utils };
 }
+
 describe('AgentDetailsActionMenu', () => {
   beforeEach(() => {
     mockedExperimentalFeaturesService.get.mockReturnValue({

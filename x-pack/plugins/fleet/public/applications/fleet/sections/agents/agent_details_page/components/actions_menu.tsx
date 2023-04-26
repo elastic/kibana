@@ -67,7 +67,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       onClick={() => {
         setIsReassignFlyoutOpen(true);
       }}
-      disabled={!agent.active}
+      disabled={!agent.active || agentPolicy?.is_managed}
       key="reassignPolicy"
     >
       <FormattedMessage
@@ -77,7 +77,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       icon="trash"
-      disabled={!hasFleetAllPrivileges || !agent.active}
+      disabled={!hasFleetAllPrivileges || !agent.active || agentPolicy?.is_managed}
       onClick={() => {
         setIsUnenrollModalOpen(true);
       }}
@@ -97,7 +97,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       icon="refresh"
-      disabled={!isAgentUpgradeable(agent, kibanaVersion)}
+      disabled={!isAgentUpgradeable(agent, kibanaVersion) || agentPolicy?.is_managed}
       onClick={() => {
         setIsUpgradeModalOpen(true);
       }}
