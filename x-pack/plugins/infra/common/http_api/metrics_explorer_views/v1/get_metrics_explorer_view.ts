@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export type { ITermJoinSource } from './term_join_source';
+import * as rt from 'io-ts';
+
+export const getMetricsExplorerViewRequestParamsRT = rt.type({
+  metricsExplorerViewId: rt.string,
+});
+
+export type GetMetricsExplorerViewRequestParams = rt.TypeOf<
+  typeof getMetricsExplorerViewRequestParamsRT
+>;

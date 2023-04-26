@@ -14,26 +14,26 @@ import {
   DEFAULT_MAX_BUCKETS_LIMIT,
   FIELD_ORIGIN,
   SOURCE_TYPES,
-} from '../../../../common/constants';
-import { getJoinAggKey } from '../../../../common/get_agg_key';
-import { ESDocField } from '../../fields/es_doc_field';
-import { AbstractESAggSource } from '../es_agg_source';
+} from '../../../../../common/constants';
+import { getJoinAggKey } from '../../../../../common/get_agg_key';
+import { ESDocField } from '../../../fields/es_doc_field';
+import { AbstractESAggSource } from '../../es_agg_source';
 import {
   getField,
   addFieldToDSL,
   extractPropertiesFromBucket,
   BucketProperties,
-} from '../../../../common/elasticsearch_util';
+} from '../../../../../common/elasticsearch_util';
 import {
   ESTermSourceDescriptor,
   VectorSourceRequestMeta,
-} from '../../../../common/descriptor_types';
-import { PropertiesMap } from '../../../../common/elasticsearch_util';
-import { isValidStringConfig } from '../../util/valid_string_config';
-import { ITermJoinSource } from '../term_join_source';
-import type { IESAggSource } from '../es_agg_source';
-import { IField } from '../../fields/field';
-import { mergeExecutionContext } from '../execution_context_utils';
+} from '../../../../../common/descriptor_types';
+import { PropertiesMap } from '../../../../../common/elasticsearch_util';
+import { isValidStringConfig } from '../../../util/valid_string_config';
+import { ITermJoinSource } from '../types';
+import type { IESAggSource } from '../../es_agg_source';
+import { IField } from '../../../fields/field';
+import { mergeExecutionContext } from '../../execution_context_utils';
 
 const TERMS_AGG_NAME = 'join';
 const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
@@ -71,7 +71,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
   private readonly _termField: ESDocField;
   readonly _descriptor: ESTermSourceDescriptor;
 
-  constructor(descriptor: ESTermSourceDescriptor) {
+  constructor(descriptor: Partial<ESTermSourceDescriptor>) {
     const sourceDescriptor = ESTermSource.createDescriptor(descriptor);
     super(sourceDescriptor);
     this._descriptor = sourceDescriptor;

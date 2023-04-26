@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { createJoinTermSource, InnerJoin } from './inner_join';
-import { SOURCE_TYPES } from '../../../common/constants';
+import type { Feature } from 'geojson';
+import type {
+  ESTermSourceDescriptor,
+  JoinSourceDescriptor,
+} from '../../../common/descriptor_types';
+import type { IVectorSource } from '../sources/vector_source';
+import type { IField } from '../fields/field';
+import { createJoinSource, InnerJoin } from './inner_join';
+import { AGG_TYPE, SOURCE_TYPES } from '../../../common/constants';
 
 jest.mock('../../kibana_services', () => {});
 jest.mock('../layers/vector_layer', () => {});
@@ -16,20 +23,20 @@ const rightSource = {
   id: 'd3625663-5b34-4d50-a784-0d743f676a0c',
   indexPatternId: '90943e30-9a47-11e8-b64d-95841ca0b247',
   term: 'geo.dest',
-  metrics: [{ type: 'count' }],
-};
+  metrics: [{ type: AGG_TYPE.COUNT }],
+} as ESTermSourceDescriptor;
 
 const mockSource = {
-  createField({ fieldName: name }) {
+  createField({ fieldName }: { fieldName: string }) {
     return {
       getName() {
-        return name;
+        return fieldName;
       },
-    };
+    } as unknown as IField;
   },
-};
+} as unknown as IVectorSource;
 
-const leftJoin = new InnerJoin(
+const iso2LeftJoin = new InnerJoin(
   {
     leftField: 'iso2',
     right: rightSource,
@@ -38,27 +45,27 @@ const leftJoin = new InnerJoin(
 );
 const COUNT_PROPERTY_NAME = '__kbnjoin__count__d3625663-5b34-4d50-a784-0d743f676a0c';
 
-describe('createJoinTermSource', () => {
+describe('createJoinSource', () => {
   test('Should return undefined when descriptor is not provided', () => {
-    expect(createJoinTermSource(undefined)).toBe(undefined);
+    expect(createJoinSource(undefined)).toBe(undefined);
   });
 
   test('Should return undefined with unmatched source type', () => {
     expect(
-      createJoinTermSource({
+      createJoinSource({
         type: SOURCE_TYPES.WMS,
-      })
+      } as unknown as Partial<JoinSourceDescriptor>)
     ).toBe(undefined);
   });
 
   describe('EsTermSource', () => {
     test('Should return EsTermSource', () => {
-      expect(createJoinTermSource(rightSource).constructor.name).toBe('ESTermSource');
+      expect(createJoinSource(rightSource)?.constructor.name).toBe('ESTermSource');
     });
 
     test('Should return undefined when indexPatternId is undefined', () => {
       expect(
-        createJoinTermSource({
+        createJoinSource({
           ...rightSource,
           indexPatternId: undefined,
         })
@@ -67,7 +74,7 @@ describe('createJoinTermSource', () => {
 
     test('Should return undefined when term is undefined', () => {
       expect(
-        createJoinTermSource({
+        createJoinSource({
           ...rightSource,
           term: undefined,
         })
@@ -78,9 +85,9 @@ describe('createJoinTermSource', () => {
   describe('TableSource', () => {
     test('Should return TableSource', () => {
       expect(
-        createJoinTermSource({
+        createJoinSource({
           type: SOURCE_TYPES.TABLE_SOURCE,
-        }).constructor.name
+        })?.constructor.name
       ).toBe('TableSource');
     });
   });
@@ -92,15 +99,11 @@ describe('joinPropertiesToFeature', () => {
       properties: {
         iso2: 'CN',
       },
-    };
+    } as unknown as Feature;
     const propertiesMap = new Map();
     propertiesMap.set('CN', { [COUNT_PROPERTY_NAME]: 61 });
 
-    leftJoin.joinPropertiesToFeature(feature, propertiesMap, [
-      {
-        propertyKey: COUNT_PROPERTY_NAME,
-      },
-    ]);
+    iso2LeftJoin.joinPropertiesToFeature(feature, propertiesMap);
     expect(feature.properties).toEqual({
       iso2: 'CN',
       [COUNT_PROPERTY_NAME]: 61,
@@ -114,21 +117,17 @@ describe('joinPropertiesToFeature', () => {
         [COUNT_PROPERTY_NAME]: 61,
         [`__kbn__dynamic__${COUNT_PROPERTY_NAME}__fillColor`]: 1,
       },
-    };
+    } as unknown as Feature;
     const propertiesMap = new Map();
 
-    leftJoin.joinPropertiesToFeature(feature, propertiesMap, [
-      {
-        propertyKey: COUNT_PROPERTY_NAME,
-      },
-    ]);
+    iso2LeftJoin.joinPropertiesToFeature(feature, propertiesMap);
     expect(feature.properties).toEqual({
       iso2: 'CN',
     });
   });
 
   test('Should coerce to string before joining', () => {
-    const leftJoin = new InnerJoin(
+    const zipCodeLeftJoin = new InnerJoin(
       {
         leftField: 'zipcode',
         right: rightSource,
@@ -140,15 +139,11 @@ describe('joinPropertiesToFeature', () => {
       properties: {
         zipcode: 40204,
       },
-    };
+    } as unknown as Feature;
     const propertiesMap = new Map();
     propertiesMap.set('40204', { [COUNT_PROPERTY_NAME]: 61 });
 
-    leftJoin.joinPropertiesToFeature(feature, propertiesMap, [
-      {
-        propertyKey: COUNT_PROPERTY_NAME,
-      },
-    ]);
+    zipCodeLeftJoin.joinPropertiesToFeature(feature, propertiesMap);
     expect(feature.properties).toEqual({
       zipcode: 40204,
       [COUNT_PROPERTY_NAME]: 61,
@@ -157,26 +152,22 @@ describe('joinPropertiesToFeature', () => {
 
   test('Should handle undefined values', () => {
     const feature = {
-      //this feature does not have the iso2 field
+      // this feature does not have the iso2 field
       properties: {
         zipcode: 40204,
       },
-    };
+    } as unknown as Feature;
     const propertiesMap = new Map();
     propertiesMap.set('40204', { [COUNT_PROPERTY_NAME]: 61 });
 
-    leftJoin.joinPropertiesToFeature(feature, propertiesMap, [
-      {
-        propertyKey: COUNT_PROPERTY_NAME,
-      },
-    ]);
+    iso2LeftJoin.joinPropertiesToFeature(feature, propertiesMap);
     expect(feature.properties).toEqual({
       zipcode: 40204,
     });
   });
 
   test('Should handle falsy values', () => {
-    const leftJoin = new InnerJoin(
+    const codeLeftJoin = new InnerJoin(
       {
         leftField: 'code',
         right: rightSource,
@@ -188,15 +179,11 @@ describe('joinPropertiesToFeature', () => {
       properties: {
         code: 0,
       },
-    };
+    } as unknown as Feature;
     const propertiesMap = new Map();
     propertiesMap.set('0', { [COUNT_PROPERTY_NAME]: 61 });
 
-    leftJoin.joinPropertiesToFeature(feature, propertiesMap, [
-      {
-        propertyKey: COUNT_PROPERTY_NAME,
-      },
-    ]);
+    codeLeftJoin.joinPropertiesToFeature(feature, propertiesMap);
     expect(feature.properties).toEqual({
       code: 0,
       [COUNT_PROPERTY_NAME]: 61,
