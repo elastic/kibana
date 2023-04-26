@@ -53,7 +53,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     timeBuckets: PropTypes.object.isRequired,
     onPointerUpdate: PropTypes.func.isRequired,
     chartTheme: PropTypes.object.isRequired,
-    cursor: PropTypes.object.isRequired,
+    cursor: PropTypes.object,
   };
 
   componentDidMount() {

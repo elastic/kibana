@@ -53,7 +53,11 @@ export const storageExplorer = {
               </EuiFlexGroup>
             ),
             rightSideItems: [
-              <EuiLink href={getStorageExplorerFeedbackHref()} target="_blank">
+              <EuiLink
+                data-test-subj="apmGiveFeedbackLink"
+                href={getStorageExplorerFeedbackHref()}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.apm.views.storageExplorer.giveFeedback',
                   {

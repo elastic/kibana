@@ -6,16 +6,19 @@
  */
 
 import createContainer from 'constate';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
+import { IHttpFetchError } from '@kbn/core-http-browser';
+import type {
   MetricsSourceConfigurationResponse,
   MetricsSourceConfiguration,
   PartialMetricsSourceConfigurationProperties,
 } from '../../../common/metrics_sources';
 
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
+import { MissingHttpClientException } from './source_errors';
+import { useSourceNotifier } from './notifications';
 
 export const pickIndexPattern = (
   source: MetricsSourceConfiguration | undefined,
@@ -30,11 +33,12 @@ export const pickIndexPattern = (
   return `${source.configuration.metricAlias}`;
 };
 
-const DEPENDENCY_ERROR_MESSAGE = 'Failed to load source: No fetch client available.';
-
 export const useSource = ({ sourceId }: { sourceId: string }) => {
-  const kibana = useKibana();
-  const fetchService = kibana.services.http?.fetch;
+  const { services } = useKibana();
+
+  const notify = useSourceNotifier();
+
+  const fetchService = services.http;
   const API_URL = `/api/metrics/source/${sourceId}`;
 
   const [source, setSource] = useState<MetricsSourceConfiguration | undefined>(undefined);
@@ -42,17 +46,17 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
   const [loadSourceRequest, loadSource] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
-      createPromise: async () => {
+      createPromise: () => {
         if (!fetchService) {
-          throw new Error(DEPENDENCY_ERROR_MESSAGE);
+          throw new MissingHttpClientException();
         }
 
-        return await fetchService<MetricsSourceConfigurationResponse>(`${API_URL}`, {
-          method: 'GET',
-        });
+        return fetchService.fetch<MetricsSourceConfigurationResponse>(API_URL, { method: 'GET' });
       },
       onResolve: (response) => {
-        setSource(response.source);
+        if (response) {
+          setSource(response.source);
+        }
       },
     },
     [fetchService, sourceId]
@@ -62,43 +66,30 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     {
       createPromise: async (sourceProperties: PartialMetricsSourceConfigurationProperties) => {
         if (!fetchService) {
-          throw new Error(DEPENDENCY_ERROR_MESSAGE);
+          throw new MissingHttpClientException();
         }
 
-        return await fetchService<MetricsSourceConfigurationResponse>(API_URL, {
+        return await fetchService.patch<MetricsSourceConfigurationResponse>(API_URL, {
           method: 'PATCH',
           body: JSON.stringify(sourceProperties),
         });
       },
       onResolve: (response) => {
         if (response) {
+          notify.updateSuccess();
           setSource(response.source);
         }
+      },
+      onReject: (error) => {
+        notify.updateFailure((error as IHttpFetchError<{ message: string }>).body?.message);
       },
     },
     [fetchService, sourceId]
   );
 
-  const [updateSourceConfigurationRequest, updateSourceConfiguration] = useTrackedPromise(
-    {
-      createPromise: async (sourceProperties: PartialMetricsSourceConfigurationProperties) => {
-        if (!fetchService) {
-          throw new Error(DEPENDENCY_ERROR_MESSAGE);
-        }
-
-        return await fetchService<MetricsSourceConfigurationResponse>(API_URL, {
-          method: 'PATCH',
-          body: JSON.stringify(sourceProperties),
-        });
-      },
-      onResolve: (response) => {
-        if (response) {
-          setSource(response.source);
-        }
-      },
-    },
-    [fetchService, sourceId]
-  );
+  useEffect(() => {
+    loadSource();
+  }, [loadSource, sourceId]);
 
   const createDerivedIndexPattern = () => {
     return {
@@ -107,54 +98,46 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     };
   };
 
-  const isLoading = useMemo(
-    () =>
-      [
-        loadSourceRequest.state,
-        createSourceConfigurationRequest.state,
-        updateSourceConfigurationRequest.state,
-      ].some((state) => state === 'pending'),
-    [
-      loadSourceRequest.state,
-      createSourceConfigurationRequest.state,
-      updateSourceConfigurationRequest.state,
-    ]
-  );
+  const hasFailedLoadingSource = loadSourceRequest.state === 'rejected';
+  const isUninitialized = loadSourceRequest.state === 'uninitialized';
+  const isLoadingSource = loadSourceRequest.state === 'pending';
+  const isLoading = isLoadingSource || createSourceConfigurationRequest.state === 'pending';
 
-  const isUninitialized = useMemo(
-    () => loadSourceRequest.state === 'uninitialized',
-    [loadSourceRequest.state]
-  );
+  const sourceExists = source ? !!source.version : undefined;
 
-  const sourceExists = useMemo(() => (source ? !!source.version : undefined), [source]);
+  const metricIndicesExist = Boolean(source?.status?.metricIndicesExist);
 
-  const metricIndicesExist = useMemo(
-    () => source && source.status && source.status.metricIndicesExist,
-    [source]
-  );
-
-  useEffect(() => {
-    loadSource();
-  }, [loadSource, sourceId]);
+  const version = source?.version;
 
   return {
     createSourceConfiguration,
     createDerivedIndexPattern,
     isLoading,
-    isLoadingSource: loadSourceRequest.state === 'pending',
+    isLoadingSource,
     isUninitialized,
-    hasFailedLoadingSource: loadSourceRequest.state === 'rejected',
+    hasFailedLoadingSource,
     loadSource,
     loadSourceRequest,
-    loadSourceFailureMessage:
-      loadSourceRequest.state === 'rejected' ? `${loadSourceRequest.value}` : undefined,
+    loadSourceFailureMessage: hasFailedLoadingSource ? `${loadSourceRequest.value}` : undefined,
     metricIndicesExist,
     source,
     sourceExists,
     sourceId,
-    updateSourceConfiguration,
-    version: source && source.version ? source.version : undefined,
+    updateSourceConfiguration: createSourceConfiguration,
+    version,
   };
 };
 
 export const [SourceProvider, useSourceContext] = createContainer(useSource);
+
+export const withSourceProvider =
+  <ComponentProps,>(Component: React.FunctionComponent<ComponentProps>) =>
+  (sourceId = 'default') => {
+    return function ComponentWithSourceProvider(props: ComponentProps) {
+      return (
+        <SourceProvider sourceId={sourceId}>
+          <Component {...props} />
+        </SourceProvider>
+      );
+    };
+  };

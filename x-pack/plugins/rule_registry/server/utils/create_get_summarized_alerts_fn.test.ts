@@ -1983,6 +1983,393 @@ describe('createGetSummarizedAlertsFn', () => {
     expect(summarizedAlerts.recovered.data).toEqual([]);
   });
 
+  it('creates function that correctly returns lifecycle alerts using alerts filter', async () => {
+    ruleDataClientMock.getReader().search.mockResolvedValueOnce({
+      hits: {
+        total: {
+          value: 2,
+        },
+        hits: [
+          {
+            _id: '1',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [EVENT_ACTION]: 'open',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
+              [ALERT_UUID]: 'uuid1',
+            },
+          },
+          {
+            _id: '2',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [EVENT_ACTION]: 'open',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_4',
+              [ALERT_UUID]: 'uuid2',
+            },
+          },
+        ],
+      },
+    } as any);
+    ruleDataClientMock.getReader().search.mockResolvedValueOnce({
+      hits: {
+        total: {
+          value: 3,
+        },
+        hits: [
+          {
+            _id: '3',
+            _index: '.alerts-default-000001',
+            _source: {
+              '@timestamp': '2020-01-01T12:00:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [EVENT_ACTION]: 'active',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
+              [ALERT_UUID]: 'uuid3',
+            },
+          },
+          {
+            _id: '4',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [EVENT_ACTION]: 'active',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
+              [ALERT_UUID]: 'uuid4',
+            },
+          },
+          {
+            _id: '5',
+            _index: '.alerts-default-000001',
+            _source: {
+              [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [EVENT_ACTION]: 'active',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_5',
+              [ALERT_UUID]: 'uuid5',
+            },
+          },
+        ],
+      },
+    } as any);
+    ruleDataClientMock.getReader().search.mockResolvedValueOnce({
+      hits: {
+        total: {
+          value: 1,
+        },
+        hits: [
+          {
+            _id: '6',
+            _index: '.alerts-default-000001',
+            _source: {
+              '@timestamp': '2020-01-01T12:00:00.000Z',
+              [ALERT_RULE_EXECUTION_UUID]: 'abc',
+              [ALERT_RULE_UUID]: 'rule-id',
+              [EVENT_ACTION]: 'close',
+              [ALERT_INSTANCE_ID]: 'TEST_ALERT_9',
+              [ALERT_UUID]: 'uuid6',
+            },
+          },
+        ],
+      },
+    } as any);
+    const getSummarizedAlertsFn = createGetSummarizedAlertsFn({
+      ruleDataClient: ruleDataClientMock,
+      useNamespace: false,
+      isLifecycleAlert: true,
+    })();
+
+    await getSummarizedAlertsFn({
+      executionUuid: 'abc',
+      ruleId: 'rule-id',
+      spaceId: 'space-id',
+      excludedAlertInstanceIds: [],
+      alertsFilter: {
+        query: {
+          kql: 'kibana.alert.rule.name:test',
+          dsl: '{"bool":{"minimum_should_match":1,"should":[{"match":{"kibana.alert.rule.name":"test"}}]}}',
+          filters: [],
+        },
+        timeframe: {
+          days: [1, 2, 3, 4, 5],
+          hours: { start: '08:00', end: '17:00' },
+          timezone: 'UTC',
+        },
+      },
+    });
+
+    expect(ruleDataClientMock.getReader).toHaveBeenCalledWith();
+    expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(3);
+    expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(1, {
+      body: {
+        size: 100,
+        track_total_hits: true,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  [ALERT_RULE_EXECUTION_UUID]: 'abc',
+                },
+              },
+              {
+                term: {
+                  [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                term: {
+                  [EVENT_ACTION]: 'open',
+                },
+              },
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      match: {
+                        'kibana.alert.rule.name': 'test',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                script: {
+                  script: {
+                    params: {
+                      datetimeField: '@timestamp',
+                      days: [1, 2, 3, 4, 5],
+                      timezone: 'UTC',
+                    },
+                    source:
+                      'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
+                  },
+                },
+              },
+              {
+                script: {
+                  script: {
+                    params: {
+                      datetimeField: '@timestamp',
+                      end: '17:00',
+                      start: '08:00',
+                      timezone: 'UTC',
+                    },
+                    source: `
+              def alertsDateTime = doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone));
+              def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
+              def start = LocalTime.parse(params.start);
+              def end = LocalTime.parse(params.end);
+
+              if (end.isBefore(start) || end.equals(start)){ // overnight
+                def dayEnd = LocalTime.parse("23:59:59");
+                def dayStart = LocalTime.parse("00:00:00");
+                if ((alertsTime.isAfter(start) && alertsTime.isBefore(dayEnd)) || (alertsTime.isAfter(dayStart) && alertsTime.isBefore(end))) {
+                  return true;
+                } else {
+                  return false;
+                }
+              } else {
+                if (alertsTime.isAfter(start) && alertsTime.isBefore(end)) {
+                    return true;
+                } else {
+                    return false;
+                }
+              }
+           `,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+    expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(2, {
+      body: {
+        size: 100,
+        track_total_hits: true,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  [ALERT_RULE_EXECUTION_UUID]: 'abc',
+                },
+              },
+              {
+                term: {
+                  [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                term: {
+                  [EVENT_ACTION]: 'active',
+                },
+              },
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      match: {
+                        'kibana.alert.rule.name': 'test',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                script: {
+                  script: {
+                    params: {
+                      datetimeField: '@timestamp',
+                      days: [1, 2, 3, 4, 5],
+                      timezone: 'UTC',
+                    },
+                    source:
+                      'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
+                  },
+                },
+              },
+              {
+                script: {
+                  script: {
+                    params: {
+                      datetimeField: '@timestamp',
+                      end: '17:00',
+                      start: '08:00',
+                      timezone: 'UTC',
+                    },
+                    source: `
+              def alertsDateTime = doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone));
+              def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
+              def start = LocalTime.parse(params.start);
+              def end = LocalTime.parse(params.end);
+
+              if (end.isBefore(start) || end.equals(start)){ // overnight
+                def dayEnd = LocalTime.parse("23:59:59");
+                def dayStart = LocalTime.parse("00:00:00");
+                if ((alertsTime.isAfter(start) && alertsTime.isBefore(dayEnd)) || (alertsTime.isAfter(dayStart) && alertsTime.isBefore(end))) {
+                  return true;
+                } else {
+                  return false;
+                }
+              } else {
+                if (alertsTime.isAfter(start) && alertsTime.isBefore(end)) {
+                    return true;
+                } else {
+                    return false;
+                }
+              }
+           `,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+    expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(3, {
+      body: {
+        size: 100,
+        track_total_hits: true,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  [ALERT_RULE_EXECUTION_UUID]: 'abc',
+                },
+              },
+              {
+                term: {
+                  [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                term: {
+                  [EVENT_ACTION]: 'close',
+                },
+              },
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      match: {
+                        'kibana.alert.rule.name': 'test',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                script: {
+                  script: {
+                    params: {
+                      datetimeField: '@timestamp',
+                      days: [1, 2, 3, 4, 5],
+                      timezone: 'UTC',
+                    },
+                    source:
+                      'params.days.contains(doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())',
+                  },
+                },
+              },
+              {
+                script: {
+                  script: {
+                    params: {
+                      datetimeField: '@timestamp',
+                      end: '17:00',
+                      start: '08:00',
+                      timezone: 'UTC',
+                    },
+                    source: `
+              def alertsDateTime = doc[params.datetimeField].value.withZoneSameInstant(ZoneId.of(params.timezone));
+              def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
+              def start = LocalTime.parse(params.start);
+              def end = LocalTime.parse(params.end);
+
+              if (end.isBefore(start) || end.equals(start)){ // overnight
+                def dayEnd = LocalTime.parse("23:59:59");
+                def dayStart = LocalTime.parse("00:00:00");
+                if ((alertsTime.isAfter(start) && alertsTime.isBefore(dayEnd)) || (alertsTime.isAfter(dayStart) && alertsTime.isBefore(end))) {
+                  return true;
+                } else {
+                  return false;
+                }
+              } else {
+                if (alertsTime.isAfter(start) && alertsTime.isBefore(end)) {
+                    return true;
+                } else {
+                    return false;
+                }
+              }
+           `,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+  });
+
   it('throws error if search throws error', async () => {
     ruleDataClientMock.getReader().search.mockImplementation(() => {
       throw new Error('search error');

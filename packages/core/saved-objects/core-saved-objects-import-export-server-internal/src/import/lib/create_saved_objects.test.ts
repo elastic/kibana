@@ -12,6 +12,10 @@ import { type SavedObject, SavedObjectsErrorHelpers } from '@kbn/core-saved-obje
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { createSavedObjects } from './create_saved_objects';
 import { extractErrors } from './extract_errors';
+import {
+  LEGACY_URL_ALIAS_TYPE,
+  LegacyUrlAlias,
+} from '@kbn/core-saved-objects-base-server-internal';
 
 type CreateSavedObjectsParams = Parameters<typeof createSavedObjects>[0];
 
@@ -28,6 +32,18 @@ const createObject = (type: string, id: string, originId?: string): SavedObject 
     { name: 'name-3', type: MULTI_NS_TYPE, id: 'id-3' }, // object that is present and has an importStateMap entry
   ],
   ...(originId && { originId }),
+});
+
+const createLegacyUrlAliasObject = (
+  sourceId: string,
+  targetId: string,
+  targetType: string,
+  targetNamespace: string = 'default'
+): SavedObject<LegacyUrlAlias> => ({
+  type: LEGACY_URL_ALIAS_TYPE,
+  id: `${targetNamespace}:${targetType}:${sourceId}`,
+  attributes: { sourceId, targetNamespace, targetType, targetId, purpose: 'savedObjectImport' },
+  references: [],
 });
 
 const MULTI_NS_TYPE = 'multi';
@@ -59,6 +75,9 @@ const importStateMap = new Map([
   [`${obj8.type}:${obj8.id}`, { destinationId: importId8 }],
 ]);
 
+const legacyUrlAliasForObj1 = createLegacyUrlAliasObject(obj1.originId!, obj1.id, obj1.type);
+const legacyUrlAliasForObj10 = createLegacyUrlAliasObject(obj10.originId!, obj10.id, obj10.type);
+
 describe('#createSavedObjects', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let bulkCreate: typeof savedObjectsClient['bulkCreate'];
@@ -72,6 +91,7 @@ describe('#createSavedObjects', () => {
     accumulatedErrors?: SavedObjectsImportFailure[];
     namespace?: string;
     overwrite?: boolean;
+    compatibilityMode?: boolean;
   }): CreateSavedObjectsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
     bulkCreate = savedObjectsClient.bulkCreate;
@@ -97,6 +117,10 @@ describe('#createSavedObjects', () => {
       const expectedObjects = getExpectedBulkCreateArgsObjects(objects, retry);
       const expectedOptions = expect.any(Object);
       expect(bulkCreate).toHaveBeenNthCalledWith(n, expectedObjects, expectedOptions);
+    },
+    legacyUrlAliases: (n: number, expectedAliasObjects: SavedObject[]) => {
+      const expectedOptions = expect.any(Object);
+      expect(bulkCreate).toHaveBeenNthCalledWith(n, expectedAliasObjects, expectedOptions);
     },
     options: (n: number, options: CreateSavedObjectsParams) => {
       const expectedObjects = expect.any(Array);
@@ -143,7 +167,7 @@ describe('#createSavedObjects', () => {
     const remappedResults = resultObjects.map((result, i) => ({ ...result, id: objects[i].id }));
     return {
       createdObjects: remappedResults.filter((obj) => !obj.error),
-      errors: extractErrors(remappedResults, objects),
+      errors: extractErrors(remappedResults, objects, [], new Map()),
     };
   };
 
@@ -217,6 +241,18 @@ describe('#createSavedObjects', () => {
       }
     });
 
+    test('when in compatibility mode, does not call bulkCreate when resolvable errors are present', async () => {
+      for (const error of resolvableErrors) {
+        const options = setupParams({
+          objects: objs,
+          accumulatedErrors: [error],
+          compatibilityMode: true,
+        });
+        await createSavedObjects(options);
+        expect(bulkCreate).not.toHaveBeenCalled();
+      }
+    });
+
     test('calls bulkCreate when unresolvable errors or no errors are present', async () => {
       for (const error of unresolvableErrors) {
         const options = setupParams({ objects: objs, accumulatedErrors: [error] });
@@ -230,6 +266,26 @@ describe('#createSavedObjects', () => {
       await createSavedObjects(options);
       expect(bulkCreate).toHaveBeenCalledTimes(1);
     });
+
+    test('when in compatibility mode, calls bulkCreate for legacy URL aliases when unresolvable errors or no errors are present', async () => {
+      for (const error of unresolvableErrors) {
+        const options = setupParams({
+          objects: objs,
+          accumulatedErrors: [error],
+          compatibilityMode: true,
+        });
+        setupMockResults(options);
+        await createSavedObjects(options);
+        expect(bulkCreate).toHaveBeenCalledTimes(2);
+        expectBulkCreateArgs.legacyUrlAliases(2, [legacyUrlAliasForObj1, legacyUrlAliasForObj10]);
+        bulkCreate.mockClear();
+      }
+      const options = setupParams({ objects: objs, compatibilityMode: true });
+      setupMockResults(options);
+      await createSavedObjects(options);
+      expect(bulkCreate).toHaveBeenCalledTimes(2);
+      expectBulkCreateArgs.legacyUrlAliases(2, [legacyUrlAliasForObj1, legacyUrlAliasForObj10]);
+    });
   });
 
   it('filters out version from objects before create', async () => {
@@ -240,30 +296,57 @@ describe('#createSavedObjects', () => {
     expectBulkCreateArgs.objects(1, [obj1]);
   });
 
-  const testBulkCreateObjects = async (namespace?: string) => {
-    const options = setupParams({ objects: objs, namespace });
+  const testBulkCreateObjects = async ({
+    namespace,
+    compatibilityMode,
+  }: { namespace?: string; compatibilityMode?: boolean } = {}) => {
+    const options = setupParams({ objects: objs, namespace, compatibilityMode });
     setupMockResults(options);
 
     await createSavedObjects(options);
-    expect(bulkCreate).toHaveBeenCalledTimes(1);
+    expect(bulkCreate).toHaveBeenCalledTimes(compatibilityMode ? 2 : 1);
     // these three objects are transformed before being created, because they are included in the `importStateMap`
     const x3 = { ...obj3, id: importId3, originId: undefined }; // this import object already has an originId, but the entry has omitOriginId=true
     const x4 = { ...obj4, id: importId4 }; // this import object already has an originId
     const x8 = { ...obj8, id: importId8, originId: obj8.id }; // this import object doesn't have an originId, so it is set before create
     const argObjs = [obj1, obj2, x3, x4, obj5, obj6, obj7, x8, obj9, obj10, obj11, obj12, obj13];
     expectBulkCreateArgs.objects(1, argObjs);
+
+    if (compatibilityMode) {
+      // Rewrite namespace in the legacy URL alias.
+      const argLegacyUrlAliasObjs = namespace
+        ? [legacyUrlAliasForObj1, legacyUrlAliasForObj10].map((legacyUrlAlias) =>
+            createLegacyUrlAliasObject(
+              legacyUrlAlias.attributes.sourceId,
+              legacyUrlAlias.attributes.targetId,
+              legacyUrlAlias.attributes.targetType,
+              namespace
+            )
+          )
+        : [legacyUrlAliasForObj1, legacyUrlAliasForObj10];
+      expectBulkCreateArgs.legacyUrlAliases(2, argLegacyUrlAliasObjs);
+    }
   };
-  const testBulkCreateOptions = async (namespace?: string) => {
+  const testBulkCreateOptions = async ({
+    namespace,
+    compatibilityMode,
+  }: { namespace?: string; compatibilityMode?: boolean } = {}) => {
     const overwrite = Symbol() as unknown as boolean;
-    const options = setupParams({ objects: objs, namespace, overwrite });
+    const options = setupParams({ objects: objs, namespace, overwrite, compatibilityMode });
     setupMockResults(options);
 
     await createSavedObjects(options);
-    expect(bulkCreate).toHaveBeenCalledTimes(1);
+    expect(bulkCreate).toHaveBeenCalledTimes(compatibilityMode ? 2 : 1);
     expectBulkCreateArgs.options(1, options);
+    if (compatibilityMode) {
+      expectBulkCreateArgs.options(2, options);
+    }
   };
-  const testReturnValue = async (namespace?: string) => {
-    const options = setupParams({ objects: objs, namespace });
+  const testReturnValue = async ({
+    namespace,
+    compatibilityMode,
+  }: { namespace?: string; compatibilityMode?: boolean } = {}) => {
+    const options = setupParams({ objects: objs, namespace, compatibilityMode });
     setupMockResults(options);
 
     const results = await createSavedObjects(options);
@@ -277,27 +360,33 @@ describe('#createSavedObjects', () => {
   };
 
   describe('with an undefined namespace', () => {
-    test('calls bulkCreate once with input objects', async () => {
+    test('calls bulkCreate according to input objects and compatibilityMode option', async () => {
       await testBulkCreateObjects();
+      await testBulkCreateObjects({ compatibilityMode: true });
     });
     test('calls bulkCreate once with input options', async () => {
       await testBulkCreateOptions();
+      await testBulkCreateOptions({ compatibilityMode: true });
     });
     test('returns bulkCreate results that are remapped to IDs of imported objects', async () => {
       await testReturnValue();
+      await testReturnValue({ compatibilityMode: true });
     });
   });
 
   describe('with a defined namespace', () => {
     const namespace = 'some-namespace';
-    test('calls bulkCreate once with input objects', async () => {
-      await testBulkCreateObjects(namespace);
+    test('calls bulkCreate according to input objects and compatibilityMode option', async () => {
+      await testBulkCreateObjects({ namespace });
+      await testBulkCreateObjects({ namespace, compatibilityMode: true });
     });
     test('calls bulkCreate once with input options', async () => {
-      await testBulkCreateOptions(namespace);
+      await testBulkCreateOptions({ namespace });
+      await testBulkCreateOptions({ namespace, compatibilityMode: true });
     });
     test('returns bulkCreate results that are remapped to IDs of imported objects', async () => {
-      await testReturnValue(namespace);
+      await testReturnValue({ namespace });
+      await testReturnValue({ namespace, compatibilityMode: true });
     });
   });
 });

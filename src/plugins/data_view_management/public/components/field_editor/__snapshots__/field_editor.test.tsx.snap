@@ -552,7 +552,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
           <eui-icon
             color="warning"
             size="s"
-            type="alert"
+            type="warning"
           />
            
           <FormattedMessage
@@ -852,7 +852,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           <eui-icon
             color="warning"
             size="s"
-            type="alert"
+            type="warning"
           />
            
           <strong>
@@ -1181,7 +1181,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
           <eui-icon
             color="warning"
             size="s"
-            type="alert"
+            type="warning"
           />
            
           <FormattedMessage
@@ -1290,7 +1290,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       />
       <eui-call-out
         color="warning"
-        iconType="alert"
+        iconType="warning"
         size="s"
         title={
           <FormattedMessage

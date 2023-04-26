@@ -39,7 +39,9 @@ export function periodToMs(schedule: { number: string; unit: Unit }) {
 export async function getStatus(context: RouteContext, params: OverviewStatusQuery) {
   const { uptimeEsClient, syntheticsMonitorClient, savedObjectsClient, server } = context;
 
-  const { query, locations: queryLocations, scopeStatusByLocation = true } = params;
+  const { query, locations: qLocations, scopeStatusByLocation = true } = params;
+
+  const queryLocations = qLocations && !Array.isArray(qLocations) ? [qLocations] : qLocations;
   /**
    * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
    *
@@ -76,14 +78,18 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
     disabledMonitorsCount,
     projectMonitorsCount,
     monitorQueryIdToConfigIdMap,
-  } = await processMonitors(allMonitors, server, savedObjectsClient, syntheticsMonitorClient);
+  } = await processMonitors(
+    allMonitors,
+    server,
+    savedObjectsClient,
+    syntheticsMonitorClient,
+    queryLocations
+  );
 
   // Account for locations filter
-  const queryLocationsArray =
-    queryLocations && !Array.isArray(queryLocations) ? [queryLocations] : queryLocations;
   const listOfLocationAfterFilter =
-    queryLocationsArray && scopeStatusByLocation
-      ? intersection(listOfLocations, queryLocationsArray)
+    queryLocations && scopeStatusByLocation
+      ? intersection(listOfLocations, queryLocations)
       : listOfLocations;
 
   const range = {

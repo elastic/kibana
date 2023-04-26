@@ -65,6 +65,7 @@ export const StepImage = ({
             retryFetchOnRevisit={false}
             size={[260, 160]}
             borderRadius={euiTheme.border.radius.small}
+            timestamp={step?.['@timestamp']}
           />
         ) : (
           <LastSuccessfulScreenshot

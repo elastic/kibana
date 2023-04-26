@@ -10,7 +10,7 @@ import { waitFor } from '@testing-library/react';
 import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
 import { ObservabilityAlertSearchBarProps } from './types';
 import { ObservabilityAlertSearchBar } from './alert_search_bar';
-import { observabilityAlertFeatureIds } from '../../../config';
+import { observabilityAlertFeatureIds } from '../../../config/alert_feature_ids';
 import { render } from '../../../utils/test_helper';
 
 const getAlertsSearchBarMock = jest.fn();
@@ -91,7 +91,7 @@ describe('ObservabilityAlertSearchBar', () => {
           },
           {
             range: {
-              '@timestamp': expect.objectContaining({
+              'kibana.alert.time_range': expect.objectContaining({
                 format: 'strict_date_optional_time',
                 gte: mockedFrom,
                 lte: mockedTo,
@@ -138,7 +138,7 @@ describe('ObservabilityAlertSearchBar', () => {
           },
           {
             range: {
-              '@timestamp': expect.objectContaining({
+              'kibana.alert.time_range': expect.objectContaining({
                 format: 'strict_date_optional_time',
                 gte: mockedFrom,
                 lte: mockedTo,

@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import {
+  getLatencyAggregationType,
+  LatencyAggregationType,
+} from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
@@ -50,6 +53,7 @@ export function LatencyChart({ height, kuery }: Props) {
 
   const {
     query: { comparisonEnabled, latencyAggregationType, offset },
+    query,
   } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
     '/services/{serviceName}/transactions',
@@ -65,6 +69,9 @@ export function LatencyChart({ height, kuery }: Props) {
     useTransactionLatencyChartsFetcher({
       kuery,
       environment,
+      transactionName:
+        'transactionName' in query ? query.transactionName : null,
+      latencyAggregationType: getLatencyAggregationType(latencyAggregationType),
     });
 
   const { currentPeriod, previousPeriod } = latencyChartsData;
@@ -102,6 +109,7 @@ export function LatencyChart({ height, kuery }: Props) {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSelect
+                  data-test-subj="apmLatencyChartSelect"
                   compressed
                   prepend={i18n.translate(
                     'xpack.apm.serviceOverview.latencyChartTitle.prepend',

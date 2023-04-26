@@ -28,7 +28,11 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   anomaly: LogEntryAnomaly;
   timeRange: TimeRange;
 }> = ({ anomaly, timeRange }) => {
-  const { logViewId } = useLogViewContext();
+  const { logViewReference } = useLogViewContext();
+
+  if (logViewReference.type === 'log-view-inline') {
+    throw new Error('Logs ML features only support persisted Log Views');
+  }
 
   const {
     getLogEntryExamples,
@@ -39,7 +43,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     dataset: anomaly.dataset,
     endTime: anomaly.startTime + anomaly.duration,
     exampleCount: EXAMPLE_COUNT,
-    sourceId: logViewId,
+    logViewReference,
     startTime: anomaly.startTime,
     categoryId: isCategoryAnomaly(anomaly) ? anomaly.categoryId : undefined,
   });

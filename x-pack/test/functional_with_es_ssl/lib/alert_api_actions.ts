@@ -104,3 +104,22 @@ export async function snoozeAlert({ supertest, alertId }: { supertest: any; aler
     });
   return alert;
 }
+
+export async function scheduleRule({ supertest, ruleId }: { supertest: any; ruleId: string }) {
+  const { body: alert } = await supertest
+    .post(`/internal/alerting/rule/${ruleId}/_snooze`)
+    .set('kbn-xsrf', 'foo')
+    .set('content-type', 'application/json')
+    .send({
+      snooze_schedule: {
+        duration: 0,
+        id: 'fake id',
+        rRule: {
+          count: 1,
+          dtstart: moment().add(3, 'hours').format(),
+          tzid: 'UTC',
+        },
+      },
+    });
+  return alert;
+}

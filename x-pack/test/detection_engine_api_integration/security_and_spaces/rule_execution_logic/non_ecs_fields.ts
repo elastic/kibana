@@ -6,8 +6,6 @@
  */
 
 import expect from 'expect';
-import { v4 as uuidv4 } from 'uuid';
-
 import {
   deleteAllRules,
   deleteSignalsIndex,
@@ -15,18 +13,12 @@ import {
   getRuleForSignalTesting,
   previewRule,
 } from '../../utils';
-import { indexDocumentsFactory } from '../../utils/data_generator';
+import { dataGeneratorFactory, enhanceDocument } from '../../utils/data_generator';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const getQueryRule = (docIdToQuery: string) => ({
   ...getRuleForSignalTesting(['ecs_non_compliant']),
   query: `id: "${docIdToQuery}"`,
-});
-
-const getDocument = (id: string, doc: Record<string, unknown>) => ({
-  id,
-  '@timestamp': new Date().toISOString(),
-  ...doc,
 });
 
 // eslint-disable-next-line import/no-default-export
@@ -36,7 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  const indexDocuments = indexDocumentsFactory({
+  const { indexListOfDocuments } = dataGeneratorFactory({
     es,
     index: 'ecs_non_compliant',
     log,
@@ -49,13 +41,12 @@ export default ({ getService }: FtrProviderContext) => {
    * 3. return created preview alert and errors logs
    */
   const indexAndCreatePreviewAlert = async (document: Record<string, unknown>) => {
-    const documentId = uuidv4();
-
-    await indexDocuments([getDocument(documentId, document)]);
+    const enhancedDocument = enhanceDocument({ document });
+    await indexListOfDocuments([enhancedDocument]);
 
     const { previewId, logs } = await previewRule({
       supertest,
-      rule: getQueryRule(documentId),
+      rule: getQueryRule(enhancedDocument.id),
     });
     const previewAlerts = await getPreviewAlerts({ es, previewId });
 
@@ -65,7 +56,8 @@ export default ({ getService }: FtrProviderContext) => {
     };
   };
 
-  describe('Non ECS fields in alert document source', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/154277
+  describe.skip('Non ECS fields in alert document source', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'

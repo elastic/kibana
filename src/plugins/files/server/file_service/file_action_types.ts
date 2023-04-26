@@ -63,6 +63,16 @@ export interface DeleteFileArgs {
 }
 
 /**
+ * Arguments to delete files in a bulk request.
+ */
+export interface BulkDeleteFilesArgs {
+  /**
+   * File IDs.
+   */
+  ids: string[];
+}
+
+/**
  * Arguments to get a file by ID.
  */
 export interface GetByIdArgs {
@@ -82,6 +92,10 @@ export interface FindFileArgs extends Pagination {
    * File kind(s), see {@link FileKind}.
    */
   kind?: string[];
+  /**
+   * File kind(s) to exclude from search, see {@link FileKind}.
+   */
+  kindToExclude?: string[];
   /**
    * File name(s).
    */
@@ -105,5 +119,5 @@ export interface FindFileArgs extends Pagination {
   /**
    * File metadata values. These values are governed by the consumer.
    */
-  meta?: Record<string, string>;
+  meta?: Record<string, string | string[]>;
 }

@@ -10,7 +10,11 @@ import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
-import { getCloudDefendNewPolicyMock, MOCK_YAML_INVALID_CONFIGURATION } from '../../test/mocks';
+import {
+  getCloudDefendNewPolicyMock,
+  MOCK_YAML_INVALID_CONFIGURATION,
+  MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES,
+} from '../../test/mocks';
 import { ControlGeneralView } from '.';
 import { getInputFromPolicy } from '../../common/utils';
 import { INPUT_CONTROL } from '../../../common/constants';
@@ -42,20 +46,20 @@ describe('<ControlGeneralView />', () => {
     try {
       const json = yaml.load(configuration);
 
-      expect(json.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
-      expect(json.responses.length).toBe(getAllByTestId('cloud-defend-response').length);
-      expect(json.selectors.length).toBe(3);
-      expect(json.responses.length).toBe(2);
+      expect(json.file.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
+      expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-response').length);
+      expect(json.file.selectors.length).toBe(3);
+      expect(json.file.responses.length).toBe(2);
     } catch (err) {
       throw err;
     }
   });
 
-  it('allows a user to add a new selector and new response', async () => {
+  it('allows a user to add a new selector', async () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
-    userEvent.click(getByTestId('cloud-defend-btnaddselector'));
-    userEvent.click(getByTestId('cloud-defend-btnaddresponse'));
+    userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
+    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddFileSelector')));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
 
@@ -67,13 +71,54 @@ describe('<ControlGeneralView />', () => {
     try {
       const json = yaml.load(configuration);
 
-      expect(json.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
-      expect(json.responses.length).toBe(getAllByTestId('cloud-defend-response').length);
-      expect(json.selectors.length).toBe(4);
-      expect(json.responses.length).toBe(3);
+      expect(json.file.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
     } catch (err) {
       throw err;
     }
+  });
+
+  it('allows a user to add a file response', async () => {
+    const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
+
+    userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
+    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddFileResponse')));
+
+    const policy = onChange.mock.calls[0][0].updatedPolicy;
+
+    rerender(<WrappedComponent policy={policy} />);
+
+    const input = getInputFromPolicy(policy, INPUT_CONTROL);
+    const configuration = input?.vars?.configuration?.value;
+
+    try {
+      const json = yaml.load(configuration);
+
+      expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-response').length);
+    } catch (err) {
+      throw err;
+    }
+  });
+
+  it('should prevent user from adding a process response if no there are no process selectors', async () => {
+    const testPolicy = `
+      file:
+        selectors:
+          - name: test
+            operation: ['createFile']
+        responses:
+          - match: [test]
+            actions: [alert, block]
+    `;
+
+    const { getByTestId } = render(
+      <WrappedComponent policy={getCloudDefendNewPolicyMock(testPolicy)} />
+    );
+
+    userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
+    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddProcessResponse')));
+
+    expect(onChange.mock.calls.length).toBe(0);
+    expect(getByTestId('cloud-defend-btnAddProcessResponse')).toBeDisabled();
   });
 
   it('updates selector name used in response.match, if its name is changed', async () => {
@@ -114,5 +159,16 @@ describe('<ControlGeneralView />', () => {
 
     expect(queryAllByTestId('cloud-defend-selector')).toHaveLength(0);
     expect(queryAllByTestId('cloud-defend-response')).toHaveLength(0);
+  });
+
+  it('prevents the user from adding more than MAX_SELECTORS_AND_RESPONSES_PER_TYPE', async () => {
+    const { getByTestId } = render(
+      <WrappedComponent
+        policy={getCloudDefendNewPolicyMock(MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES)}
+      />
+    );
+
+    userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
+    expect(getByTestId('cloud-defend-btnAddFileSelector')).toBeDisabled();
   });
 });

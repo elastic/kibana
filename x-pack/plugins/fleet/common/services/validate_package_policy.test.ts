@@ -512,7 +512,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
         vars: {},
       });
       expect(
@@ -528,7 +528,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
         vars: {},
       });
     });
@@ -547,7 +547,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
         vars: {},
       });
       expect(
@@ -563,7 +563,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
-        inputs: null,
+        inputs: {},
         vars: {},
       });
     });
@@ -937,6 +937,92 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           name: 'myvariable',
           type: 'integer',
           multi: true,
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toBeNull();
+    });
+  });
+
+  describe('Select', () => {
+    it('should return an error message if the value is not an option value', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: 'c',
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Invalid value for select type']);
+    });
+
+    it('should return an error message if the value is an empty string', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: '',
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Invalid value for select type']);
+    });
+
+    it('should accept a select with a valid value', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: 'b',
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('should accept a select with undefined value', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: undefined,
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
         },
         'myvariable',
         safeLoad

@@ -30,9 +30,12 @@ export const aiopsExplainLogRateSpikesSchema = schema.object({
       loaded: schema.maybe(schema.number()),
       remainingFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
       // TODO Improve schema
-      changePoints: schema.maybe(schema.arrayOf(schema.any())),
+      significantTerms: schema.maybe(schema.arrayOf(schema.any())),
+      regroupOnly: schema.maybe(schema.boolean()),
     })
   ),
+  /** Probability used for the random sampler aggregations */
+  sampleProbability: schema.maybe(schema.number()),
 });
 
 export type AiopsExplainLogRateSpikesSchema = TypeOf<typeof aiopsExplainLogRateSpikesSchema>;

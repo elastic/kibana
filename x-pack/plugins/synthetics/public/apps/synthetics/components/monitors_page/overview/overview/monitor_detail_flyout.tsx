@@ -98,8 +98,9 @@ function DetailFlyoutDurationChart({
 >) {
   const theme = useTheme();
 
-  const { observability } = useKibana<ClientPluginsStart>().services;
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
   return (
     <EuiPageSection bottomBorder="extended">
       <EuiTitle size="xs">
@@ -331,7 +332,7 @@ export function MonitorDetailFlyout(props: Props) {
               configId={configId}
               monitor={{
                 ...monitorSavedObject.attributes,
-                id: monitorSavedObject.id,
+                id,
                 updated_at: monitorSavedObject.updated_at!,
                 created_at: monitorSavedObject.created_at!,
               }}
@@ -342,10 +343,16 @@ export function MonitorDetailFlyout(props: Props) {
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l" color="transparent">
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={props.onClose}>{CLOSE_FLYOUT_TEXT}</EuiButtonEmpty>
+                  <EuiButtonEmpty
+                    data-test-subj="syntheticsMonitorDetailFlyoutButton"
+                    onClick={props.onClose}
+                  >
+                    {CLOSE_FLYOUT_TEXT}
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    data-test-subj="syntheticsMonitorDetailFlyoutButton"
                     // `detailLink` can be undefined, in this case, disable the button
                     isDisabled={!detailLink}
                     href={detailLink}

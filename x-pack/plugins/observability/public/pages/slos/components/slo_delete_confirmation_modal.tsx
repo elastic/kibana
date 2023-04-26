@@ -52,7 +52,7 @@ export function SloDeleteConfirmationModal({
       onCancel={onCancel}
       onConfirm={handleConfirm}
     >
-      {i18n.translate('xpack.observability.slos.slo.deleteConfirmationModal.descriptionText', {
+      {i18n.translate('xpack.observability.slo.slo.deleteConfirmationModal.descriptionText', {
         defaultMessage: "You can't recover {name} after deleting.",
         values: { name },
       })}
@@ -61,24 +61,24 @@ export function SloDeleteConfirmationModal({
 }
 
 const getTitle = () =>
-  i18n.translate('xpack.observability.slos.slo.deleteConfirmationModal.title', {
+  i18n.translate('xpack.observability.slo.slo.deleteConfirmationModal.title', {
     defaultMessage: 'Are you sure?',
   });
 
 const getCancelButtonText = () =>
-  i18n.translate('xpack.observability.slos.slo.deleteConfirmationModal.cancelButtonLabel', {
+  i18n.translate('xpack.observability.slo.slo.deleteConfirmationModal.cancelButtonLabel', {
     defaultMessage: 'Cancel',
   });
 
 const getConfirmButtonText = (name: string) =>
-  i18n.translate('xpack.observability.slos.slo.deleteConfirmationModal.deleteButtonLabel', {
+  i18n.translate('xpack.observability.slo.slo.deleteConfirmationModal.deleteButtonLabel', {
     defaultMessage: 'Delete {name}',
     values: { name },
   });
 
 const getDeleteSuccesfulMessage = (name: string) =>
   i18n.translate(
-    'xpack.observability.slos.slo.deleteConfirmationModal.successNotification.descriptionText',
+    'xpack.observability.slo.slo.deleteConfirmationModal.successNotification.descriptionText',
     {
       defaultMessage: 'Deleted {name}',
       values: { name },
@@ -87,7 +87,7 @@ const getDeleteSuccesfulMessage = (name: string) =>
 
 const getDeleteFailMessage = (name: string) =>
   i18n.translate(
-    'xpack.observability.slos.slo.deleteConfirmationModal.errorNotification.descriptionText',
+    'xpack.observability.slo.slo.deleteConfirmationModal.errorNotification.descriptionText',
     {
       defaultMessage: 'Failed to delete {name}',
       values: { name },

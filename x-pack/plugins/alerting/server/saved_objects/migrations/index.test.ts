@@ -2628,9 +2628,11 @@ describe('successful migrations', () => {
         outcomeOrder: 0,
       });
     });
+  });
 
+  describe('8.8.0', () => {
     test('adds uuid to rule actions', () => {
-      const migration870 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.7.0'];
+      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
       const rule = getMockData(
         {
           params: { foo: true },
@@ -2638,9 +2640,9 @@ describe('successful migrations', () => {
         },
         true
       );
-      const migratedAlert870 = migration870(rule, migrationContext);
+      const migratedAlert880 = migration880(rule, migrationContext);
 
-      expect(migratedAlert870.attributes.actions).toEqual([
+      expect(migratedAlert880.attributes.actions).toEqual([
         {
           group: 'default',
           actionRef: '1',
@@ -2649,6 +2651,68 @@ describe('successful migrations', () => {
           uuid: expect.stringMatching(/.*\S.*/), // non-empty string
         },
       ]);
+    });
+
+    test('migrates rule to include revision and defaults revision to 0', () => {
+      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
+
+      const rule = getMockData();
+      const migratedAlert880 = migration880(rule, migrationContext);
+      expect(migratedAlert880.attributes.revision).toEqual(0);
+    });
+
+    test('migrates security rule version to revision', () => {
+      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
+
+      const rule = getMockData({ alertTypeId: ruleTypeMappings.eql, params: { version: 2 } });
+      const migratedAlert880 = migration880(rule, migrationContext);
+      expect(migratedAlert880.attributes.revision).toEqual(2);
+    });
+
+    describe('migrate actions frequency for Security Solution ', () => {
+      test('Add frequency when throttle is null', () => {
+        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.8.0'
+        ];
+
+        const rule = getMockData({ alertTypeId: ruleTypeMappings.eql });
+        const migratedAlert880 = migration880(rule, migrationContext);
+        expect(migratedAlert880.attributes.actions[0].frequency.summary).toEqual(true);
+        expect(migratedAlert880.attributes.actions[0].frequency.notifyWhen).toEqual(
+          'onActiveAlert'
+        );
+        expect(migratedAlert880.attributes.actions[0].frequency.throttle).toEqual(null);
+      });
+
+      test('Add frequency when throttle is 1h', () => {
+        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.8.0'
+        ];
+
+        const rule = getMockData({ alertTypeId: ruleTypeMappings.eql, throttle: '1h' });
+        const migratedAlert880 = migration880(rule, migrationContext);
+        expect(migratedAlert880.attributes.actions[0].frequency.summary).toEqual(true);
+        expect(migratedAlert880.attributes.actions[0].frequency.notifyWhen).toEqual(
+          'onThrottleInterval'
+        );
+        expect(migratedAlert880.attributes.actions[0].frequency.throttle).toEqual('1h');
+      });
+
+      test('Do not migrate action when alert does NOT belong to security solution', () => {
+        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.8.0'
+        ];
+
+        const rule = getMockData();
+        const migratedAlert880 = migration880(rule, migrationContext);
+        const updatedActions = migratedAlert880.attributes.actions.map(
+          (action: { [x: string]: unknown; uuid: unknown }) => {
+            const { uuid, ...updatedAction } = action;
+            return updatedAction;
+          }
+        );
+        expect(updatedActions).toEqual(rule.attributes.actions);
+      });
     });
   });
 

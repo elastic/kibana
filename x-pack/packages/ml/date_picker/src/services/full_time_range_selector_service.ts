@@ -45,7 +45,7 @@ export async function setFullTimeRange(
   query?: QueryDslQueryContainer,
   excludeFrozenData?: boolean,
   path: SetFullTimeRangeApiPath = '/internal/file_upload/time_field_range'
-): Promise<GetTimeFieldRangeResponse> {
+): Promise<GetTimeFieldRangeResponse | undefined> {
   try {
     const runtimeMappings = dataView.getRuntimeMappings();
     const resp = await getTimeFieldRange({
@@ -62,6 +62,7 @@ export async function setFullTimeRange(
         from: moment(resp.start.epoch).toISOString(),
         to: moment(resp.end.epoch).toISOString(),
       });
+      return resp;
     } else if (typeof resp.start === 'number' && typeof resp.end === 'number') {
       timefilter.setTime({
         from: moment(resp.start).toISOString(),
@@ -79,9 +80,7 @@ export async function setFullTimeRange(
         }),
       });
     }
-
-    return resp;
-  } catch (resp) {
+  } catch (error) {
     toasts.addDanger(
       i18n.translate(
         'xpack.ml.datePicker.fullTimeRangeSelector.errorSettingTimeRangeNotification',
@@ -90,7 +89,6 @@ export async function setFullTimeRange(
         }
       )
     );
-    return resp;
   }
 }
 

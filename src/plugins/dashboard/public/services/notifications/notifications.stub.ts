@@ -17,5 +17,6 @@ export const notificationsServiceFactory: NotificationsServiceFactory = () => {
 
   return {
     toasts: pluginMock.toasts,
+    showErrorDialog: pluginMock.showErrorDialog,
   };
 };

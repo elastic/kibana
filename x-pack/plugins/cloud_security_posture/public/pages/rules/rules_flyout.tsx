@@ -18,8 +18,8 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getRuleList } from '../findings/findings_flyout/rule_tab';
-import { getRemediationList } from '../findings/findings_flyout/overview_tab';
+import { getRuleList } from '../configurations/findings_flyout/rule_tab';
+import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import type { RuleSavedObject } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 

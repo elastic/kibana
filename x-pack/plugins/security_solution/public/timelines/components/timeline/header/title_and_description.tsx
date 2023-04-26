@@ -201,7 +201,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
               <EuiCallOut
                 title={calloutMessage}
                 color="danger"
-                iconType="alert"
+                iconType="warning"
                 data-test-subj="save-timeline-callout"
               />
               <EuiSpacer size="m" />

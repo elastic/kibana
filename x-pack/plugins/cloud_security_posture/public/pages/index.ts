@@ -6,6 +6,7 @@
  */
 
 export { Findings } from './findings';
+export { Configurations } from './configurations';
 export * from './compliance_dashboard';
 export { Benchmarks } from './benchmarks';
 export { Rules } from './rules';

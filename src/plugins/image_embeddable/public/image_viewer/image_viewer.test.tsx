@@ -18,7 +18,7 @@ beforeEach(() => {
   validateUrl.mockImplementation(() => ({ isValid: true }));
 });
 
-const DefaultImageViewer = (props: { imageConfig: ImageConfig }) => {
+const DefaultImageViewer = (props: { imageConfig: ImageConfig; isScreenshotMode?: boolean }) => {
   return (
     <ImageViewerContext.Provider
       value={{
@@ -26,7 +26,7 @@ const DefaultImageViewer = (props: { imageConfig: ImageConfig }) => {
         validateUrl,
       }}
     >
-      <ImageViewer imageConfig={props.imageConfig} />
+      <ImageViewer imageConfig={props.imageConfig} isScreenshotMode={props.isScreenshotMode} />
     </ImageViewerContext.Provider>
   );
 };
@@ -74,4 +74,33 @@ test('should display an image by file id', () => {
 
   expect(getByAltText(`alt text`)).toBeVisible();
   expect(getByAltText(`alt text`)).toHaveAttribute('src', 'https://elastic.co/imageId');
+});
+
+test('image is lazy by default', () => {
+  const { getByAltText } = render(
+    <DefaultImageViewer
+      imageConfig={{
+        src: { type: 'url', url: 'https://elastic.co/image' },
+        sizing: { objectFit: 'fill' },
+        altText: 'alt text',
+      }}
+    />
+  );
+
+  expect(getByAltText(`alt text`)).toHaveAttribute('loading', 'lazy');
+});
+
+test('image is eager when in screenshotting mode', () => {
+  const { getByAltText } = render(
+    <DefaultImageViewer
+      imageConfig={{
+        src: { type: 'url', url: 'https://elastic.co/image' },
+        sizing: { objectFit: 'fill' },
+        altText: 'alt text',
+      }}
+      isScreenshotMode={true}
+    />
+  );
+
+  expect(getByAltText(`alt text`)).toHaveAttribute('loading', 'eager');
 });

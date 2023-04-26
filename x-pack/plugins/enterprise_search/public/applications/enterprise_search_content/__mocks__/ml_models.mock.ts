@@ -70,13 +70,30 @@ export const textClassificationModel: TrainedModelConfigResponse = {
   version: '2',
 };
 
-export const mlModels: TrainedModelConfigResponse[] = [nerModel, textClassificationModel];
+export const textExpansionModel: TrainedModelConfigResponse = {
+  inference_config: {
+    text_expansion: {},
+  },
+  input: {
+    field_names: ['text_field'],
+  },
+  model_id: 'text-expansion-mocked-model',
+  model_type: 'pytorch',
+  tags: [],
+  version: '1',
+};
+
+export const mlModels: TrainedModelConfigResponse[] = [
+  nerModel,
+  textClassificationModel,
+  textExpansionModel,
+];
 
 export const mlModelStats: {
   count: number;
   trained_model_stats: MlTrainedModelStats[];
 } = {
-  count: 2,
+  count: 3,
   trained_model_stats: [
     {
       model_id: nerModel.model_id,
@@ -114,6 +131,27 @@ export const mlModelStats: {
         threads_per_allocation: 1,
       } as unknown as MlTrainedModelDeploymentStats,
       model_id: textClassificationModel.model_id,
+      model_size_stats: {
+        model_size_bytes: 260831121,
+        required_native_memory_bytes: 773320482,
+      },
+      pipeline_count: 0,
+    },
+    {
+      deployment_stats: {
+        allocation_status: {
+          allocation_count: 1,
+          target_allocation_count: 1,
+          state: 'fully_allocated',
+        },
+        error_count: 0,
+        inference_count: 0,
+        nodes: [],
+        number_of_allocations: 1,
+        state: 'started',
+        threads_per_allocation: 1,
+      } as unknown as MlTrainedModelDeploymentStats,
+      model_id: textExpansionModel.model_id,
       model_size_stats: {
         model_size_bytes: 260831121,
         required_native_memory_bytes: 773320482,

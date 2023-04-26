@@ -11,12 +11,12 @@ import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } fro
 import { EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { AlertCounts } from './alert_counts';
 import { ALL_ALERT_COLOR, TOOLTIP_DATE_FORMAT } from './constants';
-import { Alert, ChartThemes } from '../types';
+import { Alert, ChartProps } from '../types';
 
 export interface AlertSummaryWidgetFullSizeProps {
   activeAlertCount: number;
   activeAlerts: Alert[];
-  chartThemes: ChartThemes;
+  chartProps: ChartProps;
   recoveredAlertCount: number;
   dateFormat?: string;
 }
@@ -24,7 +24,7 @@ export interface AlertSummaryWidgetFullSizeProps {
 export const AlertSummaryWidgetFullSize = ({
   activeAlertCount,
   activeAlerts,
-  chartThemes: { theme, baseTheme },
+  chartProps: { theme, baseTheme, onBrushEnd },
   dateFormat,
   recoveredAlertCount,
 }: AlertSummaryWidgetFullSizeProps) => {
@@ -60,6 +60,7 @@ export const AlertSummaryWidgetFullSize = ({
             headerFormatter: (tooltip) =>
               moment(tooltip.value).format(dateFormat || TOOLTIP_DATE_FORMAT),
           }}
+          onBrushEnd={onBrushEnd}
         />
         <Axis
           id="bottom"

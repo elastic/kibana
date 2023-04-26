@@ -86,8 +86,8 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
                 ),
                 includeIn: 'all',
                 savedObject: {
-                  all: [],
-                  read: [],
+                  all: [...filesSavedObjectTypes],
+                  read: [...filesSavedObjectTypes],
                 },
                 cases: {
                   delete: [APP_ID],

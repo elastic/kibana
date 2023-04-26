@@ -25,6 +25,7 @@ describe('ExceptionsViewerUtility', () => {
           exceptionsToShow={{ active: true }}
           onChangeExceptionsToShow={(optionId: string) => {}}
           lastUpdated={1660534202}
+          isEndpoint={false}
         />
       </TestProviders>
     );
@@ -47,6 +48,7 @@ describe('ExceptionsViewerUtility', () => {
           exceptionsToShow={{ active: true }}
           onChangeExceptionsToShow={(optionId: string) => {}}
           lastUpdated={Date.now()}
+          isEndpoint={false}
         />
       </TestProviders>
     );

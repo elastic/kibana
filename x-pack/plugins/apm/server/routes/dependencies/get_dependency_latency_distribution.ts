@@ -18,6 +18,11 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { getOverallLatencyDistribution } from '../latency_distribution/get_overall_latency_distribution';
 import { OverallLatencyDistributionResponse } from '../latency_distribution/types';
 
+export interface DependencyLatencyDistributionResponse {
+  allSpansDistribution: OverallLatencyDistributionResponse;
+  failedSpansDistribution: OverallLatencyDistributionResponse;
+}
+
 export async function getDependencyLatencyDistribution({
   apmEventClient,
   dependencyName,
@@ -36,10 +41,7 @@ export async function getDependencyLatencyDistribution({
   start: number;
   end: number;
   percentileThreshold: number;
-}): Promise<{
-  allSpansDistribution: OverallLatencyDistributionResponse;
-  failedSpansDistribution: OverallLatencyDistributionResponse;
-}> {
+}): Promise<DependencyLatencyDistributionResponse> {
   const commonParams = {
     chartType: LatencyDistributionChartType.dependencyLatency,
     apmEventClient,

@@ -181,7 +181,7 @@ const ProgressCta: React.FC<ProgressCtaProps> = ({
 
   if (rangeEdge === 'now' && position === 'end') {
     return (
-      <EuiButton onClick={onStreamStart} size="s">
+      <EuiButton data-test-subj="infraProgressCtaStreamLiveButton" onClick={onStreamStart} size="s">
         <FormattedMessage id="xpack.infra.logs.streamLive" defaultMessage="Stream live" />
       </EuiButton>
     );
@@ -198,6 +198,7 @@ const ProgressCta: React.FC<ProgressCtaProps> = ({
 
   return (
     <EuiButton
+      data-test-subj="infraProgressCtaButton"
       onClick={() => {
         if (typeof onExtendRange === 'function') {
           onExtendRange(extendedRange.value);

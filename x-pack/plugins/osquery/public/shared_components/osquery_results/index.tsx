@@ -19,7 +19,6 @@ import type { OsqueryActionResultsProps } from './types';
 import { OsqueryResult } from './osquery_result';
 
 const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
-  agentIds,
   ruleName,
   actionItems,
   ecsData,
@@ -37,7 +36,6 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
           queryId={queryId}
           startDate={startDate}
           ruleName={ruleName}
-          agentIds={agentIds}
           ecsData={ecsData}
         />
       );

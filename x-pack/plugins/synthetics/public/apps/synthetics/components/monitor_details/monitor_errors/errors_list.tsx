@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import moment from 'moment';
@@ -21,6 +22,7 @@ import { ErrorDetailsLink } from '../../common/links/error_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { Ping, PingState } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
+import { isActiveState } from '../hooks/use_monitor_errors';
 import {
   formatTestDuration,
   formatTestRunAt,
@@ -34,7 +36,7 @@ export const ErrorsList = ({
   errorStates: PingState[];
   loading: boolean;
 }) => {
-  const { monitorId } = useParams<{ monitorId: string }>();
+  const { monitorId: configId } = useParams<{ monitorId: string }>();
 
   const checkGroups = useMemo(() => {
     return errorStates.map((error) => error.monitor.check_group!);
@@ -54,6 +56,8 @@ export const ErrorsList = ({
     return moment(b.state.started_at).valueOf() - moment(a.state.started_at).valueOf();
   })?.[0];
 
+  const isTabletOrGreater = useIsWithinMinBreakpoint('s');
+
   const columns = [
     {
       field: 'item.state.started_at',
@@ -64,7 +68,7 @@ export const ErrorsList = ({
       render: (value: string, item: PingState) => {
         const link = (
           <ErrorDetailsLink
-            configId={monitorId}
+            configId={configId}
             stateId={item.state?.id!}
             label={formatTestRunAt(item.state!.started_at, format)}
             locationId={selectedLocation?.id}
@@ -76,17 +80,20 @@ export const ErrorsList = ({
         }
 
         return (
-          <EuiFlexGroup gutterSize="m" alignItems="center">
+          <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
             <EuiFlexItem grow={false} className="eui-textNoWrap">
               {link}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge iconType="clock" iconSide="right">
+              <EuiBadge iconType="clock" iconSide="right" css={{ maxWidth: 'max-content' }}>
                 {ACTIVE_LABEL}
               </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
         );
+      },
+      mobileOptions: {
+        header: false,
       },
     },
     ...(isBrowserType
@@ -157,7 +164,7 @@ export const ErrorsList = ({
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
           history.push(
-            `/monitor/${monitorId}/errors/${state.id}?locationId=${selectedLocation?.id}`
+            `/monitor/${configId}/errors/${state.id}?locationId=${selectedLocation?.id}`
           );
         },
       };
@@ -168,6 +175,7 @@ export const ErrorsList = ({
     <div>
       <EuiSpacer />
       <EuiInMemoryTable
+        css={{ overflowX: isTabletOrGreater ? 'auto' : undefined }}
         tableLayout="auto"
         tableCaption={ERRORS_LIST_LABEL}
         loading={loading}
@@ -198,15 +206,6 @@ export const getErrorDetailsUrl = ({
   locationId?: string;
 }) => {
   return `${basePath}/app/synthetics/monitor/${configId}/errors/${stateId}?locationId=${locationId}`;
-};
-
-const isActiveState = (item: PingState) => {
-  const timestamp = item['@timestamp'];
-  const interval = moment(item.monitor.timespan?.lt).diff(
-    moment(item.monitor.timespan?.gte),
-    'milliseconds'
-  );
-  return moment().diff(moment(timestamp), 'milliseconds') < interval;
 };
 
 const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorsList.label', {

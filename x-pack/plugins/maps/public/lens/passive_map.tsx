@@ -6,6 +6,7 @@
  */
 
 import React, { Component, RefObject } from 'react';
+import { Subscription } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiLoadingChart } from '@elastic/eui';
 import { EmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
@@ -17,6 +18,7 @@ import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_l
 interface Props {
   factory: EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput>;
   passiveLayer: LayerDescriptor;
+  onRenderComplete: () => void;
 }
 
 interface State {
@@ -34,6 +36,7 @@ export class PassiveMap extends Component<Props, State> {
   private _isMounted = false;
   private _prevPassiveLayer = this.props.passiveLayer;
   private readonly _embeddableRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
+  private _onRenderSubscription: Subscription | undefined;
 
   state: State = { mapEmbeddable: null };
 
@@ -47,6 +50,9 @@ export class PassiveMap extends Component<Props, State> {
     if (this.state.mapEmbeddable) {
       this.state.mapEmbeddable.destroy();
     }
+    if (this._onRenderSubscription) {
+      this._onRenderSubscription.unsubscribe();
+    }
   }
 
   componentDidUpdate() {
@@ -59,7 +65,7 @@ export class PassiveMap extends Component<Props, State> {
   async _setupEmbeddable() {
     const basemapLayerDescriptor = createBasemapLayerDescriptor();
     const intialLayers = basemapLayerDescriptor ? [basemapLayerDescriptor] : [];
-    const mapEmbeddable = await this.props.factory.create({
+    const mapEmbeddable = (await this.props.factory.create({
       id: uuidv4(),
       attributes: {
         title: '',
@@ -78,14 +84,21 @@ export class PassiveMap extends Component<Props, State> {
         initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
         autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
       },
-    });
+    })) as MapEmbeddable | undefined;
 
     if (!mapEmbeddable) {
       return;
     }
 
+    this._onRenderSubscription = mapEmbeddable.getOnRenderComplete$().subscribe(() => {
+      if (this._isMounted) {
+        this.props.onRenderComplete();
+      }
+    });
+
     if (this._isMounted) {
-      this.setState({ mapEmbeddable: mapEmbeddable as MapEmbeddable }, () => {
+      mapEmbeddable.setIsSharable(false);
+      this.setState({ mapEmbeddable }, () => {
         if (this.state.mapEmbeddable && this._embeddableRef.current) {
           this.state.mapEmbeddable.render(this._embeddableRef.current);
         }

@@ -19,14 +19,14 @@ export const parsedPidOrEntityIdParameter = (parameters: {
   };
 };
 
-const UNIT_TO_MILLISECONDS = (value: number) => ({
-  h: (): number => value * 60 * 60 * 1000,
-  m: (): number => value * 60 * 1000,
-  s: (): number => value * 1000,
+const UNIT_TO_SECONDS = (value: number) => ({
+  h: (): number => value * 60 * 60,
+  m: (): number => value * 60,
+  s: (): number => value,
 });
 
-const convertToMilliseconds = (value: number, unit: 'h' | 'm' | 's'): number =>
-  UNIT_TO_MILLISECONDS(value)[unit]();
+const convertToSeconds = (value: number, unit: 'h' | 'm' | 's'): number =>
+  UNIT_TO_SECONDS(value)[unit]();
 
 const EXECUTE_TIMEOUT_REGEX = /^\d+(?=(h|m|s){1}$)/;
 export const validateUnitOfTime = (value: string): boolean => EXECUTE_TIMEOUT_REGEX.test(value);
@@ -37,5 +37,5 @@ export const parsedExecuteTimeout = (timeout?: string): undefined | number => {
     return;
   }
 
-  return convertToMilliseconds(Number(timeoutMatch[0]), timeoutMatch[1] as 'h' | 'm' | 's');
+  return convertToSeconds(Number(timeoutMatch[0]), timeoutMatch[1] as 'h' | 'm' | 's');
 };

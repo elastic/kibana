@@ -9,6 +9,28 @@ import { i18n } from '@kbn/i18n';
 import { RawSettingDefinition } from './types';
 
 export const javaSettings: RawSettingDefinition[] = [
+  {
+    key: 'application_packages',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate('xpack.apm.agentConfig.applicationPackages.label', {
+      defaultMessage: 'Application packages',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.applicationPackages.description',
+      {
+        defaultMessage:
+          'Used to determine whether a stack trace frame is an in-app frame or a library frame. ' +
+          'This allows the APM app to collapse the stack frames of library code, and highlight the stack frames that originate from your application. ' +
+          'Multiple root packages can be set as a comma-separated list; there’s no need to configure sub-packages. ' +
+          'Because this setting helps determine which classes to scan on startup, setting this option can also improve startup time.\n' +
+          '\n' +
+          'You must set this option in order to use the API annotations `@CaptureTransaction` and `@CaptureSpan`.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
   // ENABLE_LOG_CORRELATION
   {
     key: 'enable_log_correlation',
@@ -47,6 +69,101 @@ export const javaSettings: RawSettingDefinition[] = [
     ),
     includeAgents: ['java'],
   },
+
+  {
+    key: 'enable_experimental_instrumentations',
+    type: 'boolean',
+    defaultValue: 'false',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.enableExperimentalInstrumentations.label',
+      {
+        defaultMessage: 'Enable experimental instrumentations',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.enableExperimentalInstrumentations.description',
+      {
+        defaultMessage:
+          'Whether to apply experimental instrumentations.\n' +
+          '\n' +
+          'NOTE: Changing this value at runtime can slow down the application temporarily. ' +
+          'Setting to true will enable instrumentations in the experimental group.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'enable_instrumentations',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.enableInstrumentations.label',
+      {
+        defaultMessage: 'Disable instrumentations',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.enableInstrumentations.description',
+      {
+        defaultMessage:
+          'A list of instrumentations which should be selectively enabled. ' +
+          'Valid options are listed in the ' +
+          '[Java APM Agent documentation](https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-disable-instrumentations).\n' +
+          '\n' +
+          'When set to non-empty value, only listed instrumentations will be enabled ' +
+          'if they are not disabled through `disable_instrumentations`or `enable_experimental_instrumentations`.\n' +
+          'When not set or empty (default), all instrumentations enabled by default will be enabled ' +
+          'unless they are disabled through `disable_instrumentations` or `enable_experimental_instrumentations`.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'log_sending',
+    type: 'boolean',
+    defaultValue: 'false',
+    label: i18n.translate('xpack.apm.agentConfig.logSending.label', {
+      defaultMessage: 'Log sending (experimental)',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.logSending.description',
+      {
+        defaultMessage:
+          'Experimental, requires latest version of the Java agent.\n' +
+          '\n' +
+          'If set to `true`,\n' +
+          'agent will send logs directly to APM server.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'span_min_duration',
+    type: 'duration',
+    defaultValue: '0ms',
+    min: '0ms',
+    label: i18n.translate('xpack.apm.agentConfig.spanMinDuration.label', {
+      defaultMessage: 'Span minimum duration',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.spanMinDuration.description',
+      {
+        defaultMessage:
+          'Sets the minimum duration of spans. Spans that execute faster than this threshold are attempted to be discarded.\n' +
+          '\n' +
+          'The attempt fails if they lead up to a span that can’t be discarded. Spans that propagate the trace context to ' +
+          'downstream services, such as outgoing HTTP requests, can’t be discarded. Additionally, spans that lead to an error ' +
+          'or that may be a parent of an async operation can’t be discarded.\n' +
+          '\n' +
+          'However, external calls that don’t propagate context, such as calls to a database, can be discarded using this threshold.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
   {
     key: 'stress_monitor_gc_stress_threshold',
     label: i18n.translate(

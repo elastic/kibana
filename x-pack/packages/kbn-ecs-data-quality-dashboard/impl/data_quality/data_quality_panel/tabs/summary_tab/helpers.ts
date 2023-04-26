@@ -36,7 +36,7 @@ export const getSummaryData = (
   { categoryId: 'ecs-compliant', mappings: partitionedFieldMetadata.ecsCompliant.length },
 ];
 
-export const getFillColor = (categoryId: CategoryId): string => {
+export const getFillColor = (categoryId: CategoryId | string): string => {
   switch (categoryId) {
     case 'incompatible':
       return euiThemeVars.euiColorDanger;
@@ -79,28 +79,34 @@ const isString = (x: string | null): x is string => typeof x === 'string';
 
 export const getMarkdownComments = ({
   docsCount,
+  formatBytes,
   formatNumber,
   ilmPhase,
   indexName,
   partitionedFieldMetadata,
   patternDocsCount,
+  sizeInBytes,
 }: {
   docsCount: number;
+  formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   pattern: string;
   patternDocsCount: number;
+  sizeInBytes: number | undefined;
 }): string[] => {
   const invalidMarkdownComments = showInvalidCallout(partitionedFieldMetadata.incompatible)
     ? getAllIncompatibleMarkdownComments({
         docsCount,
+        formatBytes,
         formatNumber,
         ilmPhase,
         indexName,
         partitionedFieldMetadata,
         patternDocsCount,
+        sizeInBytes,
       })
     : [];
 

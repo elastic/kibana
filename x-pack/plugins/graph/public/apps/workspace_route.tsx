@@ -43,6 +43,7 @@ export const WorkspaceRoute = ({
     spaces,
     indexPatterns: getIndexPatternProvider,
     inspect,
+    savedObjectsManagement,
   },
 }: WorkspaceRouteProps) => {
   /**
@@ -70,9 +71,10 @@ export const WorkspaceRoute = ({
       storage,
       data,
       unifiedSearch,
+      savedObjectsManagement,
       ...coreStart,
     }),
-    [coreStart, data, storage, unifiedSearch]
+    [coreStart, data, storage, unifiedSearch, savedObjectsManagement]
   );
 
   const { loading, requestAdapter, callNodeProxy, callSearchNodeProxy, handleSearchQueryError } =

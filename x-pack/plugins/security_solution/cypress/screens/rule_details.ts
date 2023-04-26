@@ -39,6 +39,12 @@ export const DETAILS_TITLE = '.euiDescriptionList__title';
 
 export const EXCEPTIONS_TAB = 'a[data-test-subj="navigation-rule_exceptions"]';
 
+export const EXCEPTIONS_TAB_EXPIRED_FILTER = '[data-test-subj="expired"]';
+
+export const EXCEPTIONS_TAB_ACTIVE_FILTER = '[data-test-subj="active"]';
+
+export const EXCEPTIONS_ITEM_CONTAINER = '[data-test-subj="exceptionsContainer"]';
+
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
@@ -111,6 +117,10 @@ export const THRESHOLD_DETAILS = 'Threshold';
 export const TIMELINE_TEMPLATE_DETAILS = 'Timeline template';
 
 export const TIMESTAMP_OVERRIDE_DETAILS = 'Timestamp override';
+
+export const SUPPRESS_BY_DETAILS = 'Suppress alerts by';
+
+export const SUPPRESS_FOR_DETAILS = 'Suppress alerts for';
 
 export const TIMELINE_FIELD = (field: string) => {
   return `[data-test-subj="formatted-field-${field}"]`;

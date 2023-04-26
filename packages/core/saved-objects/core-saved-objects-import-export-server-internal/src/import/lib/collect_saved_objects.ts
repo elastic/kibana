@@ -65,7 +65,10 @@ export async function collectSavedObjects({
         }
       }
       // Ensure migrations execute on every saved object
-      return Object.assign({ migrationVersion: {} }, obj);
+      return {
+        ...obj,
+        ...(!obj.migrationVersion && !obj.typeMigrationVersion ? { typeMigrationVersion: '' } : {}),
+      };
     }),
     createConcatStream([]),
   ]);

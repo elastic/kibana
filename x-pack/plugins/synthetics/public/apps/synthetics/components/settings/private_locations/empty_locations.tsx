@@ -6,21 +6,26 @@
  */
 
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiButton, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
+import { PRIVATE_LOCATIOSN_ROUTE } from '../../../../../../common/constants';
 import { setAddingNewPrivateLocation, setManageFlyoutOpen } from '../../../state/private_locations';
 
 export const EmptyLocations = ({
   inFlyout = true,
   setIsAddingNew,
   disabled,
+  redirectToSettings,
 }: {
   inFlyout?: boolean;
   disabled?: boolean;
   setIsAddingNew?: (val: boolean) => void;
+  redirectToSettings?: boolean;
 }) => {
   const dispatch = useDispatch();
+  const history = useHistory();
 
   return (
     <EuiEmptyPrompt
@@ -33,19 +38,35 @@ export const EmptyLocations = ({
         </EuiText>
       }
       actions={
-        <EuiButton
-          iconType="plusInCircle"
-          disabled={disabled}
-          color="primary"
-          fill
-          onClick={() => {
-            setIsAddingNew?.(true);
-            dispatch(setManageFlyoutOpen(true));
-            dispatch(setAddingNewPrivateLocation(true));
-          }}
-        >
-          {ADD_LOCATION}
-        </EuiButton>
+        redirectToSettings ? (
+          <EuiButton
+            data-test-subj="syntheticsEmptyLocationsButton"
+            iconType="plusInCircle"
+            color="primary"
+            fill
+            isDisabled={disabled}
+            href={history.createHref({
+              pathname: PRIVATE_LOCATIOSN_ROUTE,
+            })}
+          >
+            {ADD_LOCATION}
+          </EuiButton>
+        ) : (
+          <EuiButton
+            data-test-subj="syntheticsEmptyLocationsButton"
+            iconType="plusInCircle"
+            disabled={disabled}
+            color="primary"
+            fill
+            onClick={() => {
+              setIsAddingNew?.(true);
+              dispatch(setManageFlyoutOpen(true));
+              dispatch(setAddingNewPrivateLocation(true));
+            }}
+          >
+            {ADD_LOCATION}
+          </EuiButton>
+        )
       }
       footer={
         <EuiText size="s">
@@ -58,6 +79,7 @@ export const EmptyLocations = ({
 
 export const PrivateLocationDocsLink = ({ label }: { label?: string }) => (
   <EuiLink
+    data-test-subj="syntheticsPrivateLocationDocsLinkLink"
     href="https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html"
     target="_blank"
   >

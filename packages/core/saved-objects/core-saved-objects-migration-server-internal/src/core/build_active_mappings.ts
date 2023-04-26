@@ -27,7 +27,7 @@ import type {
 export function buildActiveMappings(
   typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties
 ): IndexMapping {
-  const mapping = defaultMapping();
+  const mapping = getBaseMappings();
 
   const mergedProperties = validateAndMerge(mapping.properties, typeDefinitions);
 
@@ -51,7 +51,7 @@ export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
     return { changedProp: 'dynamic' };
   }
 
-  if (!actual._meta || !actual._meta.migrationMappingPropertyHashes) {
+  if (!actual._meta?.migrationMappingPropertyHashes) {
     return { changedProp: '_meta' };
   }
 
@@ -114,16 +114,10 @@ function findChangedProp(actual: any, expected: any) {
  *
  * @returns {IndexMapping}
  */
-function defaultMapping(): IndexMapping {
+export function getBaseMappings(): IndexMapping {
   return {
     dynamic: 'strict',
     properties: {
-      migrationVersion: {
-        // Saved Objects can't redefine dynamic, but we cheat here to support migrations
-        // @ts-expect-error
-        dynamic: 'true',
-        type: 'object',
-      },
       type: {
         type: 'keyword',
       },
@@ -158,6 +152,12 @@ function defaultMapping(): IndexMapping {
       },
       coreMigrationVersion: {
         type: 'keyword',
+      },
+      typeMigrationVersion: {
+        type: 'version',
+      },
+      managed: {
+        type: 'boolean',
       },
     },
   };

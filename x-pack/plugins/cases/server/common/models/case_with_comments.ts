@@ -27,14 +27,11 @@ import {
   ActionTypes,
   Actions,
 } from '../../../common/api';
-import {
-  CASE_SAVED_OBJECT,
-  MAX_ALERTS_PER_CASE,
-  MAX_DOCS_PER_PAGE,
-} from '../../../common/constants';
+import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
+import { AttachmentLimitChecker } from '../limiter_checker';
 import type { AlertInfo, CaseSavedObject } from '../types';
 import {
   countAlertsForID,
@@ -43,11 +40,11 @@ import {
   getOrUpdateLensReferences,
   isCommentRequestTypeAlert,
   getAlertInfoFromComments,
+  getIDsAndIndicesAsArrays,
 } from '../utils';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
-
-const ALERT_LIMIT_MSG = `Case has reached the maximum allowed number (${MAX_ALERTS_PER_CASE}) of attached alerts.`;
+type CommentRequestWithId = Array<{ id: string } & CommentRequest>;
 
 /**
  * This class represents a case that can have a comment attached to it.
@@ -92,6 +89,13 @@ export class CaseCommentModel {
       const { id, version, ...queryRestAttributes } = updateRequest;
       const options: SavedObjectsUpdateOptions<CommentAttributes> = {
         version,
+        /**
+         * This is to handle a scenario where an update occurs for an attachment framework style comment.
+         * The code that extracts the reference information from the attributes doesn't know about the reference to the case
+         * and therefore will accidentally remove that reference and we'll lose the connection between the comment and the
+         * case.
+         */
+        references: [...this.buildRefsToCase()],
         refresh: false,
       };
 
@@ -105,6 +109,11 @@ export class CaseCommentModel {
           queryRestAttributes.comment,
           currentComment
         );
+
+        /**
+         * The call to getOrUpdateLensReferences already handles retrieving the reference to the case and ensuring that is
+         * also included here so it's ok to overwrite what was set before.
+         */
         options.references = updatedReferences;
       }
 
@@ -206,14 +215,23 @@ export class CaseCommentModel {
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest([commentReq]);
+      const attachmentsWithoutDuplicateAlerts = await this.filterDuplicatedAlerts([
+        { ...commentReq, id },
+      ]);
 
-      const references = [...this.buildRefsToCase(), ...this.getCommentReferences(commentReq)];
+      if (attachmentsWithoutDuplicateAlerts.length === 0) {
+        return this;
+      }
+
+      const { id: commentId, ...attachment } = attachmentsWithoutDuplicateAlerts[0];
+
+      const references = [...this.buildRefsToCase(), ...this.getCommentReferences(attachment)];
 
       const [comment, commentableCase] = await Promise.all([
         this.params.services.attachmentService.create({
           attributes: transformNewComment({
             createdDate,
-            ...commentReq,
+            ...attachment,
             ...this.params.user,
           }),
           references,
@@ -224,8 +242,8 @@ export class CaseCommentModel {
       ]);
 
       await Promise.all([
-        commentableCase.handleAlertComments([commentReq]),
-        this.createCommentUserAction(comment, commentReq),
+        commentableCase.handleAlertComments([attachment]),
+        this.createCommentUserAction(comment, attachment),
       ]);
 
       return commentableCase;
@@ -238,17 +256,75 @@ export class CaseCommentModel {
     }
   }
 
+  private async filterDuplicatedAlerts(
+    attachments: CommentRequestWithId
+  ): Promise<CommentRequestWithId> {
+    /**
+     * This function removes the elements in items that exist at the passed in positions.
+     */
+    const removeItemsByPosition = (items: string[], positionsToRemove: number[]): string[] =>
+      items.filter((_, itemIndex) => !positionsToRemove.some((position) => position === itemIndex));
+
+    const dedupedAlertAttachments: CommentRequestWithId = [];
+    const idsAlreadySeen = new Set();
+    const alertsAttachedToCase = await this.params.services.attachmentService.getter.getAllAlertIds(
+      {
+        caseId: this.caseInfo.id,
+      }
+    );
+
+    attachments.forEach((attachment) => {
+      if (!isCommentRequestTypeAlert(attachment)) {
+        dedupedAlertAttachments.push(attachment);
+        return;
+      }
+
+      const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
+      const idPositionsThatAlreadyExistInCase: number[] = [];
+
+      ids.forEach((id, index) => {
+        if (alertsAttachedToCase.has(id) || idsAlreadySeen.has(id)) {
+          idPositionsThatAlreadyExistInCase.push(index);
+        }
+
+        idsAlreadySeen.add(id);
+      });
+
+      const alertIdsNotAlreadyAttachedToCase = removeItemsByPosition(
+        ids,
+        idPositionsThatAlreadyExistInCase
+      );
+      const alertIndicesNotAlreadyAttachedToCase = removeItemsByPosition(
+        indices,
+        idPositionsThatAlreadyExistInCase
+      );
+
+      if (
+        alertIdsNotAlreadyAttachedToCase.length > 0 &&
+        alertIdsNotAlreadyAttachedToCase.length === alertIndicesNotAlreadyAttachedToCase.length
+      ) {
+        dedupedAlertAttachments.push({
+          ...attachment,
+          alertId: alertIdsNotAlreadyAttachedToCase,
+          index: alertIndicesNotAlreadyAttachedToCase,
+        });
+      }
+    });
+
+    return dedupedAlertAttachments;
+  }
+
+  private getAlertAttachments(attachments: CommentRequest[]): CommentRequestAlertType[] {
+    return attachments.filter(
+      (attachment): attachment is CommentRequestAlertType => attachment.type === CommentType.alert
+    );
+  }
+
   private async validateCreateCommentRequest(req: CommentRequest[]) {
-    const totalAlertsInReq = req
-      .filter<CommentRequestAlertType>(isCommentRequestTypeAlert)
-      .reduce((count, attachment) => {
-        const ids = Array.isArray(attachment.alertId) ? attachment.alertId : [attachment.alertId];
-        return count + ids.length;
-      }, 0);
+    const alertAttachments = this.getAlertAttachments(req);
+    const hasAlertsInRequest = alertAttachments.length > 0;
 
-    const reqHasAlerts = totalAlertsInReq > 0;
-
-    if (reqHasAlerts && this.caseInfo.attributes.status === CaseStatuses.closed) {
+    if (hasAlertsInRequest && this.caseInfo.attributes.status === CaseStatuses.closed) {
       throw Boom.badRequest('Alert cannot be attached to a closed case');
     }
 
@@ -256,30 +332,13 @@ export class CaseCommentModel {
       throw Boom.badRequest('The owner field of the comment must match the case');
     }
 
-    if (reqHasAlerts) {
-      /**
-       * This check is for optimization reasons.
-       * It saves one aggregation if the total number
-       * of alerts of the request is already greater than
-       * MAX_ALERTS_PER_CASE
-       */
-      if (totalAlertsInReq > MAX_ALERTS_PER_CASE) {
-        throw Boom.badRequest(ALERT_LIMIT_MSG);
-      }
+    const limitChecker = new AttachmentLimitChecker(
+      this.params.services.attachmentService,
+      this.params.fileService,
+      this.caseInfo.id
+    );
 
-      await this.validateAlertsLimitOnCase(totalAlertsInReq);
-    }
-  }
-
-  private async validateAlertsLimitOnCase(totalAlertsInReq: number) {
-    const alertsValueCount =
-      await this.params.services.attachmentService.valueCountAlertsAttachedToCase({
-        caseId: this.caseInfo.id,
-      });
-
-    if (alertsValueCount + totalAlertsInReq > MAX_ALERTS_PER_CASE) {
-      throw Boom.badRequest(ALERT_LIMIT_MSG);
-    }
+    await limitChecker.validate(req);
   }
 
   private buildRefsToCase(): SavedObjectReference[] {
@@ -307,9 +366,7 @@ export class CaseCommentModel {
   }
 
   private async handleAlertComments(attachments: CommentRequest[]) {
-    const alertAttachments = attachments.filter(
-      (attachment): attachment is CommentRequestAlertType => attachment.type === CommentType.alert
-    );
+    const alertAttachments = this.getAlertAttachments(attachments);
 
     const alerts = getAlertInfoFromComments(alertAttachments);
 
@@ -409,16 +466,22 @@ export class CaseCommentModel {
   public async bulkCreate({
     attachments,
   }: {
-    attachments: Array<{ id: string } & CommentRequest>;
+    attachments: CommentRequestWithId;
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest(attachments);
+
+      const attachmentWithoutDuplicateAlerts = await this.filterDuplicatedAlerts(attachments);
+
+      if (attachmentWithoutDuplicateAlerts.length === 0) {
+        return this;
+      }
 
       const caseReference = this.buildRefsToCase();
 
       const [newlyCreatedAttachments, commentableCase] = await Promise.all([
         this.params.services.attachmentService.bulkCreate({
-          attachments: attachments.map(({ id, ...attachment }) => {
+          attachments: attachmentWithoutDuplicateAlerts.map(({ id, ...attachment }) => {
             return {
               attributes: transformNewComment({
                 createdDate: new Date().toISOString(),

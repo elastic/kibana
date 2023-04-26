@@ -10,6 +10,11 @@ import type { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import { createLicenseServiceMock } from '../../../license/mocks';
 import type { EndpointAuthzKeyList } from '../../types/authz';
+import {
+  commandToRBACMap,
+  CONSOLE_RESPONSE_ACTION_COMMANDS,
+  type ResponseConsoleRbacControls,
+} from '../response_actions/constants';
 
 describe('Endpoint Authz service', () => {
   let licenseService: ReturnType<typeof createLicenseServiceMock>;
@@ -121,6 +126,16 @@ describe('Endpoint Authz service', () => {
     });
 
     describe('and endpoint rbac is enabled', () => {
+      const responseConsolePrivileges = CONSOLE_RESPONSE_ACTION_COMMANDS.slice().reduce<
+        ResponseConsoleRbacControls[]
+      >((acc, e) => {
+        const item = commandToRBACMap[e];
+        if (!acc.includes(item)) {
+          acc.push(item);
+        }
+        return acc;
+      }, []);
+
       beforeEach(() => {
         userRoles = [];
       });
@@ -182,6 +197,8 @@ describe('Endpoint Authz service', () => {
         ['canReadBlocklist', ['writeBlocklist', 'readBlocklist']],
         ['canWriteEventFilters', ['writeEventFilters']],
         ['canReadEventFilters', ['writeEventFilters', 'readEventFilters']],
+        // all dependent privileges are false and so it should be false
+        ['canAccessResponseConsole', responseConsolePrivileges],
       ])('%s should be false if `packagePrivilege.%s` is `false`', (auth, privileges) => {
         // read permission checks for write || read so we need to set both to false
         privileges.forEach((privilege) => {
@@ -190,6 +207,23 @@ describe('Endpoint Authz service', () => {
         const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
         expect(authz[auth]).toBe(false);
       });
+
+      it.each(responseConsolePrivileges)(
+        'canAccessResponseConsole should be true if %s for CONSOLE privileges is true',
+        (responseConsolePrivilege) => {
+          // set all to false
+          responseConsolePrivileges.forEach((p) => {
+            fleetAuthz.packagePrivileges!.endpoint.actions[p].executePackageAction = false;
+          });
+          // set one of them to true
+          fleetAuthz.packagePrivileges!.endpoint.actions[
+            responseConsolePrivilege
+          ].executePackageAction = true;
+
+          const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
+          expect(authz.canAccessResponseConsole).toBe(true);
+        }
+      );
     });
   });
 

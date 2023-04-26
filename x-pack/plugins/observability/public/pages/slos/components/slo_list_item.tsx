@@ -6,13 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { useIsMutating } from '@tanstack/react-query';
+import { useIsMutating, useQueryClient } from '@tanstack/react-query';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiPopover,
   EuiText,
@@ -20,10 +21,11 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useKibana } from '../../../utils/kibana_react';
 import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
+import { useGetFilteredRuleTypes } from '../../../hooks/use_get_filtered_rule_types';
 import { SloSummary } from './slo_summary';
 import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
 import { SloBadges } from './badges/slo_badges';
@@ -31,10 +33,15 @@ import {
   transformSloResponseToCreateSloInput,
   transformValuesToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
-import { paths } from '../../../config';
+import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
+import { sloFeatureId } from '../../../../common';
+import { paths } from '../../../config/paths';
+import type { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
+import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse;
+  rules: Array<Rule<SloRule>> | undefined;
   historicalSummary?: HistoricalSummaryResponse[];
   historicalSummaryLoading: boolean;
   activeAlerts?: ActiveAlerts;
@@ -42,6 +49,7 @@ export interface SloListItemProps {
 
 export function SloListItem({
   slo,
+  rules,
   historicalSummary = [],
   historicalSummaryLoading,
   activeAlerts,
@@ -49,21 +57,47 @@ export function SloListItem({
   const {
     application: { navigateToUrl },
     http: { basePath },
+    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
+  const queryClient = useQueryClient();
+
+  const filteredRuleTypes = useGetFilteredRuleTypes();
 
   const { mutate: cloneSlo } = useCloneSlo();
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo', slo.id]));
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
+  const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
 
   const handleClickActions = () => {
     setIsActionsPopoverOpen(!isActionsPopoverOpen);
   };
 
+  const handleViewDetails = () => {
+    navigateToUrl(basePath.prepend(paths.observability.sloDetails(slo.id)));
+  };
+
   const handleEdit = () => {
     navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
+  };
+
+  const handleCreateRule = () => {
+    setIsActionsPopoverOpen(false);
+    setIsAddRuleFlyoutOpen(true);
+  };
+
+  const handleSavedRule = async () => {
+    queryClient.invalidateQueries(['fetchRulesForSlo']);
+  };
+
+  const handleNavigateToRules = () => {
+    navigateToUrl(
+      basePath.prepend(
+        `${paths.observability.rules}?_a=(lastResponse:!(),search:%27%27,params:(sloId:%27${slo?.id}%27),status:!(),type:!())`
+      )
+    );
   };
 
   const handleClone = () => {
@@ -102,9 +136,18 @@ export function SloListItem({
             <EuiFlexItem grow>
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexItem>
-                  <EuiText size="s">{slo.name}</EuiText>
+                  <EuiText size="s">
+                    <EuiLink data-test-subj="o11ySloListItemLink" onClick={handleViewDetails}>
+                      {slo.name}
+                    </EuiLink>
+                  </EuiText>
                 </EuiFlexItem>
-                <SloBadges slo={slo} activeAlerts={activeAlerts} />
+                <SloBadges
+                  activeAlerts={activeAlerts}
+                  rules={rules}
+                  slo={slo}
+                  onClickRuleBadge={handleCreateRule}
+                />
               </EuiFlexGroup>
             </EuiFlexItem>
 
@@ -140,14 +183,46 @@ export function SloListItem({
               size="s"
               items={[
                 <EuiContextMenuItem
+                  key="view"
+                  icon="inspect"
+                  onClick={handleViewDetails}
+                  data-test-subj="sloActionsView"
+                >
+                  {i18n.translate('xpack.observability.slo.slo.item.actions.details', {
+                    defaultMessage: 'Details',
+                  })}
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
                   key="edit"
                   icon="pencil"
                   disabled={!hasWriteCapabilities}
                   onClick={handleEdit}
                   data-test-subj="sloActionsEdit"
                 >
-                  {i18n.translate('xpack.observability.slos.slo.item.actions.edit', {
+                  {i18n.translate('xpack.observability.slo.slo.item.actions.edit', {
                     defaultMessage: 'Edit',
+                  })}
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  key="createRule"
+                  icon="bell"
+                  disabled={!hasWriteCapabilities}
+                  onClick={handleCreateRule}
+                  data-test-subj="sloActionsCreateRule"
+                >
+                  {i18n.translate('xpack.observability.slo.slo.item.actions.createRule', {
+                    defaultMessage: 'Create new Alert rule',
+                  })}
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  key="manageRules"
+                  icon="list"
+                  disabled={!hasWriteCapabilities}
+                  onClick={handleNavigateToRules}
+                  data-test-subj="sloActionsManageRules"
+                >
+                  {i18n.translate('xpack.observability.slo.slo.item.actions.manageRules', {
+                    defaultMessage: 'Manage rules',
                   })}
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
@@ -157,7 +232,7 @@ export function SloListItem({
                   onClick={handleClone}
                   data-test-subj="sloActionsClone"
                 >
-                  {i18n.translate('xpack.observability.slos.slo.item.actions.clone', {
+                  {i18n.translate('xpack.observability.slo.slo.item.actions.clone', {
                     defaultMessage: 'Clone',
                   })}
                 </EuiContextMenuItem>,
@@ -168,7 +243,7 @@ export function SloListItem({
                   onClick={handleDelete}
                   data-test-subj="sloActionsDelete"
                 >
-                  {i18n.translate('xpack.observability.slos.slo.item.actions.delete', {
+                  {i18n.translate('xpack.observability.slo.slo.item.actions.delete', {
                     defaultMessage: 'Delete',
                   })}
                 </EuiContextMenuItem>,
@@ -177,6 +252,19 @@ export function SloListItem({
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {isAddRuleFlyoutOpen ? (
+        <AddRuleFlyout
+          consumer={sloFeatureId}
+          filteredRuleTypes={filteredRuleTypes}
+          ruleTypeId={SLO_BURN_RATE_RULE_ID}
+          initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
+          onSave={handleSavedRule}
+          onClose={() => {
+            setIsAddRuleFlyoutOpen(false);
+          }}
+        />
+      ) : null}
 
       {isDeleteConfirmationModalOpen ? (
         <SloDeleteConfirmationModal slo={slo} onCancel={handleDeleteCancel} />

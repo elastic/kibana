@@ -92,6 +92,8 @@ export const NOTES_AUTHOR = '.euiCommentEvent__headerUsername';
 
 export const NOTES_LINK = '[data-test-subj="markdown-link"]';
 
+export const DELETE_NOTE = '[data-test-subj="delete-note"]';
+
 export const MARKDOWN_INVESTIGATE_BUTTON =
   '[data-test-subj="insight-investigate-in-timeline-button"]';
 
@@ -319,11 +321,10 @@ export const TIMELINE_DATA_PROVIDERS_CONTAINER = '[data-test-subj="dataProviders
 export const EMPTY_DATA_PROVIDER_AREA = `.timeline-drop-area-empty`;
 
 export const HOVER_ACTIONS = {
-  ADD_TO_TIMELINE: '[data-test-subj="add-to-timeline"]',
-  FILTER_FOR: '[data-test-subj="filter-for-value"]',
-  FILTER_OUT: '[data-test-subj="filter-out-value"]',
-  COPY: '[data-test-subj="clipboard"]',
-  SHOW_TOP: 'show-top-field',
+  ADD_TO_TIMELINE: '[data-test-subj="hover-actions-add-timeline"]',
+  FILTER_FOR: '[data-test-subj="hover-actions-filter-for"]',
+  FILTER_OUT: '[data-test-subj="hovhover-actions-filter-out"]',
+  COPY: '[data-test-subj="hover-actions-copy-button"]',
 };
 
 export const GET_TIMELINE_HEADER = (fieldName: string) => {

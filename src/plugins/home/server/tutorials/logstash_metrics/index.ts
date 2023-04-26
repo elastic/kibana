@@ -57,6 +57,6 @@ export function logstashMetricsSpecProvider(context: TutorialContext): TutorialS
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['custom'],
+    integrationBrowserCategories: ['observability', 'elastic_stack'],
   };
 }

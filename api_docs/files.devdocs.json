@@ -305,7 +305,7 @@
             "section": "def-common.FilesMetrics",
             "text": "FilesMetrics"
           },
-          ">; publicDownload: (arg: Omit<{ token: string; fileName?: string | undefined; }, \"kind\">) => any; find: (arg: Omit<{ kind?: string | string[] | undefined; status?: string | string[] | undefined; extension?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
+          ">; publicDownload: (arg: Omit<{ token: string; fileName?: string | undefined; }, \"kind\">) => any; find: (arg: Omit<{ kind?: string | string[] | undefined; kindToExclude?: string | string[] | undefined; status?: string | string[] | undefined; extension?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
           {
             "pluginId": "@kbn/shared-ux-file-types",
             "scope": "common",
@@ -554,6 +554,30 @@
           "trackAdoption": true,
           "references": [
             {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/application.tsx"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/plugin.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/plugin.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/plugin.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/plugin.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/plugin.ts"
+            },
+            {
               "plugin": "imageEmbeddable",
               "path": "src/plugins/image_embeddable/public/plugin.ts"
             },
@@ -625,9 +649,31 @@
       "label": "FilesStart",
       "description": [],
       "signature": [
-        "{ filesClientFactory: ",
-        "FilesClientFactory",
-        "; }"
+        "Pick<",
+        {
+          "pluginId": "files",
+          "scope": "public",
+          "docId": "kibFilesPluginApi",
+          "section": "def-public.FilesSetup",
+          "text": "FilesSetup"
+        },
+        ", \"filesClientFactory\"> & { getFileKindDefinition: (id: string) => ",
+        {
+          "pluginId": "@kbn/shared-ux-file-types",
+          "scope": "common",
+          "docId": "kibKbnSharedUxFileTypesPluginApi",
+          "section": "def-common.FileKindBrowser",
+          "text": "FileKindBrowser"
+        },
+        "; getAllFindKindDefinitions: () => ",
+        {
+          "pluginId": "@kbn/shared-ux-file-types",
+          "scope": "common",
+          "docId": "kibKbnSharedUxFileTypesPluginApi",
+          "section": "def-common.FileKindBrowser",
+          "text": "FileKindBrowser"
+        },
+        "[]; }"
       ],
       "path": "src/plugins/files/public/plugin.ts",
       "deprecated": false,
@@ -888,7 +934,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; security: ",
+              "default",
+              "; monitoring: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -936,33 +984,7 @@
               "ExistsRequest",
               ", options?: ",
               "TransportRequestOptions",
-              " | undefined): Promise<boolean>; }; security: ",
-              "default",
-              "; ping: { (this: That, params?: ",
-              "PingRequest",
-              " | ",
-              "PingRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<boolean>; (this: That, params?: ",
-              "PingRequest",
-              " | ",
-              "PingRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<boolean, unknown>>; (this: That, params?: ",
-              "PingRequest",
-              " | ",
-              "PingRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<boolean>; }; nodes: ",
-              "default",
-              "; indices: ",
-              "default",
-              "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              " | undefined): Promise<boolean>; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -1344,7 +1366,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; info: { (this: That, params?: ",
+              ">; }; indices: ",
+              "default",
+              "; info: { (this: That, params?: ",
               "InfoRequest",
               " | ",
               "InfoRequest",
@@ -1522,7 +1546,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "MtermvectorsResponse",
-              ">; }; openPointInTime: { (this: That, params: ",
+              ">; }; nodes: ",
+              "default",
+              "; openPointInTime: { (this: That, params: ",
               "OpenPointInTimeRequest",
               " | ",
               "OpenPointInTimeRequest",
@@ -1548,7 +1574,27 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "OpenPointInTimeResponse",
-              ">; }; putScript: { (this: That, params: ",
+              ">; }; ping: { (this: That, params?: ",
+              "PingRequest",
+              " | ",
+              "PingRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<boolean>; (this: That, params?: ",
+              "PingRequest",
+              " | ",
+              "PingRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<boolean, unknown>>; (this: That, params?: ",
+              "PingRequest",
+              " | ",
+              "PingRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<boolean>; }; putScript: { (this: That, params: ",
               "PutScriptRequest",
               " | ",
               "PutScriptRequest",
@@ -1937,6 +1983,22 @@
               "; xpack: ",
               "default",
               "; }"
+            ],
+            "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-server.CreateEsFileClientArgs.indexIsAlias",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "indexIsAlias",
+            "description": [
+              "\nTreat the indices provided as Aliases. If set to true, ES `search()` will be used to\nretrieve the file info and content instead of `get()`. This is needed to ensure the\ncontent can be retrieved in cases where an index may have rolled over (ES `get()`\nneeds a \"real\" index)"
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
             "deprecated": false,
@@ -4107,6 +4169,22 @@
           },
           {
             "parentPluginId": "files",
+            "id": "def-server.FindFileArgs.kindToExclude",
+            "type": "Array",
+            "tags": [],
+            "label": "kindToExclude",
+            "description": [
+              "\nFile kind(s) to exclude from search, see {@link FileKind}."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
             "id": "def-server.FindFileArgs.name",
             "type": "Array",
             "tags": [],
@@ -4195,7 +4273,7 @@
               "\nFile metadata values. These values are governed by the consumer."
             ],
             "signature": [
-              "Record<string, string> | undefined"
+              "Record<string, string | string[]> | undefined"
             ],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
@@ -4573,7 +4651,48 @@
           "path": "src/plugins/files/server/types.ts",
           "deprecated": false,
           "trackAdoption": true,
-          "references": [],
+          "references": [
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/files/index.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+            }
+          ],
           "children": [
             {
               "parentPluginId": "files",
@@ -4641,7 +4760,12 @@
           "path": "src/plugins/files/server/types.ts",
           "deprecated": false,
           "trackAdoption": true,
-          "references": []
+          "references": [
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/client/factory.ts"
+            }
+          ]
         }
       ],
       "lifecycle": "start",
@@ -5423,6 +5547,22 @@
             ],
             "signature": [
               "number | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-common.FileKindBrowser.managementUiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "managementUiActions",
+            "description": [
+              "\nAllowed actions that can be done in the File Management UI. If not provided, all actions are allowed\n"
+            ],
+            "signature": [
+              "{ list?: { enabled: boolean; } | undefined; delete?: { enabled: boolean; reason?: string | undefined; } | undefined; } | undefined"
             ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,

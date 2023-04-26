@@ -104,7 +104,7 @@ export const Page: FC<{
     return (
       <>
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           title={
             <h2>
               <FormattedMessage

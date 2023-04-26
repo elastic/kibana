@@ -6,8 +6,8 @@
  */
 import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
-import { argv } from '@kbn/observability-plugin/e2e/parse_args_params';
-import { SyntheticsRunner } from '@kbn/observability-plugin/e2e/synthetics_runner';
+import { argv } from './helpers/parse_args_params';
+import { SyntheticsRunner } from './helpers/synthetics_runner';
 
 const { headless, grep, bail: pauseOnError } = argv;
 
@@ -31,8 +31,16 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
         'browser',
       ]);
 
-      await syntheticsRunner.loadTestFiles(async () => {
-        require('./journeys');
+      await syntheticsRunner.loadTestFiles(async (reload) => {
+        if (reload) {
+          const dirPath = require.resolve('./journeys').replace('index.ts', '');
+          Object.keys(require.cache).forEach(function (key) {
+            if (key.startsWith(dirPath)) {
+              delete require.cache[key];
+            }
+          });
+        }
+        require(path.join(__dirname, './journeys'));
       });
 
       await syntheticsRunner.run();

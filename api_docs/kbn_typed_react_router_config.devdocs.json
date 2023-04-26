@@ -430,7 +430,7 @@
           },
           ">; history: ",
           "History",
-          "<unknown>; children: React.ReactNode; }) => JSX.Element"
+          "<unknown>; children?: React.ReactNode; }) => JSX.Element"
         ],
         "path": "packages/kbn-typed-react-router-config/src/router_provider.tsx",
         "deprecated": false,

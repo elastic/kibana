@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+export const getCoreTransformsMock = jest.fn();
 export const getReferenceTransformsMock = jest.fn();
 export const getConversionTransformsMock = jest.fn();
 
 jest.doMock('./internal_transforms', () => ({
+  getCoreTransforms: getCoreTransformsMock,
   getReferenceTransforms: getReferenceTransformsMock,
   getConversionTransforms: getConversionTransformsMock,
 }));
@@ -27,6 +29,7 @@ jest.doMock('./validate_migrations', () => ({
 }));
 
 export const resetAllMocks = () => {
+  getCoreTransformsMock.mockReset().mockReturnValue([]);
   getReferenceTransformsMock.mockReset().mockReturnValue([]);
   getConversionTransformsMock.mockReset().mockReturnValue([]);
   getModelVersionTransformsMock.mockReset().mockReturnValue([]);

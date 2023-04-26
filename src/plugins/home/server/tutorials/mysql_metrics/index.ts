@@ -58,6 +58,6 @@ export function mysqlMetricsSpecProvider(context: TutorialContext): TutorialSche
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['datastore'],
+    integrationBrowserCategories: ['observability', 'datastore'],
   };
 }

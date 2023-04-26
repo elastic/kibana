@@ -25,12 +25,15 @@ import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { DocLinks } from '@kbn/doc-links';
+import {
+  dataTableActions,
+  dataTableSelectors,
+  tableDefaults,
+  TableId,
+} from '@kbn/securitysolution-data-table';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { FILTER_OPEN, TableId } from '../../../../common/types';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
-import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
@@ -78,8 +81,9 @@ import { DetectionPageFilterSet } from '../../components/detection_page_filters'
 import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
-import { GroupedAlertsTable } from '../../components/alerts_table/grouped_alerts';
+import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
 import { AlertsTableComponent } from '../../components/alerts_table';
+import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -134,7 +138,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const arePageFiltersEnabled = useIsExperimentalFeatureEnabled('alertsPageFiltersEnabled');
 
   // when arePageFiltersEnabled === false
-  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
+  const [statusFilter, setStatusFilter] = useState<Status[]>([]);
 
   const updatedAt = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).updated
@@ -172,8 +176,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     if (arePageFiltersEnabled) {
       return detectionPageFilters;
     }
-    return buildAlertStatusFilter(filterGroup);
-  }, [filterGroup, detectionPageFilters, arePageFiltersEnabled]);
+    return buildAlertStatusFilter(statusFilter[0] ?? 'open');
+  }, [statusFilter, detectionPageFilters, arePageFiltersEnabled]);
 
   useEffect(() => {
     if (!detectionPageFilterHandler) return;
@@ -183,15 +187,17 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   }, [isTableLoading, detectionPageFilterHandler]);
 
   const addFilter = useCallback(
-    ({ field, value }: { field: string; value: string | number }) => {
+    ({ field, value, negate }: AddFilterProps) => {
       filterManager.addFilters([
         {
           meta: {
             alias: null,
             disabled: false,
-            negate: false,
+            negate: negate ?? false,
           },
-          query: { match_phrase: { [field]: value } },
+          ...(value != null
+            ? { query: { match_phrase: { [field]: value } } }
+            : { exists: { field } }),
         },
       ]);
     },
@@ -269,6 +275,19 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const pageFiltersUpdateHandler = useCallback((newFilters: Filter[]) => {
     setDetectionPageFilters(newFilters);
+    if (newFilters.length) {
+      const newStatusFilter = newFilters.find(
+        (filter) => filter.meta.key === 'kibana.alert.workflow_status'
+      );
+      if (newStatusFilter) {
+        const status: Status[] = newStatusFilter.meta.params
+          ? (newStatusFilter.meta.params as Status[])
+          : [newStatusFilter.query?.match_phrase['kibana.alert.workflow_status']];
+        setStatusFilter(status);
+      } else {
+        setStatusFilter([]);
+      }
+    }
   }, []);
 
   // Callback for when open/closed filter changes
@@ -277,9 +296,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       const timelineId = TableId.alertsOnAlertsPage;
       clearEventsLoading({ id: timelineId });
       clearEventsDeleted({ id: timelineId });
-      setFilterGroup(newFilterGroup);
+      setStatusFilter([newFilterGroup]);
     },
-    [clearEventsLoading, clearEventsDeleted, setFilterGroup]
+    [clearEventsLoading, clearEventsDeleted, setStatusFilter]
   );
 
   const areDetectionPageFiltersLoading = useMemo(() => {
@@ -310,7 +329,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <AlertsTableFilterGroup
-              status={filterGroup}
+              status={statusFilter[0] ?? 'open'}
               onFilterGroupChanged={onFilterGroupChangedCallback}
             />
           </EuiFlexItem>
@@ -338,14 +357,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             to,
             mode: 'absolute',
           }}
-          chainingSystem="NONE"
+          chainingSystem={'HIERARCHICAL'}
           onInit={setDetectionPageFilterHandler}
         />
       ),
     [
       arePageFiltersEnabled,
       dataViewId,
-      filterGroup,
+      statusFilter,
       filters,
       onFilterGroupChangedCallback,
       pageFiltersUpdateHandler,
@@ -358,7 +377,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     ]
   );
 
-  const renderGroupedAlertTable = useCallback(
+  const renderAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
       return (
         <AlertsTableComponent
@@ -455,17 +474,19 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer size="l" />
             </Display>
             <GroupedAlertsTable
-              tableId={TableId.alertsOnAlertsPage}
-              loading={isAlertTableLoading}
-              hasIndexWrite={hasIndexWrite ?? false}
-              hasIndexMaintenance={hasIndexMaintenance ?? false}
-              from={from}
+              currentAlertStatusFilterValue={statusFilter}
               defaultFilters={alertsTableDefaultFilters}
-              signalIndexName={signalIndexName}
+              from={from}
+              globalFilters={filters}
+              globalQuery={query}
+              hasIndexMaintenance={hasIndexMaintenance ?? false}
+              hasIndexWrite={hasIndexWrite ?? false}
+              loading={isAlertTableLoading}
+              renderChildComponent={renderAlertTable}
               runtimeMappings={runtimeMappings}
+              signalIndexName={signalIndexName}
+              tableId={TableId.alertsOnAlertsPage}
               to={to}
-              currentAlertStatusFilterValue={filterGroup}
-              renderChildComponent={renderGroupedAlertTable}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>

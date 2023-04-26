@@ -66,7 +66,7 @@ export const ServiceLocationsField = ({
 const SELECT_ONE_OR_MORE_LOCATIONS = i18n.translate(
   'xpack.synthetics.monitorManagement.selectOneOrMoreLocations',
   {
-    defaultMessage: 'Select one or more locations',
+    defaultMessage: 'Select one or more locations.',
   }
 );
 

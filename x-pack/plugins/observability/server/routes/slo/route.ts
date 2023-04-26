@@ -11,6 +11,7 @@ import {
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
   findSLOParamsSchema,
+  getSLODiagnosisParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
   updateSLOParamsSchema,
@@ -38,6 +39,7 @@ import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summ
 import type { IndicatorTypes } from '../../domain/models';
 import type { ObservabilityRequestHandlerContext } from '../../types';
 import { ManageSLO } from '../../services/slo/manage_slo';
+import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
@@ -238,6 +240,34 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
   },
 });
 
+const getDiagnosisRoute = createObservabilityServerRoute({
+  endpoint: 'GET /internal/observability/slos/_diagnosis',
+  options: {
+    tags: [],
+  },
+  params: undefined,
+  handler: async ({ context }) => {
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const licensing = await context.licensing;
+
+    return getGlobalDiagnosis(esClient, licensing);
+  },
+});
+
+const getSloDiagnosisRoute = createObservabilityServerRoute({
+  endpoint: 'GET /internal/observability/slos/{id}/_diagnosis',
+  options: {
+    tags: [],
+  },
+  params: getSLODiagnosisParamsSchema,
+  handler: async ({ context, params }) => {
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const soClient = (await context.core).savedObjects.client;
+
+    return getSloDiagnosis(params.path.id, { esClient, soClient });
+  },
+});
+
 export const slosRouteRepository = {
   ...createSLORoute,
   ...deleteSLORoute,
@@ -247,4 +277,6 @@ export const slosRouteRepository = {
   ...findSLORoute,
   ...getSLORoute,
   ...updateSLORoute,
+  ...getDiagnosisRoute,
+  ...getSloDiagnosisRoute,
 };

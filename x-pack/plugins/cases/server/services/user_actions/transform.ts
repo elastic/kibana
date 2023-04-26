@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectReference, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 
 import { isCommentRequestTypePersistableState } from '../../../common/utils/attachments';
 import {
@@ -33,6 +33,7 @@ import { findConnectorIdReference } from '../transform';
 import { isCommentRequestTypeExternalReferenceSO } from '../../common/utils';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
+import { findReferenceId } from '../../common/references';
 
 export function transformFindResponseToExternalModel(
   userActions: SavedObjectsFindResponse<CaseUserActionAttributesWithoutConnectorId>,
@@ -189,12 +190,4 @@ function getConnectorIdFromReferences(
   }
 
   return null;
-}
-
-function findReferenceId(
-  name: string,
-  type: string,
-  references: SavedObjectReference[]
-): string | undefined {
-  return references.find((ref) => ref.name === name && ref.type === type)?.id;
 }

@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   const TEST_TYPES = [
-    'sampleOneTimeTaskTimingOut',
+    'sampleOneTimeTaskThrowingError',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',
     'sampleTask',
@@ -57,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.servicenow-itom',
         'actions:.servicenow-sir',
         'actions:.slack',
+        'actions:.slack_api',
         'actions:.swimlane',
         'actions:.teams',
         'actions:.tines',
@@ -97,6 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:siem.queryRule',
         'alerting:siem.savedQueryRule',
         'alerting:siem.thresholdRule',
+        'alerting:slo.rules.burnRate',
         'alerting:transform_health',
         'alerting:xpack.ml.anomaly_detection_alert',
         'alerting:xpack.ml.anomaly_detection_jobs_health',
@@ -111,7 +113,6 @@ export default function ({ getService }: FtrProviderContext) {
         'apm-source-map-migration-task',
         'apm-telemetry-task',
         'cases-telemetry-task',
-        'cleanup_failed_action_executions',
         'cloud_security_posture-stats_task',
         'dashboard_telemetry',
         'endpoint:metadata-check-transforms-task',

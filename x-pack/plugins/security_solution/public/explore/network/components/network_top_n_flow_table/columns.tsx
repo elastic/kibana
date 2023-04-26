@@ -68,7 +68,7 @@ export const getNetworkTopNFlowColumns = (
           <>
             <SecurityCellActions
               key={id}
-              mode={CellActionsMode.HOVER}
+              mode={CellActionsMode.HOVER_DOWN}
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
@@ -85,7 +85,7 @@ export const getNetworkTopNFlowColumns = (
             {geo && (
               <SecurityCellActions
                 key={`${id}-${geo}`}
-                mode={CellActionsMode.HOVER}
+                mode={CellActionsMode.HOVER_DOWN}
                 visibleCellActions={5}
                 showActionTooltips
                 triggerId={SecurityCellActionsTrigger.DEFAULT}

@@ -80,7 +80,7 @@ export const NetworkTimingsDonut = () => {
               groupByRollup: (d: Datum) => d.label,
               nodeLabel: (d: Datum) => d,
               shape: {
-                fillColor: (d: Datum, index: number) => {
+                fillColor: (dataName, index) => {
                   return (theme.eui as unknown as Record<string, string>)[
                     `euiColorVis${index + 1}`
                   ];

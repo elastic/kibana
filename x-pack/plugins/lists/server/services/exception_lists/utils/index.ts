@@ -228,7 +228,7 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
     created_by: exceptionListItem.created_by,
     description: description ?? exceptionListItem.description,
     entries: entries ?? exceptionListItem.entries,
-    expire_time: expireTime ?? exceptionListItem.expire_time,
+    expire_time: expireTime,
     id,
     item_id: exceptionListItem.item_id,
     list_id: exceptionListItem.list_id,

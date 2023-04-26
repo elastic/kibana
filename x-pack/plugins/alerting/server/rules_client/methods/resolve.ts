@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { AlertConsumers } from '@kbn/rule-data-utils';
+
 import { RawRule, RuleTypeParams, ResolvedSanitizedRule } from '../../types';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getAlertFromRaw } from '../lib/get_alert_from_raw';
 import { RulesClientContext } from '../types';
+import { formatLegacyActions } from '../lib';
 
 export interface ResolveParams {
   id: string;
@@ -57,6 +60,19 @@ export async function resolve<Params extends RuleTypeParams = never>(
     false,
     includeSnoozeData
   );
+
+  // format legacy actions for SIEM rules
+  if (result.attributes.consumer === AlertConsumers.SIEM) {
+    const [migratedRule] = await formatLegacyActions([rule], {
+      savedObjectsClient: context.unsecuredSavedObjectsClient,
+      logger: context.logger,
+    });
+
+    return {
+      ...migratedRule,
+      ...resolveResponse,
+    };
+  }
 
   return {
     ...rule,

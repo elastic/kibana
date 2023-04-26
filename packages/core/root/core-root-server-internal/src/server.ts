@@ -9,6 +9,8 @@
 import apm from 'elastic-apm-node';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { Logger, LoggerFactory } from '@kbn/logging';
+import type { NodeRoles } from '@kbn/core-node-server';
+import { CriticalError } from '@kbn/core-base-server-internal';
 import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
 import { DocLinksService } from '@kbn/core-doc-links-server-internal';
 import { LoggingService, ILoggingSystem } from '@kbn/core-logging-server-internal';
@@ -32,6 +34,7 @@ import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { StatusService } from '@kbn/core-status-server-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
+import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
@@ -51,6 +54,7 @@ import type {
 import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { registerServiceConfig } from './register_service_config';
+import { MIGRATION_EXCEPTION_CODE } from './constants';
 
 const coreId = Symbol('core');
 const KIBANA_STARTED_EVENT = 'kibana_started';
@@ -95,6 +99,7 @@ export class Server {
   private readonly prebootService: PrebootService;
   private readonly docLinks: DocLinksService;
   private readonly customBranding: CustomBrandingService;
+  private readonly userSettingsService: UserSettingsService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -103,6 +108,7 @@ export class Server {
   private coreStart?: InternalCoreStart;
   private discoveredPlugins?: DiscoveredPlugins;
   private readonly logger: LoggerFactory;
+  private nodeRoles?: NodeRoles;
 
   private readonly uptimePerStep: Partial<UptimeSteps> = {};
 
@@ -141,6 +147,7 @@ export class Server {
     this.prebootService = new PrebootService(core);
     this.docLinks = new DocLinksService(core);
     this.customBranding = new CustomBrandingService(core);
+    this.userSettingsService = new UserSettingsService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -158,6 +165,8 @@ export class Server {
 
     const environmentPreboot = await this.environment.preboot({ analytics: analyticsPreboot });
     const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
+
+    this.nodeRoles = nodePreboot.roles;
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     this.discoveredPlugins = await this.plugins.discover({
@@ -295,6 +304,7 @@ export class Server {
     });
 
     const customBrandingSetup = this.customBranding.setup();
+    const userSettingsServiceSetup = this.userSettingsService.setup();
 
     const renderingSetup = await this.rendering.setup({
       elasticsearch: elasticsearchServiceSetup,
@@ -302,6 +312,7 @@ export class Server {
       status: statusSetup,
       uiPlugins,
       customBranding: customBrandingSetup,
+      userSettings: userSettingsServiceSetup,
     });
 
     const httpResourcesSetup = this.httpResources.setup({
@@ -331,6 +342,7 @@ export class Server {
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
+      userSettings: userSettingsServiceSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -364,6 +376,17 @@ export class Server {
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 
     soStartSpan?.end();
+
+    if (this.nodeRoles?.migrator === true) {
+      startTransaction?.end();
+      this.log.info('Detected migrator node role; shutting down Kibana...');
+      throw new CriticalError(
+        'Migrations completed, shutting down Kibana',
+        MIGRATION_EXCEPTION_CODE,
+        0
+      );
+    }
+
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
     const customBrandingStart = this.customBranding.start();

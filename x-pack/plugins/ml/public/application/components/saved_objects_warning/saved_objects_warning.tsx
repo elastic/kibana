@@ -93,7 +93,7 @@ export const SavedObjectsWarning: FC<Props> = ({
           />
         }
         color="warning"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="mlJobSyncRequiredWarning"
       >
         <>

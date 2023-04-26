@@ -18,6 +18,9 @@ import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal'
 import type { AliasAction, FetchIndexResponse } from '../actions';
 import type { BulkIndexOperationTuple } from './create_batches';
 
+/** @internal */
+export type Aliases = Partial<Record<string, string>>;
+
 /**
  * A helper function/type for ensuring that all control state's are handled.
  */
@@ -62,6 +65,7 @@ export function mergeMigrationMappingPropertyHashes(
   return {
     ...targetMappings,
     _meta: {
+      ...targetMappings._meta,
       migrationMappingPropertyHashes: {
         ...indexMappings._meta?.migrationMappingPropertyHashes,
         ...targetMappings._meta?.migrationMappingPropertyHashes,
@@ -78,12 +82,12 @@ export function mergeMigrationMappingPropertyHashes(
 export function versionMigrationCompleted(
   currentAlias: string,
   versionAlias: string,
-  aliases: Record<string, string | undefined>
+  aliases: Aliases
 ): boolean {
   return aliases[currentAlias] != null && aliases[currentAlias] === aliases[versionAlias];
 }
 
-export function indexBelongsToLaterVersion(indexName: string, kibanaVersion: string): boolean {
+export function indexBelongsToLaterVersion(kibanaVersion: string, indexName?: string): boolean {
   const version = valid(indexVersion(indexName));
   return version != null ? gt(version, kibanaVersion) : false;
 }
@@ -165,16 +169,20 @@ export function indexVersion(indexName?: string): string | undefined {
   return (indexName?.match(/.+_(\d+\.\d+\.\d+)_\d+/) || [])[1];
 }
 
+/** @internal */
+export interface MultipleIndicesPerAlias {
+  type: 'multiple_indices_per_alias';
+  alias: string;
+  indices: string[];
+}
+
 /**
  * Creates a record of alias -> index name pairs
  */
 export function getAliases(
   indices: FetchIndexResponse
-): Either.Either<
-  { type: 'multiple_indices_per_alias'; alias: string; indices: string[] },
-  Record<string, string | undefined>
-> {
-  const aliases = {} as Record<string, string | undefined>;
+): Either.Either<MultipleIndicesPerAlias, Aliases> {
+  const aliases = {} as Aliases;
   for (const index of Object.getOwnPropertyNames(indices)) {
     for (const alias of Object.getOwnPropertyNames(indices[index].aliases || {})) {
       const secondIndexThisAliasPointsTo = aliases[alias];
@@ -211,11 +219,15 @@ export function buildRemoveAliasActions(
 /**
  * Given a document, creates a valid body to index the document using the Bulk API.
  */
-export const createBulkIndexOperationTuple = (doc: SavedObjectsRawDoc): BulkIndexOperationTuple => {
+export const createBulkIndexOperationTuple = (
+  doc: SavedObjectsRawDoc,
+  typeIndexMap: Record<string, string> = {}
+): BulkIndexOperationTuple => {
   return [
     {
       index: {
         _id: doc._id,
+        ...(typeIndexMap[doc._source.type] && { _index: typeIndexMap[doc._source.type] }),
         // use optimistic concurrency control to ensure that outdated
         // documents are only overwritten once with the latest version
         ...(typeof doc._seq_no !== 'undefined' && { if_seq_no: doc._seq_no }),
@@ -232,3 +244,44 @@ export const createBulkIndexOperationTuple = (doc: SavedObjectsRawDoc): BulkInde
 export const createBulkDeleteOperationBody = (_id: string): BulkOperationContainer => ({
   delete: { _id },
 });
+
+/** @internal */
+export enum MigrationType {
+  Compatible = 'compatible',
+  Incompatible = 'incompatible',
+  Unnecessary = 'unnecessary',
+  Invalid = 'invalid',
+}
+
+interface MigrationTypeParams {
+  isMappingsCompatible: boolean;
+  isVersionMigrationCompleted: boolean;
+}
+
+export function getMigrationType({
+  isMappingsCompatible,
+  isVersionMigrationCompleted,
+}: MigrationTypeParams): MigrationType {
+  if (isMappingsCompatible && isVersionMigrationCompleted) {
+    return MigrationType.Unnecessary;
+  }
+
+  if (isMappingsCompatible && !isVersionMigrationCompleted) {
+    return MigrationType.Compatible;
+  }
+
+  if (!isMappingsCompatible && !isVersionMigrationCompleted) {
+    return MigrationType.Incompatible;
+  }
+
+  return MigrationType.Invalid;
+}
+
+/**
+ * Generate a temporary index name, to reindex documents into it
+ * @param index The name of the SO index
+ * @param kibanaVersion The current kibana version
+ * @returns A temporary index name to reindex documents
+ */
+export const getTempIndexName = (indexPrefix: string, kibanaVersion: string): string =>
+  `${indexPrefix}_${kibanaVersion}_reindex_temp`;

@@ -7,10 +7,18 @@
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
+import {
+  ERROR_GROUP_ID,
+  SERVICE_NAME,
+} from '../../../../../common/es_fields/apm';
 import { AlertParams } from '../../route';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+
+export type TransactionErrorCountChartPreviewResponse = Array<{
+  x: number;
+  y: number;
+}>;
 
 export async function getTransactionErrorCountChartPreview({
   apmEventClient,
@@ -18,13 +26,15 @@ export async function getTransactionErrorCountChartPreview({
 }: {
   apmEventClient: APMEventClient;
   alertParams: AlertParams;
-}) {
-  const { serviceName, environment, interval, start, end } = alertParams;
+}): Promise<TransactionErrorCountChartPreviewResponse> {
+  const { serviceName, environment, errorGroupingKey, interval, start, end } =
+    alertParams;
 
   const query = {
     bool: {
       filter: [
         ...termQuery(SERVICE_NAME, serviceName),
+        ...termQuery(ERROR_GROUP_ID, errorGroupingKey),
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
       ],

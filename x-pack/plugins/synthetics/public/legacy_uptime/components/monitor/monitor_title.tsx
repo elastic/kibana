@@ -94,7 +94,11 @@ export const MonitorPageTitleContent: React.FC = () => {
         {isBrowser && (
           <EuiFlexItem grow={false}>
             <EuiText>
-              <EuiLink href="https://www.elastic.co/what-is/synthetic-monitoring" target="_blank">
+              <EuiLink
+                data-test-subj="syntheticsMonitorPageTitleContentSeeMoreLink"
+                href="https://www.elastic.co/what-is/synthetic-monitoring"
+                target="_blank"
+              >
                 <FormattedMessage
                   id="xpack.synthetics.monitorDetails.title.disclaimer.link"
                   defaultMessage="See more"

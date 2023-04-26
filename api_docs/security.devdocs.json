@@ -514,6 +514,19 @@
           },
           {
             "parentPluginId": "security",
+            "id": "def-public.SecurityLicenseFeatures.allowRoleRemoteIndexPrivileges",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRoleRemoteIndexPrivileges",
+            "description": [
+              "\nIndicates whether we allow users to define remote index privileges in roles."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
             "id": "def-public.SecurityLicenseFeatures.allowRbac",
             "type": "boolean",
             "tags": [],
@@ -933,6 +946,23 @@
     "misc": [
       {
         "parentPluginId": "security",
+        "id": "def-public.ALL_SPACES_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ALL_SPACES_ID",
+        "description": [
+          "\nThe identifier in a saved object's `namespaces` array when it is shared globally to all spaces."
+        ],
+        "signature": [
+          "\"*\""
+        ],
+        "path": "x-pack/plugins/security/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-public.AuthenticationServiceStart",
         "type": "Type",
         "tags": [],
@@ -1206,7 +1236,170 @@
     }
   },
   "server": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "security",
+        "id": "def-server.HTTPAuthorizationHeader",
+        "type": "Class",
+        "tags": [],
+        "label": "HTTPAuthorizationHeader",
+        "description": [],
+        "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-server.HTTPAuthorizationHeader.scheme",
+            "type": "string",
+            "tags": [],
+            "label": "scheme",
+            "description": [
+              "\nThe authentication scheme. Should be consumed in a case-insensitive manner.\nhttps://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml#authschemes"
+            ],
+            "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.HTTPAuthorizationHeader.credentials",
+            "type": "string",
+            "tags": [],
+            "label": "credentials",
+            "description": [
+              "\nThe authentication credentials for the scheme."
+            ],
+            "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.HTTPAuthorizationHeader.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.HTTPAuthorizationHeader.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "scheme",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "security",
+                "id": "def-server.HTTPAuthorizationHeader.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "credentials",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.HTTPAuthorizationHeader.parseFromRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "parseFromRequest",
+            "description": [
+              "\nParses request's `Authorization` HTTP header if present."
+            ],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) => ",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.HTTPAuthorizationHeader",
+                "text": "HTTPAuthorizationHeader"
+              },
+              " | null"
+            ],
+            "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "security",
+                "id": "def-server.HTTPAuthorizationHeader.parseFromRequest.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "Request instance to extract the authorization header from."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.HTTPAuthorizationHeader.toString",
+            "type": "Function",
+            "tags": [],
+            "label": "toString",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/security/server/authentication/http_authentication/http_authorization_header.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
     "interfaces": [
       {
@@ -1506,6 +1699,38 @@
             "label": "delete_from_spaces",
             "description": [
               "\nSet of space IDs that a saved object was removed from."
+            ],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditKibana.unauthorized_spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "unauthorized_spaces",
+            "description": [
+              "\nSet of space IDs that are not authorized for an action."
+            ],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditKibana.unauthorized_types",
+            "type": "Object",
+            "tags": [],
+            "label": "unauthorized_types",
+            "description": [
+              "\nSet of types that are not authorized for an action."
             ],
             "signature": [
               "readonly string[] | undefined"
@@ -3953,7 +4178,9 @@
                 "section": "def-common.RoleIndexPrivilege",
                 "text": "RoleIndexPrivilege"
               },
-              "[]; run_as: string[]; }"
+              "[]; remote_indices?: ",
+              "RoleRemoteIndexPrivilege",
+              "[] | undefined; run_as: string[]; }"
             ],
             "path": "x-pack/plugins/security/common/model/role.ts",
             "deprecated": false,
@@ -4421,6 +4648,19 @@
             "label": "allowRoleFieldLevelSecurity",
             "description": [
               "\nIndicates whether we allow users to define field level security in roles."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.allowRoleRemoteIndexPrivileges",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRoleRemoteIndexPrivileges",
+            "description": [
+              "\nIndicates whether we allow users to define remote index privileges in roles."
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
             "deprecated": false,

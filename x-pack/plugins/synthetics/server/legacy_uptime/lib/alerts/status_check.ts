@@ -28,6 +28,7 @@ import {
   getViewInAppUrl,
   setRecoveredAlertsContext,
   getAlertDetailsUrl,
+  UptimeRuleTypeAlertDefinition,
 } from './common';
 import {
   commonMonitorStateI18,
@@ -533,4 +534,5 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
     return { state: updateState(state, downMonitorsByLocation.length > 0) };
   },
+  alerts: UptimeRuleTypeAlertDefinition,
 });

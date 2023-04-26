@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { FieldValueSelection } from '@kbn/observability-plugin/public';
+import { FieldValueSelection } from '@kbn/exploratory-view-plugin/public';
 import {
   getSyntheticsFilterDisplayValues,
   SyntheticsMonitorFilterItem,

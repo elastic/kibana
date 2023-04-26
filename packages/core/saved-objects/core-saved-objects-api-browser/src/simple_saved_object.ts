@@ -27,10 +27,15 @@ export interface SimpleSavedObject<T = unknown> {
   id: SavedObjectType<T>['id'];
   /** Type of the saved object */
   type: SavedObjectType<T>['type'];
-  /** Migration version of the saved object */
+  /**
+   * Migration version of the saved object
+   * @deprecated
+   */
   migrationVersion: SavedObjectType<T>['migrationVersion'];
   /** Core migration version of the saved object */
   coreMigrationVersion: SavedObjectType<T>['coreMigrationVersion'];
+  /** Core migration version of the saved object */
+  typeMigrationVersion: SavedObjectType<T>['typeMigrationVersion'];
   /** Error associated with this object, undefined if no error */
   error: SavedObjectType<T>['error'];
   /** References to other saved objects  */
@@ -44,6 +49,14 @@ export interface SimpleSavedObject<T = unknown> {
    * `namespaceType: 'agnostic'`.
    */
   namespaces: SavedObjectType<T>['namespaces'];
+  /**
+   * Flag indicating if a saved object is managed by Kibana (default=false)
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed: SavedObjectType<T>['managed'];
 
   /**
    * Gets an attribute of this object

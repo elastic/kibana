@@ -5,7 +5,7 @@ exports[`ServerStatus renders correctly for green state 2`] = `
   aria-label="Green"
   class="euiBadge emotion-euiBadge"
   data-test-subj="serverStatusTitleBadge"
-  style="background-color: rgb(109, 204, 177); color: rgb(0, 0, 0);"
+  style="background-color: rgb(77, 210, 202); color: rgb(0, 0, 0);"
   title="Green"
 >
   <span
@@ -25,7 +25,7 @@ exports[`ServerStatus renders correctly for red state 2`] = `
   aria-label="Red"
   class="euiBadge emotion-euiBadge"
   data-test-subj="serverStatusTitleBadge"
-  style="background-color: rgb(109, 204, 177); color: rgb(0, 0, 0);"
+  style="background-color: rgb(77, 210, 202); color: rgb(0, 0, 0);"
   title="Red"
 >
   <span
@@ -45,7 +45,7 @@ exports[`ServerStatus renders correctly for yellow state 2`] = `
   aria-label="Yellow"
   class="euiBadge emotion-euiBadge"
   data-test-subj="serverStatusTitleBadge"
-  style="background-color: rgb(109, 204, 177); color: rgb(0, 0, 0);"
+  style="background-color: rgb(77, 210, 202); color: rgb(0, 0, 0);"
   title="Yellow"
 >
   <span

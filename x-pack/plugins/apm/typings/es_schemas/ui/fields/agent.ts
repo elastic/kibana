@@ -29,6 +29,7 @@ export type OpenTelemetryAgentName =
   | 'opentelemetry/php'
   | 'opentelemetry/python'
   | 'opentelemetry/ruby'
+  | 'opentelemetry/rust'
   | 'opentelemetry/swift'
   | 'opentelemetry/webjs';
 

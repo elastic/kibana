@@ -8,11 +8,14 @@ import { EphemeralTask } from '../task';
 
 // Unrecoverable
 const CODE_UNRECOVERABLE = 'TaskManager/unrecoverable';
+const CODE_RETRYABLE = 'TaskManager/retryable';
 
 const code = Symbol('TaskManagerErrorCode');
+const retry = Symbol('TaskManagerErrorRetry');
 
 export interface DecoratedError extends Error {
   [code]?: string;
+  [retry]?: Date | boolean;
 }
 
 export class EphemeralTaskRejectedDueToCapacityError extends Error {
@@ -38,6 +41,19 @@ export function isUnrecoverableError(error: Error | DecoratedError) {
 
 export function throwUnrecoverableError(error: Error) {
   (error as DecoratedError)[code] = CODE_UNRECOVERABLE;
+  throw error;
+}
+
+export function isRetryableError(error: Error | DecoratedError) {
+  if (isTaskManagerError(error) && error[code] === CODE_RETRYABLE) {
+    return error[retry];
+  }
+  return null;
+}
+
+export function throwRetryableError(error: Error, shouldRetry: Date | boolean) {
+  (error as DecoratedError)[code] = CODE_RETRYABLE;
+  (error as DecoratedError)[retry] = shouldRetry;
   throw error;
 }
 

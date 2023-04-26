@@ -5,27 +5,30 @@
  * 2.0.
  */
 
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
+import styled from '@emotion/styled';
+import { EuiEmptyPromptProps } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { PageTemplate } from '../page_template';
 
-interface NoIndicesProps {
-  message: string;
+interface NoIndicesProps extends Omit<EuiEmptyPromptProps, 'body' | 'title'> {
+  body: string;
   title: string;
-  actions: React.ReactNode;
-  'data-test-subj'?: string;
 }
 
 // Represents a fully constructed page, including page template.
-export const NoIndices: React.FC<NoIndicesProps> = ({ actions, message, title, ...rest }) => {
+export const NoIndices: React.FC<NoIndicesProps> = ({ body, title, ...rest }) => {
   return (
     <PageTemplate isEmptyState={true}>
       <KibanaPageTemplate.EmptyPrompt
         title={<h2>{title}</h2>}
-        body={<p>{message}</p>}
-        actions={actions}
+        body={<PreLineText>{body}</PreLineText>}
         {...rest}
       />
     </PageTemplate>
   );
 };
+
+const PreLineText = styled.p`
+  white-space: pre-line;
+`;

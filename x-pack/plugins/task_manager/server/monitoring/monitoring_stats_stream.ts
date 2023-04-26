@@ -68,6 +68,7 @@ export interface MonitoredStat<T> {
 }
 export type RawMonitoredStat<T extends JsonObject> = MonitoredStat<T> & {
   status: HealthStatus;
+  reason?: string;
 };
 
 export interface RawMonitoringStats {

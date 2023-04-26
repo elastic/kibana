@@ -72,6 +72,7 @@ const OsqueryAppEmptyStateComponent = () => {
           href={integrationHref}
           onClick={integrationClick}
           iconType="plusInCircleFilled"
+          data-test-subj="osquery-add-integration-button"
         >
           <FormattedMessage
             id="xpack.osquery.emptyState.addOsqueryManagerButton"

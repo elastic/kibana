@@ -6,7 +6,7 @@
  */
 
 import { journey, step, expect, before, Page } from '@elastic/synthetics';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { recordVideo } from '../../helpers/record_video';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 import { cleanTestMonitors } from './services/add_monitor';
 

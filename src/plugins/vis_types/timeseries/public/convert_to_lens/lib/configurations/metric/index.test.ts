@@ -296,6 +296,7 @@ describe('getConfigurationForGauge', () => {
       palette: undefined,
       maxAccessor: maxColumnId,
       color: '#FFFFFF',
+      showBar: true,
     });
     expect(mockGetPalette).toBeCalledTimes(1);
   });
@@ -338,6 +339,7 @@ describe('getConfigurationForGauge', () => {
       metricAccessor: columnId1,
       palette,
       maxAccessor: maxColumnId,
+      showBar: true,
     });
     expect(mockGetPalette).toBeCalledTimes(1);
   });

@@ -21,6 +21,7 @@ import {
   generateAlertMessage,
   getViewInAppUrl,
   setRecoveredAlertsContext,
+  UptimeRuleTypeAlertDefinition,
 } from './common';
 import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
@@ -29,7 +30,7 @@ import { UptimeAlertTypeFactory } from './types';
 import { Ping } from '../../../../common/runtime_types/ping';
 import { getMLJobId } from '../../../../common/lib';
 
-import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../../common/translations';
+import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../../common/rules/legacy_uptime/translations';
 import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
 
 import { ALERT_REASON_MSG, ACTION_VARIABLES, VIEW_IN_APP_URL } from './action_variables';
@@ -189,4 +190,5 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
 
     return { state: updateState(state, foundAnomalies) };
   },
+  alerts: UptimeRuleTypeAlertDefinition,
 });

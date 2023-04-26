@@ -31,7 +31,7 @@ export const mount =
           <EuiCallOut
             title="Please define a default index pattern to use this demo"
             color="danger"
-            iconType="alert"
+            iconType="warning"
           >
             <p>This demo only works if your default index pattern is set and time based</p>
           </EuiCallOut>

@@ -55,13 +55,13 @@ type TEuiReactRouterButtonEmptyProps = EuiButtonEmptyProps & IEuiReactRouterProp
 
 export const ReactRouterEuiLink: React.FC<TEuiReactRouterLinkProps> = ({ to, ...rest }) => (
   <ReactRouterHelperForEui to={to}>
-    <EuiLink {...rest} />
+    <EuiLink data-test-subj="syntheticsReactRouterEuiLinkLink" {...rest} />
   </ReactRouterHelperForEui>
 );
 
 export const ReactRouterEuiButton: React.FC<TEuiReactRouterButtonProps> = ({ to, ...rest }) => (
   <ReactRouterHelperForEui to={to}>
-    <EuiButton {...rest} />
+    <EuiButton data-test-subj="syntheticsReactRouterEuiButtonButton" {...rest} />
   </ReactRouterHelperForEui>
 );
 
@@ -70,6 +70,6 @@ export const ReactRouterEuiButtonEmpty: React.FC<TEuiReactRouterButtonEmptyProps
   ...rest
 }) => (
   <ReactRouterHelperForEui to={to}>
-    <EuiButtonEmpty {...rest} />
+    <EuiButtonEmpty data-test-subj="syntheticsReactRouterEuiButtonEmptyButton" {...rest} />
   </ReactRouterHelperForEui>
 );

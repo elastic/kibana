@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
 import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
-import { SecuritySideNav } from './security_side_nav';
-import type { SolutionGroupedNavProps } from '../solution_grouped_nav/solution_grouped_nav';
+import { BOTTOM_BAR_HEIGHT, EUI_HEADER_HEIGHT, SecuritySideNav } from './security_side_nav';
+import type { SolutionSideNavProps } from '@kbn/security-solution-side-nav';
 import type { NavLinkItem } from '../types';
-import { bottomNavOffset } from '../../../lib/helpers';
 import { track } from '../../../lib/telemetry';
+import { useKibana } from '../../../lib/kibana';
 
 const manageNavLink: NavLinkItem = {
   id: SecurityPageName.administration,
@@ -35,10 +36,12 @@ const alertsNavLink: NavLinkItem = {
   description: 'alerts description',
 };
 
-const mockSolutionGroupedNav = jest.fn((_: SolutionGroupedNavProps) => <></>);
-jest.mock('../solution_grouped_nav', () => ({
-  SolutionGroupedNav: (props: SolutionGroupedNavProps) => mockSolutionGroupedNav(props),
+const mockSolutionSideNav = jest.fn((_: SolutionSideNavProps) => <></>);
+jest.mock('@kbn/security-solution-side-nav', () => ({
+  SolutionSideNav: (props: SolutionSideNavProps) => mockSolutionSideNav(props),
 }));
+jest.mock('../../../lib/kibana');
+
 const mockUseRouteSpy = jest.fn(() => [{ pageName: SecurityPageName.alerts }]);
 jest.mock('../../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => mockUseRouteSpy(),
@@ -48,7 +51,7 @@ jest.mock('../../../links', () => ({
   getAncestorLinksInfo: (id: string) => [{ id }],
 }));
 
-const mockUseAppNavLinks = jest.fn((): NavLinkItem[] => [alertsNavLink, manageNavLink]);
+const mockUseAppNavLinks = jest.fn();
 jest.mock('../nav_links', () => ({
   useAppNavLinks: () => mockUseAppNavLinks(),
 }));
@@ -77,12 +80,16 @@ const renderNav = () =>
 describe('SecuritySideNav', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAppNavLinks.mockReturnValue([alertsNavLink, manageNavLink]);
+    useKibana().services.chrome.hasHeaderBanner$ = jest.fn(() =>
+      new BehaviorSubject(false).asObservable()
+    );
   });
 
   it('should render main items', () => {
-    mockUseAppNavLinks.mockReturnValueOnce([alertsNavLink]);
+    mockUseAppNavLinks.mockReturnValue([alertsNavLink]);
     renderNav();
-    expect(mockSolutionGroupedNav).toHaveBeenCalledWith({
+    expect(mockSolutionSideNav).toHaveBeenCalledWith({
       selectedId: SecurityPageName.alerts,
       items: [
         {
@@ -97,16 +104,16 @@ describe('SecuritySideNav', () => {
   });
 
   it('should render the loader if items are still empty', () => {
-    mockUseAppNavLinks.mockReturnValueOnce([]);
+    mockUseAppNavLinks.mockReturnValue([]);
     const result = renderNav();
     expect(result.getByTestId('sideNavLoader')).toBeInTheDocument();
-    expect(mockSolutionGroupedNav).not.toHaveBeenCalled();
+    expect(mockSolutionSideNav).not.toHaveBeenCalled();
   });
 
   it('should render with selected id', () => {
     mockUseRouteSpy.mockReturnValueOnce([{ pageName: SecurityPageName.administration }]);
     renderNav();
-    expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         selectedId: SecurityPageName.administration,
       })
@@ -114,12 +121,11 @@ describe('SecuritySideNav', () => {
   });
 
   it('should render footer items', () => {
-    mockUseAppNavLinks.mockReturnValueOnce([manageNavLink]);
+    mockUseAppNavLinks.mockReturnValue([manageNavLink]);
     renderNav();
-    expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         items: [],
-        selectedId: SecurityPageName.alerts,
         footerItems: [
           {
             id: SecurityPageName.administration,
@@ -142,88 +148,92 @@ describe('SecuritySideNav', () => {
   });
 
   it('should not render disabled items', () => {
-    mockUseAppNavLinks.mockReturnValueOnce([
-      { ...alertsNavLink, disabled: true },
-      {
-        ...manageNavLink,
-        links: [
-          {
-            id: SecurityPageName.endpoints,
-            title: 'title 2',
-            description: 'description 2',
-            disabled: true,
-            isBeta: true,
-          },
-        ],
-      },
-    ]);
+    mockUseAppNavLinks.mockReturnValue([{ ...alertsNavLink, disabled: true }, manageNavLink]);
     renderNav();
-    expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         items: [],
-        selectedId: SecurityPageName.alerts,
         footerItems: [
-          {
+          expect.objectContaining({
             id: SecurityPageName.administration,
-            label: 'manage',
-            href: '/administration',
-            categories: manageNavLink.categories,
-            items: [],
-          },
+          }),
         ],
       })
     );
   });
 
   it('should render custom item', () => {
-    mockUseAppNavLinks.mockReturnValueOnce([
-      { id: SecurityPageName.landing, title: 'get started' },
-    ]);
+    mockUseAppNavLinks.mockReturnValue([{ id: SecurityPageName.landing, title: 'get started' }]);
     renderNav();
-    expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         items: [],
-        selectedId: SecurityPageName.alerts,
         footerItems: [
-          {
+          expect.objectContaining({
             id: SecurityPageName.landing,
-            render: expect.any(Function),
-          },
+            label: 'GET STARTED',
+            labelSize: 'xs',
+            iconType: 'launch',
+            appendSeparator: true,
+          }),
         ],
       })
     );
   });
 
-  describe('bottom offset', () => {
-    it('should render with bottom offset when timeline bar visible', () => {
-      mockUseIsPolicySettingsBarVisible.mockReturnValueOnce(false);
-      mockUseShowTimeline.mockReturnValueOnce([true]);
+  describe('panelTopOffset', () => {
+    it('should render with top offset when chrome header banner is present', () => {
+      useKibana().services.chrome.hasHeaderBanner$ = jest.fn(() =>
+        new BehaviorSubject(true).asObservable()
+      );
       renderNav();
-      expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          bottomOffset: bottomNavOffset,
+          panelTopOffset: `calc(${EUI_HEADER_HEIGHT} + 32px)`,
+        })
+      );
+    });
+
+    it('should render without top offset when chrome header banner is not present', () => {
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          panelTopOffset: undefined,
+        })
+      );
+    });
+  });
+
+  describe('panelBottomOffset', () => {
+    it('should render with bottom offset when timeline bar visible', () => {
+      mockUseIsPolicySettingsBarVisible.mockReturnValue(false);
+      mockUseShowTimeline.mockReturnValue([true]);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          panelBottomOffset: BOTTOM_BAR_HEIGHT,
         })
       );
     });
 
     it('should render with bottom offset when policy settings bar visible', () => {
-      mockUseShowTimeline.mockReturnValueOnce([false]);
-      mockUseIsPolicySettingsBarVisible.mockReturnValueOnce(true);
+      mockUseShowTimeline.mockReturnValue([false]);
+      mockUseIsPolicySettingsBarVisible.mockReturnValue(true);
       renderNav();
-      expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          bottomOffset: bottomNavOffset,
+          panelBottomOffset: BOTTOM_BAR_HEIGHT,
         })
       );
     });
 
     it('should not render with bottom offset when not needed', () => {
-      mockUseShowTimeline.mockReturnValueOnce([false]);
-      mockUseIsPolicySettingsBarVisible.mockReturnValueOnce(false);
+      mockUseShowTimeline.mockReturnValue([false]);
+      mockUseIsPolicySettingsBarVisible.mockReturnValue(false);
       renderNav();
-      expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
-        expect.not.objectContaining({
-          bottomOffset: bottomNavOffset,
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          panelBottomOffset: undefined,
         })
       );
     });

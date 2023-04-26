@@ -16,7 +16,7 @@ import {
 } from '@kbn/event-annotation-plugin/public';
 import type { AccessorConfig, FramePublicAPI } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { FormatFactory } from '../../../common';
+import { FormatFactory } from '../../../common/types';
 import { isDataLayer, isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
 import { getAnnotationsAccessorColorConfig } from './annotations/helpers';
 import {
@@ -44,15 +44,13 @@ export function getColorAssignments(
 ): ColorAssignments {
   const layersPerPalette: Record<string, XYDataLayerConfig[]> = {};
 
-  layers
-    .filter((layer): layer is XYDataLayerConfig => isDataLayer(layer))
-    .forEach((layer) => {
-      const palette = layer.palette?.name || 'default';
-      if (!layersPerPalette[palette]) {
-        layersPerPalette[palette] = [];
-      }
-      layersPerPalette[palette].push(layer);
-    });
+  layers.filter(isDataLayer).forEach((layer) => {
+    const palette = layer.palette?.name || 'default';
+    if (!layersPerPalette[palette]) {
+      layersPerPalette[palette] = [];
+    }
+    layersPerPalette[palette].push(layer);
+  });
 
   return mapValues(layersPerPalette, (paletteLayers) => {
     const seriesPerLayer = paletteLayers.map((layer, layerIndex) => {

@@ -117,6 +117,7 @@ export const AlertDefaultsForm = () => {
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            data-test-subj="syntheticsAlertDefaultsFormButton"
             iconType="cross"
             onClick={() => {
               setFormFields((settings ?? DYNAMIC_SETTINGS_DEFAULTS) as FormFields);
@@ -130,6 +131,7 @@ export const AlertDefaultsForm = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="syntheticsAlertDefaultsFormButton"
             onClick={(evt: React.FormEvent) => {
               evt.preventDefault();
               onApply();

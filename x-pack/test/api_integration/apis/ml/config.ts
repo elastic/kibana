@@ -14,7 +14,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...baseIntegrationTestsConfig.getAll(),
     testFiles: [require.resolve('.')],
     junit: {
-      reportName: 'Chrome X-Pack UI Functional Tests - ml',
+      reportName: 'X-Pack API Integration Tests - ml',
     },
   };
 }

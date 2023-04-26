@@ -515,12 +515,12 @@ export class DataViewsService {
    */
   getFieldsForIndexPattern = async (
     indexPattern: DataView | DataViewSpec,
-    options?: GetFieldsOptions
+    options?: Omit<GetFieldsOptions, 'allowNoIndex'>
   ) =>
     this.getFieldsForWildcard({
       type: indexPattern.type,
       rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
-      allowNoIndex: indexPattern.allowNoIndex,
+      allowNoIndex: true,
       ...options,
       pattern: indexPattern.title as string,
     });
@@ -530,7 +530,7 @@ export class DataViewsService {
     return this.apiClient.getFieldsForWildcard({
       type: dataView.type,
       rollupIndex: dataView?.typeMeta?.params?.rollup_index,
-      allowNoIndex: dataView.allowNoIndex,
+      allowNoIndex: true,
       pattern: dataView.getIndexPattern(),
       metaFields,
     });
@@ -538,12 +538,12 @@ export class DataViewsService {
 
   private getFieldsAndIndicesForWildcard = async (options: GetFieldsOptions) => {
     const metaFields = await this.config.get<string[]>(META_FIELDS);
-    return await this.apiClient.getFieldsForWildcard({
+    return this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
       type: options.type,
       rollupIndex: options.rollupIndex,
-      allowNoIndex: options.allowNoIndex,
+      allowNoIndex: true,
       indexFilter: options.indexFilter,
     });
   };
@@ -569,8 +569,8 @@ export class DataViewsService {
   };
 
   /**
-   * Refresh field list for a given index pattern.
-   * @param indexPattern
+   * Refresh field list for a given data view.
+   * @param dataView
    * @param displayErrors  - If set false, API consumer is responsible for displaying and handling errors.
    */
   refreshFields = async (dataView: DataView, displayErrors: boolean = true) => {
@@ -582,22 +582,19 @@ export class DataViewsService {
       await this.refreshFieldsFn(dataView);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onNotification(
-          { title: err.message, color: 'danger', iconType: 'error' },
-          `refreshFields:${dataView.getIndexPattern()}`
+        // not considered an error, check dataView.matchedIndices.length to be 0
+      } else {
+        this.onError(
+          err,
+          {
+            title: i18n.translate('dataViews.fetchFieldErrorTitle', {
+              defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+              values: { id: dataView.id, title: dataView.getIndexPattern() },
+            }),
+          },
+          dataView.getIndexPattern()
         );
       }
-
-      this.onError(
-        err,
-        {
-          title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-            values: { id: dataView.id, title: dataView.getIndexPattern() },
-          }),
-        },
-        dataView.getIndexPattern()
-      );
     }
   };
 
@@ -635,13 +632,11 @@ export class DataViewsService {
       return { fields: this.fieldArrayToMap(updatedFieldList, fieldAttrs), indices };
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        if (displayErrors) {
-          this.onNotification(
-            { title: err.message, color: 'danger', iconType: 'error' },
-            `refreshFieldSpecMap:${title}`
-          );
-        }
+        // not considered an error, check dataView.matchedIndices.length to be 0
         return {};
+      }
+      if (!displayErrors) {
+        throw err;
       }
 
       this.onError(
@@ -798,19 +793,13 @@ export class DataViewsService {
         const fieldsAndIndices = await this.initFromSavedObjectLoadFields({
           savedObjectId: savedObject.id,
           spec,
+          displayErrors,
         });
         fields = fieldsAndIndices.fields;
         indices = fieldsAndIndices.indices;
       } catch (err) {
         if (err instanceof DataViewMissingIndices) {
-          this.onNotification(
-            {
-              title: err.message,
-              color: 'danger',
-              iconType: 'error',
-            },
-            `initFromSavedObject:${spec.title}`
-          );
+          // not considered an error, check dataView.matchedIndices.length to be 0
         } else {
           this.onError(
             err,

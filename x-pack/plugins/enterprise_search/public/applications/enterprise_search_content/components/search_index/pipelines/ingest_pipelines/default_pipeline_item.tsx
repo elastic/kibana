@@ -91,7 +91,7 @@ export const DefaultPipelineItem: React.FC<{
           )}
           <EuiFlexItem grow={false}>
             <span>
-              <EuiBadge color="hollow">
+              <EuiBadge color="hollow" iconType="lock">
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.managedBadge.label',
                   { defaultMessage: 'Managed' }

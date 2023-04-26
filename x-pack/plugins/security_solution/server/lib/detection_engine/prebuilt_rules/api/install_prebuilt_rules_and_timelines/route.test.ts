@@ -13,57 +13,49 @@ import {
   getBasicEmptySearchResponse,
 } from '../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock } from '../../../routes/__mocks__';
-import type { PrebuiltRuleToInstall } from '../../../../../../common/detection_engine/prebuilt_rules';
 import { installPrebuiltRulesAndTimelinesRoute, createPrepackagedRules } from './route';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { installPrepackagedTimelines } from '../../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
-import { legacyMigrate } from '../../../rule_management';
 
-jest.mock('../../../rule_management/logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual(
-    '../../../rule_management/logic/rule_actions/legacy_action_migration'
-  );
+jest.mock('../../logic/rule_assets/prebuilt_rule_assets_client', () => {
   return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
-
-jest.mock('../../logic/get_latest_prebuilt_rules', () => {
-  return {
-    getLatestPrebuiltRules: async (): Promise<PrebuiltRuleToInstall[]> => {
-      return [
-        {
-          author: ['Elastic'],
-          tags: [],
-          rule_id: 'rule-1',
-          risk_score: 50,
-          risk_score_mapping: [],
-          severity_mapping: [],
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          query: 'user.name: root or user.name: admin',
-          language: 'kuery',
-          references: [],
-          actions: [],
-          enabled: false,
-          false_positives: [],
-          max_signals: 100,
-          threat: [],
-          throttle: undefined,
-          exceptions_list: [],
-          version: 2, // set one higher than the mocks which is set to 1 to trigger updates
+    createPrebuiltRuleAssetsClient: () => {
+      return {
+        fetchLatestAssets: async () => {
+          return [
+            {
+              author: ['Elastic'],
+              tags: [],
+              rule_id: 'rule-1',
+              risk_score: 50,
+              risk_score_mapping: [],
+              severity_mapping: [],
+              description: 'some description',
+              from: 'now-5m',
+              to: 'now',
+              index: ['index-1'],
+              name: 'some-name',
+              severity: 'low',
+              interval: '5m',
+              type: 'query',
+              query: 'user.name: root or user.name: admin',
+              language: 'kuery',
+              references: [],
+              actions: [],
+              enabled: false,
+              false_positives: [],
+              max_signals: 100,
+              threat: [],
+              throttle: undefined,
+              exceptions_list: [],
+              version: 2, // set one higher than the mocks which is set to 1 to trigger updates
+            },
+          ];
         },
-      ];
+      };
     },
   };
 });
@@ -101,8 +93,6 @@ describe('add_prepackaged_rules_route', () => {
       timelines_updated: 0,
       errors: [],
     });
-
-    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())

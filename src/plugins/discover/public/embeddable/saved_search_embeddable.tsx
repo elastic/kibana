@@ -182,10 +182,11 @@ export class SavedSearchEmbeddable
 
     const { searchSource } = this.savedSearch;
 
-    const prevAbortController = this.abortController;
     // Abort any in-progress requests
     if (this.abortController) this.abortController.abort();
-    this.abortController = new AbortController();
+
+    const currentAbortController = new AbortController();
+    this.abortController = currentAbortController;
 
     updateSearchSource(
       searchSource,
@@ -203,12 +204,19 @@ export class SavedSearchEmbeddable
 
     this.searchProps!.isLoading = true;
 
+    const wasAlreadyRendered = this.getOutput().rendered;
+
     this.updateOutput({
       ...this.getOutput(),
       loading: true,
       rendered: false,
       error: undefined,
     });
+
+    if (wasAlreadyRendered && this.node) {
+      // to show a loading indicator during a refetch, we need to rerender here
+      this.render(this.node);
+    }
 
     const parentContext = this.input.executionContext;
     const child: KibanaExecutionContext = {
@@ -258,7 +266,7 @@ export class SavedSearchEmbeddable
       // Request document data
       const { rawResponse: resp } = await lastValueFrom(
         searchSource.fetch$({
-          abortSignal: this.abortController.signal,
+          abortSignal: currentAbortController.signal,
           sessionId: searchSessionId,
           inspector: {
             adapter: this.inspectorAdapters.requests,
@@ -285,7 +293,7 @@ export class SavedSearchEmbeddable
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;
     } catch (error) {
-      const cancelled = !!prevAbortController?.signal.aborted;
+      const cancelled = !!currentAbortController?.signal.aborted;
       if (!this.destroyed && !cancelled) {
         this.updateOutput({
           ...this.getOutput(),

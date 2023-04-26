@@ -16,6 +16,7 @@ export class DashboardExpectService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly filterBar = this.ctx.getService('filterBar');
+  private readonly elasticChart = this.ctx.getService('elasticChart');
 
   private readonly dashboard = this.ctx.getPageObject('dashboard');
   private readonly visChart = this.ctx.getPageObject('visChart');
@@ -32,9 +33,40 @@ export class DashboardExpectService extends FtrService {
   }
 
   async visualizationsArePresent(vizList: string[]) {
-    this.log.debug('Checking all visualisations are present on dashsboard');
+    this.log.debug('Checking all visualisations are present on the dashboard');
     const notLoaded = await this.dashboard.getNotLoadedVisualizations(vizList);
     expect(notLoaded).to.be.empty();
+  }
+
+  /**
+   * Asserts that there is no error embeddables on the dashboard
+   * @throws An error if an error embeddable is present
+   */
+  async noErrorEmbeddablesPresent() {
+    this.log.debug('Ensure that there are no error embeddables on the dashboard');
+
+    const errorEmbeddables = await this.testSubjects.findAll('embeddableError');
+    if (errorEmbeddables.length > 0) {
+      const errorMessages = await Promise.all(
+        errorEmbeddables.map(async (embeddable) => {
+          const panel = await embeddable.findByXpath('./..'); // get the parent of 'embeddableError'
+          let panelTitle = 'Empty title';
+          if (await this.testSubjects.descendantExists('dashboardPanelTitle', panel)) {
+            panelTitle = await (
+              await this.testSubjects.findDescendant('dashboardPanelTitle', panel)
+            ).getVisibleText();
+          }
+          const panelError = await embeddable.getVisibleText();
+          return `${panelTitle}: "${panelError}"`;
+        })
+      );
+
+      throw new Error(
+        `Found error embeddable(s): ${errorMessages.reduce((errorString, error) => {
+          return errorString + '\n' + `\t- ${error}`;
+        }, '')}`
+      );
+    }
   }
 
   async selectedLegendColorCount(color: string, expectedCount: number) {
@@ -273,12 +305,22 @@ export class DashboardExpectService extends FtrService {
     });
   }
 
+  // heatmap data
   async seriesElementCount(expectedCount: number) {
     this.log.debug(`DashboardExpect.seriesElementCount(${expectedCount})`);
-    await this.retry.try(async () => {
-      const seriesElements = await this.find.allByCssSelector('.series', this.findTimeout);
-      expect(seriesElements.length).to.be(expectedCount);
-    });
+    const heatmapData = await this.elasticChart.getChartDebugData('heatmapChart');
+    this.log.debug(heatmapData.axes?.y[0]);
+    expect(heatmapData.axes?.y[0].labels.length).to.be(expectedCount);
+  }
+
+  async heatmapXAxisBuckets(expectedCount: number) {
+    this.log.debug(`DashboardExpect.heatmapXAxisBuckets(${expectedCount})`);
+    const heatmapData = await this.elasticChart.getChartDebugData('heatmapChart');
+    expect(heatmapData.axes?.x[0].labels.length).to.be(expectedCount);
+  }
+
+  async heatMapNoResults() {
+    await this.testSubjects.find('heatmapChart>emptyPlaceholder');
   }
 
   // legacy controls visualization

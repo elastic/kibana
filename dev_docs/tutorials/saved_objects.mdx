@@ -252,7 +252,7 @@ Having said that, if a document is encountered that is not in the expected shape
 fail an upgrade than to silently ignore a corrupt document which can cause unexpected behaviour at some future point in time. When such a scenario is encountered,
 the error should be verbose and informative so that the corrupt document can be corrected, if possible.
 
-**WARNING:** Do not attempt to change the `migrationVersion`, `id`, or `type` fields within a migration function, this is not supported.
+**WARNING:** Do not attempt to change the `typeMigrationVersion`, `id`, or `type` fields within a migration function, this is not supported.
 
 ### Testing Migrations
 

@@ -40,10 +40,13 @@ export const alertSearchBarState = t.partial({
   ]),
 });
 
-export function useAlertSearchBarStateContainer(urlStorageKey: string) {
+export function useAlertSearchBarStateContainer(
+  urlStorageKey: string,
+  { replace }: { replace?: boolean } = {}
+) {
   const stateContainer = useContainer();
 
-  useUrlStateSyncEffect(stateContainer, urlStorageKey);
+  useUrlStateSyncEffect(stateContainer, urlStorageKey, replace);
 
   const { setRangeFrom, setRangeTo, setKuery, setStatus } = stateContainer.transitions;
   const { rangeFrom, rangeTo, kuery, status } = useContainerSelector(
@@ -65,7 +68,8 @@ export function useAlertSearchBarStateContainer(urlStorageKey: string) {
 
 function useUrlStateSyncEffect(
   stateContainer: AlertSearchBarStateContainer,
-  urlStorageKey: string
+  urlStorageKey: string,
+  replace: boolean = true
 ) {
   const history = useHistory();
   const timefilterService = useTimefilterService();
@@ -76,7 +80,12 @@ function useUrlStateSyncEffect(
       useHash: false,
       useHashQuery: false,
     });
-    const { start, stop } = setupUrlStateSync(stateContainer, urlStateStorage, urlStorageKey);
+    const { start, stop } = setupUrlStateSync(
+      stateContainer,
+      urlStateStorage,
+      urlStorageKey,
+      replace
+    );
 
     start();
 
@@ -84,17 +93,19 @@ function useUrlStateSyncEffect(
       timefilterService,
       stateContainer,
       urlStateStorage,
-      urlStorageKey
+      urlStorageKey,
+      replace
     );
 
     return stop;
-  }, [stateContainer, history, timefilterService, urlStorageKey]);
+  }, [stateContainer, history, timefilterService, urlStorageKey, replace]);
 }
 
 function setupUrlStateSync(
   stateContainer: AlertSearchBarStateContainer,
   urlStateStorage: IKbnUrlStateStorage,
-  urlStorageKey: string
+  urlStorageKey: string,
+  replace: boolean = true
 ) {
   // This handles filling the state when an incomplete URL set is provided
   const setWithDefaults = (changedState: Partial<AlertSearchBarContainerState> | null) => {
@@ -110,7 +121,7 @@ function setupUrlStateSync(
     stateStorage: {
       ...urlStateStorage,
       set: <AlertSearchBarStateContainer,>(key: string, state: AlertSearchBarStateContainer) =>
-        urlStateStorage.set(key, state, { replace: true }),
+        urlStateStorage.set(key, state, { replace }),
     },
   });
 }
@@ -119,7 +130,8 @@ function syncUrlStateWithInitialContainerState(
   timefilterService: TimefilterContract,
   stateContainer: AlertSearchBarStateContainer,
   urlStateStorage: IKbnUrlStateStorage,
-  urlStorageKey: string
+  urlStorageKey: string,
+  replace: boolean = true
 ) {
   const urlState = alertSearchBarState.decode(
     urlStateStorage.get<Partial<AlertSearchBarContainerState>>(urlStorageKey)
@@ -148,6 +160,6 @@ function syncUrlStateWithInitialContainerState(
   }
 
   urlStateStorage.set(urlStorageKey, stateContainer.get(), {
-    replace: true,
+    replace,
   });
 }

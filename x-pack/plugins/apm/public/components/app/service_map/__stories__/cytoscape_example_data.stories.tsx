@@ -67,6 +67,7 @@ export const GenerateMap: Story<{}> = () => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiButton
+            data-test-subj="apmGenerateMapGenerateServiceMapButton"
             onClick={() => {
               setElements(
                 generateServiceMapElements({ size, hasAnomalies: true })
@@ -80,6 +81,7 @@ export const GenerateMap: Story<{}> = () => {
         <EuiFlexItem>
           <EuiToolTip position="right" content="Number of services">
             <EuiFieldNumber
+              data-test-subj="apmGenerateMapFieldNumber"
               placeholder="Size"
               value={size}
               onChange={(e) => setSize(e.target.valueAsNumber)}
@@ -88,6 +90,7 @@ export const GenerateMap: Story<{}> = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButton
+            data-test-subj="apmGenerateMapGetJsonButton"
             onClick={() => {
               setJson(JSON.stringify({ elements }, null, 2));
             }}
@@ -183,6 +186,7 @@ export const MapFromJSON: Story<{}> = () => {
               />
               <EuiSpacer />
               <EuiButton
+                data-test-subj="apmMapFromJSONRenderJsonButton"
                 onClick={() => {
                   updateRenderedElements();
                 }}

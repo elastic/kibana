@@ -30,9 +30,21 @@ current view of *Discover*, including the columns and sort order in the document
 If the saved search is associated with a different {data-source} than is currently
 selected, opening the saved search changes the selected {data-source}. The query language
 used for the saved search is also automatically selected.
-. To add your search results to a dashboard:
-.. Open the main menu, then click *Dashboard*.
-.. Open or create the dashboard, then click *Edit*.
-.. Click *Add from library*.
-.. From the *Types* dropdown, select *Saved search*.
-.. Select the saved search that you want to visualize, then click *X* to close the list.
+
+[float]
+=== Duplicate a search
+. In **Discover**, open the search that you want to duplicate.
+. In the toolbar, click *Save*.
+. Give the search a new name.
+. Turn on **Save as new search**.
+. Click *Save*.
+
+
+[float]
+=== Add search results to a dashboard
+
+. Open the main menu, and then click *Dashboard*.
+. Open or create the dashboard, then click *Edit*.
+. Click *Add from library*.
+. From the *Types* dropdown, select *Saved search*.
+. Select the saved search that you want to visualize, then click *X* to close the list.

@@ -32,6 +32,7 @@ export const ShowLicenseInfo = () => {
       >
         <p>{labels.START_TRAIL_DESC}</p>
         <EuiButton
+          data-test-subj="syntheticsShowLicenseInfoButton"
           color="primary"
           href={basePath + `/app/management/stack/license_management/home`}
         >

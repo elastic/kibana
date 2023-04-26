@@ -18,8 +18,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { InitialAppData, ProductAccess } from '../../common/types';
-import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
+import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
+import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/types';
+import { PluginsStart, ClientData } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
 import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
@@ -45,10 +46,10 @@ export const renderApp = (
 
   const noProductAccess: ProductAccess = {
     hasAppSearchAccess: false,
-    hasSearchEnginesAccess: false,
     hasWorkplaceSearchAccess: false,
   };
   const productAccess = data.access || noProductAccess;
+  const productFeatures = data.features ?? { ...DEFAULT_PRODUCT_FEATURES };
 
   const EmptyContext: FC = ({ children }) => <>{children}</>;
   const CloudContext = plugins.cloud?.CloudContextProvider || EmptyContext;
@@ -60,7 +61,10 @@ export const renderApp = (
     application: core.application,
     capabilities: core.application.capabilities,
     config,
+    data: plugins.data,
+    lens: plugins.lens,
     productAccess,
+    productFeatures,
     charts: plugins.charts,
     cloud: plugins.cloud,
     uiSettings: core.uiSettings,
@@ -108,6 +112,7 @@ export const renderApp = (
     unmountLicensingLogic();
     unmountHttpLogic();
     unmountFlashMessagesLogic();
+    plugins.data.search.session.clear();
   };
 };
 

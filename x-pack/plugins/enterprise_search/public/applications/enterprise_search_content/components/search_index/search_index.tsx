@@ -19,11 +19,7 @@ import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
-import {
-  SEARCH_INDEX_PATH,
-  SEARCH_INDEX_SELECT_CONNECTOR_PATH,
-  SEARCH_INDEX_TAB_PATH,
-} from '../../routes';
+import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 
 import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
@@ -75,7 +71,11 @@ export const SearchIndex: React.FC = () => {
    * This needs to be checked for any of the 3 registered search guideIds
    * Putting it here guarantees that if a user is viewing an index with data, it'll be marked as complete
    */
-  const { guidedOnboarding } = useValues(KibanaLogic);
+  const {
+    guidedOnboarding,
+    productAccess: { hasAppSearchAccess },
+    productFeatures: { hasDefaultIngestPipeline },
+  } = useValues(KibanaLogic);
   const isAppGuideActive = useObservable(
     guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('appSearch', 'add_data')
   );
@@ -94,19 +94,6 @@ export const SearchIndex: React.FC = () => {
       guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
     }
   }, [isAppGuideActive, isWebsiteGuideActive, isDatabaseGuideActive, index?.count]);
-
-  useEffect(() => {
-    if (
-      isConnectorIndex(index) &&
-      index.name === indexName &&
-      index.connector.is_native &&
-      index.connector.service_type === null
-    ) {
-      KibanaLogic.values.navigateToUrl(
-        generateEncodedPath(SEARCH_INDEX_SELECT_CONNECTOR_PATH, { indexName })
-      );
-    }
-  }, [index]);
 
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
     {
@@ -199,7 +186,7 @@ export const SearchIndex: React.FC = () => {
     ...ALL_INDICES_TABS,
     ...(isConnectorIndex(index) ? CONNECTOR_TABS : []),
     ...(isCrawlerIndex(index) ? CRAWLER_TABS : []),
-    PIPELINES_TAB,
+    ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
   ];
 
   const selectedTab = tabs.find((tab) => tab.id === tabId);
@@ -222,7 +209,7 @@ export const SearchIndex: React.FC = () => {
       isLoading={isInitialLoading}
       pageHeader={{
         pageTitle: indexName,
-        rightSideItems: getHeaderActions(index),
+        rightSideItems: getHeaderActions(index, hasAppSearchAccess),
       }}
     >
       {isCrawlerIndex(index) && !index.connector ? (

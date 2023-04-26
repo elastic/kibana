@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { MAX_QUERY_SIZE } from '../../../../common/components/grouping';
 import { getAlertsGroupingQuery } from '.';
 
 describe('getAlertsGroupingQuery', () => {
@@ -44,19 +43,19 @@ describe('getAlertsGroupingQuery', () => {
     expect(groupingQuery).toStrictEqual({
       _source: false,
       aggs: {
-        alertsCount: {
+        unitsCount: {
           value_count: {
             field: 'kibana.alert.rule.name',
           },
         },
-        groupsNumber: {
+        groupsCount: {
           cardinality: {
             field: 'kibana.alert.rule.name',
           },
         },
-        stackByMultipleFields0: {
+        groupByFields: {
           aggs: {
-            alertsCount: {
+            unitsCount: {
               cardinality: {
                 field: 'kibana.alert.uuid',
               },
@@ -95,7 +94,7 @@ describe('getAlertsGroupingQuery', () => {
             },
           },
           multi_terms: {
-            size: MAX_QUERY_SIZE,
+            size: 10000,
             terms: [
               {
                 field: 'kibana.alert.rule.name',
@@ -181,19 +180,19 @@ describe('getAlertsGroupingQuery', () => {
     expect(groupingQuery).toStrictEqual({
       _source: false,
       aggs: {
-        alertsCount: {
+        unitsCount: {
           value_count: {
             field: 'process.name',
           },
         },
-        groupsNumber: {
+        groupsCount: {
           cardinality: {
             field: 'process.name',
           },
         },
-        stackByMultipleFields0: {
+        groupByFields: {
           aggs: {
-            alertsCount: {
+            unitsCount: {
               cardinality: {
                 field: 'kibana.alert.uuid',
               },

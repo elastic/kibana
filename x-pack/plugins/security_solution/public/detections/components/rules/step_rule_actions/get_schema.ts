@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { debouncedValidateRuleActionsField } from '../../../containers/detection_engine/rules/validate_rule_actions_field';
 
@@ -27,14 +25,7 @@ export const getSchema = ({
       },
     ],
   },
+  responseActions: {},
   enabled: {},
   kibanaSiemAppUrl: {},
-  throttle: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.fieldThrottleLabel',
-      {
-        defaultMessage: 'Actions frequency',
-      }
-    ),
-  },
 });

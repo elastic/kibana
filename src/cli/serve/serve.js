@@ -78,22 +78,40 @@ const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 /**
+ * @param {string} name The config file name
+ * @returns {boolean} Whether the file exists
+ */
+function configFileExists(name) {
+  const path = resolve(getConfigDirectory(), name);
+  try {
+    return statSync(path).isFile();
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return false;
+    }
+
+    throw err;
+  }
+}
+
+/**
+ * @returns {boolean} Whether the distribution can run in Serverless mode
+ */
+function isServerlessCapableDistribution() {
+  // For now, checking if the `serverless.yml` config file exists should be enough
+  // We could also check the following as well, but I don't think it's necessary:
+  // VALID_SERVERLESS_PROJECT_MODE.some((projectType) => configFileExists(`serverless.${projectType}.yml`))
+  return configFileExists('serverless.yml');
+}
+
+/**
  * @param {string} name
  * @param {string[]} configs
  * @param {'push' | 'unshift'} method
  */
 function maybeAddConfig(name, configs, method) {
-  const path = resolve(getConfigDirectory(), name);
-  try {
-    if (statSync(path).isFile()) {
-      configs[method](path);
-    }
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      return;
-    }
-
-    throw err;
+  if (configFileExists(name)) {
+    configs[method](resolve(getConfigDirectory(), name));
   }
 }
 
@@ -233,8 +251,11 @@ export default function (program) {
       .option(
         '--run-examples',
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
-      )
-      .option('--serverless <oblt|security|es>', 'Start Kibana in a serverless project mode');
+      );
+  }
+
+  if (isServerlessCapableDistribution()) {
+    command.option('--serverless <oblt|security|es>', 'Start Kibana in a serverless project mode');
   }
 
   if (DEV_MODE_SUPPORTED) {

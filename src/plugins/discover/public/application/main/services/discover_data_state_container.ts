@@ -14,7 +14,7 @@ import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { getRawRecordType } from '../utils/get_raw_record_type';
-import { AppState } from './discover_app_state_container';
+import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
@@ -84,7 +84,7 @@ export interface DataAvailableFieldsMsg extends DataMsg {
   fields?: string[];
 }
 
-export interface DataStateContainer {
+export interface DiscoverDataStateContainer {
   /**
    * Implicitly starting fetching data from ES
    */
@@ -134,10 +134,10 @@ export function getDataStateContainer({
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
-  getAppState: () => AppState;
+  getAppState: () => DiscoverAppState;
   getSavedSearch: () => SavedSearch;
-  appStateContainer: ReduxLikeStateContainer<AppState>;
-}): DataStateContainer {
+  appStateContainer: ReduxLikeStateContainer<DiscoverAppState>;
+}): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };

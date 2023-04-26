@@ -29,6 +29,7 @@ export type {
   ValidateAPIKeyParams,
   AuthenticationServiceStart,
 } from './authentication';
+export { HTTPAuthorizationHeader } from './authentication';
 export type { CheckPrivilegesPayload, CasesSupportedOperations } from './authorization';
 export type AuthorizationServiceSetup = SecurityPluginStart['authz'];
 export type { AuditLogger, AuditEvent, AuditHttp, AuditKibana, AuditRequest } from './audit';

@@ -68,8 +68,8 @@ const defaultServices = {
   },
   cases: {
     hooks: {
-      getUseCasesAddToNewCaseFlyout: () => {},
-      getUseCasesAddToExistingCaseModal: () => {},
+      useCasesAddToNewCaseFlyout: () => {},
+      useCasesAddToExistingCaseModal: () => {},
     },
     helpers: {
       canUseCases: () => ({

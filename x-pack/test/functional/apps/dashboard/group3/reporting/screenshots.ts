@@ -38,7 +38,8 @@ export default function ({
     await kibanaServer.importExport.unload(ecommerceSOPath);
   };
 
-  describe('Dashboard Reporting Screenshots', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/142484
+  describe.skip('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
       await loadEcommerce();
       await browser.setWindowSize(1600, 850);

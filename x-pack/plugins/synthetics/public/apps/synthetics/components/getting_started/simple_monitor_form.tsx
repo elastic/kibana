@@ -126,7 +126,7 @@ export const WEBSITE_URL_PLACEHOLDER = i18n.translate(
 export const WEBSITE_URL_HELP_TEXT = i18n.translate(
   'xpack.synthetics.monitorManagement.websiteUrlHelpText',
   {
-    defaultMessage: `For example, your company's homepage or https://elastic.co`,
+    defaultMessage: `For example, your company's homepage or https://elastic.co.`,
   }
 );
 
@@ -139,6 +139,13 @@ export const MONITOR_SUCCESS_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.monitorAddedSuccessMessage',
   {
     defaultMessage: 'Monitor added successfully.',
+  }
+);
+
+export const MONITOR_FAILURE_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.monitorFailureMessage',
+  {
+    defaultMessage: 'Monitor was unable to be saved. Please try again later.',
   }
 );
 

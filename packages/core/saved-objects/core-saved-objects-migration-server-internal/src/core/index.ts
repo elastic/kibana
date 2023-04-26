@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { buildActiveMappings } from './build_active_mappings';
+export { buildActiveMappings, getBaseMappings } from './build_active_mappings';
 export type { LogFn } from './migration_logger';
 export { excludeUnusedTypesQuery, REMOVED_TYPES } from './unused_types';
 export { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';

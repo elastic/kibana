@@ -23,7 +23,7 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/150343
-  describe.skip('installs package that has a prerelease version', async () => {
+  describe('installs package that has a prerelease version', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 

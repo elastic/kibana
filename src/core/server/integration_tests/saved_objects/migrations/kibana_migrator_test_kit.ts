@@ -36,13 +36,14 @@ import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-
 import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import type { LoggerFactory } from '@kbn/logging';
-import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { registerServiceConfig } from '@kbn/core-root-server-internal';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
+import { delay } from './test_utils';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 
@@ -71,7 +72,7 @@ export interface KibanaMigratorTestKitParams {
 export interface KibanaMigratorTestKit {
   client: ElasticsearchClient;
   migrator: IKibanaMigrator;
-  runMigrations: (rerun?: boolean) => Promise<MigrationResult[]>;
+  runMigrations: () => Promise<MigrationResult[]>;
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsRepository: ISavedObjectsRepository;
 }
@@ -121,6 +122,7 @@ export const getKibanaMigratorTestKit = async ({
   types = [],
   logFilePath = defaultLogFilePath,
 }: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
+  let hasRun = false;
   const loggingSystem = new LoggingSystem();
   const loggerFactory = loggingSystem.asLoggerFactory();
 
@@ -147,9 +149,15 @@ export const getKibanaMigratorTestKit = async ({
     kibanaBranch
   );
 
-  const runMigrations = async (rerun?: boolean) => {
+  const runMigrations = async () => {
+    if (hasRun) {
+      throw new Error('The test kit migrator can only be run once. Please instantiate it again.');
+    }
+    hasRun = true;
     migrator.prepareMigrations();
-    return await migrator.runMigrations({ rerun });
+    const migrationResults = await migrator.runMigrations();
+    await loggingSystem.stop();
+    return migrationResults;
   };
 
   const savedObjectsRepository = SavedObjectsRepository.createRepository(
@@ -233,7 +241,9 @@ const getElasticsearchClient = async (
   return configureClient(esClientConfig, {
     logger: loggerFactory.get('elasticsearch'),
     type: 'data',
-    agentFactoryProvider: new AgentManager(),
+    agentFactoryProvider: new AgentManager(
+      loggerFactory.get('elasticsearch-service', 'agent-manager')
+    ),
     kibanaVersion,
   });
 };
@@ -272,6 +282,42 @@ const getMigrator = async (
   });
 };
 
+export const getAggregatedTypesCount = async (client: ElasticsearchClient, index: string) => {
+  await client.indices.refresh();
+  const response = await client.search<unknown, { typesAggregation: { buckets: any[] } }>({
+    index,
+    _source: false,
+    aggs: {
+      typesAggregation: {
+        terms: {
+          // assign type __UNKNOWN__ to those documents that don't define one
+          missing: '__UNKNOWN__',
+          field: 'type',
+          size: 100,
+        },
+        aggs: {
+          docs: {
+            top_hits: {
+              size: 10,
+              _source: {
+                excludes: ['*'],
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return (response.aggregations!.typesAggregation.buckets as unknown as any).reduce(
+    (acc: any, current: any) => {
+      acc[current.key] = current.doc_count;
+      return acc;
+    },
+    {}
+  );
+};
+
 const registerTypes = (
   typeRegistry: SavedObjectTypeRegistry,
   types?: Array<SavedObjectsType<any>>
@@ -280,13 +326,12 @@ const registerTypes = (
 };
 
 export const createBaseline = async () => {
-  const { client, migrator, savedObjectsRepository } = await getKibanaMigratorTestKit({
+  const { client, runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
     kibanaIndex: defaultKibanaIndex,
     types: baselineTypes,
   });
 
-  migrator.prepareMigrations();
-  await migrator.runMigrations();
+  await runMigrations();
 
   await savedObjectsRepository.bulkCreate(baselineDocuments, {
     refresh: 'wait_for',
@@ -381,7 +426,30 @@ export const getIncompatibleMappingsMigrator = async ({
   });
 };
 
+export const getCurrentVersionTypeRegistry = async ({
+  oss,
+}: {
+  oss: boolean;
+}): Promise<ISavedObjectTypeRegistry> => {
+  const root = createRootWithCorePlugins({}, { oss });
+  await root.preboot();
+  const coreSetup = await root.setup();
+  const typeRegistry = coreSetup.savedObjects.getTypeRegistry();
+  root.shutdown(); // do not await for it, or we might block the tests
+  return typeRegistry;
+};
+
+export const overrideTypeRegistry = (
+  typeRegistry: ISavedObjectTypeRegistry,
+  transform: (type: SavedObjectsType<any>) => SavedObjectsType<any>
+): ISavedObjectTypeRegistry => {
+  const updatedTypeRegistry = new SavedObjectTypeRegistry();
+  typeRegistry.getAllTypes().forEach((type) => updatedTypeRegistry.registerType(transform(type)));
+  return updatedTypeRegistry;
+};
+
 export const readLog = async (logFilePath: string = defaultLogFilePath): Promise<string> => {
+  await delay(0.1);
   return await fs.readFile(logFilePath, 'utf-8');
 };
 

@@ -610,5 +610,83 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         });
       });
     }
+
+    describe('do NOT delete reference for rule type like', () => {
+      const es = getService('es');
+
+      it('.esquery', async () => {
+        const space1 = UserAtSpaceScenarios[1].space.id;
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space1)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              params: {
+                searchConfiguration: {
+                  query: { query: 'host.name:*', language: 'kuery' },
+                  index: 'logs-*',
+                },
+                timeField: '@timestamp',
+                searchType: 'searchSource',
+                timeWindowSize: 5,
+                timeWindowUnit: 'm',
+                threshold: [1000],
+                thresholdComparator: '>',
+                size: 100,
+                aggType: 'count',
+                groupBy: 'all',
+                termSize: 5,
+                excludeHitsFromPreviousRun: true,
+              },
+              consumer: 'alerts',
+              schedule: { interval: '1m' },
+              tags: [],
+              name: 'Es Query',
+              rule_type_id: '.es-query',
+              actions: [],
+            })
+          )
+          .expect(200);
+        objectRemover.add(space1, createdRule.id, 'rule', 'alerting');
+
+        const searchRule = () =>
+          es.search<{ references: unknown }>({
+            index: '.kibana*',
+            query: {
+              bool: {
+                filter: [
+                  {
+                    term: {
+                      _id: `alert:${createdRule.id}`,
+                    },
+                  },
+                ],
+              },
+            },
+            fields: ['alert.params', 'references'],
+          });
+
+        const {
+          hits: { hits: alertHitsV1 },
+        } = await searchRule();
+
+        await supertest
+          .post(`${getUrlPrefix(space1)}/internal/alerting/rules/_bulk_edit`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ids: [createdRule.id],
+            operations: [{ operation: 'set', field: 'apiKey' }],
+          });
+
+        const {
+          hits: { hits: alertHitsV2 },
+        } = await searchRule();
+
+        expect(alertHitsV1[0].fields).to.eql(alertHitsV2[0].fields);
+        expect(alertHitsV1[0]?._source?.references ?? true).to.eql(
+          alertHitsV2[0]?._source?.references ?? false
+        );
+      });
+    });
   });
 }

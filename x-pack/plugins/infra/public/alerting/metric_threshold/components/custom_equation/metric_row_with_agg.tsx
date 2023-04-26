@@ -17,6 +17,7 @@ import {
 import React, { useMemo, useCallback } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { Aggregators, CustomMetricAggTypes } from '../../../../../common/alerting/metrics';
 import { MetricRowControls } from './metric_row_controls';
 import { NormalizedFields, MetricRowBaseProps } from './types';
@@ -47,7 +48,9 @@ export const MetricRowWithAgg = ({
       fields.reduce((acc, fieldValue) => {
         if (
           aggType &&
-          aggregationTypes[aggType].validNormalizedTypes.includes(fieldValue.normalizedType)
+          aggregationTypes[aggType].validNormalizedTypes.includes(
+            fieldValue.normalizedType as ValidNormalizedTypes
+          )
         ) {
           acc.push({ label: fieldValue.name });
         }
@@ -102,6 +105,7 @@ export const MetricRowWithAgg = ({
             isInvalid={isAggInvalid}
           >
             <EuiSelect
+              data-test-subj="infraMetricRowWithAggSelect"
               compressed
               options={aggOptions}
               value={aggType}

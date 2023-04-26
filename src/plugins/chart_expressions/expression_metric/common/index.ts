@@ -19,6 +19,7 @@ export type {
   MetricVisParam,
   VisParams,
   MetricOptions,
+  AvailableMetricIcon,
 } from './types';
 
 export { metricVisFunction } from './expression_functions';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useState, useCallback } from 'react';
+import DateMath from '@kbn/datemath';
+import { useCallback, useEffect } from 'react';
 import { DataViewBase } from '@kbn/es-query';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
@@ -30,46 +31,54 @@ export interface MetricExplorerViewState {
 export const useMetricsExplorerState = (
   source: MetricsSourceConfigurationProperties,
   derivedIndexPattern: DataViewBase,
-  shouldLoadImmediately = true
+  enabled = true
 ) => {
-  const [refreshSignal, setRefreshSignal] = useState(0);
-  const [afterKey, setAfterKey] = useState<string | null | Record<string, string | null>>(null);
   const {
     defaultViewState,
     options,
-    currentTimerange,
+    timeRange,
     chartOptions,
     setChartOptions,
     setTimeRange,
     setOptions,
+    timestamps,
+    setTimestamps,
   } = useMetricsExplorerOptionsContainerContext();
 
-  const { loading, error, data, loadData } = useMetricsExplorerData(
+  const refreshTimestamps = useCallback(() => {
+    const fromTimestamp = DateMath.parse(timeRange.from)!.valueOf();
+    const toTimestamp = DateMath.parse(timeRange.to, { roundUp: true })!.valueOf();
+
+    setTimestamps({
+      interval: timeRange.interval,
+      fromTimestamp,
+      toTimestamp,
+    });
+  }, [setTimestamps, timeRange]);
+
+  const { data, error, fetchNextPage, isLoading } = useMetricsExplorerData(
     options,
     source,
     derivedIndexPattern,
-    currentTimerange,
-    afterKey,
-    refreshSignal,
-    shouldLoadImmediately
+    timestamps,
+    enabled
   );
 
-  const handleRefresh = useCallback(() => {
-    setAfterKey(null);
-    setRefreshSignal(refreshSignal + 1);
-  }, [refreshSignal]);
+  useEffect(() => {
+    refreshTimestamps();
+    // options, setOptions are added to dependencies since we need to refresh the timestamps
+    // every time options change
+  }, [options, setOptions, refreshTimestamps]);
 
   const handleTimeChange = useCallback(
     (start: string, end: string) => {
-      setAfterKey(null);
-      setTimeRange({ ...currentTimerange, from: start, to: end });
+      setTimeRange({ interval: timeRange.interval, from: start, to: end });
     },
-    [currentTimerange, setTimeRange]
+    [setTimeRange, timeRange.interval]
   );
 
   const handleGroupByChange = useCallback(
     (groupBy: string | null | string[]) => {
-      setAfterKey(null);
       setOptions({
         ...options,
         groupBy: groupBy || void 0,
@@ -80,7 +89,6 @@ export const useMetricsExplorerState = (
 
   const handleFilterQuerySubmit = useCallback(
     (query: string) => {
-      setAfterKey(null);
       setOptions({
         ...options,
         filterQuery: query,
@@ -91,7 +99,6 @@ export const useMetricsExplorerState = (
 
   const handleMetricsChange = useCallback(
     (metrics: MetricsExplorerMetric[]) => {
-      setAfterKey(null);
       setOptions({
         ...options,
         metrics,
@@ -102,7 +109,6 @@ export const useMetricsExplorerState = (
 
   const handleAggregationChange = useCallback(
     (aggregation: MetricsExplorerAggregation) => {
-      setAfterKey(null);
       const metrics =
         aggregation === 'count'
           ? [{ aggregation }]
@@ -137,24 +143,21 @@ export const useMetricsExplorerState = (
   );
 
   return {
-    loading,
-    error,
-    data,
-    currentTimerange,
-    options,
     chartOptions,
-    setChartOptions,
+    timeRange,
+    data,
+    defaultViewState,
+    error,
+    isLoading,
     handleAggregationChange,
     handleMetricsChange,
     handleFilterQuerySubmit,
     handleGroupByChange,
     handleTimeChange,
-    handleRefresh,
-    handleLoadMore: setAfterKey,
-    defaultViewState,
+    handleLoadMore: fetchNextPage,
     onViewStateChange,
-    loadData,
-    refreshSignal,
-    afterKey,
+    options,
+    setChartOptions,
+    refresh: refreshTimestamps,
   };
 };

@@ -10,24 +10,21 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
+import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
+import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import {
-  getDocumentTypeFilterForTransactions,
-  getProcessorEventForTransactions,
-} from '../../lib/helpers/transactions';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { Maybe } from '../../../typings/common';
 
 interface Options {
   environment: string;
   kuery: string;
-  searchAggregatedTransactions: boolean;
   serviceName: string;
   apmEventClient: APMEventClient;
   transactionType: string;
@@ -35,12 +32,16 @@ interface Options {
   start: number;
   end: number;
   offset?: string;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
 }
+
+export type ServiceThroughputResponse = Array<{ x: number; y: Maybe<number> }>;
 
 export async function getThroughput({
   environment,
   kuery,
-  searchAggregatedTransactions,
   serviceName,
   apmEventClient,
   transactionType,
@@ -48,22 +49,19 @@ export async function getThroughput({
   start,
   end,
   offset,
-}: Options) {
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
+}: Options): Promise<ServiceThroughputResponse> {
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
     offset,
   });
 
-  const { intervalString } = getBucketSizeForAggregatedTransactions({
-    start: startWithOffset,
-    end: endWithOffset,
-    searchAggregatedTransactions,
-  });
-
   const params = {
     apm: {
-      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
+      sources: [{ documentType, rollupInterval }],
     },
     body: {
       track_total_hits: false,
@@ -73,9 +71,6 @@ export async function getThroughput({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
-            ...getDocumentTypeFilterForTransactions(
-              searchAggregatedTransactions
-            ),
             ...rangeQuery(startWithOffset, endWithOffset),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
@@ -87,7 +82,7 @@ export async function getThroughput({
         timeseries: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: intervalString,
+            fixed_interval: `${bucketSizeInSeconds}s`,
             min_doc_count: 0,
             extended_bounds: { min: startWithOffset, max: endWithOffset },
           },

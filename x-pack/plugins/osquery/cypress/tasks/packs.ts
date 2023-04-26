@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+import { some } from 'lodash';
+import type { UsePacksResponse } from '../../public/packs/use_packs';
+import { request } from './common';
 import { closeModalIfVisible, closeToastIfVisible } from './integrations';
+import { cleanupPack } from './api_fixtures';
 
 export const preparePack = (packName: string) => {
   cy.contains('Packs').click();
+  cy.getBySel('tablePaginationPopoverButton').click();
+  cy.getBySel('tablePagination-50-rows').click();
   const createdPack = cy.contains(packName);
   createdPack.click();
 };
@@ -33,4 +39,17 @@ export const activatePack = (packName: string) => {
   cy.contains(`Successfully activated "${packName}" pack`).should('not.exist');
   cy.contains(`Successfully activated "${packName}" pack`).should('exist');
   closeToastIfVisible();
+};
+
+export const cleanupAllPrebuiltPacks = () => {
+  request<UsePacksResponse>({
+    method: 'GET',
+    url: '/api/osquery/packs',
+  }).then((response) => {
+    const prebuiltPacks = response.body.data?.filter((pack) =>
+      some(pack.references, { type: 'osquery-pack-asset' })
+    );
+
+    return Promise.all(prebuiltPacks?.map((pack) => cleanupPack(pack.id)));
+  });
 };

@@ -7,6 +7,7 @@
  */
 
 import {
+  getCoreTransformsMock,
   getConversionTransformsMock,
   getModelVersionTransformsMock,
   getReferenceTransformsMock,
@@ -221,6 +222,21 @@ describe('buildActiveMigrations', () => {
       ]);
     });
 
+    it('adds the transform from getCoreTransforms to each type', () => {
+      const foo = createType({ name: 'foo' });
+      const bar = createType({ name: 'bar' });
+
+      addType(foo);
+      addType(bar);
+
+      getCoreTransformsMock.mockReturnValue([transform(TransformType.Core, '8.8.0')]);
+
+      const migrations = buildMigrations();
+      expect(Object.keys(migrations).sort()).toEqual(['bar', 'foo']);
+      expect(migrations.foo.transforms).toEqual([expectTransform(TransformType.Core, '8.8.0')]);
+      expect(migrations.bar.transforms).toEqual([expectTransform(TransformType.Core, '8.8.0')]);
+    });
+
     it('calls getConversionTransforms with the correct parameters', () => {
       const foo = createType({ name: 'foo' });
       const bar = createType({ name: 'bar' });
@@ -285,6 +301,8 @@ describe('buildActiveMigrations', () => {
         }
       );
 
+      getCoreTransformsMock.mockReturnValue([transform(TransformType.Core, '8.8.0')]);
+
       getReferenceTransformsMock.mockReturnValue([
         transform(TransformType.Reference, '7.12.0'),
         transform(TransformType.Reference, '7.17.3'),
@@ -302,6 +320,7 @@ describe('buildActiveMigrations', () => {
 
       expect(Object.keys(migrations).sort()).toEqual(['bar', 'foo']);
       expect(migrations.foo.transforms).toEqual([
+        expectTransform(TransformType.Core, '8.8.0'),
         expectTransform(TransformType.Reference, '7.12.0'),
         expectTransform(TransformType.Migrate, '7.12.0'),
         expectTransform(TransformType.Convert, '7.14.0'),
@@ -310,6 +329,7 @@ describe('buildActiveMigrations', () => {
         expectTransform(TransformType.Migrate, '7.18.2'),
       ]);
       expect(migrations.bar.transforms).toEqual([
+        expectTransform(TransformType.Core, '8.8.0'),
         expectTransform(TransformType.Reference, '7.12.0'),
         expectTransform(TransformType.Migrate, '7.17.0'),
         expectTransform(TransformType.Reference, '7.17.3'),

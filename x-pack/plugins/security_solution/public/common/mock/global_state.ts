@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TableId } from '../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,
@@ -45,9 +45,10 @@ import { getScopePatternListSelection } from '../store/sourcerer/helpers';
 import { mockBrowserFields, mockIndexFields, mockRuntimeMappings } from '../containers/source/mock';
 import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
-import { defaultGroup } from '../store/grouping/defaults';
+import { initialGroupingState } from '../store/grouping/reducer';
+import type { SourcererState } from '../store/sourcerer';
 
-export const mockSourcererState = {
+export const mockSourcererState: SourcererState = {
   ...initialSourcererState,
   signalIndexName: `${DEFAULT_SIGNALS_INDEX}-spacename`,
   defaultDataView: {
@@ -55,6 +56,7 @@ export const mockSourcererState = {
     browserFields: mockBrowserFields,
     id: DEFAULT_DATA_VIEW_ID,
     indexFields: mockIndexFields,
+    fields: mockIndexFields,
     loading: false,
     patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
     runtimeMappings: mockRuntimeMappings,
@@ -415,13 +417,7 @@ export const mockGlobalState: State = {
       },
     },
   },
-  groups: {
-    groupById: {
-      testing: {
-        ...defaultGroup,
-      },
-    },
-  },
+  groups: initialGroupingState,
   sourcerer: {
     ...mockSourcererState,
     defaultDataView: {

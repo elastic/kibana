@@ -7,30 +7,65 @@
 
 import type { FilesSetup } from '@kbn/files-plugin/public';
 import type { FileKindBrowser } from '@kbn/shared-ux-file-types';
-import { ALLOWED_MIME_TYPES } from '../../common/constants/mime_types';
-import { MAX_FILE_SIZE } from '../../common/constants';
+import {
+  GENERAL_CASES_OWNER,
+  MAX_FILE_SIZE,
+  OBSERVABILITY_OWNER,
+  OWNERS,
+  SECURITY_SOLUTION_OWNER,
+} from '../../common/constants';
 import type { Owner } from '../../common/constants/types';
-import { APP_ID, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../common';
+import { constructFileKindIdByOwner } from '../../common/files';
+import type { CaseFileKinds, FilesConfig } from './types';
+import * as i18n from './translations';
 
-const buildFileKind = (owner: Owner): FileKindBrowser => {
+const getOwnerUIName = (owner: Owner) => {
+  switch (owner) {
+    case SECURITY_SOLUTION_OWNER:
+      return 'Security';
+    case OBSERVABILITY_OWNER:
+      return 'Observability';
+    case GENERAL_CASES_OWNER:
+      return 'Stack Management';
+    default:
+      return owner;
+  }
+};
+
+const buildFileKind = (config: FilesConfig, owner: Owner): FileKindBrowser => {
   return {
-    id: owner,
-    allowedMimeTypes: ALLOWED_MIME_TYPES,
-    maxSizeBytes: MAX_FILE_SIZE,
+    id: constructFileKindIdByOwner(owner),
+    allowedMimeTypes: config.allowedMimeTypes,
+    maxSizeBytes: config.maxSize ?? MAX_FILE_SIZE,
+    managementUiActions: {
+      delete: {
+        enabled: false,
+        reason: i18n.FILE_DELETE_REASON(getOwnerUIName(owner)),
+      },
+    },
   };
 };
+
+export const isRegisteredOwner = (ownerToCheck: string): ownerToCheck is Owner =>
+  OWNERS.includes(ownerToCheck as Owner);
 
 /**
  * The file kind definition for interacting with the file service for the UI
  */
-const CASES_FILE_KINDS: Record<Owner, FileKindBrowser> = {
-  [APP_ID]: buildFileKind(APP_ID),
-  [SECURITY_SOLUTION_OWNER]: buildFileKind(SECURITY_SOLUTION_OWNER),
-  [OBSERVABILITY_OWNER]: buildFileKind(OBSERVABILITY_OWNER),
+const createFileKinds = (config: FilesConfig): CaseFileKinds => {
+  const caseFileKinds = new Map<Owner, FileKindBrowser>();
+
+  for (const owner of OWNERS) {
+    caseFileKinds.set(owner, buildFileKind(config, owner));
+  }
+
+  return caseFileKinds;
 };
 
-export const registerCaseFileKinds = (filesSetupPlugin: FilesSetup) => {
-  for (const fileKind of Object.values(CASES_FILE_KINDS)) {
+export const registerCaseFileKinds = (config: FilesConfig, filesSetupPlugin: FilesSetup) => {
+  const fileKinds = createFileKinds(config);
+
+  for (const fileKind of fileKinds.values()) {
     filesSetupPlugin.registerFileKind(fileKind);
   }
 };
