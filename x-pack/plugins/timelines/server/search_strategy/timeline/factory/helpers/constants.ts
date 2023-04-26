@@ -49,6 +49,7 @@ export const CTI_ROW_RENDERER_FIELDS = [
 export const TIMELINE_EVENTS_FIELDS = [
   ALERT_RULE_CONSUMER,
   '@timestamp',
+  'kibana.alert.ancestors.index',
   'kibana.alert.workflow_status',
   'kibana.alert.group.id',
   'kibana.alert.original_time',
@@ -230,6 +231,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'process.entry_leader.entity_id',
   'process.entry_leader.name',
   'process.entry_leader.pid',
+  'process.entry_leader.start',
   'process.session_leader.entity_id',
   'process.session_leader.name',
   'process.session_leader.pid',
