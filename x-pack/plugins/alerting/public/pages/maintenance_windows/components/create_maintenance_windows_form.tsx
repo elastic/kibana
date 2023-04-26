@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
 import {
   FIELD_TYPES,
@@ -16,7 +16,10 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import {
+  EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
@@ -33,6 +36,7 @@ import { useCreateMaintenanceWindow } from '../../../hooks/use_create_maintenanc
 import { useUpdateMaintenanceWindow } from '../../../hooks/use_update_maintenance_window';
 import { useUiSetting } from '../../../utils/kibana_react';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
+import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
 
 const UseField = getUseField({ component: Field });
 
@@ -56,6 +60,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   ({ onCancel, onSuccess, initialValue, maintenanceWindowId }) => {
     const [defaultStartDateValue] = useState<string>(moment().toISOString());
     const [defaultEndDateValue] = useState<string>(moment().add(30, 'minutes').toISOString());
+    const [isModalVisible, setIsModalVisible] = useState(false);
     const { defaultTimezone, isBrowser } = useDefaultTimezone();
 
     const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
@@ -63,6 +68,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       useCreateMaintenanceWindow();
     const { mutate: updateMaintenanceWindow, isLoading: isUpdateLoading } =
       useUpdateMaintenanceWindow();
+    const { mutate: archiveMaintenanceWindow } = useArchiveMaintenanceWindow();
 
     const submitMaintenanceWindow = useCallback(
       async (formData, isValid) => {
@@ -108,6 +114,35 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     });
     const isRecurring = recurring || false;
     const showTimezone = isBrowser || initialValue?.timezone !== undefined;
+
+    const closeModal = useCallback(() => setIsModalVisible(false), []);
+    const showModal = useCallback(() => setIsModalVisible(true), []);
+
+    const modal = useMemo(() => {
+      let m;
+      if (isModalVisible) {
+        m = (
+          <EuiConfirmModal
+            title={i18n.ARCHIVE_TITLE}
+            onCancel={closeModal}
+            onConfirm={() => {
+              closeModal();
+              archiveMaintenanceWindow(
+                { maintenanceWindowId: maintenanceWindowId!, archive: true },
+                { onSuccess }
+              );
+            }}
+            cancelButtonText={i18n.CANCEL}
+            confirmButtonText={i18n.ARCHIVE_TITLE}
+            defaultFocusedButton="confirm"
+            buttonColor="danger"
+          >
+            <p>{i18n.ARCHIVE_CALLOUT_SUBTITLE}</p>
+          </EuiConfirmModal>
+        );
+      }
+      return m;
+    }, [closeModal, archiveMaintenanceWindow, isModalVisible, maintenanceWindowId, onSuccess]);
 
     return (
       <Form form={form}>
@@ -192,6 +227,15 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             {isRecurring ? <RecurringSchedule data-test-subj="recurring-form" /> : null}
           </EuiFlexItem>
         </EuiFlexGroup>
+        {isEditMode ? (
+          <EuiCallOut title={i18n.ARCHIVE_TITLE} color="danger" iconType="trash">
+            <p>{i18n.ARCHIVE_SUBTITLE}</p>
+            <EuiButton fill color="danger" onClick={showModal}>
+              {i18n.ARCHIVE}
+            </EuiButton>
+            {modal}
+          </EuiCallOut>
+        ) : null}
         <EuiHorizontalRule margin="xl" />
         <EuiFlexGroup
           alignItems="center"

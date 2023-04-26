@@ -23,7 +23,7 @@ interface Props {
 
 const IndexInvalidValuesComponent: React.FC<Props> = ({ indexInvalidValues }) =>
   indexInvalidValues.length === 0 ? (
-    <EuiCode>{EMPTY_PLACEHOLDER}</EuiCode>
+    <EuiCode data-test-subj="emptyPlaceholder">{EMPTY_PLACEHOLDER}</EuiCode>
   ) : (
     <EuiFlexGroup data-test-subj="indexInvalidValues" direction="column" gutterSize="none">
       {indexInvalidValues.map(({ fieldName, count }, i) => (

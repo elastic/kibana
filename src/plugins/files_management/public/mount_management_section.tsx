@@ -30,6 +30,10 @@ export const mountManagementSection = (
   startDeps: StartDependencies,
   { element, history }: ManagementAppMountParams
 ) => {
+  const {
+    files: { filesClientFactory, getAllFindKindDefinitions, getFileKindDefinition },
+  } = startDeps;
+
   ReactDOM.render(
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
@@ -41,7 +45,9 @@ export const mountManagementSection = (
           }}
         >
           <FilesManagementAppContextProvider
-            filesClient={startDeps.files.filesClientFactory.asUnscoped()}
+            filesClient={filesClientFactory.asUnscoped()}
+            getFileKindDefinition={getFileKindDefinition}
+            getAllFindKindDefinitions={getAllFindKindDefinitions}
           >
             <Router history={history}>
               <Route path="/" component={App} />

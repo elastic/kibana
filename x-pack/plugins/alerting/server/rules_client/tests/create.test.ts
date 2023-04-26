@@ -3343,7 +3343,7 @@ describe('create()', () => {
             throttle: null,
           },
           alertsFilter: {
-            query: { kql: 'test:1' },
+            query: { kql: 'test:1', filters: [] },
           },
         },
       ],

@@ -45,7 +45,7 @@ export const getRowItemsWithActions = ({
       return (
         <SecurityCellActions
           key={id}
-          mode={CellActionsMode.HOVER}
+          mode={CellActionsMode.HOVER_DOWN}
           visibleCellActions={5}
           showActionTooltips
           triggerId={SecurityCellActionsTrigger.DEFAULT}

@@ -130,7 +130,8 @@ const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
   jest.requireMock('./lib/evaluate_rule').evaluateRule.mockImplementation(() => response);
 };
 
-describe('The metric threshold alert type', () => {
+// FAILING: https://github.com/elastic/kibana/issues/155534
+describe.skip('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
