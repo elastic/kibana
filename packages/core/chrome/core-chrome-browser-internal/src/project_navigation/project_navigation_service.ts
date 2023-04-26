@@ -18,7 +18,10 @@ interface StartDeps {
 export class ProjectNavigationService {
   public start({ application, navLinks }: StartDeps) {
     const projectNavigation$ = new BehaviorSubject<ChromeProjectNavigation | undefined>(undefined);
-    // using application, navLink and projectNavigation$ keep track of navigation tree
+    // TODO: use application, navLink and projectNavigation$ to:
+    // 1. validate projectNavigation$ against navLinks,
+    // 2. filter disabled/missing links from projectNavigation
+    // 3. keep track of currently active link / path (path will be used to highlight the link in the sidenav and display part of the breadcrumbs)
 
     return {
       setProjectNavigation(projectNavigation: ChromeProjectNavigation) {

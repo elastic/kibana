@@ -164,18 +164,19 @@ export interface ChromeStart {
   getChromeStyle$(): Observable<ChromeStyle>;
 
   /**
-   * Sets the project navigation config to be used when rendering default chrome navigation.
-   * @param projectNavigation The navigation config to render in the chrome.
+   * Sets the project navigation config to be used for rendering project navigation.
+   * It is used for default project sidenav, project breadcrumbs, tracking active deep link.
+   * @param projectNavigation The project navigation config
    *
    * @remarks Has no effect if the chrome style is not `project`.
    */
   setProjectNavigation(projectNavigation: ChromeProjectNavigation): void;
 
   /**
-   * Sets the project navigation to render in the chrome sidebar.
-   * @param projectNavigation The navigation to render in the chrome.
+   * Set custom project sidenav component to be used instead of the default project sidenav.
+   * @param sideNav The sidenav element to rendered instead of the default project sidenav.
    *
    * @remarks Has no effect if the chrome style is not `project`.
    */
-  replaceProjectSideNav(projectNavigation: JSX.Element): void;
+  replaceProjectSideNav(sideNav: JSX.Element): void;
 }
