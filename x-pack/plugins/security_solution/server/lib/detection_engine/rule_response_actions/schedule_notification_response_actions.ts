@@ -28,7 +28,7 @@ export const getScheduleNotificationResponseActionsService =
     osqueryCreateActionService,
     endpointAppContextService,
   }: ScheduleNotificationResponseActionsService) =>
-  ({ signals, responseActions, hasEnterpriseLicense }: ScheduleNotificationActions) => {
+  ({ signals, responseActions }: ScheduleNotificationActions) => {
     const filteredAlerts = (signals as Alerts).filter((alert) => alert.agent?.id);
 
     const { alerts, agentIds, alertIds }: AlertsWithAgentType = reduce(

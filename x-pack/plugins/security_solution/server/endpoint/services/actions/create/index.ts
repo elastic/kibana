@@ -17,7 +17,6 @@ import type { AuthenticationServiceStart } from '@kbn/security-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { IndexResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { EcsError } from '@kbn/ecs';
 import { validateAgents, validateEndpointLicense } from './validate';
 import type { LicenseService } from '../../../../../common/license/license';
 import type { ResponseActionBodySchema } from '../../../../../common/endpoint/schema/actions';
@@ -61,10 +60,12 @@ type CreateActionPayload = TypeOf<typeof ResponseActionBodySchema> & {
   rule_name?: string;
   error?: string;
 };
+
 interface CreateActionMetadata {
   casesClient?: CasesClient;
   license?: LicenseService;
 }
+
 export const actionCreateService = (
   esClient: ElasticsearchClient,
   endpointContext: EndpointAppContext,
@@ -140,7 +141,7 @@ export const actionCreateService = (
             error: {
               code: '400',
               message: alertActionError,
-            } as EcsError,
+            },
           }
         : {}),
       ...(payload.rule_id && payload.rule_name
