@@ -83,75 +83,104 @@ describe('Rule actions normalization', () => {
   });
 
   describe('transformFromAlertThrottle', () => {
-    test('muteAll returns "NOTIFICATION_THROTTLE_NO_ACTIONS" even with notifyWhen set and actions has an array element', () => {
+    test('returns first action throttle if rule.notifyWhen is not set', () => {
       expect(
         transformFromAlertThrottle({
-          muteAll: true,
-          notifyWhen: 'onActiveAlert',
+          muteAll: false,
           actions: [
             {
               group: 'group',
               id: 'id-123',
               actionTypeId: 'id-456',
               params: {},
+              frequency: {
+                notifyWhen: 'onThrottleInterval',
+                throttle: '1d',
+              },
+            },
+            {
+              group: 'group',
+              id: 'id-123',
+              actionTypeId: 'id-456',
+              params: {},
+              frequency: {
+                notifyWhen: 'onThrottleInterval',
+                throttle: '2d',
+              },
             },
           ],
         } as RuleAlertType)
-      ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
+      ).toBe('1d');
     });
 
-    test('returns "NOTIFICATION_THROTTLE_NO_ACTIONS" if actions is an empty array and we do not have a throttle', () => {
+    test('returns "NOTIFICATION_THROTTLE_RULE" if rule.notifyWhen and first action notifyWhen are not set', () => {
+      expect(
+        transformFromAlertThrottle({
+          muteAll: false,
+          actions: [
+            {
+              group: 'group',
+              id: 'id-123',
+              actionTypeId: 'id-456',
+              params: {},
+              frequency: {
+                throttle: '1d',
+              },
+            },
+            {
+              group: 'group',
+              id: 'id-123',
+              actionTypeId: 'id-456',
+              params: {},
+              frequency: {
+                notifyWhen: 'onThrottleInterval',
+                throttle: '2d',
+              },
+            },
+          ],
+        } as RuleAlertType)
+      ).toBe(NOTIFICATION_THROTTLE_RULE);
+    });
+
+    test('returns "NOTIFICATION_THROTTLE_RULE" if rule.notifyWhen is not set and there are no actions', () => {
+      expect(
+        transformFromAlertThrottle({
+          muteAll: false,
+          actions: [],
+        } as unknown as RuleAlertType)
+      ).toBe(NOTIFICATION_THROTTLE_RULE);
+    });
+
+    test('returns "NOTIFICATION_THROTTLE_RULE" if rule.notifyWhen is "onActiveAlert"', () => {
       expect(
         transformFromAlertThrottle({
           muteAll: false,
           notifyWhen: 'onActiveAlert',
           actions: [],
         } as unknown as RuleAlertType)
-      ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
+      ).toBe(NOTIFICATION_THROTTLE_RULE);
     });
 
-    test('returns "NOTIFICATION_THROTTLE_NO_ACTIONS" if actions is an empty array and we have a throttle', () => {
+    test('returns rule.throttle value if rule.notifyWhen is "onThrottleInterval"', () => {
       expect(
         transformFromAlertThrottle({
           muteAll: false,
           notifyWhen: 'onThrottleInterval',
-          actions: [],
           throttle: '1d',
+          actions: [],
         } as unknown as RuleAlertType)
-      ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
+      ).toBe('1d');
     });
 
-    test('it returns "NOTIFICATION_THROTTLE_RULE" if "notifyWhen" is set, muteAll is false and we have an actions array', () => {
+    test('returns undefined if rule.notifyWhen is "onThrottleInterval" and rule.throttle is not set', () => {
       expect(
         transformFromAlertThrottle({
           muteAll: false,
-          notifyWhen: 'onActiveAlert',
-          actions: [
-            {
-              group: 'group',
-              id: 'id-123',
-              actionTypeId: 'id-456',
-              params: {},
-            },
-          ],
-        } as RuleAlertType)
-      ).toEqual(NOTIFICATION_THROTTLE_RULE);
-    });
-
-    test('it returns "NOTIFICATION_THROTTLE_RULE" if "notifyWhen" and "throttle" are not set, but we have an actions array', () => {
-      expect(
-        transformFromAlertThrottle({
-          muteAll: false,
-          actions: [
-            {
-              group: 'group',
-              id: 'id-123',
-              actionTypeId: 'id-456',
-              params: {},
-            },
-          ],
-        } as RuleAlertType)
-      ).toEqual(NOTIFICATION_THROTTLE_RULE);
+          notifyWhen: 'onThrottleInterval',
+          throttle: '1d',
+          actions: [],
+        } as unknown as RuleAlertType)
+      ).toBeUndefined();
     });
   });
 
