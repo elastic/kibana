@@ -44,7 +44,8 @@ export const getFormActions = (testBed: TestBed) => {
   };
 
   const setMetaField = (value: object) => {
-    find('metaEditor').simulate('change', { jsonString: JSON.stringify(value) });
+    find('metaEditor').getDOMNode().setAttribute('data-currentvalue', JSON.stringify(value));
+    find('metaEditor').simulate('change');
   };
 
   return {

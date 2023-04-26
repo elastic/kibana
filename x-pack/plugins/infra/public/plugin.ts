@@ -29,6 +29,7 @@ import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embedd
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
+import { InventoryViewsService } from './services/inventory_views';
 import { LogViewsService } from './services/log_views';
 import { TelemetryService } from './services/telemetry';
 import {
@@ -44,12 +45,14 @@ import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_
 
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
+  private inventoryViews: InventoryViewsService;
   private logViews: LogViewsService;
   private telemetry: TelemetryService;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
     this.config = context.config.get();
+    this.inventoryViews = new InventoryViewsService();
     this.logViews = new LogViewsService({
       messageFields:
         this.config.sources?.default?.fields?.message ?? defaultLogViewsStaticConfig.messageFields,
@@ -285,6 +288,10 @@ export class Plugin implements InfraClientPluginClass {
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
     const getStartServices = (): InfraClientStartServices => [core, plugins, startContract];
 
+    const inventoryViews = this.inventoryViews.start({
+      http: core.http,
+    });
+
     const logViews = this.logViews.start({
       http: core.http,
       dataViews: plugins.dataViews,
@@ -294,6 +301,7 @@ export class Plugin implements InfraClientPluginClass {
     const telemetry = this.telemetry.start();
 
     const startContract: InfraClientStartExports = {
+      inventoryViews,
       logViews,
       telemetry,
       ContainerMetricsTable: createLazyContainerMetricsTable(getStartServices),

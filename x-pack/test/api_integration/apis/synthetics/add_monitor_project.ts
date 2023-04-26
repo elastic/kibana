@@ -1758,9 +1758,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(message).to.eql(REQUEST_TOO_LARGE);
       } finally {
         await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY)
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
-          .send({ ...projectMonitors, keep_stale: false, project });
+          .send({ ...projectMonitors, project });
       }
     });
 

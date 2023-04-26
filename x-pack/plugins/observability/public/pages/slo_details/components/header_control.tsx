@@ -61,7 +61,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
     if (slo?.id) {
       locator?.navigate(
         {
-          params: { sloId: slo?.id || '' },
+          params: { sloId: slo.id },
         },
         {
           replace: true,
