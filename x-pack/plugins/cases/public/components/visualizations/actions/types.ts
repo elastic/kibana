@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Embeddable } from '@kbn/embeddable-plugin/public';
+import type { TypedLensByValueInput } from '../../../../../lens/public';
 import type { CasesContextProps } from '../../cases_context';
 
 export type UIActionProps = Pick<
@@ -13,3 +15,9 @@ export type UIActionProps = Pick<
   | 'persistableStateAttachmentTypeRegistry'
   | 'getFilesClient'
 >;
+
+export type DashboardVisualizationEmbeddable = Embeddable<{
+  attributes: TypedLensByValueInput['attributes'];
+  id: string;
+  timeRange: { from: string; to: string; fromStr: string; toStr: string };
+}>;

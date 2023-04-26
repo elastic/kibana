@@ -8,7 +8,6 @@ import React from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
-import type { Embeddable } from '@kbn/lens-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
@@ -23,9 +22,10 @@ import { KibanaContextProvider } from '../../../common/lib/kibana';
 
 import { getUICapabilities } from '../../../client/helpers/capabilities';
 import { OWNER_INFO } from '../../../../common/constants';
-import type { UIActionProps } from './types';
+import type { DashboardVisualizationEmbeddable, UIActionProps } from './types';
 import CasesProvider from '../../cases_context';
 import CreateCaseFlyout from '../../create/flyout';
+import { ADD_TO_CASE_SUCCESS } from './translations';
 
 export const ACTION_ID = 'embeddable_addToNewCase';
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
@@ -33,12 +33,12 @@ export const APP_NAME = 'Security' as const;
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 
 interface Props {
-  embeddable: Embeddable;
+  embeddable: DashboardVisualizationEmbeddable;
   onSuccess: () => void;
   onClose: () => void;
 }
 
-const FlyoutWrapper: React.FC<Props> = ({ embeddable, onClose, onSuccess }) => {
+const AddToNewCaseFlyoutWrapper: React.FC<Props> = ({ embeddable, onClose, onSuccess }) => {
   const { attributes, timeRange } = embeddable.getInput();
   const casesToasts = useCasesToast();
   const attachments = [
@@ -57,7 +57,7 @@ const FlyoutWrapper: React.FC<Props> = ({ embeddable, onClose, onSuccess }) => {
     casesToasts.showSuccessAttach({
       theCase,
       attachments: attachments ?? [],
-      title: 'Visualization added successfully',
+      content: ADD_TO_CASE_SUCCESS,
     });
   };
 
@@ -66,7 +66,7 @@ const FlyoutWrapper: React.FC<Props> = ({ embeddable, onClose, onSuccess }) => {
   );
 };
 
-FlyoutWrapper.displayName = 'FlyoutWrapper';
+AddToNewCaseFlyoutWrapper.displayName = 'AddToNewCaseFlyoutWrapper';
 
 export const createAddToNewCaseLensAction = ({
   order,
@@ -85,7 +85,7 @@ export const createAddToNewCaseLensAction = ({
     currentAppId = appId;
   });
 
-  return createAction<{ embeddable: Embeddable; coreStart: CoreStart }>({
+  return createAction<{ embeddable: DashboardVisualizationEmbeddable; coreStart: CoreStart }>({
     id: ACTION_ID,
     type: 'actionButton',
     order,
@@ -143,7 +143,7 @@ export const createAddToNewCaseLensAction = ({
                   permissions: casesCapabilities,
                 }}
               >
-                <FlyoutWrapper
+                <AddToNewCaseFlyoutWrapper
                   embeddable={embeddable}
                   onClose={onFlyoutClose}
                   onSuccess={cleanupDom}

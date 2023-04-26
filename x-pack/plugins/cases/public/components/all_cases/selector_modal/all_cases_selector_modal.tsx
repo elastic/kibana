@@ -25,7 +25,7 @@ import { casesQueryClient } from '../../cases_context/query_client';
 export interface AllCasesSelectorModalProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
   onRowClick?: (theCase?: Case) => void;
-  onClose?: () => void;
+  onClose?: (theCase?: Case) => void;
 }
 
 const Modal = styled(EuiModal)`
@@ -47,12 +47,13 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
 
     const onClick = useCallback(
       (theCase?: Case) => {
-        closeModal();
+        onClose?.(theCase);
+        setIsModalOpen(false);
         if (onRowClick) {
           onRowClick(theCase);
         }
       },
-      [closeModal, onRowClick]
+      [onClose, onRowClick]
     );
 
     return isModalOpen ? (

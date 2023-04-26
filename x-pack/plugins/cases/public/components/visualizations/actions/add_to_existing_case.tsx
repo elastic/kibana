@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import ReactDOM, { unmountComponentAtNode } from 'react-dom';
+import React, { useCallback, useMemo } from 'react';
+import { unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
-import type { Embeddable } from '@kbn/lens-plugin/public';
+
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import { KibanaThemeProvider, toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type * as H from 'history';
 
 import type { Case } from '../../../../common';
@@ -26,12 +26,13 @@ import { KibanaContextProvider, KibanaServices } from '../../../common/lib/kiban
 import { getUICapabilities } from '../../../client/helpers/capabilities';
 import CasesProvider from '../../cases_context';
 import { OWNER_INFO } from '../../../../common/constants';
-import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import type { UIActionProps } from './types';
+import type { DashboardVisualizationEmbeddable, UIActionProps } from './types';
 import AllCasesSelectorModal from '../../all_cases/selector_modal';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { useAddAttachmentToExistingCaseTransaction } from '../../../common/apm/use_cases_transactions';
 import { useCasesToast } from '../../../common/use_cases_toast';
+import { ADD_TO_CASE_SUCCESS } from './translations';
+import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 
 export const ACTION_ID = 'embeddable_addToExistingCase';
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
@@ -39,60 +40,99 @@ export const APP_NAME = 'Security' as const;
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 
 const DashboardViewAddToExistingCaseModal = ({
-  onClose,
-  embeddable,
   appId,
+  embeddable,
+  cleanupDom,
 }: {
-  embeddable: Embeddable;
-  onClose: () => void;
   appId: string | undefined;
+  embeddable: DashboardVisualizationEmbeddable;
+  cleanupDom: () => void;
 }) => {
   const { attributes, timeRange } = embeddable.getInput();
 
-  const attachments = [
-    {
-      comment: `!{lens${JSON.stringify({
-        timeRange,
-        attributes,
-      })}}`,
-      type: CommentType.user as const,
+  const onClose = useCallback(
+    (cleanup: boolean) => {
+      // This is called when modal closed and CASE SELECTED. We don't want to clean up dom when case selected, it'll cause attach cases failure.
+      if (cleanup) {
+        cleanupDom();
+      }
     },
-  ];
+    [cleanupDom]
+  );
+
+  const onCasesSelectorModalClosed = useCallback(
+    (theCase?: Case) => {
+      const shouldCleanup = theCase == null;
+      onClose?.(shouldCleanup);
+    },
+    [onClose]
+  );
+
+  const attachments = useMemo(
+    () => [
+      {
+        comment: `!{lens${JSON.stringify({
+          timeRange,
+          attributes,
+        })}}`,
+        type: CommentType.user as const,
+      },
+    ],
+    [attributes, timeRange]
+  );
+
   const { createAttachments } = useCreateAttachments();
   const { startTransaction } = useAddAttachmentToExistingCaseTransaction();
   const casesToasts = useCasesToast();
+  const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
+    onClose: cleanupDom,
+    onSuccess: cleanupDom,
+    toastContent: ADD_TO_CASE_SUCCESS,
+  });
 
-  const onRowClick = async (theCase?: Case) => {
-    try {
-      if (theCase === undefined || !appId) {
-        // closeModal();
-        // createNewCaseFlyout.open({ attachments });
-        return;
+  const onRowClick = useCallback(
+    async (theCase?: Case) => {
+      try {
+        if (theCase === undefined || !appId) {
+          onClose?.(false);
+          createNewCaseFlyout.open({ attachments });
+          return;
+        }
+        // add attachments to the case
+
+        startTransaction({ appId, attachments });
+
+        await createAttachments({
+          caseId: theCase.id,
+          caseOwner: theCase.owner,
+          data: attachments,
+          throwOnError: true,
+        });
+
+        casesToasts.showSuccessAttach({
+          theCase,
+          attachments,
+          title: ADD_TO_CASE_SUCCESS,
+        });
+
+        onClose?.(true);
+      } catch (error) {
+        // error toast is handled
+        // inside the createAttachments method
       }
-      // add attachments to the case
+    },
+    [
+      appId,
+      attachments,
+      casesToasts,
+      createAttachments,
+      createNewCaseFlyout,
+      onClose,
+      startTransaction,
+    ]
+  );
 
-      startTransaction({ appId, attachments });
-
-      await createAttachments({
-        caseId: theCase.id,
-        caseOwner: theCase.owner,
-        data: attachments,
-        throwOnError: true,
-      });
-
-      casesToasts.showSuccessAttach({
-        theCase,
-        attachments,
-        title: 'Visualization added successfully',
-        // content: props.successToaster?.content,
-      });
-    } catch (error) {
-      // error toast is handled
-      // inside the createAttachments method
-    }
-  };
-
-  return <AllCasesSelectorModal onRowClick={onRowClick} onClose={onClose} />;
+  return <AllCasesSelectorModal onRowClick={onRowClick} onClose={onCasesSelectorModalClosed} />;
 };
 
 DashboardViewAddToExistingCaseModal.displayName = 'DashboardViewAddToExistingCaseModal';
@@ -116,7 +156,7 @@ export const createAddToExistingCaseLensAction = ({
     currentAppId = appId;
   });
 
-  return createAction<{ embeddable: Embeddable }>({
+  return createAction<{ embeddable: DashboardVisualizationEmbeddable }>({
     id: ACTION_ID,
     type: 'actionButton',
     order,
@@ -151,10 +191,6 @@ export const createAddToExistingCaseLensAction = ({
         }
       };
 
-      const onModalClose = () => {
-        cleanupDom();
-      };
-
       const owner = Object.values(OWNER_INFO)
         .map((i) => i.appId)
         .filter((id) => id === currentAppId);
@@ -178,8 +214,8 @@ export const createAddToExistingCaseLensAction = ({
                 <Router history={history}>
                   <DashboardViewAddToExistingCaseModal
                     embeddable={embeddable}
-                    onClose={onModalClose}
                     appId={currentAppId}
+                    cleanupDom={cleanupDom}
                   />
                 </Router>
               </CasesProvider>
