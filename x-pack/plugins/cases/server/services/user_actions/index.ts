@@ -509,6 +509,8 @@ export class CaseUserActionService {
         `Attempting to retrieve user actions associated with cases: [${caseIds}]`
       );
 
+      // We are intentionally not adding the type here because we only want to interact with the id and this function
+      // should not use the attributes
       const finder = this.context.unsecuredSavedObjectsClient.createPointInTimeFinder({
         type: CASE_USER_ACTION_SAVED_OBJECT,
         hasReference: caseIds.map((id) => ({ id, type: CASE_SAVED_OBJECT })),

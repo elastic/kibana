@@ -38,7 +38,7 @@ import type {
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
 import type { IndexRefresh } from '../types';
-import type { CaseSavedObject } from '../../common/types';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
 export interface BuilderParameters {
   title: {
@@ -269,7 +269,7 @@ export type CreatePayloadFunction<Item, ActionType extends ActionTypeValues> = (
 ) => UserActionParameters<ActionType>['payload'];
 
 export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
-  originalCases: CaseSavedObject[];
+  originalCases: CaseSavedObjectTransformed[];
   updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
   user: User;
 }
