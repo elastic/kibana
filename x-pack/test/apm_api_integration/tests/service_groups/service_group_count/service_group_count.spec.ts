@@ -7,8 +7,8 @@
 import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { waitForActiveAlert } from '../../../common/utils/wait_for_active_alert';
 import { createApmRule } from '../../alerts/alerting_api_helper';
+import { waitForActiveAlert } from '../../alerts/helpers/wait_for_active_alert';
 import {
   createServiceGroupApi,
   deleteAllServiceGroups,

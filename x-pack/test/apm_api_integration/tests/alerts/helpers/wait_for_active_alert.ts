@@ -7,7 +7,7 @@
 import pRetry from 'p-retry';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
-
+import { APM_ALERTS_INDEX } from './constants';
 async function getActiveAlert({
   ruleId,
   esClient,
@@ -19,7 +19,7 @@ async function getActiveAlert({
   log: ToolingLog;
 }): Promise<Record<string, any>> {
   const searchParams = {
-    index: '.alerts-observability.apm.alerts-*',
+    index: APM_ALERTS_INDEX,
     size: 1,
     query: {
       bool: {
