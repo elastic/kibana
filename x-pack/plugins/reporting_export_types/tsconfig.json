@@ -22,7 +22,6 @@
     "@kbn/reporting-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/reporting-export-types",
     "@kbn/core-test-helpers-test-utils",
   ],
   "exclude": [
