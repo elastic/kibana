@@ -60,7 +60,7 @@ describe('ScheduleNotificationResponseActions', () => {
   const endpointActionMock = jest.fn();
 
   const scheduleNotificationResponseActions = getScheduleNotificationResponseActionsService({
-    osqueryCreateAction: osqueryActionMock,
+    osqueryCreateActionService: osqueryActionMock,
     endpointAppContextService: endpointActionMock as never,
   });
 

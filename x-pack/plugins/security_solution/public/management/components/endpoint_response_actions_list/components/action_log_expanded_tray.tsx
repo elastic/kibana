@@ -90,7 +90,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
 
     if (errors) {
       return (
-        // temporary solution, waiting for UI
+        // TODO: temporary solution, waiting for UI
         <>
           {map(errors, (error) => (
             <EuiFlexItem>{error}</EuiFlexItem>

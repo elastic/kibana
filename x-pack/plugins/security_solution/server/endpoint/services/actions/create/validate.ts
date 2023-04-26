@@ -9,9 +9,6 @@ import { i18n } from '@kbn/i18n';
 import type { LicenseService } from '../../../../../common/license';
 
 export const validateEndpointLicense = (license: LicenseService) => {
-  if (!license) {
-    return;
-  }
   const hasEnterpriseLicense = license.isAtLeast('enterprise');
 
   if (!hasEnterpriseLicense) {

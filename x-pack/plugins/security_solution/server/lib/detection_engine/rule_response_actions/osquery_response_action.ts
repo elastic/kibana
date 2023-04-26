@@ -27,7 +27,7 @@ export const osqueryResponseAction = (
   const { savedQueryId, packId, queries, ecsMapping, ...rest } = responseAction.params;
 
   if (!containsDynamicQueries) {
-    return osqueryCreateActionService?.create({
+    return osqueryCreateActionService.create({
       ...rest,
       queries,
       ecs_mapping: ecsMapping,
@@ -37,7 +37,7 @@ export const osqueryResponseAction = (
     });
   }
   each(alerts, (alert) => {
-    return osqueryCreateActionService?.create(
+    return osqueryCreateActionService.create(
       {
         ...rest,
         queries,

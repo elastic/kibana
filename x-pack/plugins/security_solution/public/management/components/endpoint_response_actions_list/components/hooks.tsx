@@ -116,13 +116,7 @@ export type FilterItems = Array<{
   'data-test-subj': string;
 }>;
 
-export const getActionStatus = (
-  status: ResponseActionStatus,
-  errors?: string[] | undefined
-): string => {
-  if (errors?.length) {
-    return UX_MESSAGES.badge.failed;
-  }
+export const getActionStatus = (status: ResponseActionStatus): string => {
   if (status === 'failed') {
     return UX_MESSAGES.badge.failed;
   } else if (status === 'successful') {

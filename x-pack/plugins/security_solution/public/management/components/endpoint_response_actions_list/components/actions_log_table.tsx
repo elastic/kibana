@@ -211,21 +211,16 @@ const getResponseActionListTableColumns = ({
       },
     },
     {
-      // field: 'status',
       name: TABLE_COLUMN_NAMES.status,
       width: !showHostNames ? '15%' : '10%',
       render: (action: ActionListApiResponse['data'][number]) => {
-        const status = getActionStatus(action.status, action.errors);
-
+        const _status = action.errors?.length ? 'failed' : action.status;
+        const status = getActionStatus(_status);
         return (
           <EuiToolTip content={status} anchorClassName="eui-textTruncate">
             <StatusBadge
               color={
-                status === 'failed' || action.errors?.length
-                  ? 'danger'
-                  : status === 'successful'
-                  ? 'success'
-                  : 'warning'
+                _status === 'failed' ? 'danger' : _status === 'successful' ? 'success' : 'warning'
               }
               data-test-subj={getTestId('column-status')}
               status={status}

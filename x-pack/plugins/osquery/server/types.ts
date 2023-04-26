@@ -27,7 +27,7 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { createActionService } from './handlers/action/create_action_service';
 
 export interface OsqueryPluginSetup {
-  createActionService: ReturnType<typeof createActionService> | undefined;
+  createActionService: ReturnType<typeof createActionService>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
