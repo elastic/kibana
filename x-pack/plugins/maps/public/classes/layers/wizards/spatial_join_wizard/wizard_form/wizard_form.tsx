@@ -10,9 +10,11 @@ import { EuiSpacer } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { getGeoFields, getGeoPointFields } from '../../../../../index_pattern_util';
 import { LeftSourcePanel } from './left_source_panel';
+import { RelationshipPanel } from './relationship_panel';
 import { RightSourcePanel } from './right_source_panel';
 
 export function WizardForm() {
+  const [distance, setDistance] = useState<number>(5);
   const [leftDataView, setLeftDataView] = useState<DataView | undefined>();
   const [leftGeoFields, setLeftGeoFields] = useState<DataViewField[]>([]);
   const [leftGeoField, setLeftGeoField] = useState<string | undefined>();
@@ -24,19 +26,32 @@ export function WizardForm() {
     return leftDataView !== undefined && leftGeoField !== undefined;
   }
 
+  const relationshipPanel = isLeftConfigComplete()
+    ? <>
+        <EuiSpacer size="s" />
+        <RelationshipPanel
+          distance={distance}
+          onDistanceChange={setDistance}
+        />
+      </>
+    : null;
+
   const rightSourcePanel = isLeftConfigComplete()
-    ? <RightSourcePanel
-        dataView={rightDataView}
-        geoField={rightGeoField}
-        geoFields={rightGeoFields}
-        onDataViewSelect={(dataView: DataView) => {
-          setRightDataView(dataView);
-          const geoFields = getGeoFields(dataView.fields);
-          setRightGeoFields(geoFields);
-          setRightGeoField(geoFields.length ? geoFields[0].name : undefined);
-        }}
-        onGeoFieldSelect={setRightGeoField}
-      />
+    ? <>
+        <EuiSpacer size="s" />
+        <RightSourcePanel
+          dataView={rightDataView}
+          geoField={rightGeoField}
+          geoFields={rightGeoFields}
+          onDataViewSelect={(dataView: DataView) => {
+            setRightDataView(dataView);
+            const geoFields = getGeoFields(dataView.fields);
+            setRightGeoFields(geoFields);
+            setRightGeoField(geoFields.length ? geoFields[0].name : undefined);
+          }}
+          onGeoFieldSelect={setRightGeoField}
+        />
+      </>
     : null;
 
   return (
@@ -54,7 +69,7 @@ export function WizardForm() {
         onGeoFieldSelect={setLeftGeoField}
       />
 
-      <EuiSpacer size="s" />
+      {relationshipPanel}
 
       {rightSourcePanel}
     </>
