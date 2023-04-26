@@ -18,6 +18,7 @@ import {
   FieldPicker,
 } from '@kbn/visualization-ui-components/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { LENS_APP_NAME } from '../../../../../common/constants';
 import type { FramePublicAPI } from '../../../../types';
 import type { XYState, XYAnnotationLayerConfig } from '../../types';
 import { LensAppServices } from '../../../../app_plugin/types';
@@ -88,6 +89,7 @@ export const ConfigPanelQueryAnnotation = ({
           }}
           data-test-subj="lnsXY-annotation-query-based-query-input"
           dataView={currentIndexPattern}
+          appName={LENS_APP_NAME}
           queryInputServices={useKibana<LensAppServices>().services}
         />
       </EuiFormRow>

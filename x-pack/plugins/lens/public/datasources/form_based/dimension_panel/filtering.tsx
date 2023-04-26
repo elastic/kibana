@@ -9,6 +9,7 @@ import { isEqual } from 'lodash';
 import type { Query } from '@kbn/es-query';
 import { validateQuery, FilterQueryInput } from '@kbn/visualization-ui-components/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { LENS_APP_NAME } from '../../../../common/constants';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
 import type { FormBasedLayer } from '../types';
 import type { IndexPattern } from '../../../types';
@@ -68,6 +69,7 @@ export function Filtering({
       dataView={indexPattern}
       inputFilter={inputFilter}
       queryInputServices={lensServices}
+      appName={LENS_APP_NAME}
     />
   );
 }

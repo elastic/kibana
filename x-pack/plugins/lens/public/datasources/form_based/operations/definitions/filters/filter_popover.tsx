@@ -14,7 +14,7 @@ import type { Query } from '@kbn/es-query';
 // import { QueryInput } from '../../../../shared_components/query_input';
 import { isQueryValid, QueryInput } from '@kbn/visualization-ui-components/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { i18n } from '@kbn/i18n';
+import { LENS_APP_NAME } from '../../../../../../common/constants';
 import { IndexPattern } from '../../../../../types';
 import { FilterValue, defaultLabel } from '.';
 import { LabelInput } from '../shared_components';
@@ -73,9 +73,7 @@ export const FilterPopover = ({
         onSubmit={() => {
           if (inputRef.current) inputRef.current.focus();
         }}
-        appName={i18n.translate('xpack.lens.queryInput.appName', {
-          defaultMessage: 'Lens',
-        })}
+        appName={LENS_APP_NAME}
         services={useKibana<LensAppServices>().services}
       />
       <EuiSpacer size="s" />

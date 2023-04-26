@@ -42,6 +42,7 @@ export function FilterQueryInput({
   initiallyOpen,
   ['data-test-subj']: dataTestSubj,
   queryInputServices,
+  appName,
 }: {
   inputFilter: Query | undefined;
   onChange: (query: Query) => void;
@@ -51,6 +52,7 @@ export function FilterQueryInput({
   initiallyOpen?: boolean;
   ['data-test-subj']?: string;
   queryInputServices: QueryInputServices;
+  appName: string;
 }) {
   const [filterPopoverOpen, setFilterPopoverOpen] = useState(Boolean(initiallyOpen));
   const { inputValue: queryInput, handleInputChange: setQueryInput } = useDebouncedValue<Query>({
@@ -152,9 +154,7 @@ export function FilterQueryInput({
                 isInvalid={!isQueryInputValid}
                 onSubmit={() => {}}
                 data-test-subj={dataTestSubj}
-                appName={i18n.translate('xpack.lens.queryInput.appName', {
-                  defaultMessage: 'Lens',
-                })}
+                appName={appName}
                 services={queryInputServices}
               />
             </EuiFormRow>
