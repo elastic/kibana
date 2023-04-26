@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { JoinTooltipProperty } from './join_tooltip_property';
+export type { IJoinSource, ITermJoinSource } from './types';
+
+export { isTermJoinSource } from './types';
+export { ESTermSource } from './es_term_source';
+export { TableSource } from './table_source';
