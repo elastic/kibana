@@ -14,7 +14,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { JOB_ID } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
 import { ML_PAGES } from '../../../locator';
 import { NavigateToPath, useMlKibana } from '../../contexts/kibana';
 
@@ -139,7 +139,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     try {
       const fetchedStoppedPartitions = await ml.results.getCategoryStoppedPartitions(
         selectedJobIds,
-        JOB_ID
+        ML_JOB_ID
       );
       if (
         fetchedStoppedPartitions &&

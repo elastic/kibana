@@ -14,7 +14,7 @@ import type { EntityField } from '@kbn/ml-anomaly-utils';
 import {
   type MlAnomalyRecordDoc,
   MLAnomalyDoc,
-  JOB_ID,
+  ML_JOB_ID,
   ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
 import type {
@@ -155,7 +155,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
 
   getCategoryStoppedPartitions(
     jobIds: string[],
-    fieldToBucket?: typeof JOB_ID | typeof ML_PARTITION_FIELD_VALUE
+    fieldToBucket?: typeof ML_JOB_ID | typeof ML_PARTITION_FIELD_VALUE
   ) {
     const body = JSON.stringify({
       jobIds,

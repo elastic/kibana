@@ -16,7 +16,7 @@ import {
   type MlAnomaliesTableRecord,
   type MlAnomalyCategorizerStatsDoc,
   type MlAnomalyRecordDoc,
-  JOB_ID,
+  ML_JOB_ID,
   ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
@@ -536,7 +536,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
   async function getCategoryStoppedPartitions(
     jobIds: string[],
-    fieldToBucket: typeof JOB_ID | typeof ML_PARTITION_FIELD_VALUE = ML_PARTITION_FIELD_VALUE
+    fieldToBucket: typeof ML_JOB_ID | typeof ML_PARTITION_FIELD_VALUE = ML_PARTITION_FIELD_VALUE
   ): Promise<GetStoppedPartitionResult> {
     let finalResults: GetStoppedPartitionResult = {
       jobs: {},
@@ -559,12 +559,12 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       .map((j) => j.job_id);
 
     let aggs: any;
-    if (fieldToBucket === JOB_ID) {
+    if (fieldToBucket === ML_JOB_ID) {
       // if bucketing by job_id, then return list of job_ids with at least one stopped_partitions
       aggs = {
         unique_terms: {
           terms: {
-            field: JOB_ID,
+            field: ML_JOB_ID,
           },
         },
       };
@@ -573,7 +573,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       aggs = {
         jobs: {
           terms: {
-            field: JOB_ID,
+            field: ML_JOB_ID,
           },
           aggs: {
             unique_stopped_partitions: {
@@ -622,7 +622,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         },
         jobIds
       );
-      if (fieldToBucket === JOB_ID) {
+      if (fieldToBucket === ML_JOB_ID) {
         finalResults = {
           // @ts-expect-error incorrect search response type
           jobs: results.aggregations?.unique_terms?.buckets.map(

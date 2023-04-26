@@ -50,7 +50,7 @@ export const ML_PARTITION_FIELDS = ['partition_field', 'over_field', 'by_field']
  * Machine learning job id attribute name.
  * @type {"job_id"}
  */
-export const JOB_ID = 'job_id';
+export const ML_JOB_ID = 'job_id';
 
 /**
  * Machine learning partition field value attribute name.
