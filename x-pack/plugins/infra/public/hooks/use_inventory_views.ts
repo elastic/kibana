@@ -13,6 +13,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import {
+  CreateInventoryViewAttributesRequestPayload,
+  UpdateInventoryViewAttributesRequestPayload,
+} from '../../common/http_api/latest';
 import { InventoryView } from '../../common/inventory_views';
 import { useKibanaContextForPlugin } from './use_kibana';
 import { useUrlState } from '../utils/use_url_state';
@@ -20,6 +24,10 @@ import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
+interface MutationContext {
+  id?: string;
+  previousViews?: InventoryView[];
+}
 
 const queryKeys = {
   find: ['inventory-views-find'] as const,
@@ -52,7 +60,7 @@ export const useInventoryViews = () => {
     isFetching: isFetchingViews,
   } = useQuery({
     queryKey: queryKeys.find,
-    queryFn: () => inventoryViews.findInventoryViews(),
+    queryFn: () => inventoryViews.client.findInventoryViews(),
     enabled: false, // We will manually fetch the list when necessary
     placeholderData: [], // Use a default empty array instead of undefined
     onError: (error: ServerError) => notify.getViewFailure(error.body?.message ?? error.message),
@@ -64,13 +72,13 @@ export const useInventoryViews = () => {
 
   const { data: currentView, isFetching: isFetchingCurrentView } = useQuery({
     queryKey: queryKeys.getById(currentViewId),
-    queryFn: ({ queryKey: [, id] }) => inventoryViews.getInventoryView(id),
+    queryFn: ({ queryKey: [, id] }) => inventoryViews.client.getInventoryView(id),
     onError: (error: ServerError) => notify.getViewFailure(error.body?.message ?? error.message),
     placeholderData: null,
   });
 
-  const { mutate: setDefaultViewById } = useMutation({
-    mutationFn: (id: string) => updateSourceConfiguration({ inventoryDefaultView: id }),
+  const { mutate: setDefaultViewById } = useMutation<void, ServerError, string, MutationContext>({
+    mutationFn: async (id) => void updateSourceConfiguration({ inventoryDefaultView: id }),
     /**
      * To provide a quick feedback, we perform an optimistic update on the list
      * when updating the default view.
@@ -87,9 +95,11 @@ export const useInventoryViews = () => {
       return { previousViews }; // 4
     },
     // If the mutation fails, use the context returned from onMutate to roll back
-    onError: (error: ServerError, _id, context: { previousViews: InventoryView[] }) => {
+    onError: (error: ServerError, _id, context) => {
       notify.setDefaultViewFailure(error.body?.message ?? error.message);
-      queryClient.setQueryData(queryKeys.find, context.previousViews);
+      if (context?.previousViews) {
+        queryClient.setQueryData(queryKeys.find, context.previousViews);
+      }
     },
     // Always refetch after error or success:
     onSuccess: () => {
@@ -100,31 +110,39 @@ export const useInventoryViews = () => {
     },
   });
 
-  const { mutate: createView, isLoading: isCreatingView } = useMutation({
-    mutationFn: (attributes) => inventoryViews.createInventoryView(attributes),
-    onError: (error: ServerError) => {
+  const { mutate: createView, isLoading: isCreatingView } = useMutation<
+    InventoryView,
+    ServerError,
+    CreateInventoryViewAttributesRequestPayload
+  >({
+    mutationFn: (attributes) => inventoryViews.client.createInventoryView(attributes),
+    onError: (error) => {
       notify.upsertViewFailure(error.body?.message ?? error.message);
     },
-    onSuccess: (createdView: InventoryView) => {
+    onSuccess: (createdView) => {
       queryClient.setQueryData(queryKeys.getById(createdView.id), createdView); // Store in cache created view
       switchViewById(createdView.id); // Update current view and url state
       fetchViews(); // Invalidate views list cache and refetch views
     },
   });
 
-  const { mutate: updateViewById, isLoading: isUpdatingView } = useMutation({
-    mutationFn: ({ id, attributes }) => inventoryViews.updateInventoryView(id, attributes),
+  const { mutate: updateViewById, isLoading: isUpdatingView } = useMutation<
+    InventoryView,
+    ServerError,
+    { id: string; attributes: UpdateInventoryViewAttributesRequestPayload }
+  >({
+    mutationFn: ({ id, attributes }) => inventoryViews.client.updateInventoryView(id, attributes),
     onError: (error) => {
       notify.upsertViewFailure(error.body?.message);
     },
-    onSuccess: (updatedView: InventoryView) => {
+    onSuccess: (updatedView) => {
       queryClient.setQueryData(queryKeys.getById(updatedView.id), updatedView); // Store in cache updated view
       fetchViews(); // Invalidate views list cache and refetch views
     },
   });
 
-  const { mutate: deleteViewById } = useMutation({
-    mutationFn: (id: string) => inventoryViews.deleteInventoryView(id),
+  const { mutate: deleteViewById } = useMutation<null, ServerError, string, MutationContext>({
+    mutationFn: (id: string) => inventoryViews.client.deleteInventoryView(id),
     /**
      * To provide a quick feedback, we perform an optimistic update on the list
      * when deleting a view.
@@ -145,11 +163,13 @@ export const useInventoryViews = () => {
     },
     // If the mutation fails, use the context returned from onMutate to roll back
     onError: (error, _id, context) => {
-      queryClient.setQueryData(queryKeys.find, context.previousViews);
+      if (context?.previousViews) {
+        queryClient.setQueryData(queryKeys.find, context.previousViews);
+      }
     },
     onSuccess: (_data, id) => {
       // If the deleted view was the current one, switch to the default view
-      if (currentView.id === id) {
+      if (currentView?.id === id) {
         switchViewById(defaultViewId);
       }
     },
