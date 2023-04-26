@@ -46,15 +46,25 @@ export function ExplainLogRateSpikesPageProvider({
     },
 
     async setQueryInput(query: string) {
-      const aiopsQueryInput = await testSubjects.find('aiopsQueryInput');
-      await aiopsQueryInput.type(query);
-      await aiopsQueryInput.pressKeys(browser.keys.ENTER);
-      await header.waitUntilLoadingHasFinished();
-      const queryBarText = await aiopsQueryInput.getVisibleText();
-      expect(queryBarText).to.eql(
-        query,
-        `Expected query bar text to be '${query}' (got '${queryBarText}')`
-      );
+      await retry.tryForTime(30 * 1000, async () => {
+        const aiopsQueryInput = await testSubjects.find('aiopsQueryInput');
+
+        await aiopsQueryInput.clearValueWithKeyboard();
+        const queryBarEmpty = await aiopsQueryInput.getVisibleText();
+        expect(queryBarEmpty).to.eql(
+          '',
+          `Expected query bar to be emptied, got '${queryBarEmpty}'`
+        );
+
+        await aiopsQueryInput.type(query);
+        await aiopsQueryInput.pressKeys(browser.keys.ENTER);
+        await header.waitUntilLoadingHasFinished();
+        const queryBarText = await aiopsQueryInput.getVisibleText();
+        expect(queryBarText).to.eql(
+          query,
+          `Expected query bar text to be '${query}' (got '${queryBarText}')`
+        );
+      });
     },
 
     async assertSamplingProbabilityMissing() {
