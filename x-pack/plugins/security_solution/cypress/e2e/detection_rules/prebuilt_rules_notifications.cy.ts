@@ -47,6 +47,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     beforeEach(() => {
       waitForRulesTableToBeLoaded();
     });
+
     it('should notify user about prebuilt rules package available for installation', () => {
       cy.get(LOAD_PREBUILT_RULES_BTN).should('be.visible');
       cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('be.visible');
@@ -57,7 +58,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     it('should display no install or update notifications when latest rules are installed', () => {
       // Install current available rules
       installAvailableRules();
-  
+
       waitForRulesTableToBeLoaded();
 
       // Assert that there are no installation or update notifications
@@ -92,7 +93,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('not.exist');
       deleteFirstRule();
       cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('be.visible');
-    })
+    });
   });
 
   describe('Rule update notification', () => {
@@ -109,6 +110,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       });
       waitForRulesTableToBeLoaded();
     });
+
     it('should notify user about prebuilt rules package available for update', () => {
       cy.get(UPDATE_PREBUILT_RULES_CALLOUT).should('be.visible');
     });
