@@ -2668,6 +2668,52 @@ describe('successful migrations', () => {
       const migratedAlert880 = migration880(rule, migrationContext);
       expect(migratedAlert880.attributes.revision).toEqual(2);
     });
+
+    describe('migrate actions frequency for Security Solution ', () => {
+      test('Add frequency when throttle is null', () => {
+        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.8.0'
+        ];
+
+        const rule = getMockData({ alertTypeId: ruleTypeMappings.eql });
+        const migratedAlert880 = migration880(rule, migrationContext);
+        expect(migratedAlert880.attributes.actions[0].frequency.summary).toEqual(true);
+        expect(migratedAlert880.attributes.actions[0].frequency.notifyWhen).toEqual(
+          'onActiveAlert'
+        );
+        expect(migratedAlert880.attributes.actions[0].frequency.throttle).toEqual(null);
+      });
+
+      test('Add frequency when throttle is 1h', () => {
+        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.8.0'
+        ];
+
+        const rule = getMockData({ alertTypeId: ruleTypeMappings.eql, throttle: '1h' });
+        const migratedAlert880 = migration880(rule, migrationContext);
+        expect(migratedAlert880.attributes.actions[0].frequency.summary).toEqual(true);
+        expect(migratedAlert880.attributes.actions[0].frequency.notifyWhen).toEqual(
+          'onThrottleInterval'
+        );
+        expect(migratedAlert880.attributes.actions[0].frequency.throttle).toEqual('1h');
+      });
+
+      test('Do not migrate action when alert does NOT belong to security solution', () => {
+        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.8.0'
+        ];
+
+        const rule = getMockData();
+        const migratedAlert880 = migration880(rule, migrationContext);
+        const updatedActions = migratedAlert880.attributes.actions.map(
+          (action: { [x: string]: unknown; uuid: unknown }) => {
+            const { uuid, ...updatedAction } = action;
+            return updatedAction;
+          }
+        );
+        expect(updatedActions).toEqual(rule.attributes.actions);
+      });
+    });
   });
 
   describe('Metrics Inventory Threshold rule', () => {

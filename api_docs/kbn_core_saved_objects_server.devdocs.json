@@ -9036,10 +9036,10 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-common.SavedObjectsServiceSetup.getKibanaIndex",
+            "id": "def-common.SavedObjectsServiceSetup.getDefaultIndex",
             "type": "Function",
             "tags": [],
-            "label": "getKibanaIndex",
+            "label": "getDefaultIndex",
             "description": [
               "\nReturns the default index used for saved objects."
             ],
@@ -9049,6 +9049,52 @@
             "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsServiceSetup.getAllIndices",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "getAllIndices",
+            "description": [
+              "\nReturns all (aliases to) kibana system indices used for saved object storage.\n"
+            ],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-saved-objects-server-internal",
+                "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/saved_objects_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/plugins/saved_objects_tagging/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-server-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-server-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-server-mocks/src/saved_objects_service.mock.ts"
+              }
+            ],
             "children": [],
             "returnComment": []
           }
@@ -9507,6 +9553,114 @@
                 "section": "def-common.ISavedObjectTypeRegistry",
                 "text": "ISavedObjectTypeRegistry"
               }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsServiceStart.getIndexForType",
+            "type": "Function",
+            "tags": [],
+            "label": "getIndexForType",
+            "description": [
+              "\nReturns the (alias to the) index that the specified saved object type is stored in.\n"
+            ],
+            "signature": [
+              "(type: string) => string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-common.SavedObjectsServiceStart.getIndexForType.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "The SO type to retrieve the index/alias for."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsServiceStart.getIndicesForTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getIndicesForTypes",
+            "description": [
+              "\nReturns the (alias to the) index that the specified saved object type is stored in.\n"
+            ],
+            "signature": [
+              "(types: string[]) => string[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-common.SavedObjectsServiceStart.getIndicesForTypes.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "types",
+                "description": [
+                  "The SO types to retrieve the index/alias for."
+                ],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsServiceStart.getDefaultIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "getDefaultIndex",
+            "description": [
+              "\nReturns the default index used for saved objects."
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsServiceStart.getAllIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllIndices",
+            "description": [
+              "\nReturns all (aliases to) kibana system indices used for saved object storage."
+            ],
+            "signature": [
+              "() => string[]"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
             "deprecated": false,
@@ -10504,6 +10658,45 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.ALERTING_CASES_SAVED_OBJECT_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_CASES_SAVED_OBJECT_INDEX",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.ALL_SAVED_OBJECT_INDICES",
+        "type": "Array",
+        "tags": [],
+        "label": "ALL_SAVED_OBJECT_INDICES",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.ANALYTICS_SAVED_OBJECT_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "ANALYTICS_SAVED_OBJECT_INDEX",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-common.AuthorizationTypeMap",
         "type": "Type",
         "tags": [],
@@ -10583,6 +10776,35 @@
           "\"encryptedSavedObjects\""
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/extensions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.INGEST_SAVED_OBJECT_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "INGEST_SAVED_OBJECT_INDEX",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.MAIN_SAVED_OBJECT_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "MAIN_SAVED_OBJECT_INDEX",
+        "description": [
+          "\nCollect and centralize the names of the different saved object indices.\nNote that all of them start with the '.kibana' prefix.\nThere are multiple places in the code that these indices have the form .kibana*.\nHowever, beware that there are some system indices that have the same prefix\nbut are NOT used to store saved objects, e.g.: .kibana_security_session_1"
+        ],
+        "signature": [
+          "\".kibana\""
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11685,6 +11907,18 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.SECURITY_SOLUTION_SAVED_OBJECT_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_SAVED_OBJECT_INDEX",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-common.SPACES_EXTENSION_ID",
         "type": "string",
         "tags": [],
@@ -11694,6 +11928,18 @@
           "\"spaces\""
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/extensions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-common.TASK_MANAGER_SAVED_OBJECT_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "TASK_MANAGER_SAVED_OBJECT_INDEX",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_index_pattern.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
