@@ -14,10 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  CommentAttributes as AttachmentAttributes,
-  CommentAttributesWithoutRefs as AttachmentAttributesWithoutRefs,
-} from '../../../common/api';
+import type { CommentAttributes as AttachmentAttributes } from '../../../common/api';
 import { CommentType } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import { buildFilter, combineFilters } from '../../client/utils';
@@ -102,10 +99,7 @@ export class AttachmentService {
 
       const combinedFilter = combineFilters([attachmentFilter, filter]);
 
-      const response = await this.context.unsecuredSavedObjectsClient.find<
-        AttachmentAttributes,
-        Agg
-      >({
+      const response = await this.context.unsecuredSavedObjectsClient.find<unknown, Agg>({
         type: CASE_COMMENT_SAVED_OBJECT,
         hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
         page: 1,
@@ -254,7 +248,7 @@ export class AttachmentService {
       const shouldUpdateRefs = extractedReferences.length > 0 || didDeleteOperation;
 
       const res =
-        await this.context.unsecuredSavedObjectsClient.update<AttachmentAttributesWithoutRefs>(
+        await this.context.unsecuredSavedObjectsClient.update<AttachmentPersistedAttributes>(
           CASE_COMMENT_SAVED_OBJECT,
           attachmentId,
           extractedAttributes,
@@ -291,7 +285,7 @@ export class AttachmentService {
       );
 
       const res =
-        await this.context.unsecuredSavedObjectsClient.bulkUpdate<AttachmentAttributesWithoutRefs>(
+        await this.context.unsecuredSavedObjectsClient.bulkUpdate<AttachmentPersistedAttributes>(
           comments.map((c) => {
             const {
               attributes: extractedAttributes,

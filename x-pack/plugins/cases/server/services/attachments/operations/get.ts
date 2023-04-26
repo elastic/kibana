@@ -76,7 +76,9 @@ export class AttachmentGetter {
         `Attempting to retrieve attachments associated with cases: [${caseIds}]`
       );
 
-      const finder = this.context.unsecuredSavedObjectsClient.createPointInTimeFinder({
+      // We are intentionally not adding the type here because we only want to interact with the id and this function
+      // should not use the attributes
+      const finder = this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<unknown>({
         type: CASE_COMMENT_SAVED_OBJECT,
         hasReference: caseIds.map((id) => ({ id, type: CASE_SAVED_OBJECT })),
         sortField: 'created_at',

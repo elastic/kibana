@@ -21,9 +21,18 @@ export interface AttachmentRequestAttributes {
   type: string;
   alertId?: string | string[];
   index?: string | string[];
-  rule?: Record<string, unknown>;
+  rule?: {
+    id: string | null;
+    name: string | null;
+  };
   comment?: string;
-  actions?: Record<string, unknown>;
+  actions?: {
+    targets: Array<{
+      hostname: string;
+      endpointId: string;
+    }>;
+    type: string;
+  };
   externalReferenceMetadata?: Record<string, unknown> | null;
   externalReferenceAttachmentTypeId?: string;
   externalReferenceStorage?: {
@@ -31,6 +40,7 @@ export interface AttachmentRequestAttributes {
     soType?: string;
   };
   persistableStateAttachmentState?: Record<string, unknown>;
+  persistableStateAttachmentTypeId?: string;
 }
 
 export type AttachmentPersistedAttributes = AttachmentRequestAttributes &

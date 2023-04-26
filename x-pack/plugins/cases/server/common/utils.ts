@@ -34,7 +34,6 @@ import type {
   CommentRequest,
   CommentRequestActionsType,
   CommentRequestAlertType,
-  CommentRequestExternalReferenceSOType,
   CommentRequestUserType,
   CommentResponse,
   CommentsResponse,
@@ -45,7 +44,6 @@ import {
   CaseStatuses,
   CommentType,
   ConnectorTypes,
-  ExternalReferenceStorageType,
   ExternalReferenceSORt,
   FileAttachmentMetadataRt,
 } from '../../common/api';
@@ -55,7 +53,6 @@ import {
   getLensVisualizations,
 } from '../../common/utils/markdown_plugins/utils';
 import { dedupAssignees } from '../client/cases/utils';
-import type { AttachmentRequestAttributes } from './types/attachments';
 import type { CaseSavedObjectTransformed, CaseTransformedAttributes } from './types/case';
 
 /**
@@ -253,18 +250,6 @@ export const isCommentRequestTypeAlert = (
   context: CommentRequest
 ): context is CommentRequestAlertType => {
   return context.type === CommentType.alert;
-};
-
-/**
- * A type narrowing function for external reference so attachments.
- */
-export const isCommentRequestTypeExternalReferenceSO = (
-  context: Partial<AttachmentRequestAttributes>
-): context is CommentRequestExternalReferenceSOType => {
-  return (
-    context.type === CommentType.externalReference &&
-    context.externalReferenceStorage?.type === ExternalReferenceStorageType.savedObject
-  );
 };
 
 /**
