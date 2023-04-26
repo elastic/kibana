@@ -23,7 +23,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InventoryView } from '../../../common/inventory_views';
-import { SavedView } from '../../containers/saved_view/saved_view';
 
 interface Props {
   views: InventoryView[];
