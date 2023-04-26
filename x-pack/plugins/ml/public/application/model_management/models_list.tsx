@@ -531,7 +531,10 @@ export const ModelsList: FC<Props> = ({
 
           return '';
         },
-        selectable: (item) => !isPopulatedObject(item.pipelines) && !isBuiltInModel(item),
+        selectable: (item) =>
+          !isPopulatedObject(item.pipelines) &&
+          !isBuiltInModel(item) &&
+          !(isCuratedModel(item) && !item.state),
         onSelectionChange: (selectedItems) => {
           setSelectedModels(selectedItems);
         },
