@@ -13,8 +13,10 @@ import type {
   GetOneOutputRequestSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
-  PostESLogstashOutputRequestSchema,
-  PutESLogstashOutputRequestSchema,
+  PostESOutputRequestSchema,
+  PostLogstashOutputRequestSchema,
+  PutESOutputRequestSchema,
+  PutLogstashOutputRequestSchema,
 } from '../../types';
 import type {
   DeleteOutputResponse,
@@ -103,9 +105,9 @@ export const putOuputHandler: RequestHandler<
   }
 };
 export const putESOutputHandler: RequestHandler<
-  TypeOf<typeof PutESLogstashOutputRequestSchema.params>,
+  TypeOf<typeof PutESOutputRequestSchema.params>,
   undefined,
-  TypeOf<typeof PutESLogstashOutputRequestSchema.body>
+  TypeOf<typeof PutESOutputRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
@@ -137,9 +139,9 @@ export const putESOutputHandler: RequestHandler<
 };
 
 export const putLogstashOutputHandler: RequestHandler<
-  TypeOf<typeof PutESLogstashOutputRequestSchema.params>,
+  TypeOf<typeof PutLogstashOutputRequestSchema.params>,
   undefined,
-  TypeOf<typeof PutESLogstashOutputRequestSchema.body>
+  TypeOf<typeof PutLogstashOutputRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
@@ -199,7 +201,7 @@ export const postOuputHandler: RequestHandler<
 export const postESOutputHandler: RequestHandler<
   undefined,
   undefined,
-  TypeOf<typeof PostESLogstashOutputRequestSchema.body>
+  TypeOf<typeof PostESOutputRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
@@ -226,7 +228,7 @@ export const postESOutputHandler: RequestHandler<
 export const postLogstashOutputHandler: RequestHandler<
   undefined,
   undefined,
-  TypeOf<typeof PostESLogstashOutputRequestSchema.body>
+  TypeOf<typeof PostLogstashOutputRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;

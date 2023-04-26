@@ -10,8 +10,10 @@ import { schema } from '@kbn/config-schema';
 import {
   NewOutputSchema,
   UpdateOutputSchema,
-  ESLogstashOutputSchema,
-  UpdateESOrLogstashOutputSchema,
+  ESOutputSchema,
+  LogstashOutputSchema,
+  UpdateESOutputSchema,
+  UpdateLogstashOutputSchema,
 } from '../models';
 
 export const GetOneOutputRequestSchema = {
@@ -41,13 +43,23 @@ export const PutOutputRequestSchema = {
 };
 //
 
-export const PostESLogstashOutputRequestSchema = {
-  body: ESLogstashOutputSchema,
+export const PostESOutputRequestSchema = {
+  body: ESOutputSchema,
 };
 
-export const PutESLogstashOutputRequestSchema = {
+export const PostLogstashOutputRequestSchema = {
+  body: LogstashOutputSchema,
+};
+
+export const PutESOutputRequestSchema = {
   params: schema.object({
     outputId: schema.string(),
   }),
-  body: UpdateESOrLogstashOutputSchema,
+  body: UpdateESOutputSchema,
+};
+export const PutLogstashOutputRequestSchema = {
+  params: schema.object({
+    outputId: schema.string(),
+  }),
+  body: UpdateLogstashOutputSchema,
 };

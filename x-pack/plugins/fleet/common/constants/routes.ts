@@ -91,9 +91,9 @@ export const OUTPUT_API_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/outputs`,
   // New routes:
   CREATE_ES_PATTERN: `${API_ROOT}/outputs/elasticsearch`,
-  UPDATE_ES_PATTERN: `${API_ROOT}/outputs/elasticsearch/{outputId}`,
+  UPDATE_ES_PATTERN: `${API_ROOT}/outputs/{outputId}/elasticsearch`,
   CREATE_LOGSTASH_PATTERN: `${API_ROOT}/outputs/logstash`,
-  UPDATE_LOGSTASH_PATTERN: `${API_ROOT}/outputs/logstash/{outputId}`,
+  UPDATE_LOGSTASH_PATTERN: `${API_ROOT}/outputs/{outputId}/logstash`,
   LOGSTASH_API_KEY_PATTERN: `${API_ROOT}/logstash_api_keys`,
 };
 

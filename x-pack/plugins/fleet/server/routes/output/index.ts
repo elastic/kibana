@@ -14,8 +14,10 @@ import {
   GetOutputsRequestSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
-  PostESLogstashOutputRequestSchema,
-  PutESLogstashOutputRequestSchema,
+  PostESOutputRequestSchema,
+  PostLogstashOutputRequestSchema,
+  PutESOutputRequestSchema,
+  PutLogstashOutputRequestSchema,
 } from '../../types';
 
 import {
@@ -78,7 +80,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.put(
     {
       path: OUTPUT_API_ROUTES.UPDATE_ES_PATTERN,
-      validate: PutESLogstashOutputRequestSchema,
+      validate: PutESOutputRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
@@ -89,7 +91,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.post(
     {
       path: OUTPUT_API_ROUTES.CREATE_ES_PATTERN,
-      validate: PostESLogstashOutputRequestSchema,
+      validate: PostESOutputRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
@@ -99,7 +101,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.put(
     {
       path: OUTPUT_API_ROUTES.UPDATE_LOGSTASH_PATTERN,
-      validate: PutESLogstashOutputRequestSchema,
+      validate: PutLogstashOutputRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
@@ -110,7 +112,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.post(
     {
       path: OUTPUT_API_ROUTES.CREATE_LOGSTASH_PATTERN,
-      validate: PostESLogstashOutputRequestSchema,
+      validate: PostLogstashOutputRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
