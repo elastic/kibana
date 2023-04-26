@@ -68,7 +68,11 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
-      <div>
+      <div
+        css={css`
+          max-width: 280px;
+        `}
+      >
         {messages.map(({ shortMessage, longMessage }, index) => {
           return (
             <>
