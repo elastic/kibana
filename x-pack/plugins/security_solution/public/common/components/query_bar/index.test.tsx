@@ -10,9 +10,10 @@ import React from 'react';
 import { act, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
-import { TestProviders, mockIndexPattern } from '../../mock';
+import { TestProviders, mockIndexNames } from '../../mock';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { createStubDataView } from '@kbn/data-plugin/common/stubs';
 import type { QueryBarComponentProps } from '.';
 import { QueryBar } from '.';
 
@@ -52,6 +53,8 @@ describe('QueryBar ', () => {
     mockOnSavedQuery.mockClear();
   });
 
+  const mockDataView = createStubDataView({ spec: { title: mockIndexNames.join() } });
+
   test('check if we format the appropriate props to QueryBar', () => {
     const wrapper = mount(
       <TestProviders>
@@ -59,7 +62,7 @@ describe('QueryBar ', () => {
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
           hideSavedQuery={false}
-          indexPattern={mockIndexPattern}
+          indexPattern={mockDataView}
           isRefreshPaused={true}
           filterQuery={{ query: 'here: query', language: 'kuery' }}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
@@ -82,134 +85,10 @@ describe('QueryBar ', () => {
       ...searchBarProps
     } = wrapper.find(SearchBar).props();
 
-    expect(searchBarProps).toEqual({
-      dataTestSubj: undefined,
-      dateRangeFrom: 'now/d',
-      dateRangeTo: 'now/d',
-      displayStyle: undefined,
-      filters: [],
-      indexPatterns: [
-        {
-          fields: [
-            {
-              aggregatable: true,
-              name: '@timestamp',
-              searchable: true,
-              type: 'date',
-            },
-            {
-              aggregatable: true,
-              name: '@version',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.ephemeral_id',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.hostname',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.id',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test1',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test2',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test3',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test4',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test5',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test6',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test7',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test8',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'host.name',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: false,
-              name: 'nestedField.firstAttributes',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: false,
-              name: 'nestedField.secondAttributes',
-              searchable: true,
-              type: 'string',
-            },
-          ],
-          title: 'filebeat-*,auditbeat-*,packetbeat-*',
-        },
-      ],
-      isLoading: false,
-      isRefreshPaused: true,
-      query: {
-        language: 'kuery',
-        query: 'here: query',
-      },
-      refreshInterval: undefined,
-      savedQuery: undefined,
-      showAutoRefreshOnly: false,
-      showDatePicker: false,
-      showFilterBar: true,
-      showQueryInput: true,
-      showSaveQuery: true,
-      showSubmitButton: false,
-    });
+    expect(searchBarProps).toMatchSnapshot();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/132659
-  describe.skip('#onQuerySubmit', () => {
+  describe('#onQuerySubmit', () => {
     test(' is the only reference that changed when filterQuery props get updated', async () => {
       await act(async () => {
         const wrapper = await getWrapper(
@@ -217,7 +96,7 @@ describe('QueryBar ', () => {
             dateRangeFrom={DEFAULT_FROM}
             dateRangeTo={DEFAULT_TO}
             hideSavedQuery={false}
-            indexPattern={mockIndexPattern}
+            indexPattern={mockDataView}
             isRefreshPaused={true}
             filterQuery={{ query: 'here: query', language: 'kuery' }}
             filterManager={new FilterManager(mockUiSettingsForFilterManager)}
@@ -247,7 +126,7 @@ describe('QueryBar ', () => {
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
           hideSavedQuery={false}
-          indexPattern={mockIndexPattern}
+          indexPattern={mockDataView}
           isRefreshPaused={true}
           filterQuery={{ query: 'here: query', language: 'kuery' }}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
@@ -279,7 +158,7 @@ describe('QueryBar ', () => {
             dateRangeFrom={DEFAULT_FROM}
             dateRangeTo={DEFAULT_TO}
             hideSavedQuery={false}
-            indexPattern={mockIndexPattern}
+            indexPattern={mockDataView}
             isRefreshPaused={true}
             filterQuery={{ query: 'here: query', language: 'kuery' }}
             filterManager={new FilterManager(mockUiSettingsForFilterManager)}
@@ -311,7 +190,7 @@ describe('QueryBar ', () => {
             dateRangeFrom={DEFAULT_FROM}
             dateRangeTo={DEFAULT_TO}
             hideSavedQuery={false}
-            indexPattern={mockIndexPattern}
+            indexPattern={mockDataView}
             isRefreshPaused={true}
             filterQuery={{
               query: 'here: query',

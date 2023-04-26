@@ -10,6 +10,7 @@ import React, { memo, useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -78,7 +79,9 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const [dateRangeTo, setDateRangTo] = useState<string>(
       toStr != null ? toStr : new Date(to).toISOString()
     );
-    const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
+    const { browserFields, indexPattern, sourcererDataView } = useSourcererDataView(
+      SourcererScopeName.timeline
+    );
     const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
       query: filterQuery != null ? filterQuery.expression : '',
@@ -262,12 +265,12 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       [dataProvidersDsl, savedQueryId, savedQueryServices]
     );
 
-    return (
+    return sourcererDataView ? (
       <QueryBar
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
         hideSavedQuery={kqlMode === 'search'}
-        indexPattern={indexPattern}
+        indexPattern={sourcererDataView}
         isRefreshPaused={isRefreshPaused}
         filterQuery={filterQueryConverted}
         filterManager={filterManager}
@@ -279,6 +282,8 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         dataTestSubj={'timelineQueryInput'}
         displayStyle="inPage"
       />
+    ) : (
+      <EuiLoadingSpinner />
     );
   }
 );
