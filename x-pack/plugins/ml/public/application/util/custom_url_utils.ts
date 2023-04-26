@@ -14,7 +14,7 @@ import { TimeRange } from '@kbn/es-query';
 import type {
   MlAnomalyRecordDoc,
   UrlConfig,
-  KibanaUrlConfig,
+  MlKibanaUrlConfig,
   MlCustomUrlAnomalyRecordDoc,
 } from '@kbn/ml-anomaly-utils';
 import { parseInterval } from '../../../common/util/parse_interval';
@@ -28,7 +28,7 @@ const TIME_RANGE_AUTO = 'auto';
 // Replaces the $ delimited tokens in the url_value of the custom URL configuration
 // with values from the supplied document.
 export function replaceTokensInDFAUrlValue(
-  customUrlConfig: UrlConfig | KibanaUrlConfig,
+  customUrlConfig: UrlConfig | MlKibanaUrlConfig,
   doc: DataGridItem,
   timeRange?: TimeRange
 ) {
@@ -49,7 +49,7 @@ export function replaceTokensInDFAUrlValue(
 // Replaces the $ delimited tokens in the url_value of the custom URL configuration
 // with values from the supplied document.
 export function replaceTokensInUrlValue(
-  customUrlConfig: UrlConfig | KibanaUrlConfig,
+  customUrlConfig: UrlConfig | MlKibanaUrlConfig,
   jobBucketSpanSecs: number,
   doc: MlAnomalyRecordDoc | Record<string, unknown>,
   timeFieldName: 'timestamp' | string
@@ -88,7 +88,7 @@ export function replaceTokensInUrlValue(
 // Returns the URL to open from the supplied config, with any dollar delimited tokens
 // substituted from the supplied anomaly record.
 export function getUrlForRecord(
-  urlConfig: UrlConfig | KibanaUrlConfig,
+  urlConfig: UrlConfig | MlKibanaUrlConfig,
   record: MlCustomUrlAnomalyRecordDoc | DataGridItem
 ) {
   if (isKibanaUrl(urlConfig) === true) {

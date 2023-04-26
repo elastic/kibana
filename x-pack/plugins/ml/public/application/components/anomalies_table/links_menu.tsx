@@ -26,7 +26,7 @@ import {
   isCategorizationAnomaly,
   isRuleSupported,
   type MlCustomUrlAnomalyRecordDoc,
-  type KibanaUrlConfig,
+  type MlKibanaUrlConfig,
   type MlAnomaliesTableRecord,
 } from '@kbn/ml-anomaly-utils';
 import { mlJobService } from '../../services/job_service';
@@ -288,7 +288,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(props.anomaly)]);
 
-  const openCustomUrl = (customUrl: KibanaUrlConfig) => {
+  const openCustomUrl = (customUrl: MlKibanaUrlConfig) => {
     const { anomaly, interval, isAggregatedData } = props;
 
     // eslint-disable-next-line no-console

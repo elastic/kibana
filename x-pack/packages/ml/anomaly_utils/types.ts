@@ -6,7 +6,7 @@
  */
 
 import { ML_PARTITION_FIELDS, ML_ANOMALY_RESULT_TYPE } from './constants';
-import type { KibanaUrlConfig } from './custom_urls';
+import type { MlKibanaUrlConfig } from './custom_urls';
 
 /**
  * Influencers are the entities that have contributed to, or are to blame for, the anomalies.
@@ -332,7 +332,7 @@ export interface MlAnomaliesTableRecord {
    * List of custom URL drilldowns from the table row to other pages such as
    * Discover, Dashboard or other web pages.
    */
-  customUrls?: KibanaUrlConfig[];
+  customUrls?: MlKibanaUrlConfig[];
 
   /**
    * Returns true if the anomaly record represented by the table row is for a time series

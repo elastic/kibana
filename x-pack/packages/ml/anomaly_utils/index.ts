@@ -35,9 +35,9 @@ export {
 } from './constants';
 
 export {
-  isKibanaUrlConfigWithTimeRange,
+  isMlKibanaUrlConfigWithTimeRange,
   type MlCustomUrlAnomalyRecordDoc,
-  type KibanaUrlConfig,
+  type MlKibanaUrlConfig,
   type UrlConfig,
 } from './custom_urls';
 

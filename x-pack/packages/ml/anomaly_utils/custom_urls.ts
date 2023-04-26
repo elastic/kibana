@@ -32,11 +32,11 @@ export interface BaseUrlConfig {
  * Extended interface for custom URLs including an optional time range.
  *
  * @export
- * @interface KibanaUrlConfig
- * @typedef {KibanaUrlConfig}
+ * @interface MlKibanaUrlConfig
+ * @typedef {MlKibanaUrlConfig}
  * @extends {BaseUrlConfig}
  */
-export interface KibanaUrlConfig extends BaseUrlConfig {
+export interface MlKibanaUrlConfig extends BaseUrlConfig {
   /**
    * The optional time range for the custom URL configuration
    * @type {?string}
@@ -48,11 +48,11 @@ export interface KibanaUrlConfig extends BaseUrlConfig {
  * Extended interface for custom URLs including a time range.
  *
  * @export
- * @interface KibanaUrlConfigWithTimeRange
- * @typedef {KibanaUrlConfigWithTimeRange}
+ * @interface MlKibanaUrlConfigWithTimeRange
+ * @typedef {MlKibanaUrlConfigWithTimeRange}
  * @extends {BaseUrlConfig}
  */
-export interface KibanaUrlConfigWithTimeRange extends BaseUrlConfig {
+export interface MlKibanaUrlConfigWithTimeRange extends BaseUrlConfig {
   /**
    * The time range for the custom URL configuration
    * @type {string}
@@ -66,7 +66,7 @@ export interface KibanaUrlConfigWithTimeRange extends BaseUrlConfig {
  * @export
  * @typedef {UrlConfig}
  */
-export type UrlConfig = BaseUrlConfig | KibanaUrlConfig;
+export type UrlConfig = BaseUrlConfig | MlKibanaUrlConfig;
 
 /**
  * Extended interface of MlAnomalyRecordDoc to include time range information.
@@ -90,13 +90,15 @@ export interface MlCustomUrlAnomalyRecordDoc extends MlAnomalyRecordDoc {
 }
 
 /**
- * Type guard to idenfity KibanaUrlConfigWithTimeRange.
+ * Type guard to idenfity MlKibanaUrlConfigWithTimeRange.
  *
  * @export
  * @param {unknown} arg The unknown type to be evaluated
- * @returns {arg is KibanaUrlConfigWithTimeRange} whether arg is of type KibanaUrlConfigWithTimeRange
+ * @returns {arg is MlKibanaUrlConfigWithTimeRange} whether arg is of type MlKibanaUrlConfigWithTimeRange
  */
-export function isKibanaUrlConfigWithTimeRange(arg: unknown): arg is KibanaUrlConfigWithTimeRange {
+export function isMlKibanaUrlConfigWithTimeRange(
+  arg: unknown
+): arg is MlKibanaUrlConfigWithTimeRange {
   return (
     isPopulatedObject(arg, ['url_name', 'url_value', 'time_range']) &&
     typeof arg.time_range === 'string'

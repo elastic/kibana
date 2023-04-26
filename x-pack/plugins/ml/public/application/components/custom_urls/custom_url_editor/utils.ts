@@ -16,7 +16,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { isFilterPinned, Filter } from '@kbn/es-query';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
-import type { KibanaUrlConfig, UrlConfig } from '@kbn/ml-anomaly-utils';
+import type { MlKibanaUrlConfig, UrlConfig } from '@kbn/ml-anomaly-utils';
 import { DEFAULT_RESULTS_FIELD } from '../../../../../common/constants/data_frame_analytics';
 import {
   isDataFrameAnalyticsConfigs,
@@ -351,7 +351,7 @@ function buildDiscoverUrlFromSettings(settings: CustomUrlSettings) {
 
   const urlValue = `discover#/?_g=${_g}&_a=${_a}`;
 
-  const urlToAdd: KibanaUrlConfig = {
+  const urlToAdd: MlKibanaUrlConfig = {
     url_name: settings.label,
     url_value: urlValue,
     time_range: TIME_RANGE_TYPE.AUTO,

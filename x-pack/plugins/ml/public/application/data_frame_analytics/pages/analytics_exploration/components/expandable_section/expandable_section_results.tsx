@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { KibanaUrlConfig } from '@kbn/ml-anomaly-utils';
+import type { MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
 
 import type { DataGridItem } from '../../../../../components/data_grid';
 import {
@@ -229,7 +229,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
     [indexData?.visibleColumns, discoverLocator, dataViewId, resultsField, tableItems, data]
   );
 
-  const openCustomUrl = (item: DataGridItem, customUrl: KibanaUrlConfig) => {
+  const openCustomUrl = (item: DataGridItem, customUrl: MlKibanaUrlConfig) => {
     // Replace any tokens in the configured url_value with values from the source record and open link in a new tab/window.
     const urlPath = replaceTokensInDFAUrlValue(
       customUrl,

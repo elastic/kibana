@@ -8,7 +8,7 @@
 import {
   MlAnomalyRecordDoc,
   MlCustomUrlAnomalyRecordDoc,
-  KibanaUrlConfig,
+  MlKibanaUrlConfig,
   UrlConfig,
 } from '@kbn/ml-anomaly-utils';
 
@@ -95,21 +95,21 @@ describe('ML - custom URL utils', () => {
     airline: null,
   };
 
-  const TEST_DASHBOARD_URL: KibanaUrlConfig = {
+  const TEST_DASHBOARD_URL: MlKibanaUrlConfig = {
     url_name: 'Show dashboard',
     time_range: '1h',
     url_value:
       "dashboards#/view/5f112420-9fc6-11e8-9130-150552a4bef3?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'airline:\"$airline$\"'))",
   };
 
-  const TEST_DISCOVER_URL: KibanaUrlConfig = {
+  const TEST_DISCOVER_URL: MlKibanaUrlConfig = {
     url_name: 'Raw data',
     time_range: 'auto',
     url_value:
       "discover#/?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:'airline:\"$airline$\" and odd:field,name : $odd:field,name$'))",
   };
 
-  const TEST_DASHBOARD_LUCENE_URL: KibanaUrlConfig = {
+  const TEST_DASHBOARD_LUCENE_URL: MlKibanaUrlConfig = {
     url_name: 'Show dashboard',
     time_range: '1h',
     url_value:
@@ -324,7 +324,7 @@ describe('ML - custom URL utils', () => {
     });
 
     test('replaces tokens with nesting', () => {
-      const testUrlApache: KibanaUrlConfig = {
+      const testUrlApache: MlKibanaUrlConfig = {
         url_name: 'Raw data',
         time_range: 'auto',
         url_value:
@@ -361,7 +361,7 @@ describe('ML - custom URL utils', () => {
     });
 
     test('does not escape special characters for Lucene query language inside of the filter', () => {
-      const testUrlLuceneFilters: KibanaUrlConfig = {
+      const testUrlLuceneFilters: MlKibanaUrlConfig = {
         url_name: 'Lucene query with filters',
         time_range: 'auto',
         url_value:
