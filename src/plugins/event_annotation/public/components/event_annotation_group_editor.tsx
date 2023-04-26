@@ -8,6 +8,8 @@
 
 import { EuiFieldText, EuiForm, EuiFormRow, EuiText, EuiTextArea, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import React from 'react';
 import { EventAnnotationGroupConfig } from '../../common';
@@ -31,10 +33,16 @@ export const EventAnnotationGroupEditor = ({
           margin-bottom: ${euiTheme.size.base};
         `}
       >
-        <h4>Details</h4>
+        <h4>
+          <FormattedMessage id="eventAnnotation.groupEditor.details" defaultMessage="Details" />
+        </h4>
       </EuiText>
       <EuiForm>
-        <EuiFormRow label={'Title'}>
+        <EuiFormRow
+          label={i18n.translate('eventAnnotation.groupEditor.title', {
+            defaultMessage: 'Title',
+          })}
+        >
           <EuiFieldText
             data-test-subj="annotationGroupTitle"
             value={group.title}
@@ -46,7 +54,11 @@ export const EventAnnotationGroupEditor = ({
             }
           />
         </EuiFormRow>
-        <EuiFormRow label={'Description'}>
+        <EuiFormRow
+          label={i18n.translate('eventAnnotation.groupEditor.description', {
+            defaultMessage: 'Description',
+          })}
+        >
           <EuiTextArea
             data-test-subj="annotationGroupDescription"
             value={group.description}
