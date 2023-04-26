@@ -57,7 +57,6 @@ describe('cli serverless project type', () => {
   it.each(['es', 'oblt', 'security'])(
     'Kibana does not crash when running project type %s',
     async (mode) => {
-      // Making sure `--serverless` translates into the `serverless` config entry, and validates against the accepted values
       const child = spawn(process.execPath, ['scripts/kibana', `--serverless=${mode}`], {
         cwd: REPO_ROOT,
       });
