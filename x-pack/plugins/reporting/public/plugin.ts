@@ -24,7 +24,6 @@ import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { JobId, JobSummarySet } from '@kbn/reporting-export-types/common';
 import { durationToNumber } from '../common/schema_utils';
 import { ReportingSetup, ReportingStart } from '.';
 import { ReportingAPIClient } from './lib/reporting_api_client';
@@ -42,6 +41,7 @@ import { AppNavLinkStatus } from './shared_imports';
 import { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
+import { JobId, JobSummarySet } from '../common/types';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };

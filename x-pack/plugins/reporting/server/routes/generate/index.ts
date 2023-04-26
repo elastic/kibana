@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { registerGenerateCsvFromSavedObjectImmediate } from './csv_searchsource_immediate'; // FIXME: should not need to register each immediate export type separately
+export { registerGenerateCsvFromSavedObjectImmediate } from '../../../../reporting_export_types/server/routes/generate/csv_searchsource_immediate'; // FIXME: should not need to register each immediate export type separately
 export { registerJobGenerationRoutes } from './generate_from_jobparams';

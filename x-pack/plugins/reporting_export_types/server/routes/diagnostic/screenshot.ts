@@ -10,10 +10,10 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { generatePngObservable } from '@kbn/reporting-export-types/server';
 import { getAbsoluteUrlFactory } from '@kbn/reporting-export-types/server/export_types/common/get_absolute_url';
+import { API_DIAGNOSE_URL } from '@kbn/reporting-plugin/common/constants';
+import { ReportingCore } from '@kbn/reporting-plugin/server';
+import { authorizedUserPreRouting, getCounters } from '@kbn/reporting-plugin/server/routes/lib';
 import { lastValueFrom } from 'rxjs';
-import type { ReportingCore } from '../..';
-import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { authorizedUserPreRouting, getCounters } from '../lib';
 
 const path = `${API_DIAGNOSE_URL}/screenshot`;
 

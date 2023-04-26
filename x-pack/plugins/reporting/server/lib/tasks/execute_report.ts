@@ -25,15 +25,14 @@ import {
   KibanaShuttingDownError,
   TaskRunResult,
 } from '@kbn/reporting-common';
-import { ExportTypeDefinition } from '@kbn/reporting-export-types/server/export_types/types';
-import { ReportOutput } from '@kbn/reporting-export-types/common';
+import { ReportDocument, ReportOutput } from '../../../common/types';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import { getContentStream } from '..';
 import type { ReportingCore } from '../..';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import type { ReportingConfigType } from '../../config';
-import type { BasePayload, RunTaskFn } from '../../types';
-import type { ReportDocument, ReportingStore } from '../store';
+import type { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
+import type { ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import { ReportingTask, ReportingTaskStatus, REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';

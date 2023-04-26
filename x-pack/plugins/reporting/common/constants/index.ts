@@ -6,8 +6,8 @@
  */
 
 import { CONTENT_TYPE_CSV } from '@kbn/generate-csv/src/constants';
-import * as jobTypes from '@kbn/reporting-common';
 import * as reportTypes from './report_types';
+import * as jobTypes from './job_types';
 
 const { PDF_JOB_TYPE, PDF_JOB_TYPE_V2, PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } = jobTypes;
 
@@ -30,12 +30,15 @@ export const ALLOWED_JOB_CONTENT_TYPES = [
 
 // Re-export type definitions here for convenience.
 export * from './report_types';
+export * from './job_types';
 
 type ReportTypeDeclaration = typeof reportTypes;
 export type ReportTypes = ReportTypeDeclaration[keyof ReportTypeDeclaration];
 
 type JobTypeDeclaration = typeof jobTypes;
 export type JobTypes = JobTypeDeclaration[keyof JobTypeDeclaration];
+
+export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 
 // This is deprecated because it lacks support for runtime fields
 // but the extension points are still needed for pre-existing scripted automation, until 8.0
@@ -79,6 +82,16 @@ export const API_USAGE_ERROR_TYPE = 'reportingApiError';
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
 
 export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
+
+/**
+ * A way to get the client side route for the reporting redirect app.
+ *
+ * TODO: Add a job ID and a locator to use so that we can redirect without expecting state to
+ * be injected to the page
+ */
+export const getRedirectAppPath = () => {
+  return '/app/reportingRedirect';
+};
 
 // Statuses
 export enum JOB_STATUSES {

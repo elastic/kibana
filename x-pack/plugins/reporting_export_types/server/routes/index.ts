@@ -1,17 +1,7 @@
-import { IRouter } from '@kbn/core/server';
+import { ReportingCore } from '@kbn/reporting-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import { registerDiagnosticRoutes } from './diagnostic';
 
-export function defineRoutes(router: IRouter) {
-  router.get(
-    {
-      path: '/api/reporting_export_types/example',
-      validate: false,
-    },
-    async (context, request, response) => {
-      return response.ok({
-        body: {
-          time: new Date().toISOString(),
-        },
-      });
-    }
-  );
+export function registerRoutes(reporting: ReportingCore, logger: Logger) {
+  registerDiagnosticRoutes(reporting, logger);
 }

@@ -7,7 +7,6 @@
  */
 
 export { CancellationToken } from './cancellation_token';
-export { buildKibanaPath } from './build_kibana_path';
 export type { TaskRunMetrics, CsvMetrics, TaskRunResult } from './metrics';
 export * from './errors';
 export * from './constants';

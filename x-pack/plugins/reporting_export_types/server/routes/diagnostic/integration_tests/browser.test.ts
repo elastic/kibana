@@ -9,15 +9,15 @@ import * as Rx from 'rxjs';
 import { docLinksServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import supertest from 'supertest';
-import { ReportingCore } from '../../..';
+import { ReportingCore } from '@kbn/reporting-plugin/server';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockReportingCore,
-} from '../../../test_helpers';
-import type { ReportingRequestHandlerContext } from '../../../types';
+} from '@kbn/reporting-plugin/server/test_helpers';
 import { registerDiagnoseBrowser } from '../browser';
+import { ReportingRequestHandlerContext } from '@kbn/reporting-plugin/server/types';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

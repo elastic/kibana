@@ -7,11 +7,11 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ReportSource } from '@kbn/reporting-export-types/common';
 import { defaults, get } from 'lodash';
 import Puid from 'puid';
 import { Duplex } from 'stream';
 import type { ReportingCore } from '..';
+import { ReportSource } from './store/report';
 
 /**
  * @note The Elasticsearch `http.max_content_length` is including the whole POST body.

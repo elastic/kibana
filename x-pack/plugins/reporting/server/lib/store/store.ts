@@ -8,12 +8,12 @@
 import moment from 'moment';
 import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { JobStatus, ReportOutput, ReportSource } from '@kbn/reporting-export-types/common';
+import { ReportOutput, JobStatus } from '../../../common/types';
 import { statuses } from '..';
 import type { ReportingCore } from '../..';
 import { ILM_POLICY_NAME, REPORTING_SYSTEM_INDEX } from '../../../common/constants';
 import type { ReportTaskParams } from '../tasks';
-import { Report, ReportDocument, MIGRATION_VERSION } from './report';
+import { Report, ReportDocument, MIGRATION_VERSION, ReportSource } from './report';
 import { IReport, SavedReport } from '.';
 import { IlmPolicyManager } from './ilm_policy_manager';
 import { indexTimestamp } from './index_timestamp';

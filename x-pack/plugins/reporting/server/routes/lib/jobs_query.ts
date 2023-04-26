@@ -10,7 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { ReportApiJSON, ReportSource } from '@kbn/reporting-export-types/server';
+import { ReportSource, ReportApiJSON } from '../../../common/types';
 import type { ReportingCore } from '../..';
 import { REPORTING_SYSTEM_INDEX } from '../../../common/constants';
 import { statuses } from '../../lib/statuses';

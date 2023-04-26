@@ -6,7 +6,7 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { Logger, RequestHandler } from '@kbn/core/server';
-import { IlmPolicyStatusResponse } from '@kbn/reporting-export-types/server';
+import { IlmPolicyStatusResponse } from '../../../common/types';
 import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,

@@ -12,18 +12,19 @@ import type { HttpFetchQuery } from '@kbn/core/public';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import {
   BaseParams,
-  DownloadReportFn,
-  JobId,
   ManagementLinkFn,
+  DownloadReportFn,
   ReportApiJSON,
-} from '@kbn/reporting-export-types/common';
-import { buildKibanaPath, getRedirectAppPath } from '@kbn/reporting-common';
+  JobId,
+} from '../../../common/types';
+import { buildKibanaPath } from '../../../common/build_kibana_path';
 import {
   API_BASE_GENERATE,
   API_BASE_URL,
   API_GENERATE_IMMEDIATE,
   API_LIST_URL,
   API_MIGRATE_ILM_POLICY_URL,
+  getRedirectAppPath,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
 import { add } from '../../notifier/job_completion_notifications';

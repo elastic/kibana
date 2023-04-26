@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ReportDocumentHead, ReportSource } from '@kbn/reporting-export-types/server';
+import { ReportDocumentHead } from '../../../common/types';
 import { Report } from '.';
+import { ReportSource } from './report';
 
 /*
  * Class for a report document that is saved in Elasticsearch

@@ -7,8 +7,10 @@
 
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { TaskPayloadPDF } from '@kbn/reporting-export-types/common/types/printable_pdf';
-import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types/server';
+import type {
+  JobParamsPDFDeprecated,
+  TaskPayloadPDF,
+} from '@kbn/reporting-export-types/common/types/printable_pdf';
 import { ReportingCore } from '../..';
 import { Report, ReportingStore } from '../../lib/store';
 import { ReportApiJSON } from '../../lib/store/report';
@@ -16,7 +18,7 @@ import { createMockConfigSchema, createMockReportingCore } from '../../test_help
 import { ReportingRequestHandlerContext, ReportingSetup } from '../../types';
 import { RequestHandler } from './request_handler';
 
-jest.mock('@kbn/reporting-export-types/common/crypto', () => ({
+jest.mock('../../lib/crypto', () => ({
   cryptoFactory: () => ({
     encrypt: () => `hello mock cypher text`,
   }),
@@ -126,7 +128,7 @@ describe('Handle request to generate', () => {
           "timeout": undefined,
         }
       `);
-      const { forceNow, ...snapPayload } = payload as TaskPayloadPDF;
+      const { forceNow, ...snapPayload } = payload as unknown as TaskPayloadPDF;
       expect(snapPayload).toMatchInlineSnapshot(`
         Object {
           "browserTimezone": "UTC",

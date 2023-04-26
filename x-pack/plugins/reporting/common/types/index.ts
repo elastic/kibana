@@ -4,16 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { TaskRunMetrics, TaskRunResult } from '@kbn/reporting-common';
 import type { PdfScreenshotResult, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
-export type { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from './types/csv_v2';
-export type { JobParamsPNGDeprecated } from './types/png';
-export type { JobParamsPNGV2 } from './types/png_v2';
-export type { JobAppParamsPDF, JobParamsPDFDeprecated } from './types/printable_pdf';
-export type { JobAppParamsPDFV2, JobParamsPDFV2 } from './types/printable_pdf_v2';
 export type {
   DownloadReportFn,
   IlmPolicyMigrationStatus,
@@ -22,6 +16,7 @@ export type {
   ManagementLinkFn,
   UrlOrUrlLocatorTuple,
 } from './url';
+
 export type { JobId, BaseParams, BaseParamsV2, BasePayload, BasePayloadV2 };
 
 export interface ReportDocumentHead {

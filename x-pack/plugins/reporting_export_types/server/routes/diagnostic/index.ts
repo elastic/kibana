@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ReportingCore } from '../../core';
+import { ReportingCore } from '@kbn/reporting-plugin/server';
 import { registerDiagnoseBrowser } from './browser';
 import { registerDiagnoseScreenshot } from './screenshot';
 

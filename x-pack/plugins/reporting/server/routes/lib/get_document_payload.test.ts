@@ -11,7 +11,7 @@ import { ContentStream, getContentStream, statuses } from '../../lib';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { jobsQueryFactory } from './jobs_query';
 import { getDocumentPayloadFactory } from './get_document_payload';
-import { ReportApiJSON } from '@kbn/reporting-export-types/server';
+import { ReportApiJSON } from '../../../common/types';
 
 jest.mock('../../lib/content_stream');
 jest.mock('./jobs_query');
