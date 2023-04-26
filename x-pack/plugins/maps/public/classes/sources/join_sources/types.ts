@@ -44,3 +44,7 @@ export interface IJoinSource extends ISource {
 export interface ITermJoinSource extends IJoinSource {
   getTermField(): IField;
 }
+
+export function isTermJoinSource(joinSource: IJoinSource) {
+  return 'getTermField' in (joinSource as ITermJoinSource);
+}

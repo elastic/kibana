@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../../../../common/constants';
 import { DataRequestContext } from '../../../../actions';
 import { JoinState } from '../types';
-import { ITermJoinSource } from '../../../sources/join_sources';
+import { isTermJoinSource, type ITermJoinSource } from '../../../sources/join_sources';
 
 interface SourceResult {
   refreshed: boolean;
@@ -84,7 +84,7 @@ export async function performInnerJoins(
   // Provide messaging that helps users debug term joins with no matches
   //
   const termJoinStatusesWithoutAnyMatches = joinStatuses.filter((joinStatus) => {
-    if (!('getTermField' in (joinStatus.joinState.join.getRightJoinSource() as ITermJoinSource))) {
+    if (!isTermJoinSource(joinStatus.joinState.join.getRightJoinSource())) {
       return false;
     }
 

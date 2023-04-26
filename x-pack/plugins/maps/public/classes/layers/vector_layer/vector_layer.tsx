@@ -57,7 +57,8 @@ import { DataRequestContext } from '../../../actions';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IESSource } from '../../sources/es_source';
-import { IJoinSource, ITermJoinSource } from '../../sources/join_sources';
+import type { IJoinSource, ITermJoinSource } from '../../sources/join_sources';
+import { isTermJoinSource } from '../../sources/join_sources';
 import type { IESAggSource } from '../../sources/es_agg_source';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
 import { getJoinAggKey } from '../../../../common/get_agg_key';
@@ -997,7 +998,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         const join = this.getJoins()[j];
         const joinRightSource = join.getRightJoinSource();
         if (
-          'getTermField' in (joinRightSource as ITermJoinSource) &&
+          isTermJoinSource(joinRightSource) &&
           this.getJoins()[j].getLeftField().getName() === tooltipProperty.getPropertyKey()
         ) {
           matchingTermJoins.push(joinRightSource as ITermJoinSource);

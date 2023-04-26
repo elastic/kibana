@@ -7,5 +7,6 @@
 
 export type { IJoinSource, ITermJoinSource } from './types';
 
+export { isTermJoinSource } from './types';
 export { ESTermSource } from './es_term_source';
 export { TableSource } from './table_source';
