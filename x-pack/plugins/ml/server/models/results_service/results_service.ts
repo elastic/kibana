@@ -17,7 +17,7 @@ import {
   type MlAnomalyCategorizerStatsDoc,
   type MlAnomalyRecordDoc,
   JOB_ID,
-  PARTITION_FIELD_VALUE,
+  ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
@@ -536,7 +536,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
   async function getCategoryStoppedPartitions(
     jobIds: string[],
-    fieldToBucket: typeof JOB_ID | typeof PARTITION_FIELD_VALUE = PARTITION_FIELD_VALUE
+    fieldToBucket: typeof JOB_ID | typeof ML_PARTITION_FIELD_VALUE = ML_PARTITION_FIELD_VALUE
   ): Promise<GetStoppedPartitionResult> {
     let finalResults: GetStoppedPartitionResult = {
       jobs: {},
@@ -578,7 +578,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           aggs: {
             unique_stopped_partitions: {
               terms: {
-                field: PARTITION_FIELD_VALUE,
+                field: ML_PARTITION_FIELD_VALUE,
               },
             },
           },
@@ -629,7 +629,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
             (b: { key: string; doc_count: number }) => b.key
           ),
         };
-      } else if (fieldToBucket === PARTITION_FIELD_VALUE) {
+      } else if (fieldToBucket === ML_PARTITION_FIELD_VALUE) {
         const jobs: Record<string, string[]> = jobIdsWithStopOnWarnSet.reduce(
           (obj: Record<string, string[]>, jobId: string) => {
             obj[jobId] = [];
