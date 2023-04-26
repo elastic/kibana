@@ -72,13 +72,12 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       });
     });
 
-    it.only('should install rules from the Fleet package when user clicks on CTA', () => {
+    it('should install rules from the Fleet package when user clicks on CTA', () => {
       cy.intercept('POST', '/api/fleet/epm/packages/_bulk*').as('installPackage');
 
       let numberOfRulesToInstall;
       /* Retrieve how many rules were installed from the Fleet package */
       cy.wait('@installPackage').then(({ response }) => {
-        console.log({response})
         numberOfRulesToInstall = response?.body.items.find(
           ({ name }: PackageItem) => name === 'security_detection_engine'
         ).result.assets.length;
@@ -86,18 +85,13 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         cy.get(LOAD_PREBUILT_RULES_BTN).click();
         cy.get(LOAD_PREBUILT_RULES_BTN).should('have.attr', 'disabled');
         cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
-  
+
         /* Assert that correct number of rules were installed from the Fleet package */
         // TODO: For some reason, the number of rules installed is always 3 less than the actual number of rules in the package
         // Figure out why and fix this test
         cy.get(ELASTIC_RULES_BTN).contains(numberOfRulesToInstall - 3);
-
-
       });
-
-
     });
-
   });
 
   describe('Installation of prebuilt rules', () => {
