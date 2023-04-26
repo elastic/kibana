@@ -8,6 +8,9 @@
 
 import React from 'react';
 
+/**
+ * Renders nothing instead of a component which triggered an exception.
+ */
 export class ErrorBoundary extends React.Component<{}, { hasError: boolean }> {
   constructor(props: {}) {
     super(props);
