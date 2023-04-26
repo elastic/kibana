@@ -14,7 +14,7 @@ import type {
   PackageService,
 } from '@kbn/fleet-plugin/server';
 import moment from 'moment';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { Installation, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { schema } from '@kbn/config-schema';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
@@ -94,6 +94,7 @@ export const calculateIntegrationStatus = (
     stream: IndexStatus;
     score?: IndexStatus;
   },
+  installation: Installation | undefined,
   healthyAgents: number,
   timeSinceInstallationInMinutes: number,
   installedPolicyTemplates: string[]
@@ -102,6 +103,7 @@ export const calculateIntegrationStatus = (
   const postureTypeCheck: PostureTypes = POSTURE_TYPES[integration];
   if (indicesStatus.latest === 'unprivileged' || indicesStatus.score === 'unprivileged')
     return 'unprivileged';
+  if (!installation) return 'not-installed';
   if (indicesStatus.latest === 'not-empty') return 'indexed';
   if (indicesStatus.stream === 'not-empty' && indicesStatus.latest === 'empty') return 'indexing';
 
@@ -209,7 +211,7 @@ export const getCspStatus = async ({
     agentService,
     logger
   );
-
+  console.log('INSTALLATION: ', installation)
   const healthyAgentsCspm = await getHealthyAgents(
     soClient,
     installedPackagePoliciesCspm.items,
@@ -258,6 +260,7 @@ export const getCspStatus = async ({
       stream: findingsIndexStatusCspm,
       score: scoreIndexStatusCspm,
     },
+    installation,
     healthyAgentsCspm,
     calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE),
     installedPolicyTemplates
@@ -270,6 +273,7 @@ export const getCspStatus = async ({
       stream: findingsIndexStatusKspm,
       score: scoreIndexStatusKspm,
     },
+    installation,
     healthyAgentsKspm,
     calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE),
     installedPolicyTemplates
@@ -281,6 +285,7 @@ export const getCspStatus = async ({
       latest: vulnerabilitiesLatestIndexStatus,
       stream: vulnerabilitiesIndexStatus,
     },
+    installation,
     healthyAgentsVulMgmt,
     calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE),
     installedPolicyTemplates
