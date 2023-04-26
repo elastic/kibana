@@ -80,7 +80,12 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
   // not available to get request
   const indexFilter = request.body?.index_filter;
 
-  const parsedFields = parseMetaFields(metaFields);
+  let parsedFields: string[] = [];
+  try {
+    parsedFields = parseMetaFields(metaFields);
+  } catch (error) {
+    return response.badRequest();
+  }
 
   try {
     const { fields, indices } = await indexPatterns.getFieldsForWildcard({
