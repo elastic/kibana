@@ -11,7 +11,7 @@ import { ML_SEVERITY_COLORS } from './severity_colors';
 /**
  * Severity color ramp.
  */
-export const SEVERITY_COLOR_RAMP = [
+export const ML_SEVERITY_COLOR_RAMP = [
   {
     stop: ML_ANOMALY_THRESHOLD.LOW,
     color: ML_SEVERITY_COLORS.WARNING,

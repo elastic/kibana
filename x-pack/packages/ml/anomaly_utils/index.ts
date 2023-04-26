@@ -31,7 +31,7 @@ export {
   ML_PARTITION_FIELD_VALUE,
   ML_PARTITION_FIELDS,
   ML_JOB_ID,
-  SEVERITY_COLOR_RAMP,
+  ML_SEVERITY_COLOR_RAMP,
 } from './constants';
 
 export {

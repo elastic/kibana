@@ -18,7 +18,7 @@ import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@k
 import type { ESSearchResponse } from '@kbn/es-types';
 import { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '@kbn/maps-plugin/common';
-import { type MLAnomalyDoc, SEVERITY_COLOR_RAMP } from '@kbn/ml-anomaly-utils';
+import { type MLAnomalyDoc, ML_SEVERITY_COLOR_RAMP } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '../../common/util/date_utils';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import { SEARCH_QUERY_LANGUAGE } from '../../common/constants/search';
@@ -36,7 +36,7 @@ export const ML_ANOMALY_LAYERS = {
 export const CUSTOM_COLOR_RAMP = {
   type: STYLE_TYPE.DYNAMIC,
   options: {
-    customColorRamp: SEVERITY_COLOR_RAMP,
+    customColorRamp: ML_SEVERITY_COLOR_RAMP,
     field: {
       name: 'record_score',
       origin: FIELD_ORIGIN.SOURCE,
