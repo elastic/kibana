@@ -54,6 +54,7 @@ export const getGroupingQuery = ({
     groupByFields: {
       multi_terms: {
         terms: [
+          // by looking up multiple missing values, we can ensure we're not overwriting an existing group with the default value
           {
             field: groupByField,
             // the AggregationsMultiTermLookup type is wrong in the elasticsearch node package
