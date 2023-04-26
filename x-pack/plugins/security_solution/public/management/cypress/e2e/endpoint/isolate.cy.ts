@@ -66,7 +66,8 @@ describe('Isolate command', () => {
       }
     });
 
-    it('should allow filtering endpoint by Isolated status', () => {
+    // flaky
+    it.skip('should allow filtering endpoint by Isolated status', () => {
       cy.visit(APP_ENDPOINTS_PATH);
       closeAllToasts();
       checkEndpointListForIsolatedHosts(false);

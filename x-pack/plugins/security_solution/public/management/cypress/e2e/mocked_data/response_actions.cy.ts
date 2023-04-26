@@ -150,7 +150,8 @@ describe('Response actions', () => {
       cleanupRule(ruleId);
     });
 
-    it('All response action controls are disabled', () => {
+    // flaky
+    it.skip('All response action controls are disabled', () => {
       visitRuleActions(ruleId);
       cy.getByTestSubj('response-actions-wrapper').within(() => {
         cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(

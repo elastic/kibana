@@ -80,6 +80,7 @@ describe('SyntheticsService', () => {
         password: '12345',
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
+      enabled: true,
     },
     coreStart: mockCoreStart,
     encryptedSavedObjects: mockEncryptedSO(),
@@ -101,7 +102,11 @@ describe('SyntheticsService', () => {
       };
     });
     serverMock.config = {
-      service: { devUrl: 'http://localhost', manifestUrl: 'https://test-manifest.com' },
+      service: {
+        devUrl: 'http://localhost',
+        manifestUrl: 'https://test-manifest.com',
+      },
+      enabled: true,
     };
     if (serverMock.savedObjectsClient) {
       serverMock.savedObjectsClient.find = jest.fn().mockResolvedValue({
@@ -165,6 +170,7 @@ describe('SyntheticsService', () => {
         username: 'dev',
         password: '12345',
       },
+      enabled: true,
     };
     const service = new SyntheticsService(serverMock);
 
