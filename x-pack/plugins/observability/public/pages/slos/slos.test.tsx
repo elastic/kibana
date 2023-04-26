@@ -283,7 +283,10 @@ describe('SLOs Page', () => {
 
         screen.getByTestId('confirmModalConfirmButton').click();
 
-        expect(mockDeleteSlo).toBeCalledWith({ id: sloList.results.at(0)?.id });
+        expect(mockDeleteSlo).toBeCalledWith({
+          id: sloList.results.at(0)?.id,
+          name: sloList.results.at(0)?.name,
+        });
       });
 
       it('allows cloning an SLO', async () => {
