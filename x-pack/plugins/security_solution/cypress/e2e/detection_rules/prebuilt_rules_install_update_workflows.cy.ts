@@ -15,7 +15,11 @@ import {
   UPDATE_PREBUILT_RULES_CALLOUT_BUTTON,
 } from '../../screens/alerts_detection_rules';
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
-import { createNewRuleAsset, installAvailableRules } from '../../tasks/api_calls/prebuilt_rules';
+import {
+  createNewRuleAsset,
+  installAvailableRules,
+  preventPrebuiltRulesInstallation,
+} from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -44,7 +48,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
   describe('Installation of prebuilt rules package via Fleet', () => {
     it('should install package from Fleet in the background', () => {
       waitForRulesTableToBeLoaded();
-      cy.intercept('POST', '/api/fleet/epm/packages/_bulk?prerelease=true').as('installPackage');
+      cy.intercept('POST', '/api/fleet/epm/packages/_bulk*').as('installPackage');
 
       /* Assert that the package in installed from Fleet by checking that
       /* the installSource is "registry", as opposed to "bundle" */
@@ -67,21 +71,18 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
   describe('Installation of prebuilt rules', () => {
     const RULE_1 = createRuleAssetSavedObject({
       name: 'Test rule 1',
-      rule_id: '111147bb-b27a-47ec-8b62-ef1a5d342e19',
+      rule_id: 'rule_1',
     });
     const RULE_2 = createRuleAssetSavedObject({
       name: 'Test rule 2',
-      rule_id: '22227bb-b27a-47ec-8b62-ef1a5d342e19',
+      rule_id: 'rule_2',
     });
     beforeEach(() => {
-      // Prevent the installation of the package
-      // `security_detection_engine` from Fleet
-      cy.intercept('POST', '/api/fleet/epm/packages/_bulk?prerelease=true', {}).as(
-        'getPrebuiltRules'
-      );
-      // Create two mock rules
-      createNewRuleAsset({rule: RULE_1});
-      createNewRuleAsset({rule: RULE_2});
+      preventPrebuiltRulesInstallation();
+
+      /* Create two mock rules */
+      createNewRuleAsset({ rule: RULE_1 });
+      createNewRuleAsset({ rule: RULE_2 });
       waitForRulesTableToBeLoaded();
     });
 
@@ -104,7 +105,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     });
 
     it('should fail gracefully with toast error message when request to install rules fails', () => {
-      /* Stub request to install rules to fail */
+      /* Stub request to force rules installation to fail */
       cy.intercept('PUT', '/api/detection_engine/rules/prepackaged', {
         statusCode: 500,
       }).as('installPrebuiltRules');
@@ -117,7 +118,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
   });
 
   describe('Update of prebuilt rules', () => {
-    const RULE_ID = '111147bb-b27a-47ec-8b62-ef1a5d342e19';
+    const RULE_ID = 'rule_id';
     const OUTDATED_RULE = createRuleAssetSavedObject({
       name: 'Outdated rule',
       rule_id: RULE_ID,
@@ -129,15 +130,11 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       version: 2,
     });
     beforeEach(() => {
-      /* Prevent the installation of the package */
-      /* `security_detection_engine` from Fleet  */
-      cy.intercept('POST', '/api/fleet/epm/packages/_bulk?prerelease=true', {}).as(
-        'getPrebuiltRules'
-      );
-      // Create a new rule and install it
+      preventPrebuiltRulesInstallation();
+      /* Create a new rule and install it */
       createNewRuleAsset({ rule: OUTDATED_RULE });
       installAvailableRules();
-      // Create a second version of the rule, making it available for update
+      /* Create a second version of the rule, making it available for update */
       createNewRuleAsset({ rule: UPDATED_RULE });
       waitForRulesTableToBeLoaded();
     });
@@ -152,7 +149,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     });
 
     it('should fail gracefully with toast error message when request to update rules fails', () => {
-      /* Stub request to update rules to fail */
+      /* Stub request to force rules update to fail */
       cy.intercept('PUT', '/api/detection_engine/rules/prepackaged', {
         statusCode: 500,
       }).as('updatePrebuiltRules');

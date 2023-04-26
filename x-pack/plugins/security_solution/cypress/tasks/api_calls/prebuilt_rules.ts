@@ -96,3 +96,13 @@ export const installAvailableRules = () => {
     { interval: 500, timeout: 12000 }
   );
 };
+
+/* Prevent the installation of the `security_detection_engine` package from Fleet
+/* by intercepting the request and returning a mockempty object as response
+/* Used primarily to prevent the unwanted installation of "real" prebuilt rules
+/* during e2e tests, and allow for manual installation of mock rules instead. */
+export const preventPrebuiltRulesInstallation = () => {
+  cy.intercept('POST', '/api/fleet/epm/packages/_bulk*', {}).as(
+    'getPrebuiltRules'
+  );
+};
