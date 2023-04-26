@@ -13,6 +13,7 @@ import {
   type SolutionSideNavProps,
   type SolutionSideNavItem,
 } from '..';
+import { CategoryType } from './types';
 
 const items: SolutionSideNavItem[] = [
   {
@@ -62,8 +63,16 @@ const items: SolutionSideNavItem[] = [
     label: 'I have categories',
     href: '#',
     categories: [
-      { label: 'First Category', linkIds: ['panelCatLink1', 'panelCatLink2'] },
-      { label: 'Second Category', linkIds: ['panelCatLink3', 'panelCatLink4'] },
+      {
+        label: 'Title Category',
+        type: CategoryType.title,
+        linkIds: ['panelCatLink1', 'panelCatLink2'],
+      },
+      {
+        label: 'Accordion Category',
+        type: CategoryType.accordion,
+        linkIds: ['panelCatLink3', 'panelCatLink4'],
+      },
     ],
     items: [
       {
@@ -136,9 +145,7 @@ export default {
   ],
 };
 
-type Params = Pick<SolutionSideNavProps, 'selectedId' | 'panelTopOffset' | 'panelBottomOffset'>;
-
-export const SolutionSideNav = (params: Params) => (
+export const SolutionSideNav = (params: SolutionSideNavProps) => (
   <>
     <SolutionNav
       name={'Security'}
@@ -148,8 +155,8 @@ export const SolutionSideNav = (params: Params) => (
       // eslint-disable-next-line react/no-children-prop
       children={
         <SolutionSideNavComponent
-          items={items}
-          footerItems={footerItems}
+          items={params.items}
+          footerItems={params.footerItems}
           selectedId={params.selectedId}
           panelBottomOffset={params.panelBottomOffset || undefined}
           panelTopOffset={params.panelTopOffset || undefined}
@@ -170,6 +177,14 @@ SolutionSideNav.argTypes = {
     control: { type: 'radio' },
     options: [...items, ...footerItems].map(({ id }) => id),
     defaultValue: 'simpleLink',
+  },
+  items: {
+    control: 'object',
+    defaultValue: items,
+  },
+  footerItems: {
+    control: 'object',
+    defaultValue: footerItems,
   },
   panelTopOffset: {
     control: 'text',

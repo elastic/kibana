@@ -26,9 +26,17 @@ export interface SolutionSideNavItem<T extends string = string> {
   };
 }
 
+export enum CategoryType {
+  title = 'title',
+  collapsibleTitle = 'collapsibleTitle',
+  accordion = 'accordion',
+  separator = 'separator',
+}
+
 export interface LinkCategory<T extends string = string> {
   label: string;
   linkIds: readonly T[];
+  type?: CategoryType;
 }
 
 export type LinkCategories<T extends string = string> = Readonly<Array<LinkCategory<T>>>;

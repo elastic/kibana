@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
+  EuiAccordion,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -26,14 +27,16 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { SolutionSideNavItem, LinkCategories } from './types';
+import { SolutionSideNavItem, LinkCategories, CategoryType } from './types';
 import { BetaBadge } from './beta_badge';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { useTelemetryContext } from './telemetry/telemetry_context';
 import {
   SolutionSideNavPanelStyles,
   panelClass,
+  SolutionSideNavCategoryTitleStyles,
   SolutionSideNavTitleStyles,
+  SolutionSideNavCategoryAccordionStyles,
 } from './solution_side_nav_panel.styles';
 
 export interface SolutionSideNavPanelProps {
@@ -47,6 +50,16 @@ export interface SolutionSideNavPanelProps {
 }
 export interface SolutionSideNavPanelCategoriesProps {
   categories: LinkCategories;
+  items: SolutionSideNavItem[];
+  onClose: () => void;
+}
+export interface SolutionSideNavPanelTitleCategoryProps {
+  label: string;
+  items: SolutionSideNavItem[];
+  onClose: () => void;
+}
+export interface SolutionSideNavPanelAccordionCategoryProps {
+  label: string;
   items: SolutionSideNavItem[];
   onClose: () => void;
 }
@@ -80,7 +93,7 @@ export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.m
       $bottomOffset,
       $topOffset,
     });
-    const solutionSideNavTitleStyles = SolutionSideNavTitleStyles(euiTheme, { $paddingTop: true });
+    const solutionSideNavTitleStyles = SolutionSideNavTitleStyles(euiTheme);
     const panelClasses = classNames(panelClass, 'eui-yScroll', solutionSideNavPanelStyles);
     const titleClasses = classNames(solutionSideNavTitleStyles);
 
@@ -96,7 +109,6 @@ export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.m
 
     return (
       <>
-        {/* <GlobalPanelStyle /> */}
         <EuiWindowEvent event="keydown" handler={onKeyDown} />
         <EuiPortal>
           <EuiFocusTrap autoFocus>
@@ -104,7 +116,6 @@ export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.m
               <EuiPanel
                 className={panelClasses}
                 hasShadow={hasShadow}
-                // $bottomOffset={bottomOffsetLargerBreakpoint}
                 borderRadius="none"
                 paddingSize="m"
                 data-test-subj="solutionSideNavPanel"
@@ -141,14 +152,10 @@ export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.m
 
 const SolutionSideNavPanelCategories: React.FC<SolutionSideNavPanelCategoriesProps> = React.memo(
   function SolutionSideNavPanelCategories({ categories, items, onClose }) {
-    const { euiTheme } = useEuiTheme();
-    const sideNavTitleStyles = SolutionSideNavTitleStyles(euiTheme);
-    const titleClasses = classNames(sideNavTitleStyles);
-
     return (
       <>
-        {categories.map(({ label, linkIds }) => {
-          const links = linkIds.reduce<SolutionSideNavItem[]>((acc, linkId) => {
+        {categories.map(({ label, linkIds, type = CategoryType.title }) => {
+          const categoryItems = linkIds.reduce<SolutionSideNavItem[]>((acc, linkId) => {
             const link = items.find((item) => item.id === linkId);
             if (link) {
               acc.push(link);
@@ -156,25 +163,65 @@ const SolutionSideNavPanelCategories: React.FC<SolutionSideNavPanelCategoriesPro
             return acc;
           }, []);
 
-          if (!links.length) {
+          if (!categoryItems.length) {
             return null;
           }
 
-          return (
-            <Fragment key={label}>
-              <EuiTitle size="xxxs" className={titleClasses}>
-                <h2>{label}</h2>
-              </EuiTitle>
-              <EuiHorizontalRule margin="xs" />
-              <SolutionSideNavPanelItems items={links} onClose={onClose} />
-              <EuiSpacer size="l" />
-            </Fragment>
-          );
+          switch (type) {
+            case CategoryType.accordion:
+              return (
+                <SolutionSideNavPanelAccordionCategory
+                  label={label}
+                  items={categoryItems}
+                  onClose={onClose}
+                  key={label}
+                />
+              );
+            case CategoryType.title:
+            default:
+              return (
+                <SolutionSideNavPanelTitleCategory
+                  label={label}
+                  items={categoryItems}
+                  onClose={onClose}
+                  key={label}
+                />
+              );
+          }
         })}
       </>
     );
   }
 );
+
+const SolutionSideNavPanelTitleCategory: React.FC<SolutionSideNavPanelTitleCategoryProps> =
+  React.memo(function SolutionSideNavPanelTitleCategory({ label, onClose, items }) {
+    const { euiTheme } = useEuiTheme();
+    const sideNavTitleStyles = SolutionSideNavCategoryTitleStyles(euiTheme);
+    const titleClasses = classNames(sideNavTitleStyles);
+    return (
+      <>
+        <EuiTitle size="xxxs" className={titleClasses}>
+          <h2>{label}</h2>
+        </EuiTitle>
+        <EuiHorizontalRule margin="xs" />
+        <SolutionSideNavPanelItems items={items} onClose={onClose} />
+        <EuiSpacer size="l" />
+      </>
+    );
+  });
+
+const SolutionSideNavPanelAccordionCategory: React.FC<SolutionSideNavPanelAccordionCategoryProps> =
+  React.memo(function SolutionSideNavPanelAccordionCategory({ label, onClose, items }) {
+    const { euiTheme } = useEuiTheme();
+    const sideNavAccordionStyles = SolutionSideNavCategoryAccordionStyles(euiTheme);
+    const accordionClasses = classNames(sideNavAccordionStyles);
+    return (
+      <EuiAccordion id={label} buttonContent={label} className={accordionClasses}>
+        <SolutionSideNavPanelItems items={items} onClose={onClose} />
+      </EuiAccordion>
+    );
+  });
 
 const SolutionSideNavPanelItems: React.FC<SolutionSideNavPanelItemsProps> = React.memo(
   function SolutionSideNavPanelItems({ items, onClose }) {

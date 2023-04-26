@@ -64,10 +64,15 @@ export const SolutionSideNavPanelStyles = (
   `;
 };
 
-export const SolutionSideNavTitleStyles = (
-  euiTheme: EuiThemeComputed<{}>,
-  { $paddingTop = false }: { $paddingTop?: boolean } = {}
-) => css`
+export const SolutionSideNavTitleStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   padding-left: ${euiTheme.size.s};
-  ${$paddingTop && `padding-top: ${euiTheme.size.s};`}
+  padding-top: ${euiTheme.size.s};
+`;
+
+export const SolutionSideNavCategoryTitleStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  padding-left: ${euiTheme.size.s};
+`;
+
+export const SolutionSideNavCategoryAccordionStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  margin-bottom: ${euiTheme.size.s};
 `;
