@@ -6,7 +6,7 @@
  */
 
 import type { Embeddable } from '@kbn/embeddable-plugin/public';
-import type { TypedLensByValueInput } from '../../../../../lens/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { CasesContextProps } from '../../cases_context';
 
 export type UIActionProps = Pick<
