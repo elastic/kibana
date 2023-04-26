@@ -184,12 +184,12 @@ export function SloListItem({
                 onClick={handleClickActions}
               />
             }
-            panelPaddingSize="none"
+            panelPaddingSize="m"
             closePopover={handleClickActions}
             isOpen={isActionsPopoverOpen}
           >
             <EuiContextMenuPanel
-              size="s"
+              size="m"
               items={[
                 <EuiContextMenuItem
                   key="view"
@@ -220,12 +220,12 @@ export function SloListItem({
                   data-test-subj="sloActionsCreateRule"
                 >
                   {i18n.translate('xpack.observability.slo.slo.item.actions.createRule', {
-                    defaultMessage: 'Create new Alert rule',
+                    defaultMessage: 'Create new alert rule',
                   })}
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   key="manageRules"
-                  icon="list"
+                  icon="gear"
                   disabled={!hasWriteCapabilities}
                   onClick={handleNavigateToRules}
                   data-test-subj="sloActionsManageRules"
