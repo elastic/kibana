@@ -24,7 +24,7 @@ test('is required by default', () => {
 
 test('includes namespace in failure', () => {
   expect(() =>
-    schema.string().validate(undefined, {}, 'foo-namespace')
+    schema.string().validate(undefined, 'foo-namespace')
   ).toThrowErrorMatchingInlineSnapshot(
     `"[foo-namespace]: expected value of type [string] but got [undefined]"`
   );
@@ -145,14 +145,6 @@ describe('#defaultValue', () => {
 
   test('returns value when specified', () => {
     expect(schema.string({ defaultValue: 'foo' }).validate('bar')).toBe('bar');
-  });
-
-  test('returns value from context when context reference is specified', () => {
-    expect(
-      schema.string({ defaultValue: schema.contextRef('some_value') }).validate(undefined, {
-        some_value: 'some',
-      })
-    ).toBe('some');
   });
 });
 

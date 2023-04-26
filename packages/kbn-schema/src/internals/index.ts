@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import typeDetect from 'type-detect';
 import z from 'zod';
 
 // import Joi from 'joi';
@@ -19,6 +20,17 @@ import z from 'zod';
 // function isMap<K, V>(o: any): o is Map<K, V> {
 //   return o instanceof Map;
 // }
+
+const errorMap: z.ZodErrorMap = (issue, ctx) => {
+  if (issue.code === z.ZodIssueCode.invalid_type) {
+    return {
+      message: `expected value of type [${issue.expected}] but got [${typeDetect(ctx.data)}]`,
+    };
+  }
+  return { message: ctx.defaultError };
+};
+
+z.setErrorMap(errorMap);
 
 export const internals = {
   ...z,

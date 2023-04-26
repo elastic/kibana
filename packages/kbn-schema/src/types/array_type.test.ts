@@ -41,14 +41,14 @@ test('fails with correct type if parsed input is not an array', () => {
 
 test('includes namespace in failure when wrong top-level type', () => {
   const type = schema.arrayOf(schema.string());
-  expect(() => type.validate('test', {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
+  expect(() => type.validate('test', 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
     `"[foo-namespace]: could not parse array value from json input"`
   );
 });
 
 test('includes namespace in failure when wrong item type', () => {
   const type = schema.arrayOf(schema.string());
-  expect(() => type.validate([123], {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
+  expect(() => type.validate([123], 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
     `"[foo-namespace.0]: expected value of type [string] but got [number]"`
   );
 });

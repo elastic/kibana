@@ -6,14 +6,30 @@
  * Side Public License, v 1.
  */
 
-import typeDetect from 'type-detect';
+import z from 'zod';
 import { internals } from '../internals';
-import { Type, TypeOptions, convertValidationFunction } from './type';
+import { Type, TypeOptions } from './type';
 
 export type StringOptions = TypeOptions<string> & {
   minLength?: number;
   maxLength?: number;
   hostname?: boolean;
+};
+
+const errorMap: z.ZodErrorMap = (issue, ctx) => {
+  if (issue.code === z.ZodIssueCode.too_small) {
+    const value = ctx.data as string;
+    return {
+      message: `value has length [${value.length}] but it must have a minimum length of [${issue.minimum}].`,
+    };
+  }
+  if (issue.code === z.ZodIssueCode.too_big) {
+    const value = ctx.data as string;
+    return {
+      message: `value has length [${value.length}] but it must have a maximum length of [${issue.maximum}].`,
+    };
+  }
+  return { message: ctx.defaultError };
 };
 
 export class StringType extends Type<string> {
@@ -22,47 +38,17 @@ export class StringType extends Type<string> {
     // Joi to allow the value and skip any additional validation.
     // Instead, we reimplement the string validator manually except in the
     // hostname case where empty strings aren't allowed anyways.
-    let schema =
-      options.hostname === true
-        ? internals.string().hostname()
-        : internals.any().custom(
-            convertValidationFunction((value) => {
-              if (typeof value !== 'string') {
-                return `expected value of type [string] but got [${typeDetect(value)}]`;
-              }
-            })
-          );
+    let schema = internals.string({ errorMap });
+    schema = options.hostname === true ? schema.url() : schema;
 
     if (options.minLength !== undefined) {
-      schema = schema.custom(
-        convertValidationFunction((value) => {
-          if (value.length < options.minLength!) {
-            return `value has length [${value.length}] but it must have a minimum length of [${options.minLength}].`;
-          }
-        })
-      );
+      schema = schema.min(options.minLength);
     }
 
     if (options.maxLength !== undefined) {
-      schema = schema.custom(
-        convertValidationFunction((value) => {
-          if (value.length > options.maxLength!) {
-            return `value has length [${value.length}] but it must have a maximum length of [${options.maxLength}].`;
-          }
-        })
-      );
+      schema = schema.max(options.maxLength);
     }
 
-    schema.type = 'string';
     super(schema, options);
-  }
-
-  protected handleError(type: string, { limit, value }: Record<string, any>) {
-    switch (type) {
-      case 'any.required':
-        return `expected value of type [string] but got [${typeDetect(value)}]`;
-      case 'string.hostname':
-        return `value must be a valid hostname (see RFC 1123).`;
-    }
   }
 }

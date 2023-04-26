@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import z from 'zod';
 import { ValidationError } from '../errors';
 
@@ -20,9 +19,12 @@ export interface SchemaStructureEntry {
 }
 
 export function convertValidationToRefinement<T = unknown>(
-  validate: (value: T) => string | void
+  validate: (value: T) => string | void,
+  defaultValue: unknown
 ): z.SuperRefinement<T> {
   return (value, ctx) => {
+    if (value === defaultValue) return;
+
     let validationResultMessage;
     try {
       validationResultMessage = validate(value);
@@ -40,15 +42,6 @@ export function convertValidationToRefinement<T = unknown>(
     return value;
   };
 }
-
-const errorMap: z.ZodErrorMap = (issue, ctx) => {
-  if (issue.code === z.ZodIssueCode.invalid_type) {
-    return {
-      message: `expected value of type [${issue.expected}] but got [${issue.received}]`,
-    };
-  }
-  return { message: ctx.defaultError };
-};
 
 export const symbol = Symbol('KbnConfigSchemaType');
 
@@ -73,14 +66,16 @@ export abstract class Type<V> {
     }
 
     if (options.validate) {
-      schema = schema.superRefine(convertValidationToRefinement(options.validate));
+      schema = schema.superRefine(
+        convertValidationToRefinement(options.validate, options.defaultValue)
+      );
     }
 
     this.internalSchema = schema;
   }
 
   public validate(value: any, namespace?: string): V {
-    const result = this.internalSchema.safeParse(value, { errorMap });
+    const result = this.internalSchema.safeParse(value);
 
     if (!result.success) {
       const { error } = result;
