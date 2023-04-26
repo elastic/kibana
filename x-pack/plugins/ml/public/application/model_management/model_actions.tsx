@@ -15,7 +15,10 @@ import {
   DEPLOYMENT_STATE,
   TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
-import { CURATED_TAG } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import {
+  CURATED_MODEL_TAG,
+  MODEL_STATE,
+} from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
@@ -155,7 +158,7 @@ export function useModelActions({
         type: 'icon',
         isPrimary: true,
         enabled: (item) => {
-          return canStartStopTrainedModels && !isLoading;
+          return canStartStopTrainedModels && !isLoading && item.state !== MODEL_STATE.DOWNLOADING;
         },
         available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
         onClick: async (item) => {
@@ -329,7 +332,8 @@ export function useModelActions({
         icon: 'download',
         type: 'icon',
         isPrimary: true,
-        available: (item) => item.tags.includes(CURATED_TAG),
+        available: (item) => item.tags.includes(CURATED_MODEL_TAG),
+        enabled: (item) => !item.state && !isLoading,
         onClick: async (item) => {
           try {
             onLoading(true);
@@ -391,7 +395,7 @@ export function useModelActions({
         onClick: (model) => {
           onModelsDeleteRequest([model.model_id]);
         },
-        available: (item) => canDeleteTrainedModels && !isBuiltInModel(item),
+        available: (item) => canDeleteTrainedModels && !isBuiltInModel(item) && !item.putConfig,
         enabled: (item) => {
           // TODO check for permissions to delete ingest pipelines.
           // ATM undefined means pipelines fetch failed server-side.

@@ -35,7 +35,9 @@ import {
 import { isDefined } from '@kbn/ml-is-defined';
 import {
   CURATED_MODEL_DEFINITIONS,
-  CURATED_TAG,
+  CURATED_MODEL_TAG,
+  CURATED_MODEL_TYPE,
+  MODEL_STATE,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
@@ -67,6 +69,7 @@ export type ModelItem = TrainedModelConfigResponse & {
   pipelines?: ModelPipelines['pipelines'] | null;
   deployment_ids: string[];
   putConfig?: object;
+  state: string;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -139,6 +142,35 @@ export const ModelsList: FC<Props> = ({
     []
   );
 
+  const isCuratedModel = useCallback(
+    (item: ModelItem) => item.tags.includes(CURATED_MODEL_TAG),
+    []
+  );
+
+  /**
+   * Checks if the model download complete.
+   */
+  const isDownloadComplete = useCallback(
+    async (modelId: string): Promise<boolean> => {
+      try {
+        const response = await trainedModelsApiService.getTrainedModels(modelId, {
+          include: 'definition_status',
+        });
+        // @ts-ignore
+        return !!response[0]?.fully_defined;
+      } catch (error) {
+        displayErrorToast(
+          error,
+          i18n.translate('xpack.ml.trainedModels.modelsList.downloadStatusCheckErrorMessage', {
+            defaultMessage: 'Failed to check download status',
+          })
+        );
+      }
+      return false;
+    },
+    [trainedModelsApiService, displayErrorToast]
+  );
+
   /**
    * Fetches trained models.
    */
@@ -163,6 +195,7 @@ export const ModelsList: FC<Props> = ({
                   model.model_type,
                   ...Object.keys(model.inference_config),
                   ...(isBuiltInModel(model as ModelItem) ? [BUILT_IN_MODEL_TYPE] : []),
+                  ...(isCuratedModel(model as ModelItem) ? [CURATED_MODEL_TYPE] : []),
                 ],
               }
             : {}),
@@ -244,7 +277,26 @@ export const ModelsList: FC<Props> = ({
           model.deployment_ids = modelStats
             .map((v) => v.deployment_stats?.deployment_id)
             .filter(isDefined);
+          model.state = model.stats.deployment_stats?.some(
+            (v) => v.state === DEPLOYMENT_STATE.STARTED
+          )
+            ? DEPLOYMENT_STATE.STARTED
+            : '';
         });
+
+        const curatedModels = models.filter((model) =>
+          CURATED_MODEL_DEFINITIONS.hasOwnProperty(model.model_id)
+        );
+        if (curatedModels.length > 0) {
+          for (const model of curatedModels) {
+            if (model.state === MODEL_STATE.STARTED) {
+              // no need to check for the download status if the model has been deployed
+              continue;
+            }
+            const isDownloaded = await isDownloadComplete(model.model_id);
+            model.state = isDownloaded ? MODEL_STATE.DOWNLOADED : MODEL_STATE.DOWNLOADING;
+          }
+        }
       }
 
       return true;
@@ -378,17 +430,13 @@ export const ModelsList: FC<Props> = ({
       'data-test-subj': 'mlModelsTableColumnType',
     },
     {
+      field: 'state',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
         defaultMessage: 'State',
       }),
       align: 'left',
       truncateText: false,
-      render: (model: ModelItem) => {
-        const state = model.stats?.deployment_stats?.some(
-          (v) => v.state === DEPLOYMENT_STATE.STARTED
-        )
-          ? DEPLOYMENT_STATE.STARTED
-          : '';
+      render: (state: string) => {
         return state ? <EuiBadge color="hollow">{state}</EuiBadge> : null;
       },
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
@@ -527,9 +575,10 @@ export const ModelsList: FC<Props> = ({
       .map(([modelId, modelDefinition]) => {
         return {
           model_id: modelId,
-          type: [BUILT_IN_MODEL_TYPE],
-          tags: [CURATED_TAG],
+          type: [CURATED_MODEL_TYPE],
+          tags: [CURATED_MODEL_TAG],
           putConfig: modelDefinition.config,
+          description: modelDefinition.description,
         } as ModelItem;
       });
     return [...items, ...notDownloaded];
