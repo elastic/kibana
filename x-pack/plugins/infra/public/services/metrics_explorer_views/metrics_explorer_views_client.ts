@@ -73,7 +73,7 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
       })
       .catch((error) => {
         throw new UpsertMetricsExplorerViewError(
-          `Failed to create new metrics explorer view : ${error}`
+          `Failed to create new metrics explorer view: ${error}`
         );
       });
 
