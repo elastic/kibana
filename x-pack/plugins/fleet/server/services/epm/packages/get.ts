@@ -10,6 +10,10 @@ import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+
+import { nodeBuilder } from '@kbn/es-query';
+
 import {
   installationStatuses,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -140,6 +144,77 @@ export async function getPackages(
   });
 
   return packageListWithoutStatus;
+}
+
+export async function getInstalledPackages(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  type?: 'logs' | 'metrics' | 'traces';
+  nameQuery?: string;
+  pageAfter?: SortResults;
+  pageSize: number;
+  sortDirection: 'asc' | 'desc';
+}) {
+  const { savedObjectsClient, pageAfter, pageSize, nameQuery, sortDirection, type } = options;
+
+  const packageSavedObjects = await savedObjectsClient.find<Installation>({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+    // Pagination
+    perPage: pageSize,
+    ...(pageAfter && { searchAfter: pageAfter }),
+    // Sort
+    sortField: 'name',
+    sortOrder: sortDirection,
+    // Name filter
+    ...(nameQuery && { searchFields: ['name'] }),
+    ...(nameQuery && { search: `${nameQuery}* | ${nameQuery}` }),
+    filter: nodeBuilder.is(
+      `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
+      installationStatuses.Installed
+    ),
+  });
+
+  const integrations = packageSavedObjects.saved_objects.map((integrationSavedObject) => {
+    const {
+      name,
+      version,
+      install_status: installStatus,
+      es_index_patterns: esIndexPatterns,
+    } = integrationSavedObject.attributes;
+
+    const dataStreams = Object.entries(esIndexPatterns)
+      .map(([key, value]) => {
+        return {
+          name: key,
+          title: value,
+        };
+      })
+      .filter((stream) => {
+        if (!type) {
+          return true;
+        } else {
+          return stream.title.startsWith(`${type}-`);
+        }
+      });
+
+    return {
+      // description: string;
+      // download: string;
+      // icons: string; // TODO: implement
+      name,
+      // path: string;
+      // title: string;
+      // type: string;
+      version,
+      status: installStatus,
+      dataStreams,
+    };
+  });
+
+  return {
+    items: integrations,
+    total: packageSavedObjects.total,
+    pageAfter: packageSavedObjects.saved_objects.at(-1)?.sort, // Enable ability to use searchAfter in subsequent queries
+  };
 }
 
 // Get package names for packages which cannot have more than one package policy on an agent policy

@@ -34,6 +34,7 @@ import type {
 import type {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
+  GetInstalledPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
   InstallPackageFromRegistryRequestSchema,
@@ -49,6 +50,7 @@ import {
   bulkInstallPackages,
   getCategories,
   getPackages,
+  getInstalledPackages,
   getFile,
   getPackageInfo,
   isBulkInstallError,
@@ -109,6 +111,30 @@ export const getListHandler: FleetRequestHandler<
       // Only cache responses where the installation status is excluded, otherwise the request
       // needs up-to-date information on whether the package is installed so we can't cache it
       headers: request.query.excludeInstallStatus ? { ...CACHE_CONTROL_10_MINUTES_HEADER } : {},
+    });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getInstalledListHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetInstalledPackagesRequestSchema.query>
+> = async (context, request, response) => {
+  try {
+    const savedObjectsClient = (await context.fleet).internalSoClient; // TODO: Visit permissions
+    const res = await getInstalledPackages({
+      savedObjectsClient,
+      ...request.query,
+    });
+
+    const body: GetInstalledPackagesResponse = {
+      // TODO: Add type
+      ...res,
+    };
+
+    return response.ok({
+      body,
     });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });

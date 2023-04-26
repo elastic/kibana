@@ -27,6 +27,7 @@ import { splitPkgKey } from '../../services/epm/registry';
 import {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
+  GetInstalledPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
   GetInfoRequestSchemaDeprecated,
@@ -45,6 +46,7 @@ import {
 import {
   getCategoriesHandler,
   getListHandler,
+  getInstalledListHandler,
   getLimitedListHandler,
   getFileHandler,
   getInfoHandler,
@@ -81,6 +83,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     getListHandler
+  );
+
+  router.get(
+    {
+      path: EPM_API_ROUTES.INSTALLED_LIST_PATTERN,
+      validate: GetInstalledPackagesRequestSchema,
+      fleetAuthz: {
+        integrations: { readPackageInfo: true }, // TODO: Visit permissions
+      },
+    },
+    getInstalledListHandler
   );
 
   router.get(

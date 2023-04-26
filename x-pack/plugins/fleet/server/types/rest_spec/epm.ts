@@ -24,6 +24,20 @@ export const GetPackagesRequestSchema = {
   }),
 };
 
+export const GetInstalledPackagesRequestSchema = {
+  query: schema.object({
+    type: schema.maybe(
+      schema.oneOf([schema.literal('logs'), schema.literal('metrics'), schema.literal('traces')])
+    ),
+    nameQuery: schema.maybe(schema.string()),
+    pageAfter: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
+    pageSize: schema.number({ defaultValue: 30 }),
+    sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      defaultValue: 'asc',
+    }),
+  }),
+};
+
 export const GetLimitedPackagesRequestSchema = {
   query: schema.object({
     prerelease: schema.maybe(schema.boolean()),
