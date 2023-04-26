@@ -47,7 +47,8 @@ describe('Enterprise Search MongoDB connector', () => {
 
     // Select MongoDB from the list
     cy.get('#checkableCard-mongodb').should('not.be.selected');
-    cy.get('#checkableCard-mongodb')
+    cy.get('#checkableCard-mongodb-details')
+      .find('a')
       .invoke('attr', 'href')
       .should('include', 'connectors-mongodb.html');
 
