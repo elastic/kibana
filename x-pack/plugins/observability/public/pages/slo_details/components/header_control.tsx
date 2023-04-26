@@ -10,14 +10,14 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
+import { useCapabilities } from '../../../hooks/slo/use_capabilities';
+import { useKibana } from '../../../utils/kibana_react';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
-import { sloFeatureId } from '../../../../common';
+import { rulesLocatorID, sloFeatureId } from '../../../../common';
 import { paths } from '../../../config/paths';
-import { useKibana } from '../../../utils/kibana_react';
-import { ObservabilityAppServices } from '../../../application/types';
-import { useCapabilities } from '../../../hooks/slo/use_capabilities';
+import type { RulesParams } from '../../../locators/rules';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
@@ -28,8 +28,11 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
+    share: {
+      url: { locators },
+    },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
@@ -52,12 +55,19 @@ export function HeaderControl({ isLoading, slo }: Props) {
     setRuleFlyoutVisibility(true);
   };
 
-  const handleNavigateToRules = () => {
-    navigateToUrl(
-      basePath.prepend(
-        `${paths.observability.rules}?_a=(lastResponse:!(),search:%27%27,params:(sloId:%27${slo?.id}%27),status:!(),type:!())`
-      )
-    );
+  const handleNavigateToRules = async () => {
+    const locator = locators.get<RulesParams>(rulesLocatorID);
+
+    if (slo?.id) {
+      locator?.navigate(
+        {
+          params: { sloId: slo.id },
+        },
+        {
+          replace: true,
+        }
+      );
+    }
   };
 
   const handleNavigateToApm = () => {

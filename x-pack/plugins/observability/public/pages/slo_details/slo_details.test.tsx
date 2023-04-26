@@ -49,6 +49,7 @@ const useCapabilitiesMock = useCapabilities as jest.Mock;
 
 const mockNavigate = jest.fn();
 const mockBasePathPrepend = jest.fn();
+const mockLocator = jest.fn();
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -58,6 +59,13 @@ const mockKibana = () => {
       http: {
         basePath: {
           prepend: mockBasePathPrepend,
+        },
+      },
+      share: {
+        url: {
+          locators: {
+            get: mockLocator,
+          },
         },
       },
       triggersActionsUi: {
@@ -180,6 +188,24 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
     expect(screen.queryByTestId('sloDetailsHeaderControlPopoverCreateRule')).toBeTruthy();
+  });
+
+  it("renders a 'Manage rules' button under actions menu", async () => {
+    const slo = buildSlo();
+    useParamsMock.mockReturnValue(slo.id);
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+
+    const manageRulesButton = screen.queryByTestId('sloDetailsHeaderControlPopoverManageRules');
+    expect(manageRulesButton).toBeTruthy();
+
+    fireEvent.click(manageRulesButton!);
+
+    expect(mockLocator).toBeCalled();
   });
 
   it('renders the Overview tab by default', async () => {
