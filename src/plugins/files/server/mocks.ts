@@ -15,6 +15,7 @@ import { FileClient, FileServiceFactory, FileServiceStart, FilesSetup } from '.'
 export const createFileServiceMock = (): DeeplyMockedKeys<FileServiceStart> => ({
   create: jest.fn(),
   delete: jest.fn(),
+  bulkDelete: jest.fn(),
   deleteShareObject: jest.fn(),
   find: jest.fn(),
   getById: jest.fn(),

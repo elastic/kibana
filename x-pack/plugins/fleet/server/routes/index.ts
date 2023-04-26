@@ -24,6 +24,7 @@ import { registerRoutes as registerDownloadSourcesRoutes } from './download_sour
 import { registerRoutes as registerHealthCheckRoutes } from './health_check';
 import { registerRoutes as registerFleetServerHostRoutes } from './fleet_server_policy_config';
 import { registerRoutes as registerFleetProxiesRoutes } from './fleet_proxies';
+import { registerRoutes as registerMessageSigningServiceRoutes } from './message_signing_service';
 
 export async function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
   // Always register app routes for permissions checking
@@ -43,6 +44,7 @@ export async function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config:
   registerFleetProxiesRoutes(fleetAuthzRouter);
   registerDownloadSourcesRoutes(fleetAuthzRouter);
   registerHealthCheckRoutes(fleetAuthzRouter);
+  registerMessageSigningServiceRoutes(fleetAuthzRouter);
 
   // Conditional config routes
   if (config.agents.enabled) {

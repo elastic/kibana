@@ -12,6 +12,7 @@ import type {
   CreateFileArgs,
   UpdateFileArgs,
   DeleteFileArgs,
+  BulkDeleteFilesArgs,
   GetByIdArgs,
   BulkGetByIdArgs,
   FindFileArgs,
@@ -43,6 +44,13 @@ export interface FileServiceStart {
    * @param args - delete file args
    */
   delete(args: DeleteFileArgs): Promise<void>;
+
+  /**
+   * Delete multiple files at once.
+   *
+   * @param args - delete files args
+   */
+  bulkDelete(args: BulkDeleteFilesArgs): Promise<Array<PromiseSettledResult<void>>>;
 
   /**
    * Get a file by ID. Will throw if file cannot be found.
