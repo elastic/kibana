@@ -140,5 +140,18 @@ describe('Alert details flyout', () => {
           cy.get(OVERVIEW_RULE).should('be.visible');
         });
     });
+
+    it('should have the `kibana.alert.url` field set', () => {
+      expandFirstAlert();
+      openTable();
+      filterBy('kibana.alert.url');
+      cy.get('[data-test-subj="event-field-kibana.alert.url"]')
+        .invoke('text')
+        .then((url) => {
+          cy.visit(url);
+          cy.get(ALERTS_COUNT).should('have.text', '1 alert');
+          cy.get(OVERVIEW_RULE).should('be.visible');
+        });
+    });
   });
 });
