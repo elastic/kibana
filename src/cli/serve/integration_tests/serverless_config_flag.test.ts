@@ -12,6 +12,7 @@ import { resolve } from 'path';
 import { filter, firstValueFrom, from, take, concatMap } from 'rxjs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getConfigDirectory } from '@kbn/utils';
 
 describe('cli serverless project type', () => {
   it(
@@ -46,9 +47,9 @@ describe('cli serverless project type', () => {
       // Wait for 5 lines in the logs
       await firstValueFrom(from(child.stdout).pipe(take(5)));
 
-      expect(readFileSync(resolve(REPO_ROOT, 'config/serverless.recent.yml'), 'utf-8')).toContain(
-        `serverless: ${mode}\n`
-      );
+      expect(
+        readFileSync(resolve(getConfigDirectory(), 'serverless.recent.yml'), 'utf-8')
+      ).toContain(`serverless: ${mode}\n`);
 
       child.kill('SIGKILL');
     }
