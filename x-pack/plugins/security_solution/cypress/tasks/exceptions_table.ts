@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { INPUT_FILE } from '../screens/alerts_detection_rules';
 import {
   EXCEPTIONS_TABLE,
   EXCEPTIONS_TABLE_SEARCH,
@@ -35,6 +36,8 @@ import {
   RULE_ACTION_LINK_RULE_SWITCH,
   LINKED_RULES_BADGE,
   MANAGE_RULES_SAVE,
+  IMPORT_SHARED_EXCEPTION_LISTS_BTN,
+  IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN,
 } from '../screens/exceptions';
 import { assertExceptionItemsExists } from './exceptions';
 
@@ -44,6 +47,13 @@ export const clearSearchSelection = () => {
 
 export const expandExceptionActions = () => {
   cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().click();
+};
+
+export const importExceptionLists = (listsFile: string) => {
+  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_BTN).click();
+  cy.get(INPUT_FILE).should('exist');
+  cy.get(INPUT_FILE).trigger('click').selectFile(listsFile).trigger('change');
+  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN).click();
 };
 
 export const exportExceptionList = (listId: string) => {

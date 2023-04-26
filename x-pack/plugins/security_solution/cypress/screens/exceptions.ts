@@ -159,6 +159,7 @@ export const MANAGE_EXCEPTION_CREATE_LIST_BUTTON =
   '[data-test-subj="manageExceptionListCreateExceptionListButton"]';
 
 export const RULE_ACTION_LINK_RULE_SWITCH = '[data-test-subj="ruleActionLinkRuleSwitch"]';
+export const LINK_TO_SHARED_LIST_RADIO = '[data-test-subj="addToListsRadioOptionLabel"]';
 
 export const CREATE_SHARED_EXCEPTION_LIST_NAME_INPUT =
   'input[data-test-subj="createSharedExceptionListNameInput"]';
@@ -168,6 +169,21 @@ export const CREATE_SHARED_EXCEPTION_LIST_DESCRIPTION_INPUT =
 
 export const CREATE_SHARED_EXCEPTION_LIST_BTN =
   'button[data-test-subj="exception-lists-form-create-shared"]';
+
+// Import shared exception list
+export const IMPORT_SHARED_EXCEPTION_LISTS_BTN = '[data-test-subj="importSharedExceptionList"]';
+
+export const IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN =
+  '[data-test-subj="exception-lists-form-import-action"]';
+
+export const IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN =
+  '[data-test-subj="exceptionListsImportFormCloseBTN"]';
+
+export const IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_EXISTING_CHECKBOX =
+  'label[data-test-subj="importExceptionListOverwriteExistingCheckbox"]';
+
+export const IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_CREATE_NEW_CHECKBOX =
+  '[data-test-subj="importExceptionListCreateNewCheckbox"]';
 
 export const exceptionsTableListManagementListContainerByListId = (listId: string) =>
   `[data-test-subj="exceptionsManagementListCard-${listId}"]`;
@@ -214,3 +230,17 @@ export const EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT =
   '[data-test-subj="exceptionsViewerCommentAccordion"] li div.euiCommentEvent__body';
 
 export const EXCEPTION_ITEM_COMMENT_COPY_BTN = '[data-test-subj="clipboard"]';
+
+// Exception card in Shared List Detail Page
+export const EXCEPTION_ITEM_HEADER_ACTION_MENU =
+  '[data-test-subj="exceptionItemCardHeaderButtonIcon"]';
+
+export const EXCEPTION_ITEM_OVERFLOW_ACTION_EDIT =
+  '[data-test-subj="exceptionItemCardHeaderActionItemedit"]';
+
+export const EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE =
+  '[data-test-subj="exceptionItemCardHeaderActionItemdelete"]';
+
+export const EXECPTION_ITEM_CARD_HEADER_TITLE = '[data-test-subj="exceptionItemCardHeaderTitle"]';
+
+export const EMPTY_EXCEPTIONS_VIEWER = '[data-test-subj="emptyViewerState"]';

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { getExceptionList } from '../../../objects/exception';
-import { getNewRule } from '../../../objects/rule';
+import { getExceptionList } from '../../../../objects/exception';
+import { getNewRule } from '../../../../objects/rule';
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { createRule } from '../../../tasks/api_calls/rules';
-import { exceptionsListDetailsUrl } from '../../../urls/navigation';
+import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { exceptionsListDetailsUrl } from '../../../../urls/navigation';
 import {
   editExceptionLisDetails,
   waitForExceptionListDetailToBeLoaded,
-} from '../../../tasks/exceptions_table';
-import { createExceptionList } from '../../../tasks/api_calls/exceptions';
-import { esArchiverResetKibana } from '../../../tasks/es_archiver';
+} from '../../../../tasks/exceptions_table';
+import { createExceptionList } from '../../../../tasks/api_calls/exceptions';
+import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
 import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
   EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION,
-} from '../../../screens/exceptions';
+} from '../../../../screens/exceptions';
 
 const LIST_NAME = 'My exception list';
 const UPDATED_LIST_NAME = 'Updated exception list';
@@ -34,7 +34,7 @@ const getExceptionList1 = () => ({
   list_id: 'exception_list_test',
 });
 
-describe('Exception list management page', () => {
+describe('Exception list detail page', () => {
   before(() => {
     esArchiverResetKibana();
     login();
