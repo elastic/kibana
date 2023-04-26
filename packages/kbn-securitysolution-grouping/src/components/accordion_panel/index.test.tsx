@@ -55,6 +55,7 @@ const testProps = {
   },
   renderChildComponent,
   selectedGroup: 'kibana.alert.rule.name',
+  onGroupClose: () => {},
 };
 
 describe('grouping accordion panel', () => {

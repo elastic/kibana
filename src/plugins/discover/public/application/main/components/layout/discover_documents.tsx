@@ -9,11 +9,13 @@ import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiProgress,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataTableRecord } from '../../../../types';
@@ -41,6 +43,14 @@ import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
 import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
+
+const containerStyles = css`
+  position: relative;
+`;
+
+const progressStyle = css`
+  z-index: 2;
+`;
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -182,7 +192,7 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel">
+    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={containerStyles}>
       <EuiScreenReaderOnly>
         <h2 id="documentsAriaLabel">
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
@@ -252,6 +262,9 @@ function DiscoverDocumentsComponent({
             />
           </div>
         </>
+      )}
+      {isDataLoading && (
+        <EuiProgress size="xs" color="accent" position="absolute" css={progressStyle} />
       )}
     </EuiFlexItem>
   );

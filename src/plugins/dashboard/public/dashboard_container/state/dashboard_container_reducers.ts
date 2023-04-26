@@ -124,7 +124,10 @@ export const dashboardContainerReducers = {
   },
 
   resetToLastSavedInput: (state: DashboardReduxState) => {
-    state.explicitInput = state.componentState.lastSavedInput;
+    state.explicitInput = {
+      ...state.componentState.lastSavedInput,
+      viewMode: state.explicitInput.viewMode, // keep current view mode when resetting
+    };
   },
 
   // ------------------------------------------------------------------------------
@@ -205,5 +208,13 @@ export const dashboardContainerReducers = {
 
   setHasOverlays: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
     state.componentState.hasOverlays = action.payload;
+  },
+
+  setScrollToPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.scrollToPanelId = action.payload;
+  },
+
+  setHighlightPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.highlightPanelId = action.payload;
   },
 };

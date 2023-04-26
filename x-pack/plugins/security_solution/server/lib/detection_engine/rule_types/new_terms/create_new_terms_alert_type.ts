@@ -38,6 +38,7 @@ import {
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
+  getMaxSignalsWarning,
   getUnprocessedExceptionsWarnings,
 } from '../utils/utils';
 import { createEnrichEventsFunction } from '../utils/enrichments';
@@ -107,6 +108,7 @@ export const createNewTermsAlertType = (
           exceptionFilter,
           unprocessedExceptions,
           alertTimestampOverride,
+          publicBaseUrl,
         },
         services,
         params,
@@ -153,7 +155,7 @@ export const createNewTermsAlertType = (
       // it's possible for the array to be truncated but alert documents could fail to be created for other reasons,
       // in which case createdSignalsCount would still be less than maxSignals. Since valid alerts were truncated from
       // the array in that case, we stop and report the errors.
-      while (result.createdSignalsCount < params.maxSignals) {
+      while (result.createdSignalsCount <= params.maxSignals) {
         // PHASE 1: Fetch a page of terms using a composite aggregation. This will collect a page from
         // all of the terms seen over the last rule interval. In the next phase we'll determine which
         // ones are new.
@@ -300,6 +302,7 @@ export const createNewTermsAlertType = (
             indicesToQuery: inputIndex,
             alertTimestampOverride,
             ruleExecutionLogger,
+            publicBaseUrl,
           });
 
           const bulkCreateResult = await bulkCreate(
@@ -314,6 +317,7 @@ export const createNewTermsAlertType = (
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });
 
           if (bulkCreateResult.alertsWereTruncated) {
+            result.warningMessages.push(getMaxSignalsWarning());
             break;
           }
         }

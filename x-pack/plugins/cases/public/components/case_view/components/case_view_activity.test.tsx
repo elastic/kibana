@@ -493,15 +493,36 @@ describe.skip('Case View Page activity tab', () => {
     });
 
     describe('User actions', () => {
-      it('renders the descriptions user correctly', async () => {
+      it('renders the description correctly', async () => {
         appMockRender = createAppMockRenderer();
         const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-        const description = within(result.getByTestId('description-action'));
+        const description = within(result.getByTestId('description'));
 
         await waitFor(() => {
-          expect(description.getByText('Leslie Knope')).toBeInTheDocument();
+          expect(description.getByText(caseData.description)).toBeInTheDocument();
         });
+      });
+
+      it('renders edit description user action correctly', async () => {
+        useFindCaseUserActionsMock.mockReturnValue({
+          ...defaultUseFindCaseUserActions,
+          data: {
+            userActions: [
+              getUserAction('description', 'create'),
+              getUserAction('description', 'update'),
+            ],
+          },
+        });
+
+        appMockRender = createAppMockRenderer();
+        const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+
+        const userActions = within(result.getAllByTestId('user-actions-list')[1]);
+
+        expect(
+          userActions.getByTestId('description-update-action-description-update')
+        ).toBeInTheDocument();
       });
 
       it('renders the unassigned users correctly', async () => {

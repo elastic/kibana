@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useState, FC } from 'react';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -28,6 +29,10 @@ import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
+import {
+  getDefaultAiOpsListState,
+  type AiOpsPageUrlState,
+} from '../../application/utils/url_state';
 
 import { DocumentCountContent } from '../document_count_content/document_count_content';
 import { SearchPanel } from '../search_panel';
@@ -35,7 +40,6 @@ import type { GroupTableItem } from '../spike_analysis_table/types';
 import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
 import { PageHeader } from '../page_header';
 
-import { restorableDefaults, type AiOpsPageUrlState } from './explain_log_rate_spikes_app_state';
 import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
 
 function getDocumentCountStatsSplitLabel(
@@ -66,7 +70,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
 
   const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
     'AIOPS_INDEX_VIEWER',
-    restorableDefaults
+    getDefaultAiOpsListState()
   );
   const [globalState, setGlobalState] = useUrlState('_g');
 
@@ -80,7 +84,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
 
   const setSearchParams = useCallback(
     (searchParams: {
-      searchQuery: Query['query'];
+      searchQuery: estypes.QueryDslQueryContainer;
       searchString: Query['query'];
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
@@ -112,9 +116,9 @@ export const ExplainLogRateSpikesPage: FC = () => {
     searchQuery,
   } = useData(
     { selectedDataView: dataView, selectedSavedSearch },
+    'explain_log_rage_spikes',
     aiopsListState,
     setGlobalState,
-    'explain_log_rage_spikes',
     currentSelectedSignificantTerm,
     currentSelectedGroup
   );

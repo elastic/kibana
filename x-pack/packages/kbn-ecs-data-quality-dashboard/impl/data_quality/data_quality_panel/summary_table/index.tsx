@@ -5,79 +5,79 @@
  * 2.0.
  */
 
-import type {
-  CriteriaWithPagination,
-  Direction,
-  EuiBasicTableColumn,
-  Pagination,
-} from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn, Pagination } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
-import numeral from '@elastic/numeral';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
-import { EMPTY_STAT } from '../../helpers';
 import type { IndexSummaryTableItem } from './helpers';
 import { getShowPagination } from './helpers';
+import { defaultSort, MIN_PAGE_SIZE } from '../pattern/helpers';
+import { SortConfig } from '../../types';
 
-const MIN_PAGE_SIZE = 10;
-
-interface SortConfig {
-  sort: {
-    direction: Direction;
-    field: string;
-  };
-}
-
-const defaultSort: SortConfig = {
-  sort: {
-    direction: 'desc',
-    field: 'docsCount',
-  },
-};
-
-interface Props {
-  defaultNumberFormat: string;
+export interface Props {
+  formatBytes: (value: number | undefined) => string;
+  formatNumber: (value: number | undefined) => string;
   getTableColumns: ({
+    formatBytes,
     formatNumber,
     itemIdToExpandedRowMap,
+    pattern,
     toggleExpanded,
   }: {
+    formatBytes: (value: number | undefined) => string;
     formatNumber: (value: number | undefined) => string;
     itemIdToExpandedRowMap: Record<string, React.ReactNode>;
+    pattern: string;
     toggleExpanded: (indexName: string) => void;
   }) => Array<EuiBasicTableColumn<IndexSummaryTableItem>>;
   itemIdToExpandedRowMap: Record<string, React.ReactNode>;
   items: IndexSummaryTableItem[];
+  pageIndex: number;
+  pageSize: number;
+  pattern: string;
+  setPageIndex: (pageIndex: number) => void;
+  setPageSize: (pageSize: number) => void;
+  setSorting: (sortConfig: SortConfig) => void;
+  sorting: SortConfig;
   toggleExpanded: (indexName: string) => void;
 }
 
 const SummaryTableComponent: React.FC<Props> = ({
-  defaultNumberFormat,
+  formatBytes,
+  formatNumber,
   getTableColumns,
   itemIdToExpandedRowMap,
   items,
+  pageIndex,
+  pageSize,
+  pattern,
+  setPageIndex,
+  setPageSize,
+  setSorting,
+  sorting,
   toggleExpanded,
 }) => {
-  const [sorting, setSorting] = useState<SortConfig>(defaultSort);
-  const formatNumber = useCallback(
-    (value: number | undefined): string =>
-      value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT,
-    [defaultNumberFormat]
-  );
-  const [pageIndex, setPageIndex] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(MIN_PAGE_SIZE);
   const columns = useMemo(
-    () => getTableColumns({ formatNumber, itemIdToExpandedRowMap, toggleExpanded }),
-    [formatNumber, getTableColumns, itemIdToExpandedRowMap, toggleExpanded]
+    () =>
+      getTableColumns({
+        formatBytes,
+        formatNumber,
+        itemIdToExpandedRowMap,
+        pattern,
+        toggleExpanded,
+      }),
+    [formatBytes, formatNumber, getTableColumns, itemIdToExpandedRowMap, pattern, toggleExpanded]
   );
   const getItemId = useCallback((item: IndexSummaryTableItem) => item.indexName, []);
 
-  const onChange = useCallback(({ page, sort }: CriteriaWithPagination<IndexSummaryTableItem>) => {
-    setSorting({ sort: sort ?? defaultSort.sort });
-
-    setPageIndex(page.index);
-    setPageSize(page.size);
-  }, []);
+  const onChange = useCallback(
+    ({ page, sort }: CriteriaWithPagination<IndexSummaryTableItem>) => {
+      setSorting({ sort: sort ?? defaultSort.sort });
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    },
+    [setPageIndex, setPageSize, setSorting]
+  );
 
   const pagination: Pagination = useMemo(
     () => ({
@@ -91,9 +91,10 @@ const SummaryTableComponent: React.FC<Props> = ({
 
   return (
     <EuiInMemoryTable
-      allowNeutralSort={false}
+      allowNeutralSort={true}
       compressed={true}
       columns={columns}
+      data-test-subj="summaryTable"
       isExpandable={true}
       itemId={getItemId}
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}

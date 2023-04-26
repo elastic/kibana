@@ -16,29 +16,44 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { Filter } from '@kbn/es-query';
 import { StatRenderer } from '../types';
 import { statsContainerCss } from '../styles';
 import { TAKE_ACTION } from '../translations';
 
 interface GroupStatsProps<T> {
   bucketKey: string;
-  statRenderers?: StatRenderer[];
+  groupFilter: Filter[];
+  groupNumber: number;
   onTakeActionsOpen?: () => void;
-  takeActionItems: JSX.Element[];
+  statRenderers?: StatRenderer[];
+  takeActionItems: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
 }
 
 const GroupStatsComponent = <T,>({
   bucketKey,
-  statRenderers,
+  groupFilter,
+  groupNumber,
   onTakeActionsOpen,
-  takeActionItems,
+  statRenderers,
+  takeActionItems: getTakeActionItems,
 }: GroupStatsProps<T>) => {
   const [isPopoverOpen, setPopover] = useState(false);
+  const [takeActionItems, setTakeActionItems] = useState<JSX.Element[]>([]);
 
-  const onButtonClick = useCallback(
-    () => (!isPopoverOpen && onTakeActionsOpen ? onTakeActionsOpen() : setPopover(!isPopoverOpen)),
-    [isPopoverOpen, onTakeActionsOpen]
-  );
+  const onButtonClick = useCallback(() => {
+    if (!isPopoverOpen && takeActionItems.length === 0) {
+      setTakeActionItems(getTakeActionItems(groupFilter, groupNumber));
+    }
+    return !isPopoverOpen && onTakeActionsOpen ? onTakeActionsOpen() : setPopover(!isPopoverOpen);
+  }, [
+    getTakeActionItems,
+    groupFilter,
+    groupNumber,
+    isPopoverOpen,
+    onTakeActionsOpen,
+    takeActionItems.length,
+  ]);
 
   const statsComponent = useMemo(
     () =>

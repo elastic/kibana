@@ -13,6 +13,7 @@ import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
   AGG_TYPE,
   GRID_RESOLUTION,
+  MASK_OPERATOR,
   RENDER_AS,
   SCALING_TYPES,
   MVT_FIELD_TYPE,
@@ -49,6 +50,10 @@ export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
 type AbstractAggDescriptor = {
   type: AGG_TYPE;
   label?: string;
+  mask?: {
+    operator: MASK_OPERATOR;
+    value: number;
+  };
 };
 
 export type CountAggDescriptor = AbstractAggDescriptor & {

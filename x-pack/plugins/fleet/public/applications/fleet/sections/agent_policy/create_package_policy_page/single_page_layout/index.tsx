@@ -22,6 +22,11 @@ import {
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
+import {
+  getNumTransformAssets,
+  TransformInstallWithCurrentUserPermissionCallout,
+} from '../../../../../../components/transform_install_as_current_user_callout';
+
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import { splitPkgKey } from '../../../../../../../common/services';
@@ -266,6 +271,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     ]
   );
 
+  const numTransformAssets = useMemo(
+    () => getNumTransformAssets(packageInfo?.assets),
+    [packageInfo?.assets]
+  );
+
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
   const replaceDefineStepView = useUIExtension(
     packagePolicy.package?.name ?? '',
@@ -406,6 +416,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             integration={integrationInfo?.name}
           />
         )}
+        {numTransformAssets > 0 ? (
+          <>
+            <TransformInstallWithCurrentUserPermissionCallout count={numTransformAssets} />
+            <EuiSpacer size="xl" />
+          </>
+        ) : null}
         <StepsWithLessPadding steps={steps} />
         <EuiSpacer size="xl" />
         <EuiSpacer size="xl" />

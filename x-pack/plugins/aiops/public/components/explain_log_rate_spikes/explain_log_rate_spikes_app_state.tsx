@@ -10,7 +10,6 @@ import { pick } from 'lodash';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import type { Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -21,7 +20,6 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../application/utils/search_utils';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../hooks/use_data_source';
@@ -41,34 +39,6 @@ export interface ExplainLogRateSpikesAppStateProps {
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
 }
-
-const defaultSearchQuery = {
-  match_all: {},
-};
-
-export interface AiOpsPageUrlState {
-  pageKey: 'AIOPS_INDEX_VIEWER';
-  pageUrlState: AiOpsIndexBasedAppState;
-}
-
-export interface AiOpsIndexBasedAppState {
-  searchString?: Query['query'];
-  searchQuery?: Query['query'];
-  searchQueryLanguage: SearchQueryLanguage;
-  filters?: Filter[];
-}
-
-export const getDefaultAiOpsListState = (
-  overrides?: Partial<AiOpsIndexBasedAppState>
-): Required<AiOpsIndexBasedAppState> => ({
-  searchString: '',
-  searchQuery: defaultSearchQuery,
-  searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
-  filters: [],
-  ...overrides,
-});
-
-export const restorableDefaults = getDefaultAiOpsListState();
 
 export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps> = ({
   dataView,

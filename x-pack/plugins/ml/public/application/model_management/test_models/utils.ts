@@ -22,7 +22,7 @@ export function isTestable(modelItem: ModelItem, checkForState = false) {
       Object.keys(modelItem.inference_config)[0] as SupportedPytorchTasksType
     ) &&
     (checkForState === false ||
-      modelItem.stats?.deployment_stats?.state === DEPLOYMENT_STATE.STARTED)
+      modelItem.stats?.deployment_stats?.some((v) => v.state === DEPLOYMENT_STATE.STARTED))
   ) {
     return true;
   }

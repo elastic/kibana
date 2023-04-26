@@ -75,7 +75,7 @@ function setupMockCallCluster(
 describe('makeKQLUsageCollector', () => {
   describe('fetch method', () => {
     beforeEach(() => {
-      fetch = fetchProvider('.kibana');
+      fetch = fetchProvider(() => Promise.resolve('.kibana'));
     });
 
     it('should return opt in data from the .kibana/kql-telemetry doc', async () => {
