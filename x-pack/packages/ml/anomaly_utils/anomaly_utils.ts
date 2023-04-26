@@ -320,7 +320,7 @@ export function isRuleSupported(record: MlAnomalyRecordDoc): boolean {
 export const aggregationTypeTransform = {
   /**
    * transform from ML to ES agg type
-   * @param {string} oldAggType
+   * @param {string} oldAggType the aggregation type to be transformed
    * @returns {string}
    */
   toES(oldAggType: string): string {
@@ -338,7 +338,7 @@ export const aggregationTypeTransform = {
   },
   /**
    * transform from ES to ML agg type
-   * @param {string} oldAggType
+   * @param {string} oldAggType the aggregation type to be transformed
    * @returns {string}
    */
   toML(oldAggType: string): string {

@@ -24,6 +24,11 @@ export interface Influencer {
   influencer_field_values: string[];
 }
 
+/**
+ * Alias of MlAnomalyRecordDoc
+ * @export
+ * @typedef {MLAnomalyDoc}
+ */
 export type MLAnomalyDoc = MlAnomalyRecordDoc;
 
 /**
