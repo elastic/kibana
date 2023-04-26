@@ -7,10 +7,10 @@
 
 import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import type { BrowserField, BrowserFields, IndexField } from '@kbn/timelines-plugin/common';
-import type { DataView, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
@@ -42,11 +42,7 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (
-    title: string,
-    fields: IIndexPatternFieldList,
-    _includeUnmapped: boolean = false
-  ): DataViewBase =>
+  (title: string, fields: FieldSpec[], _includeUnmapped: boolean = false): DataViewBase =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
@@ -123,18 +119,24 @@ interface FetchIndexReturn {
  * returns state directly, no redux
  */
 export const useFetchIndex = (
-  indexNames: string[],
+  dataViewIdOrIndexNames: string | string[],
   onlyCheckIfIndicesExist: boolean = false,
   strategy: 'indexFields' | 'dataView' | typeof ENDPOINT_FIELDS_SEARCH_STRATEGY = 'indexFields',
   includeUnmapped: boolean = false
 ): [boolean, FetchIndexReturn] => {
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
-  const previousIndexesName = useRef<string[]>([]);
+  const previousIndexesNameOrId = useRef<string[] | string | undefined>([]);
+  const isIndexNameArray = Array.isArray(dataViewIdOrIndexNames);
+
+  const defaultIndexesArray = useMemo(
+    () => (isIndexNameArray ? dataViewIdOrIndexNames : []),
+    [dataViewIdOrIndexNames, isIndexNameArray]
+  );
 
   const [state, setState] = useState<FetchIndexReturn & { loading: boolean }>({
     browserFields: DEFAULT_BROWSER_FIELDS,
-    indexes: indexNames,
+    indexes: defaultIndexesArray,
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
     dataView: undefined,
@@ -148,14 +150,28 @@ export const useFetchIndex = (
         try {
           setState({ ...state, loading: true });
           abortCtrl.current = new AbortController();
-          const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
+          let dv: DataView;
+          if (!isIndexNameArray) {
+            dv = await data.dataViews.get(dataViewIdOrIndexNames);
+            previousIndexesNameOrId.current = dv?.id;
+          } else {
+            dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
+            previousIndexesNameOrId.current = dv.getIndexPattern().split(',');
+          }
+          // narrowing down to FieldSpec[] because we don't need
+          // the extra functions provided by IIndexPatternFieldList
+          let fields = dv.fields as FieldSpec[];
+          if (includeUnmapped) {
+            fields = await data.dataViews.getFieldsForIndexPattern(dv, {
+              pattern: '',
+              includeUnmapped: true,
+            });
+          }
           const { browserFields } = getDataViewStateFromIndexFields(
             iNames,
-            dv.fields,
+            fields,
             includeUnmapped
           );
-
-          previousIndexesName.current = dv.getIndexPattern().split(',');
 
           setState({
             loading: false,
@@ -163,12 +179,12 @@ export const useFetchIndex = (
             browserFields,
             indexes: dv.getIndexPattern().split(','),
             indexExists: dv.getIndexPattern().split(',').length > 0,
-            indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields, includeUnmapped),
+            indexPatterns: getIndexFields(dv.getIndexPattern(), fields, includeUnmapped),
           });
         } catch (exc) {
           setState({
             browserFields: DEFAULT_BROWSER_FIELDS,
-            indexes: indexNames,
+            indexes: defaultIndexesArray,
             indexExists: true,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
             dataView: undefined,
@@ -180,18 +196,29 @@ export const useFetchIndex = (
 
       asyncSearch();
     },
-    [addError, data.dataViews, includeUnmapped, indexNames, state]
+    [
+      addError,
+      data.dataViews,
+      dataViewIdOrIndexNames,
+      defaultIndexesArray,
+      includeUnmapped,
+      isIndexNameArray,
+      state,
+    ]
   );
 
   useEffect(() => {
-    if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
-      indexFieldsSearch(indexNames);
+    if (
+      !isEmpty(dataViewIdOrIndexNames) &&
+      !isEqual(previousIndexesNameOrId.current, dataViewIdOrIndexNames)
+    ) {
+      indexFieldsSearch(dataViewIdOrIndexNames);
     }
     return () => {
       abortCtrl.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexNames, previousIndexesName]);
+  }, [dataViewIdOrIndexNames, previousIndexesNameOrId]);
 
   return [state.loading, state];
 };
