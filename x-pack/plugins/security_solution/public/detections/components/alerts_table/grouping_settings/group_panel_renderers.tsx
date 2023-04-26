@@ -36,7 +36,9 @@ export const renderGroupPanel: GroupPanelRenderer<AlertsGroupingAggregation> = (
       return isArray(bucket.key) ? (
         <RuleNameGroupContent
           ruleName={bucket.key[0]}
-          ruleDescription={bucket.key[1]}
+          ruleDescription={
+            firstNonNullValue(firstNonNullValue(bucket.description?.buckets)?.key) ?? ''
+          }
           tags={bucket.ruleTags?.buckets}
         />
       ) : undefined;

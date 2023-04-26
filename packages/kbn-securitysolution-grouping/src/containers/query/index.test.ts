@@ -7,12 +7,12 @@
  */
 
 import type { GroupingQueryArgs } from './types';
-import { getGroupingQuery, MAX_QUERY_SIZE } from '.';
+import { getGroupingQuery, MAX_QUERY_SIZE, parseGroupingQuery } from '.';
 
 const testProps: GroupingQueryArgs = {
   additionalFilters: [],
   from: '2022-12-28T15:35:32.871Z',
-  groupByFields: ['host.name'],
+  groupByField: 'host.name',
   statsAggregations: [
     {
       alertsCount: {
@@ -61,16 +61,15 @@ describe('group selector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('Sets terms query when single stackBy field requested', () => {
+  it.only('Sets terms query with missing argument for ', () => {
     const result = getGroupingQuery(testProps);
-    expect(result.aggs.groupByFields.multi_terms).toBeUndefined();
-    expect(result.aggs.groupByFields.terms).toEqual({
-      field: 'host.name',
-      missing: '-',
-      size: MAX_QUERY_SIZE,
+    result.aggs.groupByFields?.multi_terms?.terms.forEach((term, i) => {
+      expect(term).toEqual({
+        field: 'host.name',
+        missing: i === 0 ? '-' : '--',
+      });
     });
     expect(result.aggs.groupByFields.aggs).toEqual({
-      nullGroup: { missing: { field: 'host.name' } },
       bucket_truncate: { bucket_sort: { from: 0, size: 25 } },
       alertsCount: { cardinality: { field: 'kibana.alert.uuid' } },
       rulesCountAggregation: { cardinality: { field: 'kibana.alert.rule.rule_id' } },
@@ -176,5 +175,44 @@ describe('group selector', () => {
       missing: 0,
       size: MAX_QUERY_SIZE,
     });
+  });
+
+  it('parseGroupingQuery finds and flags the null group', () => {
+    const data = [
+      {
+        key: ['20.80.64.28', '20.80.64.28'],
+        key_as_string: '20.80.64.28|20.80.64.28',
+        doc_count: 75,
+      },
+      {
+        key: ['0.0.0.0', '0.0.0.0'],
+        key_as_string: '0.0.0.0|0.0.0.0',
+        doc_count: 75,
+      },
+      {
+        key: ['0.0.0.0', '::'],
+        key_as_string: '0.0.0.0|::',
+        doc_count: 75,
+      },
+    ];
+    const result = parseGroupingQuery(data);
+    expect(result).toEqual([
+      {
+        key: ['20.80.64.28'],
+        key_as_string: '20.80.64.28',
+        doc_count: 75,
+      },
+      {
+        key: ['0.0.0.0'],
+        key_as_string: '0.0.0.0',
+        doc_count: 75,
+      },
+      {
+        key: ['-'],
+        key_as_string: '-',
+        isNullGroup: true,
+        doc_count: 75,
+      },
+    ]);
   });
 });

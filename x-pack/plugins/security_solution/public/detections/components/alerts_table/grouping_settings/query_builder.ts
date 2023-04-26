@@ -10,14 +10,6 @@ import type { BoolQuery } from '@kbn/es-query';
 import type { NamedAggregation } from '@kbn/securitysolution-grouping';
 import { isNoneGroup, getGroupingQuery } from '@kbn/securitysolution-grouping';
 
-const getGroupFields = (groupValue: string) => {
-  if (groupValue === 'kibana.alert.rule.name') {
-    return [groupValue, 'kibana.alert.rule.description'];
-  } else {
-    return [groupValue];
-  }
-};
-
 interface AlertsGroupingQueryParams {
   additionalFilters: Array<{
     bool: BoolQuery;
@@ -44,7 +36,7 @@ export const getAlertsGroupingQuery = ({
   getGroupingQuery({
     additionalFilters,
     from,
-    groupByFields: !isNoneGroup([selectedGroup]) ? getGroupFields(selectedGroup) : [],
+    groupByField: selectedGroup,
     statsAggregations: !isNoneGroup([selectedGroup])
       ? getAggregationsByGroupField(selectedGroup)
       : [],
@@ -78,6 +70,14 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
     case 'kibana.alert.rule.name':
       aggMetrics.push(
         ...[
+          {
+            description: {
+              terms: {
+                field: 'kibana.alert.rule.description',
+                size: 1,
+              },
+            },
+          },
           {
             countSeveritySubAggregation: {
               cardinality: {

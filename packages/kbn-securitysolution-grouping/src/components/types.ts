@@ -12,17 +12,19 @@ export interface GenericBuckets {
   key_as_string?: string; // contains, for example, formatted dates
   doc_count: number;
 }
-
 export const NONE_GROUP_KEY = 'none';
 
 export type RawBucket<T> = GenericBuckets & T;
-export type MissingAggregation = Record<'nullGroup', { doc_count: number }>;
+
+export interface GroupingBucket {
+  isNullGroup?: boolean;
+}
 
 /** Defines the shape of the aggregation returned by Elasticsearch */
 // TODO: write developer docs for these fields
 export interface RootAggregation<T> {
   groupByFields?: {
-    buckets?: Array<RawBucket<T> & MissingAggregation>;
+    buckets?: Array<RawBucket<T> & GroupingBucket>;
   };
   groupsCount?: {
     value?: number | null;

@@ -78,13 +78,20 @@ const GroupingComponent = <T,>({
   const [trigger, setTrigger] = useState<Record<string, { state: 'open' | 'closed' | undefined }>>(
     {}
   );
+  const [nullCount, setNullCount] = useState({ unit: 0, group: 0 });
 
-  const unitCount = data?.unitsCount?.value ?? 0;
+  const unitCount = useMemo(
+    () => (data?.unitsCount?.value ?? 0) + nullCount.unit,
+    [data?.unitsCount?.value, nullCount.unit]
+  );
   const unitCountText = useMemo(() => {
     return `${unitCount.toLocaleString()} ${unit && unit(unitCount)}`;
   }, [unitCount, unit]);
 
-  const groupCount = data?.groupsCount?.value ?? 0;
+  const groupCount = useMemo(
+    () => (data?.groupsCount?.value ?? 0) + nullCount.group,
+    [data?.groupsCount?.value, nullCount.group]
+  );
   const groupCountText = useMemo(
     () => `${groupCount.toLocaleString()} ${GROUPS_UNIT(groupCount)}`,
     [groupCount]
@@ -95,10 +102,13 @@ const GroupingComponent = <T,>({
       data?.groupByFields?.buckets?.map((groupBucket, groupNumber) => {
         const group = firstNonNullValue(groupBucket.key);
         const groupKey = `group-${groupNumber}-${group}`;
-        const isNullGroup = groupBucket.nullGroup.doc_count > 0;
+        const isNullGroup = groupBucket.isNullGroup ?? false;
         const nullGroupMessage = isNullGroup
-          ? NULL_GROUP(selectedGroup, unit(groupBucket.nullGroup.doc_count))
+          ? NULL_GROUP(selectedGroup, unit(groupBucket.doc_count))
           : '';
+        if (isNullGroup) {
+          setNullCount({ unit: groupBucket.doc_count, group: 1 });
+        }
 
         return (
           <span key={groupKey}>

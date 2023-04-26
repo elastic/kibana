@@ -8,7 +8,7 @@
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
-export function getFieldTypeMissingValue(esType: string[]) {
+export function getFieldTypeMissingValues(esType: string[]) {
   const knownType: ES_FIELD_TYPES = esType[0] as ES_FIELD_TYPES;
   switch (knownType) {
     case ES_FIELD_TYPES.BYTE:
@@ -20,13 +20,12 @@ export function getFieldTypeMissingValue(esType: string[]) {
     case ES_FIELD_TYPES.SCALED_FLOAT:
     case ES_FIELD_TYPES.SHORT:
     case ES_FIELD_TYPES.UNSIGNED_LONG:
-      return 'NaN';
-    case ES_FIELD_TYPES.IP:
-      return '0.0.0.0';
     case ES_FIELD_TYPES.DATE:
     case ES_FIELD_TYPES.DATE_NANOS:
-      return 0;
+      return [0, 1];
+    case ES_FIELD_TYPES.IP:
+      return ['0.0.0.0', '::'];
     default:
-      return '-';
+      return ['-', '--'];
   }
 }

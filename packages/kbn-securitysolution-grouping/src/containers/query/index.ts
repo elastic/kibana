@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getFieldTypeMissingValue } from './helpers';
+import { GroupingBucket } from '../..';
+import { RawBucket } from '../../..';
 import type { GroupingQueryArgs, GroupingQuery } from './types';
 /** The maximum number of groups to render */
 export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;
@@ -15,6 +16,8 @@ export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;
 // https://github.com/elastic/kibana/issues/151913
 export const MAX_QUERY_SIZE = 10000;
 
+// @ts-ignore
+// @ts-ignore
 /**
  * Composes grouping query and aggregations
  * @param additionalFilters Global filtering applicable to the grouping component.
@@ -33,10 +36,11 @@ export const MAX_QUERY_SIZE = 10000;
  *
  * @returns query dsl {@link GroupingQuery}
  */
+
 export const getGroupingQuery = ({
   additionalFilters = [],
   from,
-  groupByFields,
+  groupByField,
   pageNumber,
   rootAggregations,
   runtimeMappings,
@@ -49,38 +53,25 @@ export const getGroupingQuery = ({
   size: 0,
   aggs: {
     groupByFields: {
-      ...(groupByFields.length > 1
-        ? {
-            multi_terms: {
-              terms: groupByFields.map((groupByField) => ({
-                field: groupByField,
-                // docs with empty field values will be grouped under this key
-                missing: getFieldTypeMissingValue(selectedGroupEsTypes),
-              })),
-              size: MAX_QUERY_SIZE,
-            },
-          }
-        : {
-            terms: {
-              field: groupByFields[0],
-              // docs with empty field values will be grouped under this key
-              missing: getFieldTypeMissingValue(selectedGroupEsTypes),
-              size: MAX_QUERY_SIZE,
-            },
-          }),
+      multi_terms: {
+        terms: [
+          {
+            field: groupByField,
+            missing: '-',
+          },
+          {
+            field: groupByField,
+            missing: '--',
+          },
+        ],
+        size: MAX_QUERY_SIZE,
+      },
       aggs: {
         bucket_truncate: {
           bucket_sort: {
             sort,
             from: pageNumber,
             size,
-          },
-        },
-        // this agg will return a count when the bucket is of a missing field value
-        // this is so that we have a flag in the UI for the "missing" group
-        nullGroup: {
-          missing: {
-            field: groupByFields[0],
           },
         },
         ...(statsAggregations
@@ -110,3 +101,22 @@ export const getGroupingQuery = ({
   runtime_mappings: runtimeMappings,
   _source: false,
 });
+
+export const parseGroupingQuery = <T>(
+  buckets: Array<RawBucket<T>>
+): Array<RawBucket<T> & GroupingBucket> =>
+  buckets.map((group) => {
+    const groupKeyArray = Array.isArray(group.key) ? group.key : [group.key];
+    return groupKeyArray[0] === groupKeyArray[1]
+      ? {
+          ...group,
+          key: [groupKeyArray[0]],
+          key_as_string: groupKeyArray[0],
+        }
+      : {
+          ...group,
+          key: ['-'],
+          key_as_string: '-',
+          isNullGroup: true,
+        };
+  });
