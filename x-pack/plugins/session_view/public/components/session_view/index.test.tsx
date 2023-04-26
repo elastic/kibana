@@ -7,6 +7,10 @@
 
 import { waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
+import {
+  TEST_PROCESS_INDEX,
+  TEST_SESSION_START_TIME,
+} from '../../../common/mocks/constants/session_view_process.mock';
 import { sessionViewProcessEventsMock } from '../../../common/mocks/responses/session_view_process_events.mock';
 import { sessionViewProcessEventsMergedMock } from '../../../common/mocks/responses/session_view_process_events_merged.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
@@ -48,7 +52,13 @@ describe('SessionView component', () => {
     mockedContext = createAppRootMockRenderer();
     mockedApi = mockedContext.coreStart.http.get;
     render = () =>
-      (renderResult = mockedContext.render(<SessionView sessionEntityId="test-entity-id" />));
+      (renderResult = mockedContext.render(
+        <SessionView
+          processIndex={TEST_PROCESS_INDEX}
+          sessionStartTime={TEST_SESSION_START_TIME}
+          sessionEntityId="test-entity-id"
+        />
+      ));
     mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
   });
 

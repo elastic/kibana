@@ -66,4 +66,34 @@ const hostsEntryClickedEvent: InfraTelemetryEvent = {
   },
 };
 
-export const infraTelemetryEvents = [hostsViewQuerySubmittedEvent, hostsEntryClickedEvent];
+const hostFlyoutRemoveFilter: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_REMOVED,
+  schema: {
+    field_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'Removed filter field name for the selected host.',
+        optional: false,
+      },
+    },
+  },
+};
+const hostFlyoutAddFilter: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_ADDED,
+  schema: {
+    field_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'Added filter field name for the selected host.',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const infraTelemetryEvents = [
+  hostsViewQuerySubmittedEvent,
+  hostsEntryClickedEvent,
+  hostFlyoutRemoveFilter,
+  hostFlyoutAddFilter,
+];
