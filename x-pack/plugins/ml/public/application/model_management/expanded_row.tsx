@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useMemo, useCallback } from 'react';
+import React, { FC, useMemo, useCallback } from 'react';
 import { omit, pick } from 'lodash';
 import {
   EuiBadge,
@@ -110,8 +110,6 @@ export function useListItemsFormatter() {
 }
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
-  const [modelItems, setModelItems] = useState<AllocatedModel[]>([]);
-
   const formatToListItems = useListItemsFormatter();
 
   const {
@@ -144,42 +142,39 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     license_level,
   };
 
-  useEffect(
-    function updateModelItems() {
-      (async function () {
-        const deploymentStats = stats.deployment_stats;
-        const modelSizeStats = stats.model_size_stats;
+  const deploymentStatItems: AllocatedModel[] = useMemo<AllocatedModel[]>(() => {
+    const deploymentStats = stats.deployment_stats;
+    const modelSizeStats = stats.model_size_stats;
 
-        if (!deploymentStats || !modelSizeStats) return;
+    if (!deploymentStats || !modelSizeStats) return [];
 
-        const items: AllocatedModel[] = deploymentStats.nodes.map((n) => {
-          const nodeName = Object.values(n.node)[0].name;
-          return {
-            ...deploymentStats,
-            ...modelSizeStats,
-            node: {
-              ...pick(n, [
-                'average_inference_time_ms',
-                'inference_count',
-                'routing_state',
-                'last_access',
-                'number_of_pending_requests',
-                'start_time',
-                'throughput_last_minute',
-                'number_of_allocations',
-                'threads_per_allocation',
-              ]),
-              name: nodeName,
-            } as AllocatedModel['node'],
-          };
-        });
+    const items: AllocatedModel[] = deploymentStats.flatMap((perDeploymentStat) => {
+      return perDeploymentStat.nodes.map((n) => {
+        const nodeName = Object.values(n.node)[0].name;
+        return {
+          key: `${perDeploymentStat.deployment_id}_${nodeName}`,
+          ...perDeploymentStat,
+          ...modelSizeStats,
+          node: {
+            ...pick(n, [
+              'average_inference_time_ms',
+              'inference_count',
+              'routing_state',
+              'last_access',
+              'number_of_pending_requests',
+              'start_time',
+              'throughput_last_minute',
+              'number_of_allocations',
+              'threads_per_allocation',
+            ]),
+            name: nodeName,
+          } as AllocatedModel['node'],
+        };
+      });
+    });
 
-        setModelItems(items);
-      })();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [stats.deployment_stats]
-  );
+    return items;
+  }, [stats]);
 
   const tabs: EuiTabbedContentTab[] = [
     {
@@ -313,7 +308,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
               <div data-test-subj={'mlTrainedModelStatsContent'}>
                 <EuiSpacer size={'s'} />
 
-                {!!modelItems?.length ? (
+                {!!deploymentStatItems?.length ? (
                   <>
                     <EuiPanel>
                       <EuiTitle size={'xs'}>
@@ -325,7 +320,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                         </h5>
                       </EuiTitle>
                       <EuiSpacer size={'m'} />
-                      <AllocatedModels models={modelItems} hideColumns={['model_id']} />
+                      <AllocatedModels models={deploymentStatItems} hideColumns={['model_id']} />
                     </EuiPanel>
                     <EuiSpacer size={'s'} />
                   </>
@@ -379,7 +374,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
           },
         ]
       : []),
-    ...((pipelines && Object.keys(pipelines).length > 0) || stats.ingest
+    ...((isPopulatedObject(pipelines) && Object.keys(pipelines).length > 0) || stats.ingest
       ? [
           {
             id: 'pipelines',
@@ -389,8 +384,10 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 <FormattedMessage
                   id="xpack.ml.trainedModels.modelsList.expandedRow.pipelinesTabLabel"
                   defaultMessage="Pipelines"
-                />{' '}
-                <EuiNotificationBadge>{stats.pipeline_count}</EuiNotificationBadge>
+                />
+                <EuiNotificationBadge>
+                  {isPopulatedObject(pipelines) ? Object.keys(pipelines!).length : 0}
+                </EuiNotificationBadge>
               </>
             ),
             content: (

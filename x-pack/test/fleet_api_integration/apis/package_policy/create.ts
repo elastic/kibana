@@ -6,6 +6,7 @@
  */
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
+import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { Installation } from '@kbn/fleet-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -649,7 +650,7 @@ export default function (providerContext: FtrProviderContext) {
       const getInstallationSavedObject = async (pkg: string): Promise<Installation | undefined> => {
         const res: { _source?: { 'epm-packages': Installation } } = await es.transport.request({
           method: 'GET',
-          path: `/.kibana/_doc/epm-packages:${pkg}`,
+          path: `/${INGEST_SAVED_OBJECT_INDEX}/_doc/epm-packages:${pkg}`,
         });
 
         return res?._source?.['epm-packages'] as Installation;

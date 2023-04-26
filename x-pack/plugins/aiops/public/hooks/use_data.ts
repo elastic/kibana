@@ -34,12 +34,13 @@ export const useData = (
     selectedDataView,
     selectedSavedSearch,
   }: { selectedDataView: DataView; selectedSavedSearch: SavedSearch | null },
-  aiopsListState: AiOpsIndexBasedAppState,
-  onUpdate: (params: Dictionary<unknown>) => void,
   contextId: string,
+  aiopsListState: AiOpsIndexBasedAppState,
+  onUpdate?: (params: Dictionary<unknown>) => void,
   selectedSignificantTerm?: SignificantTerm,
   selectedGroup?: GroupTableItem | null,
-  barTarget: number = DEFAULT_BAR_TARGET
+  barTarget: number = DEFAULT_BAR_TARGET,
+  readOnly: boolean = false
 ) => {
   const {
     executionContext,
@@ -67,7 +68,7 @@ export const useData = (
     });
 
     if (searchData === undefined || aiopsListState.searchString !== '') {
-      if (aiopsListState.filters) {
+      if (aiopsListState.filters && readOnly === false) {
         const globalFilters = filterManager?.getGlobalFilters();
 
         if (filterManager) filterManager.setFilters(aiopsListState.filters);
@@ -162,8 +163,8 @@ export const useData = (
           time: timefilter.getTime(),
           refreshInterval: timefilter.getRefreshInterval(),
         });
+        setLastRefresh(Date.now());
       }
-      setLastRefresh(Date.now());
     });
 
     // This listens just for an initial update of the timefilter to be switched on.
@@ -191,5 +192,6 @@ export const useData = (
     searchQueryLanguage,
     searchString,
     searchQuery,
+    forceRefresh: () => setLastRefresh(Date.now()),
   };
 };

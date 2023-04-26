@@ -7,7 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { UpdateTrainedModelDeploymentRequest } from '../../lib/ml_client/types';
+import type {
+  UpdateTrainedModelDeploymentRequest,
+  UpdateTrainedModelDeploymentResponse,
+} from '../../lib/ml_client/types';
 import type { GetGuards } from '../shared_services';
 
 export interface TrainedModelsProvider {
@@ -21,6 +24,24 @@ export interface TrainedModelsProvider {
     getTrainedModelsStats(
       params: estypes.MlGetTrainedModelsStatsRequest
     ): Promise<estypes.MlGetTrainedModelsStatsResponse>;
+    startTrainedModelDeployment(
+      params: estypes.MlStartTrainedModelDeploymentRequest
+    ): Promise<estypes.MlStartTrainedModelDeploymentResponse>;
+    stopTrainedModelDeployment(
+      params: estypes.MlStopTrainedModelDeploymentRequest
+    ): Promise<estypes.MlStopTrainedModelDeploymentResponse>;
+    inferTrainedModel(
+      params: estypes.MlInferTrainedModelRequest
+    ): Promise<estypes.MlInferTrainedModelResponse>;
+    deleteTrainedModel(
+      params: estypes.MlDeleteTrainedModelRequest
+    ): Promise<estypes.MlDeleteTrainedModelResponse>;
+    updateTrainedModelDeployment(
+      params: UpdateTrainedModelDeploymentRequest
+    ): Promise<UpdateTrainedModelDeploymentResponse>;
+    putTrainedModel(
+      params: estypes.MlPutTrainedModelRequest
+    ): Promise<estypes.MlPutTrainedModelResponse>;
   };
 }
 
@@ -80,9 +101,17 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
         async updateTrainedModelDeployment(params: UpdateTrainedModelDeploymentRequest) {
           return await guards
             .isFullLicense()
-            .hasMlCapabilities(['canStartStopTrainedModels'])
+            .hasMlCapabilities(['canCreateTrainedModels'])
             .ok(async ({ mlClient }) => {
               return mlClient.updateTrainedModelDeployment(params);
+            });
+        },
+        async putTrainedModel(params: estypes.MlPutTrainedModelRequest) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canCreateTrainedModels'])
+            .ok(async ({ mlClient }) => {
+              return mlClient.putTrainedModel(params);
             });
         },
       };

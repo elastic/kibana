@@ -27,6 +27,7 @@ export const InstallManagedAgentStep = ({
   isComplete,
   fullCopyButton,
   onCopy,
+  cloudFormationTemplateUrl,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
@@ -36,6 +37,7 @@ export const InstallManagedAgentStep = ({
   isComplete?: boolean;
   fullCopyButton?: boolean;
   onCopy?: () => void;
+  cloudFormationTemplateUrl?: string | null;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
@@ -51,6 +53,7 @@ export const InstallManagedAgentStep = ({
         enrollToken={enrollToken}
         onCopy={onCopy}
         fullCopyButton={fullCopyButton}
+        cloudFormationTemplateUrl={cloudFormationTemplateUrl}
       />
     ),
   };

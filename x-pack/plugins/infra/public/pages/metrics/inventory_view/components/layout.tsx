@@ -181,7 +181,7 @@ export const Layout = React.memo(
               </EuiFlexGroup>
             </TopActionContainer>
             <EuiFlexItem grow={false}>
-              {!hostsLinkClickedRef.current && (
+              {!hostsLinkClickedRef.current && nodeType === 'host' && (
                 <TryItButton
                   data-test-subj="inventory-hostsView-link"
                   label={i18n.translate('xpack.infra.layout.hostsLandingPageLink', {

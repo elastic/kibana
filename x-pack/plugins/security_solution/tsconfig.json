@@ -155,6 +155,6 @@
     "@kbn/security-solution-side-nav",
     "@kbn/core-lifecycle-browser",
     "@kbn/ecs",
-    "@kbn/url-state"
+    "@kbn/url-state",
   ]
 }
