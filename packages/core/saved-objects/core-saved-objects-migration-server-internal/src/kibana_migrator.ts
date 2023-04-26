@@ -132,7 +132,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     return this.status$.asObservable();
   }
 
-  private async runMigrationsInternal(): Promise<MigrationResult[]> {
+  private runMigrationsInternal(): Promise<MigrationResult[]> {
     const migrationAlgorithm = this.soMigrationsConfig.algorithm;
     if (migrationAlgorithm === 'zdt') {
       return runZeroDowntimeMigration({

@@ -13,6 +13,7 @@ import {
   type SavedObjectsType,
   MAIN_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
+import { DEFAULT_INDEX_TYPES_MAP } from '@kbn/core-saved-objects-base-server-internal';
 import {
   readLog,
   startElasticsearch,
@@ -70,6 +71,7 @@ describe('split .kibana index into multiple system indices', () => {
         getKibanaMigratorTestKit({
           types: updatedTypeRegistry.getAllTypes(),
           kibanaIndex: '.kibana',
+          defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
         });
 
       const { runMigrations, client } = await migratorTestKitFactory();

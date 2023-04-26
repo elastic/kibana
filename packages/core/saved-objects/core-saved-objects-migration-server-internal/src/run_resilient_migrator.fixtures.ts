@@ -29,31 +29,31 @@ export const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
 };
 
 export const indexTypesMapMock = {
-  '.my-index': ['testtype', 'testtype2'],
-  '.my-task-index': ['testtasktype'],
-  '.my-complementary-index': ['testtype3'],
+  '.my_index': ['testtype', 'testtype2'],
+  '.task_index': ['testtasktype'],
+  '.complementary_index': ['testtype3'],
 };
 
 export const savedObjectTypeRegistryMock = createRegistry([
   // typeRegistry depicts an updated index map:
-  //   .my-index: ['testtype', 'testtype3'],
-  //   .my-other-index: ['testtype2'],
-  //   .my-task-index': ['testtasktype'],
+  //   .my_index: ['testtype', 'testtype3'],
+  //   .other_index: ['testtype2'],
+  //   .task_index': ['testtasktype'],
   {
     name: 'testtype',
     migrations: { '8.2.3': jest.fn().mockImplementation((doc) => doc) },
   },
   {
     name: 'testtype2',
-    // We are moving 'testtype2' from '.my-index' to '.other-index'
-    indexPattern: '.other-index',
+    // We are moving 'testtype2' from '.my_index' to '.other_index'
+    indexPattern: '.other_index',
   },
   {
     name: 'testtasktype',
-    indexPattern: '.my-task-index',
+    indexPattern: '.task_index',
   },
   {
-    // We are moving 'testtype3' from '.my-complementary-index' to '.my-index'
+    // We are moving 'testtype3' from '.complementary_index' to '.my_index'
     name: 'testtype3',
   },
 ]);

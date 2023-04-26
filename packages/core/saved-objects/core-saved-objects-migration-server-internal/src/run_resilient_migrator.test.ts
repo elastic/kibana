@@ -21,8 +21,8 @@ import type { InitState, State } from './state';
 import type { Next } from './state_action_machine';
 
 const SOME_MIGRATION_RESULT: MigrationResult = {
-  sourceIndex: '.my-index_pre8.2.3_001',
-  destIndex: '.my-index_8.2.3_001',
+  sourceIndex: '.my_index_pre8.2.3_001',
+  destIndex: '.my_index_8.2.3_001',
   elapsedMs: 16,
   status: 'migrated',
 };
@@ -132,7 +132,7 @@ const mockOptions = (): RunResilientMigratorParams => {
     transformRawDocs: jest.fn(),
     preMigrationScript: "ctx._id = ctx._source.type + ':' + ctx._id",
     migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
-    indexPrefix: '.my-index',
+    indexPrefix: '.my_index',
     migrationsConfig: {
       algorithm: 'v2' as const,
       batchSize: 20,

@@ -41,25 +41,25 @@ jest.mock('./kibana_migrator_utils', () => {
     ...actual,
     indexMapToIndexTypesMap: jest.fn(actual.indexMapToIndexTypesMap),
     createMultiPromiseDefer: jest.fn(actual.createMultiPromiseDefer),
-    getIndicesInvolvedInRelocation: jest.fn(() => Promise.resolve(['.my-index', '.other-index'])),
+    getIndicesInvolvedInRelocation: jest.fn(() => Promise.resolve(['.my_index', '.other_index'])),
   };
 });
 
 const V2_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
   {
-    sourceIndex: '.my-index_pre8.2.3_001',
-    destIndex: '.my-index_8.2.3_001',
+    sourceIndex: '.my_index_pre8.2.3_001',
+    destIndex: '.my_index_8.2.3_001',
     elapsedMs: 16,
     status: 'migrated',
   },
   {
-    sourceIndex: '.other-index_pre8.2.3_001',
-    destIndex: '.other-index_8.2.3_001',
+    sourceIndex: '.other_index_pre8.2.3_001',
+    destIndex: '.other_index_8.2.3_001',
     elapsedMs: 8,
     status: 'migrated',
   },
   {
-    destIndex: '.task-index_8.2.3_001',
+    destIndex: '.task_index_8.2.3_001',
     elapsedMs: 4,
     status: 'patched',
   },
@@ -143,8 +143,8 @@ describe('runV2Migration', () => {
     options.documentMigrator.prepareMigrations();
     await runV2Migration(options);
     expect(createMultiPromiseDefer).toBeCalledTimes(2);
-    expect(createMultiPromiseDefer).toHaveBeenNthCalledWith(1, ['.my-index', '.other-index']);
-    expect(createMultiPromiseDefer).toHaveBeenNthCalledWith(2, ['.my-index', '.other-index']);
+    expect(createMultiPromiseDefer).toHaveBeenNthCalledWith(1, ['.my_index', '.other_index']);
+    expect(createMultiPromiseDefer).toHaveBeenNthCalledWith(2, ['.my_index', '.other_index']);
   });
 
   it('calls runResilientMigrator for each migrator it must spawn', async () => {
@@ -163,7 +163,7 @@ describe('runV2Migration', () => {
       1,
       expect.objectContaining({
         ...runResilientMigratorCommonParams,
-        indexPrefix: '.my-index',
+        indexPrefix: '.my_index',
         mustRelocateDocuments: true,
         readyToReindex: expect.any(Object),
         doneReindexing: expect.any(Object),
@@ -173,7 +173,7 @@ describe('runV2Migration', () => {
       2,
       expect.objectContaining({
         ...runResilientMigratorCommonParams,
-        indexPrefix: '.other-index',
+        indexPrefix: '.other_index',
         mustRelocateDocuments: true,
         readyToReindex: expect.any(Object),
         doneReindexing: expect.any(Object),
@@ -183,7 +183,7 @@ describe('runV2Migration', () => {
       3,
       expect.objectContaining({
         ...runResilientMigratorCommonParams,
-        indexPrefix: '.my-task-index',
+        indexPrefix: '.task_index',
         mustRelocateDocuments: false,
         readyToReindex: undefined,
         doneReindexing: undefined,
@@ -219,7 +219,7 @@ describe('runV2Migration', () => {
     mockRunResilientMigrator.mockResolvedValueOnce(V2_SUCCESSFUL_MIGRATION_RESULT[0]);
     mockRunResilientMigrator.mockResolvedValueOnce(V2_SUCCESSFUL_MIGRATION_RESULT[1]);
     const myTaskIndexMigratorError = new Error(
-      'Something terrible and unexpected happened whilst tyring to migrate .my-task-index'
+      'Something terrible and unexpected happened whilst tyring to migrate .task_index'
     );
     mockRunResilientMigrator.mockRejectedValueOnce(myTaskIndexMigratorError);
     const options = mockOptions();
@@ -242,7 +242,7 @@ const mockOptions = (kibanaVersion = '8.2.3') => {
     kibanaVersion,
     waitForMigrationCompletion: false,
     typeRegistry,
-    kibanaIndexPrefix: '.my-index',
+    kibanaIndexPrefix: '.my_index',
     defaultIndexTypesMap: indexTypesMapMock,
     migrationConfig: {
       algorithm: 'v2' as const,

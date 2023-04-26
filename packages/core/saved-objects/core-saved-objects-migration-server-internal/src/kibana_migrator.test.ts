@@ -23,8 +23,8 @@ import { runZeroDowntimeMigration } from './zdt';
 
 const V2_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
   {
-    sourceIndex: '.my-index_pre8.2.3_001',
-    destIndex: '.my-index_8.2.3_001',
+    sourceIndex: '.my_index_pre8.2.3_001',
+    destIndex: '.my_index_8.2.3_001',
     elapsedMs: 14,
     status: 'migrated',
   },
@@ -32,13 +32,13 @@ const V2_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
 
 const ZDT_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
   {
-    sourceIndex: '.my-index_8.8.0_001',
-    destIndex: '.my-index_8.8.1_001',
+    sourceIndex: '.my_index_8.8.0_001',
+    destIndex: '.my_index_8.8.1_001',
     elapsedMs: 14,
     status: 'migrated',
   },
   {
-    destIndex: '.other-index_8.8.0_001',
+    destIndex: '.other_index_8.8.0_001',
     elapsedMs: 128,
     status: 'patched',
   },
@@ -97,7 +97,7 @@ describe('KibanaMigrator', () => {
         },
         {
           name: 'bmap',
-          indexPattern: '.other-index',
+          indexPattern: '.other_index',
           mappings: {
             properties: { field: { type: 'text' } },
           },
@@ -154,7 +154,7 @@ describe('KibanaMigrator', () => {
       expect(runV2Migration).toHaveBeenCalledWith(
         expect.objectContaining({
           kibanaVersion: '8.2.3',
-          kibanaIndexPrefix: '.my-index',
+          kibanaIndexPrefix: '.my_index',
           migrationConfig: options.soMigrationsConfig,
           waitForMigrationCompletion: false,
         })
@@ -173,7 +173,7 @@ describe('KibanaMigrator', () => {
       expect(runZeroDowntimeMigration).toHaveBeenCalledWith(
         expect.objectContaining({
           kibanaVersion: '8.2.3',
-          kibanaIndexPrefix: '.my-index',
+          kibanaIndexPrefix: '.my_index',
           migrationConfig: options.soMigrationsConfig,
         })
       );
@@ -253,18 +253,18 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2') => {
     kibanaVersion: '8.2.3',
     waitForMigrationCompletion: false,
     defaultIndexTypesMap: {
-      '.my-index': ['testtype', 'testtype2'],
-      '.my-task-index': ['testtasktype'],
+      '.my_index': ['testtype', 'testtype2'],
+      '.task_index': ['testtasktype'],
       // this index no longer has any types registered in typeRegistry
       // but we still need a migrator for it, so that 'testtype3' documents
       // are moved over to their new index (.my_index)
-      '.my-complementary-index': ['testtype3'],
+      '.my_complementary_index': ['testtype3'],
     },
     typeRegistry: createRegistry([
       // typeRegistry depicts an updated index map:
-      //   .my-index: ['testtype', 'testtype3'],
-      //   .my-other-index: ['testtype2'],
-      //   .my-task-index': ['testtasktype'],
+      //   .my_index: ['testtype', 'testtype3'],
+      //   .other_index: ['testtype2'],
+      //   .task_index': ['testtasktype'],
       {
         name: 'testtype',
         hidden: false,
@@ -280,8 +280,8 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2') => {
         name: 'testtype2',
         hidden: false,
         namespaceType: 'single',
-        // We are moving 'testtype2' from '.my-index' to '.other-index'
-        indexPattern: '.other-index',
+        // We are moving 'testtype2' from '.my_index' to '.other_index'
+        indexPattern: '.other_index',
         mappings: {
           properties: {
             name: { type: 'keyword' },
@@ -293,7 +293,7 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2') => {
         name: 'testtasktype',
         hidden: false,
         namespaceType: 'single',
-        indexPattern: '.my-task-index',
+        indexPattern: '.task_index',
         mappings: {
           properties: {
             name: { type: 'keyword' },
@@ -302,7 +302,7 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2') => {
         migrations: {},
       },
       {
-        // We are moving 'testtype3' from '.my-complementary-index' to '.my-index'
+        // We are moving 'testtype3' from '.my_complementary_index' to '.my_index'
         name: 'testtype3',
         hidden: false,
         namespaceType: 'single',
@@ -314,7 +314,7 @@ const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2') => {
         migrations: {},
       },
     ]),
-    kibanaIndex: '.my-index',
+    kibanaIndex: '.my_index',
     soMigrationsConfig: {
       algorithm,
       batchSize: 20,
