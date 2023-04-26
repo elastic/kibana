@@ -25,7 +25,7 @@ import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
 import {
   isCategorizationAnomaly,
   isRuleSupported,
-  type CustomUrlAnomalyRecordDoc,
+  type MlCustomUrlAnomalyRecordDoc,
   type KibanaUrlConfig,
   type MlAnomaliesTableRecord,
 } from '@kbn/ml-anomaly-utils';
@@ -296,7 +296,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
     // If url_value contains $earliest$ and $latest$ tokens, add in times to the source record.
     // Create a copy of the record as we are adding properties into it.
-    const record = cloneDeep(anomaly.source) as CustomUrlAnomalyRecordDoc;
+    const record = cloneDeep(anomaly.source) as MlCustomUrlAnomalyRecordDoc;
     const timestamp = record.timestamp;
     const configuredUrlValue = customUrl.url_value;
     const timeRangeInterval =
@@ -377,7 +377,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     } else {
       // Replace any tokens in the configured url_value with values from the source record,
       // and then open link in a new tab/window.
-      const urlPath = getUrlForRecord(customUrl, record as CustomUrlAnomalyRecordDoc);
+      const urlPath = getUrlForRecord(customUrl, record as MlCustomUrlAnomalyRecordDoc);
       openCustomUrlWindow(urlPath, customUrl, basePath);
     }
   };

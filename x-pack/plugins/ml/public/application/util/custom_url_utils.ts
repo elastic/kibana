@@ -15,7 +15,7 @@ import type {
   MlAnomalyRecordDoc,
   UrlConfig,
   KibanaUrlConfig,
-  CustomUrlAnomalyRecordDoc,
+  MlCustomUrlAnomalyRecordDoc,
 } from '@kbn/ml-anomaly-utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
@@ -61,7 +61,7 @@ export function replaceTokensInUrlValue(
     'time_range' in customUrlConfig && customUrlConfig.time_range
       ? parseInterval(customUrlConfig.time_range)
       : null;
-  const record = { ...doc } as CustomUrlAnomalyRecordDoc;
+  const record = { ...doc } as MlCustomUrlAnomalyRecordDoc;
   if (urlValue.includes('$earliest$')) {
     const earliestMoment = moment(timestamp);
     if (timeRangeInterval !== null) {
@@ -89,7 +89,7 @@ export function replaceTokensInUrlValue(
 // substituted from the supplied anomaly record.
 export function getUrlForRecord(
   urlConfig: UrlConfig | KibanaUrlConfig,
-  record: CustomUrlAnomalyRecordDoc | DataGridItem
+  record: MlCustomUrlAnomalyRecordDoc | DataGridItem
 ) {
   if (isKibanaUrl(urlConfig) === true) {
     return buildKibanaUrl(urlConfig, record);
@@ -196,7 +196,7 @@ export const getQueryField = (str: string): string => {
   return fieldName;
 };
 const getQueryStringResultProvider =
-  (record: CustomUrlAnomalyRecordDoc | DataGridItem, getResultTokenValue: GetResultTokenValue) =>
+  (record: MlCustomUrlAnomalyRecordDoc | DataGridItem, getResultTokenValue: GetResultTokenValue) =>
   (resultPrefix: string, queryString: string, resultPostfix: string, isKuery: boolean): string => {
     const URL_LENGTH_LIMIT = 2000;
 
@@ -255,7 +255,7 @@ const getQueryStringResultProvider =
  * Builds a Kibana dashboard or Discover URL from the supplied config, with any
  * dollar delimited tokens substituted from the supplied anomaly record.
  */
-function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc | DataGridItem) {
+function buildKibanaUrl(urlConfig: UrlConfig, record: MlCustomUrlAnomalyRecordDoc | DataGridItem) {
   const urlValue = urlConfig.url_value;
 
   const isLuceneQueryLanguage = urlValue.includes('language:lucene');

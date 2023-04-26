@@ -72,11 +72,11 @@ export type UrlConfig = BaseUrlConfig | KibanaUrlConfig;
  * Extended interface of MlAnomalyRecordDoc to include time range information.
  *
  * @export
- * @interface CustomUrlAnomalyRecordDoc
- * @typedef {CustomUrlAnomalyRecordDoc}
+ * @interface MlCustomUrlAnomalyRecordDoc
+ * @typedef {MlCustomUrlAnomalyRecordDoc}
  * @extends {MlAnomalyRecordDoc}
  */
-export interface CustomUrlAnomalyRecordDoc extends MlAnomalyRecordDoc {
+export interface MlCustomUrlAnomalyRecordDoc extends MlAnomalyRecordDoc {
   /**
    * The `earliest` timestamp.
    * @type {string}

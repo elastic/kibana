@@ -7,7 +7,7 @@
 
 import {
   MlAnomalyRecordDoc,
-  CustomUrlAnomalyRecordDoc,
+  MlCustomUrlAnomalyRecordDoc,
   KibanaUrlConfig,
   UrlConfig,
 } from '@kbn/ml-anomaly-utils';
@@ -48,7 +48,7 @@ describe('ML - custom URL utils', () => {
     airline: ['AAL'],
   };
 
-  const TEST_RECORD: CustomUrlAnomalyRecordDoc = {
+  const TEST_RECORD: MlCustomUrlAnomalyRecordDoc = {
     ...TEST_DOC,
     earliest: '2017-02-09T15:10:00.000Z',
     latest: '2017-02-09T17:15:00.000Z',
@@ -73,7 +73,7 @@ describe('ML - custom URL utils', () => {
     'odd:field,name': [">:&12<'"],
   };
 
-  const TEST_RECORD_MULTIPLE_INFLUENCER_VALUES: CustomUrlAnomalyRecordDoc = {
+  const TEST_RECORD_MULTIPLE_INFLUENCER_VALUES: MlCustomUrlAnomalyRecordDoc = {
     ...TEST_RECORD,
     influencers: [
       {
@@ -84,7 +84,7 @@ describe('ML - custom URL utils', () => {
     airline: ['AAL', 'AWE'],
   };
 
-  const TEST_RECORD_NO_INFLUENCER_VALUES: CustomUrlAnomalyRecordDoc = {
+  const TEST_RECORD_NO_INFLUENCER_VALUES: MlCustomUrlAnomalyRecordDoc = {
     ...TEST_RECORD,
     influencers: [
       {

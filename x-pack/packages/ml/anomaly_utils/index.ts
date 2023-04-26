@@ -36,7 +36,7 @@ export {
 
 export {
   isKibanaUrlConfigWithTimeRange,
-  type CustomUrlAnomalyRecordDoc,
+  type MlCustomUrlAnomalyRecordDoc,
   type KibanaUrlConfig,
   type UrlConfig,
 } from './custom_urls';
