@@ -22,7 +22,11 @@ export interface AlertsSearchBarProps {
   showSubmitButton?: boolean;
   placeholder?: string;
   submitOnBlur?: boolean;
-  onQueryChange: (query: {
+  onQueryChange?: (query: {
+    dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
+    query?: string;
+  }) => void;
+  onQuerySubmit?: (query: {
     dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
     query?: string;
   }) => void;
