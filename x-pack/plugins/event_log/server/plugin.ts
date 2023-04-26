@@ -12,12 +12,10 @@ import {
   Plugin as CorePlugin,
   PluginInitializerContext,
   IClusterClient,
-  IContextProvider,
 } from '@kbn/core/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import type {
-  EventLogRequestHandlerContext,
   IEventLogConfig,
   IEventLogService,
   IEventLogger,
@@ -86,11 +84,6 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       event: { provider: PROVIDER },
     });
 
-    core.http.registerRouteHandlerContext<EventLogRequestHandlerContext, 'eventLog'>(
-      'eventLog',
-      this.createRouteHandlerContext()
-    );
-
     return this.eventLogService;
   }
 
@@ -153,15 +146,4 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     await this.esContext?.shutdown();
     this.systemLogger.debug('shutdown: finished');
   }
-
-  private createRouteHandlerContext = (): IContextProvider<
-    EventLogRequestHandlerContext,
-    'eventLog'
-  > => {
-    return async (context, request) => {
-      return {
-        getEventLogClient: () => this.eventLogClientService!.getClient(request),
-      };
-    };
-  };
 }
