@@ -6,9 +6,9 @@
  */
 
 import { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
-import { MlClient } from '@kbn/ml-plugin/server/lib/ml_client';
 
 import { MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';
 
@@ -20,10 +20,10 @@ import {
 
 export const startMlModelDeployment = async (
   modelName: string,
-  mlClient: MlClient | undefined,
+  esClient: ElasticsearchClient | undefined,
   trainedModelsProvider: MlTrainedModels | undefined
 ): Promise<MlModelDeploymentStatus> => {
-  if (!trainedModelsProvider || !mlClient) {
+  if (!trainedModelsProvider || !esClient || !esClient.ml) {
     throw new Error('Machine Learning is not enabled');
   }
 
@@ -55,6 +55,6 @@ export const startMlModelDeployment = async (
     wait_for: 'started',
   };
 
-  await mlClient.startTrainedModelDeployment(startRequest);
+  await esClient.ml.startTrainedModelDeployment(startRequest);
   return await getMlModelDeploymentStatus(modelName, trainedModelsProvider);
 };

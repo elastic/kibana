@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from '@kbn/core/server';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
-import { MlClient } from '@kbn/ml-plugin/server/lib/ml_client/types';
 
 import { MlModelDeploymentState } from '../../../common/types/ml';
 
@@ -17,9 +17,11 @@ import { startMlModelDeployment } from './start_ml_model_deployment';
 
 describe('startMlModelDeployment', () => {
   const knownModelName = '.elser_model_1_SNAPSHOT';
-  const mockMlClient = {
-    putTrainedModel: jest.fn(),
+  const mockMl = {
     startTrainedModelDeployment: jest.fn(),
+  };
+  const mockEsClient = {
+    ml: mockMl,
   };
   const mockTrainedModelsProvider = {
     getTrainedModels: jest.fn(),
@@ -32,7 +34,11 @@ describe('startMlModelDeployment', () => {
 
   it('should error when there is no trained model provider', () => {
     expect(() =>
-      startMlModelDeployment(knownModelName, mockMlClient as unknown as MlClient, undefined)
+      startMlModelDeployment(
+        knownModelName,
+        mockEsClient as unknown as ElasticsearchClient,
+        undefined
+      )
     ).rejects.toThrowError('Machine Learning is not enabled');
   });
 
@@ -40,7 +46,7 @@ describe('startMlModelDeployment', () => {
     try {
       await startMlModelDeployment(
         'unknownModelName',
-        mockMlClient as unknown as MlClient,
+        mockEsClient as unknown as ElasticsearchClient,
         mockTrainedModelsProvider as unknown as MlTrainedModels
       );
     } catch (e) {
@@ -63,7 +69,7 @@ describe('startMlModelDeployment', () => {
 
     const response = await startMlModelDeployment(
       knownModelName,
-      mockMlClient as unknown as MlClient,
+      mockEsClient as unknown as ElasticsearchClient,
       mockTrainedModelsProvider as unknown as MlTrainedModels
     );
 
@@ -91,14 +97,14 @@ describe('startMlModelDeployment', () => {
           targetAllocationCount: 3,
         })
       );
-    mockMlClient.startTrainedModelDeployment.mockImplementation(async () => {});
+    mockMl.startTrainedModelDeployment.mockImplementation(async () => {});
 
     const response = await startMlModelDeployment(
       knownModelName,
-      mockMlClient as unknown as MlClient,
+      mockEsClient as unknown as ElasticsearchClient,
       mockTrainedModelsProvider as unknown as MlTrainedModels
     );
     expect(response.deploymentState).toEqual(MlModelDeploymentState.Starting);
-    expect(mockMlClient.startTrainedModelDeployment).toBeCalledTimes(1);
+    expect(mockMl.startTrainedModelDeployment).toBeCalledTimes(1);
   });
 });

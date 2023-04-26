@@ -13,8 +13,6 @@ import {
 import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
-import { getMlClient } from '@kbn/ml-plugin/server/lib/ml_client';
-import { mlSavedObjectServiceFactory } from '@kbn/ml-plugin/server/saved_objects';
 
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -1014,21 +1012,12 @@ export function registerIndexRoutes({
         ? await ml.trainedModelsProvider(request, savedObjectsClient)
         : undefined;
 
-      const savedObjectService = mlSavedObjectServiceFactory(
-        savedObjectsClient,
-        savedObjectsClient,
-        true,
-        undefined,
-        client,
-        () => Promise.resolve()
-      );
-
-      const mlClient = savedObjectService
-        ? await getMlClient(client, savedObjectService)
-        : undefined;
-
       try {
-        const deployResult = await startMlModelDownload(modelName, mlClient, trainedModelsProvider);
+        const deployResult = await startMlModelDownload(
+          modelName,
+          client.asCurrentUser,
+          trainedModelsProvider
+        );
 
         return response.ok({
           body: deployResult,
@@ -1069,23 +1058,10 @@ export function registerIndexRoutes({
         ? await ml.trainedModelsProvider(request, savedObjectsClient)
         : undefined;
 
-      const savedObjectService = mlSavedObjectServiceFactory(
-        savedObjectsClient,
-        savedObjectsClient,
-        true,
-        undefined,
-        client,
-        () => Promise.resolve() // pretend isMlReady, to allow us to initialize the saved objects
-      );
-
-      const mlClient = savedObjectService
-        ? await getMlClient(client, savedObjectService)
-        : undefined;
-
       try {
         const deployResult = await startMlModelDeployment(
           modelName,
-          mlClient,
+          client.asCurrentUser,
           trainedModelsProvider
         );
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from '@kbn/core/server';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
-import { MlClient } from '@kbn/ml-plugin/server/lib/ml_client/types';
 
 import { MlModelDeploymentState } from '../../../common/types/ml';
 
@@ -17,9 +17,11 @@ import { startMlModelDownload } from './start_ml_model_download';
 
 describe('startMlModelDownload', () => {
   const knownModelName = '.elser_model_1_SNAPSHOT';
-  const mockMlClient = {
+  const mockMl = {
     putTrainedModel: jest.fn(),
-    startTrainedModelDeployment: jest.fn(),
+  };
+  const mockEsClient = {
+    ml: mockMl,
   };
   const mockTrainedModelsProvider = {
     getTrainedModels: jest.fn(),
@@ -32,7 +34,11 @@ describe('startMlModelDownload', () => {
 
   it('should error when there is no trained model provider', () => {
     expect(() =>
-      startMlModelDownload(knownModelName, mockMlClient as unknown as MlClient, undefined)
+      startMlModelDownload(
+        knownModelName,
+        mockEsClient as unknown as ElasticsearchClient,
+        undefined
+      )
     ).rejects.toThrowError('Machine Learning is not enabled');
   });
 
@@ -40,7 +46,7 @@ describe('startMlModelDownload', () => {
     try {
       await startMlModelDownload(
         'unknownModelName',
-        mockMlClient as unknown as MlClient,
+        mockEsClient as unknown as ElasticsearchClient,
         mockTrainedModelsProvider as unknown as MlTrainedModels
       );
     } catch (e) {
@@ -63,7 +69,7 @@ describe('startMlModelDownload', () => {
 
     const response = await startMlModelDownload(
       knownModelName,
-      mockMlClient as unknown as MlClient,
+      mockEsClient as unknown as ElasticsearchClient,
       mockTrainedModelsProvider as unknown as MlTrainedModels
     );
 
@@ -92,14 +98,14 @@ describe('startMlModelDownload', () => {
         })
       );
 
-    mockMlClient.putTrainedModel.mockImplementation(async () => {});
+    mockMl.putTrainedModel.mockImplementation(async () => {});
 
     const response = await startMlModelDownload(
       knownModelName,
-      mockMlClient as unknown as MlClient,
+      mockEsClient as unknown as ElasticsearchClient,
       mockTrainedModelsProvider as unknown as MlTrainedModels
     );
     expect(response.deploymentState).toEqual(MlModelDeploymentState.Downloading);
-    expect(mockMlClient.putTrainedModel).toBeCalledTimes(1);
+    expect(mockMl.putTrainedModel).toBeCalledTimes(1);
   });
 });
