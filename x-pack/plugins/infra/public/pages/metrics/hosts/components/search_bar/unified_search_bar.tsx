@@ -101,7 +101,7 @@ const StickyContainer = (props: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
 
   const top = useMemo(() => {
-    const wrapper = document.querySelector(`[data-test-subj="${METRICS_APP_DATA_TEST_SUBJ}"]`);
+    const wrapper = document.querySelector(`[data-test-subj="kibanaChrome"]`);
     if (!wrapper) {
       return `calc(${euiTheme.size.xxxl} * 2)`;
     }
