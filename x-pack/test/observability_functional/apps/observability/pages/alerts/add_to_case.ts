@@ -12,7 +12,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const observability = getService('observability');
   const retry = getService('retry');
 
-  describe('Observability alerts / Add to case', function () {
+  describe('Observability alerts / Add to case >', function () {
     this.tags('includeFirefox');
 
     before(async () => {
