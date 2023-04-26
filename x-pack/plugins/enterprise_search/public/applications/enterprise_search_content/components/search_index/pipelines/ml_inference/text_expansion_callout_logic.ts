@@ -18,6 +18,7 @@ import {
   FetchTextExpansionModelApiLogicActions,
   FetchTextExpansionModelResponse,
 } from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
+import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 
 // On page load: call Get API
 // - If no model -> Deploy button
@@ -131,7 +132,7 @@ export const TextExpansionCalloutLogic = kea<
       }
     },
     fetchTextExpansionModelSuccess: (data) => {
-      if (data?.deploymentState === 'downloading') {
+      if (data?.deploymentState === MlModelDeploymentState.Downloading) {
         if (!values.isPollingTextExpansionModelActive) {
           actions.startPollingTextExpansionModel();
         } else {
@@ -140,7 +141,7 @@ export const TextExpansionCalloutLogic = kea<
           );
         }
       } else if (
-        data?.deploymentState === 'is_fully_downloaded' &&
+        data?.deploymentState === MlModelDeploymentState.Downloaded &&
         values.isPollingTextExpansionModelActive
       ) {
         actions.stopPollingTextExpansionModel();
@@ -176,11 +177,11 @@ export const TextExpansionCalloutLogic = kea<
     ],
     isModelDownloadInProgress: [
       () => [selectors.textExpansionModel],
-      (data: FetchTextExpansionModelResponse) => data?.deploymentState === 'downloading',
+      (data: FetchTextExpansionModelResponse) => data?.deploymentState === MlModelDeploymentState.Downloading,
     ],
     isModelDownloaded: [
       () => [selectors.textExpansionModel],
-      (data: FetchTextExpansionModelResponse) => data?.deploymentState === 'is_fully_downloaded',
+      (data: FetchTextExpansionModelResponse) => data?.deploymentState === MlModelDeploymentState.Downloaded,
     ],
     isPollingTextExpansionModelActive: [
       () => [selectors.textExpansionModelPollTimeoutId],
