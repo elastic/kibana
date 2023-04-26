@@ -71,7 +71,7 @@ export const EngineConnect: React.FC = () => {
         isLoading={isLoadingEngine}
         pageHeader={{
           bottomBorder: false,
-          className: 'searchApplciationHeaderBackgroundColor',
+          className: 'searchApplicationHeaderBackgroundColor',
           pageTitle,
           rightSideItems: [],
         }}
@@ -89,7 +89,7 @@ export const EngineConnect: React.FC = () => {
       isLoading={isLoadingEngine}
       pageHeader={{
         bottomBorder: false,
-        className: 'searchApplciationHeaderBackgroundColor',
+        className: 'searchApplicationHeaderBackgroundColor',
         pageTitle,
         rightSideItems: [],
         tabs: [

@@ -315,7 +315,7 @@ export const EngineSearchPreview: React.FC = () => {
       isLoading={isLoadingEngine}
       pageHeader={{
         bottomBorder: false,
-        className: 'searchApplciationHeaderBackgroundColor',
+        className: 'searchApplicationHeaderBackgroundColor',
         pageTitle: (
           <FormattedMessage
             id="xpack.enterpriseSearch.content.engine.searchPreview.pageTitle"

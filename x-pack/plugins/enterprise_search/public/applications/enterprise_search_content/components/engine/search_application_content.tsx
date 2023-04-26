@@ -80,7 +80,7 @@ export const SearchApplicationContent = () => {
         isLoading={isLoadingEngine}
         pageHeader={{
           bottomBorder: false,
-          className: 'searchApplciationHeaderBackgroundColor',
+          className: 'searchApplicationHeaderBackgroundColor',
           pageTitle,
           rightSideItems: [],
         }}
@@ -123,7 +123,7 @@ export const SearchApplicationContent = () => {
             ),
           },
         ],
-        className: 'searchApplciationHeaderBackgroundColor',
+        className: 'searchApplicationHeaderBackgroundColor',
         pageTitle,
         rightSideItems: [
           <EuiButton
