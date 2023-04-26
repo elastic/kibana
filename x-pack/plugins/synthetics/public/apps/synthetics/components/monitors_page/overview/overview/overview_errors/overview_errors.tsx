@@ -13,9 +13,10 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { useMonitorQueryIds } from '../overview_alerts';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { OverviewErrorsSparklines } from './overview_errors_sparklines';
 import { useRefreshedRange, useGetUrlParams } from '../../../../../hooks';
@@ -28,20 +29,9 @@ export function OverviewErrors() {
 
   const { from, to } = useRefreshedRange(6, 'hours');
 
-  const { statusFilter, locations } = useGetUrlParams();
+  const { locations } = useGetUrlParams();
 
-  const monitorIds = useMemo(() => {
-    if (statusFilter === 'up') {
-      return status
-        ? Object.entries(status.upConfigs).map(([id, config]) => config.monitorQueryId)
-        : [];
-    } else if (statusFilter === 'down') {
-      return status
-        ? Object.entries(status.downConfigs).map(([id, config]) => config.monitorQueryId)
-        : [];
-    }
-    return status?.enabledMonitorQueryIds ?? [];
-  }, [status, statusFilter]);
+  const monitorIds = useMonitorQueryIds();
 
   return (
     <EuiPanel hasShadow={false} hasBorder>
