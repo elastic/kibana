@@ -13,7 +13,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
@@ -28,7 +28,20 @@ export function OverviewErrors() {
 
   const { from, to } = useRefreshedRange(6, 'hours');
 
-  const params = useGetUrlParams();
+  const { statusFilter, locations } = useGetUrlParams();
+
+  const monitorIds = useMemo(() => {
+    if (statusFilter === 'up') {
+      return status
+        ? Object.entries(status.upConfigs).map(([id, config]) => config.monitorQueryId)
+        : [];
+    } else if (statusFilter === 'down') {
+      return status
+        ? Object.entries(status.downConfigs).map(([id, config]) => config.monitorQueryId)
+        : [];
+    }
+    return status?.enabledMonitorQueryIds ?? [];
+  }, [status, statusFilter]);
 
   return (
     <EuiPanel hasShadow={false} hasBorder>
@@ -44,16 +57,16 @@ export function OverviewErrors() {
             <OverviewErrorsCount
               from={from}
               to={to}
-              monitorIds={status?.enabledMonitorQueryIds ?? []}
-              locations={params.locations}
+              monitorIds={monitorIds}
+              locations={locations}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <OverviewErrorsSparklines
               from={from}
               to={to}
-              monitorIds={status?.enabledMonitorQueryIds ?? []}
-              locations={params.locations}
+              monitorIds={monitorIds}
+              locations={locations}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
