@@ -93,7 +93,7 @@ const RuleNameGroupContent = React.memo<{
 });
 RuleNameGroupContent.displayName = 'RuleNameGroup';
 
-const HostNameGroupContent = React.memo<{ hostName: string | string[]; nullGroupMessage: string }>(
+const HostNameGroupContent = React.memo<{ hostName: string | string[]; nullGroupMessage?: string }>(
   ({ hostName, nullGroupMessage }) => (
     <EuiFlexGroup
       data-test-subj="host-name-group-renderer"
@@ -116,7 +116,7 @@ const HostNameGroupContent = React.memo<{ hostName: string | string[]; nullGroup
           <h5>{hostName}</h5>
         </EuiTitle>
       </EuiFlexItem>
-      {nullGroupMessage.length > 0 && (
+      {nullGroupMessage && (
         <EuiFlexItem grow={false}>
           <EuiIconTip content={nullGroupMessage} position="right" />
         </EuiFlexItem>
@@ -126,7 +126,7 @@ const HostNameGroupContent = React.memo<{ hostName: string | string[]; nullGroup
 );
 HostNameGroupContent.displayName = 'HostNameGroupContent';
 
-const UserNameGroupContent = React.memo<{ userName: string | string[]; nullGroupMessage: string }>(
+const UserNameGroupContent = React.memo<{ userName: string | string[]; nullGroupMessage?: string }>(
   ({ userName, nullGroupMessage }) => {
     const userNameValue = firstNonNullValue(userName) ?? '-';
     return (
@@ -140,7 +140,7 @@ const UserNameGroupContent = React.memo<{ userName: string | string[]; nullGroup
             <h5>{userName}</h5>
           </EuiTitle>
         </EuiFlexItem>
-        {nullGroupMessage.length > 0 && (
+        {nullGroupMessage && (
           <EuiFlexItem grow={false}>
             <EuiIconTip content={nullGroupMessage} position="right" />
           </EuiFlexItem>
@@ -151,7 +151,7 @@ const UserNameGroupContent = React.memo<{ userName: string | string[]; nullGroup
 );
 UserNameGroupContent.displayName = 'UserNameGroupContent';
 
-const SourceIpGroupContent = React.memo<{ sourceIp: string | string[]; nullGroupMessage: string }>(
+const SourceIpGroupContent = React.memo<{ sourceIp: string | string[]; nullGroupMessage?: string }>(
   ({ sourceIp, nullGroupMessage }) => (
     <EuiFlexGroup data-test-subj="source-ip-group-renderer" gutterSize="s" alignItems="center">
       <EuiFlexItem
@@ -168,7 +168,7 @@ const SourceIpGroupContent = React.memo<{ sourceIp: string | string[]; nullGroup
           <h5>{sourceIp}</h5>
         </EuiTitle>
       </EuiFlexItem>
-      {nullGroupMessage.length > 0 && (
+      {nullGroupMessage && (
         <EuiFlexItem grow={false}>
           <EuiIconTip content={nullGroupMessage} position="right" />
         </EuiFlexItem>

@@ -105,7 +105,7 @@ const GroupingComponent = <T,>({
         const isNullGroup = groupBucket.isNullGroup ?? false;
         const nullGroupMessage = isNullGroup
           ? NULL_GROUP(selectedGroup, unit(groupBucket.doc_count))
-          : '';
+          : undefined;
         if (isNullGroup) {
           setNullCount({ unit: groupBucket.doc_count, group: 1 });
         }
