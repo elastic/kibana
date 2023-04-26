@@ -71,9 +71,9 @@ export type AlertsTableStateProps = {
   showAlertStatusWithFlapping?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
   /**
-   * Allows to add a custom CSS class per row for customization.
+   * Allows to consumers of the table to decide to highlight a row based on the current alert.
    */
-  rowClassMapper?: (alert: Alert) => string | undefined;
+  highlightedRowMapper?: (alert: Alert) => boolean;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -142,7 +142,7 @@ const AlertsTableStateWithQueryProvider = ({
   onUpdate,
   showAlertStatusWithFlapping,
   toolbarVisibility,
-  rowClassMapper,
+  highlightedRowMapper,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
 
@@ -358,7 +358,7 @@ const AlertsTableStateWithQueryProvider = ({
       controls: persistentControls,
       showInspectButton,
       toolbarVisibility,
-      rowClassMapper,
+      highlightedRowMapper,
     }),
     [
       alertsTableConfiguration,
@@ -386,7 +386,7 @@ const AlertsTableStateWithQueryProvider = ({
       persistentControls,
       showInspectButton,
       toolbarVisibility,
-      rowClassMapper,
+      highlightedRowMapper,
     ]
   );
 

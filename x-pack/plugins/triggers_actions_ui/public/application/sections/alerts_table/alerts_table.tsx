@@ -33,8 +33,6 @@ import { SystemCellId } from './types';
 import { SystemCellFactory, systemCells } from './cells';
 import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
 
-export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
-
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const DefaultGridStyle: EuiDataGridStyle = {
   border: 'none',
@@ -289,9 +287,29 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     // Row classes do not deal with visible row indices, so we need to handle page offset
     const rowIndex = flyoutAlertIndex + pagination.pageIndex * pagination.pageSize;
     setActiveRowClasses({
-      [rowIndex]: ACTIVE_ROW_CLASS,
+      [rowIndex]: 'alertsTableActiveRow',
     });
   }, [flyoutAlertIndex, pagination.pageIndex, pagination.pageSize]);
+
+  // Update highlighted rows when alerts or pagination changes
+  const highlightedRowClasses = useMemo(() => {
+    let mappedRowClasses: EuiDataGridStyle['rowClasses'] = {};
+    const highlightedRowMapper = props.highlightedRowMapper;
+    if (highlightedRowMapper) {
+      mappedRowClasses = alerts.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
+        (rowClasses, alert, index) => {
+          const shouldHighlightRow = highlightedRowMapper(alert);
+          if (shouldHighlightRow) {
+            rowClasses[index + pagination.pageIndex * pagination.pageSize] =
+              'alertsTableHighlightedRow';
+          }
+          return rowClasses;
+        },
+        {}
+      );
+    }
+    return mappedRowClasses;
+  }, [props.highlightedRowMapper, alerts, pagination.pageIndex, pagination.pageSize]);
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
 
@@ -380,40 +398,26 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   }, [getCellActions, disabledCellActions, props.columns, visibleCellActions]);
 
   // Merges the default grid style with the grid style that comes in through props.
-  // In addition, merge rowclasses and styles to allow for active flyout row to be highlighted.
-  // When a rowClassMapper is passed in, generate those classes and merge them with the active ones.
   const actualGridStyle = useMemo(() => {
     const propGridStyle: NonNullable<EuiDataGridStyle> = props.gridStyle ?? {};
     // Merges default row classes, custom ones and adds the active row class style
     const mergedGridStyle: EuiDataGridStyle = {
       ...DefaultGridStyle,
       ...propGridStyle,
-      rowClasses: activeRowClasses,
+      rowClasses: {
+        // We're spreadind the highlighted row classes first, so that the active
+        // row classed can override the highlighted row classes.
+        ...highlightedRowClasses,
+        ...activeRowClasses,
+      },
     };
 
-    // Generate rowClasses from `rowClassMapper` when one was provided
-    let mappedRowClasses: EuiDataGridStyle['rowClasses'];
-    const rowClassMapper = props.rowClassMapper;
-    if (rowClassMapper) {
-      mappedRowClasses = alerts.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
-        (rowClasses, alert, index) => {
-          const rowClass = rowClassMapper(alert);
-          if (rowClass) {
-            rowClasses[index + pagination.pageIndex * pagination.pageSize] = rowClass;
-          }
-          return rowClasses;
-        },
-        {}
-      );
-    }
-
-    // If ANY additional rowClasses have been provided, we need to merge them
-    if (propGridStyle.rowClasses || mappedRowClasses) {
+    // If ANY additional rowClasses have been provided, we need to merge them with our internal ones
+    if (propGridStyle.rowClasses) {
       // Get all row indices with a rowClass.
       const mergedKeys = [
         ...Object.keys(activeRowClasses),
         ...Object.keys(propGridStyle.rowClasses || {}),
-        ...Object.keys(mappedRowClasses || {}),
       ];
       // Deduplicate keys to avoid extra iterations
       const dedupedKeys = Array.from(new Set(mergedKeys));
@@ -425,11 +429,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
           // Concatenate class names for active row class and passed-in row class
           // (if either exists)
-          rowClasses[intKey] = [
-            activeRowClasses[intKey],
-            propGridStyle.rowClasses?.[intKey],
-            mappedRowClasses?.[intKey],
-          ]
+          rowClasses[intKey] = [activeRowClasses[intKey], propGridStyle.rowClasses?.[intKey]]
             .filter(Boolean)
             .join(' ');
           return rowClasses;
@@ -439,7 +439,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       mergedGridStyle.rowClasses = mergedRowClasses;
     }
     return mergedGridStyle;
-  }, [alerts, activeRowClasses, props.rowClassMapper, pagination, props.gridStyle]);
+  }, [activeRowClasses, highlightedRowClasses, props.gridStyle]);
 
   return (
     <InspectButtonContainer>

@@ -48,7 +48,6 @@ import { buildTimeRangeFilter } from './helpers';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import type { State } from '../../../common/store';
 import * as i18n from './translations';
-import './index.scss';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
@@ -248,9 +247,8 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   );
 
   // Highlight rows with building block alerts
-  const rowClassMapper: AlertsTableStateProps['rowClassMapper'] = useCallback(
-    (alert: Alert) =>
-      alert[ALERT_BUILDING_BLOCK_TYPE] ? 'alertsTable-rowBackgroundHighlighted' : '',
+  const highlightedRowMapper: AlertsTableStateProps['highlightedRowMapper'] = useCallback(
+    (alert: Alert) => !!alert[ALERT_BUILDING_BLOCK_TYPE],
     []
   );
 
@@ -265,7 +263,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       query: finalBoolQuery,
       showExpandToDetails: false,
       gridStyle,
-      rowClassMapper,
+      highlightedRowMapper,
       rowHeightsOptions,
       columns: finalColumns,
       browserFields: finalBrowserFields,
@@ -281,7 +279,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       triggersActionsUi.alertsTableConfigurationRegistry,
       flyoutSize,
       gridStyle,
-      rowClassMapper,
+      highlightedRowMapper,
       rowHeightsOptions,
       finalColumns,
       finalBrowserFields,

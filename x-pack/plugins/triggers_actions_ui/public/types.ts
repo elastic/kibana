@@ -533,9 +533,9 @@ export type AlertsTableProps = {
   showInspectButton?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
   /**
-   * Allows to add a custom CSS class per row for customization.
+   * Allows to consumers of the table to decide to highlight a row based on the current alert.
    */
-  rowClassMapper?: (alert: Alert) => string | undefined;
+  highlightedRowMapper?: (alert: Alert) => boolean;
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
