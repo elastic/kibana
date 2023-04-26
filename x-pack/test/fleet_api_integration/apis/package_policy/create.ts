@@ -711,6 +711,14 @@ export default function (providerContext: FtrProviderContext) {
       expect(createdPackagePolicy.inputs[0].streams[0].compiled_stream).to.eql(
         expectedCompiledStream
       );
+
+      const expectedCompiledInput = {
+        package_var_secret: `$elastic.co.secret{${packageVarId}}`,
+        input_var_secret: `$elastic.co.secret{${inputVarId}}`,
+      };
+
+      expect(createdPackagePolicy.inputs[0].compiled_input).to.eql(expectedCompiledInput);
+
       expect(createdPackagePolicy.vars.package_var_secret.value.isSecretRef).to.eql(true);
       expect(createdPackagePolicy.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(true);
       expect(
