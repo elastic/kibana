@@ -18,6 +18,7 @@ import {
   getEndpointIntegrationVersion,
   reassignAgentPolicy,
 } from '../../tasks/fleet';
+import { changeAlertsFilter, refreshEventDetailsFlyoutAndCheckStatus } from '../../tasks/alerts';
 
 describe('Automated Response Actions', () => {
   const endpointHostname = Cypress.env(ENDPOINT_VM_NAME);
@@ -69,13 +70,24 @@ describe('Automated Response Actions', () => {
 
     it('should display endpoint automated response action in event details flyout ', () => {
       visitRuleAlerts(ruleName);
-
       closeAllToasts();
+
+      changeAlertsFilter('event.category: "file"');
+
       // wait for Endpoint to get isolated
       cy.getByTestSubj('expand-event').first().click();
       cy.getByTestSubj('endpointViewTab').click();
       cy.getByTestSubj('endpoint-actions-notification').should('not.have.text', '0');
+      cy.get('body').then(($body) => {
+        if ($body.text().includes('Pending')) {
+          refreshEventDetailsFlyoutAndCheckStatus();
+        }
+      });
       cy.getByTestSubj('endpoint-actions-results-table').within(() => {
+        cy.getByTestSubj('endpoint-actions-results-table-column-hostname').contains(
+          endpointHostname
+        );
+        cy.getByTestSubj('endpoint-actions-results-table-column-hostname').contains(unenrolledHost);
         cy.get('tbody tr').each(($tr, index) => {
           cy.wrap($tr).within(() => {
             cy.contains('Triggered by rule');
@@ -92,9 +104,10 @@ describe('Automated Response Actions', () => {
                   endpointHostname
                 );
                 cy.getByTestSubj('endpoint-actions-results-table-column-status').contains(
-                  'Successful',
-                  { timeout: 120000 }
+                  'Successful'
                 );
+                cy.getByTestSubj('endpoint-actions-results-table-expand-button').click();
+                cy.wrap($tr).parent().contains('isolate completed successfully');
               }
             });
           });

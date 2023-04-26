@@ -168,3 +168,23 @@ export const getEndpointDetectionAlertsQueryForAgentId = (endpointAgentId: strin
     },
   };
 };
+
+export const changeAlertsFilter = (text: string) => {
+  cy.getByTestSubj('queryInput')
+    .click()
+    .type(text)
+    .then(() => {
+      cy.getByTestSubj('querySubmitButton').click();
+    });
+};
+
+export const refreshEventDetailsFlyoutAndCheckStatus = () => {
+  cy.getByTestSubj('euiFlyoutCloseButton').click();
+  cy.getByTestSubj('expand-event').first().click();
+  cy.getByTestSubj('endpointViewTab').click();
+  cy.getByTestSubj('endpoint-actions-results-table-column-status').then(($status) => {
+    if ($status.text().includes('Pending')) {
+      refreshEventDetailsFlyoutAndCheckStatus();
+    }
+  });
+};
