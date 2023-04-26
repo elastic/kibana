@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { isConfigSchema } from './is_config_schema';
+export { isKbnSchema } from './is_kbn_schema';

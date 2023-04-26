@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Type } from '../types';
+import { Type, symbol } from '../types/type';
 
-export function isConfigSchema(obj: any): obj is Type<any> {
-  return obj ? obj.__isKbnConfigSchemaType === true : false;
+export function isKbnSchema(obj: unknown): obj is Type<any> {
+  return obj ? (obj as any).__isKbnConfigSchemaType === symbol : false;
 }
