@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { APPLICATIONS_PLUGIN } from '../../../../../common/constants';
+import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
 import { SetEnterpriseSearchEnginesChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchEngineNav } from '../../../shared/layout';
@@ -26,7 +26,7 @@ export const EnterpriseSearchEnginesPageTemplate: React.FC<
       {...pageTemplateProps}
       solutionNav={{
         items: navItems,
-        name: APPLICATIONS_PLUGIN.NAME,
+        name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
       }}
       restrictWidth
       setPageChrome={pageChrome && <SetEnterpriseSearchEnginesChrome trail={pageChrome} />}

@@ -164,11 +164,7 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
       <EngineListIndicesFlyout />
       {createEngineFlyoutOpen && <CreateEngineFlyout onClose={() => navigateToUrl(ENGINES_PATH)} />}
       <EnterpriseSearchEnginesPageTemplate
-        pageChrome={[
-          i18n.translate('xpack.enterpriseSearch.content.searchApplications.breadcrumb', {
-            defaultMessage: 'Search Applications',
-          }),
-        ]}
+        pageChrome={[]}
         pageHeader={{
           description: (
             <FormattedMessage
