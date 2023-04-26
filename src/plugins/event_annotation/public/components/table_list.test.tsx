@@ -24,13 +24,19 @@ import { act } from 'react-dom/test-utils';
 import { EventAnnotationGroupEditor } from './event_annotation_group_editor';
 
 describe('annotation list view', () => {
+  const adHocDVId = 'ad-hoc';
+
   const group: EventAnnotationGroupConfig = {
     annotations: [],
     description: '',
     tags: [],
-    indexPatternId: 'my-index-pattern',
+    indexPatternId: adHocDVId,
     title: 'My group',
     ignoreGlobalFilters: false,
+    dataViewSpec: {
+      id: adHocDVId,
+      title: 'Ad hoc data view',
+    },
   };
 
   let wrapper: ShallowWrapper<typeof EventAnnotationGroupTableList>;
@@ -66,6 +72,12 @@ describe('annotation list view', () => {
         parentProps={{
           onFetchSuccess: () => {},
         }}
+        dataViewListItems={[
+          {
+            id: 'some-id',
+            title: 'Some data view',
+          },
+        ]}
       />
     );
   });
@@ -73,7 +85,7 @@ describe('annotation list view', () => {
   it('renders a table list view', () => {
     expect(wrapper.debug()).toMatchInlineSnapshot(`
       "<Fragment>
-        <Memo(TableListComp) tableCaption=\\"Annotation Library\\" findItems={[Function (anonymous)]} deleteItems={[Function (anonymous)]} editItem={[Function (anonymous)]} listingLimit={30} initialPageSize={10} initialFilter=\\"\\" entityName=\\"annotation group\\" entityNamePlural=\\"annotation groups\\" onClickTitle={[Function: onClickTitle]} onFetchSuccess={[Function: onFetchSuccess]} />
+        <Memo(TableListComp) refreshListBouncer={false} tableCaption=\\"Annotation Library\\" findItems={[Function (anonymous)]} deleteItems={[Function (anonymous)]} editItem={[Function (anonymous)]} listingLimit={30} initialPageSize={10} initialFilter=\\"\\" entityName=\\"annotation group\\" entityNamePlural=\\"annotation groups\\" onClickTitle={[Function: onClickTitle]} onFetchSuccess={[Function: onFetchSuccess]} />
       </Fragment>"
     `);
   });
@@ -155,6 +167,7 @@ describe('annotation list view', () => {
 
     it('edits existing group', async () => {
       expect(wrapper.find(EuiFlyout).exists()).toBeFalsy();
+      const initialBouncerValue = wrapper.find(TableList).prop('refreshListBouncer');
 
       act(() => {
         wrapper.find(TableList).prop('editItem')!({ id: '1234' } as UserContentCommonSchema);
@@ -168,6 +181,23 @@ describe('annotation list view', () => {
       expect(wrapper.find(EuiFlyout).exists()).toBeTruthy();
 
       const updatedGroup = { ...group, tags: ['my-new-tag'] };
+
+      expect(wrapper.find(EventAnnotationGroupEditor).prop('adHocDataViewSpec')).toBe(
+        group.dataViewSpec
+      );
+      expect(wrapper.find(EventAnnotationGroupEditor).prop('dataViewListItems'))
+        .toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "some-id",
+            "title": "Some data view",
+          },
+          Object {
+            "id": "ad-hoc",
+            "title": "Ad hoc data view",
+          },
+        ]
+      `);
 
       wrapper.find(EventAnnotationGroupEditor).prop('update')(updatedGroup);
 
@@ -185,6 +215,7 @@ describe('annotation list view', () => {
       );
 
       expect(wrapper.find(EuiFlyout).exists()).toBeFalsy();
+      expect(wrapper.find(TableList).prop('refreshListBouncer')).not.toBe(initialBouncerValue); // (should refresh list)
     });
   });
 });

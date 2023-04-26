@@ -11,6 +11,7 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/types';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { EventAnnotationService } from './event_annotation_service';
@@ -28,6 +29,7 @@ export interface EventAnnotationStartDependencies {
   data: DataPublicPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 interface SetupDependencies {
@@ -66,11 +68,14 @@ export class EventAnnotationPlugin
           pluginsStart.savedObjectsManagement
         ).getService();
 
+        const dataViewListItems = await pluginsStart.dataViews.getIdsWithTitle();
+
         const services: EventAnnotationListingPageServices = {
           core: coreStart,
           savedObjectsTagging: pluginsStart.savedObjectsTagging,
           eventAnnotationService,
           PresentationUtilContextProvider: pluginsStart.presentationUtil.ContextProvider,
+          dataViewListItems,
         };
 
         // TODO wire parent props

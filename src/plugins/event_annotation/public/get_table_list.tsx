@@ -15,6 +15,7 @@ import {
 } from '@kbn/content-management-table-list';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { EventAnnotationGroupTableList } from './components/table_list';
 import { EventAnnotationServiceType } from './event_annotation_service/types';
 
@@ -23,6 +24,7 @@ export interface EventAnnotationListingPageServices {
   savedObjectsTagging: SavedObjectsTaggingApi;
   eventAnnotationService: EventAnnotationServiceType;
   PresentationUtilContextProvider: FC;
+  dataViewListItems: DataViewListItem[];
 }
 
 export const getTableList = (
@@ -44,6 +46,7 @@ export const getTableList = (
         eventAnnotationService={services.eventAnnotationService}
         visualizeCapabilities={services.core.application.capabilities.visualize}
         parentProps={parentProps}
+        dataViewListItems={services.dataViewListItems}
       />
     </TableListViewKibanaProvider>
   );

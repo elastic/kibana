@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { EventAnnotationGroupConfig } from '../../common';
 import type { EventAnnotationServiceType } from '../event_annotation_service/types';
 import { EventAnnotationGroupEditor } from './event_annotation_group_editor';
@@ -39,12 +40,14 @@ export const EventAnnotationGroupTableList = ({
   visualizeCapabilities,
   savedObjectsTagging,
   parentProps,
+  dataViewListItems: globalDataViewListItems,
 }: {
   uiSettings: IUiSettingsClient;
   eventAnnotationService: EventAnnotationServiceType;
   visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
   savedObjectsTagging: SavedObjectsTaggingApi;
   parentProps: TableListTabParentProps;
+  dataViewListItems: DataViewListItem[];
 }) => {
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -77,10 +80,36 @@ export const EventAnnotationGroupTableList = ({
     [eventAnnotationService, listingLimit]
   );
 
-  const [groupToEditInfo, setGroupToEditInfo] = useState<{
+  const [adHocDataViewSpec, setAdHocDataViewSpec] = useState<DataViewSpec>();
+
+  const dataViewListItems = useMemo(() => {
+    const items = [...globalDataViewListItems];
+    if (adHocDataViewSpec) {
+      const { id, name, title } = adHocDataViewSpec;
+      const adHocListItem: DataViewListItem = {
+        id: id!,
+        title: name ?? title!,
+      };
+      items.push(adHocListItem);
+    }
+    return items;
+  }, [adHocDataViewSpec, globalDataViewListItems]);
+
+  const [groupToEditInfo, _setGroupToEditInfo] = useState<{
     group: EventAnnotationGroupConfig;
     id?: string;
   }>();
+
+  const setGroupToEditInfo = useCallback(
+    (newGroupToEditInfo?: { group: EventAnnotationGroupConfig; id?: string }) => {
+      if (newGroupToEditInfo?.id !== groupToEditInfo?.id) {
+        // this should only happen once when the group is first loaded for editing
+        setAdHocDataViewSpec(newGroupToEditInfo?.group.dataViewSpec);
+      }
+      _setGroupToEditInfo(newGroupToEditInfo);
+    },
+    [groupToEditInfo?.id]
+  );
 
   const flyoutHeadingId = useMemo(() => htmlIdGenerator()(), []);
 
@@ -88,7 +117,12 @@ export const EventAnnotationGroupTableList = ({
     <EuiFlyout onClose={() => setGroupToEditInfo(undefined)} size={'s'}>
       <EuiFlyoutHeader hasBorder aria-labelledby={flyoutHeadingId}>
         <EuiTitle>
-          <h2 id={flyoutHeadingId}>Edit annotation group</h2>
+          <h2 id={flyoutHeadingId}>
+            <FormattedMessage
+              id="eventAnnotation.groupEditor.title"
+              defaultMessage="Edit annotation group"
+            />
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
@@ -97,6 +131,8 @@ export const EventAnnotationGroupTableList = ({
           group={groupToEditInfo.group}
           update={(group) => setGroupToEditInfo({ ...groupToEditInfo, group })}
           savedObjectsTagging={savedObjectsTagging}
+          dataViewListItems={dataViewListItems}
+          adHocDataViewSpec={adHocDataViewSpec}
         />
       </EuiFlyoutBody>
 
@@ -140,7 +176,6 @@ export const EventAnnotationGroupTableList = ({
     <>
       <TableList<EventAnnotationGroupContent>
         refreshListBouncer={refreshListBouncer}
-        // createItem={createNewGroup}
         tableCaption={i18n.translate('eventAnnotation.tableList.listTitle', {
           defaultMessage: 'Annotation Library',
         })}

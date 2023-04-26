@@ -6,8 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { EuiFieldText, EuiForm, EuiFormRow, EuiText, EuiTextArea, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSelect,
+  EuiText,
+  EuiTextArea,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
@@ -18,10 +27,14 @@ export const EventAnnotationGroupEditor = ({
   group,
   update,
   savedObjectsTagging,
+  dataViewListItems,
+  adHocDataViewSpec,
 }: {
   group: EventAnnotationGroupConfig;
   update: (group: EventAnnotationGroupConfig) => void;
   savedObjectsTagging: SavedObjectsTaggingApi;
+  dataViewListItems: DataViewListItem[];
+  adHocDataViewSpec: DataViewSpec | undefined;
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -77,6 +90,27 @@ export const EventAnnotationGroupEditor = ({
               update({
                 ...group,
                 tags,
+              })
+            }
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('eventAnnotation.groupEditor.dataView', {
+            defaultMessage: 'Data view',
+          })}
+        >
+          <EuiSelect
+            data-test-subj="annotationDataViewSelection"
+            options={dataViewListItems.map(({ id: value, title, name }) => ({
+              value,
+              text: name ?? title,
+            }))}
+            value={group.indexPatternId}
+            onChange={({ target: { value } }) =>
+              update({
+                ...group,
+                indexPatternId: value,
+                dataViewSpec: value === adHocDataViewSpec?.id ? adHocDataViewSpec : undefined,
               })
             }
           />
