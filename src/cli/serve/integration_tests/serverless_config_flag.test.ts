@@ -6,57 +6,51 @@
  * Side Public License, v 1.
  */
 
-import { spawnSync } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { firstValueFrom, from, take } from 'rxjs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
-interface LogEntry {
-  message: string;
-  log: {
-    level: string;
-  };
-}
-
-const consoleJsonLog = JSON.stringify({
-  root: { level: 'fatal', appenders: ['console-json'] },
-  appenders: { 'console-json': { type: 'console', layout: { type: 'json' } } },
-});
-
 describe('cli serverless project type', () => {
   it(
-    'exits with statusCode 78 and logs an error when serverless project type is invalid',
+    'exits with statusCode 1 and logs an error when serverless project type is invalid',
     () => {
-      // Making sure `--serverless` translates into the `serverless` config entry, and validates against the accepted values
-      const { error, status, stdout, stderr } = spawnSync(
+      const { error, status, stdout } = spawnSync(
         process.execPath,
-        ['scripts/kibana', '--serverless=non-existing-project-type', `--logging=${consoleJsonLog}`],
+        ['scripts/kibana', '--serverless=non-existing-project-type'],
         {
           cwd: REPO_ROOT,
         }
       );
       expect(error).toBe(undefined);
 
-      let fatalLogEntries;
-      try {
-        fatalLogEntries = stdout
-          .toString('utf8')
-          .split('\n')
-          .filter(Boolean)
-          .map((line) => JSON.parse(line) as LogEntry)
-          .filter((line) => line.log.level === 'FATAL');
-      } catch (e) {
-        throw new Error(
-          `error parsing log output:\n\n${e.stack}\n\nstdout: \n${stdout}\n\nstderr:\n${stderr}`
-        );
-      }
-
-      expect(fatalLogEntries).toHaveLength(1);
-      expect(fatalLogEntries[0].message).toContain(
-        '[config validation of [serverless]]: types that failed validation'
+      expect(stdout.toString('utf8')).toContain(
+        'FATAL CLI ERROR Error: invalid --serverless value, must be one of es, oblt, security'
       );
 
-      expect(status).toBe(78);
+      expect(status).toBe(1);
     },
     20 * 1000
+  );
+
+  it.each(['es', 'oblt', 'security'])(
+    'writes the serverless project type %s in config/serverless.recent.yml',
+    async (mode) => {
+      // Making sure `--serverless` translates into the `serverless` config entry, and validates against the accepted values
+      const child = spawn(process.execPath, ['scripts/kibana', '--dev', `--serverless=${mode}`], {
+        cwd: REPO_ROOT,
+      });
+
+      // Wait for 5 lines in the logs
+      await firstValueFrom(from(child.stdout).pipe(take(5)));
+
+      expect(readFileSync(resolve(REPO_ROOT, 'config/serverless.recent.yml'), 'utf-8')).toContain(
+        `serverless: ${mode}\n`
+      );
+
+      child.kill('SIGKILL');
+    }
   );
 });

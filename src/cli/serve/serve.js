@@ -8,7 +8,7 @@
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { statSync, copyFileSync, existsSync, readFileSync, writeFileSync } from 'fs';
+import { statSync, existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
@@ -22,7 +22,7 @@ const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security'];
 
 /**
  * @param {Record<string, unknown>} opts
- * @returns {ServerlessProjectMode | null}
+ * @returns {ServerlessProjectMode | true | null}
  */
 function getServerlessProjectMode(opts) {
   if (!opts.serverless) {
@@ -107,24 +107,34 @@ function maybeAddConfig(name, configs, method) {
 
 /**
  * @param {string} file
- * @param {'es' | 'security' | 'oblt' | true} mode
+ * @param {'es' | 'security' | 'oblt' | true} projectType
+ * @param {boolean} isDevMode
  * @param {string[]} configs
  * @param {'push' | 'unshift'} method
  */
-function maybeSetRecentConfig(file, mode, configs, method) {
+function maybeSetRecentConfig(file, projectType, isDevMode, configs, method) {
   const path = resolve(getConfigDirectory(), file);
 
+  function writeMode(selectedProjectType) {
+    writeFileSync(
+      path,
+      `${
+        isDevMode ? 'xpack.serverless.plugin.developer.projectSwitcher.enabled: true\n' : ''
+      }serverless: ${selectedProjectType}\n`
+    );
+  }
+
   try {
-    if (mode === true) {
+    if (projectType === true) {
       if (!existsSync(path)) {
-        const data = readFileSync(path.replace('recent', 'es'), 'utf-8');
-        writeFileSync(
-          path,
-          `${data}\nxpack.serverless.plugin.developer.projectSwitcher.enabled: true\n`
-        );
+        writeMode('es');
       }
     } else {
-      copyFileSync(path.replace('recent', mode), path);
+      const data = readFileSync(path, 'utf-8');
+      const match = data.match(/serverless: (\w+)\n/);
+      if (!match || match[1] !== projectType) {
+        writeMode(projectType);
+      }
     }
 
     configs[method](path);
@@ -273,18 +283,11 @@ export default function (program) {
       .option(
         '--run-examples',
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
-      );
-  }
-
-  if (isServerlessCapableDistribution()) {
-    command
-      .option(
-        '--serverless',
-        'Start Kibana in the most recent serverless project mode, (default is es)'
       )
       .option(
-        '--serverless <oblt|security|es>',
-        'Start Kibana in a specific serverless project mode'
+        '--serverless [oblt|security|es]',
+        'Start Kibana in a specific serverless project mode. ' +
+          'If no mode is provided, it starts Kibana in the most recent serverless project mode (default is es)'
       );
   }
 
@@ -312,10 +315,8 @@ export default function (program) {
     const configs = [getConfigPath(), ...getEnvConfigs(), ...(opts.config || [])];
     const serverlessMode = getServerlessProjectMode(opts);
 
-    // we "unshift" .serverless. config so that it only overrides defaults
     if (serverlessMode) {
-      maybeAddConfig(`serverless.yml`, configs, 'push');
-      maybeSetRecentConfig('serverless.recent.yml', serverlessMode, configs, 'unshift');
+      maybeSetRecentConfig('serverless.recent.yml', serverlessMode, opts.dev, configs, 'push');
     }
 
     // .dev. configs are "pushed" so that they override all other config files
@@ -323,7 +324,7 @@ export default function (program) {
       maybeAddConfig('kibana.dev.yml', configs, 'push');
       if (serverlessMode) {
         maybeAddConfig(`serverless.dev.yml`, configs, 'push');
-        maybeSetRecentConfig('serverless.recent.dev.yml', serverlessMode, configs, 'unshift');
+        maybeAddConfig('serverless.recent.dev.yml', configs, 'push');
       }
     }
 
