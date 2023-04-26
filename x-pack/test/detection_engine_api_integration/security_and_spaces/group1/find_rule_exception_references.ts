@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import {
   CreateExceptionListSchema,
@@ -35,6 +35,7 @@ import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('find_rule_exception_references', () => {
     before(async () => {
@@ -42,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await deleteSignalsIndex(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 

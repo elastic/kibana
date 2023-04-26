@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import {
   DETECTION_ENGINE_RULES_BULK_UPDATE,
@@ -29,6 +29,7 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('update_rules_bulk', () => {
     describe('update rules bulk', () => {
@@ -37,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteSignalsIndex(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 

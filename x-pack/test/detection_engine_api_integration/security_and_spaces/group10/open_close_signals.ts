@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -37,6 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   describe('open_close_signals', () => {
     describe('validation checks', () => {
@@ -66,7 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.eql(getSignalStatusEmptyResponse());
 
-        await deleteSignalsIndex(supertest, log);
+        await deleteSignalsIndex(supertest, log, es);
       });
 
       describe('tests with auditbeat data', () => {
@@ -84,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await deleteSignalsIndex(supertest, log, es);
           await deleteAllRules(supertest, log);
         });
 

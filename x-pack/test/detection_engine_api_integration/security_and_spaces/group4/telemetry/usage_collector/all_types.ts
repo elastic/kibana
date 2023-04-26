@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -21,6 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const retry = getService('retry');
+  const es = getService('es');
 
   describe('Detection rule telemetry', async () => {
     before(async () => {
@@ -36,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await deleteSignalsIndex(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 

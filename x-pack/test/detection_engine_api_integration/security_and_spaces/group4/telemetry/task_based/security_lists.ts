@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_LIST_ID,
@@ -29,6 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const retry = getService('retry');
+  const es = getService('es');
 
   describe('Security lists task telemetry', async () => {
     before(async () => {
@@ -46,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await deleteSignalsIndex(supertest, log, es);
       await deleteAllRules(supertest, log);
       await deleteAllExceptions(supertest, log);
     });

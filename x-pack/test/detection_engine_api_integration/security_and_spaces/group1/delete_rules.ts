@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteSignalsIndex(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 

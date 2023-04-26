@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
@@ -40,6 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
   const secureBsearch = getService('secureBsearch');
   const log = getService('log');
   const kbnClient = getService('kibanaServer');
+  const es = getService('es');
 
   const SPACE1 = 'space1';
 
@@ -127,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteSignalsIndex(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');

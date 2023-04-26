@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import dateMath from '@kbn/datemath';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import moment from 'moment';
 import { set } from '@kbn/safer-lodash-set';
 import { v4 as uuidv4 } from 'uuid';
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
-      await deleteSignalsIndex(supertest, log);
+      await deleteSignalsIndex(supertest, log, es);
     });
 
     beforeEach(async () => {

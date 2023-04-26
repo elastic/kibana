@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '@kbn/security-solution-plugin/common/constants';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteSignalsIndex(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 

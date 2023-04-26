@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
@@ -32,6 +32,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   describe('import_export_rules_flow', () => {
     beforeEach(async () => {
@@ -42,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
     afterEach(async () => {
       await deleteUserAndRole(getService, ROLES.soc_manager);
       await deleteAllExceptions(supertest, log);
-      await deleteSignalsIndex(supertest, log);
+      await deleteSignalsIndex(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 

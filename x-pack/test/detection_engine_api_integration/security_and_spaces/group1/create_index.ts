@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import {
   DEFAULT_ALERTS_INDEX,
   DETECTION_ENGINE_INDEX_URL,
@@ -25,7 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('create_index', () => {
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await deleteSignalsIndex(supertest, log, es);
     });
 
     describe('elastic admin', () => {

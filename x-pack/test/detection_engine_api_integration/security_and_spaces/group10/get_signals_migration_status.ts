@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
@@ -19,6 +19,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   const getSignalsMigrationStatus = async (query: any) => {
     const { body } = await supertest
@@ -44,7 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
-      await deleteSignalsIndex(supertest, log);
+      await deleteSignalsIndex(supertest, log, es);
     });
 
     it('returns no indexes if no signals exist in the specified range', async () => {

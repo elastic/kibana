@@ -8,6 +8,7 @@
 import type SuperTest from 'supertest';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { DETECTION_ENGINE_INDEX_URL } from '@kbn/security-solution-plugin/common/constants';
+import type { Client } from '@elastic/elasticsearch';
 import { countDownTest } from './count_down_test';
 
 /**
@@ -16,7 +17,8 @@ import { countDownTest } from './count_down_test';
  */
 export const deleteSignalsIndex = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
-  log: ToolingLog
+  log: ToolingLog,
+  es: Client
 ): Promise<void> => {
   await countDownTest(
     async () => {
@@ -28,4 +30,13 @@ export const deleteSignalsIndex = async (
     'deleteSignalsIndex',
     log
   );
+  await es.deleteByQuery({
+    index: '.alerts-security.alerts-default',
+    body: {
+      query: {
+        match_all: {},
+      },
+    },
+    refresh: true,
+  });
 };

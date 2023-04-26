@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import {
   DEFAULT_SIGNALS_INDEX,
@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
-      await deleteSignalsIndex(supertest, log);
+      await deleteSignalsIndex(supertest, log, es);
     });
 
     it('returns the deleted migration SavedObjects', async () => {

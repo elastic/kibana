@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import type {
@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
+        await deleteSignalsIndex(supertest, log, es);
         await deleteAllRules(supertest, log);
         await deleteAllExceptions(supertest, log);
       });
@@ -522,7 +522,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await deleteSignalsIndex(supertest, log, es);
           await deleteAllRules(supertest, log);
           await deleteAllExceptions(supertest, log);
         });

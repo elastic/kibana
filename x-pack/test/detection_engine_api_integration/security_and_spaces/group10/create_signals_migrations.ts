@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import {
   DEFAULT_SIGNALS_INDEX,
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),
       });
-      await deleteSignalsIndex(supertest, log);
+      await deleteSignalsIndex(supertest, log, es);
     });
 
     it('returns the information necessary to finalize the migration', async () => {

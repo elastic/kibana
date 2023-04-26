@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -19,6 +19,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const es = getService('es');
 
   describe('query_signals_route and find_alerts_route', () => {
     describe('validation checks', () => {
@@ -43,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
 
-        await deleteSignalsIndex(supertest, log);
+        await deleteSignalsIndex(supertest, log, es);
       });
     });
 
@@ -54,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
-        await deleteSignalsIndex(supertest, log);
+        await deleteSignalsIndex(supertest, log, es);
       });
 
       it('should be able to filter old signals on host.os.name.caseless using runtime field', async () => {
@@ -97,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
-        await deleteSignalsIndex(supertest, log);
+        await deleteSignalsIndex(supertest, log, es);
       });
 
       it('should be able to filter using a runtime field defined in the request', async () => {
@@ -148,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           });
 
-          await deleteSignalsIndex(supertest, log);
+          await deleteSignalsIndex(supertest, log, es);
         });
 
         it('should not give errors when executing security solution histogram aggs', async () => {
@@ -213,7 +214,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          await deleteSignalsIndex(supertest, log);
+          await deleteSignalsIndex(supertest, log, es);
         });
       });
     });
