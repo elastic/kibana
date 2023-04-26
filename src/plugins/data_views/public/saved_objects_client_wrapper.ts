@@ -44,6 +44,7 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
       },
       options: {
         searchFields: options.searchFields,
+        fields: options.fields,
       },
     });
     return results.hits;
