@@ -45,6 +45,8 @@ import type {
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
+import { identity } from 'lodash';
+import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -57,16 +59,21 @@ import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
 
-const THRESHOLD_ELU = 0.15;
-const THRESHOLD_ELA = 250;
-
 /**
  * Adds ELU timings for the executed function to the current's context transaction
  *
  * @param path The request path
  * @param log  Logger
  */
-function startEluMeasurement<T>(path: string, log: Logger): () => void {
+function startEluMeasurement<T>(
+  path: string,
+  log: Logger,
+  eluMonitorOptions: IHttpEluMonitorConfig | undefined
+): () => void {
+  if (!eluMonitorOptions?.enabled) {
+    return identity;
+  }
+
   const startUtilization = performance.eventLoopUtilization();
   const start = performance.now();
 
@@ -83,13 +90,19 @@ function startEluMeasurement<T>(path: string, log: Logger): () => void {
 
     const duration = performance.now() - start;
 
-    if (active > THRESHOLD_ELA && utilization > THRESHOLD_ELU) {
+    const { elu: eluThreshold, ela: elaThreshold } = eluMonitorOptions.logging.threshold;
+
+    if (
+      eluMonitorOptions.logging.enabled &&
+      active >= eluMonitorOptions.logging.threshold.ela &&
+      utilization >= eluMonitorOptions.logging.threshold.elu
+    ) {
       log.warn(
-        `Event loop utilization for ${path} exceeded threshold of ${THRESHOLD_ELA}ms and ${
-          THRESHOLD_ELU * 100
-        }%: ${Math.round(active)}ms out of ${Math.round(duration)}ms (${Math.round(
+        `Event loop utilization for ${path} exceeded threshold of ${elaThreshold}ms (${Math.round(
+          active
+        )}ms out of ${Math.round(duration)}ms) and ${eluThreshold * 100}% (${Math.round(
           utilization * 100
-        )}%)`,
+        )}%) `,
         {
           labels: {
             request_path: path,
@@ -416,7 +429,7 @@ export class HttpServer {
     });
 
     this.server!.ext('onRequest', (request, responseToolkit) => {
-      const stop = startEluMeasurement(request.path, this.log);
+      const stop = startEluMeasurement(request.path, this.log, this.config?.eluMonitor);
 
       const requestId = getRequestId(request, config.requestId);
 
