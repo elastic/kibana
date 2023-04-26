@@ -19,12 +19,12 @@ describe('ConvertConnectorApilogic', () => {
   describe('convertConnector', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
-      http.post.mockReturnValue(promise);
+      http.put.mockReturnValue(promise);
       const result = convertConnector({ connectorId: 'connectorId1' });
       await nextTick();
-      expect(http.post).toHaveBeenCalledWith(
+      expect(http.put).toHaveBeenCalledWith(
         '/internal/enterprise_search/connectors/connectorId1/native',
-        { body: JSON.stringify({ is_native: true }) }
+        { body: JSON.stringify({ is_native: false }) }
       );
       await expect(result).resolves.toEqual('result');
     });
