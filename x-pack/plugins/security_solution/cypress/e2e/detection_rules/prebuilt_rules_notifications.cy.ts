@@ -12,7 +12,11 @@ import {
   UPDATE_PREBUILT_RULES_CALLOUT,
 } from '../../screens/alerts_detection_rules';
 import { deleteFirstRule, waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
-import { installAvailableRules, createNewRuleAsset } from '../../tasks/api_calls/prebuilt_rules';
+import {
+  installAvailableRules,
+  createNewRuleAsset,
+  preventPrebuiltRulesInstallation,
+} from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -29,18 +33,13 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     deleteAlertsAndRules();
     esArchiverResetKibana();
 
-    /* Prevent the installation of the package */
-    /* `security_detection_engine` from Fleet */
-    cy.intercept('POST', '/api/fleet/epm/packages/_bulk?prerelease=true', {}).as(
-      'getPrebuiltRules'
-    );
+    preventPrebuiltRulesInstallation();
     createNewRuleAsset({
       rule: createRuleAssetSavedObject({
         name: 'Test rule 1',
         rule_id: 'rule_1',
       }),
     });
-    
   });
 
   describe('Rules installation notification when no rules have been installed', () => {
@@ -92,7 +91,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
 
     it('should notify user about prebuilt rules package available for installation', () => {
       cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('be.visible');
-      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).contains('2 Elastic prebuilt rules')
+      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).contains('2 Elastic prebuilt rules');
     });
 
     it('should notify user a rule is again available for installation if it is deleted', () => {
