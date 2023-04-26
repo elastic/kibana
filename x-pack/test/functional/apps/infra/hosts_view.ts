@@ -326,6 +326,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           START_DATE.format(timepickerFormat),
           END_DATE.format(timepickerFormat)
         );
+
+        await retry.waitFor(
+          'wait for table and KPI charts to load',
+          async () =>
+            (await pageObjects.infraHostsView.isHostTableLoading()) &&
+            (await pageObjects.infraHostsView.isKPIChartsLoaded())
+        );
       });
 
       after(async () => {
@@ -371,13 +378,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'rx', value: 'N/A' },
         ].forEach(({ metric, value }) => {
           it(`${metric} tile should show ${value}`, async () => {
-            await retry.waitFor(
-              'wait for chart to load',
-              async () => await pageObjects.infraHostsView.isKPITileLoaded(metric)
-            );
-
-            const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
-            expect(tileValue).to.eql(value);
+            await retry.try(async () => {
+              const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
+              expect(tileValue).to.eql(value);
+            });
           });
         });
       });
@@ -479,6 +483,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         before(async () => {
           await browser.scrollTop();
           await pageObjects.infraHostsView.submitQuery(query);
+          await retry.waitFor(
+            'wait for table and KPI charts to load',
+            async () =>
+              (await pageObjects.infraHostsView.isHostTableLoading()) &&
+              (await pageObjects.infraHostsView.isKPIChartsLoaded())
+          );
         });
 
         after(async () => {
@@ -506,13 +516,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'tx', value: 'N/A' },
               { metric: 'rx', value: 'N/A' },
             ].map(async ({ metric, value }) => {
-              await retry.waitFor(
-                'wait for chart to load',
-                async () => await pageObjects.infraHostsView.isKPITileLoaded(metric)
-              );
-
-              const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
-              expect(tileValue).to.eql(value);
+              await retry.try(async () => {
+                const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);
+                expect(tileValue).to.eql(value);
+              });
             })
           );
         });

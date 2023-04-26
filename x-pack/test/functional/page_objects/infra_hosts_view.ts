@@ -73,8 +73,16 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('hostsView-enable-feature-button');
     },
 
+    async getHostsTable() {
+      return testSubjects.find('hostsView-table');
+    },
+
+    async isHostTableLoading() {
+      return !(await testSubjects.exists('tbody[class*=euiBasicTableBodyLoading]'));
+    },
+
     async getHostsTableData() {
-      const table = await testSubjects.find('hostsView-table');
+      const table = await this.getHostsTable();
       return table.findAllByTestSubject('hostsView-tableRow');
     },
 
@@ -103,31 +111,14 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.find('hostsView-metricChart');
     },
 
-    getMetricsTab() {
+    // MetricsTtab
+    async getMetricsTab() {
       return testSubjects.find('hostsView-tabs-metrics');
     },
 
     async visitMetricsTab() {
       const metricsTab = await this.getMetricsTab();
       await metricsTab.click();
-    },
-
-    async getAllKPITiles() {
-      const container = await this.getKPIContainer();
-      return container.findAllByCssSelector('[data-test-subj*="hostsView-metricsTrend-"]');
-    },
-
-    async isKPITileLoaded(type: string) {
-      const element = await testSubjects.find(`hostsView-metricsTrend-${type}`);
-      return Boolean(
-        await element.findByCssSelector('.echChartStatus[data-ech-render-complete=true]')
-      );
-    },
-
-    async getKPITileValue(type: string) {
-      const element = await testSubjects.find(`hostsView-metricsTrend-${type}`);
-      const div = await element.findByClassName('echMetricText__value');
-      return await div.getAttribute('title');
     },
 
     async getAllMetricsCharts() {
@@ -143,6 +134,24 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('embeddablePanelAction-openInLens');
       // forces the modal to close
       await element.click();
+    },
+
+    // KPIs
+    async isKPIChartsLoaded() {
+      return !(await testSubjects.exists(
+        '[data-test-subj=hostsView-metricsTrend] .echChartStatus[data-ech-render-complete=true]'
+      ));
+    },
+
+    async getAllKPITiles() {
+      const container = await this.getKPIContainer();
+      return container.findAllByCssSelector('[data-test-subj*="hostsView-metricsTrend-"]');
+    },
+
+    async getKPITileValue(type: string) {
+      const element = await testSubjects.find(`hostsView-metricsTrend-${type}`);
+      const div = await element.findByClassName('echMetricText__value');
+      return await div.getAttribute('title');
     },
 
     // Flyout Tabs
