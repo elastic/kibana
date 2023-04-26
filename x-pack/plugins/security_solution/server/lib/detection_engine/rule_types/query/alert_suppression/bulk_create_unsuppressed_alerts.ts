@@ -40,7 +40,7 @@ export const bulkCreateUnsuppressedAlerts: BulkCreateUnsuppressedAlerts = async 
 }) => {
   const bulkCreatedResult = await searchAfterAndBulkCreate({
     tuple: { ...runOpts.tuple, maxSignals: size },
-    exceptionsList: runOpts.unprocessedExceptions,
+    exceptionsList: [],
     services,
     listClient: runOpts.listClient,
     ruleExecutionLogger: runOpts.ruleExecutionLogger,
