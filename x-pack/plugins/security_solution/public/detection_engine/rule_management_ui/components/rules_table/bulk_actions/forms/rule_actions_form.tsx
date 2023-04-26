@@ -141,6 +141,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
         component={RuleActionsField}
         componentProps={{
           messageVariables,
+          summaryMessageVariables: messageVariables,
         }}
       />
       <EuiSpacer size="m" />

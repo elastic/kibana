@@ -310,6 +310,7 @@ const EditRulePageComponent: FC = () => {
                   defaultValues={actionsStep.data}
                   setForm={setFormHook}
                   actionMessageParams={actionMessageParams}
+                  summaryActionMessageParams={actionMessageParams}
                   ruleType={rule?.type}
                 />
               )}

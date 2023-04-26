@@ -28,54 +28,61 @@ describe('renderApp', () => {
     global.console = originalConsole;
   });
 
-  it('renders', async () => {
-    const plugins = {
-      usageCollection: { reportUiCounter: noop },
-      data: {
-        query: {
+  const mockSearchSessionClear = jest.fn();
+
+  const plugins = {
+    usageCollection: { reportUiCounter: noop },
+    data: {
+      query: {
+        timefilter: {
           timefilter: {
-            timefilter: {
-              setTime: jest.fn(),
-              getTime: jest.fn().mockReturnValue({}),
-              getTimeDefaults: jest.fn().mockReturnValue({}),
-              getRefreshInterval: jest.fn().mockReturnValue({}),
-              getRefreshIntervalDefaults: jest.fn().mockReturnValue({}),
-            },
+            setTime: jest.fn(),
+            getTime: jest.fn().mockReturnValue({}),
+            getTimeDefaults: jest.fn().mockReturnValue({}),
+            getRefreshInterval: jest.fn().mockReturnValue({}),
+            getRefreshIntervalDefaults: jest.fn().mockReturnValue({}),
           },
         },
       },
-    } as unknown as ObservabilityPublicPluginsStart;
-
-    const core = {
-      application: { currentAppId$: new Observable(), navigateToUrl: noop },
-      chrome: {
-        docTitle: { change: noop },
-        setBreadcrumbs: noop,
-        setHelpExtension: noop,
-      },
-      i18n: { Context: ({ children }: { children: React.ReactNode }) => children },
-      uiSettings: { get: () => false },
-      http: { basePath: { prepend: (path: string) => path } },
-      theme: themeServiceMock.createStartContract(),
-    } as unknown as CoreStart;
-
-    const params = {
-      element: window.document.createElement('div'),
-      history: createMemoryHistory(),
-      setHeaderActionMenu: noop,
-      theme$: themeServiceMock.createTheme$(),
-    } as unknown as AppMountParameters;
-
-    const config = {
-      unsafe: {
-        alertDetails: {
-          logs: { enabled: false },
-          metrics: { enabled: false },
-          uptime: { enabled: false },
+      search: {
+        session: {
+          clear: mockSearchSessionClear,
         },
       },
-    } as ConfigSchema;
+    },
+  } as unknown as ObservabilityPublicPluginsStart;
 
+  const core = {
+    application: { currentAppId$: new Observable(), navigateToUrl: noop },
+    chrome: {
+      docTitle: { change: noop },
+      setBreadcrumbs: noop,
+      setHelpExtension: noop,
+    },
+    i18n: { Context: ({ children }: { children: React.ReactNode }) => children },
+    uiSettings: { get: () => false },
+    http: { basePath: { prepend: (path: string) => path } },
+    theme: themeServiceMock.createStartContract(),
+  } as unknown as CoreStart;
+
+  const params = {
+    element: window.document.createElement('div'),
+    history: createMemoryHistory(),
+    setHeaderActionMenu: noop,
+    theme$: themeServiceMock.createTheme$(),
+  } as unknown as AppMountParameters;
+
+  const config = {
+    unsafe: {
+      alertDetails: {
+        logs: { enabled: false },
+        metrics: { enabled: false },
+        uptime: { enabled: false },
+      },
+    },
+  } as ConfigSchema;
+
+  it('renders', async () => {
     expect(() => {
       const unmount = renderApp({
         core,
@@ -90,9 +97,30 @@ describe('renderApp', () => {
           },
           reportUiCounter: jest.fn(),
         },
-        kibanaVersion: '8.7.0',
+        kibanaVersion: '8.8.0',
       });
       unmount();
     }).not.toThrowError();
+  });
+
+  it('should clear search sessions when unmounting', () => {
+    const unmount = renderApp({
+      core,
+      config,
+      plugins,
+      appMountParameters: params,
+      observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+      ObservabilityPageTemplate: KibanaPageTemplate,
+      usageCollection: {
+        components: {
+          ApplicationUsageTrackingProvider: (props) => null,
+        },
+        reportUiCounter: jest.fn(),
+      },
+      kibanaVersion: '8.8.0',
+    });
+    unmount();
+
+    expect(mockSearchSessionClear).toBeCalled();
   });
 });

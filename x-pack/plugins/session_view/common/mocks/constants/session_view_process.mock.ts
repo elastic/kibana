@@ -17,6 +17,9 @@ import {
   ProcessEventAlertCategory,
 } from '../../types/process_tree';
 
+export const TEST_PROCESS_INDEX = 'logs-endpoint.events.process*';
+export const TEST_SESSION_START_TIME = '2021-10-14T08:05:34.853Z';
+
 export const mockEvents: ProcessEvent[] = [
   {
     '@timestamp': '2021-11-23T15:25:04.210Z',
