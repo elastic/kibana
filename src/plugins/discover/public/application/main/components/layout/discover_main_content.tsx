@@ -9,7 +9,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DragDrop, type DropType, DropOverlayWrapper } from '@kbn/dom-drag-drop';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -79,15 +79,6 @@ export const DiscoverMainContent = ({
     [trackUiMetric, stateContainer]
   );
 
-  // Field Statistics tab is not supported for text-based query mode, so we should switch to Documents view
-  const shouldSwitchToDocumentsView = viewMode === VIEW_MODE.AGGREGATED_LEVEL && isPlainRecord;
-
-  useEffect(() => {
-    if (shouldSwitchToDocumentsView) {
-      stateContainer.appState.update({ viewMode: VIEW_MODE.DOCUMENT_LEVEL });
-    }
-  }, [shouldSwitchToDocumentsView, stateContainer]);
-
   const dataState = useDataState(stateContainer.dataState.data$.main$);
   const isDropAllowed = Boolean(onDropFieldToTable);
 
@@ -127,7 +118,7 @@ export const DiscoverMainContent = ({
             />
           )}
 
-          {viewMode === VIEW_MODE.DOCUMENT_LEVEL || shouldSwitchToDocumentsView ? (
+          {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
               dataView={dataView}
               navigateTo={navigateTo}

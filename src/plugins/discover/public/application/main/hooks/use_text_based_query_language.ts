@@ -14,7 +14,7 @@ import {
 } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { DiscoverStateContainer } from '../services/discover_state';
 import type { DataDocuments$ } from '../services/discover_data_state_container';
 import { FetchStatus } from '../../types';
@@ -57,7 +57,7 @@ export function useTextBasedQueryLanguage({
       if (!query || next.fetchStatus === FetchStatus.ERROR) {
         return;
       }
-      const { columns: stateColumns, index } = stateContainer.appState.getState();
+      const { columns: stateColumns, index, viewMode } = stateContainer.appState.getState();
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
         recordRawType === 'plain' && isOfAggregateQueryType(query) && 'sql' in query;
@@ -115,6 +115,7 @@ export function useTextBasedQueryLanguage({
         const nextState = {
           ...(addDataViewToState && { index: dataViewObj.id }),
           ...(addColumnsToState && { columns: nextColumns }),
+          ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && { viewMode: VIEW_MODE.DOCUMENT_LEVEL }),
         };
         stateContainer.appState.replaceUrlState(nextState);
       } else {
