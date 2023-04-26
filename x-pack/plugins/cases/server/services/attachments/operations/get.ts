@@ -20,7 +20,6 @@ import type {
   AttachmentTotals,
   AttributesTypeAlerts,
   CommentAttributes as AttachmentAttributes,
-  CommentAttributes,
 } from '../../../../common/api';
 import { CommentType } from '../../../../common/api';
 import type {
@@ -43,7 +42,7 @@ export class AttachmentGetter {
 
   public async bulkGet(
     attachmentIds: string[]
-  ): Promise<BulkOptionalAttributes<CommentAttributes>> {
+  ): Promise<BulkOptionalAttributes<AttachmentAttributes>> {
     try {
       this.context.log.debug(
         `Attempting to retrieve attachments with ids: ${attachmentIds.join()}`
@@ -303,7 +302,7 @@ export class AttachmentGetter {
   }: {
     caseId: string;
     fileIds: string[];
-  }): Promise<Array<SavedObject<CommentAttributes>>> {
+  }): Promise<Array<SavedObject<AttachmentAttributes>>> {
     try {
       this.context.log.debug('Attempting to find file attachments');
 
@@ -332,7 +331,7 @@ export class AttachmentGetter {
           }
         );
 
-      const foundAttachments: Array<SavedObject<CommentAttributes>> = [];
+      const foundAttachments: Array<SavedObject<AttachmentAttributes>> = [];
 
       for await (const attachmentSavedObjects of finder.find()) {
         foundAttachments.push(

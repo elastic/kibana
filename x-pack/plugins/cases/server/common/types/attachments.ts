@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { JsonValue } from '@kbn/utility-types';
 import type { User } from './user';
 
 interface AttachmentCommonPersistedAttributes {
@@ -33,13 +34,13 @@ export interface AttachmentRequestAttributes {
     }>;
     type: string;
   };
-  externalReferenceMetadata?: Record<string, unknown> | null;
+  externalReferenceMetadata?: Record<string, JsonValue> | null;
   externalReferenceAttachmentTypeId?: string;
   externalReferenceStorage?: {
     type: string;
     soType?: string;
   };
-  persistableStateAttachmentState?: Record<string, unknown>;
+  persistableStateAttachmentState?: Record<string, JsonValue>;
   persistableStateAttachmentTypeId?: string;
 }
 
