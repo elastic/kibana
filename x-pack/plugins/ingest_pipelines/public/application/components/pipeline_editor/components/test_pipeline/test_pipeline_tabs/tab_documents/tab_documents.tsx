@@ -211,7 +211,7 @@ export const DocumentsTab: FunctionComponent<Props> = ({
               </EuiButtonEmpty>
               <JsonEditorField
                 field={field}
-                euiCodeEditorProps={{
+                codeEditorProps={{
                   'data-test-subj': 'documentsEditor',
                   height: '300px',
                   'aria-label': i18nTexts.documentsEditorAriaLabel,

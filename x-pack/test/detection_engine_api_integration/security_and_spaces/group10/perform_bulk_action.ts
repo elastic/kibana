@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
-  NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
@@ -172,7 +171,6 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = removeServerGeneratedProperties(JSON.parse(ruleJson));
       expect(rule).to.eql({
         ...getSimpleRuleOutput(),
-        throttle: 'rule',
         actions: [
           {
             action_type_id: '.webhook',
@@ -182,6 +180,7 @@ export default ({ getService }: FtrProviderContext): void => {
               body: '{"test":"a default action"}',
             },
             uuid: rule.actions[0].uuid,
+            frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
           },
         ],
       });
@@ -335,6 +334,7 @@ export default ({ getService }: FtrProviderContext): void => {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
           uuid: ruleBody.actions[0].uuid,
+          frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
         },
       ]);
       // we want to ensure rule is executing successfully, to prevent any AAD issues related to partial update of rule SO
@@ -407,6 +407,7 @@ export default ({ getService }: FtrProviderContext): void => {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
           uuid: ruleBody.actions[0].uuid,
+          frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
         },
       ]);
     });
@@ -705,6 +706,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
             ...(uuid ? { uuid } : {}),
+            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
           },
         ]);
       });
@@ -1334,6 +1336,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
             uuid: setTagsRule.actions[0].uuid,
+            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
           },
         ]);
       });
@@ -1618,6 +1621,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -1675,6 +1679,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -1786,6 +1791,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -1838,6 +1844,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -1892,12 +1899,17 @@ export default ({ getService }: FtrProviderContext): void => {
               .expect(200);
 
             const expectedRuleActions = [
-              { ...defaultRuleAction, uuid: body.attributes.results.updated[0].actions[0].uuid },
+              {
+                ...defaultRuleAction,
+                uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
+              },
               {
                 ...webHookActionMock,
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[1].uuid,
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -1960,12 +1972,17 @@ export default ({ getService }: FtrProviderContext): void => {
               .expect(200);
 
             const expectedRuleActions = [
-              { ...defaultRuleAction, uuid: body.attributes.results.updated[0].actions[0].uuid },
+              {
+                ...defaultRuleAction,
+                uuid: body.attributes.results.updated[0].actions[0].uuid,
+                frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
+              },
               {
                 ...slackConnectorMockProps,
                 id: slackConnector.id,
                 action_type_id: '.slack',
                 uuid: body.attributes.results.updated[0].actions[1].uuid,
+                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },
             ];
 
@@ -2014,20 +2031,22 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(200);
 
-            // Check that the updated rule is returned with the response
-            expect(body.attributes.results.updated[0].actions).to.eql([
-              { ...defaultRuleAction, uuid: createdRule.actions[0].uuid },
-            ]);
+            // Check that the rule is skipped and was not updated
+            expect(body.attributes.results.skipped[0].id).to.eql(createdRule.id);
 
             // Check that the updates have been persisted
             const { body: readRule } = await fetchRule(ruleId).expect(200);
 
             expect(readRule.actions).to.eql([
-              { ...defaultRuleAction, uuid: createdRule.actions[0].uuid },
+              {
+                ...defaultRuleAction,
+                uuid: createdRule.actions[0].uuid,
+                frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
+              },
             ]);
           });
 
-          it('should change throttle if actions list in payload is empty', async () => {
+          it('should not change throttle if actions list in payload is empty', async () => {
             // create a new connector
             const webHookConnector = await createWebHookConnector();
 
@@ -2063,13 +2082,14 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(200);
 
-            // Check that the updated rule is returned with the response
-            expect(body.attributes.results.updated[0].throttle).to.be('1h');
+            // Check that the rule is skipped and was not updated
+            expect(body.attributes.results.skipped[0].id).to.eql(createdRule.id);
 
             // Check that the updates have been persisted
             const { body: readRule } = await fetchRule(ruleId).expect(200);
 
-            expect(readRule.throttle).to.eql('1h');
+            expect(readRule.throttle).to.eql(undefined);
+            expect(readRule.actions).to.eql(createdRule.actions);
           });
         });
 
@@ -2117,6 +2137,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   id: webHookConnector.id,
                   action_type_id: '.webhook',
                   uuid: editedRule.actions[0].uuid,
+                  frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
                 },
               ]);
               // version of prebuilt rule should not change
@@ -2131,6 +2152,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   id: webHookConnector.id,
                   action_type_id: '.webhook',
                   uuid: readRule.actions[0].uuid,
+                  frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
                 },
               ]);
               expect(prebuiltRule.version).to.be(readRule.version);
@@ -2207,7 +2229,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ];
           casesForEmptyActions.forEach(({ payloadThrottle }) => {
-            it(`throttle is set to NOTIFICATION_THROTTLE_NO_ACTIONS, if payload throttle="${payloadThrottle}" and actions list is empty`, async () => {
+            it(`should not update throttle, if payload throttle="${payloadThrottle}" and actions list is empty`, async () => {
               const ruleId = 'ruleId';
               const createdRule = await createRule(supertest, log, {
                 ...getSimpleRule(ruleId),
@@ -2230,34 +2252,32 @@ export default ({ getService }: FtrProviderContext): void => {
                 })
                 .expect(200);
 
-              // Check that the updated rule is returned with the response
-              expect(body.attributes.results.updated[0].throttle).to.eql(
-                NOTIFICATION_THROTTLE_NO_ACTIONS
-              );
+              // Check that the rule is skipped and was not updated
+              expect(body.attributes.results.skipped[0].id).to.eql(createdRule.id);
 
               // Check that the updates have been persisted
               const { body: rule } = await fetchRule(ruleId).expect(200);
 
-              expect(rule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
+              expect(rule.throttle).to.eql(undefined);
             });
           });
 
           const casesForNonEmptyActions = [
             {
               payloadThrottle: NOTIFICATION_THROTTLE_RULE,
-              expectedThrottle: NOTIFICATION_THROTTLE_RULE,
+              expectedThrottle: undefined,
             },
             {
               payloadThrottle: '1h',
-              expectedThrottle: '1h',
+              expectedThrottle: undefined,
             },
             {
               payloadThrottle: '1d',
-              expectedThrottle: '1d',
+              expectedThrottle: undefined,
             },
             {
               payloadThrottle: '7d',
-              expectedThrottle: '7d',
+              expectedThrottle: undefined,
             },
           ];
           [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].forEach(
@@ -2295,10 +2315,23 @@ export default ({ getService }: FtrProviderContext): void => {
                   // Check that the updated rule is returned with the response
                   expect(body.attributes.results.updated[0].throttle).to.eql(expectedThrottle);
 
+                  const expectedActions = body.attributes.results.updated[0].actions.map(
+                    (action: any) => ({
+                      ...action,
+                      frequency: {
+                        summary: true,
+                        throttle: payloadThrottle !== 'rule' ? payloadThrottle : null,
+                        notifyWhen:
+                          payloadThrottle !== 'rule' ? 'onThrottleInterval' : 'onActiveAlert',
+                      },
+                    })
+                  );
+
                   // Check that the updates have been persisted
                   const { body: rule } = await fetchRule(ruleId).expect(200);
 
                   expect(rule.throttle).to.eql(expectedThrottle);
+                  expect(rule.actions).to.eql(expectedActions);
                 });
               });
             }
@@ -2311,11 +2344,11 @@ export default ({ getService }: FtrProviderContext): void => {
           const cases = [
             {
               payload: { throttle: '1d' },
-              expected: { notifyWhen: 'onThrottleInterval' },
+              expected: { notifyWhen: null },
             },
             {
               payload: { throttle: NOTIFICATION_THROTTLE_RULE },
-              expected: { notifyWhen: 'onActiveAlert' },
+              expected: { notifyWhen: null },
             },
           ];
           cases.forEach(({ payload, expected }) => {

@@ -16,7 +16,6 @@ import type {
   ActionVariables,
   NotifyWhenSelectOptions,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type {
   RuleAction,
   RuleActionAlertsFilterProperty,
@@ -24,6 +23,7 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { NOTIFICATION_DEFAULT_FREQUENCY } from '../../../../../common/constants';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormContext } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -31,13 +31,9 @@ import {
   FORM_CUSTOM_FREQUENCY_OPTION,
   FORM_ERRORS_TITLE,
   FORM_ON_ACTIVE_ALERT_OPTION,
+  FORM_FOR_EACH_ALERT_BODY_MESSAGE,
+  FORM_SUMMARY_BODY_MESSAGE,
 } from './translations';
-
-const DEFAULT_FREQUENCY = {
-  notifyWhen: RuleNotifyWhen.ACTIVE,
-  throttle: null,
-  summary: true,
-};
 
 const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -83,11 +79,10 @@ const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
 interface Props {
   field: FieldHook;
   messageVariables: ActionVariables;
+  summaryMessageVariables: ActionVariables;
 }
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
-const DEFAULT_ACTION_MESSAGE =
-  'Rule {{context.rule.name}} generated {{state.signals_count}} alerts';
 
 const FieldErrorsContainer = styled.div`
   p {
@@ -116,7 +111,11 @@ const ContainerActions = styled.div.attrs(
     )}
 `;
 
-export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) => {
+export const RuleActionsField: React.FC<Props> = ({
+  field,
+  messageVariables,
+  summaryMessageVariables,
+}) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const form = useFormContext();
   const { isSubmitted, isSubmitting, isValid } = form;
@@ -214,31 +213,50 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     [field]
   );
 
+  const setActionFrequency = useCallback(
+    (key: string, value: RuleActionParam, index: number) => {
+      field.setValue((prevValue: RuleAction[]) => {
+        const updatedActions = [...prevValue];
+        updatedActions[index] = {
+          ...updatedActions[index],
+          frequency: {
+            ...(updatedActions[index].frequency ?? NOTIFICATION_DEFAULT_FREQUENCY),
+            [key]: value,
+          },
+        };
+        return updatedActions;
+      });
+    },
+    [field]
+  );
+
   const actionForm = useMemo(
     () =>
       getActionForm({
         actions,
         messageVariables,
+        summaryMessageVariables,
         defaultActionGroupId: DEFAULT_ACTION_GROUP_ID,
         setActionIdByIndex,
         setActions: setAlertActionsProperty,
         setActionParamsProperty,
-        setActionFrequencyProperty: () => {},
+        setActionFrequencyProperty: setActionFrequency,
         setActionAlertsFilterProperty,
         featureId: SecurityConnectorFeatureId,
-        defaultActionMessage: DEFAULT_ACTION_MESSAGE,
-        defaultSummaryMessage: DEFAULT_ACTION_MESSAGE,
+        defaultActionMessage: FORM_FOR_EACH_ALERT_BODY_MESSAGE,
+        defaultSummaryMessage: FORM_SUMMARY_BODY_MESSAGE,
         hideActionHeader: true,
-        hideNotifyWhen: true,
         hasSummary: true,
         notifyWhenSelectOptions: NOTIFY_WHEN_OPTIONS,
-        defaultRuleFrequency: DEFAULT_FREQUENCY,
+        defaultRuleFrequency: NOTIFICATION_DEFAULT_FREQUENCY,
         showActionAlertsFilter: true,
       }),
     [
       actions,
       getActionForm,
       messageVariables,
+      summaryMessageVariables,
+      setActionFrequency,
       setActionIdByIndex,
       setActionParamsProperty,
       setAlertActionsProperty,

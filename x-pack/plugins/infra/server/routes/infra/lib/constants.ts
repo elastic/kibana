@@ -24,6 +24,9 @@ export const METADATA_AGGREGATION: Record<string, estypes.AggregationsAggregatio
         {
           field: 'cloud.provider',
         },
+        {
+          field: 'host.ip',
+        },
       ],
       size: 1,
       sort: {

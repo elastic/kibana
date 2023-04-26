@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 
 export const signalsMigrationType = 'security-solution-signals-migration';
@@ -26,6 +27,7 @@ export const signalsMigrationMappings: SavedObjectsType['mappings'] = {
 
 export const type: SavedObjectsType = {
   name: signalsMigrationType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'single',
   mappings: signalsMigrationMappings,
