@@ -18,11 +18,13 @@ import {
 
 describe('Enterprise Search Crawler', () => {
   it('test', () => {
+    const envConfig = Cypress.env('crawler_test');
+    const indexName = 'cypress-crawler-' + Math.random();
+
     login();
     cy.visit(ROUTES.NEW_INDEX);
 
-    // TODO check if it actually sees svg
-    // make sure card is selected by checking checkmark is in
+    // Crawler selected by default
     cy.getBySel(NEW_INDEX_CARD.SELECT_CRAWLER).find('svg');
 
     // continue to the new Crawler Index page
@@ -33,7 +35,6 @@ describe('Enterprise Search Crawler', () => {
 
     cy.getBySel(CRAWLER_INDEX.CREATE_BUTTON).should('be.disabled');
 
-    const indexName = 'cypress-crawler-' + Math.random();
     // type new name
     cy.getBySel(CRAWLER_INDEX.INDEX_NAME_INPUT).type(indexName);
 
@@ -43,11 +44,28 @@ describe('Enterprise Search Crawler', () => {
     // make sure we are in new index
     cy.url().should('contain', getIndexRoute(indexName) + 'domain_management');
 
+    cy.getBySel(CRAWLER_INDEX.DOMAIN_MANAGEMENT.DOMAIN_INPUT).type(envConfig.domain);
+    cy.getBySel(CRAWLER_INDEX.DOMAIN_MANAGEMENT.DOMAIN_BUTTON).click();
+
+    cy.getBySel(CRAWLER_INDEX.DOMAIN_MANAGEMENT.SUBMIT_BUTTON).should('be.enabled');
+    cy.getBySel(CRAWLER_INDEX.DOMAIN_MANAGEMENT.SUBMIT_BUTTON).click();
+
+    cy.getBySel(CRAWLER_INDEX.CRAWL_DROPDOWN).should('be.enabled');
+    cy.getBySel(CRAWLER_INDEX.CRAWL_DROPDOWN).click();
+    cy.getBySel(CRAWLER_INDEX.CRAWL_ALL_DOMAINS).click();
+
     // go to overview tab
     cy.getBySel(INDEX_OVERVIEW.TABS.OVERVIEW).click();
 
+    // Page header has index name
     cy.get('main header h1').should('contain.text', indexName);
     // check Ingestion Type stat is Crawler
     cy.getBySel(INDEX_OVERVIEW.STATS.INGESTION_TYPE).should('contain.text', 'Crawler');
+
+    cy.getBySel(INDEX_OVERVIEW.STATS.DOCUMENT_COUNT).should((el) => {
+      const text = el.text();
+      const count = parseInt(text.match(/[0-9]+/g), 10);
+      expect(count).to.gt(0);
+    });
   });
 });

@@ -57,6 +57,7 @@ export const CrawlerTotalStats: React.FC = () => {
       title: domains.length,
     },
     {
+      'data-test-subj': 'entSearchContent-indexOverview-totalStats-documentCount',
       description: i18n.translate(
         'xpack.enterpriseSearch.content.searchIndex.totalStats.documentCountCardLabel',
         {

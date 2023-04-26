@@ -8,7 +8,12 @@
 export const ROUTES = {
   CRAWLER_INDEX: '/app/enterprise_search/content/search_indices/new_index/crawler',
   NEW_INDEX: '/app/enterprise_search/content/search_indices/new_index',
+  SEARCH_INDICES_OVERVIEW: '/app/enterprise_search/content/search_indices/',
   SELECT_CONNECTOR: '/app/enterprise_search/content/search_indices/new_index/select_connector',
+};
+
+export const SEARCH_INDICES = {
+  CREATE_INDEX_BUTTON: 'entSearchContent-searchIndices-createButton',
 };
 
 export const SELECT_CONNECTOR = {
@@ -21,9 +26,11 @@ export const NEW_CONNECTOR_PAGE = {
 };
 
 export const CONNECTOR_INDEX = {
-  HEADER_SYNC_MENU: `entSearchContent-connector-header-sync-menu`,
-  HEADER_SYNC_MENU_START: `entSearchContent-connector-header-sync-startSync`,
-  SAVE_CONFIG: `entSearchContent-connector-configuration-saveConfiguration`,
+  EDIT_CONFIG: 'entSearchContent-connector-configuration-editConfiguration',
+  HEADER_SYNC_MENU: 'entSearchContent-connector-header-sync-menu',
+  HEADER_SYNC_MENU_START: 'entSearchContent-connector-header-sync-startSync',
+  SAVE_CONFIG: 'entSearchContent-connector-configuration-saveConfiguration',
+  SET_SCHEDULE_BUTTON: 'entSearchContent-connector-configuration-setScheduleAndSync',
   getConfigurationRow: (rowkey: string) =>
     `entSearchContent-connector-configuration-formrow-${rowkey}`,
 };
@@ -38,18 +45,26 @@ export const NEW_INDEX_CARD = {
 };
 
 export const CRAWLER_INDEX = {
+  CRAWL_ALL_DOMAINS: 'entSearchContent-crawler-startCrawlMenu-crawlAllDomains',
+  CRAWL_DROPDOWN: 'entSearchContent-crawler-startCrawlMenu-menuButton',
   CREATE_BUTTON: 'entSearchContent-crawler-newIndex-createIndex',
+  DOMAIN_MANAGEMENT: {
+    DOMAIN_BUTTON: 'entSearchContent-crawler-addDomainForm-validate-button',
+    DOMAIN_INPUT: 'entSearchContent-crawler-addDomainForm-validate-input',
+    SUBMIT_BUTTON: 'entSearchContent-crawler-addDomain-submitButton',
+  },
   INDEX_NAME_INPUT: 'entSearchContent-crawler-newIndex-editName',
 };
 
 export const INDEX_OVERVIEW = {
   STATS: {
     CONNECTOR_TYPE: 'entSearchContent-indexOverview-totalStats-connectorType',
-    DOCUMENT_COUNT: 'entSearchContent-indexOverview-connectorStats-documentCount',
+    DOCUMENT_COUNT: 'entSearchContent-indexOverview-totalStats-documentCount',
     INGESTION_STATUS: 'entSearchContent-indexOverview-connectorStats-ingestionStatus',
     INGESTION_TYPE: 'entSearchContent-indexOverview-totalStats-ingestionType',
   },
   TABS: {
+    CRAWLER_SCHEDULER: 'entSearchContent-index-crawler-scheduler-tab',
     OVERVIEW: 'entSearchContent-index-overview-tab',
   },
 };

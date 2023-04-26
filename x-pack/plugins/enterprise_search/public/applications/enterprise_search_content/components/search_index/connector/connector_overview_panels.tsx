@@ -48,7 +48,7 @@ export const ConnectorOverviewPanels: React.FC = () => {
       <EuiFlexItem grow={1}>
         <EuiPanel color="primary" hasShadow={false} paddingSize="l">
           <EuiStat
-            data-test-subj="entSearchContent-indexOverview-connectorStats-documentCount"
+            data-test-subj="entSearchContent-indexOverview-totalStats-documentCount"
             titleSize="m"
             description={i18n.translate(
               'xpack.enterpriseSearch.content.searchIndex.totalStats.documentCountCardLabel',

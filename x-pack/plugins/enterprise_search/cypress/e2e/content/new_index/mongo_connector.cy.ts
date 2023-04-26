@@ -15,14 +15,21 @@ import {
   NEW_CONNECTOR_PAGE,
   ROUTES,
   SELECT_CONNECTOR,
+  SEARCH_INDICES,
 } from '../selectors';
 
 describe('Enterprise Search MongoDB connector', () => {
-  it('creates a new index with MongoDB setup', () => {
+  it('succesfully syncs documents with single sync', () => {
+    // Get configuration information from cypress.env.json
     const mongoConfig = Cypress.env('mongo_test');
+    const indexName = 'cypress-mongodb-' + Math.random();
+    const baseUrl = Cypress.config().baseUrl;
     login();
 
-    cy.visit(ROUTES.NEW_INDEX);
+    cy.visit(ROUTES.SEARCH_INDICES_OVERVIEW);
+    cy.getBySel(SEARCH_INDICES.CREATE_INDEX_BUTTON).click();
+
+    cy.url().should('eq', baseUrl + ROUTES.NEW_INDEX);
 
     // default crawler selected
     cy.getBySel(NEW_INDEX_CARD.SELECT_CRAWLER).find('svg');
@@ -38,44 +45,43 @@ describe('Enterprise Search MongoDB connector', () => {
     // we are in correct route
     cy.url().should('contain', ROUTES.SELECT_CONNECTOR);
 
+    // Select MongoDB from the list
     cy.get('#checkableCard-mongodb').should('not.be.selected');
+    cy.get('#checkableCard-mongodb')
+      .invoke('attr', 'href')
+      .should('include', 'connectors-mongodb.html');
+
     cy.get('#checkableCard-mongodb').click();
 
-    // continue to the naming page
     cy.getBySel(SELECT_CONNECTOR.SELECT_AND_CONFIGURE_BUTTON).click();
 
+    // Connector URL, mongo selected
     cy.url().should('contain', 'service_type=mongodb');
 
-    const indexName = 'cypress-mongodb-' + Math.random();
-    // type new name
     cy.getBySel(NEW_CONNECTOR_PAGE.INDEX_NAME_INPUT).type(indexName);
 
     // create index
     cy.getBySel(NEW_CONNECTOR_PAGE.CREATE_BUTTON).click();
 
-    // make sure we are in new index
+    // make sure we are in new index route
     cy.url().should('contain', getIndexRoute(indexName) + 'configuration');
 
-    // Get formrows
+    // Fill in connector configuration
     cy.getBySel(CONNECTOR_INDEX.getConfigurationRow('host')).type(mongoConfig.host);
     cy.getBySel(CONNECTOR_INDEX.getConfigurationRow('user')).type(mongoConfig.username);
     cy.getBySel(CONNECTOR_INDEX.getConfigurationRow('password')).type(mongoConfig.password);
     cy.getBySel(CONNECTOR_INDEX.getConfigurationRow('database')).type(mongoConfig.database);
     cy.getBySel(CONNECTOR_INDEX.getConfigurationRow('collection')).type(mongoConfig.collection);
-    cy.getBySel(CONNECTOR_INDEX.getConfigurationRow('direct_connection')).find('button').click();
-    cy.getBySel(CONNECTOR_INDEX.getConfigurationRow('direct_connection'))
-      .find('button')
-      .invoke('prop', 'checked')
-      .should('eq', false);
-
     cy.getBySel(CONNECTOR_INDEX.SAVE_CONFIG).click();
 
-    cy.getBySel('entSearchContent-connector-overview-configuration-editConfiguration');
+    // Wait until configuration is saved
+    cy.getBySel(CONNECTOR_INDEX.EDIT_CONFIG);
+    cy.getBySel(CONNECTOR_INDEX.SET_SCHEDULE_BUTTON).click();
 
-    cy.getBySel('entSearchContent-connector-configuration-setScheduleAndSync').click();
-
+    // Scheduling Tab opened
     cy.url().should('contain', getIndexRoute(indexName) + 'scheduling');
 
+    // Start one time sync
     cy.getBySel(CONNECTOR_INDEX.HEADER_SYNC_MENU).click();
     cy.getBySel(CONNECTOR_INDEX.HEADER_SYNC_MENU_START).click();
 
@@ -86,6 +92,8 @@ describe('Enterprise Search MongoDB connector', () => {
     cy.getBySel(INDEX_OVERVIEW.STATS.CONNECTOR_TYPE).should('contain.text', 'MongoDB');
     cy.getBySel(INDEX_OVERVIEW.STATS.INGESTION_STATUS).should('contain.text', 'Configured');
     cy.getBySel(INDEX_OVERVIEW.STATS.INGESTION_STATUS).should('contain.text', 'Connected');
+
+    // Wait until document count > 0
     cy.getBySel(INDEX_OVERVIEW.STATS.DOCUMENT_COUNT).should((el) => {
       const text = el.text();
       const count = parseInt(text.match(/[0-9]+/g), 10);
