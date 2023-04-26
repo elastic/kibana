@@ -8,37 +8,32 @@
 import { isBoom } from '@hapi/boom';
 import { createValidationFunction } from '../../../common/runtime_types';
 import {
-  inventoryViewResponsePayloadRT,
-  inventoryViewRequestQueryRT,
-  INVENTORY_VIEW_URL_ENTITY,
-  getInventoryViewRequestParamsRT,
+  metricsExplorerViewRequestParamsRT,
+  METRICS_EXPLORER_VIEW_URL_ENTITY,
 } from '../../../common/http_api/latest';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 
-export const initGetInventoryViewRoute = ({
+export const initDeleteMetricsExplorerViewRoute = ({
   framework,
   getStartServices,
 }: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
   framework.registerRoute(
     {
-      method: 'get',
-      path: INVENTORY_VIEW_URL_ENTITY,
+      method: 'delete',
+      path: METRICS_EXPLORER_VIEW_URL_ENTITY,
       validate: {
-        params: createValidationFunction(getInventoryViewRequestParamsRT),
-        query: createValidationFunction(inventoryViewRequestQueryRT),
+        params: createValidationFunction(metricsExplorerViewRequestParamsRT),
       },
     },
     async (_requestContext, request, response) => {
-      const { params, query } = request;
-      const [, , { inventoryViews }] = await getStartServices();
-      const inventoryViewsClient = inventoryViews.getScopedClient(request);
+      const { params } = request;
+      const [, , { metricsExplorerViews }] = await getStartServices();
+      const metricsExplorerViewsClient = metricsExplorerViews.getScopedClient(request);
 
       try {
-        const inventoryView = await inventoryViewsClient.get(params.inventoryViewId, query);
+        await metricsExplorerViewsClient.delete(params.metricsExplorerViewId);
 
-        return response.ok({
-          body: inventoryViewResponsePayloadRT.encode({ data: inventoryView }),
-        });
+        return response.noContent();
       } catch (error) {
         if (isBoom(error)) {
           return response.customError({

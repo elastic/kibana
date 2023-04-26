@@ -8,7 +8,7 @@
 import { staticMetricsExplorerViewAttributes } from './defaults';
 import type { MetricsExplorerView, MetricsExplorerViewAttributes } from './types';
 
-export const createmetricsExplorerViewMock = (
+export const createMetricsExplorerViewMock = (
   id: string,
   attributes: MetricsExplorerViewAttributes,
   updatedAt?: number,

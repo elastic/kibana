@@ -8,36 +8,35 @@
 import { isBoom } from '@hapi/boom';
 import { createValidationFunction } from '../../../common/runtime_types';
 import {
-  inventoryViewResponsePayloadRT,
-  inventoryViewRequestQueryRT,
-  INVENTORY_VIEW_URL_ENTITY,
-  getInventoryViewRequestParamsRT,
+  createMetricsExplorerViewRequestPayloadRT,
+  metricsExplorerViewResponsePayloadRT,
+  METRICS_EXPLORER_VIEW_URL,
 } from '../../../common/http_api/latest';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 
-export const initGetInventoryViewRoute = ({
+export const initCreateMetricsExplorerViewRoute = ({
   framework,
   getStartServices,
 }: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
   framework.registerRoute(
     {
-      method: 'get',
-      path: INVENTORY_VIEW_URL_ENTITY,
+      method: 'post',
+      path: METRICS_EXPLORER_VIEW_URL,
       validate: {
-        params: createValidationFunction(getInventoryViewRequestParamsRT),
-        query: createValidationFunction(inventoryViewRequestQueryRT),
+        body: createValidationFunction(createMetricsExplorerViewRequestPayloadRT),
       },
     },
     async (_requestContext, request, response) => {
-      const { params, query } = request;
-      const [, , { inventoryViews }] = await getStartServices();
-      const inventoryViewsClient = inventoryViews.getScopedClient(request);
+      const { body } = request;
+      const [, , { metricsExplorerViews }] = await getStartServices();
+      const metricsExplorerViewsClient = metricsExplorerViews.getScopedClient(request);
 
       try {
-        const inventoryView = await inventoryViewsClient.get(params.inventoryViewId, query);
+        const metricsExplorerView = await metricsExplorerViewsClient.create(body.attributes);
 
-        return response.ok({
-          body: inventoryViewResponsePayloadRT.encode({ data: inventoryView }),
+        return response.custom({
+          statusCode: 201,
+          body: metricsExplorerViewResponsePayloadRT.encode({ data: metricsExplorerView }),
         });
       } catch (error) {
         if (isBoom(error)) {

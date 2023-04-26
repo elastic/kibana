@@ -1,20 +1,20 @@
-# Inventory Views CRUD api
+# Metrics Explorer Views CRUD api
 
-## Find all: `GET /api/infra/inventory_views`
+## Find all: `GET /api/infra/metrics_explorer_views`
 
-Retrieves all inventory views in a reduced version.
+Retrieves all metrics explorer views in a reduced version.
 
 ### Request
 
 - **Method**: GET
-- **Path**: /api/infra/inventory_views
+- **Path**: /api/infra/metrics_explorer_views
 - **Query params**:
-  - `sourceId` _(optional)_: Specify a source id related to the inventory views. Default value: `default`.
+  - `sourceId` _(optional)_: Specify a source id related to the metrics explorer views. Default value: `default`.
 
 ### Response
 
 ```json
-GET /api/infra/inventory_views
+GET /api/infra/metrics_explorer_views
 
 Status code: 200
 
@@ -52,21 +52,21 @@ Status code: 200
 }
 ```
 
-## Get one: `GET /api/infra/inventory_views/{inventoryViewId}`
+## Get one: `GET /api/infra/metrics_explorer_views/{metricsExplorerViewId}`
 
-Retrieves a single inventory view by ID
+Retrieves a single metrics explorer view by ID
 
 ### Request
 
 - **Method**: GET
-- **Path**: /api/infra/inventory_views/{inventoryViewId}
+- **Path**: /api/infra/metrics_explorer_views/{metricsExplorerViewId}
 - **Query params**:
-  - `sourceId` _(optional)_: Specify a source id related to the inventory view. Default value: `default`.
+  - `sourceId` _(optional)_: Specify a source id related to the metrics explorer view. Default value: `default`.
 
 ### Response
 
 ```json
-GET /api/infra/inventory_views/927ad6a0-da0c-11ed-9487-41e9b90f96b9
+GET /api/infra/metrics_explorer_views/927ad6a0-da0c-11ed-9487-41e9b90f96b9
 
 Status code: 200
 
@@ -115,25 +115,25 @@ Status code: 200
 ```
 
 ```json
-GET /api/infra/inventory_views/random-id
+GET /api/infra/metrics_explorer_views/random-id
 
 Status code: 404
 
 {
   "statusCode": 404,
   "error": "Not Found",
-  "message": "Saved object [inventory-view/random-id] not found"
+  "message": "Saved object [metrics-explorer-view/random-id] not found"
 }
 ```
 
-## Create one: `POST /api/infra/inventory_views`
+## Create one: `POST /api/infra/metrics_explorer_views`
 
-Creates a new inventory view.
+Creates a new metrics explorer view.
 
 ### Request
 
 - **Method**: POST
-- **Path**: /api/infra/inventory_views
+- **Path**: /api/infra/metrics_explorer_views
 - **Request body**:
   ```json
   {
@@ -154,7 +154,7 @@ Creates a new inventory view.
 ### Response
 
 ```json
-POST /api/infra/inventory_views
+POST /api/infra/metrics_explorer_views
 
 Status code: 201
 
@@ -204,7 +204,7 @@ Status code: 201
 
 Send in the payload a `name` attribute already held by another view:
 ```json
-POST /api/infra/inventory_views
+POST /api/infra/metrics_explorer_views
 
 Status code: 409
 
@@ -215,20 +215,20 @@ Status code: 409
 }
 ```
 
-## Update one: `PUT /api/infra/inventory_views/{inventoryViewId}`
+## Update one: `PUT /api/infra/metrics_explorer_views/{metricsExplorerViewId}`
 
-Updates an inventory view.
+Updates a metrics explorer view.
 
 Any attribute can be updated except for `isDefault` and `isStatic`, which are derived by the source configuration preference set by the user.
 
-Any attempt to update the static view with id `0` will return a `400 The inventory view with id 0 is not configurable.`
+Any attempt to update the static view with id `0` will return a `400 The metrics explorer view with id 0 is not configurable.` 
 
 ### Request
 
 - **Method**: PUT
-- **Path**: /api/infra/inventory_views/{inventoryViewId}
+- **Path**: /api/infra/metrics_explorer_views/{metricsExplorerViewId}
 - **Query params**:
-  - `sourceId` _(optional)_: Specify a source id related to the inventory view. Default value: `default`.
+  - `sourceId` _(optional)_: Specify a source id related to the metrics explorer view. Default value: `default`.
 - **Request body**:
   ```json
   {
@@ -249,7 +249,7 @@ Any attempt to update the static view with id `0` will return a `400 The invento
 ### Response
 
 ```json
-PUT /api/infra/inventory_views/927ad6a0-da0c-11ed-9487-41e9b90f96b9
+PUT /api/infra/metrics_explorer_views/927ad6a0-da0c-11ed-9487-41e9b90f96b9
 
 Status code: 200
 
@@ -298,20 +298,20 @@ Status code: 200
 ```
 
 ```json
-PUT /api/infra/inventory_views/random-id
+PUT /api/infra/metrics_explorer_views/random-id
 
 Status code: 404
 
 {
   "statusCode": 404,
   "error": "Not Found",
-  "message": "Saved object [inventory-view/random-id] not found"
+  "message": "Saved object [metrics-explorer-view/random-id] not found"
 }
 ```
 
 Send in the payload a `name` attribute already held by another view:
 ```json
-PUT /api/infra/inventory_views/927ad6a0-da0c-11ed-9487-41e9b90f96b9
+PUT /api/infra/metrics_explorer_views/927ad6a0-da0c-11ed-9487-41e9b90f96b9
 
 Status code: 409
 
@@ -322,33 +322,33 @@ Status code: 409
 }
 ```
 
-## Delete one: `DELETE /api/infra/inventory_views/{inventoryViewId}`
+## Delete one: `DELETE /api/infra/metrics_explorer_views/{metricsExplorerViewId}`
 
-Deletes an inventory view.
+Deletes a metrics explorer view.
 
-Any attempt to delete the static view with id `0` will return a `400 The inventory view with id 0 is not configurable.`
+Any attempt to delete the static view with id `0` will return a `400 The metrics explorer view with id 0 is not configurable.`
 
 ### Request
 
 - **Method**: DELETE
-- **Path**: /api/infra/inventory_views/{inventoryViewId}
+- **Path**: /api/infra/metrics_explorer_views/{metricsExplorerViewId}
 
 ### Response
 
 ```json
-DELETE /api/infra/inventory_views/927ad6a0-da0c-11ed-9487-41e9b90f96b9
+DELETE /api/infra/metrics_explorer_views/927ad6a0-da0c-11ed-9487-41e9b90f96b9
 
 Status code: 204 No content
 ```
 
 ```json
-DELETE /api/infra/inventory_views/random-id
+DELETE /api/infra/metrics_explorer_views/random-id
 
 Status code: 404
 
 {
   "statusCode": 404,
   "error": "Not Found",
-  "message": "Saved object [inventory-view/random-id] not found"
+  "message": "Saved object [metrics-explorer-view/random-id] not found"
 }
 ```
