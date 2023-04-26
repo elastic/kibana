@@ -30,7 +30,7 @@ export interface MessageSigningServiceInterface {
   generateKeyPair(
     providedPassphrase?: string
   ): Promise<{ privateKey: string; publicKey: string; passphrase: string }>;
-  rotateKeyPair(): Promise<{ error: Error } | undefined>;
+  rotateKeyPair(): Promise<void>;
   sign(message: Buffer | Record<string, unknown>): Promise<{ data: Buffer; signature: string }>;
   getPublicKey(): Promise<string>;
 }
@@ -135,7 +135,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     return publicKey;
   }
 
-  public async rotateKeyPair(): Promise<{ error: Error } | undefined> {
+  public async rotateKeyPair(): Promise<void> {
     try {
       const removeKeyPairResponse = await this.removeKeyPair();
       if (!removeKeyPairResponse) {
@@ -143,7 +143,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       }
       await this.generateKeyPair();
     } catch (error) {
-      return { error: Error(`Error rotating key pair: ${error.message}`) };
+      throw Error(`Error rotating key pair: ${error.message}`);
     }
   }
 
