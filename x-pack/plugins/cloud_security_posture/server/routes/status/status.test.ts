@@ -23,7 +23,7 @@ const mockInstallation: Installation = {
   install_format_schema_version: '1.0.0',
   keep_policies_up_to_date: true,
   verification_status: 'verified',
-  verification_key_id: 'd27d666cd88e42b4',
+  verification_key_id: 'blablabla',
 };
 
 describe('calculateIntegrationStatus for cspm', () => {
