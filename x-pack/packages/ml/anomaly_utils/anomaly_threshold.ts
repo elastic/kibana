@@ -8,7 +8,7 @@
 /**
  * Anomaly score numeric thresholds to indicate the severity of the anomaly.
  */
-export enum ANOMALY_THRESHOLD {
+export enum ML_ANOMALY_THRESHOLD {
   /**
    * Threshold at which anomalies are labelled in the UI as critical.
    */

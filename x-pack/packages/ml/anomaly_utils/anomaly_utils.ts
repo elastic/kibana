@@ -11,7 +11,7 @@
  */
 
 import type { SeverityType } from './anomaly_severity';
-import { ANOMALY_THRESHOLD } from './anomaly_threshold';
+import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 import { getSeverityTypes } from './get_severity_types';
 import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from './types';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_rule';
@@ -120,15 +120,15 @@ export function isCategorizationAnomaly(anomaly: MlAnomaliesTableRecord): boolea
 export function getSeverityWithLow(normalizedScore: number): SeverityType {
   const severityTypesList = getSeverityTypes();
 
-  if (normalizedScore >= ANOMALY_THRESHOLD.CRITICAL) {
+  if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {
     return severityTypesList.critical;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MAJOR) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MAJOR) {
     return severityTypesList.major;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MINOR) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
     return severityTypesList.minor;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.WARNING) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.WARNING) {
     return severityTypesList.warning;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.LOW) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
     return severityTypesList.low;
   } else {
     return severityTypesList.unknown;

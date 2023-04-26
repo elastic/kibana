@@ -15,7 +15,7 @@ import useObservable from 'react-use/lib/useObservable';
 import {
   type EntityField,
   type EntityFieldOperation,
-  ANOMALY_THRESHOLD,
+  ML_ANOMALY_THRESHOLD,
 } from '@kbn/ml-anomaly-utils';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
@@ -71,7 +71,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(
     optionValueToThreshold(
-      embeddableContext.getInput().severityThreshold ?? ANOMALY_THRESHOLD.WARNING
+      embeddableContext.getInput().severityThreshold ?? ML_ANOMALY_THRESHOLD.WARNING
     )
   );
   const [selectedEntities, setSelectedEntities] = useState<EntityField[] | undefined>();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ANOMALY_THRESHOLD } from './anomaly_threshold';
+import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 import { SEVERITY_COLORS } from './severity_colors';
 
 /**
@@ -13,19 +13,19 @@ import { SEVERITY_COLORS } from './severity_colors';
  */
 export const SEVERITY_COLOR_RAMP = [
   {
-    stop: ANOMALY_THRESHOLD.LOW,
+    stop: ML_ANOMALY_THRESHOLD.LOW,
     color: SEVERITY_COLORS.WARNING,
   },
   {
-    stop: ANOMALY_THRESHOLD.MINOR,
+    stop: ML_ANOMALY_THRESHOLD.MINOR,
     color: SEVERITY_COLORS.MINOR,
   },
   {
-    stop: ANOMALY_THRESHOLD.MAJOR,
+    stop: ML_ANOMALY_THRESHOLD.MAJOR,
     color: SEVERITY_COLORS.MAJOR,
   },
   {
-    stop: ANOMALY_THRESHOLD.CRITICAL,
+    stop: ML_ANOMALY_THRESHOLD.CRITICAL,
     color: SEVERITY_COLORS.CRITICAL,
   },
 ];

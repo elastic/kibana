@@ -11,7 +11,7 @@ import useMount from 'react-use/lib/useMount';
 import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
-import { ANOMALY_RESULT_TYPE, ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import { ANOMALY_RESULT_TYPE, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import { JobSelectorControl } from './job_selector';
 import { useMlKibana } from '../application/contexts/kibana';
 import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
@@ -108,7 +108,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
     if (Object.keys(rest).length === 0) {
       setRuleProperty('params', {
         // Set defaults
-        severity: ANOMALY_THRESHOLD.CRITICAL,
+        severity: ML_ANOMALY_THRESHOLD.CRITICAL,
         resultType: ANOMALY_RESULT_TYPE.BUCKET,
         includeInterim: false,
         // Preserve job selection

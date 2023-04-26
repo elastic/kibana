@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { TIEBREAKER_FIELD } from '../../../../common/constants';
-import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
+import { ML_ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import {
   createJobIdsFilters,
@@ -38,7 +38,7 @@ export const createMetricsK8sAnomaliesQuery = ({
   jobQuery,
 }: {
   jobIds: string[];
-  anomalyThreshold: ANOMALY_THRESHOLD;
+  anomalyThreshold: ML_ANOMALY_THRESHOLD;
   startTime: number;
   endTime: number;
   sort: Sort;

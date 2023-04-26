@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ANOMALY_THRESHOLD } from './anomaly_threshold';
+import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 import type { SeverityType } from './anomaly_severity';
 import { getSeverityTypes } from './get_severity_types';
 
@@ -17,13 +17,13 @@ import { getSeverityTypes } from './get_severity_types';
 export function getSeverity(normalizedScore: number): SeverityType {
   const severityTypesList = getSeverityTypes();
 
-  if (normalizedScore >= ANOMALY_THRESHOLD.CRITICAL) {
+  if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {
     return severityTypesList.critical;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MAJOR) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MAJOR) {
     return severityTypesList.major;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MINOR) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
     return severityTypesList.minor;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.LOW) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
     return severityTypesList.warning;
   } else {
     return severityTypesList.unknown;

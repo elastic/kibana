@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ANOMALY_THRESHOLD } from './anomaly_threshold';
+import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 import { SEVERITY_COLORS } from './severity_colors';
 
 /**
@@ -14,15 +14,15 @@ import { SEVERITY_COLORS } from './severity_colors';
  * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
  */
 export function getSeverityColor(normalizedScore: number): string {
-  if (normalizedScore >= ANOMALY_THRESHOLD.CRITICAL) {
+  if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {
     return SEVERITY_COLORS.CRITICAL;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MAJOR) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MAJOR) {
     return SEVERITY_COLORS.MAJOR;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MINOR) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
     return SEVERITY_COLORS.MINOR;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.WARNING) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.WARNING) {
     return SEVERITY_COLORS.WARNING;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.LOW) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
     return SEVERITY_COLORS.LOW;
   } else {
     return SEVERITY_COLORS.BLANK;

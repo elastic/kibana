@@ -38,7 +38,7 @@ import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
 import {
   getFormattedSeverityScore,
-  ANOMALY_THRESHOLD,
+  ML_ANOMALY_THRESHOLD,
   SEVERITY_COLORS,
 } from '@kbn/ml-anomaly-utils';
 import { SwimLanePagination } from './swimlane_pagination';
@@ -457,27 +457,27 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                           type: 'bands',
                           bands: [
                             {
-                              start: ANOMALY_THRESHOLD.LOW,
-                              end: ANOMALY_THRESHOLD.WARNING,
+                              start: ML_ANOMALY_THRESHOLD.LOW,
+                              end: ML_ANOMALY_THRESHOLD.WARNING,
                               color: SEVERITY_COLORS.LOW,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.WARNING,
-                              end: ANOMALY_THRESHOLD.MINOR,
+                              start: ML_ANOMALY_THRESHOLD.WARNING,
+                              end: ML_ANOMALY_THRESHOLD.MINOR,
                               color: SEVERITY_COLORS.WARNING,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.MINOR,
-                              end: ANOMALY_THRESHOLD.MAJOR,
+                              start: ML_ANOMALY_THRESHOLD.MINOR,
+                              end: ML_ANOMALY_THRESHOLD.MAJOR,
                               color: SEVERITY_COLORS.MINOR,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.MAJOR,
-                              end: ANOMALY_THRESHOLD.CRITICAL,
+                              start: ML_ANOMALY_THRESHOLD.MAJOR,
+                              end: ML_ANOMALY_THRESHOLD.CRITICAL,
                               color: SEVERITY_COLORS.MAJOR,
                             },
                             {
-                              start: ANOMALY_THRESHOLD.CRITICAL,
+                              start: ML_ANOMALY_THRESHOLD.CRITICAL,
                               end: Infinity,
                               color: SEVERITY_COLORS.CRITICAL,
                             },
