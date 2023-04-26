@@ -6,10 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  getSeverityType,
-  getSeverityColor as mlGetSeverityColor,
-} from '@kbn/ml-anomaly-utils';
+import { getSeverityType } from '@kbn/ml-anomaly-utils/get_severity_type';
+import { getSeverityColor as mlGetSeverityColor } from '@kbn/ml-anomaly-utils/get_severity_color';
 import { ANOMALY_SEVERITY } from '../ml_constants';
 import { ServiceHealthStatus } from '../service_health_status';
 

@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { MlAnomalyRecordDoc } from './types';
+import type { MlAnomalyRecordDoc } from './types';
 
 import {
   aggregationTypeTransform,
   getEntityFieldList,
   getEntityFieldName,
   getEntityFieldValue,
-  getSeverity,
   getSeverityWithLow,
-  getSeverityColor,
   isRuleSupported,
   showActualForFunction,
   showTypicalForFunction,
@@ -166,34 +164,6 @@ describe('ML - anomaly utils', () => {
     status: ['206'],
   };
 
-  describe('getSeverity', () => {
-    test('returns warning for 0 <= score < 25', () => {
-      expect(getSeverity(0).id).toBe('warning');
-      expect(getSeverity(0.001).id).toBe('warning');
-      expect(getSeverity(24.99).id).toBe('warning');
-    });
-
-    test('returns minor for 25 <= score < 50', () => {
-      expect(getSeverity(25).id).toBe('minor');
-      expect(getSeverity(49.99).id).toBe('minor');
-    });
-
-    test('returns minor for 50 <= score < 75', () => {
-      expect(getSeverity(50).id).toBe('major');
-      expect(getSeverity(74.99).id).toBe('major');
-    });
-
-    test('returns critical for score >= 75', () => {
-      expect(getSeverity(75).id).toBe('critical');
-      expect(getSeverity(100).id).toBe('critical');
-      expect(getSeverity(1000).id).toBe('critical');
-    });
-
-    test('returns unknown for scores less than 0', () => {
-      expect(getSeverity(-10).id).toBe('unknown');
-    });
-  });
-
   describe('getSeverityWithLow', () => {
     test('returns low for 0 <= score < 3', () => {
       expect(getSeverityWithLow(0).id).toBe('low');
@@ -224,39 +194,6 @@ describe('ML - anomaly utils', () => {
 
     test('returns unknown for scores less than 0 ', () => {
       expect(getSeverityWithLow(-10).id).toBe('unknown');
-    });
-  });
-
-  describe('getSeverityColor', () => {
-    test('returns correct hex code for low for 0 <= score < 3', () => {
-      expect(getSeverityColor(0)).toBe('#d2e9f7');
-      expect(getSeverityColor(0.001)).toBe('#d2e9f7');
-      expect(getSeverityColor(2.99)).toBe('#d2e9f7');
-    });
-
-    test('returns correct hex code for warning for 3 <= score < 25', () => {
-      expect(getSeverityColor(3)).toBe('#8bc8fb');
-      expect(getSeverityColor(24.99)).toBe('#8bc8fb');
-    });
-
-    test('returns correct hex code for minor for 25 <= score < 50', () => {
-      expect(getSeverityColor(25)).toBe('#fdec25');
-      expect(getSeverityColor(49.99)).toBe('#fdec25');
-    });
-
-    test('returns correct hex code for major for 50 <= score < 75', () => {
-      expect(getSeverityColor(50)).toBe('#fba740');
-      expect(getSeverityColor(74.99)).toBe('#fba740');
-    });
-
-    test('returns correct hex code for critical for score >= 75', () => {
-      expect(getSeverityColor(75)).toBe('#fe5050');
-      expect(getSeverityColor(100)).toBe('#fe5050');
-      expect(getSeverityColor(1000)).toBe('#fe5050');
-    });
-
-    test('returns correct hex code for unknown for scores less than 0', () => {
-      expect(getSeverityColor(-10)).toBe('#ffffff');
     });
   });
 

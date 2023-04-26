@@ -10,15 +10,11 @@
  * to extract information for display in dashboards.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from './constants';
+import type { SeverityType } from './anomaly_severity';
+import { ANOMALY_THRESHOLD } from './anomaly_threshold';
+import { getSeverityTypes } from './get_severity_types';
 import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from './types';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_rule';
-
-export interface SeverityType {
-  id: ANOMALY_SEVERITY;
-  label: string;
-}
 
 export enum ENTITY_FIELD_TYPE {
   BY = 'by',
@@ -71,53 +67,6 @@ const DISPLAY_TYPICAL_FUNCTIONS = [
   'time',
 ];
 
-let severityTypes: Record<string, SeverityType>;
-
-function getSeverityTypes() {
-  if (severityTypes) {
-    return severityTypes;
-  }
-
-  return (severityTypes = {
-    critical: {
-      id: ANOMALY_SEVERITY.CRITICAL,
-      label: i18n.translate('xpack.ml.anomalyUtils.severity.criticalLabel', {
-        defaultMessage: 'critical',
-      }),
-    },
-    major: {
-      id: ANOMALY_SEVERITY.MAJOR,
-      label: i18n.translate('xpack.ml.anomalyUtils.severity.majorLabel', {
-        defaultMessage: 'major',
-      }),
-    },
-    minor: {
-      id: ANOMALY_SEVERITY.MINOR,
-      label: i18n.translate('xpack.ml.anomalyUtils.severity.minorLabel', {
-        defaultMessage: 'minor',
-      }),
-    },
-    warning: {
-      id: ANOMALY_SEVERITY.WARNING,
-      label: i18n.translate('xpack.ml.anomalyUtils.severity.warningLabel', {
-        defaultMessage: 'warning',
-      }),
-    },
-    unknown: {
-      id: ANOMALY_SEVERITY.UNKNOWN,
-      label: i18n.translate('xpack.ml.anomalyUtils.severity.unknownLabel', {
-        defaultMessage: 'unknown',
-      }),
-    },
-    low: {
-      id: ANOMALY_SEVERITY.LOW,
-      label: i18n.translate('xpack.ml.anomalyUtils.severityWithLow.lowLabel', {
-        defaultMessage: 'low',
-      }),
-    },
-  });
-}
-
 /**
  * Returns whether the anomaly is in a categorization analysis.
  * @param anomaly Anomaly table record
@@ -132,48 +81,6 @@ export function isCategorizationAnomaly(anomaly: MlAnomaliesTableRecord): boolea
  */
 export function getFormattedSeverityScore(score: number): string {
   return score < 1 ? '< 1' : String(parseInt(String(score), 10));
-}
-
-/**
- * Returns a severity label (one of critical, major, minor, warning or unknown)
- * for the supplied normalized anomaly score (a value between 0 and 100).
- * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
- */
-export function getSeverity(normalizedScore: number): SeverityType {
-  const severityTypesList = getSeverityTypes();
-
-  if (normalizedScore >= ANOMALY_THRESHOLD.CRITICAL) {
-    return severityTypesList.critical;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MAJOR) {
-    return severityTypesList.major;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MINOR) {
-    return severityTypesList.minor;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.LOW) {
-    return severityTypesList.warning;
-  } else {
-    return severityTypesList.unknown;
-  }
-}
-
-/**
- * Returns a severity type (indicating a critical, major, minor, warning or low severity anomaly)
- * for the supplied normalized anomaly score (a value between 0 and 100).
- * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
- */
-export function getSeverityType(normalizedScore: number): ANOMALY_SEVERITY {
-  if (normalizedScore >= 75) {
-    return ANOMALY_SEVERITY.CRITICAL;
-  } else if (normalizedScore >= 50) {
-    return ANOMALY_SEVERITY.MAJOR;
-  } else if (normalizedScore >= 25) {
-    return ANOMALY_SEVERITY.MINOR;
-  } else if (normalizedScore >= 3) {
-    return ANOMALY_SEVERITY.WARNING;
-  } else if (normalizedScore >= 0) {
-    return ANOMALY_SEVERITY.LOW;
-  } else {
-    return ANOMALY_SEVERITY.UNKNOWN;
-  }
 }
 
 /**
@@ -197,27 +104,6 @@ export function getSeverityWithLow(normalizedScore: number): SeverityType {
     return severityTypesList.low;
   } else {
     return severityTypesList.unknown;
-  }
-}
-
-/**
- * Returns a severity RGB color (one of critical, major, minor, warning, low or blank)
- * for the supplied normalized anomaly score (a value between 0 and 100).
- * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
- */
-export function getSeverityColor(normalizedScore: number): string {
-  if (normalizedScore >= ANOMALY_THRESHOLD.CRITICAL) {
-    return SEVERITY_COLORS.CRITICAL;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MAJOR) {
-    return SEVERITY_COLORS.MAJOR;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.MINOR) {
-    return SEVERITY_COLORS.MINOR;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.WARNING) {
-    return SEVERITY_COLORS.WARNING;
-  } else if (normalizedScore >= ANOMALY_THRESHOLD.LOW) {
-    return SEVERITY_COLORS.LOW;
-  } else {
-    return SEVERITY_COLORS.BLANK;
   }
 }
 

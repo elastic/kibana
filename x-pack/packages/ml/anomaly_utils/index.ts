@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+export { ANOMALY_SEVERITY } from './anomaly_severity';
+export { ANOMALY_THRESHOLD } from './anomaly_threshold';
+export { SEVERITY_COLORS } from './severity_colors';
+
 export {
   aggregationTypeTransform,
   getAnomalyScoreExplanationImpactValue,
@@ -12,9 +16,6 @@ export {
   getEntityFieldName,
   getEntityFieldValue,
   getFormattedSeverityScore,
-  getSeverityColor,
-  getSeverityType,
-  getSeverity,
   getSeverityWithLow,
   isCategorizationAnomaly,
   isRuleSupported,
@@ -28,13 +29,10 @@ export {
 
 export {
   ANOMALY_RESULT_TYPE,
-  ANOMALY_SEVERITY,
-  ANOMALY_THRESHOLD,
   PARTITION_FIELD_VALUE,
   PARTITION_FIELDS,
   JOB_ID,
   SEVERITY_COLOR_RAMP,
-  SEVERITY_COLORS,
 } from './constants';
 
 export {
@@ -51,6 +49,10 @@ export {
   FILTER_TYPE,
   OPERATOR,
 } from './detector_rule';
+
+export { getSeverity } from './get_severity';
+export { getSeverityColor } from './get_severity_color';
+export { getSeverityType } from './get_severity_type';
 
 export type {
   EntityFieldType,
