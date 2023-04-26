@@ -57,14 +57,14 @@ export const getGroupingQuery = ({
           {
             field: groupByField,
             // the AggregationsMultiTermLookup type is wrong in the elasticsearch node package
-            // see linked slack thread to find out when we can remove these ts ignores
+            // see linked slack thread to find out when we can remove these ts expect errors
             // https://urle.me/eAq
-            // @ts-ignore
+            // @ts-expect-error
             missing: getFieldTypeMissingValues(selectedGroupEsTypes)[0],
           },
           {
             field: groupByField,
-            // @ts-ignore
+            // @ts-expect-error
             missing: getFieldTypeMissingValues(selectedGroupEsTypes)[1],
           },
         ],
