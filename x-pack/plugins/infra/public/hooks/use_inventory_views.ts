@@ -110,7 +110,7 @@ export const useInventoryViews = () => {
     },
   });
 
-  const { mutate: createView, isLoading: isCreatingView } = useMutation<
+  const { mutateAsync: createView, isLoading: isCreatingView } = useMutation<
     InventoryView,
     ServerError,
     CreateInventoryViewAttributesRequestPayload
@@ -126,14 +126,14 @@ export const useInventoryViews = () => {
     },
   });
 
-  const { mutate: updateViewById, isLoading: isUpdatingView } = useMutation<
+  const { mutateAsync: updateViewById, isLoading: isUpdatingView } = useMutation<
     InventoryView,
     ServerError,
     { id: string; attributes: UpdateInventoryViewAttributesRequestPayload }
   >({
     mutationFn: ({ id, attributes }) => inventoryViews.client.updateInventoryView(id, attributes),
     onError: (error) => {
-      notify.upsertViewFailure(error.body?.message);
+      notify.upsertViewFailure(error.body?.message ?? error.message);
     },
     onSuccess: (updatedView) => {
       queryClient.setQueryData(queryKeys.getById(updatedView.id), updatedView); // Store in cache updated view
@@ -194,6 +194,7 @@ export const useInventoryViews = () => {
     isFetchingCurrentView,
     isFetchingViews,
     isUpdatingView,
+    shouldLoadDefault: true,
   };
 };
 

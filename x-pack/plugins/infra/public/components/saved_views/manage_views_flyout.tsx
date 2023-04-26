@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 
 import {
@@ -22,15 +22,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { InventoryView } from '../../../common/inventory_views';
 import { SavedView } from '../../containers/saved_view/saved_view';
 
-interface Props<ViewState> {
-  views: Array<SavedView<ViewState>>;
+interface Props {
+  views: InventoryView[];
   loading: boolean;
-  sourceIsLoading: boolean;
   onClose(): void;
   onMakeDefaultView(id: string): void;
-  setView(viewState: ViewState): void;
+  onSwitchView(id: string): void;
   onDeleteView(id: string): void;
 }
 
@@ -74,20 +74,17 @@ const DeleteConfimation = ({ isDisabled, onConfirm }: DeleteConfimationProps) =>
 export function SavedViewManageViewsFlyout<ViewState>({
   onClose,
   views,
-  setView,
+  onSwitchView,
   onMakeDefaultView,
   onDeleteView,
   loading,
-  sourceIsLoading,
-}: Props<ViewState>) {
-  const [inProgressView, setInProgressView] = useState<string | null>(null);
-
-  const renderName = (name: string, item: SavedView<ViewState>) => (
+}: Props) {
+  const renderName = (name: string, item: InventoryView) => (
     <EuiButtonEmpty
       key={item.id}
       data-test-subj="infraRenderNameButton"
       onClick={() => {
-        setView(item);
+        onSwitchView(item.id);
         onClose();
       }}
     >
@@ -95,11 +92,11 @@ export function SavedViewManageViewsFlyout<ViewState>({
     </EuiButtonEmpty>
   );
 
-  const renderDeleteAction = (item: SavedView<ViewState>) => {
+  const renderDeleteAction = (item: InventoryView) => {
     return (
       <DeleteConfimation
         key={item.id}
-        isDisabled={item.isDefault}
+        isDisabled={item.attributes.isDefault}
         onConfirm={() => {
           onDeleteView(item.id);
         }}
@@ -107,15 +104,13 @@ export function SavedViewManageViewsFlyout<ViewState>({
     );
   };
 
-  const renderMakeDefaultAction = (item: SavedView<ViewState>) => {
+  const renderMakeDefaultAction = (item: InventoryView) => {
     return (
       <EuiButtonEmpty
         key={item.id}
         data-test-subj="infraRenderMakeDefaultActionButton"
-        isLoading={inProgressView === item.id && sourceIsLoading}
-        iconType={item.isDefault ? 'starFilled' : 'starEmpty'}
+        iconType={item.attributes.isDefault ? 'starFilled' : 'starEmpty'}
         onClick={() => {
-          setInProgressView(item.id);
           onMakeDefaultView(item.id);
         }}
       />
@@ -124,7 +119,7 @@ export function SavedViewManageViewsFlyout<ViewState>({
 
   const columns = [
     {
-      field: 'name',
+      field: 'attributes.name',
       name: i18n.translate('xpack.infra.openView.columnNames.name', { defaultMessage: 'Name' }),
       sortable: true,
       truncateText: true,
@@ -139,7 +134,7 @@ export function SavedViewManageViewsFlyout<ViewState>({
           render: renderMakeDefaultAction,
         },
         {
-          available: (item: SavedView<ViewState>) => item.id !== '0',
+          available: (item: InventoryView) => !item.attributes.isStatic,
           render: renderDeleteAction,
         },
       ],

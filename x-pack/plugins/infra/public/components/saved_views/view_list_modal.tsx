@@ -18,14 +18,14 @@ import { SavedView } from '../../containers/saved_view/saved_view';
 interface Props<ViewState> {
   views: Array<SavedView<ViewState>>;
   onClose(): void;
-  setView(viewState: ViewState): void;
+  onSwitchView(viewState: ViewState): void;
   currentView?: ViewState;
 }
 
 export function SavedViewListModal<ViewState extends { id: string; name: string }>({
   onClose,
   views,
-  setView,
+  onSwitchView,
   currentView,
 }: Props<ViewState>) {
   const [options, setOptions] = useState<EuiSelectableOption[] | null>(null);
@@ -45,9 +45,9 @@ export function SavedViewListModal<ViewState extends { id: string; name: string 
       onClose();
       return;
     }
-    setView(views.find((v) => v.id === selected.key)!);
+    onSwitchView(views.find((v) => v.id === selected.key)!);
     onClose();
-  }, [options, views, setView, onClose]);
+  }, [options, views, onSwitchView, onClose]);
 
   const defaultOptions = useMemo<EuiSelectableOption[]>(() => {
     return views.map((v) => ({

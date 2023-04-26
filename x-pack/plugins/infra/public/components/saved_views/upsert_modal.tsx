@@ -41,7 +41,7 @@ export const UpsertViewModal = ({
   title,
 }: Props) => {
   const [viewName, setViewName] = useState(initialName);
-  const [includeTime, setIncludeTime] = useState(initialIncludeTime);
+  const [shouldIncludeTime, setIncludeTime] = useState(initialIncludeTime);
 
   const handleNameChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     setViewName(e.target.value);
@@ -52,7 +52,7 @@ export const UpsertViewModal = ({
   };
 
   const saveView = () => {
-    onSave(viewName, includeTime);
+    onSave(viewName, shouldIncludeTime);
   };
 
   return (
@@ -82,7 +82,7 @@ export const UpsertViewModal = ({
               id="xpack.infra.waffle.savedViews.includeTimeFilterLabel"
             />
           }
-          checked={includeTime}
+          checked={shouldIncludeTime}
           onChange={handleTimeCheckChange}
         />
         <EuiSpacer size="s" />
