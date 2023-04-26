@@ -68,7 +68,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     });
   });
 
-  describe.only('Rule installation notification when at least one rule already installed', () => {
+  describe('Rule installation notification when at least one rule already installed', () => {
     beforeEach(() => {
       installAvailableRules();
       // Create new rule asset with a different rule_id as the one that was
