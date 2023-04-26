@@ -13,6 +13,7 @@ import {
   objectTypeToGetResultSchema,
   createOptionsSchema,
   createResultSchema,
+  searchOptionsSchema,
 } from '@kbn/content-management-utils';
 // import { fieldSpecSchema, serializedFieldFormatSchema, runtimeFieldSchema } from '../../schemas';
 
@@ -57,15 +58,6 @@ const dataViewAttributesSchema = schema.object(
 );
 
 const dataViewSavedObjectSchema = savedObjectSchema(dataViewAttributesSchema);
-
-const searchOptionsSchema = schema.maybe(
-  schema.object(
-    {
-      onlyTitle: schema.maybe(schema.boolean()),
-    },
-    { unknowns: 'forbid' }
-  )
-);
 
 // Content management service definition.
 // We need it for BWC support between different versions of the content

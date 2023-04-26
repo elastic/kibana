@@ -25,7 +25,8 @@ import { getIndices, HasData } from './services';
 
 import { debounceByKey } from './debounce_by_key';
 
-import { DATA_VIEW_SAVED_OBJECT_TYPE, LATEST_VERSION } from '../common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common/constants';
+import { LATEST_VERSION } from '../common/content_management/v1/constants';
 
 export class DataViewsPublicPlugin
   implements
