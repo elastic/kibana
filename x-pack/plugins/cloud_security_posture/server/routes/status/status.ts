@@ -211,7 +211,7 @@ export const getCspStatus = async ({
     agentService,
     logger
   );
-  console.log('INSTALLATION: ', installation)
+
   const healthyAgentsCspm = await getHealthyAgents(
     soClient,
     installedPackagePoliciesCspm.items,
