@@ -238,22 +238,14 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.find('queryInput');
     },
 
-    async clearQueryBar() {
-      const queryBar = await this.getQueryBar();
-
-      return queryBar.clearValueWithKeyboard();
-    },
-
     async typeInQueryBar(query: string) {
       const queryBar = await this.getQueryBar();
-
       await queryBar.clearValueWithKeyboard();
       return queryBar.type(query);
     },
 
     async submitQuery(query: string) {
       await this.typeInQueryBar(query);
-
       await testSubjects.click('querySubmitButton');
     },
 
@@ -294,13 +286,13 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     async sortByDiskLatency() {
       const diskLatency = await this.getDiskLatencyHeader();
       const button = await testSubjects.findDescendant('tableHeaderSortButton', diskLatency);
-      return button.click();
+      await button.click();
     },
 
     async sortByTitle() {
       const titleHeader = await this.getTitleHeader();
       const button = await testSubjects.findDescendant('tableHeaderSortButton', titleHeader);
-      return button.click();
+      await button.click();
     },
   };
 }
