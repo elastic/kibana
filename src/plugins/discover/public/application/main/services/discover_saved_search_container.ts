@@ -138,21 +138,18 @@ export function getSavedSearchContainer({
     const nextSavedSearch = await getNewSavedSearch(services.data);
     nextSavedSearch.searchSource.setField('index', dataView);
     const newAppState = getDefaultAppState(nextSavedSearch, services);
-    const nextSavedSearchToSet = updateSavedSearch(
-      {
-        savedSearch: { ...nextSavedSearch },
-        dataView,
-        state: newAppState,
-        services,
-      },
-      false
-    );
+    const nextSavedSearchToSet = updateSavedSearch({
+      savedSearch: { ...nextSavedSearch },
+      dataView,
+      state: newAppState,
+      services,
+    });
     return set(nextSavedSearchToSet);
   };
 
   const persist = async (nextSavedSearch: SavedSearch, saveOptions?: SavedObjectSaveOpts) => {
     addLog('[savedSearch] persist', { nextSavedSearch, saveOptions });
-    updateSavedSearch({ savedSearch: nextSavedSearch, services });
+    updateSavedSearch({ savedSearch: nextSavedSearch, services }, true);
 
     const id = await saveSavedSearch(
       nextSavedSearch,

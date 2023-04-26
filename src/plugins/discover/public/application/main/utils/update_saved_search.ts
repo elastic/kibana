@@ -44,10 +44,10 @@ export function updateSavedSearch(
     savedSearch.searchSource
       .setField('query', services.data.query.queryString.getQuery())
       .setField('filter', services.data.query.filterManager.getFilters());
-  } else {
+  } else if (state) {
     savedSearch.searchSource
-      .setField('query', state?.query ?? undefined)
-      .setField('filter', state?.filters ? cloneDeep(state.filters) : []);
+      .setField('query', state.query ?? undefined)
+      .setField('filter', state.filters ? cloneDeep(state.filters) : []);
   }
   if (state) {
     savedSearch.columns = state.columns || [];
