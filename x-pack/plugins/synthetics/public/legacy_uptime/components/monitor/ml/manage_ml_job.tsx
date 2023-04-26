@@ -184,6 +184,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
           onConfirm={() => {
             deleteAnomalyAlert();
             setIsConfirmAlertDeleteOpen(false);
+            setIsPopOverOpen(false);
           }}
           onCancel={() => {
             setIsConfirmAlertDeleteOpen(false);
