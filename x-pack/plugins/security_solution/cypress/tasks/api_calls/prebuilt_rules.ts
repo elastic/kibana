@@ -8,7 +8,7 @@
 import { ELASTIC_SECURITY_RULE_ID } from '../../../common/detection_engine/constants';
 import type { PrePackagedRulesStatusResponse } from '../../../public/detection_engine/rule_management/logic/types';
 import { getPrebuiltRuleWithExceptionsMock } from '../../../server/lib/detection_engine/prebuilt_rules/mocks';
-import { createRuleAssetSavedObject, createRuleSavedObject } from '../../helpers/rules';
+import { createRuleAssetSavedObject } from '../../helpers/rules';
 
 export const getPrebuiltRulesStatus = () => {
   return cy.request<PrePackagedRulesStatusResponse>({
@@ -75,12 +75,6 @@ export const createNewRuleAsset = ({
     { interval: 500, timeout: 12000 }
   );
 };
-
-export const SAMPLE_RULE = createRuleSavedObject({
-  rule_id: ELASTIC_SECURITY_RULE_ID,
-  tags: ['test-tag-1'],
-  enabled: true,
-});
 
 export const installAvailableRules = () => {
   cy.waitUntil(
