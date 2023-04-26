@@ -103,7 +103,7 @@ describe('ProjectSwitcher', () => {
         await waitFor(() => userEvent.click(button));
 
         const group = screen.getByTestId(TEST_ID_ITEM_GROUP);
-        const project = await within(group).findByRole('button', { name: 'Security' });
+        const project = await within(group).findByLabelText('Security');
         await waitFor(() => userEvent.click(project));
 
         expect(mock.setProjectType).toHaveBeenCalled();
@@ -142,7 +142,7 @@ describe('ProjectSwitcher', () => {
       await waitFor(() => userEvent.click(button));
 
       const group = screen.getByTestId(TEST_ID_ITEM_GROUP);
-      const project = await within(group).findByRole('button', { name: 'Security' });
+      const project = await within(group).findByLabelText('Security');
       await waitFor(() => userEvent.click(project));
 
       expect(mock.coreStart.http.post).toHaveBeenCalled();
