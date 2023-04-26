@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import type { InventoryItemType } from '../../common/inventory_models/types';
+import type { InfraClientCoreSetup } from '../types';
+import type { LogsLocatorParams } from './logs_locator';
 import { DISCOVER_APP_TARGET } from '../../common/constants';
 import { findInventoryFields } from '../../common/inventory_models';
-import type { InventoryItemType } from '../../common/inventory_models/types';
-import { InfraClientCoreSetup } from '../types';
-import type { LogsLocatorParams } from './logs_locator';
+import { getLocationToDiscover } from './helpers';
 
 const NODE_LOGS_LOCATOR_ID = 'NODE_LOGS_LOCATOR';
 
@@ -33,35 +33,16 @@ export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLoca
   constructor(protected readonly deps: NodeLogsLocatorDependencies) {}
 
   public readonly getLocation = async (params: NodeLogsLocatorParams) => {
-    const { parseSearchString } = await import('./helpers');
     const { nodeType, nodeId, filter, timeRange } = params;
-
     const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
     const query = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
 
-    const searchString = parseSearchString({ ...params, filter: query });
-
     if (this.deps.appTarget === DISCOVER_APP_TARGET) {
-      const [, plugins] = await this.deps.core.getStartServices();
-      const discoverParams: DiscoverAppLocatorParams = {
-        ...(timeRange ? { from: timeRange.from, to: timeRange.to } : {}),
-        ...(filter
-          ? {
-              query: {
-                language: 'kuery',
-                query: filter,
-              },
-            }
-          : {}),
-      };
-      const discoverLocation = await plugins.discover.locator?.getLocation(discoverParams);
-
-      if (!discoverLocation) {
-        throw new Error('Discover location not found');
-      }
-
-      return discoverLocation;
+      return await getLocationToDiscover({ core: this.deps.core, timeRange, filter });
     }
+
+    const { parseSearchString } = await import('./helpers');
+    const searchString = parseSearchString({ ...params, filter: query });
 
     return {
       app: 'logs',

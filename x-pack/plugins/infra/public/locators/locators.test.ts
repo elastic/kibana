@@ -6,22 +6,15 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { constructUrlSearchString } from './helpers';
 import { LogsLocatorDefinition, LogsLocatorDependencies } from './logs_locator';
 import { NodeLogsLocatorDefinition } from './node_logs_locator';
 import type { LogsLocatorParams } from './logs_locator';
 import type { NodeLogsLocatorParams } from './node_logs_locator';
 import { LOGS_APP_TARGET } from '../../common/constants';
 import { coreMock } from '@kbn/core/public/mocks';
-
-const APP_ID = 'logs';
-const nodeType = 'host';
-const LOG_VIEW_ID = 'testView';
-const FILTER_QUERY = 'trace.id:1234';
-const nodeId = uuidv4();
-const time = 1550671089404;
-const from = 1676815089000;
-const to = 1682351734323;
+import { findInventoryFields } from '../../common/inventory_models';
+import moment from 'moment';
+import { DEFAULT_LOG_VIEW_ID } from '../observability_logs/log_view_state';
 
 const setupLogsLocator = async (appTarget: string = LOGS_APP_TARGET) => {
   const deps: LogsLocatorDependencies = {
@@ -38,6 +31,15 @@ const setupLogsLocator = async (appTarget: string = LOGS_APP_TARGET) => {
 };
 
 describe('Infra Locators', () => {
+  const APP_ID = 'logs';
+  const nodeType = 'host';
+  const LOG_VIEW_ID = 'testView';
+  const FILTER_QUERY = 'trace.id:1234';
+  const nodeId = uuidv4();
+  const time = 1550671089404;
+  const from = 1676815089000;
+  const to = 1682351734323;
+
   describe('Logs Locator', () => {
     it('should create a link to Logs with no state', async () => {
       const params: LogsLocatorParams = {
@@ -210,3 +212,58 @@ describe('Infra Locators', () => {
     });
   });
 });
+
+/**
+ * Helpers
+ */
+
+export const constructUrlSearchString = (params: Partial<NodeLogsLocatorParams>) => {
+  const { time = 1550671089404, logViewId } = params;
+
+  return `/stream?logView=${constructLogView(logViewId)}&logPosition=${constructLogPosition(
+    time
+  )}&logFilter=${constructLogFilter(params)}`;
+};
+
+const constructLogView = (logViewId: string = DEFAULT_LOG_VIEW_ID) => {
+  return `(logViewId:${logViewId},type:log-view-reference)`;
+};
+
+const constructLogPosition = (time: number = 1550671089404) => {
+  return `(position:(tiebreaker:0,time:${time}))`;
+};
+
+const constructLogFilter = ({
+  nodeType,
+  nodeId,
+  filter,
+  timeRange,
+  time,
+}: Partial<NodeLogsLocatorParams>) => {
+  let finalFilter = filter || '';
+
+  if (nodeId) {
+    const nodeFilter = `${findInventoryFields(nodeType!).id}: ${nodeId}`;
+    finalFilter = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
+  }
+
+  const query = encodeURI(
+    `(query:(language:kuery,query:'${finalFilter}'),refreshInterval:(pause:!t,value:5000)`
+  );
+
+  if (!time) return `${query})`;
+
+  const fromDate = timeRange?.from
+    ? addHoursToTimestamp(timeRange.from, 0)
+    : addHoursToTimestamp(time, -1);
+
+  const toDate = timeRange?.to
+    ? addHoursToTimestamp(timeRange.to, 0)
+    : addHoursToTimestamp(time, 1);
+
+  return `${query},timeRange:(from:'${fromDate}',to:'${toDate}'))`;
+};
+
+const addHoursToTimestamp = (timestamp: number, hours: number): string => {
+  return moment(timestamp).add({ hours }).toISOString();
+};

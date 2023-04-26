@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LogsLocator } from './logs_locator';
-import { NodeLogsLocator } from './node_logs_locator';
+import type { LogsLocator } from './logs_locator';
+import type { NodeLogsLocator } from './node_logs_locator';
 
 export * from './logs_locator';
 export * from './node_logs_locator';
