@@ -33,6 +33,10 @@ import {
   DEPLOYMENT_STATE,
 } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
+import {
+  CURATED_MODEL_DEFINITIONS,
+  CURATED_TAG,
+} from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../components/stats_bar';
@@ -62,6 +66,7 @@ export type ModelItem = TrainedModelConfigResponse & {
   stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
   pipelines?: ModelPipelines['pipelines'] | null;
   deployment_ids: string[];
+  putConfig?: object;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -310,21 +315,26 @@ export const ModelsList: FC<Props> = ({
       align: 'left',
       width: '40px',
       isExpander: true,
-      render: (item: ModelItem) => (
-        <EuiButtonIcon
-          onClick={toggleDetails.bind(null, item)}
-          aria-label={
-            itemIdToExpandedRowMap[item.model_id]
-              ? i18n.translate('xpack.ml.trainedModels.modelsList.collapseRow', {
-                  defaultMessage: 'Collapse',
-                })
-              : i18n.translate('xpack.ml.trainedModels.modelsList.expandRow', {
-                  defaultMessage: 'Expand',
-                })
-          }
-          iconType={itemIdToExpandedRowMap[item.model_id] ? 'arrowDown' : 'arrowRight'}
-        />
-      ),
+      render: (item: ModelItem) => {
+        if (!item.stats) {
+          return null;
+        }
+        return (
+          <EuiButtonIcon
+            onClick={toggleDetails.bind(null, item)}
+            aria-label={
+              itemIdToExpandedRowMap[item.model_id]
+                ? i18n.translate('xpack.ml.trainedModels.modelsList.collapseRow', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('xpack.ml.trainedModels.modelsList.expandRow', {
+                    defaultMessage: 'Expand',
+                  })
+            }
+            iconType={itemIdToExpandedRowMap[item.model_id] ? 'arrowDown' : 'arrowRight'}
+          />
+        );
+      },
       'data-test-subj': 'mlModelsTableRowDetailsToggle',
     },
     {
@@ -510,6 +520,21 @@ export const ModelsList: FC<Props> = ({
       : {}),
   };
 
+  const resultItems = useMemo<ModelItem[]>(() => {
+    const idSet = new Set(items.map((i) => i.model_id));
+    const notDownloaded: ModelItem[] = Object.entries(CURATED_MODEL_DEFINITIONS)
+      .filter(([modelId]) => !idSet.has(modelId))
+      .map(([modelId, modelDefinition]) => {
+        return {
+          model_id: modelId,
+          type: [BUILT_IN_MODEL_TYPE],
+          tags: [CURATED_TAG],
+          putConfig: modelDefinition.config,
+        } as ModelItem;
+      });
+    return [...items, ...notDownloaded];
+  }, [items]);
+
   return (
     <>
       <SavedObjectsWarning onCloseFlyout={fetchModelsData} forceRefresh={isLoading} />
@@ -531,7 +556,7 @@ export const ModelsList: FC<Props> = ({
           isExpandable={true}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isSelectable={false}
-          items={items}
+          items={resultItems}
           itemId={ModelsTableToConfigMapping.id}
           loading={isLoading}
           search={search}

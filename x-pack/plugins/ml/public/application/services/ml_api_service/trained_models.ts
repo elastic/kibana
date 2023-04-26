@@ -196,6 +196,14 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         query: { type, node, showClosedJobs },
       });
     },
+
+    putConfig(modelId: string, config: object) {
+      return httpService.http<estypes.MlPutTrainedModelResponse>({
+        path: `${apiBasePath}/trained_models/${modelId}`,
+        method: 'PUT',
+        body: JSON.stringify(config),
+      });
+    },
   };
 }
 

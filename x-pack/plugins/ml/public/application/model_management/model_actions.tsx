@@ -15,6 +15,7 @@ import {
   DEPLOYMENT_STATE,
   TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
+import { CURATED_TAG } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
@@ -308,6 +309,46 @@ export function useModelActions({
               e,
               i18n.translate('xpack.ml.trainedModels.modelsList.stopFailed', {
                 defaultMessage: 'Failed to stop "{modelId}"',
+                values: {
+                  modelId: item.model_id,
+                },
+              })
+            );
+            onLoading(false);
+          }
+        },
+      },
+      {
+        name: i18n.translate('xpack.ml.inference.modelsList.downloadModelActionLabel', {
+          defaultMessage: 'Download model',
+        }),
+        description: i18n.translate('xpack.ml.inference.modelsList.downloadModelActionLabel', {
+          defaultMessage: 'Download model',
+        }),
+        'data-test-subj': 'mlModelsTableRowDownloadModelAction',
+        icon: 'download',
+        type: 'icon',
+        isPrimary: true,
+        available: (item) => item.tags.includes(CURATED_TAG),
+        onClick: async (item) => {
+          try {
+            onLoading(true);
+            await trainedModelsApiService.putConfig(item.model_id, item.putConfig!);
+            displaySuccessToast(
+              i18n.translate('xpack.ml.trainedModels.modelsList.downloadSuccess', {
+                defaultMessage: 'Download of the model "{modelId}" has been started successfully.',
+                values: {
+                  modelId: item.model_id,
+                },
+              })
+            );
+            // Need to fetch model state updates
+            await fetchModels();
+          } catch (e) {
+            displayErrorToast(
+              e,
+              i18n.translate('xpack.ml.trainedModels.modelsList.downloadFailed', {
+                defaultMessage: 'Failed to download "{modelId}"',
                 values: {
                   modelId: item.model_id,
                 },

@@ -40,3 +40,15 @@ export const BUILT_IN_MODEL_TYPE = i18n.translate(
 );
 
 export const BUILT_IN_MODEL_TAG = 'prepackaged';
+
+export const CURATED_TAG = 'curated';
+
+export const CURATED_MODEL_DEFINITIONS = {
+  '.elser_model_1_SNAPSHOT': {
+    config: {
+      input: {
+        field_names: ['text_field'],
+      },
+    },
+  },
+} as const;
