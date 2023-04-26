@@ -65,9 +65,9 @@ describe('FleetMessageSigningServiceHandler', () => {
   });
 
   it('POST /message_signing_service/rotate_key_pair?acknowledge=true succeeds with `acknowledge=true`', async () => {
-    (appContextService.getMessageSigningService()?.rotateKeyPair as jest.Mock).mockReturnValue({
-      success: true,
-    });
+    (appContextService.getMessageSigningService()?.rotateKeyPair as jest.Mock).mockReturnValue(
+      undefined
+    );
 
     await rotateKeyPairHandler(
       coreMock.createCustomRequestHandlerContext(context),

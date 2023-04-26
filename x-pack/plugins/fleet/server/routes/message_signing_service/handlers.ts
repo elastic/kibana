@@ -29,20 +29,20 @@ export const rotateKeyPairHandler: FleetRequestHandler<
   }
 
   try {
-    const rotateKeyResponse = await messageSigningService.rotateKeyPair();
+    const rotateKeyResponseError = await messageSigningService.rotateKeyPair();
 
-    if (!rotateKeyResponse.error && rotateKeyResponse.success) {
-      return response.ok({
+    if (rotateKeyResponseError) {
+      return response.customError({
+        statusCode: 500,
         body: {
-          message: 'Key pair rotated successfully.',
+          message: `Failed to rotate key pair. ${rotateKeyResponseError.error.message}!`,
         },
       });
     }
 
-    return response.customError({
-      statusCode: 500,
+    return response.ok({
       body: {
-        message: `Failed to rotate key pair. ${rotateKeyResponse.error?.message}!`,
+        message: 'Key pair rotated successfully.',
       },
     });
   } catch (error) {

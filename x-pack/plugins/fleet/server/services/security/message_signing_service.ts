@@ -30,7 +30,7 @@ export interface MessageSigningServiceInterface {
   generateKeyPair(
     providedPassphrase?: string
   ): Promise<{ privateKey: string; publicKey: string; passphrase: string }>;
-  rotateKeyPair(): Promise<{ error?: Error; success?: true }>;
+  rotateKeyPair(): Promise<{ error: Error } | undefined>;
   sign(message: Buffer | Record<string, unknown>): Promise<{ data: Buffer; signature: string }>;
   getPublicKey(): Promise<string>;
 }
@@ -135,37 +135,34 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     return publicKey;
   }
 
-  public async rotateKeyPair(): Promise<{ error?: Error; success?: true }> {
-    const removeKeyPairResponse = await this.removeKeyPair();
-    if (removeKeyPairResponse === true) {
-      try {
-        await this.generateKeyPair();
-        // TODO: Apply changes to all policies
-        return { success: true };
-      } catch (error) {
-        return { error: Error(`No new key pair generated: ${error.message}`) };
+  public async rotateKeyPair(): Promise<{ error: Error } | undefined> {
+    try {
+      const removeKeyPairResponse = await this.removeKeyPair();
+      if (!removeKeyPairResponse) {
+        return;
       }
+      await this.generateKeyPair();
+    } catch (error) {
+      return { error: Error(`Error rotating key pair: ${error.message}`) };
     }
-    return { error: removeKeyPairResponse };
   }
 
-  private async removeKeyPair(): Promise<true | Error> {
+  private async removeKeyPair(): Promise<boolean> {
     let currentKeyPair: Awaited<ReturnType<typeof this.getCurrentKeyPairObj>>;
     try {
       currentKeyPair = await this.getCurrentKeyPairObj();
+      if (!currentKeyPair) {
+        return false;
+      }
     } catch (error) {
-      return Error(`Error fetching current key pair: ${error.message}`);
-    }
-
-    if (!currentKeyPair) {
-      return Error('No key pair found!');
+      throw Error(`Error fetching current key pair: ${error.message}`);
     }
 
     try {
       await this.soClient.delete(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, currentKeyPair.id);
       return true;
     } catch (error) {
-      return Error(`Error deleting current key pair: ${error.message}`);
+      throw Error(`Error deleting current key pair: ${error.message}`);
     }
   }
 
