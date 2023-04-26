@@ -48,6 +48,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -159,6 +161,20 @@ describe('delete()', () => {
 
     await rulesClient.delete({ id: '1' });
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+  });
+
+  test(`doesn't invalidate API key if set by the user when authenticated using api keys`, async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingAlert,
+      attributes: {
+        ...existingAlert.attributes,
+        apiKeyCreatedByUser: true,
+      },
+    });
+
+    await rulesClient.delete({ id: '1' });
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });
 
   test('swallows error when invalidate API key throws', async () => {

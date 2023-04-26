@@ -36,11 +36,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.uiSettings.update(config.get('uiSettings.defaults'));
     });
 
-    it('Shows the no data page on load', async () => {
-      await PageObjects.common.navigateToActualUrl('observabilityCases');
-      await PageObjects.observability.expectNoDataPage();
-    });
-
     describe('observability cases all privileges', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');

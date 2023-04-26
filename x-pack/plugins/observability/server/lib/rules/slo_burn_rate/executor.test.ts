@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { IBasePath, IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ElasticsearchClientMock,
   elasticsearchServiceMock,
@@ -25,7 +25,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { FIRED_ACTION, getRuleExecutor } from './executor';
+import { ALERT_ACTION, getRuleExecutor } from './executor';
 import { aStoredSLO, createSLO } from '../../../services/slo/fixtures/slo';
 import { SLO } from '../../../domain/models';
 import { SharePluginStart } from '@kbn/share-plugin/server';
@@ -60,6 +60,7 @@ describe('BurnRateRuleExecutor', () => {
   let esClientMock: ElasticsearchClientMock;
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   let loggerMock: jest.Mocked<MockedLogger>;
+  const basePathMock = { publicBaseUrl: 'https://kibana.dev' } as IBasePath;
   let alertWithLifecycleMock: jest.MockedFn<LifecycleAlertService>;
   let alertFactoryMock: jest.Mocked<
     PublicAlertFactory<BurnRateAlertState, BurnRateAlertContext, BurnRateAllowedActionGroups>
@@ -100,6 +101,50 @@ describe('BurnRateRuleExecutor', () => {
     };
   });
 
+  it('throws when the slo is not found', async () => {
+    soClientMock.get.mockRejectedValue(new Error('NotFound'));
+    const executor = getRuleExecutor({ basePath: basePathMock });
+
+    await expect(
+      executor({
+        params: someRuleParams({ sloId: 'inexistent', burnRateThreshold: BURN_RATE_THRESHOLD }),
+        startedAt: new Date(),
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      })
+    ).rejects.toThrowError();
+  });
+
+  it('returns early when the slo is disabled', async () => {
+    const slo = createSLO({ objective: { target: 0.9 }, enabled: false });
+    soClientMock.get.mockResolvedValue(aStoredSLO(slo));
+    const executor = getRuleExecutor({ basePath: basePathMock });
+
+    const result = await executor({
+      params: someRuleParams({ sloId: slo.id, burnRateThreshold: BURN_RATE_THRESHOLD }),
+      startedAt: new Date(),
+      services: servicesMock,
+      executionId: 'irrelevant',
+      logger: loggerMock,
+      previousStartedAt: null,
+      rule: {} as SanitizedRuleConfig,
+      spaceId: 'irrelevant',
+      state: {},
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+    });
+
+    expect(esClientMock.search).not.toHaveBeenCalled();
+    expect(alertWithLifecycleMock).not.toHaveBeenCalled();
+    expect(alertFactoryMock.done).not.toHaveBeenCalled();
+    expect(result).toEqual({ state: {} });
+  });
+
   it('does not schedule an alert when both windows burn rates are below the threshold', async () => {
     const slo = createSLO({ objective: { target: 0.9 } });
     soClientMock.get.mockResolvedValue(aStoredSLO(slo));
@@ -108,7 +153,7 @@ describe('BurnRateRuleExecutor', () => {
     );
     alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
 
-    const executor = getRuleExecutor();
+    const executor = getRuleExecutor({ basePath: basePathMock });
     await executor({
       params: someRuleParams({ sloId: slo.id, burnRateThreshold: BURN_RATE_THRESHOLD }),
       startedAt: new Date(),
@@ -133,7 +178,7 @@ describe('BurnRateRuleExecutor', () => {
     );
     alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
 
-    const executor = getRuleExecutor();
+    const executor = getRuleExecutor({ basePath: basePathMock });
     await executor({
       params: someRuleParams({ sloId: slo.id, burnRateThreshold: BURN_RATE_THRESHOLD }),
       startedAt: new Date(),
@@ -158,7 +203,7 @@ describe('BurnRateRuleExecutor', () => {
     );
     alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
 
-    const executor = getRuleExecutor();
+    const executor = getRuleExecutor({ basePath: basePathMock });
     await executor({
       params: someRuleParams({ sloId: slo.id, threshold: BURN_RATE_THRESHOLD }),
       startedAt: new Date(),
@@ -188,7 +233,7 @@ describe('BurnRateRuleExecutor', () => {
     alertWithLifecycleMock.mockImplementation(() => alertMock as any);
     alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
 
-    const executor = getRuleExecutor();
+    const executor = getRuleExecutor({ basePath: basePathMock });
     await executor({
       params: someRuleParams({ sloId: slo.id, burnRateThreshold: BURN_RATE_THRESHOLD }),
       startedAt: new Date(),
@@ -212,7 +257,7 @@ describe('BurnRateRuleExecutor', () => {
       },
     });
     expect(alertMock.scheduleActions).toBeCalledWith(
-      FIRED_ACTION.id,
+      ALERT_ACTION.id,
       expect.objectContaining({
         longWindow: { burnRate: 2, duration: '1h' },
         shortWindow: { burnRate: 2, duration: '5m' },
@@ -235,7 +280,7 @@ describe('BurnRateRuleExecutor', () => {
     };
     alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [alertMock] as any });
 
-    const executor = getRuleExecutor();
+    const executor = getRuleExecutor({ basePath: basePathMock });
 
     await executor({
       params: someRuleParams({ sloId: slo.id, burnRateThreshold: BURN_RATE_THRESHOLD }),

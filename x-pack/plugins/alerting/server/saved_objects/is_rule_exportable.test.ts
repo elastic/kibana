@@ -29,6 +29,7 @@ beforeEach(() => {
   ruleTypeRegistryParams = {
     logger: loggingSystemMock.create().get(),
     taskManager,
+    alertsService: null,
     taskRunnerFactory: new TaskRunnerFactory(),
     licenseState: mockedLicenseState,
     licensing: licensingMock.createSetup(),

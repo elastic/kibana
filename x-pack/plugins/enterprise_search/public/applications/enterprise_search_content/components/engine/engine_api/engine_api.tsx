@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { ANALYTICS_PLUGIN } from '../../../../../../common/constants';
-import { COLLECTION_VIEW_PATH } from '../../../../analytics/routes';
+import { COLLECTION_INTEGRATE_PATH } from '../../../../analytics/routes';
 import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
@@ -165,9 +165,8 @@ export const EngineAPI: React.FC = () => {
                 data-telemetry-id="entSearchContent-engines-api-step4-learnHowLink"
                 onClick={() =>
                   navigateToUrl(
-                    generateEncodedPath(`${ANALYTICS_PLUGIN.URL}${COLLECTION_VIEW_PATH}`, {
+                    generateEncodedPath(`${ANALYTICS_PLUGIN.URL}${COLLECTION_INTEGRATE_PATH}`, {
                       id: engineName,
-                      section: 'integrate',
                     }),
                     { shouldNotCreateHref: true }
                   )

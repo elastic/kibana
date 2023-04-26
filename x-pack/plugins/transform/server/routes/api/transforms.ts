@@ -43,6 +43,11 @@ import {
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';
 import {
+  scheduleNowTransformsRequestSchema,
+  ScheduleNowTransformsRequestSchema,
+  ScheduleNowTransformsResponseSchema,
+} from '../../../common/api_schemas/schedule_now_transforms';
+import {
   postTransformsUpdateRequestSchema,
   PostTransformsUpdateRequestSchema,
 } from '../../../common/api_schemas/update_transforms';
@@ -68,12 +73,13 @@ import { transformHealthServiceProvider } from '../../lib/alerting/transform_hea
 enum TRANSFORM_ACTIONS {
   DELETE = 'delete',
   RESET = 'reset',
+  SCHEDULE_NOW = 'schedule_now',
   STOP = 'stop',
   START = 'start',
 }
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
-  const { router, license, getStartServices } = routeDependencies;
+  const { router, license, coreStart, dataViews } = routeDependencies;
   /**
    * @apiGroup Transforms
    *
@@ -97,10 +103,10 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
 
           const alerting = await ctx.alerting;
           if (alerting) {
-            const transformHealthService = transformHealthServiceProvider(
-              esClient.asCurrentUser,
-              alerting.getRulesClient()
-            );
+            const transformHealthService = transformHealthServiceProvider({
+              esClient: esClient.asCurrentUser,
+              rulesClient: alerting.getRulesClient(),
+            });
 
             // @ts-ignore
             await transformHealthService.populateTransformsWithAssignedRules(body.transforms);
@@ -308,7 +314,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<undefined, undefined, DeleteTransformsRequestSchema>(
       async (ctx, req, res) => {
         try {
-          const [{ savedObjects, elasticsearch }, { dataViews }] = await getStartServices();
+          const { savedObjects, elasticsearch } = coreStart;
           const savedObjectsClient = savedObjects.getScopedClient(req);
           const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
 
@@ -437,6 +443,27 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       },
     },
     license.guardApiRoute<undefined, undefined, StopTransformsRequestSchema>(stopTransformsHandler)
+  );
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {post} /api/transform/schedule_now_transforms Schedules transforms now
+   * @apiName PostScheduleNowTransforms
+   * @apiDescription Schedules transforms now
+   *
+   * @apiSchema (body) scheduleNowTransformsRequestSchema
+   */
+  router.post<undefined, undefined, ScheduleNowTransformsRequestSchema>(
+    {
+      path: addBasePath('schedule_now_transforms'),
+      validate: {
+        body: scheduleNowTransformsRequestSchema,
+      },
+    },
+    license.guardApiRoute<undefined, undefined, ScheduleNowTransformsRequestSchema>(
+      scheduleNowTransformsHandler
+    )
   );
 
   /**
@@ -779,6 +806,53 @@ async function stopTransforms(
           id: transformId,
           items: transformsInfo,
           action: TRANSFORM_ACTIONS.STOP,
+        });
+      }
+      results[transformId] = { success: false, error: e.meta.body.error };
+    }
+  }
+  return results;
+}
+
+const scheduleNowTransformsHandler: RequestHandler<
+  undefined,
+  undefined,
+  ScheduleNowTransformsRequestSchema
+> = async (ctx, req, res) => {
+  const transformsInfo = req.body;
+
+  try {
+    const esClient = (await ctx.core).elasticsearch.client;
+    return res.ok({
+      body: await scheduleNowTransforms(transformsInfo, esClient.asCurrentUser),
+    });
+  } catch (e) {
+    return res.customError(wrapError(wrapEsError(e)));
+  }
+};
+
+async function scheduleNowTransforms(
+  transformsInfo: ScheduleNowTransformsRequestSchema,
+  esClient: ElasticsearchClient
+) {
+  const results: ScheduleNowTransformsResponseSchema = {};
+
+  for (const transformInfo of transformsInfo) {
+    const transformId = transformInfo.id;
+    try {
+      await esClient.transport.request({
+        method: 'POST',
+        path: `_transform/${transformId}/_schedule_now`,
+      });
+
+      results[transformId] = { success: true };
+    } catch (e) {
+      if (isRequestTimeout(e)) {
+        return fillResultsWithTimeouts({
+          results,
+          id: transformId,
+          items: transformsInfo,
+          action: TRANSFORM_ACTIONS.SCHEDULE_NOW,
         });
       }
       results[transformId] = { success: false, error: e.meta.body.error };

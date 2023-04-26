@@ -497,6 +497,7 @@ export const sampleSignalHit = (): SignalHit => ({
       related_integrations: [],
       required_fields: [],
       response_actions: undefined,
+      revision: 0,
       setup: '',
       throttle: 'no_actions',
       actions: [],

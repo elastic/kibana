@@ -150,7 +150,7 @@ export class ToastsApi implements IToasts {
   public addDanger(toastOrTitle: ToastInput, options?: ToastOptions) {
     return this.add({
       color: 'danger',
-      iconType: 'alert',
+      iconType: 'error',
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:warning'),
       ...normalizeToast(toastOrTitle),
       ...options,
@@ -168,7 +168,7 @@ export class ToastsApi implements IToasts {
     const message = options.toastMessage || error.message;
     return this.add({
       color: 'danger',
-      iconType: 'alert',
+      iconType: 'error',
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:error'),
       text: mountReactNode(
         <ErrorToast

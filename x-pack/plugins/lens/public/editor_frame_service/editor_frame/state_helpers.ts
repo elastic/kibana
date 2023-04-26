@@ -404,10 +404,14 @@ export async function persistedStateToExpression(
 
 export function getMissingIndexPattern(
   currentDatasource: Datasource | null | undefined,
-  currentDatasourceState: { state: unknown } | null,
+  currentDatasourceState: { isLoading: boolean; state: unknown } | null,
   indexPatterns: IndexPatternMap
 ) {
-  if (currentDatasourceState?.state == null || currentDatasource == null) {
+  if (
+    currentDatasourceState?.isLoading ||
+    currentDatasourceState?.state == null ||
+    currentDatasource == null
+  ) {
     return [];
   }
   const missingIds = currentDatasource.checkIntegrity(currentDatasourceState.state, indexPatterns);

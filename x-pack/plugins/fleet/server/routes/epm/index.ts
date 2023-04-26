@@ -53,6 +53,7 @@ import {
   bulkInstallPackagesFromRegistryHandler,
   getStatsHandler,
   updatePackageHandler,
+  getVerificationKeyIdHandler,
 } from './handlers';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
@@ -185,6 +186,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     deletePackageHandler
+  );
+
+  router.get(
+    {
+      path: EPM_API_ROUTES.VERIFICATION_KEY_ID,
+      validate: false,
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
+    },
+    getVerificationKeyIdHandler
   );
 
   // deprecated since 8.0

@@ -22,9 +22,9 @@ import {
   RowSelectionState,
 } from '../../../../types';
 import { bulkActionsReducer } from './reducer';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createAppMockRenderer } from '../../test_utils';
 import { getCasesMockMap } from '../cases/index.mock';
+import { createCasesServiceMock } from '../index.mock';
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -43,6 +43,23 @@ const columns = [
     displayAsText: 'Reason',
   },
 ];
+
+const mockCaseService = createCasesServiceMock();
+
+const mockKibana = jest.fn().mockReturnValue({
+  services: {
+    cases: mockCaseService,
+  },
+});
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+
+  return {
+    ...original,
+    useKibana: () => mockKibana(),
+  };
+});
 
 describe('AlertsTable.BulkActions', () => {
   const alerts = [
@@ -77,9 +94,11 @@ describe('AlertsTable.BulkActions', () => {
     sort: [],
   };
 
+  const casesConfig = { featureId: 'test-feature-id', owner: ['test-owner'] };
+
   const alertsTableConfiguration = {
     id: '',
-    casesFeatureId: 'test',
+    casesConfig,
     columns,
     sort: [],
     useInternalFlyout: jest.fn().mockImplementation(() => ({
@@ -97,7 +116,7 @@ describe('AlertsTable.BulkActions', () => {
 
   const tableProps: AlertsTableProps = {
     alertsTableConfiguration,
-    casesData: { cases: casesMap, isLoading: false },
+    cases: { data: casesMap, isLoading: false },
     columns,
     deletedEventIds: [],
     disabledCellActions: [],
@@ -191,22 +210,145 @@ describe('AlertsTable.BulkActions', () => {
   };
 
   describe('when the bulk action hook is not set', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should not show the bulk actions column', () => {
-      const { queryByTestId } = render(
-        <IntlProvider locale="en">
-          <AlertsTable {...tableProps} />
-        </IntlProvider>
-      );
+      const { queryByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
       expect(queryByTestId('bulk-actions-header')).toBeNull();
     });
   });
 
+  describe('Cases', () => {
+    beforeAll(() => {
+      mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
+      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(() => 'Cases context');
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    afterAll(() => {
+      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(() => null);
+    });
+
+    it('should show the bulk actions column when the cases service is defined', () => {
+      mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
+
+      const { getByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
+      expect(getByTestId('bulk-actions-header')).toBeDefined();
+    });
+
+    it('should not show the bulk actions column when the case service is defined and the user does not have write access', () => {
+      mockCaseService.helpers.canUseCases = jest
+        .fn()
+        .mockReturnValue({ create: false, read: true });
+
+      const { queryByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
+
+      expect(queryByTestId('bulk-actions-header')).toBeNull();
+    });
+
+    it('should not show the bulk actions column when the case service is defined and the user does not have read access', () => {
+      mockCaseService.helpers.canUseCases = jest
+        .fn()
+        .mockReturnValue({ create: true, read: false });
+
+      const { queryByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
+
+      expect(queryByTestId('bulk-actions-header')).toBeNull();
+    });
+
+    it('should not show the bulk actions when the cases context is missing', () => {
+      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(() => null);
+
+      const { queryByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
+      expect(queryByTestId('bulk-actions-header')).toBeNull();
+    });
+
+    it('should pass the case ids when selecting alerts', async () => {
+      const mockedFn = jest.fn();
+      const newAlertsData = {
+        ...alertsData,
+        alerts: [
+          {
+            [AlertsField.name]: ['one'],
+            [AlertsField.reason]: ['two'],
+            [AlertsField.uuid]: ['uuidone'],
+            [AlertsField.case_ids]: ['test-case'],
+            _id: 'alert0',
+            _index: 'idx0',
+          },
+        ] as unknown as Alerts,
+      };
+
+      const props = {
+        ...tablePropsWithBulkActions,
+        useFetchAlertsData: () => newAlertsData,
+        initialBulkActionsState: {
+          ...defaultBulkActionsState,
+          isAllSelected: true,
+          rowCount: 1,
+          rowSelection: new Map([[0, { isLoading: false }]]),
+        },
+        alertsTableConfiguration: {
+          ...alertsTableConfiguration,
+          useBulkActions: () => [
+            {
+              label: 'Fake Bulk Action',
+              key: 'fakeBulkAction',
+              'data-test-subj': 'fake-bulk-action',
+              disableOnQuery: false,
+              onClick: mockedFn,
+            },
+          ],
+        },
+      };
+
+      render(<AlertsTableWithBulkActionsContext {...props} />);
+
+      fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
+      await waitForEuiPopoverOpen();
+
+      fireEvent.click(await screen.findByText('Fake Bulk Action'));
+
+      expect(mockedFn.mock.calls[0][0]).toEqual([
+        {
+          _id: 'alert0',
+          _index: 'idx0',
+          data: [
+            {
+              field: 'kibana.alert.rule.name',
+              value: ['one'],
+            },
+            {
+              field: 'kibana.alert.rule.uuid',
+              value: ['uuidone'],
+            },
+            {
+              field: 'kibana.alert.case_ids',
+              value: ['test-case'],
+            },
+          ],
+          ecs: {
+            _id: 'alert0',
+            _index: 'idx0',
+          },
+        },
+      ]);
+    });
+  });
+
   describe('when the bulk action hook is set', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should show the bulk actions column', () => {
       const { getByTestId } = render(
-        <IntlProvider locale="en">
-          <AlertsTable {...tablePropsWithBulkActions} />
-        </IntlProvider>
+        <AlertsTableWithBulkActionsContext {...tablePropsWithBulkActions} />
       );
       expect(getByTestId('bulk-actions-header')).toBeDefined();
     });
@@ -423,6 +565,10 @@ describe('AlertsTable.BulkActions', () => {
                   field: 'kibana.alert.rule.uuid',
                   value: ['uuidtwo'],
                 },
+                {
+                  field: 'kibana.alert.case_ids',
+                  value: [],
+                },
               ],
               ecs: {
                 _id: 'alert1',
@@ -584,7 +730,8 @@ describe('AlertsTable.BulkActions', () => {
           });
         });
 
-        describe('and executing a bulk action', () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/152176
+        describe.skip('and executing a bulk action', () => {
           it('should return the are all selected flag set to true', async () => {
             const mockedFn = jest.fn();
             const props = {

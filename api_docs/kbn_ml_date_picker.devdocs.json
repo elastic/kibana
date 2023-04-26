@@ -1025,6 +1025,29 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-date-picker",
+            "id": "def-common.FullTimeRangeSelectorProps.apiPath",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "apiPath",
+            "description": [
+              "\nOptional API path."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-date-picker",
+                "scope": "common",
+                "docId": "kibKbnMlDatePickerPluginApi",
+                "section": "def-common.SetFullTimeRangeApiPath",
+                "text": "SetFullTimeRangeApiPath"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1193,6 +1216,23 @@
           "\"exclude-frozen\" | \"include-frozen\""
         ],
         "path": "x-pack/packages/ml/date_picker/src/storage.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-date-picker",
+        "id": "def-common.SetFullTimeRangeApiPath",
+        "type": "Type",
+        "tags": [],
+        "label": "SetFullTimeRangeApiPath",
+        "description": [
+          "\nAllowed API paths to be passed to `setFullTimeRange`."
+        ],
+        "signature": [
+          "\"/internal/file_upload/time_field_range\" | \"/api/ml/fields_service/time_field_range\""
+        ],
+        "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

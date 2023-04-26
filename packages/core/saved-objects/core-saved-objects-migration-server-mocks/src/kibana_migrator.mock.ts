@@ -12,7 +12,10 @@ import type {
   IKibanaMigrator,
   KibanaMigratorStatus,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { buildActiveMappings, mergeTypes } from '@kbn/core-saved-objects-migration-server-internal';
+import {
+  buildActiveMappings,
+  buildTypesMappings,
+} from '@kbn/core-saved-objects-migration-server-internal';
 
 const defaultSavedObjectTypes: SavedObjectsType[] = [
   {
@@ -57,7 +60,7 @@ const createMigrator = (
     ),
   };
 
-  mockMigrator.getActiveMappings.mockReturnValue(buildActiveMappings(mergeTypes(types)));
+  mockMigrator.getActiveMappings.mockReturnValue(buildActiveMappings(buildTypesMappings(types)));
   mockMigrator.migrateDocument.mockImplementation((doc) => doc);
   return mockMigrator;
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RawRule, IntervalSchedule } from '../../types';
 import { resetMonitoringLastRun, getNextRun } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
@@ -82,7 +83,13 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
 
     const updateAttributes = updateMeta(context, {
       ...attributes,
-      ...(!existingApiKey && (await createNewAPIKeySet(context, { attributes, username }))),
+      ...(!existingApiKey &&
+        (await createNewAPIKeySet(context, {
+          id: attributes.alertTypeId,
+          ruleName: attributes.name,
+          username,
+          shouldUpdateApiKey: true,
+        }))),
       ...(attributes.monitoring && {
         monitoring: resetMonitoringLastRun(attributes.monitoring),
       }),
@@ -110,7 +117,14 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
   if (attributes.scheduledTaskId) {
     // If scheduledTaskId defined in rule SO, make sure it exists
     try {
-      await context.taskManager.get(attributes.scheduledTaskId);
+      const task = await context.taskManager.get(attributes.scheduledTaskId);
+
+      // Check whether task status is unrecognized. If so, we want to delete
+      // this task and create a fresh one
+      if (task.status === TaskStatus.Unrecognized) {
+        await context.taskManager.removeIfExists(attributes.scheduledTaskId);
+        scheduledTaskIdToCreate = id;
+      }
     } catch (err) {
       scheduledTaskIdToCreate = id;
     }

@@ -35,6 +35,14 @@ export const SETTINGS = {
   UNINSTALL_ASSETS_BTN: 'uninstallAssetsButton',
 };
 
+export const POLICY_EDITOR = {
+  POLICY_NAME_INPUT: 'packagePolicyNameInput',
+  DATASET_SELECT: 'datasetComboBox',
+  AGENT_POLICY_SELECT: 'agentPolicySelect',
+  INSPECT_PIPELINES_BTN: 'datastreamInspectPipelineBtn',
+  EDIT_MAPPINGS_BTN: 'datastreamEditMappingsBtn',
+};
+
 export const INTEGRATION_POLICIES_UPGRADE_CHECKBOX = 'epmDetails.upgradePoliciesCheckbox';
 
 export const getIntegrationCard = (integration: string) => `integration-card:epr:${integration}`;

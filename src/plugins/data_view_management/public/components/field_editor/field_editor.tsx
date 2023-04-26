@@ -280,7 +280,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         helpText={
           this.isDuplicateName() ? (
             <span>
-              <EuiIcon type="alert" color="warning" size="s" />
+              <EuiIcon type="warning" color="warning" size="s" />
               &nbsp;
               <FormattedMessage
                 id="indexPatternManagement.mappingConflictLabel.mappingConflictDetail"
@@ -342,7 +342,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         helpText={
           isDeprecatedLang ? (
             <span>
-              <EuiIcon type="alert" color="warning" size="s" />
+              <EuiIcon type="warning" color="warning" size="s" />
               &nbsp;
               <strong>
                 <FormattedMessage
@@ -471,7 +471,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         <EuiSpacer size="m" />
         <EuiCallOut
           color="warning"
-          iconType="alert"
+          iconType="warning"
           title={
             <FormattedMessage
               id="indexPatternManagement.fieldTypeConflict"

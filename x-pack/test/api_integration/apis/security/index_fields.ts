@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
               'type',
               'visualization.title',
               'dashboard.title',
-              'search.columns',
+              'search.title',
               'space.name',
             ];
 

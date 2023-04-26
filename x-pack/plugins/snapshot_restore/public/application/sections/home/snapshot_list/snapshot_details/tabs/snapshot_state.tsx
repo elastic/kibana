@@ -39,7 +39,7 @@ export const SnapshotState: React.FC<Props> = ({ state }) => {
       }),
     },
     [SNAPSHOT_STATE.PARTIAL]: {
-      icon: <EuiIcon color="warning" type="alert" />,
+      icon: <EuiIcon color="warning" type="warning" />,
       label: i18n.translate('xpack.snapshotRestore.snapshotState.partialLabel', {
         defaultMessage: 'Partial failure',
       }),
@@ -48,7 +48,7 @@ export const SnapshotState: React.FC<Props> = ({ state }) => {
       }),
     },
     [SNAPSHOT_STATE.INCOMPATIBLE]: {
-      icon: <EuiIcon color="warning" type="alert" />,
+      icon: <EuiIcon color="warning" type="warning" />,
       label: i18n.translate('xpack.snapshotRestore.snapshotState.incompatibleLabel', {
         defaultMessage: 'Incompatible version',
       }),

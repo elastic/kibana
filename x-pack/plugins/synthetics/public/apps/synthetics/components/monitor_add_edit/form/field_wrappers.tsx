@@ -70,6 +70,7 @@ export type FormattedComboBoxProps = Omit<DefaultFormattedComboBoxProps, Control
 export const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>(
   (props, ref: Ref<HTMLInputElement>) => (
     <EuiFieldText
+      data-test-subj="syntheticsFieldTextFieldText"
       {...(omit(props, ['defaultValue', 'selectedOptions']) as EuiFieldTextProps)}
       inputRef={ref}
     />
@@ -77,7 +78,7 @@ export const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>(
 );
 
 export const FieldNumber = React.forwardRef<HTMLInputElement, EuiFieldNumberProps>((props, ref) => (
-  <EuiFieldNumber {...props} inputRef={ref} />
+  <EuiFieldNumber data-test-subj="syntheticsFieldNumberFieldNumber" {...props} inputRef={ref} />
 ));
 
 export const FieldPassword = React.forwardRef<HTMLInputElement, EuiFieldPasswordProps>(
@@ -89,7 +90,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, EuiCheckboxProps>((pr
 ));
 
 export const Select = React.forwardRef<HTMLSelectElement, EuiSelectProps>((props, ref) => (
-  <EuiSelect {...props} inputRef={ref} />
+  <EuiSelect data-test-subj="syntheticsSelectSelect" {...props} inputRef={ref} />
 ));
 
 export const Switch = React.forwardRef<unknown, EuiSwitchProps>((props, _ref) => (

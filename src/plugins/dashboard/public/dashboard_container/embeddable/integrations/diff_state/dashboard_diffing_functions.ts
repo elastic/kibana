@@ -15,6 +15,7 @@ import {
   isFilterPinned,
   onlyDisabledFiltersChanged,
 } from '@kbn/es-query';
+import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
 
 import { DashboardContainer } from '../../dashboard_container';
 import { DashboardContainerByValueInput } from '../../../../../common';
@@ -117,14 +118,12 @@ export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
   viewMode: () => false, // When compared view mode is always considered unequal so that it gets backed up.
 };
 
-const shouldRefreshFilterCompareOptions = {
-  ...COMPARE_ALL_OPTIONS,
-  // do not compare $state to avoid refreshing when filter is pinned/unpinned (which does not impact results)
-  state: false,
-};
-
 export const shouldRefreshDiffingFunctions: DashboardDiffFunctions = {
-  ...unsavedChangesDiffingFunctions,
   filters: ({ currentValue, lastValue }) =>
     onlyDisabledFiltersChanged(lastValue, currentValue, shouldRefreshFilterCompareOptions),
+
+  // fire on all time range changes, regardless of timeRestore
+  timeRange: ({ currentValue, lastValue }) =>
+    areTimesEqual(currentValue?.from, lastValue?.from) &&
+    areTimesEqual(currentValue?.to, lastValue?.to),
 };

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { type Filter, FilterStateStore } from '@kbn/es-query';
 import type {
   FormBasedLayer,
   FormulaPublicApi,
@@ -13,15 +12,16 @@ import type {
   XYState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import {
   DEFAULT_LAYER_ID,
+  getAdhocDataView,
   getBreakdownColumn,
+  getDefaultReferences,
   getHistogramColumn,
   getXYVisualizationState,
 } from '../utils';
 import type { LensOptions } from '../../../../types';
-import { ILensVisualization } from '../types';
+import type { ILensVisualization } from '../types';
 
 const BREAKDOWN_COLUMN_NAME = 'hosts_aggs_breakdown';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -54,8 +54,7 @@ export class TX implements ILensVisualization {
       'y_network_out_bytes',
       {
         formula:
-          "counter_rate(max(system.network.out.bytes), kql='system.network.out.bytes: *') * 8",
-        timeScale: 's',
+          "average(host.network.egress.bytes) * 8 / (max(metricset.period, kql='host.network.egress.bytes: *') / 1000)",
         format: {
           id: 'bits',
           params: {
@@ -88,37 +87,6 @@ export class TX implements ILensVisualization {
       ],
     });
   };
-  getFilters = (): Filter[] => {
-    return [
-      {
-        meta: {
-          disabled: false,
-          negate: false,
-          alias: null,
-          index: '3be1e71b-4bc5-4462-a314-04539f877a19',
-          key: 'system.network.out.bytes',
-          value: 'exists',
-          type: 'exists',
-        },
-        query: {
-          exists: {
-            field: 'system.network.out.bytes',
-          },
-        },
-        $state: {
-          store: FilterStateStore.APP_STATE,
-        },
-      },
-    ];
-  };
-
-  getReferences = (): SavedObjectReference[] => {
-    return [
-      {
-        type: 'index-pattern',
-        id: this.dataView.id ?? '',
-        name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
-      },
-    ];
-  };
+  getReferences = () => getDefaultReferences(this.dataView, DEFAULT_LAYER_ID);
+  getAdhocDataView = () => getAdhocDataView(this.dataView);
 }

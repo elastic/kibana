@@ -44,9 +44,11 @@ describe('Files usage telemetry', () => {
       request.post(root, `/api/files/shares/${fileKind}/${file3.id}`).send({}).expect(200),
     ]);
 
-    const { body } = await request.get(root, `/api/stats?extended=true&legacy=true`);
+    const { body } = await request
+      .post(root, '/api/telemetry/v2/clusters/_stats')
+      .send({ unencrypted: true });
 
-    expect(body.usage.files).toMatchInlineSnapshot(`
+    expect(body[0].stats.stack_stats.kibana.plugins.files).toMatchInlineSnapshot(`
       Object {
         "countByExtension": Array [
           Object {

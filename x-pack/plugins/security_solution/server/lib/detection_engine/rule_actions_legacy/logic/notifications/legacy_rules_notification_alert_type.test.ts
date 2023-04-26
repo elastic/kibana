@@ -53,6 +53,7 @@ describe('legacyRules_notification_alert_type', () => {
         tags: [],
         consumer: 'foo',
         producer: 'foo',
+        revision: 0,
         ruleTypeId: 'ruleType',
         ruleTypeName: 'Name of rule',
         enabled: true,

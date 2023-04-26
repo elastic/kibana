@@ -118,27 +118,28 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             </p>
           }
         >
-          <EuiFormRow hasEmptyLabelSpace>
-            <EuiComboBox
-              placeholder={
-                this.props.editable
-                  ? i18n.translate(
-                      'xpack.security.management.editRole.elasticSearchPrivileges.addUserTitle',
-                      { defaultMessage: 'Add a user…' }
-                    )
-                  : undefined
-              }
-              options={this.props.runAsUsers.map((username) => ({
-                id: username,
-                label: username,
-                isGroupLabelOption: false,
-              }))}
-              selectedOptions={this.props.role.elasticsearch.run_as.map((u) => ({ label: u }))}
-              onCreateOption={this.onCreateRunAsOption}
-              onChange={this.onRunAsUserChange}
-              isDisabled={!editable}
-            />
-          </EuiFormRow>
+          <EuiComboBox
+            aria-label={i18n.translate(
+              'xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesAriaLabel',
+              { defaultMessage: 'Run as privileges' }
+            )}
+            placeholder={
+              this.props.editable
+                ? i18n.translate(
+                    'xpack.security.management.editRole.elasticSearchPrivileges.addUserTitle',
+                    { defaultMessage: 'Add a user…' }
+                  )
+                : undefined
+            }
+            options={this.props.runAsUsers.map((username) => ({
+              label: username,
+              isGroupLabelOption: false,
+            }))}
+            selectedOptions={this.props.role.elasticsearch.run_as.map((u) => ({ label: u }))}
+            onCreateOption={this.onCreateRunAsOption}
+            onChange={this.onRunAsUserChange}
+            isDisabled={!editable}
+          />
         </EuiDescribedFormGroup>
 
         <EuiSpacer />

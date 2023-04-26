@@ -117,7 +117,13 @@
             ],
             "signature": [
               "((file: ",
-              "FileJSON",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
               "<unknown>) => boolean) | undefined"
             ],
             "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
@@ -132,7 +138,13 @@
                 "label": "file",
                 "description": [],
                 "signature": [
-                  "FileJSON",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.FileJSON",
+                    "text": "FileJSON"
+                  },
                   "<unknown>"
                 ],
                 "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
@@ -172,7 +184,13 @@
             ],
             "signature": [
               "(files: ",
-              "FileJSON",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
               "<unknown>[]) => void"
             ],
             "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
@@ -187,7 +205,13 @@
                 "label": "files",
                 "description": [],
                 "signature": [
-                  "FileJSON",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.FileJSON",
+                    "text": "FileJSON"
+                  },
                   "<unknown>[]"
                 ],
                 "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",

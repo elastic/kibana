@@ -6,7 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { validateTimezone } from './validate_timezone';
 import { validateDurationSchema } from '../../lib';
+import { validateHours } from './validate_hours';
 
 export const actionsSchema = schema.arrayOf(
   schema.object({
@@ -25,6 +27,40 @@ export const actionsSchema = schema.arrayOf(
       })
     ),
     uuid: schema.maybe(schema.string()),
+    alerts_filter: schema.maybe(
+      schema.object({
+        query: schema.nullable(
+          schema.object({
+            kql: schema.string(),
+            dsl: schema.maybe(schema.string()),
+          })
+        ),
+        timeframe: schema.nullable(
+          schema.object({
+            days: schema.arrayOf(
+              schema.oneOf([
+                schema.literal(1),
+                schema.literal(2),
+                schema.literal(3),
+                schema.literal(4),
+                schema.literal(5),
+                schema.literal(6),
+                schema.literal(7),
+              ])
+            ),
+            hours: schema.object({
+              start: schema.string({
+                validate: validateHours,
+              }),
+              end: schema.string({
+                validate: validateHours,
+              }),
+            }),
+            timezone: schema.string({ validate: validateTimezone }),
+          })
+        ),
+      })
+    ),
   }),
   { defaultValue: [] }
 );

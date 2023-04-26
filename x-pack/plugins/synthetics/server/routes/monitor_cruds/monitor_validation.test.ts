@@ -29,9 +29,8 @@ import {
   TLSFields,
   TLSVersion,
   VerificationMode,
-  ZipUrlTLSFields,
 } from '../../../common/runtime_types';
-import { validateMonitor } from './monitor_validation';
+import { validateMonitor, validateProjectMonitor } from './monitor_validation';
 
 describe('validateMonitor', () => {
   let testSchedule;
@@ -46,7 +45,6 @@ describe('validateMonitor', () => {
   let testHTTPSimpleFields: HTTPSimpleFields;
   let testHTTPAdvancedFields: HTTPAdvancedFields;
   let testHTTPFields: HTTPFields;
-  let testZipUrlTLSFields: ZipUrlTLSFields;
   let testBrowserSimpleFields: BrowserSimpleFields;
   let testBrowserAdvancedFields: BrowserAdvancedFields;
   let testBrowserFields: BrowserFields;
@@ -81,7 +79,6 @@ describe('validateMonitor', () => {
     };
     testMetaData = {
       is_tls_enabled: false,
-      is_zip_url_tls_enabled: false,
       script_source: {
         is_generated_script: false,
         file_name: 'test-file.name',
@@ -158,17 +155,7 @@ describe('validateMonitor', () => {
       [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
     };
 
-    testZipUrlTLSFields = {
-      [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: 'test',
-      [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: 'test',
-      [ConfigKey.ZIP_URL_TLS_KEY]: 'key',
-      [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: 'passphrase',
-      [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: VerificationMode.STRICT,
-      [ConfigKey.ZIP_URL_TLS_VERSION]: [TLSVersion.ONE_ONE, TLSVersion.ONE_TWO],
-    };
-
     testBrowserSimpleFields = {
-      ...testZipUrlTLSFields,
       ...testCommonFields,
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
       [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
@@ -177,11 +164,6 @@ describe('validateMonitor', () => {
       [ConfigKey.METADATA]: testMetaData,
       [ConfigKey.SOURCE_INLINE]: '',
       [ConfigKey.SOURCE_PROJECT_CONTENT]: '',
-      [ConfigKey.SOURCE_ZIP_URL]: '',
-      [ConfigKey.SOURCE_ZIP_FOLDER]: '',
-      [ConfigKey.SOURCE_ZIP_USERNAME]: 'test-username',
-      [ConfigKey.SOURCE_ZIP_PASSWORD]: 'password',
-      [ConfigKey.SOURCE_ZIP_PROXY_URL]: 'http://proxy-url.com',
       [ConfigKey.PARAMS]: '',
       [ConfigKey.URLS]: null,
       [ConfigKey.PORT]: null,
@@ -209,7 +191,13 @@ describe('validateMonitor', () => {
 
   describe('should invalidate', () => {
     it(`when 'type' is null or undefined`, () => {
-      const testMonitor = { type: undefined } as unknown as MonitorFields;
+      const testMonitor = {
+        type: undefined,
+        schedule: {
+          unit: ScheduleUnit.MINUTES,
+          number: '3',
+        },
+      } as unknown as MonitorFields;
       const result = validateMonitor(testMonitor);
       expect(result).toMatchObject({
         valid: false,
@@ -219,12 +207,46 @@ describe('validateMonitor', () => {
     });
 
     it(`when 'type' is not an acceptable monitor type (DataStream)`, () => {
-      const monitor = { type: 'non-HTTP' } as unknown as MonitorFields;
+      const monitor = {
+        type: 'non-HTTP',
+        schedule: {
+          unit: ScheduleUnit.MINUTES,
+          number: '3',
+        },
+      } as unknown as MonitorFields;
       const result = validateMonitor(monitor);
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
         details: expect.stringMatching(/(?=.*invalid)(?=.*non-HTTP)(?=.*DataStream)/i),
+      });
+    });
+
+    it(`when schedule is not valid`, () => {
+      const result = validateMonitor({
+        ...testICMPFields,
+        schedule: {
+          number: '4',
+          unit: ScheduleUnit.MINUTES,
+        },
+      } as unknown as MonitorFields);
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor schedule is invalid',
+        details:
+          'Invalid schedule 4 minutes supplied to monitor configuration. Please use a supported monitor schedule.',
+      });
+    });
+
+    it(`when location is not valid`, () => {
+      const result = validateMonitor({
+        ...testICMPFields,
+        locations: ['invalid-location'],
+      } as unknown as MonitorFields);
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor is not a valid monitor of type icmp',
+        details: 'Invalid value "invalid-location" supplied to "locations"',
       });
     });
   });
@@ -389,6 +411,43 @@ describe('validateMonitor', () => {
       });
     });
   });
+
+  describe('Project Monitor', () => {
+    it(`when schedule is not valid`, () => {
+      const result = validateProjectMonitor(
+        {
+          ...testICMPFields,
+          locations: [],
+        } as any,
+        [],
+        []
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: "Couldn't save or update monitor because of an invalid configuration.",
+        details:
+          'Invalid value "{"number":"5","unit":"m"}" supplied to "schedule" | You must add at least one location or private location to this monitor.',
+      });
+    });
+
+    it(`when location is not valid`, () => {
+      const result = validateProjectMonitor(
+        {
+          ...testICMPFields,
+          locations: ['invalid-location'],
+          schedule: 5,
+        } as any,
+        [],
+        []
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: "Couldn't save or update monitor because of an invalid configuration.",
+        details:
+          'Invalid location: "invalid-location". Remove it or replace it with a valid location.',
+      });
+    });
+  });
 });
 
 function getJsonPayload() {
@@ -408,7 +467,6 @@ function getJsonPayload() {
     '  "timeout": "3m",' +
     '  "__ui": {' +
     '    "is_tls_enabled": false,' +
-    '    "is_zip_url_tls_enabled": false,' +
     '    "script_source": {' +
     '      "is_generated_script": false,' +
     '      "file_name": "test-file.name"' +

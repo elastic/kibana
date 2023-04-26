@@ -11,6 +11,7 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import type {
   ActionConnector,
   CaseResponse,
@@ -26,7 +27,7 @@ import {
   OWNER_FIELD,
   CommentType,
 } from '../../../common/api';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 
 import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
 import { createCaseError } from '../../common/error';
@@ -164,6 +165,7 @@ export const push = async (
         subAction: 'pushToService',
         subActionParams: externalServiceIncident,
       },
+      source: asSavedObjectExecutionSource({ id: caseId, type: CASE_SAVED_OBJECT }),
     });
 
     if (pushRes.status === 'error') {

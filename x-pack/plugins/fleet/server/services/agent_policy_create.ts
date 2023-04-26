@@ -56,6 +56,7 @@ async function createPackagePolicy(
       // rollback agent policy on error
       await agentPolicyService.delete(soClient, esClient, agentPolicy.id, {
         force: true,
+        user: options.user,
       });
       throw error;
     });

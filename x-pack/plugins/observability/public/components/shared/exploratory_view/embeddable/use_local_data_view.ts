@@ -35,5 +35,5 @@ export function useLocalDataView(
     }
   }, [setDataViewTitle, updatedDataViewTitle]);
 
-  return { dataViewTitle };
+  return { dataViewTitle: dataViewTitle || initDatViewTitle };
 }

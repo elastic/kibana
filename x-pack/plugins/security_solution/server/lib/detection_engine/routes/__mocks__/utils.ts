@@ -86,6 +86,7 @@ export const getOutputRuleAlertForRest = (): RuleResponse => ({
   type: 'query',
   note: '# Investigative notes',
   version: 1,
+  revision: 0,
   execution_summary: undefined,
   related_integrations: [],
   required_fields: [],

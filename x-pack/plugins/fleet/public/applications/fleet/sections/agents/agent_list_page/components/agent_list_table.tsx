@@ -23,12 +23,14 @@ import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../ser
 import { AgentHealth } from '../../components';
 
 import type { Pagination } from '../../../../hooks';
-import { useLink, useKibanaVersion } from '../../../../hooks';
+import { useLink, useKibanaVersion, useAuthz } from '../../../../hooks';
 
 import { AgentPolicySummaryLine } from '../../../../components';
 import { Tags } from '../../components/tags';
 import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
+
+import { EmptyPrompt } from './empty_prompt';
 
 const VERSION_FIELD = 'local_metadata.elastic.agent.version';
 const HOSTNAME_FIELD = 'local_metadata.host.hostname';
@@ -50,10 +52,18 @@ interface Props {
   tableRef?: React.Ref<any>;
   showUpgradeable: boolean;
   totalAgents?: number;
-  noItemsMessage: JSX.Element;
   pagination: Pagination;
   onTableChange: (criteria: CriteriaWithPagination<Agent>) => void;
   pageSizeOptions: number[];
+  isUsingFilter: boolean;
+  setEnrollmentFlyoutState: (
+    value: React.SetStateAction<{
+      isOpen: boolean;
+      selectedPolicyId?: string | undefined;
+    }>
+  ) => void;
+  clearFilters: () => void;
+  isCurrentRequestIncremented: boolean;
 }
 
 export const AgentListTable: React.FC<Props> = (props: Props) => {
@@ -65,15 +75,19 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     sortField,
     sortOrder,
     tableRef,
-    noItemsMessage,
     onTableChange,
     onSelectionChange,
     totalAgents = 0,
     showUpgradeable,
     pagination,
     pageSizeOptions,
+    isUsingFilter,
+    setEnrollmentFlyoutState,
+    clearFilters,
+    isCurrentRequestIncremented,
   } = props;
 
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
   const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   const { getHref } = useLink();
@@ -87,6 +101,34 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     const isHosted = agentPolicy?.is_managed === true;
     return !isHosted;
   };
+
+  const noItemsMessage =
+    isLoading && isCurrentRequestIncremented ? (
+      <FormattedMessage
+        id="xpack.fleet.agentList.loadingAgentsMessage"
+        defaultMessage="Loading agents…"
+      />
+    ) : isUsingFilter ? (
+      <FormattedMessage
+        id="xpack.fleet.agentList.noFilteredAgentsPrompt"
+        defaultMessage="No agents found. {clearFiltersLink}"
+        values={{
+          clearFiltersLink: (
+            <EuiLink onClick={() => clearFilters()}>
+              <FormattedMessage
+                id="xpack.fleet.agentList.clearFiltersLinkText"
+                defaultMessage="Clear filters"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    ) : (
+      <EmptyPrompt
+        hasFleetAllPrivileges={hasFleetAllPrivileges}
+        setEnrollmentFlyoutState={setEnrollmentFlyoutState}
+      />
+    );
 
   const sorting = {
     sort: {
@@ -145,7 +187,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             {showWarning && (
               <EuiFlexItem grow={false}>
                 <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                  <EuiIcon size="m" type="alert" color="warning" />
+                  <EuiIcon size="m" type="warning" color="warning" />
                   &nbsp;
                   <FormattedMessage
                     id="xpack.fleet.agentList.outOfDateLabel"
@@ -243,7 +285,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           {isAgentSelectable(agent) && isAgentUpgradeable(agent, kibanaVersion) ? (
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                <EuiIcon size="m" type="alert" color="warning" />
+                <EuiIcon size="m" type="warning" color="warning" />
                 &nbsp;
                 <FormattedMessage
                   id="xpack.fleet.agentList.agentUpgradeLabel"

@@ -6,17 +6,8 @@
  */
 
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
-import type { KibanaExecutionContext } from '@kbn/core/public';
-import { FONTS_API_PATH } from '../common/constants';
-import {
-  getHttp,
-  getTilemap,
-  getEMSSettings,
-  getMapsEmsStart,
-  getExecutionContext,
-} from './kibana_services';
+import { getTilemap, getEMSSettings, getMapsEmsStart } from './kibana_services';
 import { getLicenseId } from './licensed_features';
-import { makeExecutionContext } from '../common/execution_context';
 
 export function getKibanaTileMap(): unknown {
   return getTilemap();
@@ -60,34 +51,6 @@ async function getEMSClient(): Promise<EMSClient> {
   return emsClient;
 }
 
-export function getGlyphUrl(): string {
-  const emsSettings = getEMSSettings();
-  if (!emsSettings!.isEMSEnabled()) {
-    return getHttp().basePath.prepend(`/${FONTS_API_PATH}/{fontstack}/{range}`);
-  }
-
-  return emsSettings!.getEMSFontLibraryUrl();
-}
-
 export function isRetina(): boolean {
   return window.devicePixelRatio === 2;
-}
-
-export function makePublicExecutionContext(description: string): KibanaExecutionContext {
-  const topLevelContext = getExecutionContext().get();
-  const context = makeExecutionContext({
-    url: window.location.pathname,
-    description,
-  });
-
-  // Distinguish between running in maps app vs. embedded
-  return topLevelContext.name !== undefined && topLevelContext.name !== context.name
-    ? {
-        ...topLevelContext,
-        child: context,
-      }
-    : {
-        ...topLevelContext,
-        ...context,
-      };
 }

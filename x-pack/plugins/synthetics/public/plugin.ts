@@ -20,6 +20,10 @@ import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type {
+  ExploratoryViewPublicSetup,
+  ExploratoryViewPublicStart,
+} from '@kbn/exploratory-view-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
@@ -49,19 +53,18 @@ import {
   LazySyntheticsPolicyEditExtension,
 } from './legacy_uptime/components/fleet_package';
 import { LazySyntheticsCustomAssetsExtension } from './legacy_uptime/components/fleet_package/lazy_synthetics_custom_assets_extension';
-import { uptimeOverviewNavigatorParams } from './apps/locators/overview';
 import {
   uptimeAlertTypeInitializers,
   legacyAlertTypeInitializers,
 } from './legacy_uptime/lib/alert_types';
-import { monitorDetailNavigatorParams } from './apps/locators/monitor_detail';
-import { editMonitorNavigatorParams } from './apps/locators/edit_monitor';
+import { locators } from './apps/locators';
 import { setStartServices } from './kibana_services';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
   data: DataPublicPluginSetup;
+  exploratoryView: ExploratoryViewPublicSetup;
   observability: ObservabilityPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
@@ -75,12 +78,13 @@ export interface ClientPluginsStart {
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;
+  exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
   dataViews: DataViewsPublicPluginStart;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   cloud?: CloudStart;
   appName: string;
   storage: IStorageWrapper;
@@ -127,12 +131,25 @@ export class UptimePlugin
       return UptimeDataHelper(coreStart);
     };
 
-    plugins.share.url.locators.create(uptimeOverviewNavigatorParams);
-    plugins.share.url.locators.create(monitorDetailNavigatorParams);
-    plugins.share.url.locators.create(editMonitorNavigatorParams);
+    locators.forEach((locator) => {
+      plugins.share.url.locators.create(locator);
+    });
 
     plugins.observability.dashboard.register({
-      appName: 'synthetics',
+      appName: 'uptime',
+      hasData: async () => {
+        const dataHelper = await getUptimeDataHelper();
+        const status = await dataHelper.indexStatus();
+        return { hasData: status.indexExists, indices: status.indices };
+      },
+      fetchData: async (params: FetchDataParams) => {
+        const dataHelper = await getUptimeDataHelper();
+        return await dataHelper.overviewData(params);
+      },
+    });
+
+    plugins.exploratoryView.register({
+      appName: 'uptime',
       hasData: async () => {
         const dataHelper = await getUptimeDataHelper();
         const status = await dataHelper.indexStatus();

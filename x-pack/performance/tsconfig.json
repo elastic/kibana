@@ -12,5 +12,7 @@
     "@kbn/journeys",
     "@kbn/test-subj-selector",
     "@kbn/tooling-log",
+    "@kbn/test",
+    "@kbn/expect",
   ]
 }

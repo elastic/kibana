@@ -6,8 +6,10 @@
  */
 
 import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
+import { rRuleMappingsField } from './rrule_mappings_field';
 
 export const alertMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
   properties: {
     enabled: {
       type: 'boolean',
@@ -198,6 +200,10 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
+    revision: {
+      index: true, // Explicitly setting to `true` as there is need to query for a rule by a specific revision
+      type: 'long',
+    },
     snoozeSchedule: {
       type: 'nested',
       properties: {
@@ -211,61 +217,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           type: 'date',
           format: 'strict_date_time',
         },
-        rRule: {
-          type: 'nested',
-          properties: {
-            freq: {
-              type: 'keyword',
-            },
-            dtstart: {
-              type: 'date',
-              format: 'strict_date_time',
-            },
-            tzid: {
-              type: 'keyword',
-            },
-            until: {
-              type: 'date',
-              format: 'strict_date_time',
-            },
-            count: {
-              type: 'long',
-            },
-            interval: {
-              type: 'long',
-            },
-            wkst: {
-              type: 'keyword',
-            },
-            byweekday: {
-              type: 'keyword',
-            },
-            bymonth: {
-              type: 'short',
-            },
-            bysetpos: {
-              type: 'long',
-            },
-            bymonthday: {
-              type: 'short',
-            },
-            byyearday: {
-              type: 'short',
-            },
-            byweekno: {
-              type: 'short',
-            },
-            byhour: {
-              type: 'long',
-            },
-            byminute: {
-              type: 'long',
-            },
-            bysecond: {
-              type: 'long',
-            },
-          },
-        },
+        rRule: rRuleMappingsField,
       },
     },
     nextRun: {

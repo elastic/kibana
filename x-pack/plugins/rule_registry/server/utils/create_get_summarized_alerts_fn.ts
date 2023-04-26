@@ -22,6 +22,7 @@ import {
   QueryDslQueryContainer,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AlertsFilter } from '@kbn/alerting-plugin/common';
 import { ParsedTechnicalFields } from '../../common';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { IRuleDataClient, IRuleDataReader } from '../rule_data_client';
@@ -46,6 +47,7 @@ export const createGetSummarizedAlertsFn =
     ruleId,
     spaceId,
     excludedAlertInstanceIds,
+    alertsFilter,
   }: GetSummarizedAlertsFnOpts) => {
     if (!ruleId || !spaceId) {
       throw new Error(`Must specify both rule ID and space ID for summarized alert query.`);
@@ -76,9 +78,9 @@ export const createGetSummarizedAlertsFn =
         isLifecycleAlert: opts.isLifecycleAlert,
         formatAlert: opts.formatAlert,
         excludedAlertInstanceIds,
+        alertsFilter,
       });
     }
-
     return await getAlertsByTimeRange({
       ruleDataClientReader,
       ruleId,
@@ -87,6 +89,7 @@ export const createGetSummarizedAlertsFn =
       isLifecycleAlert: opts.isLifecycleAlert,
       formatAlert: opts.formatAlert,
       excludedAlertInstanceIds,
+      alertsFilter,
     });
   };
 
@@ -97,6 +100,7 @@ interface GetAlertsByExecutionUuidOpts {
   isLifecycleAlert: boolean;
   excludedAlertInstanceIds: string[];
   formatAlert?: (alert: AlertDocument) => AlertDocument;
+  alertsFilter?: AlertsFilter | null;
 }
 
 const getAlertsByExecutionUuid = async ({
@@ -106,6 +110,7 @@ const getAlertsByExecutionUuid = async ({
   isLifecycleAlert,
   excludedAlertInstanceIds,
   formatAlert,
+  alertsFilter,
 }: GetAlertsByExecutionUuidOpts) => {
   if (isLifecycleAlert) {
     return getLifecycleAlertsByExecutionUuid({
@@ -114,6 +119,7 @@ const getAlertsByExecutionUuid = async ({
       ruleDataClientReader,
       formatAlert,
       excludedAlertInstanceIds,
+      alertsFilter,
     });
   }
 
@@ -123,6 +129,7 @@ const getAlertsByExecutionUuid = async ({
     ruleDataClientReader,
     formatAlert,
     excludedAlertInstanceIds,
+    alertsFilter,
   });
 };
 
@@ -132,6 +139,7 @@ interface GetAlertsByExecutionUuidHelperOpts {
   ruleDataClientReader: IRuleDataReader;
   excludedAlertInstanceIds: string[];
   formatAlert?: (alert: AlertDocument) => AlertDocument;
+  alertsFilter?: AlertsFilter | null;
 }
 
 const getPersistentAlertsByExecutionUuid = async <TSearchRequest extends ESSearchRequest>({
@@ -140,10 +148,16 @@ const getPersistentAlertsByExecutionUuid = async <TSearchRequest extends ESSearc
   ruleDataClientReader,
   excludedAlertInstanceIds,
   formatAlert,
+  alertsFilter,
 }: GetAlertsByExecutionUuidHelperOpts) => {
   // persistent alerts only create new alerts so query by execution UUID to
   // get all alerts created during an execution
-  const request = getQueryByExecutionUuid(executionUuid, ruleId, excludedAlertInstanceIds);
+  const request = getQueryByExecutionUuid({
+    executionUuid,
+    ruleId,
+    excludedAlertInstanceIds,
+    alertsFilter,
+  });
   const response = await doSearch(ruleDataClientReader, request, formatAlert);
 
   return {
@@ -165,15 +179,34 @@ const getLifecycleAlertsByExecutionUuid = async ({
   ruleDataClientReader,
   excludedAlertInstanceIds,
   formatAlert,
+  alertsFilter,
 }: GetAlertsByExecutionUuidHelperOpts) => {
   // lifecycle alerts assign a different action to an alert depending
   // on whether it is new/ongoing/recovered. query for each action in order
   // to get the count of each action type as well as up to the maximum number
   // of each type of alert.
   const requests = [
-    getQueryByExecutionUuid(executionUuid, ruleId, excludedAlertInstanceIds, 'open'),
-    getQueryByExecutionUuid(executionUuid, ruleId, excludedAlertInstanceIds, 'active'),
-    getQueryByExecutionUuid(executionUuid, ruleId, excludedAlertInstanceIds, 'close'),
+    getQueryByExecutionUuid({
+      executionUuid,
+      ruleId,
+      excludedAlertInstanceIds,
+      action: 'open',
+      alertsFilter,
+    }),
+    getQueryByExecutionUuid({
+      executionUuid,
+      ruleId,
+      excludedAlertInstanceIds,
+      action: 'active',
+      alertsFilter,
+    }),
+    getQueryByExecutionUuid({
+      executionUuid,
+      ruleId,
+      excludedAlertInstanceIds,
+      action: 'close',
+      alertsFilter,
+    }),
   ];
 
   const responses = await Promise.all(
@@ -233,12 +266,21 @@ const doSearch = async (
   return getHitsWithCount(response, formatAlert);
 };
 
-const getQueryByExecutionUuid = (
-  executionUuid: string,
-  ruleId: string,
-  excludedAlertInstanceIds: string[],
-  action?: string
-) => {
+interface GetQueryByExecutionUuidParams {
+  executionUuid: string;
+  ruleId: string;
+  excludedAlertInstanceIds: string[];
+  action?: string;
+  alertsFilter?: AlertsFilter | null;
+}
+
+const getQueryByExecutionUuid = ({
+  executionUuid,
+  ruleId,
+  excludedAlertInstanceIds,
+  action,
+  alertsFilter,
+}: GetQueryByExecutionUuidParams) => {
   const filter: QueryDslQueryContainer[] = [
     {
       term: {
@@ -270,6 +312,10 @@ const getQueryByExecutionUuid = (
     });
   }
 
+  if (alertsFilter) {
+    filter.push(...generateAlertsFilterDSL(alertsFilter));
+  }
+
   return {
     body: {
       size: MAX_ALERT_DOCS_TO_RETURN,
@@ -291,6 +337,7 @@ interface GetAlertsByTimeRangeOpts {
   isLifecycleAlert: boolean;
   excludedAlertInstanceIds: string[];
   formatAlert?: (alert: AlertDocument) => AlertDocument;
+  alertsFilter?: AlertsFilter | null;
 }
 
 const getAlertsByTimeRange = async ({
@@ -301,6 +348,7 @@ const getAlertsByTimeRange = async ({
   isLifecycleAlert,
   excludedAlertInstanceIds,
   formatAlert,
+  alertsFilter,
 }: GetAlertsByTimeRangeOpts) => {
   if (isLifecycleAlert) {
     return getLifecycleAlertsByTimeRange({
@@ -310,9 +358,9 @@ const getAlertsByTimeRange = async ({
       ruleDataClientReader,
       formatAlert,
       excludedAlertInstanceIds,
+      alertsFilter,
     });
   }
-
   return getPersistentAlertsByTimeRange({
     start,
     end,
@@ -320,6 +368,7 @@ const getAlertsByTimeRange = async ({
     ruleDataClientReader,
     formatAlert,
     excludedAlertInstanceIds,
+    alertsFilter,
   });
 };
 
@@ -330,6 +379,7 @@ interface GetAlertsByTimeRangeHelperOpts {
   ruleDataClientReader: IRuleDataReader;
   formatAlert?: (alert: AlertDocument) => AlertDocument;
   excludedAlertInstanceIds: string[];
+  alertsFilter?: AlertsFilter | null;
 }
 
 enum AlertTypes {
@@ -345,10 +395,18 @@ const getPersistentAlertsByTimeRange = async <TSearchRequest extends ESSearchReq
   ruleDataClientReader,
   formatAlert,
   excludedAlertInstanceIds,
+  alertsFilter,
 }: GetAlertsByTimeRangeHelperOpts) => {
   // persistent alerts only create new alerts so query for all alerts within the time
   // range and treat them as NEW
-  const request = getQueryByTimeRange(start, end, ruleId, excludedAlertInstanceIds);
+  const request = getQueryByTimeRange(
+    start,
+    end,
+    ruleId,
+    excludedAlertInstanceIds,
+    undefined,
+    alertsFilter
+  );
   const response = await doSearch(ruleDataClientReader, request, formatAlert);
 
   return {
@@ -371,11 +429,26 @@ const getLifecycleAlertsByTimeRange = async ({
   ruleDataClientReader,
   formatAlert,
   excludedAlertInstanceIds,
+  alertsFilter,
 }: GetAlertsByTimeRangeHelperOpts) => {
   const requests = [
-    getQueryByTimeRange(start, end, ruleId, excludedAlertInstanceIds, AlertTypes.NEW),
-    getQueryByTimeRange(start, end, ruleId, excludedAlertInstanceIds, AlertTypes.ONGOING),
-    getQueryByTimeRange(start, end, ruleId, excludedAlertInstanceIds, AlertTypes.RECOVERED),
+    getQueryByTimeRange(start, end, ruleId, excludedAlertInstanceIds, AlertTypes.NEW, alertsFilter),
+    getQueryByTimeRange(
+      start,
+      end,
+      ruleId,
+      excludedAlertInstanceIds,
+      AlertTypes.ONGOING,
+      alertsFilter
+    ),
+    getQueryByTimeRange(
+      start,
+      end,
+      ruleId,
+      excludedAlertInstanceIds,
+      AlertTypes.RECOVERED,
+      alertsFilter
+    ),
   ];
 
   const responses = await Promise.all(
@@ -394,7 +467,8 @@ const getQueryByTimeRange = (
   end: Date,
   ruleId: string,
   excludedAlertInstanceIds: string[],
-  type?: AlertTypes
+  type?: AlertTypes,
+  alertsFilter?: AlertsFilter | null
 ) => {
   // base query filters the alert documents for a rule by the given time range
   let filter: QueryDslQueryContainer[] = [
@@ -470,6 +544,10 @@ const getQueryByTimeRange = (
     });
   }
 
+  if (alertsFilter) {
+    filter.push(...generateAlertsFilterDSL(alertsFilter));
+  }
+
   return {
     body: {
       size: MAX_ALERT_DOCS_TO_RETURN,
@@ -481,4 +559,62 @@ const getQueryByTimeRange = (
       },
     },
   };
+};
+
+const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryContainer[] => {
+  const filter: QueryDslQueryContainer[] = [];
+
+  if (alertsFilter.query) {
+    filter.push(JSON.parse(alertsFilter.query.dsl!));
+  }
+  if (alertsFilter.timeframe) {
+    filter.push(
+      {
+        script: {
+          script: {
+            source:
+              "params.days.contains(doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())",
+            params: {
+              days: alertsFilter.timeframe.days,
+              timezone: alertsFilter.timeframe.timezone,
+            },
+          },
+        },
+      },
+      {
+        script: {
+          script: {
+            source: `
+              def alertsDateTime = doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone));
+              def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
+              def start = LocalTime.parse(params.start);
+              def end = LocalTime.parse(params.end);
+
+              if (end.isBefore(start)){ // overnight
+                def dayEnd = LocalTime.parse("23:59:59");
+                def dayStart = LocalTime.parse("00:00:00");
+                if ((alertsTime.isAfter(start) && alertsTime.isBefore(dayEnd)) || (alertsTime.isAfter(dayStart) && alertsTime.isBefore(end))) {
+                  return true;
+                } else {
+                  return false;
+                }
+              } else {
+                if (alertsTime.isAfter(start) && alertsTime.isBefore(end)) {
+                    return true;
+                } else {
+                    return false;
+                }
+              }
+           `,
+            params: {
+              start: alertsFilter.timeframe.hours.start,
+              end: alertsFilter.timeframe.hours.end,
+              timezone: alertsFilter.timeframe.timezone,
+            },
+          },
+        },
+      }
+    );
+  }
+  return filter;
 };

@@ -12,12 +12,10 @@ import { useActions, useValues } from 'kea';
 import {
   EuiForm,
   EuiFormRow,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldPassword,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -26,13 +24,14 @@ import { Status } from '../../../../../../common/types/api';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 
+import { ConnectorConfigurationField } from './connector_configuration_field';
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 
 export const ConnectorConfigurationForm = () => {
   const { status } = useValues(ConnectorConfigurationApiLogic);
 
   const { localConfigView } = useValues(ConnectorConfigurationLogic);
-  const { saveConfig, setIsEditing, setLocalConfigEntry } = useActions(ConnectorConfigurationLogic);
+  const { saveConfig, setIsEditing } = useActions(ConnectorConfigurationLogic);
 
   return (
     <EuiForm
@@ -43,26 +42,11 @@ export const ConnectorConfigurationForm = () => {
       component="form"
     >
       {localConfigView.map((configEntry) => {
-        const { key, isPasswordField, label, value } = configEntry;
+        const { key, label } = configEntry;
+
         return (
           <EuiFormRow label={label ?? ''} key={key}>
-            {isPasswordField ? (
-              <EuiFieldPassword
-                value={value}
-                disabled={status === Status.LOADING}
-                onChange={(event) => {
-                  setLocalConfigEntry({ ...configEntry, value: event.target.value });
-                }}
-              />
-            ) : (
-              <EuiFieldText
-                value={value}
-                disabled={status === Status.LOADING}
-                onChange={(event) => {
-                  setLocalConfigEntry({ ...configEntry, value: event.target.value });
-                }}
-              />
-            )}
+            <ConnectorConfigurationField configEntry={configEntry} />
           </EuiFormRow>
         );
       })}

@@ -8,12 +8,13 @@
 import { SavedObjectReference } from '@kbn/core/types';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { AttributeService } from '@kbn/embeddable-plugin/public';
-import { checkForDuplicateTitle, OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { MapAttributes } from '../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapEmbeddableDisplayName } from '../common/i18n_getters';
-import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';
+import { getCoreOverlays, getEmbeddableService } from './kibana_services';
 import { extractReferences, injectReferences } from '../common/migrations/references';
+import { mapsClient, checkForDuplicateTitle } from './content_management';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 
 export interface SharingSavedObjectProps {
@@ -23,7 +24,7 @@ export interface SharingSavedObjectProps {
   sourceId?: string;
 }
 
-type MapDoc = MapSavedObjectAttributes & {
+type MapDoc = MapAttributes & {
   references?: SavedObjectReference[];
 };
 export interface MapUnwrapMetaInfo {
@@ -62,19 +63,12 @@ export function getMapAttributeService(): MapAttributeService {
         references: savedObjectClientReferences,
       });
 
-      const savedObject = await (savedObjectId
-        ? getSavedObjectsClient().update<MapSavedObjectAttributes>(
-            MAP_SAVED_OBJECT_TYPE,
-            savedObjectId,
-            updatedAttributes,
-            { references }
-          )
-        : getSavedObjectsClient().create<MapSavedObjectAttributes>(
-            MAP_SAVED_OBJECT_TYPE,
-            updatedAttributes,
-            { references }
-          ));
-      return { id: savedObject.id };
+      const {
+        item: { id },
+      } = await (savedObjectId
+        ? mapsClient.update({ id: savedObjectId, data: updatedAttributes, options: { references } })
+        : mapsClient.create({ data: updatedAttributes, options: { references } }));
+      return { id };
     },
     unwrapMethod: async (
       savedObjectId: string
@@ -83,14 +77,9 @@ export function getMapAttributeService(): MapAttributeService {
       metaInfo: MapUnwrapMetaInfo;
     }> => {
       const {
-        saved_object: savedObject,
-        outcome,
-        alias_target_id: aliasTargetId,
-        alias_purpose: aliasPurpose,
-      } = await getSavedObjectsClient().resolve<MapSavedObjectAttributes>(
-        MAP_SAVED_OBJECT_TYPE,
-        savedObjectId
-      );
+        item: savedObject,
+        meta: { outcome, aliasPurpose, aliasTargetId },
+      } = await mapsClient.get(savedObjectId);
 
       if (savedObject.error) {
         throw savedObject.error;
@@ -118,13 +107,11 @@ export function getMapAttributeService(): MapAttributeService {
           title: props.newTitle,
           copyOnSave: false,
           lastSavedTitle: '',
-          getEsType: () => MAP_SAVED_OBJECT_TYPE,
+          isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
           getDisplayName: getMapEmbeddableDisplayName,
+          onTitleDuplicate: props.onTitleDuplicate,
         },
-        props.isTitleDuplicateConfirmed,
-        props.onTitleDuplicate,
         {
-          savedObjectsClient: getSavedObjectsClient(),
           overlays: getCoreOverlays(),
         }
       );

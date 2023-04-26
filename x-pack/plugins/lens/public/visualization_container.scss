@@ -26,3 +26,9 @@
   justify-content: center;
   overflow: auto;
 }
+
+// Make the visualization modifiers icon appear only on panel hover
+.embPanel__content:hover .lnsEmbeddablePanelFeatureList_button {
+  color: $euiTextColor;
+  transition: color $euiAnimSpeedSlow;
+}

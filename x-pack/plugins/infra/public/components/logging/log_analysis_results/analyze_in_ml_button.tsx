@@ -27,7 +27,12 @@ export const AnalyzeInMlButton: React.FunctionComponent<{
   );
 
   return (
-    <EuiButton fill={false} size="s" onClick={handleClick}>
+    <EuiButton
+      data-test-subj="infraAnalyzeInMlButtonAnalyzeInMlButton"
+      fill={false}
+      size="s"
+      onClick={handleClick}
+    >
       <FormattedMessage
         id="xpack.infra.logs.analysis.analyzeInMlButtonLabel"
         defaultMessage="Analyze in ML"

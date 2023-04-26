@@ -22,7 +22,7 @@ export const setupCapabilities = (
 
   core.capabilities.registerSwitcher(async (request, capabilities, useDefaultCapabilities) => {
     if (useDefaultCapabilities) {
-      return capabilities;
+      return {};
     }
     const [, { security }] = await core.getStartServices();
 
@@ -42,6 +42,6 @@ export const setupCapabilities = (
       };
     }
 
-    return capabilities;
+    return {};
   });
 };

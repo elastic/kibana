@@ -12,6 +12,7 @@ import { CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   BENCHMARKS_ROUTE_PATH,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+  POSTURE_TYPE_ALL,
 } from '../../../common/constants';
 import { benchmarksQueryParamsSchema } from '../../../common/schemas/benchmark';
 import type { Benchmark } from '../../../common/types';
@@ -104,7 +105,8 @@ export const defineGetBenchmarksRoute = (router: CspRouter): void =>
           cspContext.soClient,
           cspContext.packagePolicyService,
           CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-          request.query
+          request.query,
+          POSTURE_TYPE_ALL
         );
 
         const agentPolicies = await getCspAgentPolicies(

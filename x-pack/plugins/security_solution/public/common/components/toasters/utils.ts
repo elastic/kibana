@@ -30,7 +30,7 @@ export const displayErrorToast = (
     id,
     title: errorTitle,
     color: 'danger',
-    iconType: 'alert',
+    iconType: 'error',
     errors: errorMessages,
   };
   dispatchToaster({
@@ -87,7 +87,7 @@ export const errorToToaster = ({
   title,
   error,
   color = 'danger',
-  iconType = 'alert',
+  iconType = 'error',
   dispatchToaster,
 }: ErrorToToasterArgs) => {
   let toast: AppToast;

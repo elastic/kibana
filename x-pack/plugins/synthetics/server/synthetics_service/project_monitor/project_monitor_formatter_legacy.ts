@@ -213,10 +213,14 @@ export class ProjectMonitorFormatterLegacy {
 
       /* Validates that the payload sent from the synthetics agent is valid */
       const { valid: isMonitorPayloadValid } = this.validateMonitor({
-        validationResult: validateProjectMonitor({
-          ...monitor,
-          type: normalizedMonitor[ConfigKey.MONITOR_TYPE],
-        }),
+        validationResult: validateProjectMonitor(
+          {
+            ...monitor,
+            type: normalizedMonitor[ConfigKey.MONITOR_TYPE],
+          },
+          this.locations,
+          this.privateLocations
+        ),
         monitorId: monitor.id,
       });
 

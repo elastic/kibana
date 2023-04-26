@@ -103,7 +103,7 @@
         "tags": [],
         "label": "getWindowParameters",
         "description": [
-          "\nGiven a point in time (e.g. where a user clicks), use simple heuristics to compute:\n\n1. The time window around the click to evaluate for changes\n2. The historical time window prior to the click to use as a baseline.\n\nThe philosophy here is that charts are displayed with different granularities according to their\noverall time window. We select the change point and historical time windows inline with the\noverall time window.\n\nThe algorithm for doing this is based on the typical granularities that exist in machine data.\n"
+          "\nGiven a point in time (e.g. where a user clicks), use simple heuristics to compute:\n\n1. The time window around the click to evaluate for changes\n2. The historical time window prior to the click to use as a baseline.\n\nThe philosophy here is that charts are displayed with different granularities according to their\noverall time window. We select the log spike and historical time windows inline with the\noverall time window.\n\nThe algorithm for doing this is based on the typical granularities that exist in machine data.\n"
         ],
         "signature": [
           "(clickTime: number, minTime: number, maxTime: number) => ",

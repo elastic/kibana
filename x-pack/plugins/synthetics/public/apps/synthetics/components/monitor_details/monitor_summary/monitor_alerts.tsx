@@ -15,7 +15,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RECORDS_FIELD, useTheme } from '@kbn/observability-plugin/public';
+import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
+import { useTheme } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
@@ -31,8 +32,9 @@ export const MonitorAlerts = ({
   from: string;
   dateLabel: string;
 }) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const theme = useTheme();
 
@@ -45,7 +47,7 @@ export const MonitorAlerts = ({
 
   return (
     <EuiPanel hasShadow={false} paddingSize="m" hasBorder>
-      <EuiFlexGroup alignItems="center" gutterSize="m">
+      <EuiFlexGroup alignItems="center" gutterSize="m" wrap={true}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h3>
@@ -74,7 +76,9 @@ export const MonitorAlerts = ({
                       filters: [
                         {
                           field: 'observer.geo.name',
-                          values: [selectedLocation.label],
+                          // in 8.6.0, observer.geo.name was mapped to the id,
+                          // so we have to pass both values to maintain history
+                          values: [selectedLocation.label, selectedLocation.id],
                         },
                       ],
                     },
@@ -94,7 +98,7 @@ export const MonitorAlerts = ({
           <AlertActions monitorId={monitorId} from={from} to={to} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="xs" wrap={true}>
         <EuiFlexItem style={{ width: 80 }} grow={false}>
           <ExploratoryViewEmbeddable
             dataTestSubj="monitorActiveAlertsCount"
@@ -117,14 +121,16 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['active'] },
                   {
                     field: 'observer.geo.name',
-                    values: [selectedLocation.label],
+                    // in 8.6.0, observer.geo.name was mapped to the id,
+                    // so we have to pass both values to maintain history
+                    values: [selectedLocation.label, selectedLocation.id],
                   },
                 ],
               },
             ]}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ minWidth: 80 }}>
           <ExploratoryViewEmbeddable
             sparklineMode
             customHeight="100px"
@@ -147,7 +153,9 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['active'] },
                   {
                     field: 'observer.geo.name',
-                    values: [selectedLocation.label],
+                    // in 8.6.0, observer.geo.name was mapped to the id,
+                    // so we have to pass both values to maintain history
+                    values: [selectedLocation.label, selectedLocation.id],
                   },
                 ],
                 color: theme.eui.euiColorVis7_behindText,
@@ -176,14 +184,16 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['recovered'] },
                   {
                     field: 'observer.geo.name',
-                    values: [selectedLocation.label],
+                    // in 8.6.0, observer.geo.name was mapped to the id,
+                    // so we have to pass both values to maintain history
+                    values: [selectedLocation.label, selectedLocation.id],
                   },
                 ],
               },
             ]}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ minWidth: 80 }}>
           <ExploratoryViewEmbeddable
             sparklineMode
             customHeight="100px"
@@ -206,7 +216,9 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['recovered'] },
                   {
                     field: 'observer.geo.name',
-                    values: [selectedLocation.label],
+                    // in 8.6.0, observer.geo.name was mapped to the id,
+                    // so we have to pass both values to maintain history
+                    values: [selectedLocation.label, selectedLocation.id],
                   },
                 ],
                 color: theme.eui.euiColorVis0_behindText,

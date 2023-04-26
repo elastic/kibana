@@ -100,6 +100,7 @@ export function AddToCaseAction({
     <>
       {typeof autoOpen === 'undefined' && (
         <EuiButtonEmpty
+          data-test-subj="o11yAddToCaseActionAddToCaseButton"
           size="s"
           isLoading={isSaving}
           isDisabled={lensAttributes === null}
@@ -125,7 +126,7 @@ export function CaseToastText({ linkUrl }: { linkUrl: string }) {
   return (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem>
-        <EuiLink href={linkUrl} target="_blank">
+        <EuiLink data-test-subj="o11yCaseToastTextViewCaseLink" href={linkUrl} target="_blank">
           {i18n.translate('xpack.observability.expView.heading.addToCase.notification.viewCase', {
             defaultMessage: 'View case',
           })}

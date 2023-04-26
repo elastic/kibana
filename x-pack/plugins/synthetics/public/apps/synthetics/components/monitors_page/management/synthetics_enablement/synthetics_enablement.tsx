@@ -90,6 +90,7 @@ export const EnablementEmptyState = () => {
             <h3>{labels.LEARN_MORE_LABEL}</h3>
           </EuiTitle>
           <EuiLink
+            data-test-subj="syntheticsEnablementEmptyStateLink"
             href="https://docs.google.com/document/d/1hkzFibu9LggPWXQqfbAd0mMlV75wCME7_BebXlEH-oI"
             target="_blank"
           >

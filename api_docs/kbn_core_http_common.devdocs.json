@@ -83,7 +83,28 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-http-common",
+        "id": "def-common.ApiVersion",
+        "type": "Type",
+        "tags": [
+          "note",
+          "experimental"
+        ],
+        "label": "ApiVersion",
+        "description": [
+          "\nA Kibana HTTP API version"
+        ],
+        "signature": [
+          "`${number}`"
+        ],
+        "path": "packages/core/http/core-http-common/src/versioning.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

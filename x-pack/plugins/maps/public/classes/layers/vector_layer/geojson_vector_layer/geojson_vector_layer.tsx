@@ -60,6 +60,11 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     return layerDescriptor;
   }
 
+  _isTiled(): boolean {
+    // Uses untiled maplibre source 'geojson'
+    return false;
+  }
+
   async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
     const isStaticLayer = !this.getSource().isBoundsAware();
     return isStaticLayer || this.hasJoins()
@@ -93,7 +98,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       this.getSource().getSourceStatus(sourceDataRequest);
     return {
       icon: isDeprecated ? (
-        <EuiIcon type="alert" color="danger" />
+        <EuiIcon type="warning" color="danger" />
       ) : (
         this.getCurrentStyle().getIcon(isTocIcon && areResultsTrimmed)
       ),

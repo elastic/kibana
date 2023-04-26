@@ -94,5 +94,6 @@
     "@kbn/utils",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/shared-ux-router",
+    "@kbn/shared-ux-link-redirect-app",
   ]
 }

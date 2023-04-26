@@ -15,9 +15,12 @@ export interface TestData {
   brushDeviationTargetTimestamp: number;
   brushIntervalFactor: number;
   chartClickCoordinates: [number, number];
+  fieldSelectorSearch: string;
+  fieldSelectorApplyAvailable: boolean;
   expected: {
     totalDocCountFormatted: string;
     analysisGroupsTable: Array<{ group: string; docCount: string }>;
+    filteredAnalysisGroupsTable?: Array<{ group: string; docCount: string }>;
     analysisTable: Array<{
       fieldName: string;
       fieldValue: string;
@@ -25,5 +28,6 @@ export interface TestData {
       pValue: string;
       impact: string;
     }>;
+    fieldSelectorPopover: string[];
   };
 }

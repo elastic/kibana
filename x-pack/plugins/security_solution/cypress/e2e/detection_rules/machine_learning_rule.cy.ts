@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { formatMitreAttackDescription } from '../../helpers/rules';
+import { isArray } from 'lodash';
+
+import { formatMitreAttackDescription, getHumanizedDuration } from '../../helpers/rules';
 import { getMachineLearningRule } from '../../objects/rule';
 
 import {
@@ -53,10 +55,10 @@ import { login, visitWithoutDateRange } from '../../tasks/login';
 import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Detection rules, machine learning', () => {
-  const expectedUrls = getMachineLearningRule().referenceUrls.join('');
-  const expectedFalsePositives = getMachineLearningRule().falsePositivesExamples.join('');
-  const expectedTags = getMachineLearningRule().tags.join('');
-  const expectedMitre = formatMitreAttackDescription(getMachineLearningRule().mitre);
+  const expectedUrls = (getMachineLearningRule().references ?? []).join('');
+  const expectedFalsePositives = (getMachineLearningRule().false_positives ?? []).join('');
+  const expectedTags = (getMachineLearningRule().tags ?? []).join('');
+  const expectedMitre = formatMitreAttackDescription(getMachineLearningRule().threat ?? []);
   const expectedNumberOfRules = 1;
 
   before(() => {
@@ -66,28 +68,29 @@ describe('Detection rules, machine learning', () => {
   });
 
   it('Creates and enables a new ml rule', () => {
+    const mlRule = getMachineLearningRule();
     selectMachineLearningRuleType();
-    fillDefineMachineLearningRuleAndContinue(getMachineLearningRule());
-    fillAboutRuleAndContinue(getMachineLearningRule());
-    fillScheduleRuleAndContinue(getMachineLearningRule());
+    fillDefineMachineLearningRuleAndContinue(mlRule);
+    fillAboutRuleAndContinue(mlRule);
+    fillScheduleRuleAndContinue(mlRule);
     createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
     expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
 
-    cy.get(RULE_NAME).should('have.text', getMachineLearningRule().name);
-    cy.get(RISK_SCORE).should('have.text', getMachineLearningRule().riskScore);
-    cy.get(SEVERITY).should('have.text', getMachineLearningRule().severity);
+    cy.get(RULE_NAME).should('have.text', mlRule.name);
+    cy.get(RISK_SCORE).should('have.text', mlRule.risk_score);
+    cy.get(SEVERITY).should('have.text', 'Critical');
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('contain', `${getMachineLearningRule().name}`);
-    cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', getMachineLearningRule().description);
+    cy.get(RULE_NAME_HEADER).should('contain', `${mlRule.name}`);
+    cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', mlRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
-      getDetails(SEVERITY_DETAILS).should('have.text', getMachineLearningRule().severity);
-      getDetails(RISK_SCORE_DETAILS).should('have.text', getMachineLearningRule().riskScore);
+      getDetails(SEVERITY_DETAILS).should('have.text', 'Critical');
+      getDetails(RISK_SCORE_DETAILS).should('have.text', mlRule.risk_score);
       getDetails(REFERENCE_URLS_DETAILS).should((details) => {
         expect(removeExternalLinkText(details.text())).equal(expectedUrls);
       });
@@ -98,31 +101,26 @@ describe('Detection rules, machine learning', () => {
       getDetails(TAGS_DETAILS).should('have.text', expectedTags);
     });
     cy.get(DEFINITION_DETAILS).within(() => {
-      getDetails(ANOMALY_SCORE_DETAILS).should(
-        'have.text',
-        getMachineLearningRule().anomalyScoreThreshold
-      );
+      getDetails(ANOMALY_SCORE_DETAILS).should('have.text', mlRule.anomaly_threshold);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Machine Learning');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
+      const machineLearningJobsArray = isArray(mlRule.machine_learning_job_id)
+        ? mlRule.machine_learning_job_id
+        : [mlRule.machine_learning_job_id];
       // With the #1912 ML rule improvement changes we enable jobs on rule creation.
       // Though, in cypress jobs enabling does not work reliably and job can be started or stopped.
       // Thus, we disable next check till we fix the issue with enabling jobs in cypress.
       // Relevant ticket: https://github.com/elastic/security-team/issues/5389
       // cy.get(MACHINE_LEARNING_JOB_STATUS).should('have.text', 'StoppedStopped');
-      cy.get(MACHINE_LEARNING_JOB_ID).should(
-        'have.text',
-        getMachineLearningRule().machineLearningJobs.join('')
-      );
+      cy.get(MACHINE_LEARNING_JOB_ID).should('have.text', machineLearningJobsArray.join(''));
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
-      getDetails(RUNS_EVERY_DETAILS).should(
-        'have.text',
-        `${getMachineLearningRule().runsEvery.interval}${getMachineLearningRule().runsEvery.type}`
+      getDetails(RUNS_EVERY_DETAILS).should('have.text', `${mlRule.interval}`);
+      const humanizedDuration = getHumanizedDuration(
+        mlRule.from ?? 'now-6m',
+        mlRule.interval ?? '5m'
       );
-      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
-        'have.text',
-        `${getMachineLearningRule().lookBack.interval}${getMachineLearningRule().lookBack.type}`
-      );
+      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
     });
   });
 });

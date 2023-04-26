@@ -30,11 +30,13 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { rulesSettingsClientMock } from '../rules_settings_client.mock';
+import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+const mockAlertService = alertsServiceMock.create();
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
 const uiSettingsService = uiSettingsServiceMock.createStartContract();
 const elasticsearchService = elasticsearchServiceMock.createInternalStart();
@@ -104,6 +106,7 @@ describe('Task Runner Factory', () => {
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     ruleTypeRegistry: ruleTypeRegistryMock.create(),
+    alertsService: mockAlertService,
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: true,
     maxEphemeralActionsPerRule: 10,

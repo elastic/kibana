@@ -38,6 +38,7 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
     return (
       <EuiFormRow>
         <EuiComboBox
+          compressed
           prepend={i18n.translate('xpack.aiops.changePointDetection.selectMetricFieldLabel', {
             defaultMessage: 'Metric field',
           })}
@@ -47,6 +48,7 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
           onChange={onChangeCallback}
           isClearable={false}
           data-test-subj="aiopsChangePointMetricField"
+          onClick={(e) => e.stopPropagation()}
         />
       </EuiFormRow>
     );

@@ -66,11 +66,8 @@ export const enrichItemWithName =
  */
 export const enrichItemWithExpireTime =
   (expireTimeToAdd: Moment | undefined) =>
-  (items: ExceptionsBuilderReturnExceptionItem[]): ExceptionsBuilderReturnExceptionItem[] => {
-    return expireTimeToAdd != null
-      ? enrichNewExceptionItemsWithExpireTime(items, expireTimeToAdd)
-      : items;
-  };
+  (items: ExceptionsBuilderReturnExceptionItem[]): ExceptionsBuilderReturnExceptionItem[] =>
+    enrichNewExceptionItemsWithExpireTime(items, expireTimeToAdd);
 
 /**
  * Modifies item entries to be in correct format and adds os selection to items

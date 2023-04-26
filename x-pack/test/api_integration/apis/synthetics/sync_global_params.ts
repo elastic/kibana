@@ -20,7 +20,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 import { getTestBrowserSyntheticsPolicy } from './sample_data/test_browser_policy';
-import { comparePolicies } from './sample_data/test_policy';
+import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('SyncGlobalParams', function () {
@@ -31,7 +31,12 @@ export default function ({ getService }: FtrProviderContext) {
     let testFleetPolicyID: string;
     let _browserMonitorJson: HTTPFields;
     let browserMonitorJson: HTTPFields;
+
+    let _httpMonitorJson: HTTPFields;
+    let httpMonitorJson: HTTPFields;
+
     let newMonitorId: string;
+    let newHttpMonitorId: string;
 
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const params: Record<string, string> = {};
@@ -45,11 +50,13 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       _browserMonitorJson = getFixtureJson('browser_monitor');
+      _httpMonitorJson = getFixtureJson('http_monitor');
       await kServer.savedObjects.clean({ types: [syntheticsParamType] });
     });
 
     beforeEach(() => {
       browserMonitorJson = _browserMonitorJson;
+      httpMonitorJson = _httpMonitorJson;
     });
 
     const testPolicyName = 'Fleet test server policy' + Date.now();
@@ -181,6 +188,59 @@ export default function ({ getService }: FtrProviderContext) {
         packagePolicy,
         getTestBrowserSyntheticsPolicy({ name: browserMonitorJson.name, id: newMonitorId, params })
       );
+    });
+
+    it('add a http monitor using param', async () => {
+      const newMonitor = httpMonitorJson;
+
+      newMonitor.locations.push({
+        id: testFleetPolicyID,
+        label: 'Test private location 0',
+        isServiceManaged: false,
+      });
+
+      newMonitor.proxy_url = '${test}';
+
+      const apiResponse = await supertestAPI
+        .post(API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(newMonitor);
+
+      expect(apiResponse.body.attributes).eql(
+        omit(
+          {
+            ...newMonitor,
+            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
+            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+          },
+          secretKeys
+        )
+      );
+      newHttpMonitorId = apiResponse.body.id;
+    });
+
+    it('parsed params for previously added http monitors', async () => {
+      const apiResponse = await supertestAPI.get(
+        '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+      );
+
+      const packagePolicy = apiResponse.body.items.find(
+        (pkgPolicy: PackagePolicy) =>
+          pkgPolicy.id === newHttpMonitorId + '-' + testFleetPolicyID + '-default'
+      );
+
+      expect(packagePolicy.policy_id).eql(testFleetPolicyID);
+
+      const pPolicy = getTestSyntheticsPolicy(
+        httpMonitorJson.name,
+        newHttpMonitorId,
+        undefined,
+        undefined,
+        false,
+        'test'
+      );
+
+      comparePolicies(packagePolicy, pPolicy);
     });
 
     it('delete all params and sync again', async () => {

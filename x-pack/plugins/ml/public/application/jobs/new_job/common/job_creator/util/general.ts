@@ -348,6 +348,7 @@ export function collectAggs(o: any, aggFields: Field[]) {
               name: k,
               type: ES_FIELD_TYPES.KEYWORD,
               aggregatable: true,
+              counter: false,
             });
           }
         });

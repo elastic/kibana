@@ -55,9 +55,7 @@ describe('analyticsCollectionsLogic', () => {
       it('updates to false when apiSuccess returns analytics collections array', () => {
         const collections: AnalyticsCollection[] = [
           {
-            event_retention_day_length: 19,
             events_datastream: 'collection1-events',
-            id: 'collection1',
             name: 'collection1',
           },
         ];

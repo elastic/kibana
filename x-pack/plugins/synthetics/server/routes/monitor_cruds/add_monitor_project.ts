@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ProjectMonitor } from '../../../common/runtime_types';
 
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
@@ -51,7 +52,10 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     }
 
     try {
-      const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
+      const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
+        id: DEFAULT_SPACE_ID,
+      };
+
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
       const pushMonitorFormatter = new ProjectMonitorFormatter({
@@ -75,7 +79,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     } catch (error) {
       server.logger.error(`Error adding monitors to project ${decodedProjectName}`);
       if (error.output.statusCode === 404) {
-        const spaceId = server.spaces.spacesService.getSpaceId(request);
+        const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
         return response.notFound({ body: { message: `Kibana space '${spaceId}' does not exist` } });
       }
 

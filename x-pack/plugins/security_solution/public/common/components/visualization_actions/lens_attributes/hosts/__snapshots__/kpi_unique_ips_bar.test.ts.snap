@@ -48,7 +48,7 @@ Object {
                     Object {
                       "input": Object {
                         "language": "kuery",
-                        "query": "",
+                        "query": "source.ip: *",
                       },
                       "label": "Src.",
                     },
@@ -84,7 +84,7 @@ Object {
                     Object {
                       "input": Object {
                         "language": "kuery",
-                        "query": "",
+                        "query": "destination.ip: *",
                       },
                       "label": "Dest.",
                     },
@@ -253,7 +253,7 @@ Object {
       },
     },
   },
-  "title": "[Host] Unique IPs - bar",
+  "title": "[Host] Unique IPs - bar chart",
   "visualizationType": "lnsXY",
 }
 `;

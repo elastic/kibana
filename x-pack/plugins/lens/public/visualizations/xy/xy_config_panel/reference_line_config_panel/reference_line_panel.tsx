@@ -12,7 +12,7 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { FillStyle } from '@kbn/expression-xy-plugin/common';
 import type { VisualizationDimensionEditorProps } from '../../../../types';
 import { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
-import { FormatFactory } from '../../../../../common';
+import { FormatFactory } from '../../../../../common/types';
 
 import { ColorPicker } from '../color_picker';
 import { updateLayer } from '..';

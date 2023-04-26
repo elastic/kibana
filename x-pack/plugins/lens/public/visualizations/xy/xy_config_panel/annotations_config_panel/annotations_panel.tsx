@@ -29,7 +29,7 @@ import {
   FieldOptionValue,
   FieldPicker,
 } from '../../../../shared_components/field_picker';
-import { FormatFactory } from '../../../../../common';
+import { FormatFactory } from '../../../../../common/types';
 import {
   DimensionEditorSection,
   NameInput,

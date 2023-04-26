@@ -58,6 +58,7 @@ export const APP_CLUSTER_PRIVILEGES = [
   'cluster:admin/transform/preview',
   'cluster:admin/transform/put',
   'cluster:admin/transform/reset',
+  'cluster:admin/transform/schedule_now',
   'cluster:admin/transform/start',
   'cluster:admin/transform/start_task',
   'cluster:admin/transform/stop',
@@ -84,7 +85,7 @@ export const APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES = [
 
 export const APP_INDEX_PRIVILEGES = ['monitor'];
 
-// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L214
 export const TRANSFORM_STATE = {
   ABORTING: 'aborting',
   FAILED: 'failed',
@@ -187,6 +188,17 @@ export const TRANSFORM_HEALTH_CHECK_NAMES: Record<
       'xpack.transform.alertTypes.transformHealth.errorMessagesCheckDescription',
       {
         defaultMessage: 'Get alerts if a transform contains errors in the transform messages.',
+      }
+    ),
+  },
+  healthCheck: {
+    name: i18n.translate('xpack.transform.alertTypes.transformHealth.healthCheckName', {
+      defaultMessage: 'Unhealthy transform',
+    }),
+    description: i18n.translate(
+      'xpack.transform.alertTypes.transformHealth.healthCheckDescription',
+      {
+        defaultMessage: 'Get alerts if a transform health status is not green.',
       }
     ),
   },

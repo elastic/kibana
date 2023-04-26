@@ -5,8 +5,9 @@ parameters:
     in: path
     required: true
 post:
-  summary: Agent - Actions
-  tags: []
+  summary: Create agent action
+  tags:
+    - Agent actions
   responses:
     '200':
       description: OK
@@ -35,5 +36,5 @@ post:
         schema:
           type: object
           properties:
-              action:
-                $ref: ../components/schemas/agent_action.yaml
+            action:
+              $ref: ../components/schemas/agent_action.yaml

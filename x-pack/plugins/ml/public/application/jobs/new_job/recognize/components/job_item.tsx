@@ -178,7 +178,7 @@ function getDatafeedStartedIcon({ awaitingMlNodeAllocation, success }: DatafeedR
   color: string;
 } {
   if (awaitingMlNodeAllocation === true) {
-    return { type: 'alert', color: 'warning' };
+    return { type: 'warning', color: 'warning' };
   }
 
   return success ? { type: 'check', color: 'success' } : { type: 'cross', color: 'danger' };

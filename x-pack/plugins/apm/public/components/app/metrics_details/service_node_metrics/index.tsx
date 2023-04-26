@@ -127,7 +127,10 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
             defaultMessage="We could not identify which JVMs these metrics belong to. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue. For more information on upgrading, see the {link}. As an alternative, you can use the Kibana Query bar to filter by hostname, container ID or other fields."
             values={{
               link: (
-                <EuiLink href={docLinks.links.apm.upgrading}>
+                <EuiLink
+                  data-test-subj="apmServiceNodeMetricsDocumentationOfApmServerLink"
+                  href={docLinks.links.apm.upgrading}
+                >
                   {i18n.translate(
                     'xpack.apm.serviceNodeMetrics.unidentifiedServiceNodesWarningDocumentationLink',
                     { defaultMessage: 'documentation of APM Server' }

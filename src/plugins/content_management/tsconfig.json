@@ -3,11 +3,18 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "demo/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/core-http-request-handler-context-server",
+    "@kbn/es-query",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/bfetch-plugin",
+    "@kbn/object-versioning",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/saved-objects-settings",
   ],
   "exclude": [
     "target/**/*",

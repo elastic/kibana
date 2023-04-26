@@ -136,8 +136,6 @@ export class Data {
         type = 'series';
       } else if (obj.slices) {
         type = 'slices';
-      } else if (obj.geoJson) {
-        type = 'geoJson';
       }
     });
 
@@ -224,27 +222,6 @@ export class Data {
     }
 
     return visData;
-  }
-
-  /**
-   * get min and max for all cols, rows of data
-   *
-   * @method getMaxMin
-   * @return {Object}
-   */
-  getGeoExtents() {
-    const visData = this.getVisData();
-
-    return _.reduce(
-      _.map(visData, 'geoJson.properties'),
-      function (minMax, props) {
-        return {
-          min: Math.min(props.min, minMax.min),
-          max: Math.max(props.max, minMax.max),
-        };
-      },
-      { min: Infinity, max: -Infinity }
-    );
   }
 
   /**

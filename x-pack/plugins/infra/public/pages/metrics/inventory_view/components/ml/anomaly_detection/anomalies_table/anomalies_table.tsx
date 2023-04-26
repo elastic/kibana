@@ -452,6 +452,7 @@ export const AnomaliesTable = (props: Props) => {
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={3}>
             <EuiFieldSearch
+              data-test-subj="infraAnomaliesTableFieldSearch"
               fullWidth
               placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.searchPlaceholder', {
                 defaultMessage: 'Search',

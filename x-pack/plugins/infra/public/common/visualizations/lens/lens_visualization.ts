@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { LensAttributes } from '../../../types';
-import { ILensVisualization } from './types';
+import type { LensAttributes } from '../../../types';
+import type { ILensVisualization } from './types';
 
 export const buildLensAttributes = (visualization: ILensVisualization): LensAttributes => {
   return {
@@ -18,9 +18,10 @@ export const buildLensAttributes = (visualization: ILensVisualization): LensAttr
           layers: visualization.getLayers(),
         },
       },
-      filters: visualization.getFilters(),
+      filters: [],
       query: { language: 'kuery', query: '' },
       visualization: visualization.getVisualizationState(),
+      adHocDataViews: visualization.getAdhocDataView(),
     },
   };
 };

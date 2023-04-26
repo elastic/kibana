@@ -5,64 +5,59 @@
  * 2.0.
  */
 
-import {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-  useQuery,
-} from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
 
-const EMPTY_RESPONSE: FetchHistoricalSummaryResponse = {};
-
 export interface UseFetchHistoricalSummaryResponse {
-  sloHistoricalSummaryResponse: FetchHistoricalSummaryResponse;
+  sloHistoricalSummaryResponse: FetchHistoricalSummaryResponse | undefined;
+  isInitialLoading: boolean;
+  isRefetching: boolean;
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
-  refetch: <TPageData>(
-    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
-  ) => Promise<QueryObserverResult<FetchHistoricalSummaryResponse | undefined, unknown>>;
 }
 
 export interface Params {
   sloIds: string[];
+  shouldRefetch?: boolean;
 }
 
+const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 export function useFetchHistoricalSummary({
   sloIds = [],
+  shouldRefetch,
 }: Params): UseFetchHistoricalSummaryResponse {
   const { http } = useKibana().services;
 
-  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
-    {
-      queryKey: ['fetchHistoricalSummary', sloIds],
-      queryFn: async ({ signal }) => {
-        try {
-          const response = await http.post<FetchHistoricalSummaryResponse>(
-            '/internal/observability/slos/_historical_summary',
-            {
-              body: JSON.stringify({ sloIds }),
-              signal,
-            }
-          );
+  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
+    queryKey: ['fetchHistoricalSummary', sloIds],
+    queryFn: async ({ signal }) => {
+      try {
+        const response = await http.post<FetchHistoricalSummaryResponse>(
+          '/internal/observability/slos/_historical_summary',
+          {
+            body: JSON.stringify({ sloIds }),
+            signal,
+          }
+        );
 
-          return response;
-        } catch (error) {
-          // ignore error for retrieving slos
-        }
-      },
-      refetchOnWindowFocus: false,
-    }
-  );
+        return response;
+      } catch (error) {
+        // ignore error
+      }
+    },
+    refetchInterval: shouldRefetch ? LONG_REFETCH_INTERVAL : undefined,
+    refetchOnWindowFocus: false,
+  });
 
   return {
-    sloHistoricalSummaryResponse: isInitialLoading ? EMPTY_RESPONSE : data ?? EMPTY_RESPONSE,
-    isLoading: isInitialLoading || isLoading || isRefetching,
+    sloHistoricalSummaryResponse: data,
+    isLoading,
+    isRefetching,
+    isInitialLoading,
     isSuccess,
     isError,
-    refetch,
   };
 }

@@ -7,6 +7,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { css } from '@emotion/react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
@@ -14,6 +15,14 @@ import { ResultLinks } from '../job_actions';
 import { MultiJobActionsMenu } from './actions_menu';
 import { GroupSelector } from './group_selector';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+const cssOverride = css({
+  height: '20px',
+  width: '1px',
+  display: 'inline-block',
+  verticalAlign: 'middle',
+  margin: '0 5px',
+});
 
 export class MultiJobActions extends Component {
   constructor(props) {
@@ -24,12 +33,12 @@ export class MultiJobActions extends Component {
 
   render() {
     const jobsSelected = this.props.selectedJobs.length > 0;
+
     return (
       <div
-        className={`multi-select-actions${jobsSelected ? '' : '-no-display'}`}
         data-test-subj={`mlADJobListMultiSelectActionsArea ${jobsSelected ? 'active' : 'inactive'}`}
       >
-        {jobsSelected && (
+        {jobsSelected ? (
           <EuiFlexGroup
             gutterSize="xs"
             alignItems="center"
@@ -49,7 +58,7 @@ export class MultiJobActions extends Component {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <div className="actions-border-large" />
+              <div css={cssOverride} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <ResultLinks jobs={this.props.selectedJobs} />
@@ -74,7 +83,7 @@ export class MultiJobActions extends Component {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
+        ) : null}
       </div>
     );
   }

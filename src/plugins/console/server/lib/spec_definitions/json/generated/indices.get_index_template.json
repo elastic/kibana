@@ -3,14 +3,15 @@
     "url_params": {
       "flat_settings": "__flag__",
       "master_timeout": "",
-      "local": "__flag__"
+      "local": "__flag__",
+      "include_defaults": "__flag__"
     },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_index_template",
-      "_index_template/{index_template}"
+      "_index_template/{name}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html"
   }

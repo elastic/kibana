@@ -2762,6 +2762,9 @@
             "opentelemetry/ruby": {
               "type": "long"
             },
+            "opentelemetry/rust": {
+              "type": "long"
+            },
             "opentelemetry/swift": {
               "type": "long"
             },
@@ -4783,6 +4786,77 @@
                 "daily": {
                   "type": "long"
                 },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
                 "assignees": {
                   "properties": {
                     "total": {
@@ -4871,6 +4945,77 @@
                       "type": "long"
                     }
                   }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -4900,6 +5045,77 @@
                       "type": "long"
                     }
                   }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -4927,6 +5143,77 @@
                     },
                     "totalWithAtLeastOne": {
                       "type": "long"
+                    }
+                  }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -5182,6 +5469,48 @@
                   "type": "date"
                 }
               }
+            },
+            "latestPackageVersion": {
+              "type": "keyword"
+            },
+            "cspm": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "installedPackagePolicies": {
+                  "type": "long"
+                },
+                "healthyAgents": {
+                  "type": "long"
+                }
+              }
+            },
+            "kspm": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "installedPackagePolicies": {
+                  "type": "long"
+                },
+                "healthyAgents": {
+                  "type": "long"
+                }
+              }
+            },
+            "vuln_mgmt": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "installedPackagePolicies": {
+                  "type": "long"
+                },
+                "healthyAgents": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -5235,6 +5564,9 @@
               "benchmark_version": {
                 "type": "keyword"
               },
+              "kubernetes_version": {
+                "type": "keyword"
+              },
               "passed_findings_count": {
                 "type": "long"
               },
@@ -5257,6 +5589,9 @@
           "type": "array",
           "items": {
             "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
               "rule_id": {
                 "type": "keyword"
               },
@@ -5502,18 +5837,6 @@
     },
     "maps": {
       "properties": {
-        "indexPatternsWithGeoFieldCount": {
-          "type": "long"
-        },
-        "indexPatternsWithGeoPointFieldCount": {
-          "type": "long"
-        },
-        "indexPatternsWithGeoShapeFieldCount": {
-          "type": "long"
-        },
-        "geoShapeAggLayersCount": {
-          "type": "long"
-        },
         "mapsTotalCount": {
           "type": "long"
         },
@@ -13976,6 +14299,18 @@
             "description": "The number of times the \"Copy Saved Objects\" API has been called with \"overwrite\" set to false."
           }
         },
+        "apiCalls.copySavedObjects.compatibilityModeEnabled.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"compatibilityMode\" set to true."
+          }
+        },
+        "apiCalls.copySavedObjects.compatibilityModeEnabled.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"compatibilityMode\" set to false."
+          }
+        },
         "apiCalls.resolveCopySavedObjectsErrors.total": {
           "type": "long",
           "_meta": {
@@ -14004,6 +14339,18 @@
           "type": "long",
           "_meta": {
             "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"createNewCopies\" set to false."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.compatibilityModeEnabled.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"compatibilityMode\" set to true."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.compatibilityModeEnabled.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"compatibilityMode\" set to false."
           }
         },
         "apiCalls.disableLegacyUrlAliases.total": {

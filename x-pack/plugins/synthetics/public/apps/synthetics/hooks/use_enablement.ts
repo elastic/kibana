@@ -20,10 +20,10 @@ export function useEnablement() {
   const { loading, error, enablement } = useSelector(selectSyntheticsEnablement);
 
   useEffect(() => {
-    if (!enablement) {
+    if (!enablement && !loading) {
       dispatch(getSyntheticsEnablement());
     }
-  }, [dispatch, enablement]);
+  }, [dispatch, enablement, loading]);
 
   return {
     enablement: {

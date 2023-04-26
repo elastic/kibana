@@ -16,13 +16,16 @@ export const parseAlertsGroupingData = (
   response: AlertSearchResponse<{}, AlertsByGroupingAgg>
 ): AlertsProgressBarData[] => {
   const buckets = response?.aggregations?.alertsByGrouping?.buckets ?? [];
-  if (buckets.length === 0) {
+  const emptyFieldCount = response?.aggregations?.missingFields?.doc_count ?? 0;
+  if (buckets.length === 0 && emptyFieldCount === 0) {
     return [];
   }
 
   const other = response?.aggregations?.alertsByGrouping?.sum_other_doc_count ?? 0;
   const total =
-    buckets.reduce((acc: number, group: BucketItem) => acc + group.doc_count, 0) + other;
+    buckets.reduce((acc: number, group: BucketItem) => acc + group.doc_count, 0) +
+    other +
+    emptyFieldCount;
 
   const topAlerts = buckets.map((group) => {
     return {
@@ -42,7 +45,32 @@ export const parseAlertsGroupingData = (
     });
   }
 
+  if (emptyFieldCount > 0) {
+    topAlerts.push({
+      key: '-',
+      value: emptyFieldCount,
+      percentage: Math.round((emptyFieldCount / total) * 1000) / 10,
+      label: '-',
+    });
+  }
+
   return topAlerts;
+};
+
+export const getNonEmptyPercent = (topAlerts: AlertsProgressBarData[]): number => {
+  const consolidated = topAlerts.reduce(
+    (ret, cur) => {
+      ret.total += cur.value;
+      if (cur.key !== '-') {
+        ret.nonEmpty += cur.value;
+      }
+      return ret;
+    },
+    { total: 0, nonEmpty: 0 }
+  );
+  return consolidated.total > 0
+    ? Math.round((consolidated.nonEmpty / consolidated.total) * 100)
+    : 0;
 };
 
 export const getIsAlertsProgressBarData = (

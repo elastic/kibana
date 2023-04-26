@@ -20,8 +20,10 @@ import { Rules } from './rules';
 import { Timelines } from './timelines';
 import { Management } from './management';
 import { LandingPages } from './landing_pages';
+import { CloudDefend } from './cloud_defend';
 import { CloudSecurityPosture } from './cloud_security_posture';
 import { ThreatIntelligence } from './threat_intelligence';
+import { Dashboards } from './dashboards';
 
 /**
  * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
@@ -37,6 +39,8 @@ const subPluginClasses = {
   Timelines,
   Management,
   LandingPages,
+  Dashboards,
+  CloudDefend,
   CloudSecurityPosture,
   ThreatIntelligence,
 };

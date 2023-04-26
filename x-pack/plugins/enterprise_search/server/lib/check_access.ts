@@ -18,19 +18,17 @@ import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 interface CheckAccess {
   request: KibanaRequest;
   security: SecurityPluginSetup;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   config: ConfigType;
   log: Logger;
 }
 
 const ALLOW_ALL_PLUGINS: ProductAccess = {
   hasAppSearchAccess: true,
-  hasSearchEnginesAccess: false, // still false unless Feature Flag explicitly enabled on backend
   hasWorkplaceSearchAccess: true,
 };
 const DENY_ALL_PLUGINS: ProductAccess = {
   hasAppSearchAccess: false,
-  hasSearchEnginesAccess: false,
   hasWorkplaceSearchAccess: false,
 };
 
@@ -54,7 +52,7 @@ export const checkAccess = async ({
   }
 
   // We can only retrieve the active space when security is enabled and the request has already been authenticated
-  const attemptSpaceRetrieval = request.auth.isAuthenticated;
+  const attemptSpaceRetrieval = request.auth.isAuthenticated && !!spaces;
   let allowedAtSpace = false;
 
   if (attemptSpaceRetrieval) {

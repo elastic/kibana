@@ -58,6 +58,6 @@ export function dockerMetricsSpecProvider(context: TutorialContext): TutorialSch
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['containers', 'os_system'],
+    integrationBrowserCategories: ['containers', 'observability'],
   };
 }

@@ -135,6 +135,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
                 disabled={false}
                 callback={fullTimeRangeCallback}
                 timefilter={timefilter}
+                apiPath="/api/ml/fields_service/time_field_range"
               />
             </EuiFlexItem>
             <EuiFlexItem />

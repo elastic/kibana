@@ -34,7 +34,7 @@ import {
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
-import { getEditPath } from '../../common';
+import { getEditPath } from '../../common/constants';
 import { isLensEqual } from './lens_document_equality';
 import {
   type IndexPatternServiceAPI,

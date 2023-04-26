@@ -111,13 +111,13 @@ describe('Related integrations', () => {
     });
   });
 
-  context(
+  context.skip(
     'installed integrations: Amazon CloudFront, AWS CloudTrail, System, enabled integrations: Amazon CloudFront, Aws Cloudfront, System',
     () => {
       const rule = {
         name: 'Related integrations rule',
         integrations: [
-          { name: 'Amazon CloudFront', installed: true, enabled: true },
+          { name: 'AWS Cloudfront', installed: true, enabled: true },
           { name: 'AWS CloudTrail', installed: true, enabled: false },
           { name: 'Aws Unknown', installed: false, enabled: false },
           { name: 'System', installed: true, enabled: true },

@@ -24,6 +24,7 @@ interface TransformActionParamsOptions {
   spaceId: string;
   tags?: string[];
   alertInstanceId: string;
+  alertUuid: string;
   alertActionGroup: string;
   alertActionGroupName: string;
   actionParams: RuleActionParams;
@@ -64,6 +65,7 @@ export function transformActionParams({
   spaceId,
   tags,
   alertInstanceId,
+  alertUuid,
   alertActionGroup,
   alertActionGroupName,
   context,
@@ -101,6 +103,7 @@ export function transformActionParams({
     },
     alert: {
       id: alertInstanceId,
+      uuid: alertUuid,
       actionGroup: alertActionGroup,
       actionGroupName: alertActionGroupName,
       flapping,

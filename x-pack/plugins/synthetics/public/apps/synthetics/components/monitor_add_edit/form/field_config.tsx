@@ -28,6 +28,8 @@ import {
   EuiTextAreaProps,
   EuiButtonGroupProps,
   EuiSuperSelectProps,
+  EuiHighlight,
+  EuiBadge,
 } from '@elastic/eui';
 import {
   FieldText,
@@ -66,7 +68,11 @@ import {
   FieldMap,
   FormLocation,
 } from '../types';
-import { AlertConfigKey, DEFAULT_BROWSER_ADVANCED_FIELDS } from '../constants';
+import {
+  AlertConfigKey,
+  DEFAULT_BROWSER_ADVANCED_FIELDS,
+  ALLOWED_SCHEDULES_IN_MINUTES,
+} from '../constants';
 import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
 
@@ -88,16 +94,10 @@ const getScheduleContent = (value: number) => {
   }
 };
 
-const getScheduleConfig = (schedules: number[]) => {
-  return schedules.map((value) => ({
-    value: `${value}`,
-    text: getScheduleContent(value),
-  }));
-};
-
-const BROWSER_SCHEDULES = getScheduleConfig([3, 5, 10, 15, 30, 60, 120, 240]);
-
-const LIGHTWEIGHT_SCHEDULES = getScheduleConfig([1, 3, 5, 10, 15, 30, 60]);
+const SCHEDULES = ALLOWED_SCHEDULES_IN_MINUTES.map((value) => ({
+  value,
+  text: getScheduleContent(parseInt(value, 10)),
+}));
 
 export const MONITOR_TYPE_CONFIG = {
   [FormMonitorType.MULTISTEP]: {
@@ -376,12 +376,10 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'How often do you want to run this test? Higher frequencies will increase your total cost.',
     }),
-    dependencies: [ConfigKey.MONITOR_TYPE],
-    props: ({ dependencies }): EuiSelectProps => {
-      const [monitorType] = dependencies;
+    props: (): EuiSelectProps => {
       return {
         'data-test-subj': 'syntheticsMonitorConfigSchedule',
-        options: monitorType === DataStream.BROWSER ? BROWSER_SCHEDULES : LIGHTWEIGHT_SCHEDULES,
+        options: SCHEDULES,
         disabled: readOnly,
       };
     },
@@ -406,7 +404,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           isServiceManaged: location.isServiceManaged || false,
         })),
         selectedOptions: Object.values(field?.value || {}).map((location) => ({
-          color: locations.some((s) => s.id === location.id) ? 'default' : 'danger',
+          color: locations.some((s) => s.id === location.id)
+            ? location.isServiceManaged
+              ? 'default'
+              : 'primary'
+            : 'danger',
           label: locations?.find((loc) => location.id === loc.id)?.label ?? location.id,
           id: location.id || '',
           isServiceManaged: location.isServiceManaged || false,
@@ -418,6 +420,20 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           });
         },
         isDisabled: readOnly,
+        renderOption: (option: FormLocation, searchValue: string) => {
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem>
+                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+              </EuiFlexItem>
+              {!option.isServiceManaged && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="primary">Private</EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          );
+        },
       };
     },
   },
@@ -556,7 +572,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           defaultMessage:
             "Change the default namespace. This setting changes the name of the monitor's data stream. ",
         })}
-        <EuiLink href="#" target="_blank">
+        <EuiLink data-test-subj="syntheticsFIELDLearnMoreLink" href="#" target="_blank">
           {i18n.translate('xpack.synthetics.monitorConfig.namespace.learnMore', {
             defaultMessage: 'Learn more',
           })}
@@ -1074,12 +1090,12 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     label: i18n.translate('xpack.synthetics.monitorConfig.textAssertion.label', {
       defaultMessage: 'Text assertion',
     }),
-    required: true,
+    required: false,
     helpText: i18n.translate('xpack.synthetics.monitorConfig.textAssertion.helpText', {
       defaultMessage: 'Consider the page loaded when the specified text is rendered.',
     }),
     validation: () => ({
-      required: true,
+      required: false,
     }),
     props: (): EuiFieldTextProps => ({
       readOnly,
@@ -1102,7 +1118,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         {
           value: DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.THROTTLING_CONFIG],
           inputDisplay: (
-            <EuiFlexGroup alignItems="baseline" gutterSize="xs">
+            <EuiFlexGroup alignItems="baseline" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiText>
                   {i18n.translate('xpack.synthetics.monitorConfig.throttling.options.default', {
@@ -1138,6 +1154,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           defaultMessage: 'Configure Playwright agent with custom options. ',
         })}
         <EuiLink
+          data-test-subj="syntheticsFIELDLearnMoreLink"
           href={getDocLinks()?.links?.observability?.syntheticsCommandReference}
           target="_blank"
         >

@@ -48,23 +48,6 @@ export const TLSCodec = t.intersection([TLSFieldsCodec, TLSSensitiveFieldsCodec]
 
 export type TLSFields = t.TypeOf<typeof TLSCodec>;
 
-// ZipUrlTLSFields
-export const ZipUrlTLSFieldsCodec = t.partial({
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: t.string,
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: t.string,
-  [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: VerificationModeCodec,
-  [ConfigKey.ZIP_URL_TLS_VERSION]: t.array(TLSVersionCodec),
-});
-
-export const ZipUrlTLSSensitiveFieldsCodec = t.partial({
-  [ConfigKey.ZIP_URL_TLS_KEY]: t.string,
-  [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: t.string,
-});
-
-export const ZipUrlTLSCodec = t.intersection([ZipUrlTLSFieldsCodec, ZipUrlTLSSensitiveFieldsCodec]);
-
-export type ZipUrlTLSFields = t.TypeOf<typeof ZipUrlTLSCodec>;
-
 // CommonFields
 export const CommonFieldsCodec = t.intersection([
   t.interface({
@@ -222,17 +205,12 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
   t.intersection([
     t.interface({
       [ConfigKey.METADATA]: MetadataCodec,
-      [ConfigKey.SOURCE_ZIP_URL]: t.string,
-      [ConfigKey.SOURCE_ZIP_FOLDER]: t.string,
-      [ConfigKey.SOURCE_ZIP_PROXY_URL]: t.string,
     }),
     t.partial({
       [ConfigKey.PLAYWRIGHT_OPTIONS]: t.string,
       [ConfigKey.TEXT_ASSERTION]: t.string,
     }),
   ]),
-  ZipUrlTLSFieldsCodec,
-  ZipUrlTLSSensitiveFieldsCodec,
   CommonFieldsCodec,
 ]);
 
@@ -240,13 +218,10 @@ export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.SOURCE_INLINE]: t.string,
     [ConfigKey.SOURCE_PROJECT_CONTENT]: t.string,
-    [ConfigKey.SOURCE_ZIP_USERNAME]: t.string,
-    [ConfigKey.SOURCE_ZIP_PASSWORD]: t.string,
     [ConfigKey.PARAMS]: t.string,
     [ConfigKey.URLS]: t.union([t.string, t.null]),
     [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
-  ZipUrlTLSFieldsCodec,
   CommonFieldsCodec,
 ]);
 
@@ -265,7 +240,6 @@ export const EncryptedBrowserAdvancedFieldsCodec = t.interface({
 export const BrowserSimpleFieldsCodec = t.intersection([
   EncryptedBrowserSimpleFieldsCodec,
   BrowserSensitiveSimpleFieldsCodec,
-  ZipUrlTLSSensitiveFieldsCodec,
 ]);
 
 export const BrowserSensitiveAdvancedFieldsCodec = t.interface({

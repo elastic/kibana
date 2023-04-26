@@ -68,6 +68,18 @@ export const EXCEPTION_ITEM_CONTAINER = '[data-test-subj="exceptionEntriesContai
 export const EXCEPTION_FIELD_LIST =
   '[data-test-subj="comboBoxOptionsList fieldAutocompleteComboBox-optionsList"]';
 
+export const EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP =
+  '[data-test-subj="mappingConflictsTooltip"]';
+
+export const EXCEPTION_FIELD_MAPPING_CONFLICTS_ICON =
+  '[data-test-subj="mappingConflictsWarningIcon"]';
+
+export const EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON =
+  '[data-test-subj="mappingConflictsAccordionIcon"]';
+
+export const EXCEPTION_FIELD_MAPPING_CONFLICTS_DESCRIPTION =
+  '[data-test-subj="mappingConflictsDescription"]';
+
 export const EXCEPTION_FLYOUT_TITLE = '[data-test-subj="exceptionFlyoutTitle"]';
 
 export const EXCEPTION_EDIT_FLYOUT_SAVE_BTN = '[data-test-subj="editExceptionConfirmButton"]';
@@ -116,10 +128,44 @@ export const OS_SELECTION_SECTION = '[data-test-subj="osSelectionDropdown"]';
 
 export const OS_INPUT = '[data-test-subj="osSelectionDropdown"] [data-test-subj="comboBoxInput"]';
 
+// Shared Exception List Management Page
 export const MANAGE_EXCEPTION_CREATE_BUTTON_MENU =
   '[data-test-subj="manageExceptionListCreateButton"]';
 
 export const MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION =
   '[data-test-subj="manageExceptionListCreateExceptionButton"]';
 
+export const MANAGE_EXCEPTION_CREATE_LIST_BUTTON =
+  '[data-test-subj="manageExceptionListCreateExceptionListButton"]';
+
 export const RULE_ACTION_LINK_RULE_SWITCH = '[data-test-subj="ruleActionLinkRuleSwitch"]';
+
+export const CREATE_SHARED_EXCEPTION_LIST_NAME_INPUT =
+  'input[data-test-subj="createSharedExceptionListNameInput"]';
+
+export const CREATE_SHARED_EXCEPTION_LIST_DESCRIPTION_INPUT =
+  'textarea[data-test-subj="createSharedExceptionListDescriptionInput"]';
+
+export const CREATE_SHARED_EXCEPTION_LIST_BTN =
+  'button[data-test-subj="exception-lists-form-create-shared"]';
+
+// Exception list management
+export const EXCEPTIONS_LIST_MANAGEMENT_NAME =
+  '[data-test-subj="exceptionListManagementTitleText"]';
+
+export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_NAME_BTN =
+  '[data-test-subj="exceptionListManagementTitleEditIcon"]';
+
+export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT =
+  '[data-test-subj="editModalNameTextField"]';
+
+export const EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION =
+  '[data-test-subj="exceptionListManagementDescriptionText"]';
+
+export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT =
+  '[data-test-subj="editModalDescriptionTextField"]';
+
+export const EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN = '[data-test-subj="editModalSaveBtn"]';
+
+export const EXCEPTIONS_LIST_DETAILS_HEADER =
+  '[data-test-subj="exceptionListManagementPageHeader"]';

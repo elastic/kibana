@@ -344,7 +344,7 @@ export const SessionView = ({
               <EuiResizablePanel initialSize={100} minSize="60%" paddingSize="none">
                 {hasError && (
                   <EuiEmptyPrompt
-                    iconType="alert"
+                    iconType="warning"
                     color="danger"
                     title={
                       <h2>

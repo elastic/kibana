@@ -10,8 +10,8 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 
 import { map } from 'rxjs/operators';
+import { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
 import { MLHttpFetchError } from '../../../../../common/util/errors';
-import { SupportedPytorchTasksType } from '../../../../../common/constants/trained_models';
 import { trainedModelsApiProvider } from '../../../services/ml_api_service/trained_models';
 import { getInferenceInfoComponent } from './inference_info';
 

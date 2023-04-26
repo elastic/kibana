@@ -78,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           true
         );
 
-        expect(response.body.currentPeriod.timeseries[0].y).to.eql(2);
+        expect(response.body.currentPeriod.timeseries[0].y).to.eql(3);
         expect(response.body.previousPeriod.timeseries[0].y).to.eql(0);
       });
 
@@ -90,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           true
         );
 
-        expect(response.body.currentPeriod.timeseries[0].y).to.eql(2);
+        expect(response.body.currentPeriod.timeseries[0].y).to.eql(3);
         expect(response.body.previousPeriod.timeseries).to.eql([]);
       });
     });
@@ -119,7 +119,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           true
         );
 
-        expect(response.body.currentPeriod.timeseries[0].y).to.eql(2);
+        expect(response.body.currentPeriod.timeseries[0].y).to.eql(3);
         expect(response.body.previousPeriod.timeseries).to.eql([]);
       });
     });

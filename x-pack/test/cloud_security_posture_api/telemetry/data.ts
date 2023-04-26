@@ -14,7 +14,8 @@ export interface MockTelemetryFindings {
   result: { evaluation: string };
   host: { name: string };
   cluster_id?: string;
-  cloud?: { account: { id: string } };
+  cloud?: { account?: { id: string } };
+  cloudbeat?: { kubernetes: { version: string } };
 }
 
 export interface MockTelemetryData {
@@ -81,6 +82,7 @@ export const data: MockTelemetryData = {
       agent: { id: '07bd3686-98ef-4b23-99cb-9ff544b25ae2' },
       result: { evaluation: 'passed' },
       host: { name: 'docker-fleet-agent' },
+      cloudbeat: { kubernetes: { version: 'v1.23.0' } },
     },
     {
       cluster_id: 'my-k8s-cluster-5555',
@@ -100,6 +102,7 @@ export const data: MockTelemetryData = {
       agent: { id: '07bd3686-98ef-4b23-99cb-9ff544b25ae3' },
       result: { evaluation: 'passed' },
       host: { name: 'control-plane' },
+      cloudbeat: { kubernetes: { version: 'v1.23.0' } },
     },
   ],
   kspmFindingsNoPostureType: [
@@ -120,6 +123,7 @@ export const data: MockTelemetryData = {
       agent: { id: '07bd3686-98ef-4b23-99cb-9ff544b25ae2' },
       result: { evaluation: 'passed' },
       host: { name: 'docker-fleet-agent' },
+      cloudbeat: { kubernetes: { version: 'v1.23.0' } },
     },
     {
       cluster_id: 'my-k8s-cluster-5555',
@@ -138,6 +142,7 @@ export const data: MockTelemetryData = {
       agent: { id: '07bd3686-98ef-4b23-99cb-9ff544b25ae3' },
       result: { evaluation: 'passed' },
       host: { name: 'control-plane' },
+      cloudbeat: { kubernetes: { version: 'v1.23.0' } },
     },
   ],
 };

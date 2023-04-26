@@ -20,7 +20,6 @@ import {
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { SLO, APMTransactionDurationIndicator } from '../../../domain/models';
 import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
-import { DEFAULT_APM_INDEX } from './constants';
 import { Query } from './types';
 import { parseIndex } from './common';
 
@@ -35,7 +34,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       this.buildDescription(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildCommonGroupBy(slo),
+      this.buildGroupBy(slo),
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo)
     );
@@ -49,7 +48,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     const queryFilter: Query[] = [
       {
         range: {
-          [slo.settings.timestampField]: {
+          '@timestamp': {
             gte: `now-${slo.timeWindow.duration.format()}`,
           },
         },
@@ -92,7 +91,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     }
 
     return {
-      index: parseIndex(indicator.params.index ?? DEFAULT_APM_INDEX),
+      index: parseIndex(indicator.params.index),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {

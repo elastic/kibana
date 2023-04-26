@@ -29,6 +29,9 @@ export const createDefaultPolicy = (
 ): PolicyConfig => {
   const factoryPolicy = policyConfigFactory();
 
+  // Add license information after policy creation
+  factoryPolicy.meta.license = licenseService.getLicenseType();
+
   const defaultPolicyPerType =
     config?.type === 'cloud'
       ? getCloudPolicyConfig(factoryPolicy)

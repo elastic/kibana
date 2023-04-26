@@ -14,15 +14,18 @@ export async function importDashboards(
   objects: SavedObject[],
   { overwrite, exclude }: { overwrite: boolean; exclude: string[] }
 ) {
-  // The server assumes that documents with no migrationVersion are up to date.
-  // That assumption enables Kibana and other API consumers to not have to build
-  // up migrationVersion prior to creating new objects. But it means that imports
-  // need to set migrationVersion to something other than undefined, so that imported
+  // The server assumes that documents with no `typeMigrationVersion` are up to date.
+  // That assumption enables Kibana and other API consumers to not have to determine
+  // `typeMigrationVersion` prior to creating new objects. But it means that imports
+  // need to set `typeMigrationVersion` to something other than undefined, so that imported
   // docs are not seen as automatically up-to-date.
   const docs = objects
     .filter((item) => !exclude.includes(item.type))
     // filter out any document version, if present
-    .map(({ version, ...doc }) => ({ ...doc, migrationVersion: doc.migrationVersion || {} }));
+    .map(({ version, ...doc }) => ({
+      ...doc,
+      ...(!doc.migrationVersion && !doc.typeMigrationVersion ? { typeMigrationVersion: '' } : {}),
+    }));
 
   const results = await savedObjectsClient.bulkCreate(docs, { overwrite });
   return { objects: results.saved_objects };

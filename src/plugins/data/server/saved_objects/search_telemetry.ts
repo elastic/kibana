@@ -8,6 +8,7 @@
 
 import { SavedObjectsType } from '@kbn/core/server';
 import { migrate712 } from './migrations/to_v7_12_0';
+import { SCHEMA_SEARCH_TELEMETRY_V8_8_0 } from './schemas/search_telemetry';
 
 export const searchTelemetry: SavedObjectsType = {
   name: 'search-telemetry',
@@ -19,5 +20,8 @@ export const searchTelemetry: SavedObjectsType = {
   },
   migrations: {
     '7.12.0': migrate712,
+  },
+  schemas: {
+    '8.8.0': SCHEMA_SEARCH_TELEMETRY_V8_8_0,
   },
 };

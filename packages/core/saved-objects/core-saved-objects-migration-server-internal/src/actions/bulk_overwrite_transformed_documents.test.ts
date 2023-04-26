@@ -40,7 +40,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
     const task = bulkOverwriteTransformedDocuments({
       client,
       index: 'new_index',
-      transformedDocs: [],
+      operations: [],
       refresh: 'wait_for',
     });
 
@@ -74,7 +74,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
     const task = bulkOverwriteTransformedDocuments({
       client,
       index: 'new_index',
-      transformedDocs: [],
+      operations: [],
       refresh: 'wait_for',
     });
 
@@ -99,7 +99,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
     const task = bulkOverwriteTransformedDocuments({
       client,
       index: 'new_index',
-      transformedDocs: [],
+      operations: [],
       refresh: 'wait_for',
     });
     try {
@@ -140,7 +140,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
     const task = bulkOverwriteTransformedDocuments({
       client,
       index: 'new_index',
-      transformedDocs: [],
+      operations: [],
       refresh: 'wait_for',
     });
 
@@ -193,7 +193,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
     const task = bulkOverwriteTransformedDocuments({
       client,
       index: 'new_index',
-      transformedDocs: [],
+      operations: [],
       refresh: 'wait_for',
     });
 

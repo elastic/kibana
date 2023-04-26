@@ -25,6 +25,6 @@ export const fetchDisableSynthetics = async (): Promise<{}> => {
   return await apiService.delete(API_URLS.SYNTHETICS_ENABLEMENT);
 };
 
-export const fetchEnableSynthetics = async (): Promise<{}> => {
+export const fetchEnableSynthetics = async (): Promise<MonitorManagementEnablementResult> => {
   return await apiService.post(API_URLS.SYNTHETICS_ENABLEMENT);
 };

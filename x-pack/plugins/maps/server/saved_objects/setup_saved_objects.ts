@@ -11,9 +11,10 @@ import type { SavedObjectMigrationMap } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { APP_ICON, getFullPath } from '../../common/constants';
+import { CONTENT_ID } from '../../common/content_management';
 import { migrateDataPersistedState } from '../../common/migrations/migrate_data_persisted_state';
 import { migrateDataViewsPersistedState } from '../../common/migrations/migrate_data_view_persisted_state';
-import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import type { MapAttributes } from '../../common/content_management';
 import { savedObjectMigrations } from './saved_object_migrations';
 
 export function setupSavedObjects(
@@ -21,8 +22,8 @@ export function setupSavedObjects(
   getFilterMigrations: () => MigrateFunctionsObject,
   getDataViewMigrations: () => MigrateFunctionsObject
 ) {
-  core.savedObjects.registerType<MapSavedObjectAttributes>({
-    name: 'map',
+  core.savedObjects.registerType<MapAttributes>({
+    name: CONTENT_ID,
     hidden: false,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
@@ -71,7 +72,7 @@ export const getMapsFilterMigrations = (
 ): MigrateFunctionsObject =>
   mapValues(
     filterMigrations,
-    (filterMigration) => (doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>) => {
+    (filterMigration) => (doc: SavedObjectUnsanitizedDoc<MapAttributes>) => {
       try {
         const attributes = migrateDataPersistedState(doc, filterMigration);
 
@@ -93,20 +94,17 @@ export const getMapsFilterMigrations = (
 export const getMapsDataViewMigrations = (
   migrations: MigrateFunctionsObject
 ): MigrateFunctionsObject =>
-  mapValues(
-    migrations,
-    (migration) => (doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>) => {
-      try {
-        const attributes = migrateDataViewsPersistedState(doc, migration);
+  mapValues(migrations, (migration) => (doc: SavedObjectUnsanitizedDoc<MapAttributes>) => {
+    try {
+      const attributes = migrateDataViewsPersistedState(doc, migration);
 
-        return {
-          ...doc,
-          attributes,
-        };
-      } catch (e) {
-        // Do not fail migration
-        // Maps application can display error when saved object is viewed
-        return doc;
-      }
+      return {
+        ...doc,
+        attributes,
+      };
+    } catch (e) {
+      // Do not fail migration
+      // Maps application can display error when saved object is viewed
+      return doc;
     }
-  );
+  });

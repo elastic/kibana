@@ -12,6 +12,11 @@ import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { APMInternalESClient } from '../../../../lib/helpers/create_es_client/create_internal_es_client';
 
+export type EnvironmentsResponse = Array<{
+  name: string;
+  alreadyConfigured: boolean;
+}>;
+
 export async function getEnvironments({
   serviceName,
   internalESClient,
@@ -24,7 +29,7 @@ export async function getEnvironments({
   apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   size: number;
-}) {
+}): Promise<EnvironmentsResponse> {
   return withApmSpan('get_environments_for_agent_configuration', async () => {
     const [allEnvironments, existingEnvironments] = await Promise.all([
       getAllEnvironments({

@@ -21,7 +21,6 @@ export const DataGridMemoized = memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
-
   return (
     <EuiFlexGroup
       style={{ width: '100%' }}
@@ -30,7 +29,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       responsive={false}
       data-test-subj="embeddedSavedSearchDocTable"
     >
-      {props.totalHitCount !== 0 && (
+      {Boolean(props.totalHitCount) && props.totalHitCount !== 0 && (
         <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
           <TotalDocuments totalHitCount={props.totalHitCount} />
         </EuiFlexItem>

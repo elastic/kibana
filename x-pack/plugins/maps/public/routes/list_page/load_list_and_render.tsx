@@ -10,9 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { ScopedHistory } from '@kbn/core/public';
-import { getSavedObjectsClient, getToasts } from '../../kibana_services';
+import { getToasts } from '../../kibana_services';
 import { MapsListView } from './maps_list_view';
-import { APP_ID, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { APP_ID } from '../../../common/constants';
+import { mapsClient } from '../../content_management';
 
 interface Props {
   history: ScopedHistory;
@@ -38,13 +39,9 @@ export class LoadListAndRender extends Component<Props> {
 
   async _loadMapsList() {
     try {
-      const results = await getSavedObjectsClient().find({
-        type: MAP_SAVED_OBJECT_TYPE,
-        perPage: 1,
-        fields: ['title'],
-      });
+      const results = await mapsClient.search({ limit: 1 });
       if (this._isMounted) {
-        this.setState({ mapsLoaded: true, hasSavedMaps: !!results.savedObjects.length });
+        this.setState({ mapsLoaded: true, hasSavedMaps: !!results.hits.length });
       }
     } catch (err) {
       if (this._isMounted) {

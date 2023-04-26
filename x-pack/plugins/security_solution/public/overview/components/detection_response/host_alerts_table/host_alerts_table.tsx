@@ -19,6 +19,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
@@ -26,9 +28,9 @@ import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/componen
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
+
 import * as i18n from '../translations';
-import { ITEMS_PER_PAGE, openAlertsFilter, SEVERITY_COLOR } from '../utils';
+import { ITEMS_PER_PAGE, SEVERITY_COLOR } from '../utils';
 import type { HostAlertsItem } from './use_host_alerts_items';
 import { useHostAlertsItems } from './use_host_alerts_items';
 
@@ -43,22 +45,28 @@ type GetTableColumns = (
 const DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID = 'vulnerableHostsBySeverityQuery';
 
 export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableProps) => {
-  const { openTimelineWithFilters } = useNavigateToTimeline();
+  const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
 
-  const openHostInTimeline = useCallback(
-    ({ hostName, severity }: { hostName: string; severity?: string }) => {
-      const hostNameFilter = { field: 'host.name', value: hostName };
-      const severityFilter = severity
-        ? { field: 'kibana.alert.severity', value: severity }
-        : undefined;
+  const openHostInAlerts = useCallback(
+    ({ hostName, severity }: { hostName: string; severity?: string }) =>
+      openAlertsPageWithFilters([
+        {
+          title: i18n.OPEN_IN_ALERTS_TITLE_HOSTNAME,
+          selectedOptions: [hostName],
+          fieldName: 'host.name',
+        },
 
-      openTimelineWithFilters(
-        severityFilter
-          ? [[hostNameFilter, openAlertsFilter, severityFilter]]
-          : [[hostNameFilter, openAlertsFilter]]
-      );
-    },
-    [openTimelineWithFilters]
+        ...(severity
+          ? [
+              {
+                title: i18n.OPEN_IN_ALERTS_TITLE_SEVERITY,
+                selectedOptions: [severity],
+                fieldName: ALERT_SEVERITY,
+              },
+            ]
+          : []),
+      ]),
+    [openAlertsPageWithFilters]
   );
 
   const { toggleStatus, setToggleStatus } = useQueryToggle(
@@ -70,7 +78,7 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
     signalIndexName,
   });
 
-  const columns = useMemo(() => getTableColumns(openHostInTimeline), [openHostInTimeline]);
+  const columns = useMemo(() => getTableColumns(openHostInAlerts), [openHostInAlerts]);
 
   return (
     <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>

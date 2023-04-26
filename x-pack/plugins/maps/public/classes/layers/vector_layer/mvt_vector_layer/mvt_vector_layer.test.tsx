@@ -101,7 +101,7 @@ describe('getFeatureById', () => {
   });
 });
 
-describe('isInitialDataLoadComplete', () => {
+describe('isLayerLoading', () => {
   const sourceDataRequestDescriptor = {
     data: {},
     dataId: 'source',
@@ -109,7 +109,7 @@ describe('isInitialDataLoadComplete', () => {
     dataRequestMetaAtStart: undefined,
     dataRequestToken: undefined,
   };
-  test('should return false when tile loading has not started', () => {
+  test('should be true when tile loading has not started', () => {
     const layer = new MvtVectorLayer({
       customIcons: [],
       layerDescriptor: {
@@ -124,10 +124,10 @@ describe('isInitialDataLoadComplete', () => {
         },
       } as unknown as IVectorSource,
     });
-    expect(layer.isInitialDataLoadComplete()).toBe(false);
+    expect(layer.isLayerLoading()).toBe(true);
   });
 
-  test('should return false when tiles are loading', () => {
+  test('should be true when tiles are loading', () => {
     const layer = new MvtVectorLayer({
       customIcons: [],
       layerDescriptor: {
@@ -143,10 +143,10 @@ describe('isInitialDataLoadComplete', () => {
         },
       } as unknown as IVectorSource,
     });
-    expect(layer.isInitialDataLoadComplete()).toBe(false);
+    expect(layer.isLayerLoading()).toBe(true);
   });
 
-  test('should return true when tiles are loaded', () => {
+  test('should be false when tiles are loaded', () => {
     const layer = new MvtVectorLayer({
       customIcons: [],
       layerDescriptor: {
@@ -162,10 +162,10 @@ describe('isInitialDataLoadComplete', () => {
         },
       } as unknown as IVectorSource,
     });
-    expect(layer.isInitialDataLoadComplete()).toBe(true);
+    expect(layer.isLayerLoading()).toBe(false);
   });
 
-  test('should return false when tiles are loaded but join is loading', () => {
+  test('should be true when tiles are loaded but join is loading', () => {
     const layer = new MvtVectorLayer({
       customIcons: [],
       joins: [
@@ -198,10 +198,10 @@ describe('isInitialDataLoadComplete', () => {
         },
       } as unknown as IVectorSource,
     });
-    expect(layer.isInitialDataLoadComplete()).toBe(false);
+    expect(layer.isLayerLoading()).toBe(true);
   });
 
-  test('should return true when tiles are loaded and joins are loaded', () => {
+  test('should be false when tiles are loaded and joins are loaded', () => {
     const layer = new MvtVectorLayer({
       customIcons: [],
       joins: [
@@ -236,6 +236,6 @@ describe('isInitialDataLoadComplete', () => {
         },
       } as unknown as IVectorSource,
     });
-    expect(layer.isInitialDataLoadComplete()).toBe(true);
+    expect(layer.isLayerLoading()).toBe(false);
   });
 });

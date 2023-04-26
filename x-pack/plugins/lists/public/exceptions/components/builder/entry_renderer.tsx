@@ -205,7 +205,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           isLoading={false}
           isDisabled={isDisabled || indexPattern == null}
           onChange={handleFieldChange}
-          acceptsCustomOptions={entry.nested == null}
+          acceptsCustomOptions={entry.nested == null && allowCustomOptions}
           data-test-subj="exceptionBuilderEntryField"
           showMappingConflicts={true}
         />
@@ -224,29 +224,40 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
               id={'1'}
               buttonContent={
                 <>
-                  <EuiIcon tabIndex={0} type="alert" size="s" css={warningIconCss} />
+                  <EuiIcon
+                    data-test-subj="mappingConflictsAccordionIcon"
+                    tabIndex={0}
+                    type="warning"
+                    size="s"
+                    css={warningIconCss}
+                  />
                   {i18n.FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION}
                 </>
               }
               arrowDisplay="none"
             >
-              {conflictsInfo.map((info) => {
-                const groupDetails = info.groupedIndices.map(
-                  ({ name, count }) =>
-                    `${count > 1 ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(name, count) : name}`
-                );
-                return (
-                  <>
-                    <EuiSpacer size="s" />
-                    {`${
-                      info.totalIndexCount > 1
-                        ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(info.type, info.totalIndexCount)
-                        : info.type
-                    }: ${groupDetails.join(', ')}`}
-                  </>
-                );
-              })}
-              <EuiSpacer size="s" />
+              <div data-test-subj="mappingConflictsDescription">
+                {conflictsInfo.map((info) => {
+                  const groupDetails = info.groupedIndices.map(
+                    ({ name, count }) =>
+                      `${count > 1 ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(name, count) : name}`
+                  );
+                  return (
+                    <>
+                      <EuiSpacer size="s" />
+                      {`${
+                        info.totalIndexCount > 1
+                          ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(
+                              info.type,
+                              info.totalIndexCount
+                            )
+                          : info.type
+                      }: ${groupDetails.join(', ')}`}
+                    </>
+                  );
+                })}
+                <EuiSpacer size="s" />
+              </div>
             </EuiAccordion>
           </>
         );

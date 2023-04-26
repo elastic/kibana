@@ -16,6 +16,7 @@
     "@kbn/spaces-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/i18n",
+    "@kbn/config-schema",
   ],
   "exclude": [
     "target/**/*",

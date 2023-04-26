@@ -165,30 +165,32 @@ export const MaxLinesInput = ({
   );
 };
 
+const noop = () => {};
+
 export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopoverProps> = ({
   legendOptions,
   mode,
   onDisplayChange,
   position,
   location,
-  onLocationChange = () => {},
+  onLocationChange = noop,
   verticalAlignment,
   horizontalAlignment,
   floatingColumns,
-  onAlignmentChange = () => {},
-  onFloatingColumnsChange = () => {},
+  onAlignmentChange = noop,
+  onFloatingColumnsChange = noop,
   onPositionChange,
   renderNestedLegendSwitch,
   nestedLegend,
-  onNestedLegendChange = () => {},
+  onNestedLegendChange = noop,
   valueInLegend,
-  onValueInLegendChange = () => {},
+  onValueInLegendChange = noop,
   renderValueInLegendSwitch,
   groupPosition = 'right',
   maxLines,
-  onMaxLinesChange = () => {},
+  onMaxLinesChange = noop,
   shouldTruncate,
-  onTruncateLegendChange = () => {},
+  onTruncateLegendChange = noop,
   legendSize,
   onLegendSizeChange,
   showAutoLegendSizeOption,
@@ -294,7 +296,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
                 })}
                 data-test-subj="lens-legend-nested-switch"
                 showLabel={false}
-                checked={!!nestedLegend}
+                checked={Boolean(nestedLegend)}
                 onChange={onNestedLegendChange}
               />
             </EuiFormRow>

@@ -78,6 +78,14 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: '.buildkite/scripts/steps/functional/on_merge_unsupported_ftrs.sh'
+    label: Trigger unsupported ftr tests
+    timeout_in_minutes: 10
+    depends_on:
+      - build
+    agents:
+      queue: 'kibana-default'
+
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:

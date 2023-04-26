@@ -30,6 +30,19 @@ import { ConfigKey } from './monitor_management';
 
 export const DEFAULT_NAMESPACE_STRING = 'default';
 
+export const ALLOWED_SCHEDULES_IN_MINUTES = [
+  '1',
+  '3',
+  '5',
+  '10',
+  '15',
+  '20',
+  '30',
+  '60',
+  '120',
+  '240',
+];
+
 export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
@@ -74,7 +87,6 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
       is_generated_script: false,
       file_name: '',
     },
-    is_zip_url_tls_enabled: false,
   },
   [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
   [ConfigKey.PARAMS]: '',
@@ -85,23 +97,10 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
   },
   [ConfigKey.SOURCE_INLINE]: '',
   [ConfigKey.SOURCE_PROJECT_CONTENT]: '',
-  [ConfigKey.SOURCE_ZIP_URL]: '',
-  [ConfigKey.SOURCE_ZIP_USERNAME]: '',
-  [ConfigKey.SOURCE_ZIP_PASSWORD]: '',
-  [ConfigKey.SOURCE_ZIP_FOLDER]: '',
-  [ConfigKey.SOURCE_ZIP_PROXY_URL]: '',
   [ConfigKey.TEXT_ASSERTION]: '',
   [ConfigKey.URLS]: '',
   [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
   [ConfigKey.TIMEOUT]: null,
-
-  // Deprecated, slated to be removed in a future version
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: undefined,
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: undefined,
-  [ConfigKey.ZIP_URL_TLS_KEY]: undefined,
-  [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: undefined,
-  [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: undefined,
-  [ConfigKey.ZIP_URL_TLS_VERSION]: undefined,
 };
 
 export const DEFAULT_HTTP_SIMPLE_FIELDS: HTTPSimpleFields = {

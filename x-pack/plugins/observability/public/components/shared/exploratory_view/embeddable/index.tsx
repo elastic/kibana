@@ -91,6 +91,7 @@ export function getExploratoryViewEmbeddable(
     );
 
     const { dataViews, loading } = useAppDataView({
+      series,
       dataViewCache,
       dataViewsService,
       dataTypesIndexPatterns,

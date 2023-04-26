@@ -8,7 +8,7 @@
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { Status } from '../../../../../common/types/api';
-import { EnterpriseSearchEngineIndex } from '../../../../../common/types/engines';
+import { EnterpriseSearchEngineIndex, SchemaField } from '../../../../../common/types/engines';
 
 import {
   EngineOverviewLogic,
@@ -76,20 +76,17 @@ describe('EngineOverviewLogic', () => {
             count: 10,
             health: 'green',
             name: 'index-001',
-            source: 'api',
           },
           {
             count: 10,
             health: 'green',
             name: 'index-002',
-            source: 'api',
           },
         ];
         const engineData = {
-          created: '2023-02-07T19:16:43Z',
           indices,
           name: 'foo-engine',
-          updated: '2023-02-07T19:16:43Z',
+          updated_at_millis: 2202018295,
         } as EngineOverviewValues['engineData'];
         expect(selectIndices(engineData)).toBe(indices);
       });
@@ -101,11 +98,11 @@ describe('EngineOverviewLogic', () => {
       it('returns the number of indices', () => {
         const noIndices: EnterpriseSearchEngineIndex[] = [];
         const oneIndex = [
-          { count: 23, health: 'unknown', name: 'index-001', source: 'api' },
+          { count: 23, health: 'unknown', name: 'index-001' },
         ] as EnterpriseSearchEngineIndex[];
         const twoIndices = [
-          { count: 23, health: 'unknown', name: 'index-001', source: 'api' },
-          { count: 92, health: 'unknown', name: 'index-002', source: 'api' },
+          { count: 23, health: 'unknown', name: 'index-001' },
+          { count: 92, health: 'unknown', name: 'index-002' },
         ] as EnterpriseSearchEngineIndex[];
 
         expect(selectIndicesCount(noIndices)).toBe(0);
@@ -130,19 +127,16 @@ describe('EngineOverviewLogic', () => {
             count: 12,
             health: 'unknown',
             name: 'index-001',
-            source: 'api',
           },
           {
             count: 34,
             health: 'unknown',
             name: 'index-002',
-            source: 'crawler',
           },
           {
             count: 56,
             health: 'unknown',
             name: 'index-003',
-            source: 'api',
           },
         ] as EnterpriseSearchEngineIndex[];
         it('returns true', () => {
@@ -156,19 +150,16 @@ describe('EngineOverviewLogic', () => {
             count: 12,
             health: 'unknown',
             name: 'index-001',
-            source: 'api',
           },
           {
             count: 34,
             health: 'yellow',
             name: 'index-002',
-            source: 'crawler',
           },
           {
             count: 56,
             health: 'green',
             name: 'index-003',
-            source: 'api',
           },
         ] as EnterpriseSearchEngineIndex[];
         it('returns true', () => {
@@ -182,19 +173,16 @@ describe('EngineOverviewLogic', () => {
             count: 12,
             health: 'unknown',
             name: 'index-001',
-            source: 'api',
           },
           {
             count: 34,
             health: 'yellow',
             name: 'index-002',
-            source: 'crawler',
           },
           {
             count: 56,
             health: 'unknown',
             name: 'index-003',
-            source: 'api',
           },
         ] as EnterpriseSearchEngineIndex[];
         it('returns true', () => {
@@ -208,19 +196,16 @@ describe('EngineOverviewLogic', () => {
             count: 12,
             health: 'green',
             name: 'index-001',
-            source: 'api',
           },
           {
             count: 34,
             health: 'yellow',
             name: 'index-002',
-            source: 'crawler',
           },
           {
             count: 56,
             health: 'green',
             name: 'index-003',
-            source: 'api',
           },
         ] as EnterpriseSearchEngineIndex[];
         it('returns false', () => {
@@ -245,7 +230,6 @@ describe('EngineOverviewLogic', () => {
               count: 23,
               health: 'green',
               name: 'index-001',
-              source: 'crawler',
             },
           ] as EnterpriseSearchEngineIndex[])
         ).toBe(23);
@@ -258,13 +242,11 @@ describe('EngineOverviewLogic', () => {
               count: 23,
               health: 'green',
               name: 'index-001',
-              source: 'crawler',
             },
             {
               count: 45,
               health: 'green',
               name: 'index-002',
-              source: 'crawler',
             },
           ] as EnterpriseSearchEngineIndex[])
         ).toBe(68);
@@ -277,19 +259,16 @@ describe('EngineOverviewLogic', () => {
               count: 23,
               health: 'green',
               name: 'index-001',
-              source: 'crawler',
             },
             {
               count: null,
               health: 'unknown',
               name: 'index-002',
-              source: 'crawler',
             },
             {
               count: 45,
               health: 'green',
               name: 'index-002',
-              source: 'crawler',
             },
           ] as EnterpriseSearchEngineIndex[])
         ).toBe(68);
@@ -303,37 +282,52 @@ describe('EngineOverviewLogic', () => {
       it('counts the fields from the field capabilities', () => {
         const fieldCapabilities = {
           created: '2023-02-07T19:16:43Z',
-          field_capabilities: {
-            fields: {
-              age: {
-                integer: {
-                  aggregatable: true,
-                  metadata_field: false,
-                  searchable: true,
+          fields: [
+            {
+              indices: [
+                {
+                  name: 'index-001',
                   type: 'integer',
                 },
-              },
-              color: {
-                keyword: {
-                  aggregatable: true,
-                  metadata_field: false,
-                  searchable: true,
+                {
+                  name: 'index-002',
+                  type: 'integer',
+                },
+              ],
+              name: 'age',
+              type: 'integer',
+            },
+            {
+              indices: [
+                {
+                  name: 'index-001',
                   type: 'keyword',
                 },
-              },
-              name: {
-                text: {
-                  aggregatable: false,
-                  metadata_field: false,
-                  searchable: true,
+                {
+                  name: 'index-002',
+                  type: 'keyword',
+                },
+              ],
+              name: 'color',
+              type: 'keyword',
+            },
+            {
+              indices: [
+                {
+                  name: 'index-001',
                   type: 'text',
                 },
-              },
+                {
+                  name: 'index-002',
+                  type: 'text',
+                },
+              ],
+              name: 'name',
+              type: 'text',
             },
-            indices: ['index-001', 'index-002'],
-          },
+          ] as SchemaField[],
           name: 'engine-001',
-          updated: '2023-02-07T19:16:43Z',
+          updated_at_millis: 2202018295,
         };
         expect(selectFieldsCount(fieldCapabilities)).toBe(3);
       });
@@ -341,77 +335,146 @@ describe('EngineOverviewLogic', () => {
       it('excludes metadata fields from the count', () => {
         const fieldCapabilities = {
           created: '2023-02-07T19:16:43Z',
-          field_capabilities: {
-            fields: {
-              _doc_count: {
-                integer: {
-                  aggregatable: false,
-                  metadata_field: true,
-                  searchable: false,
+          fields: [
+            {
+              aggregatable: true,
+              indices: [
+                {
+                  name: 'index-001',
                   type: 'integer',
                 },
-              },
-              _id: {
-                _id: {
-                  aggregatable: false,
-                  metadata_field: true,
-                  searchable: true,
+                {
+                  name: 'index-002',
+                  type: 'integer',
+                },
+              ],
+              metadata_field: true,
+              name: '_doc_count',
+              searchable: true,
+              type: 'integer',
+            },
+            {
+              aggregatable: true,
+              indices: [
+                {
+                  name: 'index-001',
                   type: '_id',
                 },
-              },
-              _index: {
-                _index: {
-                  aggregatable: true,
-                  metadata_field: true,
-                  searchable: true,
+                {
+                  name: 'index-002',
+                  type: '_id',
+                },
+              ],
+              metadata_field: true,
+              name: '_id',
+              searchable: true,
+              type: '_id',
+            },
+            {
+              aggregatable: true,
+              indices: [
+                {
+                  name: 'index-001',
                   type: '_index',
                 },
-              },
-              _source: {
-                _source: {
-                  aggregatable: false,
-                  metadata_field: true,
-                  searchable: false,
+                {
+                  name: 'index-002',
+                  type: '_index',
+                },
+              ],
+              metadata_field: true,
+              name: '_index',
+              searchable: true,
+              type: '_index',
+            },
+            {
+              aggregatable: true,
+              indices: [
+                {
+                  name: 'index-001',
                   type: '_source',
                 },
-              },
-              _version: {
-                _version: {
-                  aggregatable: true,
-                  metadata_field: true,
-                  searchable: false,
+                {
+                  name: 'index-002',
+                  type: '_source',
+                },
+              ],
+              metadata_field: true,
+              name: '_source',
+              searchable: true,
+              type: '_source',
+            },
+            {
+              aggregatable: true,
+              indices: [
+                {
+                  name: 'index-001',
                   type: '_version',
                 },
-              },
-              age: {
-                integer: {
-                  aggregatable: true,
-                  metadata_field: false,
-                  searchable: true,
+                {
+                  name: 'index-002',
+                  type: '_version',
+                },
+              ],
+              metadata_field: true,
+              name: '_version',
+              searchable: true,
+              type: '_version',
+            },
+            {
+              aggregatable: true,
+              indices: [
+                {
+                  name: 'index-001',
                   type: 'integer',
                 },
-              },
-              color: {
-                keyword: {
-                  aggregatable: true,
-                  metadata_field: false,
-                  searchable: true,
+                {
+                  name: 'index-002',
+                  type: 'integer',
+                },
+              ],
+              metadata_field: false,
+              name: 'age',
+              searchable: true,
+              type: 'integer',
+            },
+            {
+              aggregatable: true,
+              indices: [
+                {
+                  name: 'index-001',
                   type: 'keyword',
                 },
-              },
-              name: {
-                text: {
-                  aggregatable: false,
-                  metadata_field: false,
-                  searchable: true,
+                {
+                  name: 'index-002',
+                  type: 'keyword',
+                },
+              ],
+              metadata_field: false,
+              name: 'color',
+              searchable: true,
+              type: 'keyword',
+            },
+            {
+              aggregatable: false,
+              indices: [
+                {
+                  name: 'index-001',
                   type: 'text',
                 },
-              },
+                {
+                  name: 'index-002',
+                  type: 'text',
+                },
+              ],
+              metadata_field: false,
+              name: 'name',
+              searchable: true,
+              type: 'text',
             },
-            indices: ['index-001', 'index-002'],
-          },
+          ] as SchemaField[],
           name: 'foo-engine',
-          updated: '2023-02-07T19:16:43Z',
+          updated_at_millis: 2202018295,
         };
         expect(selectFieldsCount(fieldCapabilities)).toBe(3);
       });

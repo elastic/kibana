@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import moment from 'moment';
@@ -21,6 +22,7 @@ import { ErrorDetailsLink } from '../../common/links/error_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { Ping, PingState } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
+import { isActiveState } from '../hooks/use_monitor_errors';
 import {
   formatTestDuration,
   formatTestRunAt,
@@ -34,7 +36,7 @@ export const ErrorsList = ({
   errorStates: PingState[];
   loading: boolean;
 }) => {
-  const { monitorId } = useParams<{ monitorId: string }>();
+  const { monitorId: configId } = useParams<{ monitorId: string }>();
 
   const checkGroups = useMemo(() => {
     return errorStates.map((error) => error.monitor.check_group!);
@@ -50,6 +52,12 @@ export const ErrorsList = ({
 
   const selectedLocation = useSelectedLocation();
 
+  const lastTestRun = errorStates?.sort((a, b) => {
+    return moment(b.state.started_at).valueOf() - moment(a.state.started_at).valueOf();
+  })?.[0];
+
+  const isTabletOrGreater = useIsWithinMinBreakpoint('s');
+
   const columns = [
     {
       field: 'item.state.started_at',
@@ -60,56 +68,66 @@ export const ErrorsList = ({
       render: (value: string, item: PingState) => {
         const link = (
           <ErrorDetailsLink
-            configId={monitorId}
+            configId={configId}
             stateId={item.state?.id!}
             label={formatTestRunAt(item.state!.started_at, format)}
             locationId={selectedLocation?.id}
           />
         );
         const isActive = isActiveState(item);
-        if (!isActive) {
+        if (!isActive || lastTestRun.state.id !== item.state.id) {
           return link;
         }
 
         return (
-          <EuiFlexGroup gutterSize="m" alignItems="center">
-            <EuiFlexItem grow={false}>{link}</EuiFlexItem>
+          <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
+            <EuiFlexItem grow={false} className="eui-textNoWrap">
+              {link}
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge iconType="clock" iconSide="right">
-                Active
+              <EuiBadge iconType="clock" iconSide="right" css={{ maxWidth: 'max-content' }}>
+                {ACTIVE_LABEL}
               </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
         );
       },
+      mobileOptions: {
+        header: false,
+      },
     },
+    ...(isBrowserType
+      ? [
+          {
+            field: 'monitor.check_group',
+            name: FAILED_STEP_LABEL,
+            truncateText: true,
+            sortable: (a: PingState) => {
+              const failedStep = failedSteps.find(
+                (step) => step.monitor.check_group === a.monitor.check_group
+              );
+              if (!failedStep) {
+                return a.monitor.check_group;
+              }
+              return failedStep.synthetics?.step?.name;
+            },
+            render: (value: string, item: PingState) => {
+              const failedStep = failedSteps.find((step) => step.monitor.check_group === value);
+              if (!failedStep) {
+                return <>--</>;
+              }
+              return (
+                <EuiText size="s">
+                  {failedStep.synthetics?.step?.index}. {failedStep.synthetics?.step?.name}
+                </EuiText>
+              );
+            },
+          },
+        ]
+      : []),
     {
-      field: 'monitor.check_group',
-      name: !isBrowserType ? ERROR_MESSAGE_LABEL : FAILED_STEP_LABEL,
-      truncateText: true,
-      sortable: (a: PingState) => {
-        const failedStep = failedSteps.find(
-          (step) => step.monitor.check_group === a.monitor.check_group
-        );
-        if (!failedStep) {
-          return a.monitor.check_group;
-        }
-        return failedStep.synthetics?.step?.name;
-      },
-      render: (value: string, item: PingState) => {
-        if (!isBrowserType) {
-          return <EuiText size="s">{item.error.message ?? '--'}</EuiText>;
-        }
-        const failedStep = failedSteps.find((step) => step.monitor.check_group === value);
-        if (!failedStep) {
-          return <>--</>;
-        }
-        return (
-          <EuiText size="s">
-            {failedStep.synthetics?.step?.index}. {failedStep.synthetics?.step?.name}
-          </EuiText>
-        );
-      },
+      field: 'error.message',
+      name: ERROR_MESSAGE_LABEL,
     },
     {
       field: 'state.duration_ms',
@@ -146,7 +164,7 @@ export const ErrorsList = ({
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
           history.push(
-            `/monitor/${monitorId}/errors/${state.id}?locationId=${selectedLocation?.id}`
+            `/monitor/${configId}/errors/${state.id}?locationId=${selectedLocation?.id}`
           );
         },
       };
@@ -157,6 +175,8 @@ export const ErrorsList = ({
     <div>
       <EuiSpacer />
       <EuiInMemoryTable
+        css={{ overflowX: isTabletOrGreater ? 'auto' : undefined }}
+        tableLayout="auto"
         tableCaption={ERRORS_LIST_LABEL}
         loading={loading}
         items={errorStates}
@@ -188,15 +208,6 @@ export const getErrorDetailsUrl = ({
   return `${basePath}/app/synthetics/monitor/${configId}/errors/${stateId}?locationId=${locationId}`;
 };
 
-const isActiveState = (item: PingState) => {
-  const timestamp = item['@timestamp'];
-  const interval = moment(item.monitor.timespan?.lt).diff(
-    moment(item.monitor.timespan?.gte),
-    'milliseconds'
-  );
-  return moment().diff(moment(timestamp), 'milliseconds') < interval;
-};
-
 const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorsList.label', {
   defaultMessage: 'Errors list',
 });
@@ -215,4 +226,8 @@ const FAILED_STEP_LABEL = i18n.translate('xpack.synthetics.failedStep.label', {
 
 const TIMESTAMP_LABEL = i18n.translate('xpack.synthetics.timestamp.label', {
   defaultMessage: '@timestamp',
+});
+
+const ACTIVE_LABEL = i18n.translate('xpack.synthetics.active.label', {
+  defaultMessage: 'Active',
 });

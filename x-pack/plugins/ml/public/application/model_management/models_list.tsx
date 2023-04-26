@@ -27,6 +27,7 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
+import { BUILT_IN_MODEL_TYPE, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../components/stats_bar';
@@ -37,7 +38,6 @@ import {
   TrainedModelConfigResponse,
   TrainedModelStat,
 } from '../../../common/types/trained_models';
-import { BUILT_IN_MODEL_TAG } from '../../../common/constants/data_frame_analytics';
 import { DeleteModelsModal } from './delete_models_modal';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { ListingPageUrlState } from '../../../common/types/common';
@@ -46,7 +46,6 @@ import { useTableSettings } from '../data_frame_analytics/pages/analytics_manage
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../routing/use_refresh';
-import { BUILT_IN_MODEL_TYPE } from '../../../common/constants/trained_models';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { TestTrainedModelFlyout } from './test_models';
 

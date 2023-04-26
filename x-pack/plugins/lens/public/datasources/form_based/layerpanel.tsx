@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { DatasourceLayerPanelProps } from '../../types';
 import { FormBasedPrivateState } from './types';
 import { ChangeIndexPattern } from '../../shared_components/dataview_picker/dataview_picker';
+import { getSamplingValue } from './utils';
 
 export interface FormBasedLayerPanelProps extends DatasourceLayerPanelProps<FormBasedPrivateState> {
   state: FormBasedPrivateState;
@@ -36,6 +37,7 @@ export function LayerPanel({
       isAdhoc: !isPersisted,
     };
   });
+
   return (
     <I18nProvider>
       <ChangeIndexPattern
@@ -46,6 +48,7 @@ export function LayerPanel({
           'data-test-subj': 'lns_layerIndexPatternLabel',
           size: 's',
           fontWeight: 'normal',
+          samplingValue: getSamplingValue(layer),
         }}
         indexPatternId={layer.indexPatternId}
         indexPatternRefs={indexPatternRefs}

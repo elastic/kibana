@@ -7,10 +7,7 @@
 
 import { TableSource } from './table_source';
 import { FIELD_ORIGIN } from '../../../../common/constants';
-import {
-  VectorJoinSourceRequestMeta,
-  VectorSourceRequestMeta,
-} from '../../../../common/descriptor_types';
+import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 
 describe('TableSource', () => {
   describe('getName', () => {
@@ -57,7 +54,7 @@ describe('TableSource', () => {
       });
 
       const propertiesMap = await tableSource.getPropertiesMap(
-        {} as unknown as VectorJoinSourceRequestMeta,
+        {} as unknown as VectorSourceRequestMeta,
         'a',
         'b',
         () => {}

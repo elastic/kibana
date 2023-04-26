@@ -12,7 +12,7 @@ import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_lo
 import { HttpLogic } from '../../../shared/http';
 
 export interface PostConnectorConfigurationArgs {
-  configuration: Record<string, string>;
+  configuration: Record<string, string | number | boolean | null>;
   connectorId: string;
   indexName: string;
 }

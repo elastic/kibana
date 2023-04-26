@@ -166,6 +166,7 @@ export const OptionsListControl = ({
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
         anchorPosition="downCenter"
+        initialFocus={'[data-test-subj=optionsList-control-search-input]'}
         className="optionsList__popoverOverride"
         closePopover={() => dispatch(setPopoverOpen(false))}
         anchorClassName="optionsList__anchorOverride"

@@ -218,6 +218,17 @@ const urlStateSerializer = (updated: {
   return updatedQueryParams;
 };
 
+const tableColumnMetadata = {
+  title: {
+    field: 'attributes.title',
+    name: 'Name, description, tags',
+  },
+  updatedAt: {
+    field: 'updatedAt',
+    name: 'Last updated',
+  },
+} as const;
+
 function TableListViewComp<T extends UserContentCommonSchema>({
   tableListTitle,
   tableListDescription,
@@ -437,7 +448,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   const tableColumns = useMemo(() => {
     const columns: Array<EuiBasicTableColumn<T>> = [
       {
-        field: 'attributes.title',
+        field: tableColumnMetadata.title.field,
         name:
           titleColumnName ??
           i18n.translate('contentManagement.tableList.mainColumnName', {
@@ -471,7 +482,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
     if (hasUpdatedAtMetadata) {
       columns.push({
-        field: 'updatedAt',
+        field: tableColumnMetadata.updatedAt.field,
         name: i18n.translate('contentManagement.tableList.lastUpdatedColumnTitle', {
           defaultMessage: 'Last updated',
         }),
@@ -630,8 +641,17 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       } = {};
 
       if (criteria.sort) {
+        // We need to serialise the field as the <EuiInMemoryTable /> return either (1) the field _name_ (e.g. "Last updated")
+        // when changing the "Rows per page" select value or (2) the field _value_ (e.g. "updatedAt") when clicking the column title
+        let fieldSerialized: unknown = criteria.sort.field;
+        if (fieldSerialized === tableColumnMetadata.title.name) {
+          fieldSerialized = tableColumnMetadata.title.field;
+        } else if (fieldSerialized === tableColumnMetadata.updatedAt.name) {
+          fieldSerialized = tableColumnMetadata.updatedAt.field;
+        }
+
         data.sort = {
-          field: criteria.sort.field as SortColumnField,
+          field: fieldSerialized as SortColumnField,
           direction: criteria.sort.direction,
         };
       }
@@ -724,7 +744,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
             />
           }
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           <p>
             <FormattedMessage

@@ -36,7 +36,7 @@ export const getSummaryData = (
   { categoryId: 'ecs-compliant', mappings: partitionedFieldMetadata.ecsCompliant.length },
 ];
 
-export const getFillColor = (categoryId: CategoryId): string => {
+export const getFillColor = (categoryId: CategoryId | string): string => {
   switch (categoryId) {
     case 'incompatible':
       return euiThemeVars.euiColorDanger;

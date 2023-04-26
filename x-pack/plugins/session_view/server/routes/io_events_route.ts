@@ -88,43 +88,47 @@ export const searchProcessWithIOEvents = async (
       ]
     : [];
 
-  const search = await client.search({
-    index: [PROCESS_EVENTS_INDEX],
-    body: {
-      query: {
-        bool: {
-          must: [
-            { term: { [EVENT_ACTION]: 'text_output' } },
-            { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
-            ...rangeFilter,
-          ],
+  try {
+    const search = await client.search({
+      index: [PROCESS_EVENTS_INDEX],
+      body: {
+        query: {
+          bool: {
+            must: [
+              { term: { [EVENT_ACTION]: 'text_output' } },
+              { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
+              ...rangeFilter,
+            ],
+          },
         },
-      },
-      size: 0,
-      aggs: {
-        custom_agg: {
-          terms: {
-            field: PROCESS_ENTITY_ID_PROPERTY,
-            size: PROCESS_EVENTS_PER_PAGE,
+        size: 0,
+        aggs: {
+          custom_agg: {
+            terms: {
+              field: PROCESS_ENTITY_ID_PROPERTY,
+              size: PROCESS_EVENTS_PER_PAGE,
+            },
           },
         },
       },
-    },
-  });
+    });
 
-  const agg: any = search.aggregations?.custom_agg;
-  const buckets: Aggregate[] = agg?.buckets || [];
+    const agg: any = search.aggregations?.custom_agg;
+    const buckets: Aggregate[] = agg?.buckets || [];
 
-  return buckets.map((bucket) => ({
-    _source: {
-      event: {
-        kind: EventKind.event,
-        action: EventAction.text_output,
-        id: bucket.key,
+    return buckets.map((bucket) => ({
+      _source: {
+        event: {
+          kind: EventKind.event,
+          action: EventAction.text_output,
+          id: bucket.key,
+        },
+        process: {
+          entity_id: bucket.key,
+        },
       },
-      process: {
-        entity_id: bucket.key,
-      },
-    },
-  }));
+    }));
+  } catch (err) {
+    return [];
+  }
 };

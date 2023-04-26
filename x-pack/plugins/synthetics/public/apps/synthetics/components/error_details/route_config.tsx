@@ -39,7 +39,7 @@ export const getErrorDetailsRouteConfig = (
       ),
       rightSideItems: [
         <ErrorDuration />,
-        <MonitorDetailsLocation />,
+        <MonitorDetailsLocation isDisabled={true} />,
         <ResolvedAt />,
         <ErrorStartedAt />,
       ],

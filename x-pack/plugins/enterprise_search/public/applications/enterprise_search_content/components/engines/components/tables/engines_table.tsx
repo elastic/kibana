@@ -76,11 +76,11 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
       width: '30%',
     },
     {
-      field: 'updated',
+      field: 'updated_at_millis',
       name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.lastUpdated', {
         defaultMessage: 'Last updated',
       }),
-      dataType: 'string',
+      dataType: 'number',
       render: (dateString: string) => <FormattedDateTime date={new Date(dateString)} hideTime />,
     },
     {

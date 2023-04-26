@@ -76,18 +76,19 @@ buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image-aarch64.tar.g
 buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"
 cd -
 
+# This part is related with updating the configuration of kibana-controller,
+# so that new stack instances contain the latest and greatest image of kibana,
+# and the respective stack components of course.
 echo "--- Trigger image tag update"
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
-
   cat << EOF | buildkite-agent pipeline upload
 steps:
-  - trigger: k8s-gitops-update-image-tag
+  - trigger: serverless-gitops-update-stack-image-tag
+    async: true
     label: ":argo: Update image tag for Kibana"
     branches: main
     build:
       env:
-        MODE: sed
-        TARGET_FILE: kibana-controller.yaml
         IMAGE_TAG: "git-$GIT_ABBREV_COMMIT"
         SERVICE: kibana-controller
         NAMESPACE: kibana-ci

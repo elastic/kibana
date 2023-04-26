@@ -29,13 +29,16 @@
       "presentationUtil",
       "visualizations",
       "uiActions",
-      "share"
+      "share",
+      "savedObjectsManagement",
+      "savedObjectsFinder"
     ],
     "optionalPlugins": [
       "home",
       "reporting",
       "spaces",
-      "usageCollection"
+      "usageCollection",
+      "savedObjects",
     ],
     "requiredBundles": [
       "discover",
@@ -43,9 +46,8 @@
       "kibanaUtils",
       "lens",
       "maps",
-      "savedObjects",
       "visualizations",
       "fieldFormats"
-    ]
+    ],
   }
 }

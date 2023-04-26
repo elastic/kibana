@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { EventAction, Process, ProcessFields, Teletype } from '../../../common/types/process_tree';
+import { EventAction, Process, ProcessFields } from '../../../common/types/process_tree';
 import { DetailPanelProcess, DetailPanelProcessLeader } from '../../types';
 import { DASH } from '../../constants';
 import { dataOrDash } from '../../utils/data_or_dash';
-
-const FILTER_FORKS_EXECS = [EventAction.fork, EventAction.exec];
 
 const DEFAULT_PROCESS_DATA: DetailPanelProcessLeader = {
   id: DASH,
@@ -18,7 +16,9 @@ const DEFAULT_PROCESS_DATA: DetailPanelProcessLeader = {
   start: DASH,
   end: DASH,
   exitCode: DASH,
+  userId: DASH,
   userName: DASH,
+  groupId: DASH,
   groupName: DASH,
   workingDirectory: DASH,
   interactive: DASH,
@@ -60,15 +60,6 @@ export const getProcessExecutableCopyText = (executable: string[][]): string => 
 export const formatProcessArgs = (args: string[] | undefined): string =>
   args && args.length && args.map ? `[${args.map((arg) => `'${arg}'`).join(', ')}]` : DASH;
 
-/**
- * Get isInteractive boolean string from tty.
- *
- * @param  {Teletype | undefined} tty
- * @return {String} returns 'True' if tty exists, 'False' otherwise.
- */
-export const getIsInterativeString = (tty: Teletype | undefined): string =>
-  !!tty ? 'True' : 'False';
-
 const getDetailPanelProcessLeader = (
   leader: ProcessFields | undefined
 ): DetailPanelProcessLeader => ({
@@ -78,8 +69,10 @@ const getDetailPanelProcessLeader = (
   start: leader?.start ?? DEFAULT_PROCESS_DATA.start,
   end: leader?.end ?? DEFAULT_PROCESS_DATA.end,
   exitCode: leader?.exit_code?.toString() ?? DEFAULT_PROCESS_DATA.exitCode,
-  interactive: getIsInterativeString(leader?.tty),
+  interactive: leader?.interactive ? 'True' : 'False',
+  userId: leader?.user?.id ?? DEFAULT_PROCESS_DATA.userId,
   userName: leader?.user?.name ?? DEFAULT_PROCESS_DATA.userName,
+  groupId: leader?.group?.id ?? DEFAULT_PROCESS_DATA.groupId,
   groupName: leader?.group?.name ?? DEFAULT_PROCESS_DATA.groupName,
   workingDirectory: leader?.working_directory ?? DEFAULT_PROCESS_DATA.workingDirectory,
   args: formatProcessArgs(leader?.args) ?? DEFAULT_PROCESS_DATA.args,
@@ -97,6 +90,7 @@ export const getDetailPanelProcess = (process: Process | null): DetailPanelProce
     end: DEFAULT_PROCESS_DATA.end,
     exitCode: DEFAULT_PROCESS_DATA.exitCode,
     interactive: DEFAULT_PROCESS_DATA.interactive,
+    userId: DEFAULT_PROCESS_DATA.userId,
     userName: DEFAULT_PROCESS_DATA.userName,
     groupName: DEFAULT_PROCESS_DATA.groupName,
     args: DEFAULT_PROCESS_DATA.args,
@@ -118,8 +112,10 @@ export const getDetailPanelProcess = (process: Process | null): DetailPanelProce
   processData.start = `${dataOrDash(details.process?.start)}`;
   processData.end = `${dataOrDash(process.getEndTime())}`;
   processData.exitCode = `${dataOrDash(details.process?.exit_code)}`;
-  processData.interactive = getIsInterativeString(details.process?.tty);
+  processData.interactive = details.process?.interactive ? 'True' : 'False';
+  processData.userId = `${dataOrDash(details.process?.user?.id)}`;
   processData.userName = `${dataOrDash(details.process?.user?.name)}`;
+  processData.groupId = `${dataOrDash(details.process?.group?.id)}`;
   processData.groupName = `${dataOrDash(details.process?.group?.name)}`;
   processData.pid = `${dataOrDash(details.process?.pid)}`;
   processData.workingDirectory = `${dataOrDash(details.process?.working_directory)}`;
@@ -130,26 +126,16 @@ export const getDetailPanelProcess = (process: Process | null): DetailPanelProce
   // we grab the executable from each process lifecycle event to give an indication
   // of the processes journey. Processes can sometimes exec multiple times, so it's good
   // information to have.
-  processData.executable = [];
-  process.events.forEach((event) => {
-    if (
-      event.process?.executable &&
-      event.event?.action &&
-      FILTER_FORKS_EXECS.includes(event.event.action)
-    ) {
-      processData.executable.push([event.process.executable, `(${event.event.action})`]);
-    }
-  });
-  if (!processData.executable.length) {
-    // if there were no forks, execs (due to bad data), check if we at least have an executable for some event
-    const executable = process.getDetails().process?.executable;
-
-    if (executable) {
-      processData.executable.push([executable]);
-    } else {
-      processData.executable = DEFAULT_PROCESS_DATA.executable;
-    }
+  const executables = details.process?.previous?.map((exe) => exe?.executable || '') || [];
+  if (details.process?.executable) {
+    executables.push(details.process.executable);
   }
+
+  processData.executable = executables.map((exe, i) => {
+    const action = i === 0 ? EventAction.fork : EventAction.exec;
+
+    return [exe, `(${action})`];
+  });
 
   processData.entryLeader = getDetailPanelProcessLeader(details?.process?.entry_leader);
   processData.sessionLeader = getDetailPanelProcessLeader(details?.process?.session_leader);

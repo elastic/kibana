@@ -18,6 +18,7 @@ import {
   EuiLink,
   EuiSelect,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -39,6 +40,7 @@ export interface CrawlRulesTableProps {
   description?: React.ReactNode;
   domainId: string;
   indexName: string;
+  title?: React.ReactNode;
 }
 
 export const getReadableCrawlerRule = (rule: CrawlerRules) => {
@@ -99,17 +101,14 @@ const DEFAULT_DESCRIPTION = (
   <p>
     <FormattedMessage
       id="xpack.enterpriseSearch.crawler.crawlRulesTable.description"
-      defaultMessage="Create a crawl rule to include or exclude pages whose URL matches the rule. Rules run in sequential order, and each URL is evaluated according to the first match. {link}"
-      values={{
-        link: (
-          <EuiLink href={docLinks.crawlerManaging} target="_blank" external>
-            {i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.descriptionLinkText', {
-              defaultMessage: 'Learn more about crawl rules',
-            })}
-          </EuiLink>
-        ),
-      }}
+      defaultMessage="Create a crawl rule to include or exclude pages whose URL matches the rule. Rules run in sequential order, and each URL is evaluated according to the first match."
     />
+    <EuiSpacer size="s" />
+    <EuiLink href={docLinks.crawlerManaging} target="_blank" external>
+      {i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.descriptionLinkText', {
+        defaultMessage: 'Learn more about crawl rules',
+      })}
+    </EuiLink>
   </p>
 );
 
@@ -119,6 +118,7 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
   indexName,
   crawlRules,
   defaultCrawlRule,
+  title,
 }) => {
   const { updateCrawlRules } = useActions(CrawlerDomainDetailLogic);
 
@@ -251,7 +251,7 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
         updateCrawlRules(newCrawlRules as CrawlRule[]);
         clearFlashMessages();
       }}
-      title=""
+      title={title || ''}
       uneditableItems={defaultCrawlRule ? [defaultCrawlRule] : undefined}
       canRemoveLastItem
     />

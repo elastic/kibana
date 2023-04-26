@@ -7,18 +7,49 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SELECTED_ALERTS = (selectedAlertsFormatted: string, selectedAlerts: number) =>
-  i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectedAlertsTitle', {
-    values: { selectedAlertsFormatted, selectedAlerts },
-    defaultMessage:
-      'Selected {selectedAlertsFormatted} {selectedAlerts, plural, =1 {alert} other {alerts}}',
+import { TableEntityType } from '../../../../../common/types';
+
+const ENTITY_TYPE_PLURAL = (entityType: TableEntityType, count: number) => {
+  switch (entityType) {
+    case TableEntityType.alert: {
+      return i18n.translate('xpack.securitySolution.toolbar.bulkActions.entityAlerts', {
+        values: { count },
+        defaultMessage: '{count, plural, =1 {alert} other {alerts}}',
+      });
+    }
+    case TableEntityType.event: {
+      return i18n.translate('xpack.securitySolution.toolbar.bulkActions.entityEvents', {
+        values: { count },
+        defaultMessage: '{count, plural, =1 {event} other {events}}',
+      });
+    }
+    case TableEntityType.session: {
+      return i18n.translate('xpack.securitySolution.toolbar.bulkActions.entitySessions', {
+        values: { count },
+        defaultMessage: '{count, plural, =1 {session} other {sessions}}',
+      });
+    }
+  }
+};
+
+export const SELECT_ALL_ENTITIES = (
+  entityType: TableEntityType,
+  totalFormatted: string,
+  total: number
+) =>
+  i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectAllEntitiesTitle', {
+    values: { entityPlural: ENTITY_TYPE_PLURAL(entityType, total), totalFormatted, total },
+    defaultMessage: 'Select {total, plural, =1 {} other {all}} {totalFormatted} {entityPlural}',
   });
 
-export const SELECT_ALL_ALERTS = (totalAlertsFormatted: string, totalAlerts: number) =>
-  i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectAllAlertsTitle', {
-    values: { totalAlertsFormatted, totalAlerts },
-    defaultMessage:
-      'Select all {totalAlertsFormatted} {totalAlerts, plural, =1 {alert} other {alerts}}',
+export const SELECTED_ENTITIES = (
+  entityType: TableEntityType,
+  totalFormatted: string,
+  total: number
+) =>
+  i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectedEntitiesTitle', {
+    values: { entityPlural: ENTITY_TYPE_PLURAL(entityType, total), totalFormatted },
+    defaultMessage: 'Selected {totalFormatted} {entityPlural}',
   });
 
 export const CLEAR_SELECTION = i18n.translate(

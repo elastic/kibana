@@ -7,10 +7,24 @@
 import { uniq } from 'lodash';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import { getServicesAlerts } from './get_service_alerts';
-import { getHealthStatuses } from './get_health_statuses';
-import { getServicesWithoutTransactions } from './get_services_without_transactions';
-import { getServiceTransactionStats } from './get_service_transaction_stats';
+import { ServiceHealthStatusesResponse } from './get_health_statuses';
+import { ServicesWithoutTransactionsResponse } from './get_services_without_transactions';
+import { ServiceAlertsResponse } from './get_service_alerts';
+import { ServiceTransactionStatsResponse } from './get_service_transaction_stats';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { ServiceHealthStatus } from '../../../../common/service_health_status';
+
+export interface MergedServiceStat {
+  serviceName: string;
+  transactionType?: string;
+  environments?: string[];
+  agentName?: AgentName;
+  latency?: number | null;
+  transactionErrorRate?: number;
+  throughput?: number;
+  healthStatus?: ServiceHealthStatus;
+  alertsCount?: number;
+}
 
 export function mergeServiceStats({
   serviceStats,
@@ -18,15 +32,11 @@ export function mergeServiceStats({
   healthStatuses,
   alertCounts,
 }: {
-  serviceStats: Awaited<
-    ReturnType<typeof getServiceTransactionStats>
-  >['serviceStats'];
-  servicesWithoutTransactions: Awaited<
-    ReturnType<typeof getServicesWithoutTransactions>
-  >['services'];
-  healthStatuses: Awaited<ReturnType<typeof getHealthStatuses>>;
-  alertCounts: Awaited<ReturnType<typeof getServicesAlerts>>;
-}) {
+  serviceStats: ServiceTransactionStatsResponse['serviceStats'];
+  servicesWithoutTransactions: ServicesWithoutTransactionsResponse['services'];
+  healthStatuses: ServiceHealthStatusesResponse;
+  alertCounts: ServiceAlertsResponse;
+}): MergedServiceStat[] {
   const foundServiceNames = serviceStats.map(({ serviceName }) => serviceName);
 
   const servicesWithOnlyMetricDocuments = servicesWithoutTransactions.filter(

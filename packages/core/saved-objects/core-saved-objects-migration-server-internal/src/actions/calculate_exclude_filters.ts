@@ -23,7 +23,7 @@ export interface CalculateExcludeFiltersParams {
 
 export interface CalculatedExcludeFilter {
   /** Array with all the clauses that must be bool.must_not'ed */
-  mustNotClauses: QueryDslQueryContainer[];
+  filterClauses: QueryDslQueryContainer[];
   /** Any errors that were encountered during filter calculation, keyed by the type name */
   errorsByType: Record<string, Error>;
 }
@@ -91,17 +91,17 @@ export const calculateExcludeFilters =
       }
 
       const errorsByType: Array<[string, Error]> = [];
-      const mustNotClauses: QueryDslQueryContainer[] = [];
+      const filterClauses: QueryDslQueryContainer[] = [];
 
       // Loop through all results and collect successes and errors
       results.forEach((r) =>
         Either.isRight(r)
-          ? mustNotClauses.push(r.right)
+          ? filterClauses.push(r.right)
           : Either.isLeft(r) && errorsByType.push([r.left.soType, r.left.error as Error])
       );
 
       return Either.right({
-        mustNotClauses,
+        filterClauses,
         errorsByType: Object.fromEntries(errorsByType),
       });
     });

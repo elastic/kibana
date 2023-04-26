@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { useEditAction } from './use_edit_action';
+export { useEditAction, type EditAction } from './use_edit_action';

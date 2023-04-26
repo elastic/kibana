@@ -26,6 +26,7 @@ export const createCaseSavedObjectType = (
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
+    dynamic: false,
     properties: {
       assignees: {
         properties: {

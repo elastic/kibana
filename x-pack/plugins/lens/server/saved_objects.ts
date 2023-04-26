@@ -8,7 +8,7 @@
 import { CoreSetup } from '@kbn/core/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { getEditPath } from '../common';
+import { getEditPath } from '../common/constants';
 import { getAllMigrations } from './migrations/saved_object_migrations';
 import { CustomVisualizationMigrations } from './migrations/types';
 
@@ -50,12 +50,8 @@ export function setupSavedObjects(
           type: 'keyword',
         },
         state: {
-          type: 'flattened',
-        },
-        expression: {
-          index: false,
-          doc_values: false,
-          type: 'keyword',
+          dynamic: false,
+          properties: {},
         },
       },
     },

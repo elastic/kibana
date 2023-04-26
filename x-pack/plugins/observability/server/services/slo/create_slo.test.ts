@@ -6,6 +6,7 @@
  */
 
 import { CreateSLO } from './create_slo';
+import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
 import {
   createResourceInstallerMock,
@@ -38,13 +39,55 @@ describe('CreateSLO', () => {
 
       expect(mockResourceInstaller.ensureCommonResourcesInstalled).toHaveBeenCalled();
       expect(mockRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining({ ...sloParams, id: expect.any(String) })
+        expect.objectContaining({
+          ...sloParams,
+          id: expect.any(String),
+          settings: {
+            syncDelay: oneMinute(),
+            frequency: oneMinute(),
+          },
+          revision: 1,
+          tags: [],
+          enabled: true,
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        })
       );
       expect(mockTransformManager.install).toHaveBeenCalledWith(
         expect.objectContaining({ ...sloParams, id: expect.any(String) })
       );
       expect(mockTransformManager.start).toHaveBeenCalledWith('slo-transform-id');
       expect(response).toEqual(expect.objectContaining({ id: expect.any(String) }));
+    });
+
+    it('overrides the default values when provided', async () => {
+      const sloParams = createSLOParams({
+        indicator: createAPMTransactionErrorRateIndicator(),
+        tags: ['one', 'two'],
+        settings: {
+          syncDelay: fiveMinute(),
+        },
+      });
+      mockTransformManager.install.mockResolvedValue('slo-transform-id');
+
+      await createSLO.execute(sloParams);
+
+      expect(mockResourceInstaller.ensureCommonResourcesInstalled).toHaveBeenCalled();
+      expect(mockRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...sloParams,
+          id: expect.any(String),
+          settings: {
+            syncDelay: fiveMinute(),
+            frequency: oneMinute(),
+          },
+          revision: 1,
+          tags: ['one', 'two'],
+          enabled: true,
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        })
+      );
     });
   });
 

@@ -27,6 +27,7 @@ export interface ServiceData {
   };
   runOnce?: boolean;
   isEdit?: boolean;
+  licenseLevel: string;
 }
 
 export class ServiceAPIClient {
@@ -111,7 +112,7 @@ export class ServiceAPIClient {
       const url = this.locations[Math.floor(Math.random() * this.locations.length)].url;
 
       /* url is required for service locations, but omitted for private locations.
-      /* this.locations is only service locations */
+  /* this.locations is only service locations */
       const httpsAgent = this.getHttpsAgent(url);
 
       if (httpsAgent) {
@@ -137,7 +138,7 @@ export class ServiceAPIClient {
 
   async callAPI(
     method: 'POST' | 'PUT' | 'DELETE',
-    { monitors: allMonitors, output, runOnce, isEdit }: ServiceData
+    { monitors: allMonitors, output, runOnce, isEdit, licenseLevel }: ServiceData
   ) {
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
@@ -156,7 +157,7 @@ export class ServiceAPIClient {
         promises.push(
           rxjsFrom(
             this.callServiceEndpoint(
-              { monitors: locMonitors, isEdit, runOnce, output },
+              { monitors: locMonitors, isEdit, runOnce, output, licenseLevel },
               method,
               url
             )
@@ -196,7 +197,7 @@ export class ServiceAPIClient {
   }
 
   async callServiceEndpoint(
-    { monitors, output, runOnce, isEdit }: ServiceData,
+    { monitors, output, runOnce, isEdit, licenseLevel }: ServiceData,
     method: 'POST' | 'PUT' | 'DELETE',
     url: string
   ) {
@@ -214,6 +215,7 @@ export class ServiceAPIClient {
           output,
           stack_version: this.stackVersion,
           is_edit: isEdit,
+          license_level: licenseLevel,
         },
         headers: this.authorization
           ? {

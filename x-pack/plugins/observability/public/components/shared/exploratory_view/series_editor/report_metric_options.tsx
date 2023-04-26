@@ -107,6 +107,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
         <EuiPopover
           button={
             <EuiButton
+              data-test-subj="o11yReportMetricOptionsButton"
               iconType="plusInCircle"
               onClick={() => setShowOptions((prevState) => !prevState)}
               fill

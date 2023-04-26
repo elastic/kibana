@@ -151,7 +151,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
           />
         }
         color="danger"
-        iconType="alert"
+        iconType="warning"
         style={{ width: '100%' }}
       >
         <p>{error.message}</p>

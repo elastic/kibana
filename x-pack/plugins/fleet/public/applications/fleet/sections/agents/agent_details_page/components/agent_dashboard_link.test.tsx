@@ -118,4 +118,36 @@ describe('AgentDashboardLink', () => {
     expect(link).not.toBeNull();
     expect(link?.getAttribute('href')).toBe('/mock/app/fleet/policies/policy123/settings');
   });
+
+  it('it should disable the button if the agent policy is managed', async () => {
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
+      isLoading: false,
+      data: {
+        item: {
+          status: 'installed',
+        },
+      },
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
+    const testRenderer = createFleetTestRendererMock();
+
+    const result = testRenderer.render(
+      <AgentDashboardLink
+        agent={
+          {
+            id: 'agent-id-123',
+          } as unknown as Agent
+        }
+        agentPolicy={
+          {
+            monitoring_enabled: [],
+            is_managed: true,
+          } as unknown as AgentPolicy
+        }
+      />
+    );
+
+    expect(
+      result.getByTestId('agentDetails.enableLogsAndMetricsButton').hasAttribute('disabled')
+    ).toBeTruthy();
+  });
 });

@@ -12,7 +12,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ValueClickContext } from '@kbn/embeddable-plugin/public';
 import { getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import { BucketColumns, PartitionVisParams } from '../../common/types';
+import { BucketColumns, PartitionVisParams, Dimensions } from '../../common/types';
 import { FilterEvent } from '../types';
 
 export const canFilter = async (
@@ -131,6 +131,13 @@ export const getSeriesValueColumnIndex = (value: string, visData: Datatable): nu
   return visData.columns.findIndex(({ id }) => !!visData.rows.find((r) => r[id] === value));
 };
 
+export const getAccessor = (buckets: Dimensions['buckets'], index: number) => {
+  const accessorForDimensionBuckets = buckets?.find((b) => {
+    return typeof b !== 'string' && b.accessor === index;
+  });
+  return accessorForDimensionBuckets || buckets?.[index];
+};
+
 export const getFilterPopoverTitle = (
   visParams: PartitionVisParams,
   visData: Datatable,
@@ -140,7 +147,7 @@ export const getFilterPopoverTitle = (
 ) => {
   let formattedTitle = '';
   if (visParams.dimensions.buckets) {
-    const accessor = visParams.dimensions.buckets[columnIndex];
+    const accessor = getAccessor(visParams.dimensions.buckets, columnIndex);
     formattedTitle = accessor
       ? formatter(getFormatByAccessor(accessor, visData.columns)).convert(seriesKey)
       : '';

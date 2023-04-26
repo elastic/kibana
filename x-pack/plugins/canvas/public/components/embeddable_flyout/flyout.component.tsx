@@ -9,7 +9,7 @@ import React, { FC, useCallback } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectFinderUi, SavedObjectMetaData } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectFinder, SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import { useEmbeddablesService, usePlatformService } from '../../services';
 
 const strings = {
@@ -38,7 +38,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({
   const embeddablesService = useEmbeddablesService();
   const platformService = usePlatformService();
   const { getEmbeddableFactories } = embeddablesService;
-  const { getHttp, getUISettings } = platformService;
+  const { getHttp, getUISettings, getSavedObjectsManagement } = platformService;
 
   const onAddPanel = useCallback(
     (id: string, savedObjectType: string) => {
@@ -77,13 +77,16 @@ export const AddEmbeddableFlyout: FC<Props> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <SavedObjectFinderUi
+        <SavedObjectFinder
           onChoose={onAddPanel}
           savedObjectMetaData={availableSavedObjects}
           showFilter={true}
           noItemsMessage={strings.getNoItemsText()}
-          uiSettings={getUISettings()}
-          http={getHttp()}
+          services={{
+            uiSettings: getUISettings(),
+            http: getHttp(),
+            savedObjectsManagement: getSavedObjectsManagement(),
+          }}
         />
       </EuiFlyoutBody>
     </EuiFlyout>

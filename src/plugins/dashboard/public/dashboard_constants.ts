@@ -59,6 +59,7 @@ export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 // Grid
 // ------------------------------------------------------------------
 export const DEFAULT_PANEL_HEIGHT = 15;
+export const DASHBOARD_MARGIN_SIZE = 8;
 export const DASHBOARD_GRID_HEIGHT = 20;
 export const DASHBOARD_GRID_COLUMN_COUNT = 48;
 export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;

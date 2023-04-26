@@ -6,27 +6,27 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-import { SloStatusBadge } from './slo_status_badge';
 import { SloIndicatorTypeBadge } from './slo_indicator_type_badge';
+import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloTimeWindowBadge } from './slo_time_window_badge';
+import type { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
+import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
+  activeAlerts?: ActiveAlerts;
 }
 
-export function SloBadges({ slo }: Props) {
+export function SloBadges({ slo, activeAlerts }: Props) {
   return (
-    <EuiFlexGroup direction="row" responsive={false} gutterSize="s">
+    <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
       <SloStatusBadge slo={slo} />
-      <EuiFlexItem grow={false}>
-        <SloIndicatorTypeBadge slo={slo} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SloTimeWindowBadge slo={slo} />
-      </EuiFlexItem>
+      <SloIndicatorTypeBadge slo={slo} />
+      <SloTimeWindowBadge slo={slo} />
+      <SloActiveAlertsBadge activeAlerts={activeAlerts} />
     </EuiFlexGroup>
   );
 }

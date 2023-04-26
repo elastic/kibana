@@ -62,7 +62,7 @@ export const ReportStatusIndicator: FC<Props> = ({ job }) => {
   switch (job.status) {
     case JOB_STATUSES.COMPLETED:
       if (hasIssues) {
-        icon = <EuiIcon type="alert" color="warning" />;
+        icon = <EuiIcon type="warning" color="warning" />;
         statusText = i18nTexts.completedWithWarnings;
         break;
       }
@@ -70,7 +70,7 @@ export const ReportStatusIndicator: FC<Props> = ({ job }) => {
       statusText = i18nTexts.completed;
       break;
     case JOB_STATUSES.WARNINGS:
-      icon = <EuiIcon type="alert" color="warning" />;
+      icon = <EuiIcon type="warning" color="warning" />;
       statusText = i18nTexts.completedWithWarnings;
       break;
     case JOB_STATUSES.PENDING:
@@ -82,7 +82,7 @@ export const ReportStatusIndicator: FC<Props> = ({ job }) => {
       statusText = i18nTexts.processing({ attempt: job.attempts, of: job.max_attempts });
       break;
     case JOB_STATUSES.FAILED:
-      icon = <EuiIcon type="crossInACircleFilled" color="danger" />;
+      icon = <EuiIcon type="error" color="danger" />;
       statusText = i18nTexts.failed;
       break;
     default:

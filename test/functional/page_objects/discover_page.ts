@@ -210,6 +210,10 @@ export class DiscoverPageObject extends FtrService {
     await this.comboBox.set('unifiedHistogramBreakdownFieldSelector', field);
   }
 
+  public async chooseLensChart(chart: string) {
+    await this.comboBox.set('unifiedHistogramSuggestionSelector', chart);
+  }
+
   public async getHistogramLegendList() {
     const unifiedHistogram = await this.testSubjects.find('unifiedHistogramChart');
     const list = await unifiedHistogram.findAllByClassName('echLegendItem__label');
@@ -460,6 +464,18 @@ export class DiscoverPageObject extends FtrService {
 
   public async hasNoResultsTimepicker() {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
+  }
+
+  public noResultsErrorVisible() {
+    return this.testSubjects.exists('discoverNoResultsError');
+  }
+
+  public mainErrorVisible() {
+    return this.testSubjects.exists('discoverMainError');
+  }
+
+  public getDiscoverErrorMessage() {
+    return this.testSubjects.getVisibleText('discoverErrorCalloutMessage');
   }
 
   public async expandTimeRangeAsSuggestedInNoResultsMessage() {

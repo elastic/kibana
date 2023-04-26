@@ -11,12 +11,7 @@ import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/s
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
-import {
-  ExecutorError,
-  getActionTypeFeatureUsageName,
-  TaskRunnerFactory,
-  ILicenseState,
-} from './lib';
+import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
 import {
   ActionType,
   PreConfiguredAction,
@@ -157,15 +152,7 @@ export class ActionTypeRegistry {
       [`actions:${actionType.id}`]: {
         title: actionType.name,
         maxAttempts,
-        getRetry(attempts: number, error: unknown) {
-          if (error instanceof ExecutorError) {
-            return error.retry == null ? false : error.retry;
-          }
-          // Only retry other kinds of errors based on attempts
-          return attempts < maxAttempts;
-        },
-        createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create(context, maxAttempts),
+        createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
       },
     });
     // No need to notify usage on basic action types

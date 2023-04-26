@@ -18,10 +18,9 @@ import {
 
 import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
-import { getLatestPrebuiltRules } from '../../logic/get_latest_prebuilt_rules';
 import { getRulesToInstall } from '../../logic/get_rules_to_install';
 import { getRulesToUpdate } from '../../logic/get_rules_to_update';
-import { ruleAssetsClientFactory } from '../../logic/rule_asset/rule_asset_saved_objects_client';
+import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { rulesToMap } from '../../logic/utils';
 
 import { buildFrameworkRequest } from '../../../../timeline/utils/common';
@@ -47,10 +46,10 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (
       const ctx = await context.resolve(['core', 'alerting']);
       const savedObjectsClient = ctx.core.savedObjects.client;
       const rulesClient = ctx.alerting.getRulesClient();
-      const ruleAssetsClient = ruleAssetsClientFactory(savedObjectsClient);
+      const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
 
       try {
-        const latestPrebuiltRules = await getLatestPrebuiltRules(ruleAssetsClient);
+        const latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
 
         const customRules = await findRules({
           rulesClient,

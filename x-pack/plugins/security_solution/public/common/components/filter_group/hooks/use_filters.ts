@@ -6,14 +6,14 @@
  */
 
 import { useContext } from 'react';
-import { FilterContext } from '..';
+import { FilterGroupContext } from '../filter_group_context';
 
-export const useFilters = () => {
-  const context = useContext(FilterContext);
+export const useFilterGroupInternalContext = () => {
+  const filterContext = useContext(FilterGroupContext);
 
-  if (!context) {
-    throw new Error('hook must be used with in FilterGroup Component');
+  if (!filterContext) {
+    throw new Error('FilterContext should only be used inside FilterGroup Wrapper');
   }
 
-  return context;
+  return filterContext;
 };

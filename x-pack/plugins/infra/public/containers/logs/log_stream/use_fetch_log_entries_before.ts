@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
 import { IKibanaSearchRequest } from '@kbn/data-plugin/public';
 import { LogEntryBeforeCursor } from '../../../../common/log_entry';
-import { LogViewColumnConfiguration } from '../../../../common/log_views';
+import { LogViewColumnConfiguration, LogViewReference } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
   logEntriesSearchRequestParamsRT,
@@ -34,21 +34,21 @@ export const useLogEntriesBeforeRequest = ({
   endTimestamp,
   highlightPhrase,
   query,
-  sourceId,
+  logViewReference,
   startTimestamp,
 }: {
   columnOverrides?: LogViewColumnConfiguration[];
   endTimestamp: number;
   highlightPhrase?: string;
   query?: LogEntriesSearchRequestQuery;
-  sourceId: string;
+  logViewReference: LogViewReference;
   startTimestamp: number;
 }) => {
   const { search: fetchLogEntriesBefore, requests$: logEntriesBeforeSearchRequests$ } =
     useDataSearch({
       getRequest: useCallback(
         (cursor: LogEntryBeforeCursor['before'], params: { size: number; extendTo?: number }) => {
-          return !!sourceId
+          return !!logViewReference
             ? {
                 request: {
                   params: logEntriesSearchRequestParamsRT.encode({
@@ -58,7 +58,7 @@ export const useLogEntriesBeforeRequest = ({
                     highlightPhrase,
                     query: query as JsonObject,
                     size: params.size,
-                    sourceId,
+                    logView: logViewReference,
                     startTimestamp: params.extendTo ?? startTimestamp,
                   }),
                 },
@@ -66,7 +66,7 @@ export const useLogEntriesBeforeRequest = ({
               }
             : null;
         },
-        [columnOverrides, endTimestamp, highlightPhrase, query, sourceId, startTimestamp]
+        [columnOverrides, endTimestamp, highlightPhrase, query, logViewReference, startTimestamp]
       ),
       parseResponses: parseLogEntriesBeforeSearchResponses,
     });
@@ -106,14 +106,14 @@ export const useFetchLogEntriesBefore = ({
   endTimestamp,
   highlightPhrase,
   query,
-  sourceId,
+  logViewReference,
   startTimestamp,
 }: {
   columnOverrides?: LogViewColumnConfiguration[];
   endTimestamp: number;
   highlightPhrase?: string;
   query?: LogEntriesSearchRequestQuery;
-  sourceId: string;
+  logViewReference: LogViewReference;
   startTimestamp: number;
 }) => {
   const { fetchLogEntriesBefore, logEntriesBeforeSearchRequests$ } = useLogEntriesBeforeRequest({
@@ -121,7 +121,7 @@ export const useFetchLogEntriesBefore = ({
     endTimestamp,
     highlightPhrase,
     query,
-    sourceId,
+    logViewReference,
     startTimestamp,
   });
 

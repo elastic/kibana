@@ -46,7 +46,7 @@ export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => 
       <EuiCallOut
         title={i18nTexts.title}
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="savePipelineError"
       >
         {results.length > 1 ? (

@@ -6,19 +6,33 @@
  */
 
 import { ElasticsearchClient, type Logger } from '@kbn/core/server';
-import { IndexStatus } from '../../common/types';
+import { IndexStatus, PostureTypes } from '../../common/types';
 
 export const checkIndexStatus = async (
   esClient: ElasticsearchClient,
   index: string,
-  logger: Logger
+  logger: Logger,
+  postureType: PostureTypes = 'all'
 ): Promise<IndexStatus> => {
+  const query =
+    postureType === 'all'
+      ? {
+          match_all: {},
+        }
+      : {
+          bool: {
+            filter: {
+              term: {
+                'rule.benchmark.posture_type': postureType,
+              },
+            },
+          },
+        };
+
   try {
     const queryResult = await esClient.search({
       index,
-      query: {
-        match_all: {},
-      },
+      query,
       size: 1,
     });
 

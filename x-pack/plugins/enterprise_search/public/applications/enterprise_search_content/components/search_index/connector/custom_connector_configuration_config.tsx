@@ -67,7 +67,7 @@ export const ConnectorConfigurationConfig: React.FC = () => {
         />
         <EuiSpacer />
         <EuiCallOut
-          iconType="alert"
+          iconType="warning"
           color="warning"
           title={i18n.translate(
             'xpack.enterpriseSearch.content.indices.configurationConnector.config.warning.title',

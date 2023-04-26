@@ -15,7 +15,12 @@ import { RawRule, SanitizedRule, RuleTypeParams, Rule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { validateRuleTypeParams, getRuleNotifyWhenType, getDefaultMonitoring } from '../../lib';
 import { getRuleExecutionStatusPending } from '../../lib/rule_execution_status';
-import { createRuleSavedObject, extractReferences, validateActions, addUuid } from '../lib';
+import {
+  createRuleSavedObject,
+  extractReferences,
+  validateActions,
+  addGeneratedActionValues,
+} from '../lib';
 import { generateAPIKeyName, getMappedParams, apiKeyAsAlertAttributes } from '../common';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { NormalizedAlertAction, RulesClientContext } from '../types';
@@ -35,6 +40,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'updatedAt'
     | 'apiKey'
     | 'apiKeyOwner'
+    | 'apiKeyCreatedByUser'
     | 'muteAll'
     | 'mutedInstanceIds'
     | 'actions'
@@ -43,6 +49,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'isSnoozedUntil'
     | 'lastRun'
     | 'nextRun'
+    | 'revision'
   > & { actions: NormalizedAlertAction[] };
   options?: SavedObjectOptions;
   allowMissingConnectorSecrets?: boolean;
@@ -52,7 +59,7 @@ export async function create<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
   { data: initialData, options, allowMissingConnectorSecrets }: CreateOptions<Params>
 ): Promise<SanitizedRule<Params>> {
-  const data = { ...initialData, actions: addUuid(initialData.actions) };
+  const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
 
   const id = options?.id || SavedObjectsUtils.generateId();
 
@@ -85,11 +92,20 @@ export async function create<Params extends RuleTypeParams = never>(
   const username = await context.getUserName();
 
   let createdAPIKey = null;
+  let isAuthTypeApiKey = false;
   try {
+    isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
+    const name = generateAPIKeyName(ruleType.id, data.name);
     createdAPIKey = data.enabled
-      ? await withSpan({ name: 'createAPIKey', type: 'rules' }, () =>
-          context.createAPIKey(generateAPIKeyName(ruleType.id, data.name))
-        )
+      ? isAuthTypeApiKey
+        ? context.getAuthenticationAPIKey(`${name}-user-created`)
+        : await withSpan(
+            {
+              name: 'createAPIKey',
+              type: 'rules',
+            },
+            () => context.createAPIKey(name)
+          )
       : null;
   } catch (error) {
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
@@ -138,7 +154,7 @@ export async function create<Params extends RuleTypeParams = never>(
 
   const rawRule: RawRule = {
     ...data,
-    ...apiKeyAsAlertAttributes(createdAPIKey, username),
+    ...apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey),
     legacyId,
     actions,
     createdBy: username,
@@ -153,6 +169,7 @@ export async function create<Params extends RuleTypeParams = never>(
     throttle,
     executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
     monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
+    revision: 0,
     running: false,
   };
 

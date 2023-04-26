@@ -140,6 +140,7 @@ export const EventSchema = schema.maybe(
         alert: schema.maybe(
           schema.object({
             flapping: ecsBoolean(),
+            uuid: ecsString(),
             rule: schema.maybe(
               schema.object({
                 consumer: ecsString(),
@@ -201,6 +202,7 @@ export const EventSchema = schema.maybe(
             id: ecsString(),
             execution: schema.maybe(
               schema.object({
+                source: ecsString(),
                 uuid: ecsString(),
               })
             ),

@@ -10,7 +10,7 @@
       "hosts": [ "smtp.gmail.com:587" ],
       "schedule": 1,
       "tags": [ "service:smtp", "org:google" ],
-      "privateLocations": [ "BEEP" ],
+      "privateLocations": [ ],
       "hash": "ekrjelkjrelkjre",
       "ssl.verification_mode": "strict"
     },
@@ -22,7 +22,7 @@
       "hosts": "localhost:18278",
       "schedule": 1,
       "tags": "tag1,tag2",
-      "privateLocations": [ "BEEP" ],
+      "privateLocations": [  ],
       "hash": "ekrjelkjrelkjre"
     },
     {
@@ -34,7 +34,7 @@
       "ports": ["5698"],
       "schedule": 1,
       "tags": "tag1,tag2",
-      "privateLocations": [ "BEEP" ],
+      "privateLocations": [ ],
       "unsupportedKey": {
         "nestedUnsupportedKey": "unnsuportedValue"
       },

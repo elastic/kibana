@@ -95,7 +95,7 @@ describe('useAddToRulesTable', () => {
     } = current;
     expect(sortedRulesByLinkedRulesOnTop.length).toEqual(0);
     expect(isLoading).toBeTruthy();
-    expect(pagination).toEqual({ pageIndex: 0, initialPageSize: 5, showPerPageOptions: false });
+    expect(pagination).toEqual({ pageIndex: 0, initialPageSize: 25, showPerPageOptions: false });
     expect(searchOptions.filters[0].name).toEqual('Tags');
     expect(addToSelectedRulesDescription).toEqual(
       'After you create the exception, it is added to the rules you link. '

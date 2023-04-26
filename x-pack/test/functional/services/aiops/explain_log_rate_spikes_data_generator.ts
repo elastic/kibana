@@ -64,11 +64,17 @@ function getArtificialLogsWithSpike(index: string) {
   });
 
   // Now let's add items to the dataset to make some specific significant terms being returned as results
+  const docsPerUrl1: Record<string, number> = {
+    'login.php': 299,
+    'user.php': 300,
+    'home.php': 301,
+  };
+
   ['200', '404'].forEach((responseCode) => {
     ['login.php', 'user.php', 'home.php'].forEach((url) => {
       tsOffset = 0;
-      [...Array(300)].forEach(() => {
-        tsOffset += DAY_MS / 300;
+      [...Array(docsPerUrl1[url])].forEach(() => {
+        tsOffset += DAY_MS / docsPerUrl1[url];
         bulkBody.push(action);
         bulkBody.push({
           user: 'Peter',
@@ -82,11 +88,16 @@ function getArtificialLogsWithSpike(index: string) {
     });
   });
 
-  ['Paul', 'Mary'].forEach((user) => {
+  const docsPerUrl2: Record<string, number> = {
+    'login.php': 399,
+    'home.php': 400,
+  };
+
+  ['Paul', 'Mary'].forEach((user, userIndex) => {
     ['login.php', 'home.php'].forEach((url) => {
       tsOffset = 0;
-      [...Array(400)].forEach(() => {
-        tsOffset += DAY_MS / 400;
+      [...Array(docsPerUrl2[url] + userIndex)].forEach(() => {
+        tsOffset += DAY_MS / docsPerUrl2[url];
         bulkBody.push(action);
         bulkBody.push({
           user,

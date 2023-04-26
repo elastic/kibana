@@ -12,8 +12,10 @@ import {
   addMustClausesToBoolQuery,
   addMustNotClausesToBoolQuery,
   getAliases,
+  getMigrationType,
   buildRemoveAliasActions,
   versionMigrationCompleted,
+  MigrationType,
 } from './helpers';
 
 describe('addExcludedTypesToBoolQuery', () => {
@@ -286,4 +288,21 @@ describe('buildRemoveAliasActions', () => {
       { remove: { index: '.kibana_test_123', alias: 'c', must_exist: true } },
     ]);
   });
+});
+
+describe('getMigrationType', () => {
+  it.each`
+    isMappingsCompatible | isVersionMigrationCompleted | expected
+    ${true}              | ${true}                     | ${MigrationType.Unnecessary}
+    ${true}              | ${false}                    | ${MigrationType.Compatible}
+    ${false}             | ${false}                    | ${MigrationType.Incompatible}
+    ${false}             | ${true}                     | ${MigrationType.Invalid}
+  `(
+    "returns '$expected' migration type",
+    ({ isMappingsCompatible, isVersionMigrationCompleted, expected }) => {
+      expect(getMigrationType({ isMappingsCompatible, isVersionMigrationCompleted })).toBe(
+        expected
+      );
+    }
+  );
 });

@@ -13,8 +13,23 @@ import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '@kbn/fleet-pl
 import userEvent from '@testing-library/user-event';
 import { getPosturePolicy } from './utils';
 import { CLOUDBEAT_AWS, CLOUDBEAT_EKS } from '../../../common/constants';
+import { useParams } from 'react-router-dom';
+
+// mock useParams
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn().mockReturnValue({
+    integration: undefined,
+  }),
+}));
 
 describe('<CspPolicyTemplateForm />', () => {
+  beforeEach(() => {
+    (useParams as jest.Mock).mockReturnValue({
+      integration: undefined,
+    });
+  });
+
   const onChange = jest.fn();
 
   const WrappedComponent = ({
@@ -47,6 +62,23 @@ describe('<CspPolicyTemplateForm />', () => {
 
   beforeEach(() => {
     onChange.mockClear();
+  });
+
+  it('updates package policy namespace to default when it changes', () => {
+    const policy = getMockPolicyK8s();
+    const { rerender } = render(<WrappedComponent newPolicy={policy} />);
+
+    rerender(<WrappedComponent newPolicy={{ ...policy, namespace: 'some-namespace' }} />);
+
+    // Listen to the onChange triggered by the test (re-render with new policy namespace)
+    // It should ensure the initial state is valid.
+    expect(onChange).toHaveBeenNthCalledWith(1, {
+      isValid: true,
+      updatedPolicy: {
+        ...policy,
+        namespace: 'default',
+      },
+    });
   });
 
   it('renders and updates name field', () => {
@@ -84,8 +116,8 @@ describe('<CspPolicyTemplateForm />', () => {
   it('renders KSPM input selector', () => {
     const { getByLabelText } = render(<WrappedComponent newPolicy={getMockPolicyK8s()} />);
 
-    const option1 = getByLabelText('Self-Managed/Vanilla Kubernetes');
-    const option2 = getByLabelText('EKS (Elastic Kubernetes Service)');
+    const option1 = getByLabelText('Self-Managed');
+    const option2 = getByLabelText('EKS');
 
     expect(option1).toBeInTheDocument();
     expect(option2).toBeInTheDocument();
@@ -99,7 +131,7 @@ describe('<CspPolicyTemplateForm />', () => {
     const eksPolicy = getMockPolicyEKS();
 
     const { getByLabelText } = render(<WrappedComponent newPolicy={k8sPolicy} />);
-    const option = getByLabelText('EKS (Elastic Kubernetes Service)');
+    const option = getByLabelText('EKS');
     userEvent.click(option);
 
     // Listen to the 2nd triggered by the test.
@@ -131,8 +163,8 @@ describe('<CspPolicyTemplateForm />', () => {
       <WrappedComponent newPolicy={getMockPolicyK8s()} edit={true} />
     );
 
-    const option1 = getByLabelText('Self-Managed/Vanilla Kubernetes');
-    const option2 = getByLabelText('EKS (Elastic Kubernetes Service)');
+    const option1 = getByLabelText('Self-Managed');
+    const option2 = getByLabelText('EKS');
 
     expect(option1).toBeInTheDocument();
     expect(option2).toBeInTheDocument();
@@ -166,13 +198,30 @@ describe('<CspPolicyTemplateForm />', () => {
       ...input,
       enabled: input.policy_template === 'kspm',
     }));
+    policy.name = 'cloud_security_posture-1';
+
+    (useParams as jest.Mock).mockReturnValue({
+      integration: 'kspm',
+    });
 
     render(<WrappedComponent newPolicy={policy} />);
 
     // 1st call happens on mount and selects the default policy template enabled input
     expect(onChange).toHaveBeenNthCalledWith(1, {
       isValid: true,
-      updatedPolicy: getMockPolicyK8s(),
+      updatedPolicy: {
+        ...getMockPolicyK8s(),
+        name: 'cloud_security_posture-1',
+      },
+    });
+
+    // 2nd call happens to set integration name
+    expect(onChange).toHaveBeenNthCalledWith(2, {
+      isValid: true,
+      updatedPolicy: {
+        ...policy,
+        name: 'kspm-1',
+      },
     });
   });
 
@@ -183,13 +232,30 @@ describe('<CspPolicyTemplateForm />', () => {
       ...input,
       enabled: input.policy_template === 'cspm',
     }));
+    policy.name = 'cloud_security_posture-1';
+
+    (useParams as jest.Mock).mockReturnValue({
+      integration: 'cspm',
+    });
 
     render(<WrappedComponent newPolicy={policy} />);
 
     // 1st call happens on mount and selects the default policy template enabled input
     expect(onChange).toHaveBeenNthCalledWith(1, {
       isValid: true,
-      updatedPolicy: getMockPolicyAWS(),
+      updatedPolicy: {
+        ...getMockPolicyAWS(),
+        name: 'cloud_security_posture-1',
+      },
+    });
+
+    // 2nd call happens to set integration name
+    expect(onChange).toHaveBeenNthCalledWith(2, {
+      isValid: true,
+      updatedPolicy: {
+        ...policy,
+        name: 'cspm-1',
+      },
     });
   });
 

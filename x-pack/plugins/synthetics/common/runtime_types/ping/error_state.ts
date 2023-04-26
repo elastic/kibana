@@ -6,9 +6,8 @@
  */
 
 import * as t from 'io-ts';
-
-export const ErrorStateCodec = t.type({
-  duration_ms: t.string,
+export const StateEndsCodec = t.type({
+  duration_ms: t.union([t.string, t.number]),
   checks: t.number,
   ends: t.union([t.string, t.null]),
   started_at: t.string,
@@ -17,3 +16,16 @@ export const ErrorStateCodec = t.type({
   down: t.number,
   status: t.string,
 });
+
+export const ErrorStateCodec = t.type({
+  duration_ms: t.union([t.string, t.number]),
+  checks: t.number,
+  ends: t.union([StateEndsCodec, t.null]),
+  started_at: t.string,
+  id: t.string,
+  up: t.number,
+  down: t.number,
+  status: t.string,
+});
+
+export type ErrorState = t.TypeOf<typeof ErrorStateCodec>;

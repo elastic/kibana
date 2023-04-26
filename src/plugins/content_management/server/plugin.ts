@@ -21,22 +21,37 @@ import {
   ContentManagementServerStart,
   SetupDependencies,
 } from './types';
-import { procedureNames } from '../common';
-
-type CreateRouterFn = CoreSetup['http']['createRouter'];
+import { EventStreamService, EsEventStreamClientFactory } from './event_stream';
+import { procedureNames } from '../common/rpc';
 
 export class ContentManagementPlugin
   implements Plugin<ContentManagementServerSetup, ContentManagementServerStart, SetupDependencies>
 {
   private readonly logger: Logger;
   private readonly core: Core;
+  readonly #eventStream: EventStreamService;
 
-  constructor(initializerContext: { logger: PluginInitializerContext['logger'] }) {
+  constructor(initializerContext: PluginInitializerContext) {
+    const kibanaVersion = initializerContext.env.packageInfo.version;
+
     this.logger = initializerContext.logger.get();
-    this.core = new Core({ logger: this.logger });
+    this.#eventStream = new EventStreamService({
+      logger: this.logger,
+      clientFactory: new EsEventStreamClientFactory({
+        baseName: '.kibana',
+        kibanaVersion,
+        logger: this.logger,
+      }),
+    });
+    this.core = new Core({
+      logger: this.logger,
+      eventStream: this.#eventStream,
+    });
   }
 
-  public setup(core: { http: { createRouter: CreateRouterFn } }) {
+  public setup(core: CoreSetup) {
+    this.#eventStream.setup({ core });
+
     const { api: coreApi, contentRegistry } = this.core.setup();
 
     const rpc = new RpcService<RpcContext>();
@@ -54,6 +69,16 @@ export class ContentManagementPlugin
   }
 
   public start(core: CoreStart) {
+    this.#eventStream.start();
+
     return {};
+  }
+
+  public async stop(): Promise<void> {
+    try {
+      await this.#eventStream.stop();
+    } catch (e) {
+      this.logger.error(`Error during event stream stop: ${e}`);
+    }
   }
 }

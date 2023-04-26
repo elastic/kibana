@@ -21,7 +21,7 @@ const UserActionContentToolbarComponent: React.FC<UserActionContentToolbarProps>
   withCopyLinkAction = true,
   children,
 }) => (
-  <EuiFlexGroup responsive={false} alignItems="center">
+  <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
     {withCopyLinkAction ? (
       <EuiFlexItem grow={false}>
         <UserActionCopyLink id={id} />

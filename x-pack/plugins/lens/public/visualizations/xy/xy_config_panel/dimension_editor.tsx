@@ -12,7 +12,7 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import { State, XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
-import { FormatFactory } from '../../../../common';
+import { FormatFactory } from '../../../../common/types';
 import { getSeriesColor, isHorizontalChart } from '../state_helpers';
 import { ColorPicker } from './color_picker';
 import { PalettePicker, useDebouncedValue } from '../../../shared_components';

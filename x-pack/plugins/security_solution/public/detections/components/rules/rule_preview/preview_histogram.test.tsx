@@ -28,9 +28,13 @@ import { useTimelineEvents } from '../../../../common/components/events_viewer/u
 import { TableId } from '../../../../../common/types';
 import { createStore } from '../../../../common/store';
 import { mockEventViewerResponse } from '../../../../common/components/events_viewer/mock';
+import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import type { UseFieldBrowserOptionsProps } from '../../../../timelines/components/fields_browser';
 import type { TransformColumnsProps } from '../../../../common/components/control_columns';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 
 jest.mock('../../../../common/components/control_columns', () => ({
   transformControlColumns: (props: TransformColumnsProps) => [],
@@ -46,7 +50,14 @@ jest.mock('../../../../common/containers/use_global_time');
 jest.mock('./use_preview_histogram');
 jest.mock('../../../../common/utils/normalize_time_range');
 jest.mock('../../../../common/components/events_viewer/use_timelines_events');
-
+jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+const getMockUseIsExperimentalFeatureEnabled =
+  (mockMapping?: Partial<ExperimentalFeatures>) => (flag: keyof typeof allowedExperimentalValues) =>
+    mockMapping ? mockMapping?.[flag] : allowedExperimentalValues?.[flag];
 const originalKibanaLib = jest.requireActual('../../../../common/lib/kibana');
 
 // Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
@@ -77,6 +88,9 @@ describe('PreviewHistogram', () => {
   const mockSetQuery = jest.fn();
 
   beforeEach(() => {
+    mockUseIsExperimentalFeatureEnabled.mockImplementation(
+      getMockUseIsExperimentalFeatureEnabled({ alertsPreviewChartEmbeddablesEnabled: false })
+    );
     (useGlobalTime as jest.Mock).mockReturnValue({
       from: '2020-07-07T08:20:18.966Z',
       isInitializing: false,
@@ -140,7 +154,6 @@ describe('PreviewHistogram', () => {
           />
         </TestProviders>
       );
-
       expect(wrapper.findWhere((node) => node.text() === '1 alert').exists()).toBeTruthy();
       expect(
         wrapper.findWhere((node) => node.text() === ALL_VALUES_ZEROS_TITLE).exists()
@@ -238,6 +251,48 @@ describe('PreviewHistogram', () => {
       );
 
       expect(wrapper.find(`[data-test-subj="preview-histogram-loading"]`).exists()).toBeTruthy();
+    });
+  });
+
+  describe('when the alertsPreviewChartEmbeddablesEnabled experimental feature flag is enabled', () => {
+    let wrapper: ReactWrapper;
+    beforeEach(() => {
+      mockUseIsExperimentalFeatureEnabled.mockImplementation(
+        getMockUseIsExperimentalFeatureEnabled({
+          alertsPreviewChartEmbeddablesEnabled: true,
+        })
+      );
+
+      (usePreviewHistogram as jest.Mock).mockReturnValue([
+        false,
+        {
+          inspect: { dsl: [], response: [] },
+          totalCount: 1,
+          refetch: jest.fn(),
+          data: [],
+          buckets: [],
+        },
+      ]);
+      wrapper = mount(
+        <TestProviders store={store}>
+          <PreviewHistogram
+            addNoiseWarning={jest.fn()}
+            previewId={'test-preview-id'}
+            spaceId={'default'}
+            ruleType={'query'}
+            indexPattern={getMockIndexPattern()}
+            timeframeOptions={getLastMonthTimeframe()}
+          />
+        </TestProviders>
+      );
+    });
+
+    test('should not fetch preview data', () => {
+      expect((usePreviewHistogram as jest.Mock).mock.calls[0][0].skip).toEqual(true);
+    });
+
+    test('should render Lens embeddable', () => {
+      expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toBeTruthy();
     });
   });
 });

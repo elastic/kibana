@@ -58,6 +58,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         user: {
           id: this.randomUser(),
         },
+        rule: undefined,
       },
       overrides
     );
@@ -220,9 +221,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             ResponseActionsExecuteParameters
           >
         ).parameters = {
-          command: (overrides.parameters as ResponseActionsExecuteParameters).command ?? 'ls -al',
+          command: (overrides.parameters as ResponseActionsExecuteParameters)?.command ?? 'ls -al',
           timeout:
-            (overrides.parameters as ResponseActionsExecuteParameters).timeout ??
+            (overrides.parameters as ResponseActionsExecuteParameters)?.timeout ??
             DEFAULT_EXECUTE_ACTION_TIMEOUT, // 4hrs
         };
       }
@@ -231,7 +232,8 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         details.outputs = {
           [details.agents[0]]: this.generateExecuteActionResponseOutput({
             content: {
-              outputFileId: getFileDownloadId(details, details.agents[0]),
+              output_file_id: getFileDownloadId(details, details.agents[0]),
+              ...overrides.outputs?.[details.agents[0]].content,
             },
           }),
         };
@@ -310,22 +312,26 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         content: {
           stdout: this.randomChoice([
             this.randomString(1280),
+            this.randomString(3580),
             `-rw-r--r--    1 elastic  staff      458 Jan 26 09:10 doc.txt\
           -rw-r--r--     1 elastic  staff  298 Feb  2 09:10 readme.md`,
           ]),
           stderr: this.randomChoice([
             this.randomString(1280),
+            this.randomString(3580),
             `error line 1\
           error line 2\
           error line 3 that is quite very long and will be truncated, and should not be visible in the UI\
           errorline4thathasalotmoretextthatdoesnotendfortestingpurposesrepeatalotoftexthereandkeepaddingmoreandmoretextwithoutendtheideabeingthatwedonotuseperiodsorcommassothattheconsoleuiisunabletobreakthislinewithoutsomecssrulessowiththislineweshouldbeabletotestthatwithgenerateddata`,
           ]),
-          stdoutTruncated: true,
-          stderrTruncated: true,
+          stdout_truncated: true,
+          stderr_truncated: true,
           shell_code: 0,
           shell: 'bash',
-          cwd: '/some/path',
-          outputFileId: 'some-output-file-id',
+          cwd: this.randomChoice(['/some/path', '/a-very/long/path'.repeat(30)]),
+          output_file_id: 'some-output-file-id',
+          output_file_stdout_truncated: this.randomChoice([true, false]),
+          output_file_stderr_truncated: this.randomChoice([true, false]),
         },
       },
       overrides

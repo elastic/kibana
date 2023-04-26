@@ -11,7 +11,7 @@ import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
 import { TestRunErrorInfo } from './components/test_run_error_info';
-import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel';
+import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel_container';
 import { useSelectedLocation } from '../monitor_details/hooks/use_selected_location';
 import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
 import { StepNumberNav } from './components/step_number_nav';
@@ -47,8 +47,8 @@ export const TestRunDetails = () => {
     <>
       <TestRunErrorInfo journeyDetails={stepsData?.details} hasNoSteps={hasNoSteps} />
       {!hasNoSteps && (
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem grow={2} style={{ minWidth: 0 }}>
+        <EuiFlexGroup gutterSize="m" wrap={true}>
+          <EuiFlexItem css={{ flexBasis: '60%', minWidth: 260 }}>
             <EuiPanel hasShadow={false} hasBorder>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={true}>
@@ -86,10 +86,10 @@ export const TestRunDetails = () => {
             <EuiSpacer size="m" />
             <TestRunSteps isLoading={stepsLoading} steps={stepsData?.steps ?? []} />
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>
+          <EuiFlexItem css={{ flexBasis: '36%', minWidth: 'min-content' }}>
             <StepDurationPanel legendPosition="bottom" />
             <EuiSpacer size="m" />
-            <MonitorDetailsPanelContainer />
+            <MonitorDetailsPanelContainer hideEnabled hideLocations />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

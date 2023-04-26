@@ -8,6 +8,7 @@
 import React, { useContext } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 
+import { getScreenshotUrl } from './journey_screenshot_dialog';
 import { SyntheticsSettingsContext } from '../../../contexts';
 
 import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_image';
@@ -15,6 +16,7 @@ import { JourneyScreenshotPreview } from '../monitor_test_result/journey_screens
 import { ScreenshotImageSize, THUMBNAIL_SCREENSHOT_SIZE } from './screenshot_size';
 
 interface Props {
+  timestamp?: string;
   checkGroup?: string;
   stepStatus?: string;
   initialStepNumber?: number;
@@ -26,6 +28,7 @@ interface Props {
 }
 
 export const JourneyStepScreenshotContainer = ({
+  timestamp,
   checkGroup,
   stepStatus,
   allStepsLoaded,
@@ -40,7 +43,7 @@ export const JourneyStepScreenshotContainer = ({
   const { basePath } = useContext(SyntheticsSettingsContext);
 
   const imgPath = checkGroup
-    ? `${basePath}/internal/uptime/journey/screenshot/${checkGroup}/${initialStepNumber}`
+    ? getScreenshotUrl({ basePath, checkGroup, stepNumber: initialStepNumber })
     : '';
 
   const intersection = useIntersection(intersectionRef, {
@@ -55,6 +58,7 @@ export const JourneyStepScreenshotContainer = ({
     imgPath,
     retryFetchOnRevisit,
     checkGroup,
+    timestamp,
   });
 
   const { url, loading, stepName, maxSteps } = imageResult?.[imgPath] ?? {};
@@ -72,6 +76,7 @@ export const JourneyStepScreenshotContainer = ({
         size={size}
         unavailableMessage={unavailableMessage}
         borderRadius={borderRadius}
+        timestamp={timestamp}
       />
     </div>
   );

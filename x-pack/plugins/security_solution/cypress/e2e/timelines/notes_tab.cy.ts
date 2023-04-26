@@ -93,7 +93,7 @@ describe('Timeline notes tab', () => {
 
   it('should render insight query from markdown', () => {
     addNotesToTimeline(
-      `!{insight{"description":"2 top level OR providers, 1 nested AND","label":"test insight", "providers": [[{ "field": "event.id", "value": "kibana.alert.original_event.id", "queryType": "phrase", "excluded": "false" }], [{ "field": "event.category", "value": "network", "queryType": "phrase", "excluded": "false" }, {"field": "process.pid", "value": "process.pid", "queryType": "phrase", "excluded": "false"}]]}}`
+      `!{investigate{"description":"2 top level OR providers, 1 nested AND","label":"test insight", "providers": [[{ "field": "event.id", "value": "kibana.alert.original_event.id", "queryType": "phrase", "excluded": "false" }], [{ "field": "event.category", "value": "network", "queryType": "phrase", "excluded": "false" }, {"field": "process.pid", "value": "process.pid", "queryType": "phrase", "excluded": "false"}]]}}`
     );
     cy.get(MARKDOWN_INVESTIGATE_BUTTON).should('exist');
   });

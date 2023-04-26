@@ -7,9 +7,11 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { EsErrorBody } from '../util/errors';
 import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
+import type { UrlConfig } from './custom_urls';
 
 export interface DeleteDataFrameAnalyticsWithIndexStatus {
   success: boolean;
@@ -56,9 +58,14 @@ export interface ClassificationAnalysis {
 }
 
 export type AnalysisConfig = estypes.MlDataframeAnalysisContainer;
+export interface DataFrameAnalyticsMeta {
+  custom_urls?: UrlConfig[];
+  [key: string]: any;
+}
 export interface DataFrameAnalyticsConfig
   extends Omit<estypes.MlDataframeAnalyticsSummary, 'analyzed_fields'> {
   analyzed_fields?: estypes.MlDataframeAnalysisAnalyzedFields;
+  _meta?: DataFrameAnalyticsMeta;
 }
 
 export interface UpdateDataFrameAnalyticsConfig {
@@ -66,6 +73,11 @@ export interface UpdateDataFrameAnalyticsConfig {
   description?: string;
   model_memory_limit?: string;
   max_num_threads?: number;
+  _meta?: DataFrameAnalyticsMeta;
+}
+
+export function isDataFrameAnalyticsConfigs(arg: unknown): arg is DataFrameAnalyticsConfig {
+  return isPopulatedObject(arg, ['dest', 'analysis', 'id']) && typeof arg.id === 'string';
 }
 
 export type DataFrameAnalysisConfigType =

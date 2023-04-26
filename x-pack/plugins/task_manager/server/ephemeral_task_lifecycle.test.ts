@@ -22,6 +22,10 @@ import { TaskPoolMock } from './task_pool.mock';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from './mocks';
 
+jest.mock('./constants', () => ({
+  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report'],
+}));
+
 const executionContext = executionContextServiceMock.createSetupContract();
 
 describe('EphemeralTaskLifecycle', () => {

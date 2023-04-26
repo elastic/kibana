@@ -13,7 +13,11 @@ import { FunctionFactory } from '../../../types';
 export const help: FunctionHelp<FunctionFactory<ReturnType<typeof filtersFunctionFactory>>> = {
   help: i18n.translate('xpack.canvas.functions.filtersHelpText', {
     defaultMessage:
-      'Aggregates element filters from the workpad for use elsewhere, usually a data source.',
+      'Aggregates element filters from the workpad for use elsewhere, usually a data source. {FILTER_FN} is deprecated and will be removed in a future release. Use {REPLACEMENT} instead.',
+    values: {
+      FILTER_FN: '`filters`',
+      REPLACEMENT: '`kibana | selectFilter`',
+    },
   }),
   args: {
     group: i18n.translate('xpack.canvas.functions.filters.args.group', {

@@ -174,6 +174,7 @@ export function SavedQueryManagementList({
 
         if (loadedSavedQuery && loadedSavedQuery.id === savedQueryId) {
           onClearSavedQuery();
+          setSelectedSavedQuery(undefined);
         }
 
         await savedQueryService.deleteSavedQuery(savedQueryId);
@@ -275,7 +276,7 @@ export function SavedQueryManagementList({
                 placeholder: i18n.translate(
                   'unifiedSearch.query.queryBar.indexPattern.findFilterSet',
                   {
-                    defaultMessage: 'Find a saved query',
+                    defaultMessage: 'Find a query',
                   }
                 ),
               }}
@@ -333,7 +334,7 @@ export function SavedQueryManagementList({
               aria-label={i18n.translate(
                 'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
                 {
-                  defaultMessage: 'Apply saved query',
+                  defaultMessage: 'Apply query',
                 }
               )}
               data-test-subj="saved-query-management-apply-changes-button"
@@ -342,13 +343,13 @@ export function SavedQueryManagementList({
                 ? i18n.translate(
                     'unifiedSearch.search.searchBar.savedQueryPopoverReplaceFilterSetLabel',
                     {
-                      defaultMessage: 'Replace with selected saved query',
+                      defaultMessage: 'Load query',
                     }
                   )
                 : i18n.translate(
                     'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
                     {
-                      defaultMessage: 'Apply saved query',
+                      defaultMessage: 'Apply query',
                     }
                   )}
             </EuiButton>

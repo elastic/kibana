@@ -40,6 +40,7 @@ pageLoadAssetSize:
   enterpriseSearch: 35741
   esUiShared: 326654
   eventAnnotation: 20500
+  exploratoryView: 74673
   expressionError: 22127
   expressionGauge: 25000
   expressionHeatmap: 27505
@@ -93,6 +94,7 @@ pageLoadAssetSize:
   navigation: 37269
   newsfeed: 42228
   observability: 95000
+  observabilityShared: 21266
   osquery: 107090
   painlessLab: 179748
   presentationUtil: 58834

@@ -1236,7 +1236,7 @@ describe('SearchSource', () => {
 
       test('doesnt call any post flight requests if disabled', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg').postFlightRequest = jest.fn();
+        typesRegistry.get('avg')!.postFlightRequest = jest.fn();
         const ac = getAggConfigs(typesRegistry, false);
 
         searchSource = new SearchSource({}, searchSourceDependencies);
@@ -1251,12 +1251,12 @@ describe('SearchSource', () => {
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
         expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
 
-        expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(0);
+        expect(typesRegistry.get('avg')!.postFlightRequest).toHaveBeenCalledTimes(0);
       });
 
       test('doesnt call any post flight if searchsource has error', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg').postFlightRequest = jest.fn();
+        typesRegistry.get('avg')!.postFlightRequest = jest.fn();
         const ac = getAggConfigs(typesRegistry, true);
 
         searchSourceDependencies.search = jest.fn().mockImplementation(() =>
@@ -1278,12 +1278,12 @@ describe('SearchSource', () => {
         expect(fetchSub.complete).toHaveBeenCalledTimes(0);
         expect(fetchSub.error).toHaveBeenNthCalledWith(1, 1);
 
-        expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(0);
+        expect(typesRegistry.get('avg')!.postFlightRequest).toHaveBeenCalledTimes(0);
       });
 
       test('calls post flight requests, fires 1 extra response, returns last response', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg').postFlightRequest = jest.fn().mockResolvedValue({
+        typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockResolvedValue({
           other: 5,
         });
 
@@ -1325,12 +1325,12 @@ describe('SearchSource', () => {
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
         expect(resp.rawResponse).toStrictEqual({ other: 5 });
-        expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(3);
+        expect(typesRegistry.get('avg')!.postFlightRequest).toHaveBeenCalledTimes(3);
       });
 
       test('calls post flight requests only once, with multiple subs (shareReplay)', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg').postFlightRequest = jest.fn().mockResolvedValue({
+        typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockResolvedValue({
           other: 5,
         });
 
@@ -1366,12 +1366,12 @@ describe('SearchSource', () => {
 
         expect(fetchSub.next).toHaveBeenCalledTimes(3);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
-        expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(1);
+        expect(typesRegistry.get('avg')!.postFlightRequest).toHaveBeenCalledTimes(1);
       });
 
       test('calls post flight requests, handles error', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg').postFlightRequest = jest.fn().mockRejectedValue(undefined);
+        typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockRejectedValue(undefined);
         const ac = getAggConfigs(typesRegistry, true);
 
         searchSource = new SearchSource({}, searchSourceDependencies);
@@ -1385,7 +1385,7 @@ describe('SearchSource', () => {
         expect(fetchSub.next).toHaveBeenCalledTimes(2);
         expect(fetchSub.complete).toHaveBeenCalledTimes(0);
         expect(fetchSub.error).toHaveBeenCalledTimes(1);
-        expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(1);
+        expect(typesRegistry.get('avg')!.postFlightRequest).toHaveBeenCalledTimes(1);
       });
     });
   });

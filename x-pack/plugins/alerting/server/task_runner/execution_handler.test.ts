@@ -92,6 +92,7 @@ const rule = {
         stateVal: 'My {{state.value}} goes here',
         alertVal: 'My {{alertId}} {{alertName}} {{spaceId}} {{tags}} {{alertInstanceId}} goes here',
       },
+      uuid: '111-111',
     },
   ],
 } as unknown as SanitizedRule<RuleTypeParams>;
@@ -111,6 +112,7 @@ const defaultExecutionParams = {
   apiKey,
   ruleConsumer: 'rule-consumer',
   executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+  alertUuid: 'uuid-1',
   ruleLabel: 'rule-label',
   request: {} as KibanaRequest,
   alertingEventLogger,
@@ -774,7 +776,7 @@ describe('Execution Handler', () => {
     await executionHandler.run(
       generateAlert({
         id: 1,
-        throttledActions: { 'test:default:1h': { date: new Date(DATE_1970) } },
+        throttledActions: { '111-111': { date: new Date(DATE_1970) } },
       })
     );
 
@@ -916,10 +918,7 @@ describe('Execution Handler', () => {
 
   test('skips summary actions (per rule run) when there is no alerts', async () => {
     getSummarizedAlertsMock.mockResolvedValue({
-      new: {
-        count: 1,
-        data: [mockAAD],
-      },
+      new: { count: 0, data: [] },
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     });
@@ -941,6 +940,7 @@ describe('Execution Handler', () => {
                 message:
                   'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
               },
+              alertsFilter: { query: { kql: 'test:1', dsl: '{}' } },
             },
           ],
         },
@@ -949,7 +949,6 @@ describe('Execution Handler', () => {
 
     await executionHandler.run({});
 
-    expect(getSummarizedAlertsMock).not.toHaveBeenCalled();
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
     expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
   });
@@ -982,6 +981,7 @@ describe('Execution Handler', () => {
                 message:
                   'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
               },
+              uuid: '111-111',
             },
           ],
         },
@@ -998,8 +998,8 @@ describe('Execution Handler', () => {
       excludedAlertInstanceIds: ['foo'],
     });
     expect(result).toEqual({
-      throttledActions: {
-        'testActionTypeId:summary:1d': {
+      throttledSummaryActions: {
+        '111-111': {
           date: new Date(),
         },
       },
@@ -1067,13 +1067,15 @@ describe('Execution Handler', () => {
                 message:
                   'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
               },
+              uuid: '111-111',
             },
           ],
         },
         taskInstance: {
+          ...defaultExecutionParams.taskInstance,
           state: {
             ...defaultExecutionParams.taskInstance.state,
-            summaryActions: { 'testActionTypeId:summary:1d': { date: new Date() } },
+            summaryActions: { '111-111': { date: new Date() } },
           },
         } as unknown as ConcreteTaskInstance,
       })
@@ -1112,6 +1114,7 @@ describe('Execution Handler', () => {
               params: {
                 message: 'New: {{alerts.new.count}}',
               },
+              uuid: '111-111',
             },
             {
               id: '2',
@@ -1122,16 +1125,18 @@ describe('Execution Handler', () => {
                 notifyWhen: 'onThrottleInterval',
                 throttle: '10d',
               },
+              uuid: '222-222',
             },
           ],
         },
         taskInstance: {
+          ...defaultExecutionParams.taskInstance,
           state: {
             ...defaultExecutionParams.taskInstance.state,
             summaryActions: {
-              'testActionTypeId:summary:1d': { date: new Date() },
-              'testActionTypeId:summary:10d': { date: new Date() },
-              'testActionTypeId:summary:10m': { date: new Date() }, // does not exist in the actions list
+              '111-111': { date: new Date() },
+              '222-222': { date: new Date() },
+              '333-333': { date: new Date() }, // does not exist in the actions list
             },
           },
         } as unknown as ConcreteTaskInstance,
@@ -1140,11 +1145,11 @@ describe('Execution Handler', () => {
 
     const result = await executionHandler.run({});
     expect(result).toEqual({
-      throttledActions: {
-        'testActionTypeId:summary:1d': {
+      throttledSummaryActions: {
+        '111-111': {
           date: new Date(),
         },
-        'testActionTypeId:summary:10d': {
+        '222-222': {
           date: new Date(),
         },
       },
@@ -1285,6 +1290,146 @@ describe('Execution Handler', () => {
             ],
           ]
       `);
+  });
+
+  test('does not schedule actions for the summarized alerts that are filtered out', async () => {
+    getSummarizedAlertsMock.mockResolvedValue({
+      new: {
+        count: 0,
+        data: [],
+      },
+      ongoing: {
+        count: 0,
+        data: [],
+      },
+      recovered: { count: 0, data: [] },
+    });
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        rule: {
+          ...defaultExecutionParams.rule,
+          mutedInstanceIds: ['foo'],
+          actions: [
+            {
+              id: '1',
+              uuid: '111',
+              group: null,
+              actionTypeId: 'testActionTypeId',
+              frequency: {
+                summary: true,
+                notifyWhen: 'onActiveAlert',
+                throttle: null,
+              },
+              params: {
+                message:
+                  'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
+              },
+              alertsFilter: {
+                query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}' },
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    await executionHandler.run({
+      ...generateAlert({ id: 1 }),
+      ...generateAlert({ id: 2 }),
+    });
+
+    expect(getSummarizedAlertsMock).toHaveBeenCalledWith({
+      executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+      ruleId: '1',
+      spaceId: 'test1',
+      excludedAlertInstanceIds: ['foo'],
+      alertsFilter: {
+        query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}' },
+      },
+    });
+    expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+    expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
+      '(2) alerts have been filtered out for: testActionTypeId:111'
+    );
+  });
+
+  test('does not schedule actions for the for-each type alerts that are filtered out', async () => {
+    getSummarizedAlertsMock.mockResolvedValue({
+      new: {
+        count: 1,
+        data: [{ ...mockAAD, kibana: { alert: { instance: { id: '1' } } } }],
+      },
+      ongoing: {
+        count: 0,
+        data: [],
+      },
+      recovered: { count: 0, data: [] },
+    });
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        rule: {
+          ...defaultExecutionParams.rule,
+          mutedInstanceIds: ['foo'],
+          actions: [
+            {
+              id: '1',
+              uuid: '111',
+              group: 'default',
+              actionTypeId: 'testActionTypeId',
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActiveAlert',
+                throttle: null,
+              },
+              params: {},
+              alertsFilter: {
+                query: { kql: 'kibana.alert.instance.id:1', dsl: '{}' },
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    await executionHandler.run({
+      ...generateAlert({ id: 1 }),
+      ...generateAlert({ id: 2 }),
+      ...generateAlert({ id: 3 }),
+    });
+
+    expect(getSummarizedAlertsMock).toHaveBeenCalledWith({
+      executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+      ruleId: '1',
+      spaceId: 'test1',
+      excludedAlertInstanceIds: ['foo'],
+      alertsFilter: {
+        query: { kql: 'kibana.alert.instance.id:1', dsl: '{}' },
+      },
+    });
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith([
+      {
+        apiKey: 'MTIzOmFiYw==',
+        consumer: 'rule-consumer',
+        executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+        id: '1',
+        params: {},
+        relatedSavedObjects: [{ id: '1', namespace: 'test1', type: 'alert', typeId: 'test' }],
+        source: { source: { id: '1', type: 'alert' }, type: 'SAVED_OBJECT' },
+        spaceId: 'test1',
+      },
+    ]);
+    expect(alertingEventLogger.logAction).toHaveBeenCalledWith({
+      alertGroup: 'default',
+      alertId: '1',
+      id: '1',
+      typeId: 'testActionTypeId',
+    });
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
+      '(2) alerts have been filtered out for: testActionTypeId:111'
+    );
   });
 
   describe('rule url', () => {

@@ -277,4 +277,33 @@ describe('nodeBuilder', () => {
       `);
     });
   });
+
+  describe('range method', () => {
+    const date = new Date(1679741259769);
+    const dateString = date.toISOString();
+
+    test('formats all range operators', () => {
+      const operators: Array<'gt' | 'gte' | 'lt' | 'lte'> = ['gt', 'gte', 'lt', 'lte'];
+
+      for (const operator of operators) {
+        const nodes = nodeBuilder.range('foo', operator, dateString);
+        const query = toElasticsearchQuery(nodes);
+
+        expect(query).toMatchObject({
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                range: {
+                  foo: {
+                    [operator]: dateString,
+                  },
+                },
+              },
+            ],
+          },
+        });
+      }
+    });
+  });
 });

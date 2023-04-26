@@ -13,7 +13,7 @@ u_JJX4UBvD7uFsw9L2x4,timeless-test,1,Proterozoic,-,Paleozoic,Permian
 
 exports[`Reporting APIs CSV Generation from Saved Search ID export from non-timebased data view query stored in the saved search job response data is correct 1`] = `
 Object {
-  "contentDisposition": "attachment; filename=\\"*zoic.csv\\"",
+  "contentDisposition": "attachment; filename=*zoic.csv",
   "contentType": "text/csv; charset=utf-8",
   "title": "*zoic",
 }
@@ -66,7 +66,7 @@ exports[`Reporting APIs CSV Generation from Saved Search ID export from timebase
 
 exports[`Reporting APIs CSV Generation from Saved Search ID export from timebased data view timezone formatting export with custom timezone and timeRange from locator params job response data is correct 1`] = `
 Object {
-  "contentDisposition": "attachment; filename=\\"Ecommerce Data.csv\\"",
+  "contentDisposition": "attachment; filename=Ecommerce%20Data.csv",
   "contentType": "text/csv; charset=utf-8",
   "title": "Ecommerce Data",
 }

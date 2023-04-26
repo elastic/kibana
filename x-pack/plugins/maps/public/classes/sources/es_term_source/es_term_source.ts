@@ -26,13 +26,13 @@ import {
 } from '../../../../common/elasticsearch_util';
 import {
   ESTermSourceDescriptor,
-  VectorJoinSourceRequestMeta,
+  VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { ITermJoinSource } from '../term_join_source';
 import { IField } from '../../fields/field';
-import { makePublicExecutionContext } from '../../../util';
+import { mergeExecutionContext } from '../execution_context_utils';
 
 const TERMS_AGG_NAME = 'join';
 const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
@@ -122,7 +122,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
   }
 
   async getPropertiesMap(
-    searchFilters: VectorJoinSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     leftSourceName: string,
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void,
@@ -133,7 +133,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     }
 
     const indexPattern = await this.getIndexPattern();
-    const searchSource: ISearchSource = await this.makeSearchSource(searchFilters, 0);
+    const searchSource: ISearchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
     const termsField = getField(indexPattern, this._termField.getName());
     const termsAgg = {
@@ -158,8 +158,11 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
           rightSource: `${indexPattern.getName()}:${this._termField.getName()}`,
         },
       }),
-      searchSessionId: searchFilters.searchSessionId,
-      executionContext: makePublicExecutionContext('es_term_source:terms'),
+      searchSessionId: requestMeta.searchSessionId,
+      executionContext: mergeExecutionContext(
+        { description: 'es_term_source:terms' },
+        requestMeta.executionContext
+      ),
       requestsAdapter: inspectorAdapters.requests,
     });
 

@@ -23,7 +23,6 @@ import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { getDefaultMonitoring } from '../../lib/monitoring';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
@@ -69,6 +68,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   auditLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -416,6 +417,7 @@ describe('create()', () => {
         ],
         "alertTypeId": "123",
         "apiKey": null,
+        "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -457,6 +459,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 0,
         "running": false,
         "schedule": Object {
           "interval": "1m",
@@ -636,6 +639,7 @@ describe('create()', () => {
         ],
         "alertTypeId": "123",
         "apiKey": null,
+        "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -677,6 +681,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 0,
         "running": false,
         "schedule": Object {
           "interval": "1m",
@@ -1086,6 +1091,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
@@ -1105,6 +1111,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: null,
         params: { bar: true },
+        revision: 0,
         running: false,
         schedule: { interval: '1m' },
         tags: ['foo'],
@@ -1295,6 +1302,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
@@ -1314,6 +1322,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: null,
         params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
+        revision: 0,
         running: false,
         schedule: { interval: '1m' },
         tags: ['foo'],
@@ -1474,6 +1483,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         legacyId: null,
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
@@ -1493,6 +1503,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: null,
         params: { bar: true, parameterThatIsSavedObjectRef: 'action_0' },
+        revision: 0,
         running: false,
         schedule: { interval: '1m' },
         tags: ['foo'],
@@ -1646,6 +1657,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -1668,6 +1680,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
         running: false,
       },
       {
@@ -1782,6 +1795,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -1804,6 +1818,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
         running: false,
       },
       {
@@ -1918,6 +1933,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -1940,6 +1956,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
         running: false,
       },
       {
@@ -2076,6 +2093,7 @@ describe('create()', () => {
         ],
         apiKeyOwner: null,
         apiKey: null,
+        apiKeyCreatedByUser: null,
         legacyId: null,
         createdBy: 'elastic',
         updatedBy: 'elastic',
@@ -2116,6 +2134,7 @@ describe('create()', () => {
         meta: {
           versionApiKeyLastmodified: 'v8.0.0',
         },
+        revision: 0,
         running: false,
       },
       {
@@ -2470,6 +2489,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
         running: false,
       },
       {
@@ -2553,6 +2573,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyCreatedByUser: null,
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -2575,6 +2596,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
         running: false,
       },
       {
@@ -3193,5 +3215,243 @@ describe('create()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
+  });
+
+  test('throws error when some actions have alertsFilter but neither timeframe nor query', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [
+        { id: 'default', name: 'Default' },
+        { id: 'group2', name: 'Action Group 2' },
+        { id: 'group3', name: 'Action Group 3' },
+      ],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+      getSummarizedAlerts: jest.fn().mockResolvedValue({}),
+    }));
+
+    const data = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '10h',
+          },
+          alertsFilter: {},
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to validate actions due to the following error: Action's alertsFilter  must have either \\"query\\" or \\"timeframe\\" : 149"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('throws error when some actions have alertsFilter but the rule type does not support it', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: true,
+            notifyWhen: 'onActiveAlert',
+            throttle: null,
+          },
+          alertsFilter: {
+            query: { kql: 'test:1' },
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to validate actions due to the following error: This ruleType (Test) can't have an action with Alerts Filter. Actions: [150]"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('calls the authentication API key function if the user is authenticated using an api key', async () => {
+    const data = getMockData();
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        actions: [],
+        scheduledTaskId: 'task-123',
+      },
+      references: [
+        {
+          id: '1',
+          name: 'action_0',
+          type: 'action',
+        },
+      ],
+    });
+    await rulesClient.create({ data });
+
+    expect(rulesClientParams.isAuthenticationTypeAPIKey).toHaveBeenCalledTimes(1);
+    expect(rulesClientParams.getAuthenticationAPIKey).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        actions: [
+          {
+            actionRef: 'action_0',
+            group: 'default',
+            actionTypeId: 'test',
+            params: { foo: true },
+            uuid: '151',
+          },
+        ],
+        alertTypeId: '123',
+        consumer: 'bar',
+        name: 'abc',
+        legacyId: null,
+        params: { bar: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        apiKeyOwner: 'elastic',
+        apiKeyCreatedByUser: true,
+        createdBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        enabled: true,
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
+        schedule: { interval: '1m' },
+        throttle: null,
+        notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
+        mutedInstanceIds: [],
+        tags: ['foo'],
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+          error: null,
+          warning: null,
+        },
+        monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
+        running: false,
+      },
+      {
+        id: 'mock-saved-object-id',
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+      }
+    );
+  });
+
+  test('throws error and does not add API key to invalidatePendingApiKey SO when create saved object fails if the user is authenticated using an api key', async () => {
+    const data = getMockData();
+    rulesClientParams.getAuthenticationAPIKey.mockReturnValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Test failure"`
+    );
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: [] },
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 });

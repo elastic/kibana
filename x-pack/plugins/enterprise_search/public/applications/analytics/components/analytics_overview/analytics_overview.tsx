@@ -9,10 +9,16 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import {
+  LicensingCallout,
+  LICENSING_FEATURE,
+} from '../../../enterprise_search_content/components/shared/licensing_callout/licensing_callout';
+import { KibanaLogic } from '../../../shared/kibana';
+import { LicensingLogic } from '../../../shared/licensing';
 import { AddAnalyticsCollection } from '../add_analytics_collections/add_analytics_collection';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
@@ -26,7 +32,13 @@ export const AnalyticsOverview: React.FC = () => {
   const { analyticsCollections, isLoading, hasNoAnalyticsCollections } =
     useValues(AnalyticsCollectionsLogic);
 
+  const { isCloud } = useValues(KibanaLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+
+  const isGated = !isCloud && !hasPlatinumLicense;
+
   useEffect(() => {
+    if (isGated) return;
     fetchAnalyticsCollections();
   }, []);
 
@@ -34,7 +46,7 @@ export const AnalyticsOverview: React.FC = () => {
     <EnterpriseSearchAnalyticsPageTemplate
       pageChrome={[]}
       restrictWidth
-      isLoading={isLoading}
+      isLoading={isLoading && !isGated}
       pageViewTelemetry="Analytics Collections Overview"
       pageHeader={{
         description: i18n.translate(
@@ -47,31 +59,20 @@ export const AnalyticsOverview: React.FC = () => {
         pageTitle: i18n.translate('xpack.enterpriseSearch.analytics.collections.pageTitle', {
           defaultMessage: 'Behavioral Analytics',
         }),
-        rightSideItems: [<AddAnalyticsCollection />],
+        rightSideItems: [<AddAnalyticsCollection disabled={isGated} />],
       }}
     >
-      {!hasNoAnalyticsCollections && (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle>
-              <h2>
-                {i18n.translate('xpack.enterpriseSearch.analytics.collections.headingTitle', {
-                  defaultMessage: 'Collections',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AddAnalyticsCollection />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-
-      <EuiSpacer size="l" />
-      {hasNoAnalyticsCollections ? (
-        <AnalyticsOverviewEmptyPage />
+      {isGated ? (
+        <EuiFlexItem>
+          <LicensingCallout feature={LICENSING_FEATURE.ANALYTICS} />
+        </EuiFlexItem>
+      ) : hasNoAnalyticsCollections ? (
+        <>
+          <EuiSpacer size="l" />
+          <AnalyticsOverviewEmptyPage />
+        </>
       ) : (
-        <AnalyticsCollectionTable collections={analyticsCollections} isLoading={isLoading} />
+        <AnalyticsCollectionTable collections={analyticsCollections} />
       )}
     </EnterpriseSearchAnalyticsPageTemplate>
   );

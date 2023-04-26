@@ -27,9 +27,15 @@ export interface EntryPointsTableProps {
   domain: CrawlerDomain;
   indexName: string;
   items: EntryPoint[];
+  title?: string | React.ReactNode;
 }
 
-export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({ domain, indexName, items }) => {
+export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
+  domain,
+  indexName,
+  items,
+  title,
+}) => {
   const { onAdd, onDelete, onUpdate } = useActions(EntryPointsTableLogic);
   const field = 'value';
 
@@ -76,7 +82,8 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({ domain, inde
           {i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.description', {
             defaultMessage:
               'Include the most important URLs for your website here. Entry point URLs will be the first pages to be indexed and processed for links to other pages.',
-          })}{' '}
+          })}
+          <EuiSpacer size="s" />
           <EuiLink href={docLinks.crawlerManaging} target="_blank" external>
             {i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.learnMoreLinkText', {
               defaultMessage: 'Learn more about entry points.',
@@ -130,7 +137,7 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({ domain, inde
       onAdd={onAdd}
       onDelete={onDelete}
       onUpdate={onUpdate}
-      title=""
+      title={title}
       disableReordering
     />
   );

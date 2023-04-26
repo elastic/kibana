@@ -17,32 +17,34 @@ export const registerObservabilityRuleTypes = (
   config: ConfigSchema,
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
 ) => {
-  if (config.unsafe.slo.enabled) {
-    observabilityRuleTypeRegistry.register({
-      id: SLO_BURN_RATE_RULE_ID,
-      description: i18n.translate('xpack.observability.slo.rules.burnRate.description', {
-        defaultMessage: 'Alert when your SLO burn rate is too high over a defined period of time.',
-      }),
-      format: ({ fields }) => {
-        return {
-          reason: fields[ALERT_REASON] ?? '-',
-          link: '/app/observability/slos',
-        };
-      },
-      iconClass: 'bell',
-      documentationUrl(docLinks) {
-        return '/unknown/docs';
-      },
-      ruleParamsExpression: lazy(() => import('../components/app/burn_rate_rule_editor')),
-      validate: validateBurnRateRule,
-      requiresAppContext: false,
-      defaultActionMessage: i18n.translate(
-        'xpack.observability.slo.rules.burnRate.defaultActionMessage',
-        {
-          defaultMessage: `\\{\\{rule.name\\}\\} is firing:
-- Reason: \\{\\{context.reason\\}\\}`,
-        }
-      ),
-    });
-  }
+  observabilityRuleTypeRegistry.register({
+    id: SLO_BURN_RATE_RULE_ID,
+    description: i18n.translate('xpack.observability.slo.rules.burnRate.description', {
+      defaultMessage: 'Alert when your SLO burn rate is too high over a defined period of time.',
+    }),
+    format: ({ fields }) => {
+      return {
+        reason: fields[ALERT_REASON] ?? '-',
+        link: '/app/observability/slos',
+      };
+    },
+    iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return '/unknown/docs';
+    },
+    ruleParamsExpression: lazy(() => import('../components/app/burn_rate_rule_editor')),
+    validate: validateBurnRateRule,
+    requiresAppContext: false,
+    defaultActionMessage: i18n.translate(
+      'xpack.observability.slo.rules.burnRate.defaultActionMessage',
+      {
+        defaultMessage: `The rule \\{\\{rule.name\\}\\} for the SLO '\\{\\{context.sloName\\}\\}' is firing:
+- Reason: \\{\\{context.reason\\}\\}
+- The burn rate over the last \\{\\{context.longWindow.duration\\}\\} is \\{\\{context.longWindow.burnRate\\}\\}
+- The burn rate over the last \\{\\{context.shortWindow.duration\\}\\} is \\{\\{context.shortWindow.burnRate\\}\\}
+- The burn rate threshold is set to \\{\\{context.burnRateThreshold\\}\\}
+- View in the SLO details page: \\{\\{context.viewInAppUrl\\}\\}`,
+      }
+    ),
+  });
 };

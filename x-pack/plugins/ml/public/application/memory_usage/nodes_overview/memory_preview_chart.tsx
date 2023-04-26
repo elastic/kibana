@@ -138,7 +138,15 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
             }),
           },
         ]}
-        marker={<EuiIcon type="arrowDown" />}
+        marker={
+          <EuiIcon
+            type="arrowDown"
+            aria-label={i18n.translate('xpack.ml.trainedModels.nodesList.mlMaxMemoryAriaLabel', {
+              defaultMessage: 'Maximum memory permitted for ML native processes {bytes}',
+              values: { bytes: bytesFormatter(memoryOverview.ml_max_in_bytes) },
+            })}
+          />
+        }
         markerPosition={Position.Top}
       />
 

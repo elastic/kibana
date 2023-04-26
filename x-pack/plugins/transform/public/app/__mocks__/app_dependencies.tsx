@@ -25,6 +25,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { AppDependencies } from '../app_dependencies';
 import { MlSharedContext } from './shared_context';
 import type { GetMlSharedImportsReturnType } from '../../shared_imports';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 const coreSetup = coreMock.createSetup();
 const coreStart = coreMock.createStart();
@@ -43,7 +44,7 @@ const appDependencies: AppDependencies = {
   docLinks: coreStart.docLinks,
   i18n: coreStart.i18n,
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
-  notifications: coreSetup.notifications,
+  notifications: coreStart.notifications,
   uiSettings: coreStart.uiSettings,
   savedObjects: coreStart.savedObjects,
   storage: { get: jest.fn() } as unknown as Storage,
@@ -56,6 +57,7 @@ const appDependencies: AppDependencies = {
   ml: {} as GetMlSharedImportsReturnType,
   triggersActionsUi: {} as jest.Mocked<TriggersAndActionsUIPublicPluginStart>,
   unifiedSearch: {} as jest.Mocked<UnifiedSearchPublicPluginStart>,
+  savedObjectsManagement: {} as jest.Mocked<SavedObjectsManagementPluginStart>,
 };
 
 export const useAppDependencies = () => {

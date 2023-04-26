@@ -100,7 +100,30 @@ describe('RuleDataClient', () => {
 
       expect(scopedClusterClient.search).toHaveBeenCalledWith({
         body: query,
+        ignore_unavailable: true,
         index: `.alerts-observability.apm.alerts*`,
+      });
+    });
+
+    test('getReader searchs an index pattern without a wildcard when the namespace is provided', async () => {
+      const ruleDataClient = new RuleDataClient(
+        getRuleDataClientOptions({
+          waitUntilReadyForReading: new Promise((resolve) =>
+            setTimeout(resolve, 3000, right(scopedClusterClient))
+          ),
+        })
+      );
+
+      const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
+      const reader = ruleDataClient.getReader({ namespace: 'test' });
+      await reader.search({
+        body: query,
+      });
+
+      expect(scopedClusterClient.search).toHaveBeenCalledWith({
+        body: query,
+        ignore_unavailable: true,
+        index: `.alerts-observability.apm.alerts-test`,
       });
     });
 

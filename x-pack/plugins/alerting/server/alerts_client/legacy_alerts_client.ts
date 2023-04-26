@@ -143,12 +143,6 @@ export class LegacyAlertsClient<
       flappingSettings,
     });
 
-    setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-      flappingSettings,
-      processedAlertsActive,
-      processedAlertsRecovered
-    );
-
     const { trimmedAlertsRecovered, earlyRecoveredAlerts } = trimRecoveredAlerts(
       this.options.logger,
       processedAlertsRecovered,
@@ -212,5 +206,13 @@ export class LegacyAlertsClient<
 
   public getExecutorServices() {
     return getPublicAlertFactory(this.alertFactory!);
+  }
+
+  public setFlapping(flappingSettings: RulesSettingsFlappingProperties) {
+    setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+      flappingSettings,
+      this.processedAlerts.active,
+      this.processedAlerts.recovered
+    );
   }
 }

@@ -104,7 +104,7 @@ describe('Flash Message Helpers', () => {
         expect(FlashMessagesLogic.values.toastMessages).toEqual([
           {
             color: 'danger',
-            iconType: 'alert',
+            iconType: 'error',
             title: 'Something went wrong',
             id: 'errorToast-1234567890',
           },
@@ -142,7 +142,7 @@ describe('Flash Message Helpers', () => {
         expect(FlashMessagesLogic.values.toastMessages).toEqual([
           {
             color: 'danger',
-            iconType: 'alert',
+            iconType: 'error',
             title: 'Something went wrong',
             text: "Here's some helpful advice on what to do",
             toastLifeTimeMs: 50000,

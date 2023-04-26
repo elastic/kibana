@@ -36,7 +36,7 @@ import type {
   LensSavedObjectAttributes,
   LensUnwrapMetaInfo,
 } from '../embeddable/embeddable';
-import { DOC_TYPE } from '../../common';
+import { DOC_TYPE } from '../../common/constants';
 import { LensAppServices } from '../app_plugin/types';
 import { mockDataPlugin } from './data_plugin_mock';
 import { getLensInspectorService } from '../lens_inspector_service';

@@ -106,7 +106,7 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
           <EuiCallOut
             size="s"
             color="warning"
-            iconType="alert"
+            iconType="warning"
             title={i18n.translate(
               'xpack.fleet.agentReassignPolicy.packageBadgeFleetServerWarning',
               {

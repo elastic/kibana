@@ -52,6 +52,8 @@
     "@kbn/usage-collection-plugin",
     "@kbn/core-http-browser-mocks",
     "@kbn/shared-ux-router",
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/saved-objects-finder-plugin",
   ],
   "exclude": [
     "target/**/*",

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { formatMitreAttackDescription } from '../../helpers/rules';
-import type { Mitre } from '../../objects/rule';
-import { getNewTermsRule } from '../../objects/rule';
+import { formatMitreAttackDescription, getHumanizedDuration } from '../../helpers/rules';
+import { getIndexPatterns, getNewTermsRule } from '../../objects/rule';
 
 import { ALERT_DATA_GRID } from '../../screens/alerts';
 import {
@@ -46,7 +45,6 @@ import {
 
 import { getDetails } from '../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
   createAndEnableRule,
@@ -60,7 +58,6 @@ import {
 import { login, visit } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
-import type { CompleteTimeline } from '../../objects/timeline';
 
 describe('New Terms rules', () => {
   before(() => {
@@ -68,51 +65,42 @@ describe('New Terms rules', () => {
     login();
   });
   describe('Detection rules, New Terms', () => {
-    const expectedUrls = getNewTermsRule().referenceUrls?.join('');
-    const expectedFalsePositives = getNewTermsRule().falsePositivesExamples?.join('');
-    const expectedTags = getNewTermsRule().tags?.join('');
-    const mitreAttack = getNewTermsRule().mitre as Mitre[];
-    const expectedMitre = formatMitreAttackDescription(mitreAttack);
+    const rule = getNewTermsRule();
+    const expectedUrls = rule.references?.join('');
+    const expectedFalsePositives = rule.false_positives?.join('');
+    const expectedTags = rule.tags?.join('');
+    const mitreAttack = rule.threat;
+    const expectedMitre = formatMitreAttackDescription(mitreAttack ?? []);
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
-      const timeline = getNewTermsRule().timeline as CompleteTimeline;
       deleteAlertsAndRules();
-      createTimeline(timeline).then((response) => {
-        cy.wrap({
-          ...getNewTermsRule(),
-          timeline: {
-            ...timeline,
-            id: response.body.data.persistTimeline.timeline.savedObjectId,
-          },
-        }).as('rule');
-      });
     });
 
     it('Creates and enables a new terms rule', function () {
       visit(RULE_CREATION);
       selectNewTermsRuleType();
-      fillDefineNewTermsRuleAndContinue(this.rule);
-      fillAboutRuleAndContinue(this.rule);
-      fillScheduleRuleAndContinue(this.rule);
+      fillDefineNewTermsRuleAndContinue(rule);
+      fillAboutRuleAndContinue(rule);
+      fillScheduleRuleAndContinue(rule);
       createAndEnableRule();
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
       expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
 
-      cy.get(RULE_NAME).should('have.text', this.rule.name);
-      cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
-      cy.get(SEVERITY).should('have.text', this.rule.severity);
+      cy.get(RULE_NAME).should('have.text', rule.name);
+      cy.get(RISK_SCORE).should('have.text', rule.risk_score);
+      cy.get(SEVERITY).should('have.text', 'High');
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
       goToRuleDetails();
 
-      cy.get(RULE_NAME_HEADER).should('contain', `${this.rule.name}`);
-      cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', this.rule.description);
+      cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
+      cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
       cy.get(ABOUT_DETAILS).within(() => {
-        getDetails(SEVERITY_DETAILS).should('have.text', this.rule.severity);
-        getDetails(RISK_SCORE_DETAILS).should('have.text', this.rule.riskScore);
+        getDetails(SEVERITY_DETAILS).should('have.text', 'High');
+        getDetails(RISK_SCORE_DETAILS).should('have.text', rule.risk_score);
         getDetails(REFERENCE_URLS_DETAILS).should((details) => {
           expect(removeExternalLinkText(details.text())).equal(expectedUrls);
         });
@@ -125,22 +113,20 @@ describe('New Terms rules', () => {
       cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
-        getDetails(INDEX_PATTERNS_DETAILS).should('have.text', 'auditbeat-*');
-        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', this.rule.customQuery);
+        getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
+        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.query);
         getDetails(RULE_TYPE_DETAILS).should('have.text', 'New Terms');
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
         getDetails(NEW_TERMS_FIELDS_DETAILS).should('have.text', 'host.name');
         getDetails(NEW_TERMS_HISTORY_WINDOW_DETAILS).should('have.text', '51000h');
       });
       cy.get(SCHEDULE_DETAILS).within(() => {
-        getDetails(RUNS_EVERY_DETAILS).should(
-          'have.text',
-          `${this.rule.runsEvery.interval}${this.rule.runsEvery.type}`
+        getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+        const humanizedDuration = getHumanizedDuration(
+          rule.from ?? 'now-6m',
+          rule.interval ?? '5m'
         );
-        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
-          'have.text',
-          `${this.rule.lookBack.interval}${this.rule.lookBack.type}`
-        );
+        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
       });
 
       waitForTheRuleToBeExecuted();
@@ -149,9 +135,9 @@ describe('New Terms rules', () => {
       cy.get(ALERT_DATA_GRID)
         .invoke('text')
         .then((text) => {
-          expect(text).contains(this.rule.name);
-          expect(text).contains(this.rule.severity.toLowerCase());
-          expect(text).contains(this.rule.riskScore);
+          expect(text).contains(rule.name);
+          expect(text).contains(rule.severity);
+          expect(text).contains(rule.risk_score);
         });
     });
   });

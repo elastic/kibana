@@ -18,6 +18,7 @@ export type {
   EphemeralTask,
   TaskRunCreatorFunction,
   RunContext,
+  IntervalSchedule,
 } from './task';
 
 export { TaskStatus } from './task';

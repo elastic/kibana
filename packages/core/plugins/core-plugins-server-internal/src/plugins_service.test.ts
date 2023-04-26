@@ -728,7 +728,7 @@ describe('PluginsService', () => {
         },
         coreContext: { coreId, env, logger, configService },
         instanceInfo: { uuid: 'uuid' },
-        nodeInfo: { roles: { backgroundTasks: true, ui: true } },
+        nodeInfo: { roles: { backgroundTasks: true, ui: true, migrator: false } },
       });
 
       const logs = loggingSystemMock.collect(logger);

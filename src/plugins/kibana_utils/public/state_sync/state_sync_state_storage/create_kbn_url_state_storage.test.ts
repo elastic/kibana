@@ -12,7 +12,7 @@ import { History, createBrowserHistory } from 'history';
 import { takeUntil, toArray } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { CoreScopedHistory } from '@kbn/core/public';
-import { withNotifyOnErrors } from '../../state_management/url';
+import { withNotifyOnErrors, flushNotifyOnErrors } from '../../state_management/url';
 import { coreMock } from '@kbn/core/public/mocks';
 
 describe('KbnUrlStateStorage', () => {
@@ -102,6 +102,16 @@ describe('KbnUrlStateStorage', () => {
       expect(cb).toBeCalledWith(expect.any(Error));
     });
 
+    it('should notify about errors throttled', () => {
+      const cb = jest.fn();
+      urlStateStorage = createKbnUrlStateStorage({ useHash: false, history, onGetError: cb });
+      const key = '_s';
+      history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
+      urlStateStorage.get(key);
+      urlStateStorage.get(key);
+      expect(cb).toBeCalledTimes(1);
+    });
+
     describe('withNotifyOnErrors integration', () => {
       test('toast is shown', () => {
         const toasts = coreMock.createStart().notifications.toasts;
@@ -113,6 +123,7 @@ describe('KbnUrlStateStorage', () => {
         const key = '_s';
         history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
         expect(() => urlStateStorage.get(key)).not.toThrow();
+        flushNotifyOnErrors();
         expect(toasts.addError).toBeCalled();
       });
     });
@@ -294,6 +305,7 @@ describe('KbnUrlStateStorage', () => {
         const key = '_s';
         history.replace(`/?${key}=(ok:2,test:`); // malformed rison
         expect(() => urlStateStorage.get(key)).not.toThrow();
+        flushNotifyOnErrors();
         expect(toasts.addError).toBeCalled();
       });
     });

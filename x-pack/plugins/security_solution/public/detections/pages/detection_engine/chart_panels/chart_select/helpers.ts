@@ -108,21 +108,21 @@ export const getOptionProperties = (
       return {
         id: TABLE_ID,
         'data-test-subj': `chart-select-${TABLE_ID}`,
-        label: i18n.TABLE_TITLE,
+        label: i18n.COUNTS,
         value: TABLE_ID,
       };
     case TREND_ID:
       return {
         id: TREND_ID,
         'data-test-subj': `chart-select-${TREND_ID}`,
-        label: i18n.TREND_TITLE,
+        label: i18n.TREND,
         value: TREND_ID,
       };
     case TREEMAP_ID:
       return {
         id: TREEMAP_ID,
         'data-test-subj': `chart-select-${TREEMAP_ID}`,
-        label: i18n.TREEMAP_TITLE,
+        label: i18n.TREEMAP,
         value: TREEMAP_ID,
       };
     case CHARTS_ID:

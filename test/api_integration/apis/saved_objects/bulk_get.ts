@@ -72,7 +72,8 @@ export default function ({ getService }: FtrProviderContext) {
                     resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
                 },
                 migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                coreMigrationVersion: '7.14.0',
+                coreMigrationVersion: '8.8.0',
+                typeMigrationVersion: resp.body.saved_objects[0].typeMigrationVersion,
                 namespaces: ['default'],
                 references: [
                   {
@@ -103,12 +104,14 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 namespaces: ['default'],
                 migrationVersion: resp.body.saved_objects[2].migrationVersion,
-                coreMigrationVersion: '7.14.0',
+                coreMigrationVersion: '8.8.0',
+                typeMigrationVersion: resp.body.saved_objects[2].typeMigrationVersion,
                 references: [],
               },
             ],
           });
           expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
+          expect(resp.body.saved_objects[0].typeMigrationVersion).to.be.ok();
         }));
   });
 }

@@ -123,6 +123,7 @@ export interface ProcessSelf extends ProcessFields {
   entry_leader?: ProcessFields;
   group_leader?: ProcessFields;
   io?: IOFields;
+  previous?: [{ args?: string[]; args_count?: number; executable?: string }];
 }
 
 export interface ProcessEventHost {
@@ -145,16 +146,21 @@ export interface ProcessEventHost {
   };
 }
 
+export interface ProcessEventAlertRuleParameters {
+  query?: string;
+}
+
 export interface ProcessEventAlertRule {
   category?: string;
   consumer?: string;
   description?: string;
   enabled?: boolean;
   name?: string;
-  query?: string;
   risk_score?: number;
   severity?: string;
   uuid?: string;
+  parameters?: ProcessEventAlertRuleParameters;
+  query?: string;
 }
 
 export interface ProcessEventAlert {
@@ -164,7 +170,7 @@ export interface ProcessEventAlert {
   status?: string;
   original_time?: string;
   original_event?: {
-    action?: string;
+    action?: EventAction | EventAction[];
   };
   rule?: ProcessEventAlertRule;
 }
@@ -186,7 +192,7 @@ export interface ProcessEvent {
   event?: {
     kind?: EventKind;
     category?: string[];
-    action?: EventAction;
+    action?: EventAction | EventAction[];
     id?: string;
   };
   file?: {
@@ -236,7 +242,6 @@ export interface Process {
   getOutput(): string;
   getDetails(): ProcessEvent;
   isUserEntered(): boolean;
-  getMaxAlertLevel(): number | null;
   getChildren(verboseMode: boolean): Process[];
   isVerbose(): boolean;
   getEndTime(): string;

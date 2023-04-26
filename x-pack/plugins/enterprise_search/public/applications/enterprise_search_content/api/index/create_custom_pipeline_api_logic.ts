@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
@@ -14,9 +15,7 @@ export interface CreateCustomPipelineApiLogicArgs {
   indexName: string;
 }
 
-export interface CreateCustomPipelineApiLogicResponse {
-  created: string[];
-}
+export type CreateCustomPipelineApiLogicResponse = Record<string, IngestPipeline | undefined>;
 
 export const createCustomPipeline = async ({
   indexName,

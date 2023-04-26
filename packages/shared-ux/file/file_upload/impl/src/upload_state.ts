@@ -8,7 +8,11 @@
 
 import * as Rx from 'rxjs';
 import { ImageMetadataFactory, getImageMetadata, isImage } from '@kbn/shared-ux-file-util';
-import type { FileKind, FileJSON, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
+import type {
+  FileKindBrowser,
+  FileJSON,
+  BaseFilesClient as FilesClient,
+} from '@kbn/shared-ux-file-types';
 import { i18nTexts } from './i18n_texts';
 
 import { createStateSubject, type SimpleStateSubject, parseFileName } from './util';
@@ -48,7 +52,7 @@ export class UploadState {
   private subscriptions: Rx.Subscription[];
 
   constructor(
-    private readonly fileKind: FileKind,
+    private readonly fileKind: FileKindBrowser,
     private readonly client: FilesClient,
     private readonly opts: UploadOptions = { allowRepeatedUploads: false },
     private readonly loadImageMetadata: ImageMetadataFactory = getImageMetadata
@@ -240,7 +244,7 @@ export const createUploadState = ({
   imageMetadataFactory,
   ...options
 }: {
-  fileKind: FileKind;
+  fileKind: FileKindBrowser;
   client: FilesClient;
   imageMetadataFactory?: ImageMetadataFactory;
 } & UploadOptions) => {

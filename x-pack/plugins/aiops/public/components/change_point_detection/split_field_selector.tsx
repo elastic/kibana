@@ -47,6 +47,7 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ val
   return (
     <EuiFormRow>
       <EuiComboBox
+        compressed
         prepend={i18n.translate('xpack.aiops.changePointDetection.selectSpitFieldLabel', {
           defaultMessage: 'Split field',
         })}
@@ -56,6 +57,7 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ val
         onChange={onChangeCallback}
         isClearable
         data-test-subj="aiopsChangePointSplitField"
+        onClick={(e) => e.stopPropagation()}
       />
     </EuiFormRow>
   );

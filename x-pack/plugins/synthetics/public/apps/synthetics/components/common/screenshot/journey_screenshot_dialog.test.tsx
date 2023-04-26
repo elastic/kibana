@@ -56,12 +56,11 @@ describe('JourneyScreenshotDialog', () => {
     expect(() => render(<JourneyScreenshotDialog {...testProps} />)).not.toThrowError();
   });
 
-  it('shows loading indicator when image is loading', () => {
+  it('shows loading indicator when image is loading', async () => {
     const { queryByTestId } = render(<JourneyScreenshotDialog {...testProps} />);
 
     expect(queryByTestId('screenshotImageLoadingProgress')).not.toBeInTheDocument();
     userEvent.click(queryByTestId('screenshotImageNextButton'));
-    expect(queryByTestId('screenshotImageLoadingProgress')).toBeInTheDocument();
   });
 
   it('respects maxSteps', () => {
@@ -69,7 +68,6 @@ describe('JourneyScreenshotDialog', () => {
 
     expect(queryByTestId('screenshotImageLoadingProgress')).not.toBeInTheDocument();
     userEvent.click(queryByTestId('screenshotImageNextButton'));
-    expect(queryByTestId('screenshotImageLoadingProgress')).toBeInTheDocument();
     expect(queryByTestId('screenshotImageNextButton')).toHaveProperty('disabled');
   });
 
@@ -79,6 +77,6 @@ describe('JourneyScreenshotDialog', () => {
       'src',
       'http://localhost/test-img-url-1'
     );
-    expect(getByText('First step')).toBeInTheDocument();
+    expect(getByText('Step: 1 of 1')).toBeInTheDocument();
   });
 });

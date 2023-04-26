@@ -12,12 +12,12 @@ import { createAsyncAction } from '../utils/actions';
 import { OverviewStatus } from '../../../../../common/runtime_types';
 
 export const fetchOverviewStatusAction = createAsyncAction<
-  MonitorOverviewPageState,
+  { pageState: MonitorOverviewPageState; scopeStatusByLocation?: boolean },
   OverviewStatus
 >('fetchOverviewStatusAction');
 
 export const quietFetchOverviewStatusAction = createAsyncAction<
-  MonitorOverviewPageState,
+  { pageState: MonitorOverviewPageState; scopeStatusByLocation?: boolean },
   OverviewStatus
 >('quietFetchOverviewStatusAction');
 

@@ -20,7 +20,7 @@ steps:
   - command: .buildkite/scripts/steps/code_coverage/ingest.sh
     label: 'Merge and Ingest'
     agents:
-      queue: c2-16
+      queue: n2-4-spot
     depends_on:
       - jest
       - jest-integration

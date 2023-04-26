@@ -34,7 +34,7 @@ import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
-import { BucketSize } from '../../../../pages/overview';
+import type { BucketSize } from '../../../../pages/overview/helpers/calculate_bucket_size';
 
 interface Props {
   bucketSize: BucketSize;
@@ -53,7 +53,7 @@ export function UptimeSection({ bucketSize }: Props) {
   const { data, status } = useFetcher(
     () => {
       if (bucketSize && absoluteStart && absoluteEnd) {
-        return getDataHandler('synthetics')?.fetchData({
+        return getDataHandler('uptime')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
           timeZone,
@@ -75,7 +75,7 @@ export function UptimeSection({ bucketSize }: Props) {
     ]
   );
 
-  if (!hasDataMap.synthetics?.hasData) {
+  if (!hasDataMap.uptime?.hasData) {
     return null;
   }
 

@@ -8,6 +8,7 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, useMemo, useEffect } from 'react';
 
+import { TRAINED_MODEL_TYPE, SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { NerInference } from './models/ner';
 import { QuestionAnsweringInference } from './models/question_answering';
 
@@ -20,10 +21,6 @@ import {
 
 import { TextEmbeddingInference } from './models/text_embedding';
 
-import {
-  TRAINED_MODEL_TYPE,
-  SUPPORTED_PYTORCH_TASKS,
-} from '../../../../common/constants/trained_models';
 import { useMlApiContext } from '../../contexts/kibana';
 import { InferenceInputForm } from './models/inference_input_form';
 import { InferrerType } from './models';

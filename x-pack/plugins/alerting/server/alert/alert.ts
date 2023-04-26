@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { v4 as uuidV4 } from 'uuid';
+import { get, isEmpty } from 'lodash';
+import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
+import { CombinedSummarizedAlerts } from '../types';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -34,7 +37,13 @@ export type PublicAlert<
   ActionGroupIds extends string = DefaultActionGroupId
 > = Pick<
   Alert<State, Context, ActionGroupIds>,
-  'getState' | 'replaceState' | 'scheduleActions' | 'setContext' | 'getContext' | 'hasContext'
+  | 'getContext'
+  | 'getState'
+  | 'getUuid'
+  | 'hasContext'
+  | 'replaceState'
+  | 'scheduleActions'
+  | 'setContext'
 >;
 
 export class Alert<
@@ -53,6 +62,7 @@ export class Alert<
     this.state = (state || {}) as State;
     this.context = {} as Context;
     this.meta = meta;
+    this.meta.uuid = meta.uuid ?? uuidV4();
 
     if (!this.meta.flappingHistory) {
       this.meta.flappingHistory = [];
@@ -63,11 +73,23 @@ export class Alert<
     return this.id;
   }
 
+  getUuid() {
+    return this.meta.uuid!;
+  }
+
   hasScheduledActions() {
     return this.scheduledExecutionOptions !== undefined;
   }
 
-  isThrottled({ throttle, actionHash }: { throttle: string | null; actionHash?: string }) {
+  isThrottled({
+    throttle,
+    actionHash,
+    uuid,
+  }: {
+    throttle: string | null;
+    actionHash?: string;
+    uuid?: string;
+  }) {
     if (this.scheduledExecutionOptions === undefined) {
       return false;
     }
@@ -79,9 +101,12 @@ export class Alert<
         this.scheduledExecutionOptions
       )
     ) {
-      if (actionHash) {
+      if (uuid && actionHash) {
         if (this.meta.lastScheduledActions.actions) {
-          const lastTriggerDate = this.meta.lastScheduledActions.actions[actionHash]?.date;
+          const actionInState =
+            this.meta.lastScheduledActions.actions[uuid] ||
+            this.meta.lastScheduledActions.actions[actionHash]; // actionHash must be removed once all the hash identifiers removed from the task state
+          const lastTriggerDate = actionInState?.date;
           return !!(lastTriggerDate && lastTriggerDate.getTime() + throttleMills > Date.now());
         }
         return false;
@@ -169,7 +194,7 @@ export class Alert<
     return this;
   }
 
-  updateLastScheduledActions(group: ActionGroupIds, actionHash?: string | null) {
+  updateLastScheduledActions(group: ActionGroupIds, actionHash?: string | null, uuid?: string) {
     if (!this.meta.lastScheduledActions) {
       this.meta.lastScheduledActions = {} as LastScheduledActions;
     }
@@ -179,11 +204,15 @@ export class Alert<
 
     if (this.meta.lastScheduledActions.group !== group) {
       this.meta.lastScheduledActions.actions = {};
-    } else if (actionHash) {
+    } else if (uuid) {
       if (!this.meta.lastScheduledActions.actions) {
         this.meta.lastScheduledActions.actions = {};
       }
-      this.meta.lastScheduledActions.actions[actionHash] = { date };
+      // remove deprecated actionHash
+      if (!!actionHash && this.meta.lastScheduledActions.actions[actionHash]) {
+        delete this.meta.lastScheduledActions.actions[actionHash];
+      }
+      this.meta.lastScheduledActions.actions[uuid] = { date };
     }
   }
 
@@ -197,11 +226,12 @@ export class Alert<
   toRaw(recovered: boolean = false): RawAlertInstance {
     return recovered
       ? {
-          // for a recovered alert, we only care to track the flappingHistory
-          // and the flapping flag
+          // for a recovered alert, we only care to track the flappingHistory,
+          // the flapping flag, and the UUID
           meta: {
             flappingHistory: this.meta.flappingHistory,
             flapping: this.meta.flapping,
+            uuid: this.meta.uuid,
           },
         }
       : {
@@ -239,5 +269,15 @@ export class Alert<
 
   resetPendingRecoveredCount() {
     this.meta.pendingRecoveredCount = 0;
+  }
+
+  isFilteredOut(summarizedAlerts: CombinedSummarizedAlerts | null) {
+    if (summarizedAlerts === null) {
+      return false;
+    }
+
+    return !summarizedAlerts.all.data.some(
+      (alert) => get(alert, ALERT_INSTANCE_ID) === this.getId()
+    );
   }
 }

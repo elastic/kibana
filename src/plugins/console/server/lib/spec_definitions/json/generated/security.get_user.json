@@ -1,5 +1,8 @@
 {
   "security.get_user": {
+    "url_params": {
+      "with_profile_uid": "__flag__"
+    },
     "methods": [
       "GET"
     ],

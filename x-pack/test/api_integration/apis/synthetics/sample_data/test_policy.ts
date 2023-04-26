@@ -14,7 +14,8 @@ export const getTestSyntheticsPolicy = (
   id: string,
   locationName?: string,
   namespace?: string,
-  isTLSEnabled?: boolean
+  isTLSEnabled?: boolean,
+  proxyUrl?: string
 ): PackagePolicy => ({
   id: '2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
   version: 'WzE2MjYsMV0=',
@@ -53,7 +54,7 @@ export const getTestSyntheticsPolicy = (
             'service.name': { value: '', type: 'text' },
             timeout: { value: '3ms', type: 'text' },
             max_redirects: { value: '3', type: 'integer' },
-            proxy_url: { value: 'http://proxy.com', type: 'text' },
+            proxy_url: { value: proxyUrl ?? 'http://proxy.com', type: 'text' },
             tags: { value: '["tag1","tag2"]', type: 'yaml' },
             username: { value: 'test-username', type: 'text' },
             password: { value: 'test', type: 'password' },
@@ -103,7 +104,7 @@ export const getTestSyntheticsPolicy = (
             schedule: '@every 5m',
             timeout: '3ms',
             max_redirects: 3,
-            proxy_url: 'http://proxy.com',
+            proxy_url: proxyUrl ?? 'http://proxy.com',
             tags: ['tag1', 'tag2'],
             username: 'test-username',
             password: 'test',

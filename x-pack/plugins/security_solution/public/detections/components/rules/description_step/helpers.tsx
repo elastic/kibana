@@ -100,7 +100,7 @@ export const buildQueryBarDescription = ({
         description: (
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
             {filterManager.getFilters().map((filter, index) => (
-              <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
+              <EuiFlexItem grow={false} key={`${field}-filter-${index}`} css={{ width: '100%' }}>
                 <EuiBadgeWrap color="hollow">
                   {indexPatterns != null ? (
                     <FilterBadgeGroup filters={[filter]} dataViews={[indexPatterns]} />
@@ -545,7 +545,7 @@ export const buildAlertSuppressionDescription = (
       />
       {!license.isAtLeast(minimumLicenseForSuppression) && (
         <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
-          <EuiIcon type={'alert'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
+          <EuiIcon type={'warning'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
         </EuiToolTip>
       )}
     </>
@@ -579,7 +579,7 @@ export const buildAlertSuppressionWindowDescription = (
       />
       {!license.isAtLeast(minimumLicenseForSuppression) && (
         <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
-          <EuiIcon type={'alert'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
+          <EuiIcon type={'warning'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
         </EuiToolTip>
       )}
     </>

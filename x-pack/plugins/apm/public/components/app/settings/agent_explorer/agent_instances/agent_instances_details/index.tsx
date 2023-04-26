@@ -79,6 +79,7 @@ export function getInstanceColumns(
                     values={{
                       seeDocs: (
                         <EuiLink
+                          data-test-subj="apmGetInstanceColumnsConfigurationOptionsLink"
                           href={`${agentDocsPageUrl}${
                             !isOpenTelemetryAgentName(agentName)
                               ? 'configuration.html#service-node-name'

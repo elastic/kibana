@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 
@@ -14,7 +14,7 @@ import { HostsTableType } from '../store/model';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { AnomaliesHostTable } from '../../../common/components/ml/tables/anomalies_host_table';
 import { EventsQueryTabBody } from '../../../common/components/events_tab';
-import { HOSTS_PATH } from '../../../../common/constants';
+import { HOSTS_PATH, SecurityPageName } from '../../../../common/constants';
 
 import {
   HostsQueryTabBody,
@@ -23,7 +23,7 @@ import {
   SessionsTabBody,
 } from './navigation';
 import { TableId } from '../../../../common/types';
-import { hostNameExistsFilter } from '../../../common/components/visualization_actions/utils';
+import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 
 export const HostsTabs = React.memo<HostsTabsProps>(
   ({ deleteQuery, filterQuery, from, indexNames, isInitializing, setQuery, to, type }) => {
@@ -37,6 +37,8 @@ export const HostsTabs = React.memo<HostsTabsProps>(
       startDate: from,
       type,
     };
+
+    const hostNameExistsFilter = useMemo(() => fieldNameExistsFilter(SecurityPageName.hosts), []);
 
     return (
       <Switch>

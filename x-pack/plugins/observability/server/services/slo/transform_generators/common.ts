@@ -17,15 +17,9 @@ export function getElastichsearchQueryOrThrow(kuery: string) {
 }
 
 export function parseIndex(index: string): string | string[] {
-  if (index.indexOf(',') > -1) {
-    if (index.indexOf(':') > -1) {
-      const indexParts = index.split(':'); // "remote_name:foo-*,bar*"
-      const remoteName = indexParts[0];
-      return indexParts[1].split(',').map((idx) => `${remoteName}:${idx}`); // [ "remote_name:foo-*", "remote_name:bar-*"]
-    }
-
-    return index.split(',');
+  if (index.indexOf(',') === -1) {
+    return index;
   }
 
-  return index;
+  return index.split(',');
 }

@@ -184,7 +184,7 @@ Object {
               "color": "#aa6556",
               "fill": "none",
               "forAccessor": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
-              "icon": "alert",
+              "icon": "warning",
               "iconPosition": "left",
               "lineWidth": 2,
               "textVisibility": true,

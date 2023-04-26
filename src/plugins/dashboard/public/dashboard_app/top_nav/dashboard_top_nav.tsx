@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import classNames from 'classnames';
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -17,7 +18,7 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiHorizontalRule, EuiToolTipProps } from '@elastic/eui';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -33,6 +34,7 @@ import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_constants';
 import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_context';
 
+import './_dashboard_top_nav.scss';
 export interface DashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
@@ -214,7 +216,11 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
   });
 
   return (
-    <>
+    <div
+      className={classNames('dashboardTopNav', {
+        'dashboardTopNav-fullscreenMode': fullScreenMode,
+      })}
+    >
       <h1
         id="dashboardTitle"
         className="euiScreenReaderOnly"
@@ -246,7 +252,12 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
                 {
                   'data-test-subj': 'dashboardUnsavedChangesBadge',
                   badgeText: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
-                  color: 'success',
+                  title: '',
+                  color: 'warning',
+                  toolTipProps: {
+                    content: unsavedChangesBadgeStrings.getUnsavedChangedBadgeToolTipContent(),
+                    position: 'bottom',
+                  } as EuiToolTipProps,
                 },
               ]
             : undefined
@@ -267,6 +278,6 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
       ) : null}
       {viewMode === ViewMode.EDIT ? <DashboardEditingToolbar /> : null}
       <EuiHorizontalRule margin="none" />
-    </>
+    </div>
   );
 }

@@ -7,25 +7,15 @@
  */
 
 import { Observable } from 'rxjs';
-import type { UnifiedHistogramInitializedApi, UnifiedHistogramUninitializedApi } from './container';
+import type { UnifiedHistogramApi } from './container';
 
-export type MockUnifiedHistogramApi = Omit<UnifiedHistogramUninitializedApi, 'initialized'> &
-  Omit<UnifiedHistogramInitializedApi, 'initialized'> & { initialized: boolean };
-
-export const createMockUnifiedHistogramApi = (
-  { initialized }: { initialized: boolean } = { initialized: false }
-) => {
-  const api: MockUnifiedHistogramApi = {
-    initialized,
-    initialize: jest.fn(() => {
-      api.initialized = true;
-    }),
+export const createMockUnifiedHistogramApi = () => {
+  const api: UnifiedHistogramApi = {
     state$: new Observable(),
     setChartHidden: jest.fn(),
     setTopPanelHeight: jest.fn(),
     setBreakdownField: jest.fn(),
     setTimeInterval: jest.fn(),
-    setRequestParams: jest.fn(),
     setTotalHits: jest.fn(),
     refetch: jest.fn(),
   };

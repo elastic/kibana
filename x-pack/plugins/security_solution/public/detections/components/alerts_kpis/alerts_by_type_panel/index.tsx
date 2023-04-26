@@ -13,9 +13,13 @@ import { AlertsByType } from './alerts_by_type';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
-import { alertTypeAggregations } from '../alerts_summary_charts_panel/aggregations';
+import {
+  alertTypeAggregations,
+  alertRuleAggregations,
+} from '../alerts_summary_charts_panel/aggregations';
 import { getIsAlertsTypeData } from './helpers';
 import * as i18n from './translations';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const ALERTS_BY_TYPE_CHART_ID = 'alerts-summary-alert_by_type';
 
@@ -26,10 +30,11 @@ export const AlertsByTypePanel: React.FC<ChartsPanelProps> = ({
   runtimeMappings,
   skip,
 }) => {
+  const isAlertTypeEnabled = useIsExperimentalFeatureEnabled('alertTypeEnabled');
   const uniqueQueryId = useMemo(() => `${ALERTS_BY_TYPE_CHART_ID}-${uuid()}`, []);
 
   const { items, isLoading } = useSummaryChartData({
-    aggregations: alertTypeAggregations,
+    aggregations: isAlertTypeEnabled ? alertTypeAggregations : alertRuleAggregations,
     filters,
     query,
     signalIndexName,
@@ -44,9 +49,9 @@ export const AlertsByTypePanel: React.FC<ChartsPanelProps> = ({
       <EuiPanel hasBorder hasShadow={false} data-test-subj="alerts-by-type-panel">
         <HeaderSection
           id={uniqueQueryId}
-          inspectTitle={i18n.ALERTS_TYPE_TITLE}
+          inspectTitle={isAlertTypeEnabled ? i18n.ALERTS_TYPE_TITLE : i18n.ALERTS_RULE_TITLE}
           outerDirection="row"
-          title={i18n.ALERTS_TYPE_TITLE}
+          title={isAlertTypeEnabled ? i18n.ALERTS_TYPE_TITLE : i18n.ALERTS_RULE_TITLE}
           titleSize="xs"
           hideSubtitle
         />

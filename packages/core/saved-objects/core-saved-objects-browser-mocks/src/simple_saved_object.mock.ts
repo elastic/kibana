@@ -39,6 +39,7 @@ const createSimpleSavedObjectMock = (
     type: savedObject.type,
     migrationVersion: savedObject.migrationVersion,
     coreMigrationVersion: savedObject.coreMigrationVersion,
+    typeMigrationVersion: savedObject.typeMigrationVersion,
     error: savedObject.error,
     references: savedObject.references,
     updatedAt: savedObject.updated_at,

@@ -66,8 +66,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
         expect(await testSubjects.exists('addFilter')).to.be(false);
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(false);
+        // here Lens suggests a table so the chart is not rendered
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
-        expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(false);
+        expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(false);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(false);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(false);
@@ -87,7 +88,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
-
+        // here Lens suggests a heatmap so it is rendered
+        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
+        expect(await testSubjects.exists('heatmapChart')).to.be(true);
         const cell = await dataGrid.getCellElement(0, 3);
         expect(await cell.getVisibleText()).to.be('2269');
       });

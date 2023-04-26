@@ -40,6 +40,7 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { KEEP_GLOBAL_FILTERS_ACTION_ID } from './annotations/actions';
 import { layerTypes, Visualization } from '../..';
 
+const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
   type: 'manual',
@@ -2623,8 +2624,6 @@ describe('xy_visualization', () => {
       });
 
       describe('Annotation layers', () => {
-        const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
-
         function createStateWithAnnotationProps(annotation: Partial<EventAnnotationConfig>) {
           return {
             layers: [
@@ -2693,7 +2692,7 @@ describe('xy_visualization', () => {
                 layerType: layerTypes.ANNOTATIONS,
                 indexPatternId: 'indexPattern1',
                 annotations: [exampleAnnotation],
-                ignoreGlobalFilters: true,
+                ignoreGlobalFilters: false,
               },
             ],
           };
@@ -2877,6 +2876,57 @@ describe('xy_visualization', () => {
             "shortMessage": "",
           }
         `);
+      });
+    });
+
+    describe('info', () => {
+      function getFrameMock() {
+        const datasourceMock = createMockDatasource('testDatasource');
+        datasourceMock.publicAPIMock.getOperationForColumnId.mockImplementation((id) =>
+          id === DATE_HISTORGRAM_COLUMN_ID
+            ? ({
+                label: DATE_HISTORGRAM_COLUMN_ID,
+                dataType: 'date',
+                scale: 'interval',
+              } as OperationDescriptor)
+            : ({
+                dataType: 'number',
+                label: 'MyOperation',
+              } as OperationDescriptor)
+        );
+
+        return createMockFramePublicAPI({
+          datasourceLayers: { first: datasourceMock.publicAPIMock },
+          dataViews: createMockDataViewsState({
+            indexPatterns: { first: createMockedIndexPattern() },
+          }),
+        });
+      }
+
+      it('should return an info message if annotation layer is ignoring the global filters', () => {
+        const initialState = exampleState();
+        const state: State = {
+          ...initialState,
+          layers: [
+            ...initialState.layers,
+            {
+              layerId: 'annotation',
+              layerType: layerTypes.ANNOTATIONS,
+              annotations: [exampleAnnotation2],
+              ignoreGlobalFilters: true,
+              indexPatternId: 'myIndexPattern',
+            },
+          ],
+        };
+        expect(xyVisualization.getUserMessages!(state, { frame: getFrameMock() })).toContainEqual(
+          expect.objectContaining({
+            displayLocations: [{ id: 'embeddableBadge' }],
+            fixableInEditor: false,
+            severity: 'info',
+            shortMessage: 'Layers ignoring global filters',
+            uniqueId: 'ignoring-global-filters-layers',
+          })
+        );
       });
     });
   });

@@ -20,23 +20,20 @@ const DEFAULT_VALUES: EngineIndicesLogicValues = {
 };
 
 const mockEngineData: EnterpriseSearchEngineDetails = {
-  created: '1999-12-31T23:59:59Z',
   indices: [
     {
       count: 10,
       health: 'green',
       name: 'search-001',
-      source: 'api',
     },
     {
       count: 1000,
       health: 'yellow',
       name: 'search-002',
-      source: 'crawler',
     },
   ],
   name: DEFAULT_VALUES.engineName,
-  updated: '1999-12-31T23:59:59Z',
+  updated_at_millis: 1679501369566,
 };
 
 describe('EngineViewLogic', () => {

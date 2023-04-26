@@ -1,6 +1,7 @@
 get:
-  summary: Agents setup - Info
-  tags: []
+  summary: Get agent setup info
+  tags:
+    - Agents
   responses:
     '200':
       description: OK
@@ -14,7 +15,9 @@ get:
   security:
     - basicAuth: []
 post:
-  summary: Agents setup - Create
+  summary: Initiate agent setup
+  tags:
+    - Agents
   operationId: setup-agents
   responses:
     '200':

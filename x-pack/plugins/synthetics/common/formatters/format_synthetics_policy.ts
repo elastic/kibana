@@ -6,8 +6,19 @@
  */
 
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import { formatters } from './formatters';
+import { cloneDeep } from 'lodash';
+import { replaceStringWithParams } from './formatting_utils';
+import { syntheticsPolicyFormatters } from './formatters';
 import { ConfigKey, DataStream, MonitorFields } from '../runtime_types';
+
+export const PARAMS_KEYS_TO_SKIP = [
+  'secrets',
+  'fields',
+  ConfigKey.LOCATIONS,
+  ConfigKey.TLS_VERSION,
+  ConfigKey.SOURCE_PROJECT_CONTENT,
+  ConfigKey.SOURCE_INLINE,
+];
 
 export const formatSyntheticsPolicy = (
   newPolicy: NewPackagePolicy,
@@ -19,11 +30,12 @@ export const formatSyntheticsPolicy = (
       'monitor.project.id': string;
     }
   >,
+  params: Record<string, string>,
   isLegacy?: boolean
 ) => {
   const configKeys = Object.keys(config) as ConfigKey[];
 
-  const formattedPolicy = { ...newPolicy };
+  const formattedPolicy = cloneDeep(newPolicy);
 
   const currentInput = formattedPolicy.inputs.find(
     (input) => input.type === `synthetics/${monitorType}`
@@ -44,15 +56,18 @@ export const formatSyntheticsPolicy = (
   configKeys.forEach((key) => {
     const configItem = dataStream?.vars?.[key];
     if (configItem) {
-      if (formatters[key]) {
-        configItem.value = formatters[key]?.(config);
+      if (syntheticsPolicyFormatters[key]) {
+        configItem.value = syntheticsPolicyFormatters[key]?.(config, key);
       } else if (key === ConfigKey.MONITOR_SOURCE_TYPE && isLegacy) {
         configItem.value = undefined;
       } else {
         configItem.value = config[key] === undefined || config[key] === null ? null : config[key];
       }
+      if (!PARAMS_KEYS_TO_SKIP.includes(key)) {
+        configItem.value = replaceStringWithParams(configItem.value, params);
+      }
     }
   });
 
-  return { formattedPolicy, dataStream, currentInput };
+  return { formattedPolicy, hasDataStream: Boolean(dataStream), hasInput: Boolean(currentInput) };
 };

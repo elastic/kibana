@@ -14,7 +14,7 @@ import type { LensAppServices } from './types';
 import type { Document } from '../persistence/saved_object_store';
 import type { DatasourceMap, VisualizationMap } from '../types';
 import { extractReferencesFromState, getResolvedDateRange } from '../utils';
-import { getEditPath } from '../../common';
+import { getEditPath } from '../../common/constants';
 
 interface ShareableConfiguration
   extends Pick<
@@ -45,8 +45,7 @@ function getShareURLForSavedObject(
   );
 }
 
-function getShortShareableURL(
-  shortUrlService: (params: LensAppLocatorParams) => Promise<string>,
+export function getLocatorParams(
   data: LensAppServices['data'],
   {
     filters,
@@ -57,7 +56,9 @@ function getShortShareableURL(
     visualizationMap,
     visualization,
     adHocDataViews,
-  }: ShareableConfiguration
+    currentDoc,
+  }: ShareableConfiguration,
+  isDirty: boolean
 ) {
   const references = extractReferencesFromState({
     activeDatasources: Object.keys(datasourceStates).reduce(
@@ -80,7 +81,7 @@ function getShortShareableURL(
   const serializableDatasourceStates = datasourceStates as LensAppState['datasourceStates'] &
     SerializableRecord;
 
-  return shortUrlService({
+  const snapshotParams = {
     filters,
     query,
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
@@ -90,16 +91,38 @@ function getShortShareableURL(
     searchSessionId: data.search.session.getSessionId(),
     references,
     dataViewSpecs: adHocDataViews,
-  });
+  };
+
+  return {
+    shareURL: snapshotParams,
+    // for reporting use the shorten version when available
+    reporting:
+      currentDoc?.savedObjectId && !isDirty
+        ? {
+            filters,
+            query,
+            resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+            savedObjectId: currentDoc?.savedObjectId,
+          }
+        : snapshotParams,
+  };
 }
 
 export async function getShareURL(
   shortUrlService: (params: LensAppLocatorParams) => Promise<string>,
   services: Pick<LensAppServices, 'application' | 'data'>,
-  configuration: ShareableConfiguration
+  configuration: ShareableConfiguration,
+  shareUrlEnabled: boolean,
+  isDirty: boolean
 ) {
+  const { shareURL: locatorParams, reporting: reportingLocatorParams } = getLocatorParams(
+    services.data,
+    configuration,
+    isDirty
+  );
   return {
-    shareableUrl: await getShortShareableURL(shortUrlService, services.data, configuration),
+    shareableUrl: await (shareUrlEnabled ? shortUrlService(locatorParams) : undefined),
     savedObjectURL: getShareURLForSavedObject(services, configuration.currentDoc),
+    reportingLocatorParams,
   };
 }

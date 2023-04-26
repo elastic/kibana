@@ -33,6 +33,8 @@ import {
   percentSystemMemoryUsedScript,
 } from '../metrics/by_agent/shared/memory';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 
 interface Options {
   apmEventClient: APMEventClient;
@@ -59,7 +61,7 @@ interface TaskParameters {
   offsetInMs: number;
 }
 
-export function getServiceMapServiceNodeInfo({
+function getServiceMapServiceNodeInfoForTimeRange({
   environment,
   serviceName,
   apmEventClient,
@@ -136,12 +138,25 @@ async function getFailedTransactionsRateStats({
       environment,
       apmEventClient,
       serviceName,
-      searchAggregatedTransactions,
       start,
       end,
       kuery: '',
-      numBuckets,
       transactionTypes: defaultTransactionTypes,
+      bucketSizeInSeconds: getBucketSizeForAggregatedTransactions({
+        start,
+        end,
+        numBuckets,
+        searchAggregatedTransactions,
+      }).bucketSize,
+      ...(searchAggregatedTransactions
+        ? {
+            documentType: ApmDocumentType.TransactionMetric,
+            rollupInterval: RollupInterval.OneMinute,
+          }
+        : {
+            documentType: ApmDocumentType.TransactionEvent,
+            rollupInterval: RollupInterval.None,
+          }),
     });
     return {
       value: average,
@@ -361,4 +376,37 @@ function getMemoryStats({
 
     return memoryUsage;
   });
+}
+
+export interface ServiceMapServiceNodeInfoResponse {
+  currentPeriod: NodeStats;
+  previousPeriod: NodeStats | undefined;
+}
+
+export async function getServiceMapServiceNodeInfo({
+  environment,
+  apmEventClient,
+  serviceName,
+  searchAggregatedTransactions,
+  start,
+  end,
+  offset,
+}: Options): Promise<ServiceMapServiceNodeInfoResponse> {
+  const commonProps = {
+    environment,
+    apmEventClient,
+    serviceName,
+    searchAggregatedTransactions,
+    start,
+    end,
+  };
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    getServiceMapServiceNodeInfoForTimeRange(commonProps),
+    offset
+      ? getServiceMapServiceNodeInfoForTimeRange({ ...commonProps, offset })
+      : undefined,
+  ]);
+
+  return { currentPeriod, previousPeriod };
 }

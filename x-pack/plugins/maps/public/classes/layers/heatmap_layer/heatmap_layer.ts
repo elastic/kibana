@@ -48,6 +48,11 @@ export class HeatmapLayer extends AbstractLayer {
     }
   }
 
+  _isTiled(): boolean {
+    // Uses tiled maplibre source 'vector'
+    return true;
+  }
+
   getLayerIcon(isTocIcon: boolean) {
     const { docCount } = getAggsMeta(this._getMetaFromTiles());
     return docCount === 0 ? NO_RESULTS_ICON_AND_TOOLTIPCONTENT : super.getLayerIcon(isTocIcon);

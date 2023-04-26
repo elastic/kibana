@@ -498,7 +498,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
             const actionErrors = runLog?.num_errored_actions as number;
             if (actionErrors) {
               return (
-                <Component onClick={() => onFlyoutOpen(runLog)} iconType="alert">
+                <Component onClick={() => onFlyoutOpen(runLog)} iconType="warning">
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.viewActionErrors"
                     defaultMessage="View action errors"

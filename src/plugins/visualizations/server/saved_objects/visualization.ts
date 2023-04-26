@@ -32,16 +32,14 @@ export const getVisualizationSavedObjectType = (
     },
   },
   mappings: {
+    dynamic: false, // declared here to prevent indexing root level attribute fields
     properties: {
       description: { type: 'text' },
       kibanaSavedObjectMeta: {
-        properties: { searchSourceJSON: { type: 'text', index: false } },
+        properties: {},
       },
-      savedSearchRefName: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
-      uiStateJSON: { type: 'text', index: false },
       version: { type: 'integer' },
-      visState: { type: 'text', index: false },
     },
   },
   migrations: () => getAllMigrations(getSearchSourceMigrations()),

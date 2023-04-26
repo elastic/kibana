@@ -29,6 +29,7 @@ export interface UseAddToCaseActions {
   onSuccess?: () => Promise<void>;
   isActiveTimelines: boolean;
   isInDetections: boolean;
+  refetch: (() => void) | undefined;
 }
 
 export const useAddToCaseActions = ({
@@ -39,6 +40,7 @@ export const useAddToCaseActions = ({
   onSuccess,
   isActiveTimelines,
   isInDetections,
+  refetch,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
   const userCasesPermissions = useGetUserCasesPermissions();
@@ -62,6 +64,16 @@ export const useAddToCaseActions = ({
 
   const { activeStep, incrementStep, setStep, isTourShown } = useTourContext();
 
+  const onCaseSuccess = () => {
+    if (onSuccess) {
+      onSuccess();
+    }
+
+    if (refetch) {
+      refetch();
+    }
+  };
+
   const afterCaseCreated = useCallback(async () => {
     if (isTourShown(SecurityStepId.alertsCases)) {
       setStep(SecurityStepId.alertsCases, AlertsCasesTourSteps.viewCase);
@@ -79,16 +91,16 @@ export const useAddToCaseActions = ({
     [activeStep, isTourShown]
   );
 
-  const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
+  const createCaseFlyout = casesUi.hooks.useCasesAddToNewCaseFlyout({
     onClose: onMenuItemClick,
-    onSuccess,
+    onSuccess: onCaseSuccess,
     afterCaseCreated,
     ...prefillCasesValue,
   });
 
-  const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
+  const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal({
     onClose: onMenuItemClick,
-    onRowClick: onSuccess,
+    onSuccess: onCaseSuccess,
   });
 
   const handleAddToNewCaseClick = useCallback(() => {
@@ -115,7 +127,7 @@ export const useAddToCaseActions = ({
   const handleAddToExistingCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
-    selectCaseModal.open({ attachments: caseAttachments });
+    selectCaseModal.open({ getAttachments: () => caseAttachments });
   }, [caseAttachments, onMenuItemClick, selectCaseModal]);
 
   const addToCaseActionItems = useMemo(() => {

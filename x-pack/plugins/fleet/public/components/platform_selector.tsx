@@ -79,7 +79,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
           'We recommend using the installers (TAR/ZIP) over system packages (RPM/DEB) because they provide the ability to upgrade your agent with Fleet.',
       })}
       color="warning"
-      iconType="alert"
+      iconType="warning"
     />
   );
 
@@ -90,7 +90,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
           'We recommend adding the Kubernetes integration to your agent policy in order to get useful metrics and logs from your Kubernetes clusters.',
       })}
       color="warning"
-      iconType="alert"
+      iconType="warning"
     />
   );
 

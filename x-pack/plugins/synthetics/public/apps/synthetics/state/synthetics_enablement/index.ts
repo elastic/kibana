@@ -68,17 +68,12 @@ export const syntheticsEnablementReducer = createReducer(initialState, (builder)
 
     .addCase(enableSynthetics, (state) => {
       state.loading = true;
+      state.enablement = null;
     })
     .addCase(enableSyntheticsSuccess, (state, action) => {
       state.loading = false;
       state.error = null;
-      state.enablement = {
-        canEnable: state.enablement?.canEnable ?? false,
-        areApiKeysEnabled: state.enablement?.areApiKeysEnabled ?? false,
-        canManageApiKeys: state.enablement?.canManageApiKeys ?? false,
-        isValidApiKey: state.enablement?.isValidApiKey ?? false,
-        isEnabled: true,
-      };
+      state.enablement = action.payload;
     })
     .addCase(enableSyntheticsFailure, (state, action) => {
       state.loading = false;

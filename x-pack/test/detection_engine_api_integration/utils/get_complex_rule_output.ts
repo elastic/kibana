@@ -51,6 +51,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RuleResponse> =
   tags: ['tag 1', 'tag 2', 'any tag you want'],
   to: 'now',
   from: 'now-6m',
+  revision: 0,
   severity: 'high',
   severity_mapping: [],
   language: 'kuery',

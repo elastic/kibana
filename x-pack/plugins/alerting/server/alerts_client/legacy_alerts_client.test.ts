@@ -12,7 +12,7 @@ import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert
 import { Alert } from '../alert/alert';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
-import { getAlertsForNotification, processAlerts, setFlapping } from '../lib';
+import { getAlertsForNotification, processAlerts } from '../lib';
 import { logAlerts } from '../task_runner/log_alerts';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
 
@@ -253,19 +253,6 @@ describe('Legacy Alerts Client', () => {
       autoRecoverAlerts: true,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
-
-    expect(setFlapping).toHaveBeenCalledWith(
-      {
-        enabled: true,
-        lookBackWindow: 20,
-        statusChangeThreshold: 4,
-      },
-      {
-        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
-        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
-      },
-      {}
-    );
 
     expect(getAlertsForNotification).toHaveBeenCalledWith(
       {

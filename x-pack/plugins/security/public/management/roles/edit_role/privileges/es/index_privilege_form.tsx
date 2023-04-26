@@ -241,18 +241,16 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                       ) : undefined
                     }
                   >
-                    <Fragment>
-                      <EuiComboBox
-                        data-test-subj={`fieldInput${this.props.formIndex}`}
-                        options={this.state.flsOptions.map(toOption)}
-                        selectedOptions={grant.map(toOption)}
-                        onCreateOption={this.onCreateGrantedField}
-                        onChange={this.onGrantedFieldsChange}
-                        isDisabled={this.props.isRoleReadOnly}
-                        async={true}
-                        isLoading={this.state.isFieldListLoading}
-                      />
-                    </Fragment>
+                    <EuiComboBox
+                      data-test-subj={`fieldInput${this.props.formIndex}`}
+                      options={this.state.flsOptions.map(toOption)}
+                      selectedOptions={grant.map(toOption)}
+                      onCreateOption={this.onCreateGrantedField}
+                      onChange={this.onGrantedFieldsChange}
+                      isDisabled={this.props.isRoleReadOnly}
+                      async={true}
+                      isLoading={this.state.isFieldListLoading}
+                    />
                   </EuiFormRow>
                 </EuiFlexItem>
                 <EuiFlexItem>
@@ -266,18 +264,16 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                     fullWidth={true}
                     className="indexPrivilegeForm__deniedFieldsRow"
                   >
-                    <Fragment>
-                      <EuiComboBox
-                        data-test-subj={`deniedFieldInput${this.props.formIndex}`}
-                        options={this.state.flsOptions.map(toOption)}
-                        selectedOptions={except.map(toOption)}
-                        onCreateOption={this.onCreateDeniedField}
-                        onChange={this.onDeniedFieldsChange}
-                        isDisabled={isRoleReadOnly}
-                        async={true}
-                        isLoading={this.state.isFieldListLoading}
-                      />
-                    </Fragment>
+                    <EuiComboBox
+                      data-test-subj={`deniedFieldInput${this.props.formIndex}`}
+                      options={this.state.flsOptions.map(toOption)}
+                      selectedOptions={except.map(toOption)}
+                      onCreateOption={this.onCreateDeniedField}
+                      onChange={this.onDeniedFieldsChange}
+                      isDisabled={isRoleReadOnly}
+                      async={true}
+                      isLoading={this.state.isFieldListLoading}
+                    />
                   </EuiFormRow>
                 </EuiFlexItem>
               </EuiFlexGroup>

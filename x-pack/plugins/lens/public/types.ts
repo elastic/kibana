@@ -39,8 +39,13 @@ import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
 import { CellValueContext } from '@kbn/embeddable-plugin/public';
-import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
-import type { DateRange, LayerType, SortingHint } from '../common';
+import type {
+  DraggingIdentifier,
+  DragDropIdentifier,
+  DragContextState,
+  DropType,
+} from '@kbn/dom-drag-drop';
+import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
   LensResizeActionData,
@@ -213,24 +218,6 @@ export type TableChangeType =
   | 'reorder'
   | 'layers';
 
-export type DropType =
-  | 'field_add'
-  | 'field_replace'
-  | 'reorder'
-  | 'move_compatible'
-  | 'replace_compatible'
-  | 'move_incompatible'
-  | 'replace_incompatible'
-  | 'replace_duplicate_compatible'
-  | 'duplicate_compatible'
-  | 'swap_compatible'
-  | 'replace_duplicate_incompatible'
-  | 'duplicate_incompatible'
-  | 'swap_incompatible'
-  | 'field_combine'
-  | 'combine_compatible'
-  | 'combine_incompatible';
-
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
   table: TableSuggestion;
@@ -257,6 +244,7 @@ export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   searchQuery?: Query;
   searchFilters?: Filter[];
   title?: string;
+  description?: string;
   visTypeTitle?: string;
   isEmbeddable?: boolean;
 } & NavigateToLensContext<T>;
@@ -295,7 +283,7 @@ export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 
 export interface UserMessage {
   uniqueId?: string;
-  severity: 'error' | 'warning';
+  severity: 'error' | 'warning' | 'info';
   shortMessage: string;
   longMessage: React.ReactNode | string;
   fixableInEditor: boolean;
@@ -488,6 +476,7 @@ export interface Datasource<T = unknown, P = unknown> {
     deps: {
       frame: FrameDatasourceAPI;
       setState: StateSetter<T>;
+      visualizationInfo?: VisualizationInfo;
     }
   ) => UserMessage[];
 
@@ -886,6 +875,8 @@ export interface Suggestion<T = unknown, V = unknown> {
   previewExpression?: Ast | string;
   previewIcon: IconType;
   hide?: boolean;
+  // flag to indicate if the visualization is incomplete
+  incomplete?: boolean;
   changeType: TableChangeType;
   keptLayerIds: string[];
 }
@@ -938,6 +929,10 @@ export interface VisualizationSuggestion<T = unknown> {
    * directly.
    */
   hide?: boolean;
+  /**
+   * Flag indicating whether this suggestion is incomplete
+   */
+  incomplete?: boolean;
   /**
    * Descriptive title of the suggestion. Should be as short as possible. This title is shown if
    * the suggestion is advertised to the user and will also show either the `previewExpression` or

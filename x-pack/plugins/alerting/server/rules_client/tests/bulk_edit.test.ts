@@ -47,6 +47,9 @@ const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
+const isAuthenticationTypeApiKeyMock = jest.fn();
+const getAuthenticationApiKeyMock = jest.fn();
+
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
@@ -64,6 +67,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   auditLogger,
   minimumScheduleInterval: { value: '1m', enforce: false },
+  isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
+  getAuthenticationAPIKey: getAuthenticationApiKeyMock,
 };
 const paramsModifier = jest.fn();
 
@@ -94,6 +99,7 @@ describe('bulkEdit()', () => {
       notifyWhen: null,
       actions: [],
       name: 'my rule name',
+      revision: 0,
     },
     references: [],
     version: '123',
@@ -103,6 +109,7 @@ describe('bulkEdit()', () => {
     attributes: {
       ...existingRule.attributes,
       apiKey: MOCK_API_KEY,
+      apiKeyCreatedByUser: false,
     },
   };
 
@@ -220,6 +227,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -251,6 +259,7 @@ describe('bulkEdit()', () => {
             type: 'alert',
             attributes: expect.objectContaining({
               tags: ['foo', 'test-1'],
+              revision: 1,
             }),
           }),
         ],
@@ -275,6 +284,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -302,6 +312,7 @@ describe('bulkEdit()', () => {
             type: 'alert',
             attributes: expect.objectContaining({
               tags: [],
+              revision: 1,
             }),
           }),
         ],
@@ -326,6 +337,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -354,6 +366,7 @@ describe('bulkEdit()', () => {
             type: 'alert',
             attributes: expect.objectContaining({
               tags: ['test-1', 'test-2'],
+              revision: 1,
             }),
           }),
         ],
@@ -573,12 +586,14 @@ describe('bulkEdit()', () => {
               ],
               apiKey: null,
               apiKeyOwner: null,
+              apiKeyCreatedByUser: null,
               meta: { versionApiKeyLastmodified: 'v8.2.0' },
               name: 'my rule name',
               enabled: false,
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
               tags: ['foo'],
+              revision: 1,
             },
             references: [{ id: '1', name: 'action_0', type: 'action' }],
           },
@@ -588,6 +603,220 @@ describe('bulkEdit()', () => {
       expect(result.rules[0]).toEqual({
         ...existingRule.attributes,
         actions: [existingAction, { ...newAction, uuid: '222' }],
+        id: existingRule.id,
+        snoozeSchedule: [],
+      });
+    });
+
+    test('should only increment revision once for multiple operations', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              revision: 1,
+            },
+          },
+        ],
+      });
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [
+              {
+                id: '687300e0-b882-11ed-ad70-c74a8cf8f386',
+                group: 'default',
+                params: {
+                  message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                },
+              },
+            ],
+          },
+          {
+            field: 'throttle',
+            operation: 'set',
+            value: null,
+          },
+          {
+            field: 'notifyWhen',
+            operation: 'set',
+            value: 'onActiveAlert',
+          },
+        ],
+      });
+
+      expect(result.rules[0]).toHaveProperty('revision', 1);
+    });
+
+    test("should set timeframe in alertsFilter null if doesn't exist", async () => {
+      ruleTypeRegistry.get.mockReturnValue({
+        id: 'myType',
+        name: 'Test',
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'custom', name: 'Not the Default' },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        async executor() {
+          return { state: {} };
+        },
+        producer: 'alerts',
+        getSummarizedAlerts: jest.fn().mockResolvedValue({}),
+      });
+      const existingAction = {
+        frequency: {
+          notifyWhen: 'onActiveAlert',
+          summary: false,
+          throttle: null,
+        },
+        group: 'default',
+        id: '1',
+        params: {},
+        uuid: '111',
+        alertsFilter: {
+          query: {
+            kql: 'name:test',
+            dsl: '{"bool":{"should":[{"match":{"name":"test"}}],"minimum_should_match":1}}',
+          },
+          timeframe: {
+            days: [1],
+            hours: { start: '08:00', end: '17:00' },
+            timezone: 'UTC',
+          },
+        },
+      };
+      const newAction = {
+        frequency: {
+          notifyWhen: 'onActiveAlert',
+          summary: false,
+          throttle: null,
+        },
+        group: 'default',
+        id: '2',
+        params: {},
+        uuid: '222',
+        alertsFilter: { query: { kql: 'test:1', dsl: 'test' } },
+      };
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              actions: [
+                {
+                  ...existingAction,
+                  actionRef: 'action_0',
+                },
+                {
+                  ...newAction,
+                  actionRef: 'action_1',
+                  uuid: '222',
+                  alertsFilter: {
+                    query: { kql: 'test:1', dsl: 'test' },
+                    timeframe: null,
+                  },
+                },
+              ],
+            },
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+              {
+                name: 'action_1',
+                type: 'action',
+                id: '2',
+              },
+            ],
+          },
+        ],
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [existingAction, newAction] as NormalizedAlertAction[],
+          },
+        ],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              actions: [
+                {
+                  actionRef: 'action_0',
+                  actionTypeId: 'test',
+                  frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+                  group: 'default',
+                  params: {},
+                  uuid: '111',
+                  alertsFilter: existingAction.alertsFilter,
+                },
+                {
+                  actionRef: '',
+                  actionTypeId: '',
+                  frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+                  group: 'default',
+                  params: {},
+                  uuid: '222',
+                  alertsFilter: {
+                    query: {
+                      dsl: '{"bool":{"should":[{"match":{"test":"1"}}],"minimum_should_match":1}}',
+                      kql: 'test:1',
+                    },
+                    timeframe: null,
+                  },
+                },
+              ],
+              apiKey: null,
+              apiKeyOwner: null,
+              apiKeyCreatedByUser: null,
+              meta: { versionApiKeyLastmodified: 'v8.2.0' },
+              name: 'my rule name',
+              enabled: false,
+              updatedAt: '2019-02-12T21:01:22.479Z',
+              updatedBy: 'elastic',
+              tags: ['foo'],
+              revision: 1,
+            },
+            references: [{ id: '1', name: 'action_0', type: 'action' }],
+          },
+        ],
+        { overwrite: true }
+      );
+      expect(result.rules[0]).toEqual({
+        ...existingRule.attributes,
+        actions: [
+          existingAction,
+          {
+            ...newAction,
+            alertsFilter: {
+              query: {
+                dsl: 'test',
+                kql: 'test:1',
+              },
+              timeframe: null,
+            },
+          },
+        ],
         id: existingRule.id,
         snoozeSchedule: [],
       });
@@ -628,6 +857,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -665,6 +895,7 @@ describe('bulkEdit()', () => {
               params: expect.objectContaining({
                 index: ['test-1', 'test-2', 'test-4', 'test-5'],
               }),
+              revision: 1,
             }),
           }),
         ],
@@ -691,6 +922,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -723,6 +955,7 @@ describe('bulkEdit()', () => {
               params: expect.objectContaining({
                 index: ['test-1'],
               }),
+              revision: 1,
             }),
           }),
         ],
@@ -819,6 +1052,7 @@ describe('bulkEdit()', () => {
             type: 'alert',
             attributes: expect.objectContaining({
               snoozeSchedule: [snoozePayload],
+              revision: 0,
             }),
           }),
         ],
@@ -848,6 +1082,7 @@ describe('bulkEdit()', () => {
             id: '1',
             type: 'alert',
             attributes: expect.objectContaining({
+              revision: 0,
               snoozeSchedule: [snoozePayload],
             }),
           }),
@@ -893,6 +1128,7 @@ describe('bulkEdit()', () => {
             id: '1',
             type: 'alert',
             attributes: expect.objectContaining({
+              revision: 0,
               snoozeSchedule: [...existingSnooze, snoozePayload],
             }),
           }),
@@ -938,6 +1174,7 @@ describe('bulkEdit()', () => {
             type: 'alert',
             attributes: expect.objectContaining({
               muteAll: true,
+              revision: 0,
               snoozeSchedule: [snoozePayload],
             }),
           }),
@@ -981,6 +1218,7 @@ describe('bulkEdit()', () => {
             id: '1',
             type: 'alert',
             attributes: expect.objectContaining({
+              revision: 0,
               snoozeSchedule: [existingSnooze[1], existingSnooze[2]],
             }),
           }),
@@ -1025,6 +1263,7 @@ describe('bulkEdit()', () => {
             id: '1',
             type: 'alert',
             attributes: expect.objectContaining({
+              revision: 0,
               snoozeSchedule: [],
             }),
           }),
@@ -1069,6 +1308,7 @@ describe('bulkEdit()', () => {
             id: '1',
             type: 'alert',
             attributes: expect.objectContaining({
+              revision: 0,
               snoozeSchedule: [existingSnooze[0]],
             }),
           }),
@@ -1181,7 +1421,7 @@ describe('bulkEdit()', () => {
       expect(createAPIKeyMock).not.toHaveBeenCalled();
 
       // Explicitly bulk editing the apiKey will set the api key, even if the rule is disabled
-      await rulesClient.bulkEdit({
+      const result = await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
         operations: [
           {
@@ -1192,6 +1432,9 @@ describe('bulkEdit()', () => {
       });
 
       expect(createAPIKeyMock).toHaveBeenCalled();
+
+      // Just API key updates do not result in an increment to revision
+      expect(result.rules[0]).toHaveProperty('revision', 0);
     });
   });
 
@@ -1211,7 +1454,7 @@ describe('bulkEdit()', () => {
       });
     });
 
-    it('should succesfully update tags and index patterns and return updated rule', async () => {
+    it('should successfully update tags and index patterns and return updated rule', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
@@ -1230,6 +1473,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -1270,6 +1514,7 @@ describe('bulkEdit()', () => {
               params: {
                 index: ['index-1', 'index-2', 'index-3'],
               },
+              revision: 1,
             }),
           }),
         ],
@@ -1277,7 +1522,7 @@ describe('bulkEdit()', () => {
       );
     });
 
-    it('should succesfully update rule if tags are updated but index patterns are not', async () => {
+    it('should successfully update rule if tags are updated but index patterns are not', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
@@ -1296,6 +1541,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -1337,6 +1583,7 @@ describe('bulkEdit()', () => {
               params: {
                 index: ['index-1', 'index-2'],
               },
+              revision: 1,
             }),
           }),
         ],
@@ -1344,7 +1591,7 @@ describe('bulkEdit()', () => {
       );
     });
 
-    it('should succesfully update rule if index patterns are updated but tags are not', async () => {
+    it('should successfully update rule if index patterns are updated but tags are not', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
@@ -1363,6 +1610,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -1404,6 +1652,7 @@ describe('bulkEdit()', () => {
               params: {
                 index: ['index-1', 'index-2', 'index-3'],
               },
+              revision: 1,
             }),
           }),
         ],
@@ -1828,6 +2077,142 @@ describe('bulkEdit()', () => {
         ],
       });
       expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my rule name');
+    });
+
+    describe('set by the user when authenticated using api keys', () => {
+      beforeEach(() => {
+        isAuthenticationTypeApiKeyMock.mockReturnValue(true);
+        getAuthenticationApiKeyMock.mockReturnValue({
+          apiKeysEnabled: true,
+          result: { api_key: '111' },
+        });
+        mockCreatePointInTimeFinderAsInternalUser({
+          saved_objects: [
+            {
+              ...existingDecryptedRule,
+              attributes: {
+                ...existingDecryptedRule.attributes,
+                enabled: true,
+                apiKeyCreatedByUser: true,
+              },
+            },
+          ],
+        });
+      });
+
+      test('should not call bulkMarkApiKeysForInvalidation', async () => {
+        await rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        });
+
+        expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+      });
+
+      test('should call bulkMarkApiKeysForInvalidation with empty array if bulkCreate failed', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockImplementation(() => {
+          throw new Error('Fail');
+        });
+
+        await expect(
+          rulesClient.bulkEdit({
+            filter: 'alert.attributes.tags: "APM"',
+            operations: [
+              {
+                field: 'tags',
+                operation: 'add',
+                value: ['test-1'],
+              },
+            ],
+          })
+        ).rejects.toThrow('Fail');
+
+        expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+        expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+          { apiKeys: [] },
+          expect.any(Object),
+          expect.any(Object)
+        );
+      });
+
+      test('should call bulkMarkApiKeysForInvalidation with empty array if SO update failed', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [
+            {
+              id: '1',
+              type: 'alert',
+              attributes: {
+                enabled: true,
+                tags: ['foo'],
+                alertTypeId: 'myType',
+                schedule: { interval: '1m' },
+                consumer: 'myApp',
+                scheduledTaskId: 'task-123',
+                params: { index: ['test-index-*'] },
+                throttle: null,
+                notifyWhen: null,
+                actions: [],
+              },
+              references: [],
+              version: '123',
+              error: {
+                error: 'test failure',
+                statusCode: 500,
+                message: 'test failure',
+              },
+            },
+          ],
+        });
+
+        await rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        });
+
+        expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+      });
+
+      test('should not call get apiKey if rule is disabled', async () => {
+        await rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        });
+        expect(rulesClientParams.getAuthenticationAPIKey).not.toHaveBeenCalledWith();
+      });
+
+      test('should return error in rule errors if key is not generated', async () => {
+        await rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        });
+        expect(rulesClientParams.getAuthenticationAPIKey).toHaveBeenCalledWith(
+          'Alerting: myType/my rule name-user-created'
+        );
+      });
     });
   });
 

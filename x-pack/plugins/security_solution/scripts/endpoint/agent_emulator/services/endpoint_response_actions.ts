@@ -46,7 +46,7 @@ export const sleep = (ms: number = 1000) => new Promise((r) => setTimeout(r, ms)
 
 export const fetchEndpointActionList = async (
   kbn: KbnClient,
-  options: EndpointActionListRequestQuery = {}
+  options: EndpointActionListRequestQuery = { withAutomatedActions: true }
 ): Promise<ActionListApiResponse> => {
   try {
     return (
@@ -248,27 +248,29 @@ export const sendEndpointActionResponse = async (
     // Index the file content (just one chunk)
     // call to `.index()` copied from File plugin here:
     // https://github.com/elastic/kibana/blob/main/src/plugins/files/server/blob_storage_service/adapters/es/content_stream/content_stream.ts#L195
-    await esClient.index(
-      {
-        index: FILE_STORAGE_DATA_INDEX,
-        id: `${fileMeta._id}.0`,
-        document: cborx.encode({
-          bid: fileMeta._id,
-          last: true,
-          data: Buffer.from(
-            'UEsDBAoACQAAAFZeRFWpAsDLHwAAABMAAAAMABwAYmFkX2ZpbGUudHh0VVQJAANTVjxjU1Y8Y3V4CwABBPUBAAAEFAAAAMOcoyEq/Q4VyG02U9O0LRbGlwP/y5SOCfRKqLz1rsBQSwcIqQLAyx8AAAATAAAAUEsBAh4DCgAJAAAAVl5EVakCwMsfAAAAEwAAAAwAGAAAAAAAAQAAAKSBAAAAAGJhZF9maWxlLnR4dFVUBQADU1Y8Y3V4CwABBPUBAAAEFAAAAFBLBQYAAAAAAQABAFIAAAB1AAAAAAA=',
-            'base64'
-          ),
-        }),
-        refresh: 'wait_for',
-      },
-      {
-        headers: {
-          'content-type': 'application/cbor',
-          accept: 'application/json',
+    await esClient
+      .index(
+        {
+          index: FILE_STORAGE_DATA_INDEX,
+          id: `${fileMeta._id}.0`,
+          document: cborx.encode({
+            bid: fileMeta._id,
+            last: true,
+            data: Buffer.from(
+              'UEsDBAoACQAAAFZeRFWpAsDLHwAAABMAAAAMABwAYmFkX2ZpbGUudHh0VVQJAANTVjxjU1Y8Y3V4CwABBPUBAAAEFAAAAMOcoyEq/Q4VyG02U9O0LRbGlwP/y5SOCfRKqLz1rsBQSwcIqQLAyx8AAAATAAAAUEsBAh4DCgAJAAAAVl5EVakCwMsfAAAAEwAAAAwAGAAAAAAAAQAAAKSBAAAAAGJhZF9maWxlLnR4dFVUBQADU1Y8Y3V4CwABBPUBAAAEFAAAAFBLBQYAAAAAAQABAFIAAAB1AAAAAAA=',
+              'base64'
+            ),
+          }),
+          refresh: 'wait_for',
         },
-      }
-    );
+        {
+          headers: {
+            'content-type': 'application/cbor',
+            accept: 'application/json',
+          },
+        }
+      )
+      .then(() => sleep(2000));
   }
 
   return endpointResponse;
@@ -280,6 +282,8 @@ type ResponseOutput<TOutputContent extends object = object> = Pick<
 >;
 
 const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
+  const commentUppercase = (action?.comment ?? '').toUpperCase();
+
   switch (action.command) {
     case 'running-processes':
       return {
@@ -317,12 +321,24 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
       } as ResponseOutput<ResponseActionGetFileOutputContent>;
 
     case 'execute':
-      const outputFileId = getFileDownloadId(action, action.agents[0]);
+      const executeOutput: Partial<ResponseActionExecuteOutputContent> = {
+        output_file_id: getFileDownloadId(action, action.agents[0]),
+      };
+
+      // Error?
+      if (commentUppercase.indexOf('EXECUTE:FAILURE') > -1) {
+        executeOutput.stdout = '';
+        executeOutput.stdout_truncated = false;
+        executeOutput.output_file_stdout_truncated = false;
+      } else {
+        executeOutput.stderr = '';
+        executeOutput.stderr_truncated = false;
+        executeOutput.output_file_stderr_truncated = false;
+      }
+
       return {
         output: endpointActionGenerator.generateExecuteActionResponseOutput({
-          content: {
-            outputFileId,
-          },
+          content: executeOutput,
         }),
       } as ResponseOutput<ResponseActionExecuteOutputContent>;
 

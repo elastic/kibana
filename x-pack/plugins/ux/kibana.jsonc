@@ -6,14 +6,12 @@
     "id": "ux",
     "server": false,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "ux"
-    ],
+    "configPath": ["xpack", "ux"],
     "requiredPlugins": [
       "features",
       "data",
       "dataViews",
+      "exploratoryView",
       "licensing",
       "triggersActionsUi",
       "embeddable",
@@ -34,6 +32,7 @@
     ],
     "requiredBundles": [
       "kibanaReact",
+      "exploratoryView",
       "observability",
       "maps"
     ]

@@ -69,8 +69,8 @@ export type {
   GetAgentIncomingDataRequest,
   IncomingDataList,
   GetAgentIncomingDataResponse,
-  PutAgentReassignRequest,
-  PutAgentReassignResponse,
+  PostAgentReassignRequest,
+  PostAgentReassignResponse,
   PostBulkAgentReassignRequest,
   PostBulkAgentReassignResponse,
   PostNewAgentActionResponse,
@@ -113,6 +113,7 @@ export type {
   ServiceName,
   GetCategoriesRequest,
   GetCategoriesResponse,
+  GetVerificationKeyIdResponse,
   GetPackagesRequest,
   GetPackagesResponse,
   GetLimitedPackagesResponse,
@@ -132,6 +133,8 @@ export type {
   GetAvailableVersionsResponse,
   PostHealthCheckRequest,
   PostHealthCheckResponse,
+  PostRetrieveAgentsByActionsRequest,
+  PostRetrieveAgentsByActionsResponse,
 } from '../../common/types';
 export {
   entries,

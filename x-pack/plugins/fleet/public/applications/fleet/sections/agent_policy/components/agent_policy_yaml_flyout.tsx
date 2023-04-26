@@ -49,7 +49,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
           />
         }
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         {error.message}
       </EuiCallOut>

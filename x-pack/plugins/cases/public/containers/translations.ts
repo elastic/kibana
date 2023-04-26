@@ -13,6 +13,10 @@ export const ERROR_TITLE = i18n.translate('xpack.cases.containers.errorTitle', {
   defaultMessage: 'Error fetching data',
 });
 
+export const ERROR_CREATING_CASE = i18n.translate('xpack.cases.containers.errorCreatingCaseTitle', {
+  defaultMessage: 'Error creating case',
+});
+
 export const ERROR_DELETING = i18n.translate('xpack.cases.containers.errorDeletingTitle', {
   defaultMessage: 'Error deleting data',
 });

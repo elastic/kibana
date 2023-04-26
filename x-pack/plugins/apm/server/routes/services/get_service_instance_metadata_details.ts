@@ -18,6 +18,22 @@ import {
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { Agent } from '../../../typings/es_schemas/ui/fields/agent';
+import { Service } from '../../../typings/es_schemas/raw/fields/service';
+import { Container } from '../../../typings/es_schemas/raw/fields/container';
+import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
+import { Host } from '../../../typings/es_schemas/raw/fields/host';
+import { Cloud } from '../../../typings/es_schemas/raw/fields/cloud';
+
+export interface ServiceInstanceMetadataDetailsResponse {
+  '@timestamp': string;
+  agent?: Agent;
+  service?: Service;
+  container?: Container;
+  kubernetes?: Kubernetes;
+  host?: Host;
+  cloud?: Cloud;
+}
 
 export async function getServiceInstanceMetadataDetails({
   serviceName,
@@ -31,7 +47,7 @@ export async function getServiceInstanceMetadataDetails({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}) {
+}): Promise<ServiceInstanceMetadataDetailsResponse> {
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [SERVICE_NODE_NAME]: serviceNodeName } },

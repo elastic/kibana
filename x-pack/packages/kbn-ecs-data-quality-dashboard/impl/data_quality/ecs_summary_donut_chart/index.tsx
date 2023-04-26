@@ -16,6 +16,7 @@ import type {
   Theme,
   WordCloudElementEvent,
   XYChartElementEvent,
+  PartitionLayer,
 } from '@elastic/charts';
 import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import {
@@ -101,12 +102,12 @@ const EcsSummaryDonutChartComponent: React.FC<Props> = ({
   const valueAccessor = useCallback((d: Datum) => d.mappings as number, []);
   const valueFormatter = useCallback((d: number) => `${d}`, []);
   const layers = useMemo(
-    () => [
+    (): PartitionLayer[] => [
       {
         groupByRollup: (d: Datum) => d.categoryId,
         nodeLabel: (d: Datum) => getNodeLabel(d),
         shape: {
-          fillColor: (d: Datum) => getFillColor(d.dataName),
+          fillColor: getFillColor,
         },
       },
     ],

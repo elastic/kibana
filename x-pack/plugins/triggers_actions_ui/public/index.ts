@@ -42,6 +42,7 @@ export type {
   RuleDefinitionProps,
   RulesListVisibleColumns,
   AlertSummaryTimeRange,
+  NotifyWhenSelectOptions,
 } from './types';
 
 export type {
@@ -100,7 +101,7 @@ export function plugin(context: PluginInitializerContext) {
 }
 
 export { useKibana } from './common';
-export type { AggregationType, Comparator } from './common';
+export type { AggregationType, Comparator, ValidNormalizedTypes } from './common';
 
 export {
   WhenExpression,

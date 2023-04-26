@@ -18,11 +18,15 @@ import {
 } from './slo_list_search_filter_sort_bar';
 import { SloListItems } from './slo_list_items';
 
-export function SloList() {
+export interface Props {
+  autoRefresh: boolean;
+}
+
+export function SloList({ autoRefresh }: Props) {
   const [activePage, setActivePage] = useState(0);
 
   const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<SortType>('name');
+  const [sort, setSort] = useState<SortType>('creationTime');
   const [indicatorTypeFilter, setIndicatorTypeFilter] = useState<FilterType[]>([]);
 
   const { isLoading, isError, sloList, refetch } = useFetchSloList({
@@ -30,6 +34,7 @@ export function SloList() {
     name: query,
     sortBy: sort,
     indicatorTypes: indicatorTypeFilter,
+    shouldRefetch: autoRefresh,
   });
 
   const { results = [], total = 0, perPage = 0 } = sloList || {};
