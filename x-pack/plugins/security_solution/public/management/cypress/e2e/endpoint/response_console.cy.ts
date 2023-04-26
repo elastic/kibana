@@ -67,6 +67,7 @@ describe('Response console', () => {
       performCommandInputChecks('isolate');
       submitCommand();
       waitForCommandToBeExecuted();
+      waitForEndpointListPageToBeLoaded(endpointHostname);
       checkEndpointListForOnlyIsolatedHosts();
     });
 
