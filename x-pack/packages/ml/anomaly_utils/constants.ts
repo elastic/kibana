@@ -44,7 +44,7 @@ export const ML_ANOMALY_RESULT_TYPE = {
  * Array of partition fields.
  * @type {readonly ["partition_field", "over_field", "by_field"]}
  */
-export const PARTITION_FIELDS = ['partition_field', 'over_field', 'by_field'] as const;
+export const ML_PARTITION_FIELDS = ['partition_field', 'over_field', 'by_field'] as const;
 
 /**
  * Machine learning job id attribute name.

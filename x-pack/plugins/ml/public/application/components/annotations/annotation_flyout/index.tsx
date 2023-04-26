@@ -29,7 +29,7 @@ import {
 import { CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type PartitionFieldsType, PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
+import { type PartitionFieldsType, ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
 import {
   ANNOTATION_MAX_LENGTH_CHARS,
   ANNOTATION_EVENT_USER,
@@ -227,7 +227,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     // if unchecked, remove all the partitions before indexing
     if (!this.state.applyAnnotationToSeries) {
       delete annotation.detector_index;
-      PARTITION_FIELDS.forEach((fieldType) => {
+      ML_PARTITION_FIELDS.forEach((fieldType) => {
         delete annotation[getAnnotationFieldName(fieldType)];
         delete annotation[getAnnotationFieldValue(fieldType)];
       });

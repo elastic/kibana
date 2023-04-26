@@ -10,7 +10,7 @@ import { each, get } from 'lodash';
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
+import { ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
@@ -264,7 +264,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
 
       // clause to get annotations that have no partition fields
       const haveAnyPartitionFields: object[] = [];
-      PARTITION_FIELDS.forEach((field) => {
+      ML_PARTITION_FIELDS.forEach((field) => {
         haveAnyPartitionFields.push({
           exists: {
             field: getAnnotationFieldName(field),
