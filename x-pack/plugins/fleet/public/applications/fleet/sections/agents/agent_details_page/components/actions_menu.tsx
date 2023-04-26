@@ -108,6 +108,9 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         defaultMessage="Upgrade agent"
       />
     </EuiContextMenuItem>,
+  ];
+
+  menuItems.push(
     <EuiContextMenuItem
       icon="inspect"
       onClick={() => {
@@ -115,13 +118,14 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         setIsAgentDetailsJsonFlyoutOpen(!isAgentDetailsJsonFlyoutOpen);
       }}
       key="agentDetailsJson"
+      data-test-subj="viewAgentDetailsJsonBtn"
     >
       <FormattedMessage
         id="xpack.fleet.agentList.viewAgentDetailsJsonText"
         defaultMessage="View agent JSON"
       />
-    </EuiContextMenuItem>,
-  ];
+    </EuiContextMenuItem>
+  );
 
   if (diagnosticFileUploadEnabled) {
     menuItems.push(
@@ -131,6 +135,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         onClick={() => {
           setIsRequestDiagnosticsModalOpen(true);
         }}
+        data-test-subj="requestAgentDiagnosticsBtn"
         key="requestDiagnostics"
       >
         <FormattedMessage
