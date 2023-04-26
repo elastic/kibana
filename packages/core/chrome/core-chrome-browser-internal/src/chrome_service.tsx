@@ -133,13 +133,11 @@ export class ChromeService {
     };
 
     const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
-    const bodyClasses$ = combineLatest([headerBanner$, this.isVisible$!]).pipe(
-      map(([headerBanner, isVisible]) => {
+    const bodyClasses$ = combineLatest([headerBanner$, this.isVisible$!, chromeStyle$]).pipe(
+      map(([headerBanner, isVisible, chromeStyle]) => {
         return [
           'kbnBody',
-          chromeStyle$.getValue() === 'classic'
-            ? 'kbnBody--classicLayout'
-            : 'kbnBody--projectLayout',
+          chromeStyle === 'project' ? 'kbnBody--projectLayout' : 'kbnBody--classicLayout',
           headerBanner ? 'kbnBody--hasHeaderBanner' : 'kbnBody--noHeaderBanner',
           isVisible ? 'kbnBody--chromeVisible' : 'kbnBody--chromeHidden',
           getKbnVersionClass(),

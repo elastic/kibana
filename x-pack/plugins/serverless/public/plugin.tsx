@@ -10,7 +10,6 @@ import ReactDOM from 'react-dom';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
 import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
 import { ProjectType } from '@kbn/serverless-types';
 
@@ -54,11 +53,9 @@ export class ServerlessPlugin implements Plugin<ServerlessPluginSetup, Serverles
   ) {
     ReactDOM.render(
       <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-        <I18nProvider>
-          <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
-            <ProjectSwitcher {...{ currentProjectType }} />
-          </ProjectSwitcherKibanaProvider>
-        </I18nProvider>
+        <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
+          <ProjectSwitcher {...{ currentProjectType }} />
+        </ProjectSwitcherKibanaProvider>
       </KibanaThemeProvider>,
       targetDomElement
     );
