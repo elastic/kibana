@@ -63,6 +63,16 @@ export interface DeleteFileArgs {
 }
 
 /**
+ * Arguments to delete files in a bulk request.
+ */
+export interface BulkDeleteFilesArgs {
+  /**
+   * File IDs.
+   */
+  ids: string[];
+}
+
+/**
  * Arguments to get a file by ID.
  */
 export interface GetByIdArgs {

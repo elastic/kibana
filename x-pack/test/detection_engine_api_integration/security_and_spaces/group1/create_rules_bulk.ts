@@ -112,11 +112,14 @@ export default ({ getService }: FtrProviderContext): void => {
        this pops up again elsewhere.
       */
       it('should create a single rule with a rule_id and validate it ran successfully', async () => {
-        const simpleRule = getRuleForSignalTesting(['auditbeat-*']);
+        const rule = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          query: 'process.executable: "/usr/bin/sudo"',
+        };
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
-          .send([simpleRule])
+          .send([rule])
           .expect(200);
 
         await waitForRuleSuccess({ supertest, log, id: body[0].id });

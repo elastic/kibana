@@ -13,12 +13,15 @@ export interface UpdateTrainedModelDeploymentRequest {
   model_id: string;
   number_of_allocations: number;
 }
+export interface UpdateTrainedModelDeploymentResponse {
+  acknowledge: boolean;
+}
 
 export interface MlClient extends OrigMlClient {
   anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
   updateTrainedModelDeployment: (
     payload: UpdateTrainedModelDeploymentRequest
-  ) => Promise<{ acknowledge: boolean }>;
+  ) => Promise<UpdateTrainedModelDeploymentResponse>;
 }
 
 export type MlClientParams =
