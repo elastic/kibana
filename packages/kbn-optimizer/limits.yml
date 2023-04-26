@@ -7,7 +7,7 @@ pageLoadAssetSize:
   banners: 17946
   bfetch: 22837
   canvas: 1066647
-  cases: 170000
+  cases: 175000
   charts: 55000
   cloud: 21076
   cloudChat: 19894
@@ -95,7 +95,7 @@ pageLoadAssetSize:
   newsfeed: 42228
   observability: 95000
   observabilityOnboarding: 19573
-  observabilityShared: 21266
+  observabilityShared: 36643
   osquery: 107090
   painlessLab: 179748
   presentationUtil: 58834
