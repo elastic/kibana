@@ -35,6 +35,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
+    notifications: { toasts },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana<ObservabilityAppServices>().services;
   const { hasWriteCapabilities } = useCapabilities();
@@ -43,7 +44,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
 
-  const { mutate: cloneSlo } = useCloneSlo();
+  const { mutateAsync: cloneSlo } = useCloneSlo();
   const isDeleting = Boolean(useIsMutating(['deleteSlo', slo?.id]));
 
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
@@ -97,14 +98,24 @@ export function HeaderControl({ isLoading, slo }: Props) {
     }
   };
 
-  const handleClone = () => {
+  const handleClone = async () => {
     if (slo) {
+      setIsPopoverOpen(false);
+
       const newSlo = transformValuesToCreateSLOInput(
         transformSloResponseToCreateSloInput({ ...slo, name: `[Copy] ${slo.name}` })!
       );
 
-      cloneSlo({ slo: newSlo, idToCopyFrom: slo.id });
-      setIsPopoverOpen(false);
+      await cloneSlo({ slo: newSlo, idToCopyFrom: slo.id });
+
+      toasts.addSuccess(
+        i18n.translate('xpack.observability.slo.sloDetails.headerControl.cloneSuccess', {
+          defaultMessage: 'Successfully created {name}',
+          values: { name: newSlo.name },
+        })
+      );
+
+      navigateToUrl(basePath.prepend(paths.observability.slos));
     }
   };
 

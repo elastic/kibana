@@ -45,7 +45,7 @@ export function SloDetailsPage() {
 
   const { isLoading, slo } = useFetchSloDetails({ sloId, shouldRefetch: isAutoRefreshing });
 
-  const isDeleting = Boolean(useIsMutating(['deleteSlo', slo?.id]));
+  const isCloningOrDeleting = Boolean(useIsMutating());
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
@@ -58,6 +58,8 @@ export function SloDetailsPage() {
     navigateToUrl(basePath.prepend(paths.observability.slos));
   }
 
+  const isPerformingAction = isLoading || isCloningOrDeleting;
+
   const handleToggleAutoRefresh = () => {
     setIsAutoRefreshing(!isAutoRefreshing);
   };
@@ -65,15 +67,15 @@ export function SloDetailsPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <HeaderTitle isLoading={isLoading} slo={slo} />,
+        pageTitle: <HeaderTitle isLoading={isPerformingAction} slo={slo} />,
         rightSideItems: [
-          <HeaderControl isLoading={isLoading} slo={slo} />,
+          <HeaderControl isLoading={isPerformingAction} slo={slo} />,
           <AutoRefreshButton
-            disabled={isLoading || isDeleting}
+            disabled={isPerformingAction}
             isAutoRefreshing={isAutoRefreshing}
             onClick={handleToggleAutoRefresh}
           />,
-          <FeedbackButton disabled={isLoading || isDeleting} />,
+          <FeedbackButton disabled={isPerformingAction} />,
         ],
         bottomBorder: false,
       }}
