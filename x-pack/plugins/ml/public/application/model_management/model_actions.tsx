@@ -340,7 +340,7 @@ export function useModelActions({
             await trainedModelsApiService.putConfig(item.model_id, item.putConfig!);
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.downloadSuccess', {
-                defaultMessage: 'Download of the model "{modelId}" has been started successfully.',
+                defaultMessage: '"{modelId}" model download has been started successfully.',
                 values: {
                   modelId: item.model_id,
                 },
