@@ -119,7 +119,7 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
 };
 
 export const APPLICATIONS_PLUGIN = {
-  ID: 'searchApplications',
+  ID: 'enterpriseSearchApplications',
   LOGO: 'logoEnterpriseSearch',
   NAME: i18n.translate('xpack.enterpriseSearch.applications.productName', {
     defaultMessage: 'Applications',
