@@ -30,6 +30,7 @@ export interface MessageSigningServiceInterface {
   generateKeyPair(
     providedPassphrase?: string
   ): Promise<{ privateKey: string; publicKey: string; passphrase: string }>;
+  rotateKeyPair(): Promise<boolean>;
   sign(message: Buffer | Record<string, unknown>): Promise<{ data: Buffer; signature: string }>;
   getPublicKey(): Promise<string>;
 }
@@ -132,6 +133,25 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     }
 
     return publicKey;
+  }
+
+  public async rotateKeyPair(): Promise<boolean> {
+    const isRemoved = await this.removeKeyPair();
+    if (isRemoved) {
+      await this.generateKeyPair();
+      return true;
+    }
+    return false;
+    // TODO: Apply changes to all policies
+  }
+
+  private async removeKeyPair(): Promise<boolean> {
+    const currentKeyPair = await this.getCurrentKeyPairObj();
+    if (currentKeyPair) {
+      await this.soClient.delete(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, currentKeyPair.id);
+      return true;
+    }
+    return false;
   }
 
   private get soClient() {

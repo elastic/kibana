@@ -16,6 +16,7 @@ import type {
   IKibanaSearchResponse,
   ISearchOptions,
 } from '@kbn/data-plugin/common';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   AggregatableFieldOverallStats,
@@ -29,7 +30,6 @@ import {
 } from '../search_strategy/requests/overall_stats';
 import type { OverallStats } from '../types/overall_stats';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
-import { extractErrorProperties } from '../utils/error_utils';
 import {
   DataStatsFetchProgress,
   isRandomSamplingOption,

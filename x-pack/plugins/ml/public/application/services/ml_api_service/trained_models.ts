@@ -132,6 +132,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         number_of_allocations: number;
         threads_per_allocation: number;
         priority: 'low' | 'normal';
+        deployment_id?: string;
       }
     ) {
       return httpService.http<{ acknowledge: boolean }>({
@@ -141,11 +142,11 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    stopModelAllocation(modelId: string, options: { force: boolean } = { force: false }) {
+    stopModelAllocation(deploymentsIds: string[], options: { force: boolean } = { force: false }) {
       const force = options?.force;
 
       return httpService.http<{ acknowledge: boolean }>({
-        path: `${apiBasePath}/trained_models/${modelId}/deployment/_stop`,
+        path: `${apiBasePath}/trained_models/${deploymentsIds.join(',')}/deployment/_stop`,
         method: 'POST',
         query: { force },
       });

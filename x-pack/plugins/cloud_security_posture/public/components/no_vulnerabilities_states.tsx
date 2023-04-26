@@ -13,6 +13,7 @@ import {
   EuiMarkdownFormat,
   EuiLink,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
@@ -43,7 +44,7 @@ const ScanningVulnerabilitiesEmptyPrompt = () => (
       <h2>
         <FormattedMessage
           id="xpack.csp.noVulnerabilitiesStates.scanningVulnerabilitiesEmptyPrompt.indexingButtonTitle"
-          defaultMessage="Scanning your cloud environment for vulnerabilities"
+          defaultMessage="Scanning your environment"
         />
       </h2>
     }
@@ -51,7 +52,7 @@ const ScanningVulnerabilitiesEmptyPrompt = () => (
       <p>
         <FormattedMessage
           id="xpack.csp.noVulnerabilitiesStates.scanningVulnerabilitiesEmptyPrompt.indexingDescription"
-          defaultMessage="Results should start to appear within a minute"
+          defaultMessage="Results will appear here as soon as they are available."
         />
       </p>
     }
@@ -72,7 +73,7 @@ const VulnerabilitiesFindingsInstalledEmptyPrompt = ({
           <FormattedHTMLMessage
             tagName="h2"
             id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.promptTitle"
-            defaultMessage="Detect vulnerabilities <br/> in your cloud assets!"
+            defaultMessage="Detect vulnerabilities in your <br/> cloud assets"
           />
         </h2>
       }
@@ -82,17 +83,7 @@ const VulnerabilitiesFindingsInstalledEmptyPrompt = ({
         <p>
           <FormattedMessage
             id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.promptDescription"
-            defaultMessage="Add the Elastic Vulnerability Management Integration to begin. {learnMore}."
-            values={{
-              learnMore: (
-                <EuiLink href={''} target="_blank">
-                  <FormattedMessage
-                    id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.learnMoreTitle"
-                    defaultMessage="Learn more about Elastic Vulnerability Management(VM) for Cloud"
-                  />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="Add the Cloud Native Vulnerability Management integration to begin"
           />
         </p>
       }
@@ -102,9 +93,17 @@ const VulnerabilitiesFindingsInstalledEmptyPrompt = ({
             <EuiButton color="primary" fill href={vulnMgmtIntegrationLink}>
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.addVulMngtIntegrationButtonTitle"
-                defaultMessage="Install Elastic Vulnerability Management for Cloud"
+                defaultMessage="Install Cloud Native Vulnerability Management"
               />
             </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty color="primary" href={'https://ela.st/cnvm'} target="_blank">
+              <FormattedMessage
+                id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.learnMoreButtonTitle"
+                defaultMessage="Learn more"
+              />
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
@@ -206,10 +205,10 @@ export const NoVulnerabilitiesStates = () => {
       .sort((a, b) => a.localeCompare(b));
 
   const render = () => {
-    if (status === 'not-deployed' || status === 'indexing' || status === 'waiting_for_results')
+    if (status === 'indexing' || status === 'waiting_for_results')
       return <ScanningVulnerabilitiesEmptyPrompt />; // integration installed, but no agents added
     if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
-    if (status === 'not-installed')
+    if (status === 'not-deployed' || status === 'not-installed')
       return (
         <VulnerabilitiesFindingsInstalledEmptyPrompt
           vulnMgmtIntegrationLink={vulnMgmtIntegrationLink}

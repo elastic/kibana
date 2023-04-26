@@ -32,6 +32,7 @@ import {
   GetExceptionFilterFromExceptionListIdsProps,
   GetExceptionFilterFromExceptionsProps,
   ExceptionFilterResponse,
+  DuplicateExceptionListProps,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
@@ -615,5 +616,33 @@ export const getExceptionFilterFromExceptions = async ({
       exclude_exceptions: excludeExceptions,
       chunk_size: chunkSize,
     }),
+    signal,
+  });
+
+/**
+ * Duplicate an ExceptionList and its items by providing a ExceptionList list_id
+ *
+ * @param http Kibana http service
+ * @param includeExpiredExceptions boolean for including exception items with expired TTL
+ * @param listId ExceptionList LIST_ID (not id)
+ * @param namespaceType ExceptionList namespace_type
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const duplicateExceptionList = async ({
+  http,
+  includeExpiredExceptions,
+  listId,
+  namespaceType,
+  signal,
+}: DuplicateExceptionListProps): Promise<ExceptionListSchema> =>
+  http.fetch<ExceptionListSchema>(`${EXCEPTION_LIST_URL}/_duplicate`, {
+    method: 'POST',
+    query: {
+      list_id: listId,
+      namespace_type: namespaceType,
+      include_expired_exceptions: includeExpiredExceptions,
+    },
     signal,
   });

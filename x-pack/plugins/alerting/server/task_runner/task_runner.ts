@@ -47,6 +47,7 @@ import {
   parseDuration,
   RawAlertInstance,
   RuleLastRunOutcomeOrderMap,
+  MaintenanceWindow,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -315,6 +316,25 @@ export class TaskRunner<
     });
     const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
     const flappingSettings = await rulesSettingsClient.flapping().get();
+    const maintenanceWindowClient = this.context.getMaintenanceWindowClientWithRequest(fakeRequest);
+
+    let activeMaintenanceWindows: MaintenanceWindow[] = [];
+    try {
+      activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows({
+        interval: rule.schedule.interval,
+      });
+    } catch (err) {
+      this.logger.error(
+        `error getting active maintenance window for ${ruleTypeId}:${ruleId} ${err.message}`
+      );
+    }
+
+    const maintenanceWindowIds = activeMaintenanceWindows.map(
+      (maintenanceWindow) => maintenanceWindow.id
+    );
+    if (maintenanceWindowIds.length) {
+      this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowIds);
+    }
 
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
@@ -397,6 +417,7 @@ export class TaskRunner<
               },
               logger: this.logger,
               flappingSettings,
+              ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
             })
           );
 
@@ -444,6 +465,7 @@ export class TaskRunner<
         shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
         flappingSettings,
         notifyWhen,
+        maintenanceWindowIds,
       });
     });
 
@@ -470,6 +492,10 @@ export class TaskRunner<
 
       if (isRuleSnoozed(rule)) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
+      } else if (maintenanceWindowIds.length) {
+        this.logger.debug(
+          `no scheduling of actions for rule ${ruleLabel}: has active maintenance windows ${maintenanceWindowIds}.`
+        );
       } else if (!this.shouldLogAndScheduleActionsForAlerts()) {
         this.logger.debug(
           `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
@@ -548,7 +574,7 @@ export class TaskRunner<
     this.alertingEventLogger.start();
 
     return await loadRule<Params>({
-      paramValidator: this.ruleType.validate?.params,
+      paramValidator: this.ruleType.validate.params,
       ruleId,
       spaceId,
       context: this.context,
@@ -692,7 +718,7 @@ export class TaskRunner<
       schedule = asOk(
         (
           await loadRule<Params>({
-            paramValidator: this.ruleType.validate?.params,
+            paramValidator: this.ruleType.validate.params,
             ruleId,
             spaceId,
             context: this.context,

@@ -90,7 +90,7 @@ export const ConfigForm: FC<ConfigFormProps> = memo(
                       </EuiTextColor>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiIconTip type="iInCircle" color="subdued" content={osRestriction} />
+                      <EuiIconTip type="warning" color="warning" content={osRestriction} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>

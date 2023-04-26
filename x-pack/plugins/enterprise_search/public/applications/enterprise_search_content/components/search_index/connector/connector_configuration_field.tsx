@@ -95,7 +95,14 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       );
 
       return sensitive ? (
-        <EuiAccordion id={key + '-accordion'} buttonContent={label}>
+        <EuiAccordion
+          id={key + '-accordion'}
+          buttonContent={
+            <EuiToolTip content={tooltip}>
+              <p>{label}</p>
+            </EuiToolTip>
+          }
+        >
           {textarea}
         </EuiAccordion>
       ) : (

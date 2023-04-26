@@ -6,9 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual, omit } from 'lodash';
+import { isEqual } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { ShouldIncrementRevision } from './bulk_edit';
 import {
   PartialRule,
@@ -186,19 +185,8 @@ async function updateAlert<Params extends RuleTypeParams>(
 
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
-  // TODO https://github.com/elastic/kibana/issues/148414
-  // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
-  const firstFrequency = data.actions.find((action) => action?.frequency)?.frequency;
-  if (attributes.consumer === AlertConsumers.SIEM && firstFrequency) {
-    data.actions = data.actions.map((action) => omit(action, 'frequency'));
-    if (!attributes.notifyWhen) {
-      attributes.notifyWhen = firstFrequency.notifyWhen;
-      attributes.throttle = firstFrequency.throttle;
-    }
-  }
-
   // Validate
-  const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
+  const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it

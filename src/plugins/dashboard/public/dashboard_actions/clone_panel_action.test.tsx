@@ -21,7 +21,7 @@ import { ErrorEmbeddable, IContainer, isErrorEmbeddable } from '@kbn/embeddable-
 import { DashboardPanelState } from '../../common';
 import { ClonePanelAction } from './clone_panel_action';
 import { pluginServices } from '../services/plugin_services';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../mocks';
+import { buildMockDashboard, getSampleDashboardPanel } from '../mocks';
 import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 
 let container: DashboardContainer;
@@ -37,7 +37,12 @@ beforeEach(async () => {
     create: jest.fn().mockImplementation(() => ({ id: 'brandNewSavedObject' })),
   };
 
-  const input = getSampleDashboardInput({
+  const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+
+  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    .fn()
+    .mockReturnValue(mockEmbeddableFactory);
+  container = buildMockDashboard({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
         explicitInput: { firstName: 'Kibanana', id: '123' },
@@ -45,13 +50,6 @@ beforeEach(async () => {
       }),
     },
   });
-  const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-
-  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-    .fn()
-    .mockReturnValue(mockEmbeddableFactory);
-  container = new DashboardContainer(input);
-  await container.untilInitialized();
 
   const refOrValContactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
