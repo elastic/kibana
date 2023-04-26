@@ -13,17 +13,20 @@ import { LeftSourcePanel } from './left_source_panel';
 export function WizardForm() {
   const [leftDataView, setLeftDataView] = useState<DataView | undefined>();
   const [leftGeoFields, setLeftGeoFields] = useState<DataViewField[]>([]);
-  const [leftGeoField, setLeftGeoField] = useState<DataViewField | undefined>();
+  const [leftGeoField, setLeftGeoField] = useState<string | undefined>();
 
   return (
     <LeftSourcePanel
       dataView={leftDataView}
+      geoField={leftGeoField}
+      geoFields={leftGeoFields}
       onDataViewSelect={(dataView: DataView) => {
         setLeftDataView(dataView);
-        const leftGeoFields = getGeoPointFields(dataView.fields);
-        setLeftGeoFields(leftGeoFields);
-        setLeftGeoField(leftGeoFields.length ? leftGeoFields[0] : undefined);
+        const geoFields = getGeoPointFields(dataView.fields);
+        setLeftGeoFields(geoFields);
+        setLeftGeoField(geoFields.length ? geoFields[0].name : undefined);
       }}
+      onGeoFieldSelect={setLeftGeoField}
     />
   )
 }
