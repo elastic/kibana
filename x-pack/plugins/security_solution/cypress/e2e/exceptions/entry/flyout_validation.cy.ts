@@ -63,6 +63,7 @@ import {
 import { getExceptionList } from '../../../objects/exception';
 
 // Test Skipped until we fix the Flyout rerendering issue
+// https://github.com/elastic/kibana/issues/154994
 
 // NOTE: You might look at these tests and feel they're overkill,
 // but the exceptions flyout has a lot of logic making it difficult

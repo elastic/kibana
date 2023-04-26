@@ -15,6 +15,7 @@ import {
   toNdJsonString,
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
+  getImportExceptionsListItemNewerVersionSchemaMock,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -1421,6 +1422,53 @@ export default ({ getService }: FtrProviderContext): void => {
           await deleteAllExceptions(supertest, log);
         });
 
+        /* 
+         After the 8.7 version, this test can be treated as testing importing an old version of 
+         List Item as The "expire_time" property is not part of the getImportExceptionsListItemSchemaMock
+         and this is how we can differentiate between an Old version of a list item and a newer.
+         The reason behind it is both List and Rule don't keep the version so that we can use it to  
+         simulate migration cases
+        */
+        it('should be able to import a rule and an old version exception list, then delete it successfully', async () => {
+          const simpleRule = getSimpleRule('rule-1');
+
+          // import old exception version
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+            .set('kbn-xsrf', 'true')
+            .attach(
+              'file',
+              Buffer.from(
+                toNdJsonString([
+                  simpleRule,
+                  getImportExceptionsListSchemaMock('test_list_id'),
+                  getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
+                ])
+              ),
+              'rules.ndjson'
+            )
+            .expect(200);
+          expect(body).to.eql({
+            success: true,
+            success_count: 1,
+            rules_count: 1,
+            errors: [],
+            exceptions_errors: [],
+            exceptions_success: true,
+            exceptions_success_count: 1,
+            action_connectors_success: true,
+            action_connectors_success_count: 0,
+            action_connectors_errors: [],
+            action_connectors_warnings: [],
+          });
+
+          // delete the exception list item by its item_id
+          await supertest
+            .delete(`${EXCEPTION_LIST_ITEM_URL}?item_id=${'test_item_id'}`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+        });
+
         it('should be able to import a rule and an exception list', async () => {
           const simpleRule = getSimpleRule('rule-1');
 
@@ -1433,7 +1481,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 toNdJsonString([
                   simpleRule,
                   getImportExceptionsListSchemaMock('test_list_id'),
-                  getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
+                  getImportExceptionsListItemNewerVersionSchemaMock('test_item_id', 'test_list_id'),
                 ])
               ),
               'rules.ndjson'

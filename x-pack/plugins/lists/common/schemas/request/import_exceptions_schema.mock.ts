@@ -12,7 +12,7 @@ import {
   ImportExceptionsListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ENTRIES } from '../../constants.mock';
+import { ENTRIES, EXPIRE_TIME } from '../../constants.mock';
 
 export const getImportExceptionsListSchemaMock = (
   listId = 'detection_list_id'
@@ -23,6 +23,10 @@ export const getImportExceptionsListSchemaMock = (
   type: 'detection',
 });
 
+/** 
+  This mock holds the old properties of the Exception List item
+  so that we can test the migration test cases
+*/
 export const getImportExceptionsListItemSchemaMock = (
   itemId = 'item_id_1',
   listId = 'detection_list_id'
@@ -35,6 +39,23 @@ export const getImportExceptionsListItemSchemaMock = (
   type: 'simple',
 });
 
+/**  
+  This mock will hold the new properties of the Exception List item
+  so please keep it updated with the new ones and use it to test the 
+  new scenarios 
+*/
+export const getImportExceptionsListItemNewerVersionSchemaMock = (
+  itemId = 'item_id_1',
+  listId = 'detection_list_id'
+): ImportExceptionListItemSchema => ({
+  description: 'some description',
+  entries: ENTRIES,
+  expire_time: EXPIRE_TIME,
+  item_id: itemId,
+  list_id: listId,
+  name: 'Query with a rule id',
+  type: 'simple',
+});
 export const getImportExceptionsListSchemaDecodedMock = (
   listId = 'detection_list_id'
 ): ImportExceptionListSchemaDecoded => ({
