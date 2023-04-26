@@ -337,7 +337,10 @@ export function useModelActions({
         onClick: async (item) => {
           try {
             onLoading(true);
-            await trainedModelsApiService.putConfig(item.model_id, item.putConfig!);
+            await trainedModelsApiService.putTrainedModelConfig(
+              item.model_id,
+              item.putModelConfig!
+            );
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.downloadSuccess', {
                 defaultMessage: '"{modelId}" model download has been started successfully.',
@@ -395,7 +398,8 @@ export function useModelActions({
         onClick: (model) => {
           onModelsDeleteRequest([model.model_id]);
         },
-        available: (item) => canDeleteTrainedModels && !isBuiltInModel(item) && !item.putConfig,
+        available: (item) =>
+          canDeleteTrainedModels && !isBuiltInModel(item) && !item.putModelConfig,
         enabled: (item) => {
           // TODO check for permissions to delete ingest pipelines.
           // ATM undefined means pipelines fetch failed server-side.

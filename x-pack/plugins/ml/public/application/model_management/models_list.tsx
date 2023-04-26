@@ -68,7 +68,7 @@ export type ModelItem = TrainedModelConfigResponse & {
   stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
   pipelines?: ModelPipelines['pipelines'] | null;
   deployment_ids: string[];
-  putConfig?: object;
+  putModelConfig?: object;
   state: string;
 };
 
@@ -577,7 +577,7 @@ export const ModelsList: FC<Props> = ({
           model_id: modelId,
           type: [CURATED_MODEL_TYPE],
           tags: [CURATED_MODEL_TAG],
-          putConfig: modelDefinition.config,
+          putModelConfig: modelDefinition.config,
           description: modelDefinition.description,
         } as ModelItem;
       });
