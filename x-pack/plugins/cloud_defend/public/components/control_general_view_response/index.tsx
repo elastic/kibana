@@ -194,11 +194,11 @@ export const ControlGeneralViewResponse = ({
     const errs: ControlFormErrorMap = {};
 
     if (response.match.length === 0) {
-      errs.match = i18n.errorValueRequired;
+      errs.match = [i18n.errorValueRequired];
     }
 
     if (response.actions.length === 0) {
-      errs.actions = i18n.errorActionRequired;
+      errs.actions = [i18n.errorActionRequired];
     }
 
     return errs;
