@@ -2362,7 +2362,6 @@
     "discover.grid.flyout.documentNavigation": "文档导航",
     "discover.grid.flyout.toastColumnAdded": "已添加列“{columnName}”",
     "discover.grid.flyout.toastColumnRemoved": "已移除列“{columnName}”",
-    "discover.grid.flyout.toastFilterAdded": "已添加筛选",
     "discover.grid.selectDoc": "选择文档“{rowNumber}”",
     "discover.grid.tableRow.detailHeading": "已展开文档",
     "discover.grid.tableRow.viewSingleDocumentLinkTextSimple": "单个文档",
