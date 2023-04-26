@@ -163,11 +163,13 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
-      id: APPLICATIONS_PLUGIN.ID,
-      title: APPLICATIONS_PLUGIN.NAV_TITLE,
-      euiIconType: APPLICATIONS_PLUGIN.LOGO,
       appRoute: APPLICATIONS_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      euiIconType: APPLICATIONS_PLUGIN.LOGO,
+      id: APPLICATIONS_PLUGIN.ID,
+      navLinkStatus: AppNavLinkStatus.default,
+      searchable: true,
+      title: APPLICATIONS_PLUGIN.NAV_TITLE,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
