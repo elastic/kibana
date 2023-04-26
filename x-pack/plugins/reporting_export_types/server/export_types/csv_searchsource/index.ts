@@ -13,7 +13,7 @@ import {
   LICENSE_TYPE_TRIAL,
   LICENSE_TYPE_BASIC,
   PDF_JOB_TYPE_V2 as jobType,
-} from '@kbn/reporting-common';
+} from '@kbn/reporting-plugin/common/constants';
 import type { ExportTypeDefinition } from '@kbn/reporting-plugin/server/types';
 import { JobParamsCSV, TaskPayloadCSV } from '../../../common/types/csv_searchsource';
 import { createJobFnFactory } from './create_job';

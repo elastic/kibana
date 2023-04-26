@@ -13,7 +13,7 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_ENTERPRISE,
   CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
-} from '@kbn/reporting-common/constants';
+} from '@kbn/reporting-plugin/common/constants';
 import { ExportTypeDefinition } from '../types';
 import { ImmediateExecuteFn, runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';

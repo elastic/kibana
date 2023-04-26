@@ -6,7 +6,7 @@
     "id": "reportingExportTypes",
     "server": true,
     "browser": false,
-    "configPath": ["xpack"],
+    "configPath": ["xpack", "reportingExportTypes"],
     "requiredPlugins": ["reporting"],
     "optionalPlugins": [],
     "requiredBundles": [],

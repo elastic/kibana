@@ -7,7 +7,10 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ReportingCore } from '@kbn/reporting-plugin/server';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
+import {
+  createMockConfigSchema,
+  createMockReportingCore,
+} from '@kbn/reporting-plugin/server/test_helpers';
 import { getCustomLogo } from './get_custom_logo';
 
 let mockReportingPlugin: ReportingCore;

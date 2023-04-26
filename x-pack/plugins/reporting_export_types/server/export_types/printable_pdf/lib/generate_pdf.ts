@@ -9,7 +9,7 @@ import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import type { ReportingCore } from '@kbn/reporting-plugin/server';
 import { PdfScreenshotOptions } from '@kbn/reporting-plugin/server/types';
-import { PdfMetrics } from '../../..';
+import { PdfMetrics } from '@kbn/reporting-common/metrics';
 import { getTracker } from '../../common/pdf_tracker';
 
 interface PdfResult {

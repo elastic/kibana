@@ -12,14 +12,14 @@ import type { ReportingCore } from '@kbn/reporting-plugin/server';
 import { CancellationToken } from '@kbn/reporting-common';
 import { generatePngObservable } from '../common';
 import { runTaskFnFactory } from './execute_job';
-import { cryptoFactory } from '../../../common/crypto';
 import { TaskPayloadPNGV2 } from '../../../common/types/png_v2';
+import { cryptoFactory } from '@kbn/reporting-plugin/server/lib';
+import { LocatorParams } from '@kbn/reporting-plugin/common/types';
 import {
-  createMockConfig,
   createMockConfigSchema,
   createMockReportingCore,
-} from '../../test_helpers';
-import { LocatorParams } from '../../../common';
+  createMockConfig,
+} from '@kbn/reporting-plugin/server/test_helpers';
 
 jest.mock('../common/generate_png');
 

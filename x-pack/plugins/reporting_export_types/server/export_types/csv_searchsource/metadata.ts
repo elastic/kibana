@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CSV_JOB_TYPE } from '@kbn/reporting-common/job_types';
+import { CSV_JOB_TYPE } from '@kbn/reporting-plugin/common/constants';
 
 export const metadata = {
   id: 'csv_searchsource',

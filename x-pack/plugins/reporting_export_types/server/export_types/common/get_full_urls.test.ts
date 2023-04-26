@@ -7,9 +7,9 @@
 
 import { TaskPayloadPNG } from '../../../common/types/png';
 import type { ReportingConfig } from '@kbn/reporting-plugin/server';
-import { createMockConfig } from '../../test_helpers';
-import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getFullUrls } from './get_full_urls';
+import { createMockConfig } from '@kbn/reporting-plugin/server/test_helpers';
+import { TaskPayloadPDF } from '@kbn/reporting-plugin/server/routes/lib/request_handler';
 
 let mockConfig: ReportingConfig;
 

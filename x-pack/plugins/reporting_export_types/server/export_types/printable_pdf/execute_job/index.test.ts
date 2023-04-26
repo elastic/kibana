@@ -12,9 +12,12 @@ import type { ReportingCore } from '@kbn/reporting-plugin/server';
 import { CancellationToken } from '@kbn/reporting-common';
 import { generatePdfObservable } from '../lib/generate_pdf';
 import { runTaskFnFactory } from '.';
-import { cryptoFactory } from '../../../../common/crypto';
-import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
-import { TaskPayloadPDF } from '../../../../common/types/printable_pdf';
+import { cryptoFactory } from '@kbn/reporting-plugin/server/lib';
+import { TaskPayloadPDF } from '@kbn/reporting-plugin/server/routes/lib/request_handler';
+import {
+  createMockConfigSchema,
+  createMockReportingCore,
+} from '@kbn/reporting-plugin/server/test_helpers';
 
 jest.mock('../lib/generate_pdf');
 

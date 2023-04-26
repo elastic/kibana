@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import { BaseParams, LocatorParams, BasePayload } from '@kbn/reporting-plugin/common/types';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import type { LocatorParams } from '../url';
-import type { BaseParams, BasePayload } from '../base';
 
 // Job params: structure of incoming user request data
 export interface JobParamsPNGV2 extends BaseParams {

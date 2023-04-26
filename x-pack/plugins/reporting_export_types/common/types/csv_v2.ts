@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { BaseParamsV2, BasePayloadV2 } from '..';
+import { BaseParamsV2, BasePayloadV2 } from '@kbn/reporting-plugin/common/types';
+
 interface CsvFromSavedObjectBase {
   objectType: 'search';
 }

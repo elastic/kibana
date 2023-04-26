@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/routes/lib';
+import { TaskPayloadPDF } from '@kbn/reporting-plugin/server/routes/lib/request_handler';
 import type { CreateJobFn, CreateJobFnFactory } from '@kbn/reporting-plugin/server/types';
-import { TaskPayloadPDF } from '../../../../common/types/printable_pdf';
-import { JobParamsPDFDeprecated } from '../../../../common';
 import { validateUrls } from '../../common';
 
 export const createJobFnFactory: CreateJobFnFactory<

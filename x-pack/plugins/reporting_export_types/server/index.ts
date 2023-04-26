@@ -17,6 +17,5 @@ export { getExportType as getTypePrintablePdf } from './export_types/printable_p
 export { getExportType as getTypePrintablePdfV2 } from './export_types/printable_pdf_v2';
 
 export * from './export_types/common';
-export * from '../common';
 
 export const plugin = (initializerContext: PluginInitializerContext) => new ExportTypesPlugin();

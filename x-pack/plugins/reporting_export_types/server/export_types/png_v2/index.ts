@@ -12,10 +12,9 @@ import {
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_TRIAL,
   PNG_JOB_TYPE_V2 as jobType,
-} from '@kbn/reporting-common/constants';
+} from '@kbn/reporting-plugin/common/constants';
 import type { CreateJobFn, RunTaskFn } from '@kbn/reporting-plugin/server/types';
-import { TaskPayloadPNGV2 } from '../../../common/types/png_v2';
-import { JobParamsPNGV2 } from '../../../common';
+import { JobParamsPNGV2, TaskPayloadPNGV2 } from '../../../common/types/png_v2';
 import { ExportTypeDefinition } from '../types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';

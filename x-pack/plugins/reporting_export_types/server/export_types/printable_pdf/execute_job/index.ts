@@ -10,7 +10,7 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import type { RunTaskFn, RunTaskFnFactory } from '@kbn/reporting-plugin/server/types';
-import { TaskPayloadPDF } from '../../../../common/types/printable_pdf';
+import { TaskPayloadPDF } from '@kbn/reporting-plugin/server/routes/lib/request_handler';
 import { decryptJobHeaders, getCustomLogo, getFullUrls } from '../../common';
 import { generatePdfObservable } from '../lib/generate_pdf';
 

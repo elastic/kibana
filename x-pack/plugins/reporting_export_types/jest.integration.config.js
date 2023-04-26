@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-plugin/common/constants';
-
-export const metadata = {
-  id: PNG_REPORT_TYPE_V2,
-  name: 'PNG',
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/plugins/reporting_export_types'],
 };

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { createMockPluginSetup } from '@kbn/reporting-plugin/server/test_helpers';
 import { ExportTypesPlugin } from './plugin';
-import { createMockPluginSetup } from '@kbn/reporting-mocks';
 
 describe('ExportTypesPlugin', () => {
   it('returns', async () => {

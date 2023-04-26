@@ -18,7 +18,7 @@ import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
 import { ReportingStore } from './lib';
 import { registerRoutes } from './routes';
-import { setFieldFormats } from './services';
+import { setFieldFormats } from './routes/generate/services';
 import type {
   ReportingRequestHandlerContext,
   ReportingSetup,

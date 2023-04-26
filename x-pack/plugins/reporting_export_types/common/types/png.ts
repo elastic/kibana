@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { BaseParams, BasePayload } from '@kbn/reporting-plugin/common/types/base';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import type { BaseParams, BasePayload } from '../base';
 
 interface BaseParamsPNG {
   layout: LayoutParams;

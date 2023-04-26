@@ -12,6 +12,7 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/reporting_export_types',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/reporting_export_types/{common,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/plugins/reporting_export_types/{common,server}/**/**/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/plugins/reporting_export_types/server/routes/diagnostic/integration_tests/*.{js,ts,tsx}',
   ],
 };

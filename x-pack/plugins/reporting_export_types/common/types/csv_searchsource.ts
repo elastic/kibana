@@ -6,7 +6,7 @@
  */
 
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import type { BaseParams, BasePayload } from '../base';
+import { BaseParams, BasePayload } from '@kbn/reporting-plugin/common/types';
 
 interface BaseParamsCSV {
   searchSource: SerializedSearchSourceFields;

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import { LocatorParams, BaseParams, BasePayload } from '@kbn/reporting-plugin/common/types';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import type { LocatorParams } from '../url';
-import type { BaseParams, BasePayload } from '../base';
 
 interface BaseParamsPDFV2 {
   layout: LayoutParams;
