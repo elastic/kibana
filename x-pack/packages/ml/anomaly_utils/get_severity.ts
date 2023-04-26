@@ -7,7 +7,7 @@
 
 import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 import type { MlSeverityType } from './anomaly_severity';
-import { getSeverityTypes } from './get_severity_types';
+import { ML_ANOMALY_SEVERITY_TYPES } from './anomaly_severity_types';
 
 /**
  * Returns a severity label (one of critical, major, minor, warning or unknown)
@@ -15,17 +15,15 @@ import { getSeverityTypes } from './get_severity_types';
  * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
  */
 export function getSeverity(normalizedScore: number): MlSeverityType {
-  const severityTypesList = getSeverityTypes();
-
   if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {
-    return severityTypesList.critical;
+    return ML_ANOMALY_SEVERITY_TYPES.critical;
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MAJOR) {
-    return severityTypesList.major;
+    return ML_ANOMALY_SEVERITY_TYPES.major;
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
-    return severityTypesList.minor;
+    return ML_ANOMALY_SEVERITY_TYPES.minor;
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
-    return severityTypesList.warning;
+    return ML_ANOMALY_SEVERITY_TYPES.warning;
   } else {
-    return severityTypesList.unknown;
+    return ML_ANOMALY_SEVERITY_TYPES.unknown;
   }
 }
