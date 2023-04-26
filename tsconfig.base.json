@@ -1132,6 +1132,8 @@
       "@kbn/serverless/*": ["x-pack/plugins/serverless/*"],
       "@kbn/serverless-project-switcher": ["packages/serverless/project_switcher"],
       "@kbn/serverless-project-switcher/*": ["packages/serverless/project_switcher/*"],
+      "@kbn/serverless-storybook-config": ["packages/serverless/storybook/config"],
+      "@kbn/serverless-storybook-config/*": ["packages/serverless/storybook/config/*"],
       "@kbn/serverless-types": ["packages/serverless/types"],
       "@kbn/serverless-types/*": ["packages/serverless/types/*"],
       "@kbn/session-notifications-plugin": ["test/plugin_functional/plugins/session_notifications"],

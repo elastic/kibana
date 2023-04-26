@@ -1111,6 +1111,7 @@
     "@kbn/repo-source-classifier": "link:packages/kbn-repo-source-classifier",
     "@kbn/repo-source-classifier-cli": "link:packages/kbn-repo-source-classifier-cli",
     "@kbn/security-api-integration-helpers": "link:x-pack/test/security_api_integration/packages/helpers",
+    "@kbn/serverless-storybook-config": "link:packages/serverless/storybook/config",
     "@kbn/some-dev-log": "link:packages/kbn-some-dev-log",
     "@kbn/sort-package-json": "link:packages/kbn-sort-package-json",
     "@kbn/spec-to-console": "link:packages/kbn-spec-to-console",

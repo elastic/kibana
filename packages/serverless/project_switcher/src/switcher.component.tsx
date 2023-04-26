@@ -8,25 +8,17 @@
 
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiPopover,
-  useGeneratedHtmlId,
-  EuiPopoverTitle,
-  EuiFlexItem,
-  EuiHeaderSectionItemButton,
-  EuiIcon,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiPopover, useGeneratedHtmlId, EuiPopoverTitle, EuiKeyPadMenu } from '@elastic/eui';
 
 import { ProjectType } from '@kbn/serverless-types';
 
 import { SwitcherItem } from './item';
 import type { ProjectSwitcherComponentProps } from './types';
+import { HeaderButton } from './header_button';
+import { projectTypes } from './constants';
 
-export const TEST_ID_BUTTON = 'projectSwitcherButton';
+export { TEST_ID as TEST_ID_BUTTON } from './header_button';
 export const TEST_ID_ITEM_GROUP = 'projectSwitcherItemGroup';
-
-const types: ProjectType[] = ['security', 'observability', 'search'];
 
 const switcherCSS = css`
   min-width: 240px;
@@ -49,30 +41,22 @@ export const ProjectSwitcher = ({
     setIsOpen(!isOpen);
   };
 
-  const onChange = (projectType: ProjectType, e: React.MouseEvent) => {
-    e.preventDefault();
+  const onChange = (projectType: ProjectType) => {
     closePopover();
     onProjectChange(projectType);
     return false;
   };
 
-  const items = types.map((type) => (
-    <EuiFlexItem key={type}>
-      <span>
-        <SwitcherItem type={type} onClick={onChange} isCurrent={currentProjectType === type} />
-      </span>
-    </EuiFlexItem>
+  const items = projectTypes.map((type) => (
+    <SwitcherItem
+      key={type}
+      type={type}
+      onChange={onChange}
+      isSelected={currentProjectType === type}
+    />
   ));
 
-  const button = (
-    <EuiHeaderSectionItemButton
-      aria-label="Developer Tools"
-      onClick={onButtonClick}
-      data-test-subj={TEST_ID_BUTTON}
-    >
-      <EuiIcon type="submodule" size="m" />
-    </EuiHeaderSectionItemButton>
-  );
+  const button = <HeaderButton onClick={onButtonClick} {...{ currentProjectType }} />;
 
   return (
     <EuiPopover
@@ -81,14 +65,9 @@ export const ProjectSwitcher = ({
       repositionOnScroll
     >
       <EuiPopoverTitle>Switch Project Type</EuiPopoverTitle>
-      <EuiFlexGroup
-        css={switcherCSS}
-        direction="column"
-        gutterSize="s"
-        data-test-subj={TEST_ID_ITEM_GROUP}
-      >
+      <EuiKeyPadMenu css={switcherCSS} data-test-subj={TEST_ID_ITEM_GROUP}>
         {items}
-      </EuiFlexGroup>
+      </EuiKeyPadMenu>
     </EuiPopover>
   );
 };
