@@ -19,7 +19,7 @@ import {
   reassignAgentPolicy,
 } from '../../tasks/fleet';
 
-describe.only('Automated Response Actions', () => {
+describe('Automated Response Actions', () => {
   const endpointHostname = Cypress.env(ENDPOINT_VM_NAME);
   const unenrolledHost = 'Host unenrolled';
   beforeEach(() => {
