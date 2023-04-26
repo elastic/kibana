@@ -8,7 +8,7 @@
 /**
  * RGB hex codes used to indicate the severity of an anomaly according to its anomaly score.
  */
-export const SEVERITY_COLORS = {
+export const ML_SEVERITY_COLORS = {
   /**
    * Color used in the UI to indicate a critical anomaly, with a score greater than or equal to 75.
    */

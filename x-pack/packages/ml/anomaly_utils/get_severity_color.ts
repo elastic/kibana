@@ -6,7 +6,7 @@
  */
 
 import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
-import { SEVERITY_COLORS } from './severity_colors';
+import { ML_SEVERITY_COLORS } from './severity_colors';
 
 /**
  * Returns a severity RGB color (one of critical, major, minor, warning, low or blank)
@@ -15,16 +15,16 @@ import { SEVERITY_COLORS } from './severity_colors';
  */
 export function getSeverityColor(normalizedScore: number): string {
   if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {
-    return SEVERITY_COLORS.CRITICAL;
+    return ML_SEVERITY_COLORS.CRITICAL;
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MAJOR) {
-    return SEVERITY_COLORS.MAJOR;
+    return ML_SEVERITY_COLORS.MAJOR;
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
-    return SEVERITY_COLORS.MINOR;
+    return ML_SEVERITY_COLORS.MINOR;
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.WARNING) {
-    return SEVERITY_COLORS.WARNING;
+    return ML_SEVERITY_COLORS.WARNING;
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
-    return SEVERITY_COLORS.LOW;
+    return ML_SEVERITY_COLORS.LOW;
   } else {
-    return SEVERITY_COLORS.BLANK;
+    return ML_SEVERITY_COLORS.BLANK;
   }
 }

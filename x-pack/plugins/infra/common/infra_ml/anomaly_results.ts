@@ -22,7 +22,7 @@ export enum ML_ANOMALY_THRESHOLD {
   LOW = 0,
 }
 
-export const SEVERITY_COLORS = {
+export const ML_SEVERITY_COLORS = {
   CRITICAL: '#fe5050',
   MAJOR: '#fba740',
   MINOR: '#fdec25',

@@ -7,7 +7,7 @@
 
 export { ML_ANOMALY_SEVERITY } from './anomaly_severity';
 export { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
-export { SEVERITY_COLORS } from './severity_colors';
+export { ML_SEVERITY_COLORS } from './severity_colors';
 
 export {
   aggregationTypeTransform,
