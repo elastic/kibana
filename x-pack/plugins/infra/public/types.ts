@@ -43,6 +43,7 @@ import type {
   SourceProviderProps,
   UseNodeMetricsTableOptions,
 } from './components/infrastructure_node_metrics_tables/shared';
+import { InventoryViewsServiceStart } from './services/inventory_views';
 import { LogViewsServiceStart } from './services/log_views';
 import { ITelemetryClient } from './services/telemetry';
 import { InfraLocators } from './locators';
@@ -53,6 +54,7 @@ export interface InfraClientSetupExports {
 }
 
 export interface InfraClientStartExports {
+  inventoryViews: InventoryViewsServiceStart;
   logViews: LogViewsServiceStart;
   telemetry: ITelemetryClient;
   locators: InfraLocators;
