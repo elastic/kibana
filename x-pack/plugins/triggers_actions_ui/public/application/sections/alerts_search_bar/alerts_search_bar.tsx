@@ -42,7 +42,7 @@ export function AlertsSearchBar({
 
   const onSearchQuerySubmit = useCallback(
     ({ dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query }) => {
-      onQuerySubmit?.({
+      onQuerySubmit({
         dateRange,
         query: typeof nextQuery?.query === 'string' ? nextQuery.query : undefined,
       });
@@ -62,7 +62,7 @@ export function AlertsSearchBar({
     [onQueryChange, setQueryLanguage]
   );
   const onRefresh = ({ dateRange }: { dateRange: TimeRange }) => {
-    onQuerySubmit?.({
+    onQuerySubmit({
       dateRange,
     });
   };
