@@ -62,6 +62,7 @@
     "xpack.searchProfiler": "plugins/searchprofiler",
     "xpack.security": "plugins/security",
     "xpack.server": "legacy/server",
+    "xpack.serverless": "plugins/serverless",
     "xpack.securitySolution": "plugins/security_solution",
     "xpack.sessionView": "plugins/session_view",
     "xpack.snapshotRestore": "plugins/snapshot_restore",
