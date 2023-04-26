@@ -17,7 +17,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - group 3', () => {
+  describe('lens app - group 4', () => {
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
@@ -71,30 +71,10 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    // group 3 - 11m 30s
-    loadTestFile(require.resolve('./colors')); // 1m 2s
-    loadTestFile(require.resolve('./chart_data')); // 1m 10s
-    loadTestFile(require.resolve('./time_shift')); // 1m
-    loadTestFile(require.resolve('./drag_and_drop')); // 7m 40s
-    loadTestFile(require.resolve('./geo_field')); // 26s
-
-    // group 4 - 12m 30s
-    // loadTestFile(require.resolve('./formula')); // 5m 52s
-    // loadTestFile(require.resolve('./heatmap')); // 51s
-    // loadTestFile(require.resolve('./gauge')); // 1m 17s
-    // loadTestFile(require.resolve('./metric')); // 4m 7s
-    // loadTestFile(require.resolve('./legacy_metric')); // 29s
-
-    // group 5 - 11m 30s
-    // loadTestFile(require.resolve('./disable_auto_apply')); // 1m 6s
-    // loadTestFile(require.resolve('./reference_lines')); // 1m
-    // loadTestFile(require.resolve('./annotations')); // 1m
-    // loadTestFile(require.resolve('./inspector')); // 1m 19s
-    // loadTestFile(require.resolve('./error_handling')); // 1m 8s
-    // loadTestFile(require.resolve('./lens_tagging')); // 1m 9s
-    // loadTestFile(require.resolve('./lens_reporting')); // 3m
-    // keep these two last in the group in this order because they are messing with the default saved objects
-    // loadTestFile(require.resolve('./rollup')); // 1m 30s
-    // loadTestFile(require.resolve('./no_data')); // 36s
+    loadTestFile(require.resolve('./formula')); // 5m 52s
+    loadTestFile(require.resolve('./heatmap')); // 51s
+    loadTestFile(require.resolve('./gauge')); // 1m 17s
+    loadTestFile(require.resolve('./metric')); // 4m 7s
+    loadTestFile(require.resolve('./legacy_metric')); // 29s
   });
 };
