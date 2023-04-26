@@ -43,19 +43,19 @@ describe('Timeline', () => {
         {
           id: 'timeToFirstByte',
           offset: 100000,
-          type: 'agentMark',
+          type: 'agentMark' as const,
           verticalLine: true,
         },
         {
           id: 'domInteractive',
           offset: 110000,
-          type: 'agentMark',
+          type: 'agentMark' as const,
           verticalLine: true,
         },
         {
           id: 'domComplete',
           offset: 190000,
-          type: 'agentMark',
+          type: 'agentMark' as const,
           verticalLine: true,
         },
       ],
