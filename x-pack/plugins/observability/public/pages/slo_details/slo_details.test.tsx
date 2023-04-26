@@ -60,6 +60,12 @@ const mockKibana = () => {
           prepend: mockBasePathPrepend,
         },
       },
+      notifications: {
+        toasts: {
+          addSuccess: jest.fn(),
+          addError: jest.fn(),
+        },
+      },
       triggersActionsUi: {
         getAddRuleFlyout: jest.fn(() => (
           <div data-test-subj="add-rule-flyout">mocked component</div>
