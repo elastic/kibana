@@ -57,7 +57,7 @@ export const ManagedUser = ({
     [getAppUrl]
   );
 
-  if (!managedUser.isIntegrationEnabled) {
+  if (!managedUser.isLoading && !managedUser.isIntegrationEnabled) {
     return (
       <>
         <EuiTitle size="s">
