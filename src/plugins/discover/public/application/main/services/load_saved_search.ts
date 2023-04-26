@@ -44,21 +44,22 @@ export const loadSavedSearch = async (
   const { savedSearchId, useAppState } = params ?? {};
   const { appStateContainer, internalStateContainer, savedSearchContainer, services } = deps;
   const appState = useAppState ? appStateContainer.getState() : undefined;
-  // First let's clean up the previous state
-  services.filterManager.setAppFilters([]);
-  services.data.query.queryString.clearQuery();
-  if (!useAppState) {
-    appStateContainer.set({});
-  }
-  // Then, take care of data view and saved search loading
+
+  // Loading the saved search or creating a new one
   let nextSavedSearch = savedSearchId
     ? await savedSearchContainer.load(savedSearchId)
     : await savedSearchContainer.new(
         await getStateDataView(params, { services, appState, internalStateContainer })
       );
 
+  // Cleaning up the previous state
+  services.filterManager.setAppFilters([]);
+  services.data.query.queryString.clearQuery();
+  if (!useAppState) {
+    appStateContainer.set({});
+  }
+  // Update saved search by a given app state (in URL)
   if (appState) {
-    // Update saved search by a given app state (in URL)
     if (savedSearchId && appState.index) {
       // This is for the case appState is overwriting the loaded saved search data view
       const savedSearchDataViewId = nextSavedSearch.searchSource.getField('index')?.id;
