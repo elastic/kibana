@@ -7,7 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { UpdateTrainedModelDeploymentRequest } from '../../lib/ml_client/types';
+import type {
+  UpdateTrainedModelDeploymentRequest,
+  UpdateTrainedModelDeploymentResponse,
+} from '../../lib/ml_client/types';
 import type { GetGuards } from '../shared_services';
 
 export interface TrainedModelsProvider {
@@ -35,7 +38,7 @@ export interface TrainedModelsProvider {
     ): Promise<estypes.MlDeleteTrainedModelResponse>;
     updateTrainedModelDeployment(
       params: UpdateTrainedModelDeploymentRequest
-    ): Promise<{ acknowledge: boolean }>;
+    ): Promise<UpdateTrainedModelDeploymentResponse>;
   };
 }
 
