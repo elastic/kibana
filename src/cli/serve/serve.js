@@ -16,28 +16,6 @@ import { getConfigPath, getConfigDirectory } from '@kbn/utils';
 import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
 
-/** @typedef {'es' | 'oblt' | 'security'} ServerlessProjectMode */
-/** @type {ServerlessProjectMode[]} */
-const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security'];
-
-/**
- * @param {Record<string, unknown>} opts
- * @returns {ServerlessProjectMode | null}
- */
-function getServerlessProjectMode(opts) {
-  if (!opts.serverless) {
-    return null;
-  }
-
-  if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless)) {
-    return opts.serverless;
-  }
-
-  throw new Error(
-    `invalid --serverless value, must be one of ${VALID_SERVERLESS_PROJECT_MODE.join(', ')}`
-  );
-}
-
 function canRequire(path) {
   try {
     require.resolve(path);
@@ -92,16 +70,6 @@ function configFileExists(name) {
 
     throw err;
   }
-}
-
-/**
- * @returns {boolean} Whether the distribution can run in Serverless mode
- */
-function isServerlessCapableDistribution() {
-  // For now, checking if the `serverless.yml` config file exists should be enough
-  // We could also check the following as well, but I don't think it's necessary:
-  // VALID_SERVERLESS_PROJECT_MODE.some((projectType) => configFileExists(`serverless.${projectType}.yml`))
-  return configFileExists('serverless.yml');
 }
 
 /**
@@ -254,10 +222,6 @@ export default function (program) {
       );
   }
 
-  if (isServerlessCapableDistribution()) {
-    command.option('--serverless <oblt|security|es>', 'Start Kibana in a serverless project mode');
-  }
-
   if (DEV_MODE_SUPPORTED) {
     command
       .option('--dev', 'Run the server with development mode defaults')
@@ -280,21 +244,10 @@ export default function (program) {
   command.action(async function (opts) {
     const unknownOptions = this.getUnknownOptions();
     const configs = [getConfigPath(), ...getEnvConfigs(), ...(opts.config || [])];
-    const serverlessMode = getServerlessProjectMode(opts);
-
-    // we "unshift" .serverless. config so that it only overrides defaults
-    if (serverlessMode) {
-      maybeAddConfig(`serverless.yml`, configs, 'push');
-      maybeAddConfig(`serverless.${serverlessMode}.yml`, configs, 'unshift');
-    }
 
     // .dev. configs are "pushed" so that they override all other config files
     if (opts.dev && opts.devConfig !== false) {
       maybeAddConfig('kibana.dev.yml', configs, 'push');
-      if (serverlessMode) {
-        maybeAddConfig(`serverless.dev.yml`, configs, 'push');
-        maybeAddConfig(`serverless.${serverlessMode}.dev.yml`, configs, 'push');
-      }
     }
 
     const cliArgs = {
@@ -315,7 +268,6 @@ export default function (program) {
       oss: !!opts.oss,
       cache: !!opts.cache,
       dist: !!opts.dist,
-      serverless: !!opts.serverless,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode
