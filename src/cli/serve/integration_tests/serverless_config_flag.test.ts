@@ -9,7 +9,7 @@
 import { spawn, spawnSync } from 'child_process';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { firstValueFrom, from, take } from 'rxjs';
+import { filter, firstValueFrom, from, take, concatMap } from 'rxjs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
@@ -39,7 +39,7 @@ describe('cli serverless project type', () => {
     'writes the serverless project type %s in config/serverless.recent.yml',
     async (mode) => {
       // Making sure `--serverless` translates into the `serverless` config entry, and validates against the accepted values
-      const child = spawn(process.execPath, ['scripts/kibana', '--dev', `--serverless=${mode}`], {
+      const child = spawn(process.execPath, ['scripts/kibana', `--serverless=${mode}`], {
         cwd: REPO_ROOT,
       });
 
@@ -51,6 +51,37 @@ describe('cli serverless project type', () => {
       );
 
       child.kill('SIGKILL');
+    }
+  );
+
+  it.each(['es', 'oblt', 'security'])(
+    'Kibana does not crash when running project type %s',
+    async (mode) => {
+      // Making sure `--serverless` translates into the `serverless` config entry, and validates against the accepted values
+      const child = spawn(process.execPath, ['scripts/kibana', `--serverless=${mode}`], {
+        cwd: REPO_ROOT,
+      });
+
+      // Wait until Kibana starts listening to the port
+      let leftover = '';
+      const found = await firstValueFrom(
+        from(child.stdout).pipe(
+          concatMap((chunk: Buffer) => {
+            const data = leftover + chunk.toString('utf-8');
+            const msgs = data.split('\n');
+            leftover = msgs.pop() ?? '';
+            return msgs;
+          }),
+          filter(
+            (msg) =>
+              msg.includes('http server running at http://localhost:5601') || msg.includes('FATAL')
+          )
+        )
+      );
+
+      child.kill('SIGKILL');
+
+      expect(found).not.toContain('FATAL');
     }
   );
 });
