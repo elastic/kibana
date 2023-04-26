@@ -16,8 +16,6 @@ export { BooleanType } from './boolean_type';
 export { BufferType } from './buffer_type';
 export type { ByteSizeOptions } from './byte_size_type';
 export { ByteSizeType } from './byte_size_type';
-export type { ConditionalTypeValue } from './conditional_type';
-export { ConditionalType } from './conditional_type';
 export type { DurationOptions } from './duration_type';
 export { DurationType } from './duration_type';
 export { LiteralType } from './literal_type';

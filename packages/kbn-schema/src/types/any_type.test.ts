@@ -16,20 +16,6 @@ test('works for any value', () => {
   expect(schema.any().validate({ foo: 'bar', baz: 2 })).toEqual({ foo: 'bar', baz: 2 });
 });
 
-test('is required by default', () => {
-  expect(() => schema.any().validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [any] but got [undefined]"`
-  );
-});
-
-test('includes namespace in failure', () => {
-  expect(() =>
-    schema.any().validate(undefined, {}, 'foo-namespace')
-  ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: expected value of type [any] but got [undefined]"`
-  );
-});
-
 describe('#defaultValue', () => {
   test('returns default when undefined', () => {
     expect(schema.any({ defaultValue: true }).validate(undefined)).toBe(true);

@@ -18,7 +18,6 @@ import {
   BufferType,
   ByteSizeOptions,
   ByteSizeType,
-  ConditionalType,
   DurationOptions,
   DurationType,
   IpOptions,
@@ -48,11 +47,11 @@ import {
   StreamType,
 } from './src/types';
 
-export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
+export type { AnyType, TypeOf, Props, SchemaStructureEntry, NullableProps };
 export { ObjectType, Type };
 export { ByteSizeValue } from './src/byte_size_value';
 export { SchemaTypeError, ValidationError } from './src/errors';
-export { isConfigSchema } from './src/typeguards';
+export { isKbnSchema } from './src/typeguards';
 
 function any(options?: TypeOptions<any>) {
   return new AnyType(options);

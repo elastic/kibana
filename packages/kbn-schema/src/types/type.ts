@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { AnySchema, CustomValidator, ErrorReport } from 'joi';
-import { SchemaTypeError, ValidationError } from '../errors';
-import { Reference } from '../references';
+import z from 'zod';
+import { ValidationError } from '../errors';
 
 export interface TypeOptions<T> {
-  defaultValue?: T | Reference<T> | (() => T);
+  defaultValue?: T | (() => T);
   validate?: (value: T) => string | void;
 }
 
@@ -20,10 +19,10 @@ export interface SchemaStructureEntry {
   type: string;
 }
 
-export const convertValidationFunction = <T = unknown>(
+export function convertValidationToRefinement<T = unknown>(
   validate: (value: T) => string | void
-): CustomValidator<T> => {
-  return (value, { error }) => {
+): z.SuperRefinement<T> {
+  return (value, ctx) => {
     let validationResultMessage;
     try {
       validationResultMessage = validate(value);
@@ -32,12 +31,26 @@ export const convertValidationFunction = <T = unknown>(
     }
 
     if (typeof validationResultMessage === 'string') {
-      return error('any.custom', { message: validationResultMessage });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: validationResultMessage,
+      });
     }
 
     return value;
   };
+}
+
+const errorMap: z.ZodErrorMap = (issue, ctx) => {
+  if (issue.code === z.ZodIssueCode.invalid_type) {
+    return {
+      message: `expected value of type [${issue.expected}] but got [${issue.received}]`,
+    };
+  }
+  return { message: ctx.defaultError };
 };
+
+export const symbol = Symbol('KbnConfigSchemaType');
 
 export abstract class Type<V> {
   // This is just to enable the `TypeOf` helper, and because TypeScript would
@@ -46,54 +59,35 @@ export abstract class Type<V> {
   public readonly type: V = null! as V;
 
   // used for the `isConfigSchema` typeguard
-  public readonly __isKbnConfigSchemaType = true;
+  public readonly __isKbnConfigSchemaType = symbol;
 
   /**
    * Internal "schema" backed by Joi.
    * @type {Schema}
    */
-  protected readonly internalSchema: AnySchema;
+  protected readonly internalSchema: z.ZodType;
 
-  protected constructor(schema: AnySchema, options: TypeOptions<V> = {}) {
+  protected constructor(schema: z.ZodType, options: TypeOptions<V> = {}) {
     if (options.defaultValue !== undefined) {
-      schema = schema.optional();
-
-      // If default value is a function, then we must provide description for it.
-      if (typeof options.defaultValue === 'function') {
-        schema = schema.default(options.defaultValue);
-      } else {
-        schema = schema.default(
-          Reference.isReference(options.defaultValue)
-            ? options.defaultValue.getSchema()
-            : (options.defaultValue as any)
-        );
-      }
+      schema = schema.optional().default(options.defaultValue);
     }
 
     if (options.validate) {
-      schema = schema.custom(convertValidationFunction(options.validate));
-    }
-
-    // Attach generic error handler only if it hasn't been attached yet since
-    // only the last error handler is counted.
-    if (schema.$_getFlag('error') === undefined) {
-      schema = schema.error(([error]) => this.onError(error));
+      schema = schema.superRefine(convertValidationToRefinement(options.validate));
     }
 
     this.internalSchema = schema;
   }
 
-  public validate(value: any, context: Record<string, any> = {}, namespace?: string): V {
-    const { value: validatedValue, error } = this.internalSchema.validate(value, {
-      context,
-      presence: 'required',
-    });
+  public validate(value: any, namespace?: string): V {
+    const result = this.internalSchema.safeParse(value, { errorMap });
 
-    if (error) {
-      throw new ValidationError(error as any, namespace);
+    if (!result.success) {
+      const { error } = result;
+      throw new ValidationError(error.errors[0] as any, namespace);
     }
 
-    return validatedValue;
+    return result.data;
   }
 
   /**
@@ -102,65 +96,4 @@ export abstract class Type<V> {
   public getSchema() {
     return this.internalSchema;
   }
-
-  public getSchemaStructure() {
-    return recursiveGetSchemaStructure(this.internalSchema);
-  }
-
-  protected handleError(
-    type: string,
-    context: Record<string, any>,
-    path: string[]
-  ): string | SchemaTypeError | void {
-    return undefined;
-  }
-
-  private onError(error: SchemaTypeError | ErrorReport): SchemaTypeError {
-    if (error instanceof SchemaTypeError) {
-      return error;
-    }
-
-    const { local, code, path, value } = error;
-    const convertedPath = path.map((entry) => entry.toString());
-    const context: Record<string, any> = {
-      ...local,
-      value,
-    };
-
-    const errorHandleResult = this.handleError(code, context, convertedPath);
-    if (errorHandleResult instanceof SchemaTypeError) {
-      return errorHandleResult;
-    }
-
-    // If error handler just defines error message, then wrap it into proper
-    // `SchemaTypeError` instance.
-    if (typeof errorHandleResult === 'string') {
-      return new SchemaTypeError(errorHandleResult, convertedPath);
-    }
-
-    // If error is produced by the custom validator, just extract source message
-    // from context and wrap it into `SchemaTypeError` instance.
-    if (code === 'any.custom' && context.message) {
-      return new SchemaTypeError(context.message, convertedPath);
-    }
-
-    // `message` is only initialized once `toString` has been called (...)
-    // see https://github.com/sideway/joi/blob/master/lib/errors.js
-    const message = error.toString();
-    return new SchemaTypeError(message || code, convertedPath);
-  }
-}
-
-function recursiveGetSchemaStructure(internalSchema: AnySchema, path: string[] = []) {
-  const array: SchemaStructureEntry[] = [];
-  // Note: we are relying on Joi internals to obtain the schema structure (recursive keys).
-  // This is not ideal, but it works for now and we only need it for some integration test assertions.
-  // If it breaks in the future, we'll need to update our tests.
-  for (const [key, val] of (internalSchema as any)._ids._byKey.entries()) {
-    array.push(...recursiveGetSchemaStructure(val.schema, [...path, key]));
-  }
-  if (!array.length) {
-    array.push({ path, type: internalSchema.type ?? 'unknown' });
-  }
-  return array;
 }
