@@ -35,6 +35,7 @@ import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { FormatSelectorOptions } from '../../datasources/form_based/dimension_panel/format_selector';
 import { toExpression } from './to_expression';
+import { nonNullable } from '../../utils';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -666,7 +667,7 @@ export const getMetricVisualization = ({
     return suggestion;
   },
 
-  getVisualizationInfo(state: MetricVisualizationState) {
+  getVisualizationInfo(state) {
     const dimensions = [];
     if (state.metricAccessor) {
       dimensions.push({
@@ -706,6 +707,10 @@ export const getMetricVisualization = ({
       });
     }
 
+    const stops = state.palette?.params?.stops || [];
+    const hasStaticColoring = !!state.color;
+    const hasDynamicColoring = !!state.palette;
+
     return {
       layers: [
         {
@@ -714,6 +719,12 @@ export const getMetricVisualization = ({
           chartType: 'metric',
           ...this.getDescription(state),
           dimensions,
+          palette: (hasDynamicColoring
+            ? stops.map(({ color }) => color)
+            : hasStaticColoring
+            ? [state.color]
+            : [getDefaultColor(state)]
+          ).filter(nonNullable),
         },
       ],
     };

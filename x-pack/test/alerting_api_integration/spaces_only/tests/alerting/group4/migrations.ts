@@ -640,7 +640,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.body._source?.references).toEqual(references);
     });
 
-    it('8.7 adds uuid to the actions', async () => {
+    it('8.8 adds uuid to the actions', async () => {
       const response = await es.get<{ alert: RawRule }>(
         {
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
@@ -668,6 +668,28 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           uuid: expect.any(String),
         },
+      ]);
+    });
+
+    it('8.8 adds frequency to the actions for security solution', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          id: 'alert:8990af61-c09a-11ec-9164-4bfd6fc32c43',
+        },
+        { meta: true }
+      );
+
+      const alert = response.body._source?.alert;
+
+      expect(alert?.actions).toEqual([
+        expect.objectContaining({
+          frequency: {
+            summary: true,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '1h',
+          },
+        }),
       ]);
     });
   });

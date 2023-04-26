@@ -347,6 +347,55 @@
       },
       {
         "parentPluginId": "unifiedFieldList",
+        "id": "def-public.FieldPopoverFooter",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldPopoverFooter",
+        "description": [],
+        "signature": [
+          "(props: React.PropsWithChildren<",
+          {
+            "pluginId": "unifiedFieldList",
+            "scope": "public",
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.FieldPopoverFooterProps",
+            "text": "FieldPopoverFooterProps"
+          },
+          ">) => JSX.Element | null"
+        ],
+        "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_footer.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopoverFooter.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.FieldPopoverFooterProps",
+                "text": "FieldPopoverFooterProps"
+              },
+              ">"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_footer.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
         "id": "def-public.FieldPopoverHeader",
         "type": "Function",
         "tags": [],
@@ -386,55 +435,6 @@
               ">"
             ],
             "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "unifiedFieldList",
-        "id": "def-public.FieldPopoverVisualize",
-        "type": "Function",
-        "tags": [],
-        "label": "FieldPopoverVisualize",
-        "description": [],
-        "signature": [
-          "(props: React.PropsWithChildren<",
-          {
-            "pluginId": "unifiedFieldList",
-            "scope": "public",
-            "docId": "kibUnifiedFieldListPluginApi",
-            "section": "def-public.FieldPopoverVisualizeProps",
-            "text": "FieldPopoverVisualizeProps"
-          },
-          ">) => JSX.Element"
-        ],
-        "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_visualize.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "unifiedFieldList",
-            "id": "def-public.FieldPopoverVisualize.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              {
-                "pluginId": "unifiedFieldList",
-                "scope": "public",
-                "docId": "kibUnifiedFieldListPluginApi",
-                "section": "def-public.FieldPopoverVisualizeProps",
-                "text": "FieldPopoverVisualizeProps"
-              },
-              ">"
-            ],
-            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_visualize.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4437,35 +4437,24 @@
           },
           {
             "parentPluginId": "unifiedFieldList",
-            "id": "def-public.FieldVisualizeButtonProps.wrapInContainer",
-            "type": "Function",
+            "id": "def-public.FieldVisualizeButtonProps.visualizeInfo",
+            "type": "Object",
             "tags": [],
-            "label": "wrapInContainer",
+            "label": "visualizeInfo",
             "description": [],
             "signature": [
-              "((element: React.ReactElement<any, string | React.JSXElementConstructor<any>>) => React.ReactElement<any, string | React.JSXElementConstructor<any>>) | undefined"
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.VisualizeInformation",
+                "text": "VisualizeInformation"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "unifiedFieldList",
-                "id": "def-public.FieldVisualizeButtonProps.wrapInContainer.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "element",
-                "description": [],
-                "signature": [
-                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
-                ],
-                "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5241,49 +5230,23 @@
       },
       {
         "parentPluginId": "unifiedFieldList",
-        "id": "def-public.FieldPopoverVisualizeProps",
+        "id": "def-public.FieldPopoverFooterProps",
         "type": "Type",
         "tags": [],
-        "label": "FieldPopoverVisualizeProps",
+        "label": "FieldPopoverFooterProps",
         "description": [],
         "signature": [
-          "{ field: ",
           {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewField",
-            "text": "DataViewField"
-          },
-          "; originatingApp: string; dataView: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          "; uiActions: ",
-          {
-            "pluginId": "uiActions",
+            "pluginId": "unifiedFieldList",
             "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.UiActionsStart",
-            "text": "UiActionsStart"
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.FieldVisualizeButtonProps",
+            "text": "FieldVisualizeButtonProps"
           },
-          "; multiFields?: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewField",
-            "text": "DataViewField"
-          },
-          "[] | undefined; contextualFields?: string[] | undefined; trackUiMetric?: ((metricType: string, eventName: string | string[]) => void) | undefined; buttonProps?: Partial<",
-          "EuiButtonProps",
-          "> | undefined; }"
+          " | ",
+          "FieldCategorizeButtonProps"
         ],
-        "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_visualize.tsx",
+        "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_footer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
