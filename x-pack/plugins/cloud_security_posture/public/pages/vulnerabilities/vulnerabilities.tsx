@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
 import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
@@ -53,7 +53,7 @@ export const Vulnerabilities = () => {
   const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
   const getSetupStatus = useCspSetupStatusApi();
 
-  if (getSetupStatus?.data?.vuln_mgmt.status !== 'indexed') return <NoVulnerabilitiesStates />;
+  if (getSetupStatus?.data?.vuln_mgmt?.status !== 'indexed') return <NoVulnerabilitiesStates />;
 
   if (error) {
     return <ErrorCallout error={error as Error} />;
@@ -79,9 +79,9 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     onChangeItemsPerPage,
     onChangePage,
     onSort,
+    urlQuery,
     setUrlQuery,
     onResetFilters,
-    urlQuery,
   } = useCloudPostureTable({
     dataView,
     defaultQuery: getDefaultQuery,
@@ -101,20 +101,23 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
     enabled: !queryError,
   });
 
-  const [isVulnerabilityDetailFlyoutVisible, setIsVulnerabilityDetailFlyoutVisible] =
-    useState(false);
+  const invalidIndex = -1;
+  const selectedVulnerability = data?.page[urlQuery.vulnerabilityIndex];
 
-  const [vulnerability, setVulnerability] = useState<VulnerabilityRecord>();
-
-  const showFlyout = (vulnerabilityRecord: VulnerabilityRecord) => {
-    setIsVulnerabilityDetailFlyoutVisible(true);
-    setVulnerability(vulnerabilityRecord);
+  const onCloseFlyout = () => {
+    setUrlQuery({
+      vulnerabilityIndex: invalidIndex,
+    });
   };
 
-  const hideFlyout = () => {
-    setIsVulnerabilityDetailFlyoutVisible(false);
-    setVulnerability(undefined);
-  };
+  const onOpenFlyout = useCallback(
+    (rowIndex: number) => {
+      setUrlQuery({
+        vulnerabilityIndex: rowIndex,
+      });
+    },
+    [setUrlQuery]
+  );
 
   const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
     total: data?.total,
@@ -218,7 +221,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
             iconType="expand"
             aria-label="View"
             onClick={() => {
-              showFlyout(vulnerabilityRow);
+              onOpenFlyout(rowIndex);
             }}
           />
         );
@@ -244,12 +247,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         if (!vulnerabilityRow.vulnerability.severity) {
           return null;
         }
-        return (
-          <SeverityStatusBadge
-            score={vulnerabilityRow.vulnerability.score?.base}
-            status={vulnerabilityRow.vulnerability.severity}
-          />
-        );
+        return <SeverityStatusBadge status={vulnerabilityRow.vulnerability.severity} />;
       }
       if (columnId === vulnerabilitiesColumns.package_version) {
         return (
@@ -271,7 +269,25 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         );
       }
     };
-  }, [data?.page]);
+  }, [data?.page, onOpenFlyout]);
+
+  const onPaginateFlyout = useCallback(
+    (nextVulnerabilityIndex: number) => {
+      // the index of the vulnerability in the current page
+      const newVulnerabilityIndex = nextVulnerabilityIndex % pageSize;
+
+      // if the vulnerability is not in the current page, we need to change the page
+      const flyoutPageIndex = Math.floor(nextVulnerabilityIndex / pageSize);
+
+      setUrlQuery({
+        pageIndex: flyoutPageIndex,
+        vulnerabilityIndex: newVulnerabilityIndex,
+      });
+    },
+    [pageSize, setUrlQuery]
+  );
+
+  const flyoutVulnerabilityIndex = urlQuery?.vulnerabilityIndex;
 
   const error = queryError || null;
 
@@ -285,6 +301,8 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
   if (!data?.page) {
     return defaultNoDataRenderer();
   }
+
+  const showVulnerabilityFlyout = flyoutVulnerabilityIndex > invalidIndex;
 
   return (
     <>
@@ -377,11 +395,13 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
             }}
           />
           {isLastLimitedPage && <LimitedResultsBar />}
-          {/* Todo: Add Pagination */}
-          {isVulnerabilityDetailFlyoutVisible && !!vulnerability && (
+          {showVulnerabilityFlyout && (
             <VulnerabilityFindingFlyout
-              vulnerabilityRecord={vulnerability}
-              closeFlyout={hideFlyout}
+              flyoutIndex={flyoutVulnerabilityIndex + urlQuery.pageIndex * pageSize}
+              vulnerabilityRecord={selectedVulnerability}
+              totalVulnerabilitiesCount={data?.total}
+              onPaginate={onPaginateFlyout}
+              closeFlyout={onCloseFlyout}
             />
           )}
         </>
