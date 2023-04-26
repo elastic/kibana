@@ -34,6 +34,7 @@ export interface CliArgs {
   disableOptimizer: boolean;
   cache: boolean;
   dist: boolean;
+  serverless?: boolean;
 }
 
 /** @internal */

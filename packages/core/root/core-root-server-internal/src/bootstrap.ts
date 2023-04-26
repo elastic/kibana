@@ -68,7 +68,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
 
     env = Env.createDefault(REPO_ROOT, {
       configs: extendedConfigs,
-      cliArgs,
+      cliArgs: { ...cliArgs, serverless: true },
       repoPackages: getPackages(REPO_ROOT),
     });
 
