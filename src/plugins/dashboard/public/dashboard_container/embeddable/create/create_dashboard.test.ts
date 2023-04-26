@@ -7,7 +7,10 @@
  */
 
 import {
+  ContactCardEmbeddable,
+  ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
+  ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples';
 import {
@@ -252,4 +255,64 @@ test('creates a control group from the control group factory and waits for it to
     expect.objectContaining({ controlStyle: 'twoLine' })
   );
   expect(mockControlGroupContainer.untilInitialized).toHaveBeenCalled();
+});
+
+/*
+ * dashboard.getInput$() subscriptions are used to update:
+ * 1) dashboard instance searchSessionId state
+ * 2) child input on parent input changes
+ *
+ * Rxjs subscriptions are executed in the order that they are created.
+ * This test ensures that searchSessionId update subscription is created before child input subscription
+ * to ensure child input subscription includes updated searchSessionId.
+ */
+test('searchSessionId is updated prior to child embeddable parent subscription execution', async () => {
+  const embeddableFactory = {
+    create: new ContactCardEmbeddableFactory((() => null) as any, {} as any),
+    getDefaultInput: jest.fn().mockResolvedValue({
+      timeRange: {
+        to: 'now',
+        from: 'now-15m',
+      },
+    }),
+  };
+  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    .fn()
+    .mockReturnValue(embeddableFactory);
+  let sessionCount = 0;
+  pluginServices.getServices().data.search.session.start = () => {
+    sessionCount++;
+    return `searchSessionId${sessionCount}`;
+  };
+  const dashboard = await createDashboard(embeddableId, {
+    searchSessionSettings: {
+      getSearchSessionIdFromURL: () => undefined,
+      removeSessionIdFromUrl: () => {},
+      createSessionRestorationDataProvider: () => {},
+    } as unknown as DashboardCreationOptions['searchSessionSettings'],
+  });
+  const embeddable = await dashboard.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Bob',
+  });
+
+  expect(embeddable.getInput().searchSessionId).toBe('searchSessionId1');
+
+  dashboard.updateInput({
+    timeRange: {
+      to: 'now',
+      from: 'now-7d',
+    },
+  });
+
+  expect(sessionCount).toBeGreaterThan(1);
+  const embeddableInput = embeddable.getInput();
+  expect((embeddableInput as any).timeRange).toEqual({
+    to: 'now',
+    from: 'now-7d',
+  });
+  expect(embeddableInput.searchSessionId).toBe(`searchSessionId${sessionCount}`);
 });
