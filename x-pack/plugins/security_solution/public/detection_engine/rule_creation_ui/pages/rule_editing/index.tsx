@@ -311,6 +311,7 @@ const EditRulePageComponent: FC = () => {
                   ruleScheduleInterval={scheduleStep.data.interval}
                   setForm={setFormHook}
                   actionMessageParams={actionMessageParams}
+                  summaryActionMessageParams={actionMessageParams}
                   ruleType={rule?.type}
                 />
               )}

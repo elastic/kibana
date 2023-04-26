@@ -47,6 +47,7 @@ describe('StepRuleActions', () => {
       <StepRuleActions
         ruleScheduleInterval={'5m'}
         actionMessageParams={actionMessageParams}
+        summaryActionMessageParams={actionMessageParams}
         isReadOnlyView={false}
         isLoading={false}
       />
