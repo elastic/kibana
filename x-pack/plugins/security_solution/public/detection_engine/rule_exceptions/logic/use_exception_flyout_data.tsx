@@ -24,8 +24,7 @@ export interface ReturnUseFetchExceptionFlyoutData {
  *
  */
 export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExceptionFlyoutData => {
-  const { data, spaces } = useKibana().services;
-  const [dataViewLoading, setDataViewLoading] = useState(false);
+  const { spaces } = useKibana().services;
   const [activeSpaceId, setActiveSpaceId] = useState('');
   const isSingleRule = useMemo(() => rules != null && rules.length === 1, [rules]);
   const isMLRule = useMemo(
@@ -42,6 +41,7 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
     };
     fetchAndSetActiveSpace();
   }, [spaces]);
+
   // If data view is defined, it superceeds use of rule defined index patterns.
   // If no rule is available, use fields from default data view id.
   const memoDataViewId = useMemo(
@@ -70,57 +70,25 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
   // We only want to provide a non empty array if it's an ML rule and we were able to fetch
   // the index patterns, or if it's a rule not using data views. Otherwise, return an empty
   // empty array to avoid making the `useFetchIndex` call
-  const memoRuleIndices = useMemo(() => {
+  const memoRuleIndicesOrDvId = useMemo(() => {
     if (isMLRule && jobs.length > 0) {
       return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
     } else if (memoDataViewId != null) {
-      return [];
+      return memoDataViewId;
     } else {
       return memoNonDataViewIndexPatterns;
     }
   }, [jobs, isMLRule, memoDataViewId, memoNonDataViewIndexPatterns]);
 
-  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] = useFetchIndex(
-    memoRuleIndices,
+  const [isIndexPatternLoading, { indexPatterns: dataView }] = useFetchIndex(
+    memoRuleIndicesOrDvId,
     false,
     'indexFields',
     true
   );
 
-  // Data view logic
-  const [dataViewIndexPatterns, setDataViewIndexPatterns] = useState<DataViewBase | null>(null);
-  useEffect(() => {
-    const fetchSingleDataView = async () => {
-      // ensure the memoized data view includes a space id, otherwise
-      // we could be trying to fetch a data view that does not exist, which would
-      // throw an error here.
-      if (activeSpaceId !== '' && memoDataViewId) {
-        setDataViewLoading(true);
-        const dv = await data.dataViews.get(memoDataViewId);
-        const fieldsWithUnmappedInfo = await data.dataViews.getFieldsForIndexPattern(dv, {
-          pattern: '',
-          includeUnmapped: true,
-        });
-        setDataViewLoading(false);
-        setDataViewIndexPatterns({
-          ...dv,
-          fields: fieldsWithUnmappedInfo,
-        });
-      }
-    };
-
-    fetchSingleDataView();
-  }, [memoDataViewId, data.dataViews, setDataViewIndexPatterns, activeSpaceId]);
-
-  // Determine whether to use index patterns or data views
-  const indexPatternsToUse = useMemo(
-    (): DataViewBase =>
-      memoDataViewId && dataViewIndexPatterns != null ? dataViewIndexPatterns : indexIndexPatterns,
-    [memoDataViewId, dataViewIndexPatterns, indexIndexPatterns]
-  );
-
   return {
-    isLoading: isIndexPatternLoading || mlJobLoading || dataViewLoading,
-    indexPatterns: indexPatternsToUse,
+    isLoading: isIndexPatternLoading || mlJobLoading,
+    indexPatterns: dataView,
   };
 };
