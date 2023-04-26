@@ -147,7 +147,7 @@ export class ObservabilityDataViews {
       );
 
       if (dataView.matchedIndices.length === 0) {
-        return;
+        throw new DataViewMissingIndices('No indices match pattern');
       }
 
       if (runtimeFields !== null) {

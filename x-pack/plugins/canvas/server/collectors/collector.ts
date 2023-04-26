@@ -29,7 +29,7 @@ const collectors: TelemetryCollector[] = [workpadCollector, customElementCollect
 */
 export function registerCanvasUsageCollector(
   usageCollection: UsageCollectionSetup | undefined,
-  kibanaIndex: string
+  getIndexForType: (type: string) => Promise<string>
 ) {
   if (!usageCollection) {
     return;
@@ -40,7 +40,7 @@ export function registerCanvasUsageCollector(
     isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext) => {
       const collectorResults = await Promise.all(
-        collectors.map((collector) => collector(kibanaIndex, esClient))
+        collectors.map((collector) => collector(getIndexForType, esClient))
       );
 
       return collectorResults.reduce((reduction, usage) => {
