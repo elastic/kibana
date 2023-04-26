@@ -185,6 +185,12 @@ describe('Enterprise Search Managed Indices', () => {
       mockTrainedModelsProvider = {
         getTrainedModels: jest.fn(),
         getTrainedModelsStats: jest.fn(),
+        startTrainedModelDeployment: jest.fn(),
+        stopTrainedModelDeployment: jest.fn(),
+        inferTrainedModel: jest.fn(),
+        deleteTrainedModel: jest.fn(),
+        updateTrainedModelDeployment: jest.fn(),
+        putTrainedModel: jest.fn(),
       } as MlTrainedModels;
 
       mockMl = {
@@ -1079,6 +1085,12 @@ describe('Enterprise Search Managed Indices', () => {
       mockTrainedModelsProvider = {
         getTrainedModels: jest.fn(),
         getTrainedModelsStats: jest.fn(),
+        startTrainedModelDeployment: jest.fn(),
+        stopTrainedModelDeployment: jest.fn(),
+        inferTrainedModel: jest.fn(),
+        deleteTrainedModel: jest.fn(),
+        updateTrainedModelDeployment: jest.fn(),
+        putTrainedModel: jest.fn(),
       } as MlTrainedModels;
 
       mockMl = {

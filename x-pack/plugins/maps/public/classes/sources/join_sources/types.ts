@@ -15,9 +15,8 @@ import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { ISource } from '../source';
 
-export interface ITermJoinSource extends ISource {
+export interface IJoinSource extends ISource {
   hasCompleteConfig(): boolean;
-  getTermField(): IField;
   getWhereQuery(): Query | undefined;
   getPropertiesMap(
     requestMeta: VectorSourceRequestMeta,
@@ -40,4 +39,12 @@ export interface ITermJoinSource extends ISource {
     executionContext: KibanaExecutionContext
   ): Promise<ITooltipProperty[]>;
   getFieldByName(fieldName: string): IField | null;
+}
+
+export interface ITermJoinSource extends IJoinSource {
+  getTermField(): IField;
+}
+
+export function isTermJoinSource(joinSource: IJoinSource) {
+  return 'getTermField' in (joinSource as ITermJoinSource);
 }
