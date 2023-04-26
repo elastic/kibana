@@ -44,11 +44,11 @@ describe('Response console', () => {
         initialAgentData = agentData;
       });
 
-      getEndpointIntegrationVersion().then((version) => {
-        createAgentPolicyTask(version, (data) => {
+      getEndpointIntegrationVersion().then((version) =>
+        createAgentPolicyTask(version).then((data) => {
           response = data;
-        });
-      });
+        })
+      );
     });
 
     after(() => {
@@ -93,11 +93,11 @@ describe('Response console', () => {
         initialAgentData = agentData;
       });
 
-      getEndpointIntegrationVersion().then((version) => {
-        createAgentPolicyTask(version, (data) => {
+      getEndpointIntegrationVersion().then((version) =>
+        createAgentPolicyTask(version).then((data) => {
           response = data;
-        });
-      });
+        })
+      );
     });
 
     after(() => {
@@ -120,15 +120,16 @@ describe('Response console', () => {
           cy.contains(header);
         });
 
-        cy.get('tbody')
-          .find('tr')
-          .then((rows) => {
-            expect(rows.length).to.be.greaterThan(0);
-          })
-          .find('td')
+        cy.get('tbody > tr').should('have.length.greaterThan', 0);
+        cy.get('tbody > tr > td').should('contain', '/usr/sbin/cron');
+        cy.get('tbody > tr > td')
           .contains('/usr/sbin/cron')
-          .then((td) => {
-            cronPID = td.parents('tr').find('td').eq(1).find('span').text();
+          .parents('td')
+          .siblings('td')
+          .eq(1)
+          .find('span')
+          .then((span) => {
+            cronPID = span.text();
           });
       });
     });
@@ -144,14 +145,17 @@ describe('Response console', () => {
       submitCommand();
 
       cy.getByTestSubj('getProcessesSuccessCallout', { timeout: 120000 }).within(() => {
-        cy.get('tbody')
-          .find('td')
+        cy.get('tbody > tr > td')
           .contains('/usr/sbin/cron')
-          .then((td) => {
-            newCronPID = td.parents('tr').find('td').eq(1).find('span').text();
-            expect(newCronPID).to.not.equal(cronPID);
+          .parents('td')
+          .siblings('td')
+          .eq(1)
+          .find('span')
+          .then((span) => {
+            newCronPID = span.text();
           });
       });
+      expect(newCronPID).to.not.equal(cronPID);
     });
 
     it('"suspend-process --pid" - should suspend a process', () => {

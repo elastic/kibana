@@ -38,8 +38,7 @@ export const selectCommandFromHelpMenu = (command: string) => {
 export const checkInputForCommandPresence = (command: string) => {
   cy.getByTestSubj('endpointResponseActionsConsole-cmdInput-leftOfCursor')
     .invoke('text')
-    .then((text) => text.trim())
-    .should('eq', command);
+    .should('eq', `${command} `); // command in the cli input is followed by a space
 };
 
 export const submitCommand = () => {

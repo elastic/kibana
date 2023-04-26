@@ -51,11 +51,11 @@ describe('Isolate command', () => {
         initialAgentData = agentData;
       });
 
-      getEndpointIntegrationVersion().then((version) => {
-        createAgentPolicyTask(version, (data) => {
+      getEndpointIntegrationVersion().then((version) =>
+        createAgentPolicyTask(version).then((data) => {
           response = data;
-        });
-      });
+        })
+      );
     });
 
     after(() => {
@@ -67,8 +67,7 @@ describe('Isolate command', () => {
       }
     });
 
-    // flaky
-    it.skip('should allow filtering endpoint by Isolated status', () => {
+    it('should allow filtering endpoint by Isolated status', () => {
       cy.visit(APP_ENDPOINTS_PATH);
       closeAllToasts();
       checkEndpointListForOnlyUnIsolatedHosts();
@@ -113,11 +112,11 @@ describe('Isolate command', () => {
         initialAgentData = agentData;
       });
 
-      getEndpointIntegrationVersion().then((version) => {
-        createAgentPolicyTask(version, (data) => {
+      getEndpointIntegrationVersion().then((version) =>
+        createAgentPolicyTask(version).then((data) => {
           response = data;
-        });
-      });
+        })
+      );
       loadRule(false).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
@@ -186,11 +185,11 @@ describe('Isolate command', () => {
       getAgentByHostName(endpointHostname).then((agentData) => {
         initialAgentData = agentData;
       });
-      getEndpointIntegrationVersion().then((version) => {
-        createAgentPolicyTask(version, (data) => {
+      getEndpointIntegrationVersion().then((version) =>
+        createAgentPolicyTask(version).then((data) => {
           response = data;
-        });
-      });
+        })
+      );
 
       loadRule(false).then((data) => {
         ruleId = data.id;
