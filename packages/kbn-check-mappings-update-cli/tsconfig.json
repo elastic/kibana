@@ -25,5 +25,6 @@
     "@kbn/dev-cli-runner",
     "@kbn/test",
     "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/safer-lodash-set",
   ]
 }
