@@ -1,4 +1,6 @@
 newsfeed.enabled: false
+xpack.security.showNavLinks: false
+xpack.serverless.plugin.enabled: true
 xpack.fleet.enableExperimental: ['fleetServerStandalone']
 xpack.fleet.internal.disableILMPolicies: true
 

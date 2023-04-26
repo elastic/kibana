@@ -5013,6 +5013,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/serverless-project-switcher@link:packages/serverless/project_switcher":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-storybook-config@link:packages/serverless/storybook/config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-types@link:packages/serverless/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless@link:x-pack/plugins/serverless":
+  version "0.0.0"
+  uid ""
+
 "@kbn/session-notifications-plugin@link:test/plugin_functional/plugins/session_notifications":
   version "0.0.0"
   uid ""
