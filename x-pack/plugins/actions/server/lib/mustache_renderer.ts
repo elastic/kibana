@@ -7,8 +7,10 @@
 
 import Mustache from 'mustache';
 import { isString, isPlainObject, cloneDeepWith, merge } from 'lodash';
+import { getMustacheLambdas } from './mustache_lambdas';
 
 export type Escape = 'markdown' | 'slack' | 'json' | 'none';
+
 type Variables = Record<string, unknown>;
 
 // return a rendered mustache template with no escape given the specified variables and escape
@@ -25,11 +27,13 @@ export function renderMustacheStringNoEscape(string: string, variables: Variable
 // return a rendered mustache template given the specified variables and escape
 export function renderMustacheString(string: string, variables: Variables, escape: Escape): string {
   const augmentedVariables = augmentObjectVariables(variables);
+  const lambdas = getMustacheLambdas();
+
   const previousMustacheEscape = Mustache.escape;
   Mustache.escape = getEscape(escape);
 
   try {
-    return Mustache.render(`${string}`, augmentedVariables);
+    return Mustache.render(`${string}`, { ...lambdas, ...augmentedVariables });
   } catch (err) {
     // log error; the mustache code does not currently leak variables
     return `error rendering mustache template "${string}": ${err.message}`;
@@ -98,6 +102,9 @@ function addToStringDeep(object: unknown): void {
 
   // walk arrays, but don't add a toString() as mustache already does something
   if (Array.isArray(object)) {
+    // instead, add an asJSON()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (object as any).asJSON = () => JSON.stringify(object);
     object.forEach((element) => addToStringDeep(element));
     return;
   }

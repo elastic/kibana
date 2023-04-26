@@ -23,9 +23,10 @@ import { i18n } from '@kbn/i18n';
 
 import { ANALYTICS_PLUGIN } from '../../../../../../common/constants';
 import { COLLECTION_INTEGRATE_PATH } from '../../../../analytics/routes';
+import { CloudDetails, useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
+import { decodeCloudId } from '../../../../shared/decode_cloud_id/decode_cloud_id';
 import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
-import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
 import { KibanaLogic } from '../../../../shared/kibana';
 
 import { EngineViewLogic } from '../engine_view_logic';
@@ -34,12 +35,19 @@ import { EngineApiIntegrationStage } from './engine_api_integration';
 import { EngineApiLogic } from './engine_api_logic';
 import { GenerateEngineApiKeyModal } from './generate_engine_api_key_modal/generate_engine_api_key_modal';
 
+export const elasticsearchUrl = (cloudContext: CloudDetails): string => {
+  const defaultUrl = 'https://localhost:9200';
+  const url =
+    (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || defaultUrl;
+  return url;
+};
+
 export const SearchApplicationAPI = () => {
   const { engineName } = useValues(EngineViewLogic);
   const { isGenerateModalOpen } = useValues(EngineApiLogic);
   const { openGenerateModal, closeGenerateModal } = useActions(EngineApiLogic);
-  const enterpriseSearchUrl = getEnterpriseSearchUrl();
   const { navigateToUrl } = useValues(KibanaLogic);
+  const cloudContext = useCloudDetails();
 
   const steps = [
     {
@@ -132,7 +140,7 @@ export const SearchApplicationAPI = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow>
               <EuiCodeBlock language="markup" fontSize="m" paddingSize="m" isCopyable>
-                {enterpriseSearchUrl}
+                {elasticsearchUrl(cloudContext)}
               </EuiCodeBlock>
             </EuiFlexItem>
           </EuiFlexGroup>

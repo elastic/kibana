@@ -74,10 +74,10 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
+      await supertest.put(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.11.4')
+        .post('/api/fleet/epm/packages/synthetics/0.12.0')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -321,6 +321,9 @@ export default function ({ getService }: FtrProviderContext) {
             custom_heartbeat_id: `${journeyId}-${project}-default`,
             'check.response.body.negative': [],
             'check.response.body.positive': ['Saved', 'saved'],
+            'check.response.json': [
+              { description: 'check status', expression: 'foo.bar == "myValue"' },
+            ],
             'check.response.headers': {},
             'check.request.body': {
               type: 'text',
@@ -357,8 +360,10 @@ export default function ({ getService }: FtrProviderContext) {
             username: '',
             password: '',
             proxy_url: '',
+            proxy_headers: {},
             'response.include_body': 'always',
             'response.include_headers': false,
+            'response.include_body_max_bytes': '900',
             revision: 1,
             schedule: {
               number: '60',
@@ -378,6 +383,9 @@ export default function ({ getService }: FtrProviderContext) {
             'url.port': null,
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
+            mode: 'any',
+            ipv6: true,
+            ipv4: true,
           });
         }
       } finally {
@@ -486,6 +494,9 @@ export default function ({ getService }: FtrProviderContext) {
             urls: '',
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
+            mode: 'any',
+            ipv6: true,
+            ipv4: true,
           });
         }
       } finally {
@@ -590,6 +601,9 @@ export default function ({ getService }: FtrProviderContext) {
                 : `${parseInt(monitor.wait?.slice(0, -1) || '1', 10) * 60}`,
             id: `${journeyId}-${project}-default`,
             hash: 'ekrjelkjrelkjre',
+            mode: 'any',
+            ipv4: true,
+            ipv6: true,
           });
         }
       } finally {
@@ -1744,9 +1758,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(message).to.eql(REQUEST_TOO_LARGE);
       } finally {
         await supertest
-          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY)
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
-          .send({ ...projectMonitors, keep_stale: false, project });
+          .send({ ...projectMonitors, project });
       }
     });
 
@@ -1784,6 +1798,7 @@ export default function ({ getService }: FtrProviderContext) {
                     positive: ['Saved', 'saved'],
                   },
                   status: [200],
+                  json: [{ description: 'check status', expression: 'foo.bar == "myValue"' }],
                 },
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
@@ -1792,6 +1807,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: 900,
                 },
                 'response.include_headers': false,
                 schedule: 60,
@@ -1885,6 +1901,12 @@ export default function ({ getService }: FtrProviderContext) {
                     positive: ['Saved', 'saved'],
                   },
                   status: [200],
+                  json: [
+                    {
+                      description: 'check status',
+                      expression: 'foo.bar == "myValue"',
+                    },
+                  ],
                 },
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
@@ -1893,6 +1915,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: 900,
                 },
                 'response.include_headers': false,
                 schedule: 60,
@@ -1946,6 +1969,12 @@ export default function ({ getService }: FtrProviderContext) {
                     positive: ['Saved', 'saved'],
                   },
                   status: [200],
+                  json: [
+                    {
+                      description: 'check status',
+                      expression: 'foo.bar == "myValue"',
+                    },
+                  ],
                 },
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
@@ -1954,6 +1983,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: 900,
                 },
                 'response.include_headers': false,
                 schedule: 60,
@@ -2008,6 +2038,12 @@ export default function ({ getService }: FtrProviderContext) {
                     positive: ['Saved', 'saved'],
                   },
                   status: [200],
+                  json: [
+                    {
+                      description: 'check status',
+                      expression: 'foo.bar == "myValue"',
+                    },
+                  ],
                 },
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
@@ -2016,6 +2052,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
+                  include_body_max_bytes: 900,
                 },
                 'response.include_headers': false,
                 schedule: 60,

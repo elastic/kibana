@@ -32,15 +32,17 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { getFlag } from '../../../utils/get_flag';
 import { AnalyticsCollectionExploreTableLogic } from '../analytics_collection_explore_table_logic';
 import {
   ExploreTableColumns,
   ExploreTableItem,
   ExploreTables,
   SearchTermsTable,
-  TopClickedTable,
-  TopReferrersTable,
+  ClickedTable,
+  ReferrersTable,
   WorsePerformersTable,
+  LocationsTable,
 } from '../analytics_collection_explore_table_types';
 
 import { AnalyticsCollectionExplorerCallout } from './analytics_collection_explorer_callout';
@@ -63,7 +65,7 @@ const tabs: Array<{ id: ExploreTables; name: string }> = [
     ),
   },
   {
-    id: ExploreTables.TopClicked,
+    id: ExploreTables.Clicked,
     name: i18n.translate(
       'xpack.enterpriseSearch.analytics.collections.collectionsView.explorer.topClickedTab',
       { defaultMessage: 'Top clicked results' }
@@ -77,7 +79,14 @@ const tabs: Array<{ id: ExploreTables; name: string }> = [
     ),
   },
   {
-    id: ExploreTables.TopReferrers,
+    id: ExploreTables.Locations,
+    name: i18n.translate(
+      'xpack.enterpriseSearch.analytics.collections.collectionsView.explorer.locationsTab',
+      { defaultMessage: 'Locations' }
+    ),
+  },
+  {
+    id: ExploreTables.Referrers,
     name: i18n.translate(
       'xpack.enterpriseSearch.analytics.collections.collectionsView.explorer.referrersTab',
       { defaultMessage: 'Referrers' }
@@ -86,9 +95,10 @@ const tabs: Array<{ id: ExploreTables; name: string }> = [
 ];
 
 const tableSettings: {
+  [ExploreTables.Clicked]: TableSetting<ClickedTable>;
+  [ExploreTables.Locations]: TableSetting<LocationsTable>;
+  [ExploreTables.Referrers]: TableSetting<ReferrersTable>;
   [ExploreTables.SearchTerms]: TableSetting<SearchTermsTable>;
-  [ExploreTables.TopClicked]: TableSetting<TopClickedTable>;
-  [ExploreTables.TopReferrers]: TableSetting<TopReferrersTable>;
   [ExploreTables.WorsePerformers]: TableSetting<WorsePerformersTable>;
 } = {
   [ExploreTables.SearchTerms]: {
@@ -149,7 +159,7 @@ const tableSettings: {
       },
     },
   },
-  [ExploreTables.TopClicked]: {
+  [ExploreTables.Clicked]: {
     columns: [
       {
         field: ExploreTableColumns.page,
@@ -184,7 +194,7 @@ const tableSettings: {
       },
     },
   },
-  [ExploreTables.TopReferrers]: {
+  [ExploreTables.Referrers]: {
     columns: [
       {
         field: ExploreTableColumns.page,
@@ -197,6 +207,46 @@ const tableSettings: {
             <EuiText size="s" color={euiTheme.colors.primaryText}>
               <p>{value}</p>
             </EuiText>
+          ),
+        sortable: true,
+        truncateText: true,
+      },
+      {
+        align: 'right',
+        field: ExploreTableColumns.sessions,
+        name: i18n.translate(
+          'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.session',
+          { defaultMessage: 'Session' }
+        ),
+        sortable: true,
+        truncateText: true,
+      },
+    ],
+    sorting: {
+      sort: {
+        direction: 'desc',
+        field: ExploreTableColumns.sessions,
+      },
+    },
+  },
+  [ExploreTables.Locations]: {
+    columns: [
+      {
+        field: ExploreTableColumns.location,
+        name: i18n.translate(
+          'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.location',
+          { defaultMessage: 'Location' }
+        ),
+        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string, data: LocationsTable) =>
+          (
+            <EuiFlexGroup gutterSize="m" alignItems="center">
+              <EuiText>
+                <h3>{getFlag(data.countryISOCode)}</h3>
+              </EuiText>
+              <EuiText size="s" color={euiTheme.colors.primaryText}>
+                <p>{value}</p>
+              </EuiText>
+            </EuiFlexGroup>
           ),
         sortable: true,
         truncateText: true,
@@ -277,6 +327,7 @@ export const AnalyticsCollectionExplorerTable = () => {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             isClearable
+            isLoading={isLoading}
             incremental
             fullWidth
           />
