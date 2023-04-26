@@ -15,7 +15,6 @@ export {
   getEntityFieldList,
   getEntityFieldName,
   getEntityFieldValue,
-  getFormattedSeverityScore,
   getSeverityWithLow,
   isCategorizationAnomaly,
   isRuleSupported,
@@ -50,6 +49,7 @@ export {
   OPERATOR,
 } from './detector_rule';
 
+export { getFormattedSeverityScore } from './get_formatted_severity_score';
 export { getSeverity } from './get_severity';
 export { getSeverityColor } from './get_severity_color';
 export { getSeverityType } from './get_severity_type';

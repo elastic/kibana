@@ -76,14 +76,6 @@ export function isCategorizationAnomaly(anomaly: MlAnomaliesTableRecord): boolea
 }
 
 /**
- * Returns formatted severity score.
- * @param score - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
- */
-export function getFormattedSeverityScore(score: number): string {
-  return score < 1 ? '< 1' : String(parseInt(String(score), 10));
-}
-
-/**
  * Returns a severity label (one of critical, major, minor, warning, low or unknown)
  * for the supplied normalized anomaly score (a value between 0 and 100), where scores
  * less than 3 are assigned a severity of 'low'.
