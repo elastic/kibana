@@ -42,7 +42,7 @@ import {
   ServiceLocations,
   SyntheticsMonitorWithId,
   SyntheticsMonitorWithSecrets,
-  SyntheticsParam,
+  SyntheticsParamSO,
   ThrottlingOptions,
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
@@ -307,7 +307,7 @@ export class SyntheticsService {
         this.syncErrors = await this.apiClient.post({
           monitors,
           output,
-          licenseLevel: license.type,
+          license,
         });
       }
       return this.syncErrors;
@@ -329,7 +329,7 @@ export class SyntheticsService {
           monitors,
           output,
           isEdit,
-          licenseLevel: license.type,
+          license,
         };
 
         this.syncErrors = await this.apiClient.put(data);
@@ -372,7 +372,7 @@ export class SyntheticsService {
         service.syncErrors = await this.apiClient.syncMonitors({
           monitors,
           output,
-          licenseLevel: license.type,
+          license,
         });
       } catch (e) {
         sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
@@ -406,7 +406,7 @@ export class SyntheticsService {
       return await this.apiClient.runOnce({
         monitors,
         output,
-        licenseLevel: license.type,
+        license,
       });
     } catch (e) {
       this.logger.error(e);
@@ -429,7 +429,7 @@ export class SyntheticsService {
       const data = {
         output,
         monitors: this.formatConfigs(configs),
-        licenseLevel: license.type,
+        license,
       };
       return await this.apiClient.delete(data);
     }
@@ -453,7 +453,7 @@ export class SyntheticsService {
         const data = {
           output,
           monitors,
-          licenseLevel: license.type,
+          license,
         };
         return await this.apiClient.delete(data);
       }
@@ -555,10 +555,10 @@ export class SyntheticsService {
   async getSyntheticsParams({ spaceId }: { spaceId?: string } = {}) {
     const encryptedClient = this.server.encryptedSavedObjects.getClient();
 
-    const paramsBySpace: Record<string, Record<string, string>> = {};
+    const paramsBySpace: Record<string, Record<string, string>> = Object.create(null);
 
     const finder =
-      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParam>({
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParamSO>({
         type: syntheticsParamType,
         perPage: 1000,
         namespaces: spaceId ? [spaceId] : undefined,
@@ -568,7 +568,7 @@ export class SyntheticsService {
       response.saved_objects.forEach((param) => {
         param.namespaces?.forEach((namespace) => {
           if (!paramsBySpace[namespace]) {
-            paramsBySpace[namespace] = {};
+            paramsBySpace[namespace] = Object.create(null);
           }
           paramsBySpace[namespace][param.attributes.key] = param.attributes.value;
         });

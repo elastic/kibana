@@ -21,6 +21,11 @@ import {
   TestElasticsearchUtils,
   createTestServers as createkbnServerTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
+import {
+  MAIN_SAVED_OBJECT_INDEX,
+  TASK_MANAGER_SAVED_OBJECT_INDEX,
+  ANALYTICS_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
 
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, '7_13_corrupt_transform_failures.log');
@@ -114,18 +119,33 @@ describe('migration v2', () => {
 
       const esClient: ElasticsearchClient = esServer.es.getClient();
       const docs = await esClient.search({
-        index: '.kibana',
+        index: [
+          MAIN_SAVED_OBJECT_INDEX,
+          TASK_MANAGER_SAVED_OBJECT_INDEX,
+          ANALYTICS_SAVED_OBJECT_INDEX,
+        ],
         _source: false,
         fields: ['_id'],
         size: 50,
       });
 
-      // 23 saved objects + 14 corrupt (discarded) = 37 total in the old index
-      expect((docs.hits.total as SearchTotalHits).value).toEqual(23);
+      // 34 saved objects (11 tasks + 23 misc) + 14 corrupt (discarded) = 48 total in the old indices
+      expect((docs.hits.total as SearchTotalHits).value).toEqual(34);
       expect(docs.hits.hits.map(({ _id }) => _id).sort()).toEqual([
         'config:7.13.0',
         'index-pattern:logs-*',
         'index-pattern:metrics-*',
+        'task:Actions-actions_telemetry',
+        'task:Actions-cleanup_failed_action_executions',
+        'task:Alerting-alerting_health_check',
+        'task:Alerting-alerting_telemetry',
+        'task:Alerts-alerts_invalidate_api_keys',
+        'task:Lens-lens_telemetry',
+        'task:apm-telemetry-task',
+        'task:data_enhanced_search_sessions_monitor',
+        'task:endpoint:user-artifact-packager:1.0.0',
+        'task:security:endpoint-diagnostics:1.0.0',
+        'task:session_cleanup',
         'ui-metric:console:DELETE_delete',
         'ui-metric:console:GET_get',
         'ui-metric:console:GET_search',

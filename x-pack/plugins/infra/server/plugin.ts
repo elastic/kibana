@@ -20,8 +20,6 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { publicConfigKeys } from '../common/plugin_config_types';
-import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
-import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
 import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
 import { initInfraServer } from './infra_server';
@@ -43,7 +41,12 @@ import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { makeGetMetricIndices } from './lib/metrics/make_get_metric_indices';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
-import { logViewSavedObjectType } from './saved_objects';
+import {
+  inventoryViewSavedObjectType,
+  logViewSavedObjectType,
+  metricsExplorerViewSavedObjectType,
+} from './saved_objects';
+import { InventoryViewsService } from './services/inventory_views';
 import { LogEntriesService } from './services/log_entries';
 import { LogViewsService } from './services/log_views';
 import { RulesService } from './services/rules';
@@ -117,6 +120,7 @@ export class InfraServerPlugin
 
   private logsRules: RulesService;
   private metricsRules: RulesService;
+  private inventoryViews: InventoryViewsService;
   private logViews: LogViewsService;
 
   constructor(context: PluginInitializerContext<InfraConfig>) {
@@ -134,6 +138,7 @@ export class InfraServerPlugin
       this.logger.get('metricsRules')
     );
 
+    this.inventoryViews = new InventoryViewsService(this.logger.get('inventoryViews'));
     this.logViews = new LogViewsService(this.logger.get('logViews'));
   }
 
@@ -148,6 +153,7 @@ export class InfraServerPlugin
         sources,
       }
     );
+    const inventoryViews = this.inventoryViews.setup();
     const logViews = this.logViews.setup();
 
     // register saved object types
@@ -229,11 +235,17 @@ export class InfraServerPlugin
 
     return {
       defineInternalSourceConfiguration: sources.defineInternalSourceConfiguration.bind(sources),
+      inventoryViews,
       logViews,
     } as InfraPluginSetup;
   }
 
   start(core: CoreStart, plugins: InfraServerPluginStartDeps) {
+    const inventoryViews = this.inventoryViews.start({
+      infraSources: this.libs.sources,
+      savedObjects: core.savedObjects,
+    });
+
     const logViews = this.logViews.start({
       infraSources: this.libs.sources,
       savedObjects: core.savedObjects,
@@ -247,6 +259,7 @@ export class InfraServerPlugin
     });
 
     return {
+      inventoryViews,
       logViews,
       getMetricIndices: makeGetMetricIndices(this.libs.sources),
     };

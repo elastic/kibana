@@ -125,7 +125,8 @@ export class EndpointAppContextService {
           logger,
           licenseService,
           featureUsageService,
-          endpointMetadataService
+          endpointMetadataService,
+          cloud
         )
       );
 

@@ -5,18 +5,12 @@
  * 2.0.
  */
 import { syntheticsServiceAPIKeySavedObject } from '../../legacy_uptime/lib/saved_objects/service_api_key';
-import {
-  SyntheticsRestApiRouteFactory,
-  UMRestApiRouteFactory,
-} from '../../legacy_uptime/routes/types';
+import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import {
-  generateAndSaveServiceAPIKey,
-  SyntheticsForbiddenError,
-} from '../../synthetics_service/get_api_key';
+import { generateAndSaveServiceAPIKey } from '../../synthetics_service/get_api_key';
 
-export const getSyntheticsEnablementRoute: UMRestApiRouteFactory = (libs) => ({
-  method: 'GET',
+export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = (libs) => ({
+  method: 'PUT',
   path: API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
   handler: async ({ savedObjectsClient, request, server }): Promise<any> => {
@@ -25,7 +19,18 @@ export const getSyntheticsEnablementRoute: UMRestApiRouteFactory = (libs) => ({
         server,
       });
       const { canEnable, isEnabled } = result;
-      if (canEnable && !isEnabled && server.config.service?.manifestUrl) {
+      const { security } = server;
+      const { apiKey, isValid } = await libs.requests.getAPIKeyForSyntheticsService({
+        server,
+      });
+      if (apiKey && !isValid) {
+        await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
+        await security.authc.apiKeys?.invalidateAsInternalUser({
+          ids: [apiKey?.id || ''],
+        });
+      }
+      const regenerationRequired = !isEnabled || !isValid;
+      if (canEnable && regenerationRequired && server.config.service?.manifestUrl) {
         await generateAndSaveServiceAPIKey({
           request,
           authSavedObjectsClient: savedObjectsClient,
@@ -68,37 +73,10 @@ export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => (
         server,
       });
       await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);
-      await security.authc.apiKeys?.invalidate(request, { ids: [apiKey?.id || ''] });
+      await security.authc.apiKeys?.invalidateAsInternalUser({ ids: [apiKey?.id || ''] });
       return response.ok({});
     } catch (e) {
       server.logger.error(e);
-      throw e;
-    }
-  },
-});
-
-export const enableSyntheticsRoute: UMRestApiRouteFactory = (libs) => ({
-  method: 'POST',
-  path: API_URLS.SYNTHETICS_ENABLEMENT,
-  validate: {},
-  handler: async ({ request, response, server, savedObjectsClient }): Promise<any> => {
-    const { logger } = server;
-    try {
-      await generateAndSaveServiceAPIKey({
-        request,
-        authSavedObjectsClient: savedObjectsClient,
-        server,
-      });
-      return response.ok({
-        body: await libs.requests.getSyntheticsEnablement({
-          server,
-        }),
-      });
-    } catch (e) {
-      logger.error(e);
-      if (e instanceof SyntheticsForbiddenError) {
-        return response.forbidden();
-      }
       throw e;
     }
   },

@@ -10,6 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { RawRule, RawRuleAction } from '@kbn/alerting-plugin/server/types';
 import { FILEBEAT_7X_INDICATOR_PATH } from '@kbn/alerting-plugin/server/saved_objects/migrations';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { getUrlPrefix } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -185,7 +186,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       // NOTE: We have to use elasticsearch directly against the ".kibana" index because alerts do not expose the references which we want to test exists
       const response = await es.get<{ references: [{}] }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:38482620-ef1b-11eb-ad71-7de7959be71c',
         },
         { meta: true }
@@ -208,7 +209,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     it('7.16.0 migrates existing alerts to contain legacyId field', async () => {
       const searchResult = await es.search<RawRule>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           body: {
             query: {
               term: {
@@ -230,7 +231,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     it('7.16.0 migrates existing rules so predefined connectors are not stored in references', async () => {
       const searchResult = await es.search<RawRule>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           body: {
             query: {
               term: {
@@ -273,7 +274,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       // NOTE: We hae to use elastic search directly against the ".kibana" index because alerts do not expose the references which we want to test exists
       const response = await es.get<{ references: [{}] }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:d7a8c6a1-9394-48df-a634-d5457c35d747',
         },
         { meta: true }
@@ -297,7 +298,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         };
       }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:ece1ece2-9394-48df-a634-d5457c351ece',
         },
         { meta: true }
@@ -317,7 +318,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         };
       }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:fce1ece2-9394-48df-a634-d5457c351fce',
         },
         { meta: true }
@@ -337,7 +338,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         };
       }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:1ce1ece2-9394-48df-a634-d5457c3511ce',
         },
         { meta: true }
@@ -351,7 +352,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     it('8.0 migrates incorrect action group spellings on the Metrics Inventory Threshold rule type', async () => {
       const response = await es.get<{ alert: RawRule }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:92237b30-4e03-11ec-9ab9-d980518a2d28',
         },
         { meta: true }
@@ -365,7 +366,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     it('8.0 migrates and disables pre-existing rules', async () => {
       const response = await es.get<{ alert: RawRule }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:38482620-ef1b-11eb-ad71-7de7959be71c',
         },
         { meta: true }
@@ -378,7 +379,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     it('8.0.1 migrates and adds tags to disabled rules in 8.0', async () => {
       const responseEnabledBeforeMigration = await es.get<{ alert: RawRule }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:1efdfa40-8ec7-11ec-a700-5524407a7653',
         },
         { meta: true }
@@ -386,7 +387,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(responseEnabledBeforeMigration.statusCode).toEqual(200);
       const responseDisabledBeforeMigration = await es.get<{ alert: RawRule }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:13fdfa40-8ec7-11ec-a700-5524407a7667',
         },
         { meta: true }
@@ -407,7 +408,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     it('8.2.0 migrates params to mapped_params for specific params properties', async () => {
       const response = await es.get<{ alert: RawRule }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:66560b6f-5ca4-41e2-a1a1-dcfd7117e124',
         },
         { meta: true }
@@ -423,7 +424,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     it('8.2.0 migrates existing esQuery alerts to contain searchType param', async () => {
       const response = await es.get<{ alert: RawRule }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:776cb5c0-ad1e-11ec-ab9e-5f5932f4fad8',
         },
         { meta: true }
@@ -435,7 +436,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     it('8.3.0 removes internal tags in Security Solution rule', async () => {
       const response = await es.get<{ alert: RawRule }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:8990af61-c09a-11ec-9164-4bfd6fc32c43',
         },
         { meta: true }
@@ -448,7 +449,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     it('8.4.1 removes IsSnoozedUntil', async () => {
       const searchResult = await es.search<RawRule>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           body: {
             query: {
               term: {
@@ -474,7 +475,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         };
       }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:c8b39c29-d860-43b6-8817-b8058d80ddbc',
         },
         { meta: true }
@@ -494,7 +495,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         };
       }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:62c62b7f-8bf3-4104-a064-6247b7bda44f',
         },
         { meta: true }
@@ -514,7 +515,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         };
       }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:f0d13f4d-35ae-4554-897a-6392e97bb84c',
         },
         { meta: true }
@@ -526,7 +527,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     it('8.6.0 migrates executionStatus and monitoring', async () => {
       const response = await es.get<{ alert: RawRule }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:8370ffd2-f2db-49dc-9741-92c657189b9b',
         },
         { meta: true }
@@ -571,7 +572,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     it('8.6 migrates executionStatus warnings and errors', async () => {
       const response = await es.get<{ alert: RawRule }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:c87707ac-7328-47f7-b212-2cb40a4fc9b9',
         },
         { meta: true }
@@ -587,7 +588,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     it('8.7.0 adds aggType and groupBy to ES query rules', async () => {
       const response = await es.search<RawRule>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           body: {
             query: {
               bool: {
@@ -629,7 +630,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       const response = await es.get<{ alert: RawRule; references: SavedObjectReference[] }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:8bd01ff0-9d84-11ed-994d-f1971f849da5',
         },
         { meta: true }
@@ -639,10 +640,10 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.body._source?.references).toEqual(references);
     });
 
-    it('8.7 adds uuid to the actions', async () => {
+    it('8.8 adds uuid to the actions', async () => {
       const response = await es.get<{ alert: RawRule }>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'alert:9c003b00-00ee-11ec-b067-2524946ba327',
         },
         { meta: true }
@@ -667,6 +668,28 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
           uuid: expect.any(String),
         },
+      ]);
+    });
+
+    it('8.8 adds frequency to the actions for security solution', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          id: 'alert:8990af61-c09a-11ec-9164-4bfd6fc32c43',
+        },
+        { meta: true }
+      );
+
+      const alert = response.body._source?.alert;
+
+      expect(alert?.actions).toEqual([
+        expect.objectContaining({
+          frequency: {
+            summary: true,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '1h',
+          },
+        }),
       ]);
     });
   });

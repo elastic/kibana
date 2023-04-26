@@ -14,6 +14,8 @@ import userEvent from '@testing-library/user-event';
 import { getPosturePolicy } from './utils';
 import { CLOUDBEAT_AWS, CLOUDBEAT_EKS } from '../../../common/constants';
 import { useParams } from 'react-router-dom';
+import { createReactQueryResponse } from '../../test/fixtures/react_query';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -22,12 +24,19 @@ jest.mock('react-router-dom', () => ({
     integration: undefined,
   }),
 }));
+jest.mock('../../common/api/use_setup_status_api');
 
 describe('<CspPolicyTemplateForm />', () => {
   beforeEach(() => {
     (useParams as jest.Mock).mockReturnValue({
       integration: undefined,
     });
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed', installedPackageVersion: '1.2.13' },
+      })
+    );
   });
 
   const onChange = jest.fn();
@@ -200,10 +209,18 @@ describe('<CspPolicyTemplateForm />', () => {
     }));
     policy.name = 'cloud_security_posture-1';
 
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          kspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
+        },
+      })
+    );
+
     (useParams as jest.Mock).mockReturnValue({
       integration: 'kspm',
     });
-
     render(<WrappedComponent newPolicy={policy} />);
 
     // 1st call happens on mount and selects the default policy template enabled input
@@ -220,7 +237,7 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: {
         ...policy,
-        name: 'kspm-1',
+        name: 'kspm-2',
       },
     });
   });
@@ -237,6 +254,14 @@ describe('<CspPolicyTemplateForm />', () => {
     (useParams as jest.Mock).mockReturnValue({
       integration: 'cspm',
     });
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          cspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
+        },
+      })
+    );
 
     render(<WrappedComponent newPolicy={policy} />);
 
@@ -254,7 +279,49 @@ describe('<CspPolicyTemplateForm />', () => {
       isValid: true,
       updatedPolicy: {
         ...policy,
-        name: 'cspm-1',
+        name: 'cspm-2',
+      },
+    });
+  });
+
+  it('selects default VULN_MGMT input selector', () => {
+    const policy = getMockPolicyAWS();
+    // enable all inputs of a policy template, same as fleet does
+    policy.inputs = policy.inputs.map((input) => ({
+      ...input,
+      enabled: input.policy_template === 'cspm',
+    }));
+    policy.name = 'cloud_security_posture-1';
+
+    (useParams as jest.Mock).mockReturnValue({
+      integration: 'vuln_mgmt',
+    });
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: {
+          vuln_mgmt: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
+        },
+      })
+    );
+
+    render(<WrappedComponent newPolicy={policy} />);
+
+    // 1st call happens on mount and selects the default policy template enabled input
+    expect(onChange).toHaveBeenNthCalledWith(1, {
+      isValid: true,
+      updatedPolicy: {
+        ...getMockPolicyAWS(),
+        name: 'cloud_security_posture-1',
+      },
+    });
+
+    // 2nd call happens to set integration name
+    expect(onChange).toHaveBeenNthCalledWith(2, {
+      isValid: true,
+      updatedPolicy: {
+        ...policy,
+        name: 'vuln_mgmt-2',
       },
     });
   });

@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { type FieldVisualizeButtonProps, FieldVisualizeButton } from './field_visualize_button';
+export {
+  type FieldVisualizeButtonProps,
+  FieldVisualizeButton,
+  getFieldVisualizeButton,
+} from './field_visualize_button';
 
 export {
   triggerVisualizeActions,

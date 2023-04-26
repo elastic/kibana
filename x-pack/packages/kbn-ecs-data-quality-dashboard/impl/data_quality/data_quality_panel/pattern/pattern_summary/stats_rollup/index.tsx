@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip } from '@elastic/eui';
-import numeral from '@elastic/numeral';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -29,21 +28,25 @@ const DocsContainer = styled.div`
 const STAT_TITLE_SIZE = 's';
 
 interface Props {
-  defaultNumberFormat: string;
   docsCount: number | undefined;
+  formatBytes: (value: number | undefined) => string;
+  formatNumber: (value: number | undefined) => string;
   incompatible: number | undefined;
   indices: number | undefined;
   indicesChecked: number | undefined;
   pattern?: string;
+  sizeInBytes: number | undefined;
 }
 
 const StatsRollupComponent: React.FC<Props> = ({
-  defaultNumberFormat,
   docsCount,
+  formatBytes,
+  formatNumber,
   incompatible,
   indices,
   indicesChecked,
   pattern,
+  sizeInBytes,
 }) => {
   const incompatibleDescription = useMemo(
     () => <StatLabel line1={i18n.INCOMPATIBLE} line2={i18n.FIELDS} />,
@@ -53,11 +56,17 @@ const StatsRollupComponent: React.FC<Props> = ({
     () => <StatLabel line1={i18n.INDICES} line2={i18n.CHECKED} />,
     []
   );
+  const sizeDescription = useMemo(() => <StatLabel line2={i18n.SIZE} />, []);
   const docsDescription = useMemo(() => <StatLabel line2={i18n.DOCS} />, []);
   const indicesDescription = useMemo(() => <StatLabel line2={i18n.INDICES} />, []);
 
   return (
-    <StatsFlexGroup alignItems="flexEnd" gutterSize="none" justifyContent="flexEnd">
+    <StatsFlexGroup
+      alignItems="flexEnd"
+      data-test-subj="statsRollup"
+      gutterSize="none"
+      justifyContent="flexEnd"
+    >
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={
@@ -68,9 +77,7 @@ const StatsRollupComponent: React.FC<Props> = ({
         >
           <EuiStat
             description={incompatibleDescription}
-            title={
-              incompatible != null ? numeral(incompatible).format(defaultNumberFormat) : EMPTY_STAT
-            }
+            title={incompatible != null ? formatNumber(incompatible) : EMPTY_STAT}
             titleColor={getIncompatibleStatColor(incompatible)}
             titleSize={STAT_TITLE_SIZE}
           />
@@ -88,11 +95,7 @@ const StatsRollupComponent: React.FC<Props> = ({
           >
             <EuiStat
               description={indicesCheckedDescription}
-              title={
-                indicesChecked != null
-                  ? numeral(indicesChecked).format(defaultNumberFormat)
-                  : EMPTY_STAT
-              }
+              title={indicesChecked != null ? formatNumber(indicesChecked) : EMPTY_STAT}
               titleSize={STAT_TITLE_SIZE}
             />
           </EuiToolTip>
@@ -110,7 +113,25 @@ const StatsRollupComponent: React.FC<Props> = ({
           >
             <EuiStat
               description={indicesDescription}
-              title={indices != null ? numeral(indices).format(defaultNumberFormat) : 0}
+              title={indices != null ? formatNumber(indices) : 0}
+              titleSize={STAT_TITLE_SIZE}
+            />
+          </EuiToolTip>
+        </IndicesStatContainer>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <IndicesStatContainer>
+          <EuiToolTip
+            content={
+              pattern != null
+                ? i18n.INDICES_SIZE_PATTERN_TOOL_TIP(pattern)
+                : i18n.TOTAL_SIZE_TOOL_TIP
+            }
+          >
+            <EuiStat
+              description={sizeDescription}
+              title={sizeInBytes != null ? formatBytes(sizeInBytes) : EMPTY_STAT}
               titleSize={STAT_TITLE_SIZE}
             />
           </EuiToolTip>
@@ -126,9 +147,7 @@ const StatsRollupComponent: React.FC<Props> = ({
           >
             <EuiStat
               description={docsDescription}
-              title={
-                docsCount != null ? numeral(docsCount).format(defaultNumberFormat) : EMPTY_STAT
-              }
+              title={docsCount != null ? formatNumber(docsCount) : EMPTY_STAT}
               titleSize={STAT_TITLE_SIZE}
             />
           </EuiToolTip>
