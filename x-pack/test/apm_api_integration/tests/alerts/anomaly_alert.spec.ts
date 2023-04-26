@@ -9,7 +9,7 @@ import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { ANOMALY_SEVERITY } from '@kbn/apm-plugin/common/ml_constants';
+import { ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
 import { createApmRule } from './alerting_api_helper';
