@@ -18,6 +18,7 @@ import {
   Plugin as PluginClass,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
@@ -36,10 +37,6 @@ import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/publi
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import {
-  ObservabilityPublicSetup,
-  ObservabilityPublicStart,
-} from '@kbn/observability-plugin/public';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
@@ -48,7 +45,6 @@ import { APP_ROUTE } from './constants';
 
 export interface ExploratoryViewPublicPluginsSetup {
   data: DataPublicPluginSetup;
-  observability: ObservabilityPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
@@ -62,10 +58,11 @@ export interface ExploratoryViewPublicPluginsStart {
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
+
   guidedOnboarding: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
-  observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
   spaces?: SpacesPluginStart;

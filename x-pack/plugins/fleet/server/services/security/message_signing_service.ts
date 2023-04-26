@@ -8,7 +8,10 @@
 import { generateKeyPairSync, createSign, randomBytes } from 'crypto';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from '@kbn/core-saved-objects-api-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
@@ -27,6 +30,7 @@ export interface MessageSigningServiceInterface {
   generateKeyPair(
     providedPassphrase?: string
   ): Promise<{ privateKey: string; publicKey: string; passphrase: string }>;
+  rotateKeyPair(): Promise<boolean>;
   sign(message: Buffer | Record<string, unknown>): Promise<{ data: Buffer; signature: string }>;
   getPublicKey(): Promise<string>;
 }
@@ -45,35 +49,12 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     publicKey: string;
     passphrase: string;
   }> {
-    let passphrase = providedPassphrase || this.generatePassphrase();
-
-    const currentKeyPair = await this.getCurrentKeyPair();
-    if (
-      currentKeyPair.privateKey &&
-      currentKeyPair.publicKey &&
-      (currentKeyPair.passphrase || currentKeyPair.passphrasePlain)
-    ) {
-      passphrase = currentKeyPair.passphrase || currentKeyPair.passphrasePlain;
-
-      // newly configured encryption key, encrypt the passphrase
-      if (currentKeyPair.passphrasePlain && this.isEncryptionAvailable) {
-        await this.soClient.update<MessageSigningKeys>(
-          MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
-          currentKeyPair.id,
-          {
-            passphrase,
-            passphrase_plain: '',
-          }
-        );
-      }
-
-      return {
-        privateKey: currentKeyPair.privateKey,
-        publicKey: currentKeyPair.publicKey,
-        passphrase,
-      };
+    const existingKeyPair = await this.checkForExistingKeyPair();
+    if (existingKeyPair) {
+      return existingKeyPair;
     }
 
+    const passphrase = providedPassphrase || this.generatePassphrase();
     const keyPair = generateKeyPairSync('ec', {
       namedCurve: 'prime256v1',
       privateKeyEncoding: {
@@ -154,6 +135,25 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     return publicKey;
   }
 
+  public async rotateKeyPair(): Promise<boolean> {
+    const isRemoved = await this.removeKeyPair();
+    if (isRemoved) {
+      await this.generateKeyPair();
+      return true;
+    }
+    return false;
+    // TODO: Apply changes to all policies
+  }
+
+  private async removeKeyPair(): Promise<boolean> {
+    const currentKeyPair = await this.getCurrentKeyPairObj();
+    if (currentKeyPair) {
+      await this.soClient.delete(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, currentKeyPair.id);
+      return true;
+    }
+    return false;
+  }
+
   private get soClient() {
     if (this._soClient) {
       return this._soClient;
@@ -176,13 +176,9 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     return this._soClient;
   }
 
-  private async getCurrentKeyPair(): Promise<{
-    id: string;
-    privateKey: string;
-    publicKey: string;
-    passphrase: string;
-    passphrasePlain: string;
-  }> {
+  private async getCurrentKeyPairObj(): Promise<
+    SavedObjectsFindResult<MessageSigningKeys> | undefined
+  > {
     const finder =
       await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<MessageSigningKeys>({
         type: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
@@ -190,30 +186,59 @@ export class MessageSigningService implements MessageSigningServiceInterface {
         sortField: 'created_at',
         sortOrder: 'desc',
       });
-    let keyPair = {
-      id: '',
-      privateKey: '',
-      publicKey: '',
-      passphrase: '',
-      passphrasePlain: '',
-    };
+    let soDoc: SavedObjectsFindResult<MessageSigningKeys> | undefined;
     for await (const result of finder.find()) {
-      const savedObject = result.saved_objects[0];
-      const attributes = savedObject?.attributes;
-      if (!attributes?.private_key) {
-        break;
-      }
-      keyPair = {
-        id: savedObject.id,
-        privateKey: attributes.private_key,
-        publicKey: attributes.public_key,
-        passphrase: attributes.passphrase,
-        passphrasePlain: attributes.passphrase_plain,
-      };
+      soDoc = result.saved_objects[0];
       break;
     }
+    finder.close();
 
-    return keyPair;
+    return soDoc;
+  }
+
+  private async checkForExistingKeyPair(): Promise<
+    | {
+        privateKey: string;
+        publicKey: string;
+        passphrase: string;
+      }
+    | undefined
+  > {
+    const currentKeyPair = await this.getCurrentKeyPairObj();
+    if (!currentKeyPair) {
+      return;
+    }
+
+    const { attributes } = currentKeyPair;
+    if (!attributes) {
+      return;
+    }
+
+    const {
+      private_key: privateKey,
+      public_key: publicKey,
+      passphrase: passphraseEncrypted,
+      passphrase_plain: passphrasePlain,
+    } = attributes;
+    const passphrase = passphraseEncrypted || passphrasePlain;
+    if (!privateKey || !publicKey || !passphrase) {
+      return;
+    }
+
+    // newly configured encryption key, encrypt the passphrase
+    if (passphrasePlain && this.isEncryptionAvailable) {
+      await this.soClient.update<MessageSigningKeys>(
+        MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+        currentKeyPair?.id,
+        { ...attributes, passphrase, passphrase_plain: '' }
+      );
+    }
+
+    return {
+      privateKey,
+      publicKey,
+      passphrase,
+    };
   }
 
   private generatePassphrase(): string {

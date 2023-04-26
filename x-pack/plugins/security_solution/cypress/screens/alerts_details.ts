@@ -68,8 +68,6 @@ export const UPDATE_ENRICHMENT_RANGE_BUTTON = '[data-test-subj="enrichment-butto
 
 export const OVERVIEW_TAB = '[data-test-subj="overviewTab"]';
 
-export const SUMMARY_VIEW_PREVALENCE_CELL = `${SUMMARY_VIEW} [data-test-subj='alert-prevalence']`;
-
 export const SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON = `${SUMMARY_VIEW} [aria-label='Investigate in timeline']`;
 
 export const INSIGHTS_RELATED_ALERTS_BY_SESSION = `[data-test-subj='related-alerts-by-session']`;

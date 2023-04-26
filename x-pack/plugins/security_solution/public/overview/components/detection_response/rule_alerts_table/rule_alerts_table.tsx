@@ -21,6 +21,8 @@ import {
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { CellActionsMode } from '@kbn/cell-actions';
+import { SecurityCellActionsTrigger } from '../../../../actions/constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { HeaderSection } from '../../../../common/components/header_section';
 
@@ -36,6 +38,7 @@ import { HoverVisibilityContainer } from '../../../../common/components/hover_vi
 import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { FormattedCount } from '../../../../common/components/formatted_number';
+import { SecurityCellActions } from '../../../../common/components/cell_actions';
 
 export interface RuleAlertsTableProps {
   signalIndexName: string | null;
@@ -95,13 +98,27 @@ export const getTableColumns: GetTableColumns = ({
     name: i18n.RULE_ALERTS_COLUMN_ALERT_COUNT,
     'data-test-subj': 'severityRuleAlertsTable-alertCount',
     render: (alertCount: number, { name }) => (
-      <EuiLink
-        data-test-subj="severityRuleAlertsTable-alertCountLink"
-        disabled={alertCount === 0}
-        onClick={() => openRuleInAlertsPage(name)}
+      <SecurityCellActions
+        field={{
+          name: ALERT_RULE_NAME,
+          value: name,
+          type: 'keyword',
+          aggregatable: true,
+        }}
+        mode={CellActionsMode.HOVER_RIGHT}
+        triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        metadata={{
+          andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
+        }}
       >
-        <FormattedCount count={alertCount} />
-      </EuiLink>
+        <EuiLink
+          data-test-subj="severityRuleAlertsTable-alertCountLink"
+          disabled={alertCount === 0}
+          onClick={() => openRuleInAlertsPage(name)}
+        >
+          <FormattedCount count={alertCount} />
+        </EuiLink>
+      </SecurityCellActions>
     ),
   },
   {

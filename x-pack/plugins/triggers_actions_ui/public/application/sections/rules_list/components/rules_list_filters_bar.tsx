@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
   EuiFilterGroup,
-  EuiFieldSearch,
   EuiSpacer,
   EuiLink,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import { ActionType, RulesListFilters, UpdateFiltersProps } from '../../../../types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
@@ -29,43 +29,42 @@ import { ActionTypeFilter } from './action_type_filter';
 import { RuleTagFilter } from './rule_tag_filter';
 import { RuleStatusFilter } from './rule_status_filter';
 
-const ENTER_KEY = 13;
-
 interface RulesListFiltersBarProps {
-  inputText: string;
-  filters: RulesListFilters;
-  showActionFilter: boolean;
-  rulesStatusesTotal: Record<string, number>;
-  rulesLastRunOutcomesTotal: Record<string, number>;
-  tags: string[];
-  filterOptions: TypeFilterProps['options'];
   actionTypes: ActionType[];
+  filterOptions: TypeFilterProps['options'];
+  filters: RulesListFilters;
+  inputText: string;
   lastUpdate: string;
+  rulesLastRunOutcomesTotal: Record<string, number>;
+  rulesStatusesTotal: Record<string, number>;
+  showActionFilter: boolean;
   showErrors: boolean;
-  updateFilters: (updateFiltersProps: UpdateFiltersProps) => void;
-  setInputText: (text: string) => void;
+  tags: string[];
   onClearSelection: () => void;
   onRefreshRules: () => void;
   onToggleRuleErrors: () => void;
+  setInputText: (text: string) => void;
+  updateFilters: (updateFiltersProps: UpdateFiltersProps) => void;
 }
 
+const ENTER_KEY = 13;
 export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) => {
   const {
-    filters,
-    inputText,
-    showActionFilter = true,
-    rulesStatusesTotal,
-    rulesLastRunOutcomesTotal,
-    tags,
     actionTypes,
     filterOptions,
+    filters,
+    inputText,
     lastUpdate,
-    showErrors,
-    updateFilters,
-    setInputText,
     onClearSelection,
     onRefreshRules,
     onToggleRuleErrors,
+    rulesLastRunOutcomesTotal,
+    rulesStatusesTotal,
+    setInputText,
+    showActionFilter = true,
+    showErrors,
+    tags,
+    updateFilters,
   } = props;
 
   const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
@@ -136,6 +135,19 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     ...getRuleTagFilter(),
   ];
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputText(e.target.value);
+    if (e.target.value === '') {
+      updateFilters({ filter: 'searchText', value: e.target.value });
+    }
+  };
+
+  const handleKeyup = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.keyCode === ENTER_KEY) {
+      updateFilters({ filter: 'searchText', value: inputText });
+    }
+  };
+
   return (
     <>
       <RulesListErrorBanner
@@ -150,25 +162,16 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFieldSearch
+            data-test-subj="ruleSearchField"
             fullWidth
             isClearable
-            data-test-subj="ruleSearchField"
-            value={inputText}
-            onChange={(e) => {
-              setInputText(e.target.value);
-              if (e.target.value === '') {
-                updateFilters({ filter: 'searchText', value: e.target.value });
-              }
-            }}
-            onKeyUp={(e) => {
-              if (e.keyCode === ENTER_KEY) {
-                updateFilters({ filter: 'searchText', value: inputText });
-              }
-            }}
             placeholder={i18n.translate(
               'xpack.triggersActionsUI.sections.rulesList.searchPlaceholderTitle',
               { defaultMessage: 'Search' }
             )}
+            value={inputText}
+            onChange={handleChange}
+            onKeyUp={handleKeyup}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{renderRuleStatusFilter()}</EuiFlexItem>

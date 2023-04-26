@@ -19,7 +19,7 @@ export const getAlertCategoryDisplayText = (alert: ProcessEvent, category: strin
   if (filePath && category === ProcessEventAlertCategory.file) return dataOrDash(filePath);
   if (destination?.address && category === ProcessEventAlertCategory.network)
     return dataOrDash(getAlertNetworkDisplay(destination));
-  return;
+  return '';
 };
 
 export const getAlertNetworkDisplay = (destination: ProcessEventIPAddress) => {

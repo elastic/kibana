@@ -67,9 +67,9 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
   reducers: ({ props }) => ({
     application: [props.application || {}, {}],
     capabilities: [props.capabilities || {}, {}],
-    config: [props.config || {}, {}],
     charts: [props.charts, {}],
     cloud: [props.cloud || {}, {}],
+    config: [props.config || {}, {}],
     data: [props.data, {}],
     guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],

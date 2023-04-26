@@ -12,14 +12,14 @@ import { useEuiTheme } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../dashboard_constants';
-import { useDashboardContainerContext } from '../../dashboard_container_context';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
 export const useDashboardGridSettings = (panelsInOrder: string[]) => {
-  const { useEmbeddableSelector: select } = useDashboardContainerContext();
+  const dashboard = useDashboardContainer();
   const { euiTheme } = useEuiTheme();
 
-  const panels = select((state) => state.explicitInput.panels);
-  const viewMode = select((state) => state.explicitInput.viewMode);
+  const panels = dashboard.select((state) => state.explicitInput.panels);
+  const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
 
   const layouts = useMemo(() => {
     return {

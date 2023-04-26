@@ -93,7 +93,7 @@ describe('migration actions', () => {
     await bulkOverwriteTransformedDocuments({
       client,
       index: 'existing_index_with_docs',
-      operations: docs.map(createBulkIndexOperationTuple),
+      operations: docs.map((doc) => createBulkIndexOperationTuple(doc)),
       refresh: 'wait_for',
     })();
 
@@ -106,7 +106,7 @@ describe('migration actions', () => {
     await bulkOverwriteTransformedDocuments({
       client,
       index: 'existing_index_with_write_block',
-      operations: docs.map(createBulkIndexOperationTuple),
+      operations: docs.map((doc) => createBulkIndexOperationTuple(doc)),
       refresh: 'wait_for',
     })();
     await setWriteBlock({ client, index: 'existing_index_with_write_block' })();
@@ -307,7 +307,7 @@ describe('migration actions', () => {
       const res = (await bulkOverwriteTransformedDocuments({
         client,
         index: 'new_index_without_write_block',
-        operations: sourceDocs.map(createBulkIndexOperationTuple),
+        operations: sourceDocs.map((doc) => createBulkIndexOperationTuple(doc)),
         refresh: 'wait_for',
       })()) as Either.Left<unknown>;
 
@@ -887,7 +887,7 @@ describe('migration actions', () => {
       await bulkOverwriteTransformedDocuments({
         client,
         index: 'reindex_target_4',
-        operations: sourceDocs.map(createBulkIndexOperationTuple),
+        operations: sourceDocs.map((doc) => createBulkIndexOperationTuple(doc)),
         refresh: 'wait_for',
       })();
 
@@ -1445,7 +1445,7 @@ describe('migration actions', () => {
       await bulkOverwriteTransformedDocuments({
         client,
         index: 'existing_index_without_mappings',
-        operations: sourceDocs.map(createBulkIndexOperationTuple),
+        operations: sourceDocs.map((doc) => createBulkIndexOperationTuple(doc)),
         refresh: 'wait_for',
       })();
 
@@ -1895,7 +1895,7 @@ describe('migration actions', () => {
       const task = bulkOverwriteTransformedDocuments({
         client,
         index: 'existing_index_with_docs',
-        operations: newDocs.map(createBulkIndexOperationTuple),
+        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
         refresh: 'wait_for',
       });
 
@@ -1921,7 +1921,7 @@ describe('migration actions', () => {
         operations: [
           ...existingDocs,
           { _source: { title: 'doc 8' } } as unknown as SavedObjectsRawDoc,
-        ].map(createBulkIndexOperationTuple),
+        ].map((doc) => createBulkIndexOperationTuple(doc)),
         refresh: 'wait_for',
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -1941,7 +1941,7 @@ describe('migration actions', () => {
         bulkOverwriteTransformedDocuments({
           client,
           index: 'existing_index_with_write_block',
-          operations: newDocs.map(createBulkIndexOperationTuple),
+          operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
           refresh: 'wait_for',
         })()
       ).resolves.toMatchInlineSnapshot(`
@@ -1964,7 +1964,7 @@ describe('migration actions', () => {
       const task = bulkOverwriteTransformedDocuments({
         client,
         index: 'existing_index_with_docs',
-        operations: newDocs.map(createBulkIndexOperationTuple),
+        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {

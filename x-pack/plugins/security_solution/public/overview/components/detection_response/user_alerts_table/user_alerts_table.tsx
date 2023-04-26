@@ -20,6 +20,8 @@ import {
 } from '@elastic/eui';
 
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { CellActionsMode } from '@kbn/cell-actions';
+import { SecurityCellActionsTrigger } from '../../../../actions/constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
@@ -32,6 +34,7 @@ import * as i18n from '../translations';
 import { ITEMS_PER_PAGE, SEVERITY_COLOR } from '../utils';
 import type { UserAlertsItem } from './use_user_alerts_items';
 import { useUserAlertsItems } from './use_user_alerts_items';
+import { SecurityCellActions } from '../../../../common/components/cell_actions';
 
 interface UserAlertsTableProps {
   signalIndexName: string | null;
@@ -142,13 +145,27 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.ALERTS_TEXT,
     'data-test-subj': 'userSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { userName }) => (
-      <EuiLink
-        data-test-subj="userSeverityAlertsTable-totalAlertsLink"
-        disabled={totalAlerts === 0}
-        onClick={() => handleClick({ userName })}
+      <SecurityCellActions
+        field={{
+          name: 'user.name',
+          value: userName,
+          type: 'keyword',
+          aggregatable: true,
+        }}
+        mode={CellActionsMode.HOVER_RIGHT}
+        triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        metadata={{
+          andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
+        }}
       >
-        <FormattedCount count={totalAlerts} />
-      </EuiLink>
+        <EuiLink
+          data-test-subj="userSeverityAlertsTable-totalAlertsLink"
+          disabled={totalAlerts === 0}
+          onClick={() => handleClick({ userName })}
+        >
+          <FormattedCount count={totalAlerts} />
+        </EuiLink>
+      </SecurityCellActions>
     ),
   },
   {
@@ -156,13 +173,30 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_CRITICAL_LABEL,
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
-        <EuiLink
-          data-test-subj="userSeverityAlertsTable-criticalLink"
-          disabled={count === 0}
-          onClick={() => handleClick({ userName, severity: 'critical' })}
+        <SecurityCellActions
+          field={{
+            name: 'user.name',
+            value: userName,
+            type: 'keyword',
+            aggregatable: true,
+          }}
+          mode={CellActionsMode.HOVER_RIGHT}
+          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+          metadata={{
+            andFilters: [
+              { field: 'kibana.alert.severity', value: 'critical' },
+              { field: 'kibana.alert.workflow_status', value: 'open' },
+            ],
+          }}
         >
-          <FormattedCount count={count} />
-        </EuiLink>
+          <EuiLink
+            data-test-subj="userSeverityAlertsTable-criticalLink"
+            disabled={count === 0}
+            onClick={() => handleClick({ userName, severity: 'critical' })}
+          >
+            <FormattedCount count={count} />
+          </EuiLink>
+        </SecurityCellActions>
       </EuiHealth>
     ),
   },
@@ -171,9 +205,29 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_HIGH_LABEL,
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
-        <EuiLink disabled={count === 0} onClick={() => handleClick({ userName, severity: 'high' })}>
-          <FormattedCount count={count} />
-        </EuiLink>
+        <SecurityCellActions
+          field={{
+            name: 'user.name',
+            value: userName,
+            type: 'keyword',
+            aggregatable: true,
+          }}
+          mode={CellActionsMode.HOVER_RIGHT}
+          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+          metadata={{
+            andFilters: [
+              { field: 'kibana.alert.severity', value: 'high' },
+              { field: 'kibana.alert.workflow_status', value: 'open' },
+            ],
+          }}
+        >
+          <EuiLink
+            disabled={count === 0}
+            onClick={() => handleClick({ userName, severity: 'high' })}
+          >
+            <FormattedCount count={count} />
+          </EuiLink>
+        </SecurityCellActions>
       </EuiHealth>
     ),
   },
@@ -182,12 +236,29 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_MEDIUM_LABEL,
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
-        <EuiLink
-          disabled={count === 0}
-          onClick={() => handleClick({ userName, severity: 'medium' })}
+        <SecurityCellActions
+          field={{
+            name: 'user.name',
+            value: userName,
+            type: 'keyword',
+            aggregatable: true,
+          }}
+          mode={CellActionsMode.HOVER_RIGHT}
+          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+          metadata={{
+            andFilters: [
+              { field: 'kibana.alert.severity', value: 'medium' },
+              { field: 'kibana.alert.workflow_status', value: 'open' },
+            ],
+          }}
         >
-          <FormattedCount count={count} />
-        </EuiLink>
+          <EuiLink
+            disabled={count === 0}
+            onClick={() => handleClick({ userName, severity: 'medium' })}
+          >
+            <FormattedCount count={count} />
+          </EuiLink>
+        </SecurityCellActions>
       </EuiHealth>
     ),
   },
@@ -196,9 +267,29 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_LOW_LABEL,
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
-        <EuiLink disabled={count === 0} onClick={() => handleClick({ userName, severity: 'low' })}>
-          <FormattedCount count={count} />
-        </EuiLink>
+        <SecurityCellActions
+          field={{
+            name: 'user.name',
+            value: userName,
+            type: 'keyword',
+            aggregatable: true,
+          }}
+          mode={CellActionsMode.HOVER_RIGHT}
+          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+          metadata={{
+            andFilters: [
+              { field: 'kibana.alert.severity', value: 'low' },
+              { field: 'kibana.alert.workflow_status', value: 'open' },
+            ],
+          }}
+        >
+          <EuiLink
+            disabled={count === 0}
+            onClick={() => handleClick({ userName, severity: 'low' })}
+          >
+            <FormattedCount count={count} />
+          </EuiLink>
+        </SecurityCellActions>
       </EuiHealth>
     ),
   },

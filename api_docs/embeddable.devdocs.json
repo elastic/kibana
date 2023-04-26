@@ -1023,7 +1023,7 @@
                     "section": "def-public.EmbeddableContainerSettings",
                     "text": "EmbeddableContainerSettings"
                   },
-                  "<TContainerInput> | undefined"
+                  " | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
@@ -5933,7 +5933,7 @@
             "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
-          "; }) => ",
+          "; onAddPanel?: ((id: string) => void) | undefined; }) => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "common",
@@ -6243,6 +6243,38 @@
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.openAddPanelFlyout.$1.onAddPanel",
+                "type": "Function",
+                "tags": [],
+                "label": "onAddPanel",
+                "description": [],
+                "signature": [
+                  "((id: string) => void) | undefined"
+                ],
+                "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "embeddable",
+                    "id": "def-public.openAddPanelFlyout.$1.onAddPanel.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
               }
             ]
           }
@@ -6912,16 +6944,6 @@
         "tags": [],
         "label": "EmbeddableContainerSettings",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableContainerSettings",
-            "text": "EmbeddableContainerSettings"
-          },
-          "<TContainerInput>"
-        ],
         "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6953,23 +6975,6 @@
             ],
             "signature": [
               "string[] | undefined"
-            ],
-            "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.EmbeddableContainerSettings.readyToInitializeChildren$",
-            "type": "Object",
-            "tags": [],
-            "label": "readyToInitializeChildren$",
-            "description": [
-              "\n"
-            ],
-            "signature": [
-              "Observable",
-              "<TContainerInput> | undefined"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
             "deprecated": false,
@@ -7963,7 +7968,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"error\" | \"loading\" | \"rendered\" | \"loaded\""
+              "\"error\" | \"loading\" | \"loaded\" | \"rendered\""
             ],
             "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
             "deprecated": false,
@@ -10493,7 +10498,7 @@
         "label": "EmbeddablePhase",
         "description": [],
         "signature": [
-          "\"error\" | \"loading\" | \"rendered\" | \"loaded\""
+          "\"error\" | \"loading\" | \"loaded\" | \"rendered\""
         ],
         "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
         "deprecated": false,

@@ -9,25 +9,25 @@
 import type { IRouter } from '@kbn/core-http-server';
 import type { VersionedRouter, VersionedRoute, VersionedRouteConfig } from '@kbn/core-http-server';
 import { CoreVersionedRoute } from './core_versioned_route';
-import { HandlerResolutionStrategy, Method, VersionedRouterRoute } from './types';
+import type { HandlerResolutionStrategy, Method, VersionedRouterRoute } from './types';
+
+/** @internal */
+interface Dependencies {
+  router: IRouter;
+  defaultHandlerResolutionStrategy?: HandlerResolutionStrategy;
+  /** Whether Kibana is running in a dev environment */
+  isDev?: boolean;
+}
 
 export class CoreVersionedRouter implements VersionedRouter {
   private readonly routes = new Set<CoreVersionedRoute>();
-  public static from({
-    router,
-    validateResponses,
-    defaultHandlerResolutionStrategy = 'oldest',
-  }: {
-    router: IRouter;
-    validateResponses?: boolean;
-    defaultHandlerResolutionStrategy?: HandlerResolutionStrategy;
-  }) {
-    return new CoreVersionedRouter(router, validateResponses, defaultHandlerResolutionStrategy);
+  public static from({ router, defaultHandlerResolutionStrategy, isDev }: Dependencies) {
+    return new CoreVersionedRouter(router, defaultHandlerResolutionStrategy, isDev);
   }
   private constructor(
     public readonly router: IRouter,
-    public readonly validateResponses: boolean = false,
-    public readonly defaultHandlerResolutionStrategy: HandlerResolutionStrategy = 'oldest'
+    public readonly defaultHandlerResolutionStrategy: HandlerResolutionStrategy = 'oldest',
+    public readonly isDev: boolean = false
   ) {}
 
   private registerVersionedRoute =

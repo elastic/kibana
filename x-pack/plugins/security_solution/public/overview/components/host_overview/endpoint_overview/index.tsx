@@ -9,6 +9,7 @@ import { EuiHealth } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
+import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
@@ -16,8 +17,6 @@ import { DefaultFieldRenderer } from '../../../../timelines/components/field_ren
 import * as i18n from './translations';
 import type { EndpointFields } from '../../../../../common/search_strategy/security_solution/hosts';
 import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy/security_solution/hosts';
-import { AgentStatus } from '../../../../common/components/endpoint/agent_status';
-import { EndpointHostIsolationStatus } from '../../../../common/components/endpoint/host_isolation';
 
 interface Props {
   contextID?: string;
@@ -77,20 +76,11 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
         {
           title: i18n.FLEET_AGENT_STATUS,
           description:
-            data != null && data.elasticAgentStatus ? (
-              <>
-                <AgentStatus hostStatus={data.elasticAgentStatus} />
-                <EndpointHostIsolationStatus
-                  isIsolated={Boolean(data.isolation)}
-                  pendingActions={{
-                    pendingIsolate: data.pendingActions?.isolate ?? 0,
-                    pendingUnIsolate: data.pendingActions?.unisolate ?? 0,
-                    pendingKillProcess: data.pendingActions?.['kill-process'] ?? 0,
-                    pendingSuspendProcess: data.pendingActions?.['suspend-process'] ?? 0,
-                    pendingRunningProcesses: data.pendingActions?.['running-processes'] ?? 0,
-                  }}
-                />
-              </>
+            data != null && data.hostInfo ? (
+              <EndpointAgentStatus
+                endpointHostInfo={data.hostInfo}
+                data-test-subj="endpointHostAgentStatus"
+              />
             ) : (
               getEmptyTagValue()
             ),

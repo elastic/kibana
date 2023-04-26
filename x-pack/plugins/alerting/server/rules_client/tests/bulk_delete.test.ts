@@ -25,7 +25,21 @@ import {
   enabledRule2,
   returnedRule1,
   returnedRule2,
+  siemRule1,
 } from './test_helpers';
+import { schema } from '@kbn/config-schema';
+import { migrateLegacyActions } from '../lib';
+
+jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
+  return {
+    migrateLegacyActions: jest.fn(),
+  };
+});
+(migrateLegacyActions as jest.Mock).mockResolvedValue({
+  hasLegacyActions: false,
+  resultedActions: [],
+  resultedReferences: [],
+});
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -161,6 +175,9 @@ describe('bulkDelete', () => {
         return { state: {} };
       },
       producer: 'alerts',
+      validate: {
+        params: schema.any(),
+      },
     });
   });
 
@@ -450,6 +467,46 @@ describe('bulkDelete', () => {
         'Successfully deleted schedules for underlying tasks: id1, id2'
       );
       expect(logger.error).toBeCalledTimes(0);
+    });
+  });
+
+  describe('legacy actions migration for SIEM', () => {
+    test('should call migrateLegacyActions', async () => {
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [enabledRule1, enabledRule2, siemRule1] };
+          },
+        });
+
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: enabledRule1.id, type: 'alert', success: true },
+          { id: enabledRule2.id, type: 'alert', success: true },
+          { id: siemRule1.id, type: 'alert', success: true },
+        ],
+      });
+
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(migrateLegacyActions).toHaveBeenCalledTimes(3);
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: enabledRule1.id,
+        skipActionsValidation: true,
+        attributes: enabledRule1.attributes,
+      });
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: enabledRule2.id,
+        skipActionsValidation: true,
+        attributes: enabledRule2.attributes,
+      });
+      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+        ruleId: siemRule1.id,
+        skipActionsValidation: true,
+        attributes: siemRule1.attributes,
+      });
     });
   });
 

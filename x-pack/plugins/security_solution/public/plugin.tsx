@@ -194,7 +194,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const store = await this.store(coreStart, startPlugins, subPlugins);
         const services = await startServices(params);
-        await this.registerActions(startPlugins, store, params.history, services);
+        await this.registerActions(store, params.history, services);
 
         const { renderApp } = await this.lazyApplicationDependencies();
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
@@ -466,14 +466,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   private async registerActions(
-    plugins: StartPlugins,
     store: SecurityAppStore,
     history: H.History,
     services: StartServices
   ) {
     if (!this._actionsRegistered) {
       const { registerActions } = await this.lazyActions();
-      registerActions(plugins, store, history, services);
+      registerActions(store, history, services);
       this._actionsRegistered = true;
     }
   }

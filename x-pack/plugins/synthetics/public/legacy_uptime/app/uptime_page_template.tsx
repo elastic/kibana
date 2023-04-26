@@ -28,10 +28,10 @@ export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps>
   ...pageTemplateProps
 }) => {
   const {
-    services: { observability },
+    services: { observabilityShared },
   } = useKibana<ClientPluginsStart>();
 
-  const PageTemplateComponent = observability.navigation.PageTemplate;
+  const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
 
   const noDataConfig = useNoDataConfig();
 

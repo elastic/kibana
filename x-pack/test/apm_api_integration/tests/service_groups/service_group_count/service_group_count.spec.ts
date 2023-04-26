@@ -32,7 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       name: 'Latency threshold | synth-go',
       params: {
         serviceName: 'synth-go',
-        transactionType: '',
+        transactionType: undefined,
         windowSize: 99,
         windowUnit: 'y',
         threshold: 100,

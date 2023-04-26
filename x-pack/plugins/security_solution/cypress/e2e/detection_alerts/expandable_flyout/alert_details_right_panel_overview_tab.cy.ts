@@ -28,6 +28,11 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITY_PANEL_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_VIEW_ALL_ENTITIES_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON,
 } from '../../../screens/document_expandable_flyout';
 import {
   expandFirstAlertExpandableFlyout,
@@ -35,6 +40,7 @@ import {
   toggleOverviewTabDescriptionSection,
   toggleOverviewTabInvestigationSection,
   toggleOverviewTabInsightsSection,
+  toggleOverviewTabVisualizationsSection,
 } from '../../../tasks/document_expandable_flyout';
 import { cleanKibana } from '../../../tasks/common';
 import { login, visit } from '../../../tasks/login';
@@ -177,6 +183,49 @@ describe.skip(
           .should('be.visible')
           .click();
         cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
+      });
+
+      // TODO work on getting proper IoC data to make the threat intelligence section work here
+      it.skip('should display threat intelligence section', () => {
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER)
+          .scrollIntoView()
+          .should('be.visible')
+          .and('have.text', 'Threat Intelligence');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_CONTENT)
+          .should('be.visible')
+          .within(() => {
+            // threat match detected
+            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES)
+              .eq(0)
+              .should('be.visible')
+              .and('have.text', '1 threat match detected'); // TODO
+
+            // field with threat enrichement
+            cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES)
+              .eq(1)
+              .should('be.visible')
+              .and('have.text', '1 field enriched with threat intelligence'); // TODO
+          });
+      });
+
+      // TODO work on getting proper IoC data to make the threat intelligence section work here
+      //  and improve when we can navigate Threat Intelligence to sub tab directly
+      it.skip('should navigate to left panel, entities tab when view all fields of threat intelligence is clicked', () => {
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VIEW_ALL_BUTTON)
+          .should('be.visible')
+          .click();
+        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT).should('be.visible');
+      });
+    });
+
+    describe('visualizations section', () => {
+      before(() => {
+        toggleOverviewTabInsightsSection();
+        toggleOverviewTabVisualizationsSection();
+      });
+
+      it('should display analyzer preview', () => {
+        cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_TREE).should('be.visible');
       });
     });
   }

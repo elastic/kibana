@@ -123,7 +123,7 @@ export const JourneyScreenshotDialog = ({
           <ScreenshotImage
             label={stepCountLabel}
             imgSrc={imgSrc}
-            isLoading={loading ?? false}
+            isLoading={!!loading}
             animateLoading={false}
             hasBorder={false}
             size={'full'}
@@ -143,7 +143,7 @@ export const JourneyScreenshotDialog = ({
             // we don't want this to be captured by row click which leads to step list page
             evt.stopPropagation();
           }}
-          onKeyDown={(evt) => {
+          onKeyDown={(_evt) => {
             // Just to satisfy ESLint
           }}
         >

@@ -269,7 +269,7 @@ describe('policy details: ', () => {
               },
               policy: {
                 value: {
-                  meta: { license: '' },
+                  meta: { license: '', cloud: false },
                   windows: {
                     events: {
                       credential_access: true,
