@@ -7,13 +7,16 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { DEFAULT_INDEX_TYPES_MAP } from './kibana_migrator_constants';
 import {
   calculateTypeStatuses,
   createMultiPromiseDefer,
+  getCurrentIndexTypesMap,
   getIndicesInvolvedInRelocation,
   indexMapToIndexTypesMap,
 } from './kibana_migrator_utils';
@@ -38,6 +41,143 @@ describe('createMultiPromiseDefer', () => {
     defers['.kibana_cases'].resolve();
     await new Promise((resolve) => setImmediate(resolve)); // next tick
     expect(resolved).toEqual(2);
+  });
+});
+
+describe('getCurrentIndexTypesMap', () => {
+  const defaultIndexTypesMap: IndexTypesMap = {
+    '.my_index': ['type1', 'type2', 'type3'],
+    '.task_index': ['type4'],
+  };
+
+  describe('when mainIndex does NOT exist', () => {
+    it('assumes we are targeting a fresh ES cluster', async () => {
+      const notFoundError = new errors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 404,
+          body: { ok: false, message: 'Unknown resource.' },
+        })
+      );
+      const client = elasticsearchClientMock.createInternalClient(
+        elasticsearchClientMock.createErrorTransportRequestPromise(notFoundError)
+      );
+
+      const currentIndexTypesMap = await getCurrentIndexTypesMap({
+        client,
+        mainIndex: '.my_index',
+        defaultIndexTypesMap: {},
+        logger: loggerMock.create(),
+      });
+
+      expect(currentIndexTypesMap).toBeUndefined();
+    });
+  });
+
+  describe('when mainIndex exists, but it does not have an indexTypesMap in its mapping._meta', () => {
+    it('returns the defaultIndexTypesMap', async () => {
+      const getMappingResponse: IndicesGetMappingResponse = {
+        '.my_index_8.8.0_001': {
+          mappings: {
+            _meta: {
+              migrationMappingPropertyHashes: {
+                application_usage_daily: '43b8830d5d0df85a6823d290885fc9fd',
+                application_usage_totals: '3d1b76c39bfb2cc8296b024d73854724',
+                application_usage_transactional: '3d1b76c39bfb2cc8296b024d73854724',
+              },
+            },
+          },
+        },
+      };
+
+      const client = elasticsearchClientMock.createInternalClient();
+      client.indices.getMapping.mockResolvedValueOnce(getMappingResponse);
+
+      const currentIndexTypesMap = await getCurrentIndexTypesMap({
+        client,
+        mainIndex: '.my_index',
+        defaultIndexTypesMap,
+        logger: loggerMock.create(),
+      });
+
+      expect(currentIndexTypesMap).toEqual(defaultIndexTypesMap);
+    });
+  });
+
+  describe('when mainIndex exists and it does have an indexTypesMap property in its mapping._meta', () => {
+    it('returns the stored indexTypesMap', async () => {
+      const storedIndexTypesMap: IndexTypesMap = {
+        '.my_index': ['type1', 'type2'],
+        '.task_index': ['type4'],
+        '.other_index': ['type3'],
+      };
+      const getMappingResponse: IndicesGetMappingResponse = {
+        '.my_index_8.8.0_001': {
+          mappings: {
+            _meta: {
+              migrationMappingPropertyHashes: {
+                application_usage_daily: '43b8830d5d0df85a6823d290885fc9fd',
+                application_usage_totals: '3d1b76c39bfb2cc8296b024d73854724',
+                application_usage_transactional: '3d1b76c39bfb2cc8296b024d73854724',
+              },
+              indexTypesMap: storedIndexTypesMap,
+            },
+          },
+        },
+      };
+
+      const client = elasticsearchClientMock.createInternalClient();
+      client.indices.getMapping.mockResolvedValueOnce(getMappingResponse);
+
+      const currentIndexTypesMap = await getCurrentIndexTypesMap({
+        client,
+        mainIndex: '.my_index',
+        defaultIndexTypesMap,
+        logger: loggerMock.create(),
+      });
+
+      expect(currentIndexTypesMap).toEqual(storedIndexTypesMap);
+    });
+  });
+
+  describe('when retriable errors occur', () => {
+    it('keeps trying to fetch the index mappings forever', async () => {
+      const unavailable = new errors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 503,
+          headers: { 'Retry-After': '30' },
+          body: 'Kibana server is not ready yet',
+        })
+      );
+
+      const notFound = new errors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 404,
+          body: { ok: false, message: 'Unknown resource.' },
+        })
+      );
+
+      const client = elasticsearchClientMock.createInternalClient();
+      client.indices.getMapping.mockRejectedValueOnce(unavailable);
+      client.indices.getMapping.mockRejectedValueOnce(unavailable);
+      client.indices.getMapping.mockRejectedValueOnce(unavailable);
+      client.indices.getMapping.mockRejectedValueOnce(unavailable);
+      client.indices.getMapping.mockRejectedValueOnce(unavailable);
+      client.indices.getMapping.mockRejectedValueOnce(unavailable);
+      client.indices.getMapping.mockRejectedValueOnce(unavailable);
+      client.indices.getMapping.mockRejectedValueOnce(unavailable);
+      client.indices.getMapping.mockRejectedValueOnce(unavailable);
+      client.indices.getMapping.mockRejectedValueOnce(notFound);
+
+      await getCurrentIndexTypesMap({
+        client,
+        mainIndex: '.my_index',
+        defaultIndexTypesMap,
+        logger: loggerMock.create(),
+        retryDelay: 1,
+      });
+
+      expect(client.indices.getMapping).toHaveBeenCalledTimes(10);
+    });
   });
 });
 

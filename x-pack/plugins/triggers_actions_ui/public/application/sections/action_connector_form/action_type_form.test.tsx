@@ -377,10 +377,20 @@ describe('action_type_form', () => {
           params: [],
           state: [],
         },
+        {
+          context: [],
+          params: [],
+          state: [],
+        },
         undefined,
         false,
       ],
       [
+        {
+          context: [],
+          params: [],
+          state: [],
+        },
         {
           context: [],
           params: [],
@@ -517,6 +527,7 @@ function getActionTypeForm({
   setActionAlertsFilterProperty,
   hasSummary = true,
   messageVariables = { context: [], state: [], params: [] },
+  summaryMessageVariables = { context: [], state: [], params: [] },
   notifyWhenSelectOptions,
   defaultNotifyWhenValue,
 }: {
@@ -533,6 +544,7 @@ function getActionTypeForm({
   setActionAlertsFilterProperty?: () => void;
   hasSummary?: boolean;
   messageVariables?: ActionVariables;
+  summaryMessageVariables?: ActionVariables;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultNotifyWhenValue?: RuleNotifyWhenType;
 }) {
@@ -619,6 +631,7 @@ function getActionTypeForm({
       actionTypeRegistry={actionTypeRegistry}
       hasSummary={hasSummary}
       messageVariables={messageVariables}
+      summaryMessageVariables={summaryMessageVariables}
       notifyWhenSelectOptions={notifyWhenSelectOptions}
       defaultNotifyWhenValue={defaultNotifyWhenValue}
     />
