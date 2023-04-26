@@ -73,7 +73,6 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     data: [props.data, {}],
     guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],
-    isSidebarEnabled: [props.isSidebarEnabled, true],
     lens: [props.lens, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {
