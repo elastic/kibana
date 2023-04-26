@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LinkDescriptor, useFetcher } from '@kbn/observability-plugin/public';
+import { LinkDescriptor } from '@kbn/observability-plugin/public';
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { LoadingPage } from '../../components/loading_page';
@@ -42,16 +42,6 @@ export const RedirectToNodeLogs = ({
   const filter = getFilterFromLocation(location);
   const time = getTimeFromLocation(location);
 
-  const { data } = useFetcher(() => {
-    return services.locators.nodeLogsLocator.getLocation({
-      nodeId,
-      nodeType,
-      time,
-      filter,
-      logViewId,
-    });
-  }, []);
-
   if (isLoading) {
     return (
       <LoadingPage
@@ -66,7 +56,15 @@ export const RedirectToNodeLogs = ({
     );
   }
 
-  return data ? <Redirect to={data.path} /> : null;
+  services.locators.nodeLogsLocator.navigate({
+    nodeId,
+    nodeType,
+    time,
+    filter,
+    logViewId,
+  });
+
+  return null;
 };
 
 export const getNodeLogsUrl = ({
