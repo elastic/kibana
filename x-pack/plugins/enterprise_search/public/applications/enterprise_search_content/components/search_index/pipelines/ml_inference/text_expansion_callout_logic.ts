@@ -177,11 +177,17 @@ export const TextExpansionCalloutLogic = kea<
     ],
     isModelDownloadInProgress: [
       () => [selectors.textExpansionModel],
-      (data: FetchTextExpansionModelResponse) => data?.deploymentState === MlModelDeploymentState.Downloading,
+      (data: FetchTextExpansionModelResponse) =>
+        data?.deploymentState === MlModelDeploymentState.Downloading,
     ],
     isModelDownloaded: [
       () => [selectors.textExpansionModel],
-      (data: FetchTextExpansionModelResponse) => data?.deploymentState === MlModelDeploymentState.Downloaded,
+      (data: FetchTextExpansionModelResponse) =>
+        data?.deploymentState === MlModelDeploymentState.Downloaded ||
+        // TODO: add button for starting model, then remove these states
+        data?.deploymentState === MlModelDeploymentState.Starting ||
+        data?.deploymentState === MlModelDeploymentState.Started ||
+        data?.deploymentState === MlModelDeploymentState.FullyAllocated,
     ],
     isPollingTextExpansionModelActive: [
       () => [selectors.textExpansionModelPollTimeoutId],
