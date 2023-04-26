@@ -946,6 +946,23 @@
     "misc": [
       {
         "parentPluginId": "security",
+        "id": "def-public.ALL_SPACES_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ALL_SPACES_ID",
+        "description": [
+          "\nThe identifier in a saved object's `namespaces` array when it is shared globally to all spaces."
+        ],
+        "signature": [
+          "\"*\""
+        ],
+        "path": "x-pack/plugins/security/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-public.AuthenticationServiceStart",
         "type": "Type",
         "tags": [],

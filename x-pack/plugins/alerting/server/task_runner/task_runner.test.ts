@@ -678,11 +678,14 @@ describe('Task Runner', () => {
       'Updating rule task for test rule with id 1 - {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"} - {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}'
     );
 
+    const maintenanceWindowIds = ['test-id-1', 'test-id-2'];
+
     testAlertingEventLogCalls({
       activeAlerts: 1,
       newAlerts: 1,
       status: 'active',
       logAlert: 2,
+      maintenanceWindowIds,
     });
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
       1,
@@ -690,7 +693,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.newInstance,
         group: 'default',
         state: { start: DATE_1970, duration: '0' },
-        maintenanceWindowIds: ['test-id-1', 'test-id-2'],
+        maintenanceWindowIds,
       })
     );
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
@@ -699,7 +702,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.activeInstance,
         group: 'default',
         state: { start: DATE_1970, duration: '0' },
-        maintenanceWindowIds: ['test-id-1', 'test-id-2'],
+        maintenanceWindowIds,
       })
     );
 
@@ -3113,6 +3116,7 @@ describe('Task Runner', () => {
     errorMessage = 'GENERIC ERROR MESSAGE',
     executionStatus = 'succeeded',
     setRuleName = true,
+    maintenanceWindowIds,
     logAlert = 0,
     logAction = 0,
     hasReachedAlertLimit = false,
@@ -3126,6 +3130,7 @@ describe('Task Runner', () => {
     generatedActions?: number;
     executionStatus?: 'succeeded' | 'failed' | 'not-reached';
     setRuleName?: boolean;
+    maintenanceWindowIds?: string[];
     logAlert?: number;
     logAction?: number;
     errorReason?: string;
@@ -3140,6 +3145,11 @@ describe('Task Runner', () => {
       expect(alertingEventLogger.setRuleName).not.toHaveBeenCalled();
     }
     expect(alertingEventLogger.getStartAndDuration).toHaveBeenCalled();
+    if (maintenanceWindowIds?.length) {
+      expect(alertingEventLogger.setMaintenanceWindowIds).toHaveBeenCalledWith(
+        maintenanceWindowIds
+      );
+    }
     if (status === 'error') {
       expect(alertingEventLogger.done).toHaveBeenCalledWith({
         metrics: null,

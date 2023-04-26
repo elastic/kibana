@@ -24,6 +24,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { RecoveredActionGroup } from '../../common';
 import { RegistryRuleType } from '../rule_type_registry';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
+import { schema } from '@kbn/config-schema';
 
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
@@ -196,6 +197,9 @@ beforeEach(() => {
       return { state: {} };
     },
     producer: 'myApp',
+    validate: {
+      params: schema.any(),
+    },
   }));
   features.getKibanaFeatures.mockReturnValue([
     myAppFeature,

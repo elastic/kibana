@@ -24,6 +24,7 @@ export function openAddPanelFlyout(options: {
   showCreateNewMenu?: boolean;
   reportUiCounter?: UsageCollectionStart['reportUiCounter'];
   theme: ThemeServiceStart;
+  onAddPanel?: (id: string) => void;
 }): OverlayRef {
   const {
     embeddable,
@@ -35,11 +36,13 @@ export function openAddPanelFlyout(options: {
     showCreateNewMenu,
     reportUiCounter,
     theme,
+    onAddPanel,
   } = options;
   const flyoutSession = overlays.openFlyout(
     toMountPoint(
       <AddPanelFlyout
         container={embeddable}
+        onAddPanel={onAddPanel}
         onClose={() => {
           if (flyoutSession) {
             flyoutSession.close();

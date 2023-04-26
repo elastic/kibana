@@ -24,8 +24,9 @@ import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
   addToNewCaseDisabled: boolean;
-  defaultNumberFormat: string;
   docsCount: number;
+  formatBytes: (value: number | undefined) => string;
+  formatNumber: (value: number | undefined) => string;
   getGroupByFieldsOnClick: (
     elements: Array<
       | FlameElementEvent
@@ -46,13 +47,15 @@ interface Props {
   pattern: string;
   patternDocsCount: number;
   setSelectedTabId: (tabId: string) => void;
+  sizeInBytes: number | undefined;
   theme: Theme;
 }
 
 const SummaryTabComponent: React.FC<Props> = ({
   addSuccessToast,
   addToNewCaseDisabled,
-  defaultNumberFormat,
+  formatBytes,
+  formatNumber,
   docsCount,
   getGroupByFieldsOnClick,
   ilmPhase,
@@ -62,13 +65,15 @@ const SummaryTabComponent: React.FC<Props> = ({
   pattern,
   patternDocsCount,
   setSelectedTabId,
+  sizeInBytes,
   theme,
 }) => (
   <>
     <CalloutSummary
       addSuccessToast={addSuccessToast}
       addToNewCaseDisabled={addToNewCaseDisabled}
-      defaultNumberFormat={defaultNumberFormat}
+      formatBytes={formatBytes}
+      formatNumber={formatNumber}
       docsCount={docsCount}
       ilmPhase={ilmPhase}
       indexName={indexName}
@@ -76,6 +81,7 @@ const SummaryTabComponent: React.FC<Props> = ({
       partitionedFieldMetadata={partitionedFieldMetadata}
       pattern={pattern}
       patternDocsCount={patternDocsCount}
+      sizeInBytes={sizeInBytes}
     />
 
     <EcsSummaryDonutChart

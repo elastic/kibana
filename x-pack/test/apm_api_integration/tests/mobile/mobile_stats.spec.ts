@@ -134,7 +134,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: `service.version:"2.3" and service.environment: "production"`,
         });
 
-        expect(response.currentPeriod.sessions.value).to.eql(3);
+        expect(response.currentPeriod.sessions.value).to.eql(12);
         expect(response.currentPeriod.requests.value).to.eql(0);
       });
     });

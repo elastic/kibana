@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Status } from '../../../../../common/detection_engine/schemas/common';
@@ -30,8 +30,9 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import * as i18n from '../translations';
 import { getTelemetryEvent, METRIC_TYPE, track } from '../../../../common/lib/telemetry';
 import type { StartServices } from '../../../../types';
+
 export interface TakeActionsProps {
-  currentStatus?: Status;
+  currentStatus?: Status[];
   indexName: string;
   showAlertStatusActions?: boolean;
 }
@@ -182,7 +183,7 @@ export const useGroupTakeActionsItems = ({
     ]
   );
 
-  const items = useMemo(() => {
+  return useMemo(() => {
     const getActionItems = ({
       query,
       tableId,
@@ -196,61 +197,89 @@ export const useGroupTakeActionsItems = ({
     }) => {
       const actionItems: JSX.Element[] = [];
       if (showAlertStatusActions) {
-        if (currentStatus !== FILTER_OPEN) {
-          actionItems.push(
-            <EuiContextMenuItem
-              key="open"
-              data-test-subj="open-alert-status"
-              onClick={() =>
-                onClickUpdate({
-                  groupNumber,
-                  query,
-                  selectedGroup,
-                  status: FILTER_OPEN as AlertWorkflowStatus,
-                  tableId,
-                })
-              }
-            >
-              {BULK_ACTION_OPEN_SELECTED}
-            </EuiContextMenuItem>
-          );
-        }
-        if (currentStatus !== FILTER_ACKNOWLEDGED) {
-          actionItems.push(
-            <EuiContextMenuItem
-              key="acknowledge"
-              data-test-subj="acknowledged-alert-status"
-              onClick={() =>
-                onClickUpdate({
-                  groupNumber,
-                  query,
-                  selectedGroup,
-                  status: FILTER_ACKNOWLEDGED as AlertWorkflowStatus,
-                  tableId,
-                })
-              }
-            >
-              {BULK_ACTION_ACKNOWLEDGED_SELECTED}
-            </EuiContextMenuItem>
-          );
-        }
-        if (currentStatus !== FILTER_CLOSED) {
-          actionItems.push(
-            <EuiContextMenuItem
-              key="close"
-              data-test-subj="close-alert-status"
-              onClick={() =>
-                onClickUpdate({
-                  groupNumber,
-                  query,
-                  selectedGroup,
-                  status: FILTER_CLOSED as AlertWorkflowStatus,
-                  tableId,
-                })
-              }
-            >
-              {BULK_ACTION_CLOSE_SELECTED}
-            </EuiContextMenuItem>
+        if (currentStatus && currentStatus.length === 1) {
+          const singleStatus = currentStatus[0];
+          if (singleStatus !== FILTER_OPEN) {
+            actionItems.push(
+              <EuiContextMenuItem
+                key="open"
+                data-test-subj="open-alert-status"
+                onClick={() =>
+                  onClickUpdate({
+                    groupNumber,
+                    query,
+                    selectedGroup,
+                    status: FILTER_OPEN as AlertWorkflowStatus,
+                    tableId,
+                  })
+                }
+              >
+                {BULK_ACTION_OPEN_SELECTED}
+              </EuiContextMenuItem>
+            );
+          }
+          if (singleStatus !== FILTER_ACKNOWLEDGED) {
+            actionItems.push(
+              <EuiContextMenuItem
+                key="acknowledge"
+                data-test-subj="acknowledged-alert-status"
+                onClick={() =>
+                  onClickUpdate({
+                    groupNumber,
+                    query,
+                    selectedGroup,
+                    status: FILTER_ACKNOWLEDGED as AlertWorkflowStatus,
+                    tableId,
+                  })
+                }
+              >
+                {BULK_ACTION_ACKNOWLEDGED_SELECTED}
+              </EuiContextMenuItem>
+            );
+          }
+          if (singleStatus !== FILTER_CLOSED) {
+            actionItems.push(
+              <EuiContextMenuItem
+                key="close"
+                data-test-subj="close-alert-status"
+                onClick={() =>
+                  onClickUpdate({
+                    groupNumber,
+                    query,
+                    selectedGroup,
+                    status: FILTER_CLOSED as AlertWorkflowStatus,
+                    tableId,
+                  })
+                }
+              >
+                {BULK_ACTION_CLOSE_SELECTED}
+              </EuiContextMenuItem>
+            );
+          }
+        } else {
+          const statusArr = {
+            [FILTER_OPEN]: BULK_ACTION_OPEN_SELECTED,
+            [FILTER_ACKNOWLEDGED]: BULK_ACTION_ACKNOWLEDGED_SELECTED,
+            [FILTER_CLOSED]: BULK_ACTION_CLOSE_SELECTED,
+          };
+          Object.keys(statusArr).forEach((workflowStatus) =>
+            actionItems.push(
+              <EuiContextMenuItem
+                key={workflowStatus}
+                data-test-subj={`${workflowStatus}-alert-status`}
+                onClick={() =>
+                  onClickUpdate({
+                    groupNumber,
+                    query,
+                    selectedGroup,
+                    status: workflowStatus as AlertWorkflowStatus,
+                    tableId,
+                  })
+                }
+              >
+                {statusArr[workflowStatus]}
+              </EuiContextMenuItem>
+            )
           );
         }
       }
@@ -259,6 +288,4 @@ export const useGroupTakeActionsItems = ({
 
     return getActionItems;
   }, [currentStatus, onClickUpdate, showAlertStatusActions]);
-
-  return items;
 };

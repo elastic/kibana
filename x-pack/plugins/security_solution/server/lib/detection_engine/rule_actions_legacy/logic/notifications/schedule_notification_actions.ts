@@ -50,16 +50,18 @@ export const normalizeAlertForNotificationActions = (alert: DetectionAlert) => {
  * the equivalent "legacy" alert context so that pre-8.0 actions will continue to work.
  */
 export const formatAlertsForNotificationActions = (alerts: unknown[]): unknown[] => {
-  return alerts.map((alert) => {
-    if (isDetectionAlert(alert)) {
-      const normalizedAlert = normalizeAlertForNotificationActions(alert);
-      return {
-        ...expandDottedObject(convertToLegacyAlert(normalizedAlert)),
-        ...expandDottedObject(normalizedAlert),
-      };
-    }
-    return alert;
-  });
+  return alerts.map((alert) => formatAlertForNotificationActions(alert));
+};
+
+export const formatAlertForNotificationActions = (alert: unknown): unknown => {
+  if (isDetectionAlert(alert)) {
+    const normalizedAlert = normalizeAlertForNotificationActions(alert);
+    return {
+      ...expandDottedObject(convertToLegacyAlert(normalizedAlert)),
+      ...expandDottedObject(normalizedAlert),
+    };
+  }
+  return alert;
 };
 
 interface ScheduleNotificationActions {

@@ -30,7 +30,7 @@ const transform: RewriteRequestCase<MaintenanceWindowFindResponse> = ({
 }) => ({
   ...rest,
   expirationDate,
-  rRule: { ...rRule },
+  rRule,
   eventStartTime,
   eventEndTime,
   createdBy,

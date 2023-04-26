@@ -29,7 +29,7 @@
           "\nComposes grouping query and aggregations"
         ],
         "signature": [
-          "({ additionalFilters, from, groupByFields, pageNumber, rootAggregations, runtimeMappings, size, sort, statsAggregations, to, }: ",
+          "({ additionalFilters, from, groupByFields, rootAggregations, runtimeMappings, size, pageNumber, sort, statsAggregations, to, }: ",
           "GroupingQueryArgs",
           ") => ",
           "GroupingQuery"
@@ -43,7 +43,7 @@
             "id": "def-common.getGroupingQuery.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  additionalFilters = [],\n  from,\n  groupByFields,\n  pageNumber,\n  rootAggregations,\n  runtimeMappings,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  sort,\n  statsAggregations,\n  to,\n}",
+            "label": "{\n  additionalFilters = [],\n  from,\n  groupByFields,\n  rootAggregations,\n  runtimeMappings,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  pageNumber,\n  sort,\n  statsAggregations,\n  to,\n}",
             "description": [],
             "signature": [
               "GroupingQueryArgs"
@@ -69,7 +69,7 @@
           "\nChecks if no group is selected"
         ],
         "signature": [
-          "(groupKey: string | null) => boolean"
+          "(groupKeys: string[]) => boolean"
         ],
         "path": "packages/kbn-securitysolution-grouping/src/components/index.tsx",
         "deprecated": false,
@@ -78,19 +78,19 @@
           {
             "parentPluginId": "@kbn/securitysolution-grouping",
             "id": "def-common.isNoneGroup.$1",
-            "type": "CompoundType",
+            "type": "Array",
             "tags": [],
-            "label": "groupKey",
+            "label": "groupKeys",
             "description": [
-              "selected group field value"
+              "selected group field values"
             ],
             "signature": [
-              "string | null"
+              "string[]"
             ],
             "path": "packages/kbn-securitysolution-grouping/src/components/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "isRequired": true
           }
         ],
         "returnComment": [
@@ -108,7 +108,7 @@
           "\nHook to configure grouping component"
         ],
         "signature": [
-          "<T>({ componentProps, defaultGroupingOptions, fields, groupingId, onGroupChange, tracker, }: GroupingArgs<T>) => Grouping<T>"
+          "<T>({ componentProps, defaultGroupingOptions, fields, groupingId, maxGroupingLevels, onGroupChange, tracker, }: GroupingArgs<T>) => Grouping<T>"
         ],
         "path": "packages/kbn-securitysolution-grouping/src/hooks/use_grouping.tsx",
         "deprecated": false,
@@ -119,7 +119,7 @@
             "id": "def-common.useGrouping.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  componentProps,\n  defaultGroupingOptions,\n  fields,\n  groupingId,\n  onGroupChange,\n  tracker,\n}",
+            "label": "{\n  componentProps,\n  defaultGroupingOptions,\n  fields,\n  groupingId,\n  maxGroupingLevels,\n  onGroupChange,\n  tracker,\n}",
             "description": [],
             "signature": [
               "GroupingArgs<T>"
@@ -135,82 +135,6 @@
       }
     ],
     "interfaces": [
-      {
-        "parentPluginId": "@kbn/securitysolution-grouping",
-        "id": "def-common.GroupingAggregation",
-        "type": "Interface",
-        "tags": [],
-        "label": "GroupingAggregation",
-        "description": [
-          "Defines the shape of the aggregation returned by Elasticsearch"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/securitysolution-grouping",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionGroupingPluginApi",
-            "section": "def-common.GroupingAggregation",
-            "text": "GroupingAggregation"
-          },
-          "<T>"
-        ],
-        "path": "packages/kbn-securitysolution-grouping/src/components/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/securitysolution-grouping",
-            "id": "def-common.GroupingAggregation.groupByFields",
-            "type": "Object",
-            "tags": [],
-            "label": "groupByFields",
-            "description": [],
-            "signature": [
-              "{ buckets?: ",
-              {
-                "pluginId": "@kbn/securitysolution-grouping",
-                "scope": "common",
-                "docId": "kibKbnSecuritysolutionGroupingPluginApi",
-                "section": "def-common.RawBucket",
-                "text": "RawBucket"
-              },
-              "<T>[] | undefined; } | undefined"
-            ],
-            "path": "packages/kbn-securitysolution-grouping/src/components/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-grouping",
-            "id": "def-common.GroupingAggregation.groupsCount",
-            "type": "Object",
-            "tags": [],
-            "label": "groupsCount",
-            "description": [],
-            "signature": [
-              "{ value?: number | null | undefined; } | undefined"
-            ],
-            "path": "packages/kbn-securitysolution-grouping/src/components/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-grouping",
-            "id": "def-common.GroupingAggregation.unitsCount",
-            "type": "Object",
-            "tags": [],
-            "label": "unitsCount",
-            "description": [],
-            "signature": [
-              "{ value?: number | null | undefined; } | undefined"
-            ],
-            "path": "packages/kbn-securitysolution-grouping/src/components/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/securitysolution-grouping",
         "id": "def-common.GroupOption",
@@ -306,21 +230,59 @@
     "misc": [
       {
         "parentPluginId": "@kbn/securitysolution-grouping",
-        "id": "def-common.GroupingFieldTotalAggregation",
+        "id": "def-common.DynamicGroupingProps",
         "type": "Type",
-        "tags": [],
-        "label": "GroupingFieldTotalAggregation",
-        "description": [],
+        "tags": [
+          "interface"
+        ],
+        "label": "DynamicGroupingProps",
+        "description": [
+          "Type for dynamic grouping component props where T is the consumer `GroupingAggregation`"
+        ],
         "signature": [
-          "{ [x: string]: { value?: number | null | undefined; buckets?: ",
+          "{ isLoading: boolean; data?: ",
           {
             "pluginId": "@kbn/securitysolution-grouping",
             "scope": "common",
             "docId": "kibKbnSecuritysolutionGroupingPluginApi",
-            "section": "def-common.RawBucket",
-            "text": "RawBucket"
+            "section": "def-common.GroupingAggregation",
+            "text": "GroupingAggregation"
           },
-          "<T>[] | undefined; }; }"
+          "<T> | undefined; activePage: number; itemsPerPage: number; groupingLevel?: number | undefined; inspectButton?: JSX.Element | undefined; onChangeGroupsItemsPerPage?: ((size: number) => void) | undefined; onChangeGroupsPage?: ((index: number) => void) | undefined; renderChildComponent: (groupFilter: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; onGroupClose: () => void; selectedGroup: string; takeActionItems: (groupFilters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[], groupNumber: number) => JSX.Element[]; }"
+        ],
+        "path": "packages/kbn-securitysolution-grouping/src/hooks/use_grouping.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-grouping",
+        "id": "def-common.GroupingAggregation",
+        "type": "Type",
+        "tags": [],
+        "label": "GroupingAggregation",
+        "description": [],
+        "signature": [
+          "RootAggregation",
+          "<T> & ",
+          "GroupingFieldTotalAggregation",
+          "<T>"
         ],
         "path": "packages/kbn-securitysolution-grouping/src/components/types.ts",
         "deprecated": false,

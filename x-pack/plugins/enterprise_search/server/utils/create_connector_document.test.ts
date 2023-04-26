@@ -22,6 +22,7 @@ describe('createConnectorDocument', () => {
           reduce_whitespace: true,
           run_ml_inference: false,
         },
+        serviceType: null,
       })
     ).toEqual({
       api_key_id: null,
@@ -114,6 +115,7 @@ describe('createConnectorDocument', () => {
           reduce_whitespace: true,
           run_ml_inference: false,
         },
+        serviceType: null,
       })
     ).toEqual({
       api_key_id: null,
