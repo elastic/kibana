@@ -202,12 +202,12 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     return url;
   };
 
-  private getSavedObjectUrl = () => {
+  private getSavedObjectUrl = async () => {
     if (this.isNotSaved()) {
       return;
     }
 
-    const url = this.getSnapshotUrl(true);
+    const url = await this.getSnapshotUrl(true);
 
     const parsedUrl = parseUrl(url);
     if (!parsedUrl || !parsedUrl.hash) {
@@ -234,15 +234,16 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     return this.updateUrlParams(formattedUrl);
   };
 
-  private getSnapshotUrl = (forSavedObject?: boolean) => {
-    let url = '';
+  private getSnapshotUrl = async (forSavedObject?: boolean) => {
+    let url = this.props.shareableUrl;
     if (forSavedObject && this.props.shareableUrlForSavedObject) {
       url = this.props.shareableUrlForSavedObject;
     }
-    if (!url) {
-      url = this.props.shareableUrl || window.location.href;
+    if (!url && this.props.shareableUrlLocatorParams) {
+      const { locator, params } = this.props.shareableUrlLocatorParams;
+      url = await locator.getUrl(params, { absolute: true });
     }
-    return this.updateUrlParams(url);
+    return this.updateUrlParams(url ?? window.location.href);
   };
 
   private makeUrlEmbeddable = (url: string): string => {
@@ -295,15 +296,15 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     return `<iframe src="${url}" height="600" width="800"></iframe>`;
   };
 
-  private setUrl = () => {
+  private setUrl = async () => {
     let url: string | undefined;
 
     if (this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
-      url = this.getSavedObjectUrl();
+      url = await this.getSavedObjectUrl();
     } else if (this.state.useShortUrl) {
       url = this.shortUrlCache;
     } else {
-      url = this.getSnapshotUrl();
+      url = await this.getSnapshotUrl();
     }
 
     if (url) {
@@ -362,7 +363,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
         const shortUrl = await shortUrls.createWithLocator(shareableUrlLocatorParams);
         this.shortUrlCache = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
       } else {
-        const snapshotUrl = this.getSnapshotUrl();
+        const snapshotUrl = await this.getSnapshotUrl();
         const shortUrl = await this.props.urlService.shortUrls
           .get(null)
           .createFromLongUrl(snapshotUrl);
