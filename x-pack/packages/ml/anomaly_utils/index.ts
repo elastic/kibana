@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { ANOMALY_SEVERITY } from './anomaly_severity';
+export { ML_ANOMALY_SEVERITY } from './anomaly_severity';
 export { ANOMALY_THRESHOLD } from './anomaly_threshold';
 export { SEVERITY_COLORS } from './severity_colors';
 

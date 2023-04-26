@@ -14,7 +14,7 @@ import type {
 } from '@kbn/observability-plugin/common';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
-import { ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import {
   ERROR_GROUP_ID,
@@ -264,28 +264,28 @@ export const RULE_TYPES_CONFIG: Record<
 
 export const ANOMALY_ALERT_SEVERITY_TYPES = [
   {
-    type: ANOMALY_SEVERITY.CRITICAL,
+    type: ML_ANOMALY_SEVERITY.CRITICAL,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.criticalLabel', {
       defaultMessage: 'critical',
     }),
     threshold: ANOMALY_THRESHOLD.CRITICAL,
   },
   {
-    type: ANOMALY_SEVERITY.MAJOR,
+    type: ML_ANOMALY_SEVERITY.MAJOR,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.majorLabel', {
       defaultMessage: 'major',
     }),
     threshold: ANOMALY_THRESHOLD.MAJOR,
   },
   {
-    type: ANOMALY_SEVERITY.MINOR,
+    type: ML_ANOMALY_SEVERITY.MINOR,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.minor', {
       defaultMessage: 'minor',
     }),
     threshold: ANOMALY_THRESHOLD.MINOR,
   },
   {
-    type: ANOMALY_SEVERITY.WARNING,
+    type: ML_ANOMALY_SEVERITY.WARNING,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.warningLabel', {
       defaultMessage: 'warning',
     }),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export enum ANOMALY_SEVERITY {
+export enum ML_ANOMALY_SEVERITY {
   CRITICAL = 'critical',
   MAJOR = 'major',
   MINOR = 'minor',
@@ -31,18 +31,18 @@ export const SEVERITY_COLORS = {
   BLANK: '#ffffff',
 };
 
-export const getSeverityCategoryForScore = (score: number): ANOMALY_SEVERITY | undefined => {
+export const getSeverityCategoryForScore = (score: number): ML_ANOMALY_SEVERITY | undefined => {
   if (score >= ANOMALY_THRESHOLD.CRITICAL) {
-    return ANOMALY_SEVERITY.CRITICAL;
+    return ML_ANOMALY_SEVERITY.CRITICAL;
   } else if (score >= ANOMALY_THRESHOLD.MAJOR) {
-    return ANOMALY_SEVERITY.MAJOR;
+    return ML_ANOMALY_SEVERITY.MAJOR;
   } else if (score >= ANOMALY_THRESHOLD.MINOR) {
-    return ANOMALY_SEVERITY.MINOR;
+    return ML_ANOMALY_SEVERITY.MINOR;
   } else if (score >= ANOMALY_THRESHOLD.WARNING) {
-    return ANOMALY_SEVERITY.WARNING;
+    return ML_ANOMALY_SEVERITY.WARNING;
   } else {
     // Category is too low to include
-    return ANOMALY_SEVERITY.LOW;
+    return ML_ANOMALY_SEVERITY.LOW;
   }
 };
 

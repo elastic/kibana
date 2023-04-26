@@ -189,7 +189,7 @@ import { MlPluginSetup } from '../../../../ml/server';
 or
 
 ```
-import { ANOMALY_SEVERITY } from '../../ml/common';
+import { ML_ANOMALY_SEVERITY } from '../../ml/common';
 ```
 
 Functions are shared from the following directories:

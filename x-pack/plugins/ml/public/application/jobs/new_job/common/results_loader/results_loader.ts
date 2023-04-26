@@ -7,7 +7,7 @@
 
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
 
-import { getSeverityType, ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils';
+import { getSeverityType, ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils';
 
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
@@ -37,7 +37,7 @@ export interface ModelItem {
 export interface Anomaly {
   time: number;
   value: number;
-  severity: ANOMALY_SEVERITY;
+  severity: ML_ANOMALY_SEVERITY;
 }
 
 const emptyModelItem = {

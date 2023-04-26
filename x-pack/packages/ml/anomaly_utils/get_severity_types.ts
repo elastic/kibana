@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type SeverityType, ANOMALY_SEVERITY } from './anomaly_severity';
+import { type SeverityType, ML_ANOMALY_SEVERITY } from './anomaly_severity';
 
 let severityTypes: Record<string, SeverityType>;
 
@@ -17,37 +17,37 @@ export function getSeverityTypes() {
 
   return (severityTypes = {
     critical: {
-      id: ANOMALY_SEVERITY.CRITICAL,
+      id: ML_ANOMALY_SEVERITY.CRITICAL,
       label: i18n.translate('xpack.ml.anomalyUtils.severity.criticalLabel', {
         defaultMessage: 'critical',
       }),
     },
     major: {
-      id: ANOMALY_SEVERITY.MAJOR,
+      id: ML_ANOMALY_SEVERITY.MAJOR,
       label: i18n.translate('xpack.ml.anomalyUtils.severity.majorLabel', {
         defaultMessage: 'major',
       }),
     },
     minor: {
-      id: ANOMALY_SEVERITY.MINOR,
+      id: ML_ANOMALY_SEVERITY.MINOR,
       label: i18n.translate('xpack.ml.anomalyUtils.severity.minorLabel', {
         defaultMessage: 'minor',
       }),
     },
     warning: {
-      id: ANOMALY_SEVERITY.WARNING,
+      id: ML_ANOMALY_SEVERITY.WARNING,
       label: i18n.translate('xpack.ml.anomalyUtils.severity.warningLabel', {
         defaultMessage: 'warning',
       }),
     },
     unknown: {
-      id: ANOMALY_SEVERITY.UNKNOWN,
+      id: ML_ANOMALY_SEVERITY.UNKNOWN,
       label: i18n.translate('xpack.ml.anomalyUtils.severity.unknownLabel', {
         defaultMessage: 'unknown',
       }),
     },
     low: {
-      id: ANOMALY_SEVERITY.LOW,
+      id: ML_ANOMALY_SEVERITY.LOW,
       label: i18n.translate('xpack.ml.anomalyUtils.severityWithLow.lowLabel', {
         defaultMessage: 'low',
       }),

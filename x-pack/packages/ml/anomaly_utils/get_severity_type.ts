@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { ANOMALY_SEVERITY } from './anomaly_severity';
+import { ML_ANOMALY_SEVERITY } from './anomaly_severity';
 
 /**
  * Returns a severity type (indicating a critical, major, minor, warning or low severity anomaly)
  * for the supplied normalized anomaly score (a value between 0 and 100).
  * @param normalizedScore - A normalized score between 0-100, which is based on the probability of the anomalousness of this record
  */
-export function getSeverityType(normalizedScore: number): ANOMALY_SEVERITY {
+export function getSeverityType(normalizedScore: number): ML_ANOMALY_SEVERITY {
   if (normalizedScore >= 75) {
-    return ANOMALY_SEVERITY.CRITICAL;
+    return ML_ANOMALY_SEVERITY.CRITICAL;
   } else if (normalizedScore >= 50) {
-    return ANOMALY_SEVERITY.MAJOR;
+    return ML_ANOMALY_SEVERITY.MAJOR;
   } else if (normalizedScore >= 25) {
-    return ANOMALY_SEVERITY.MINOR;
+    return ML_ANOMALY_SEVERITY.MINOR;
   } else if (normalizedScore >= 3) {
-    return ANOMALY_SEVERITY.WARNING;
+    return ML_ANOMALY_SEVERITY.WARNING;
   } else if (normalizedScore >= 0) {
-    return ANOMALY_SEVERITY.LOW;
+    return ML_ANOMALY_SEVERITY.LOW;
   } else {
-    return ANOMALY_SEVERITY.UNKNOWN;
+    return ML_ANOMALY_SEVERITY.UNKNOWN;
   }
 }

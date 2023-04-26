@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getSeverity } from '@kbn/ml-anomaly-utils/get_severity';
-import { ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { getSeverityColor } from '../../../../../common/anomaly_detection';
 import { ServiceAnomalyTimeseries } from '../../../../../common/anomaly_detection/service_anomaly_timeseries';
@@ -59,9 +59,9 @@ export function getChartAnomalyTimeseries({
   ];
 
   const severities = [
-    { severity: ANOMALY_SEVERITY.MAJOR, threshold: ANOMALY_THRESHOLD.MAJOR },
+    { severity: ML_ANOMALY_SEVERITY.MAJOR, threshold: ANOMALY_THRESHOLD.MAJOR },
     {
-      severity: ANOMALY_SEVERITY.CRITICAL,
+      severity: ML_ANOMALY_SEVERITY.CRITICAL,
       threshold: ANOMALY_THRESHOLD.CRITICAL,
     },
   ];

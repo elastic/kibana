@@ -12,7 +12,7 @@ import { AnnotationTooltipFormatter, RectAnnotation, RectAnnotationDatum } from 
 // Individual deep imports to not consume the whole package bundle.
 import { getSeverityColor } from '@kbn/ml-anomaly-utils/get_severity_color';
 import { getSeverityType } from '@kbn/ml-anomaly-utils/get_severity_type';
-import { ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
 import { AnnotationTooltip } from './annotation_tooltip';
 
@@ -24,7 +24,7 @@ interface Props {
 export const DurationAnomaliesBar = ({ anomalies, hiddenLegends }: Props) => {
   const anomalyAnnotations: Map<string, { rect: RectAnnotationDatum[]; color: string }> = new Map();
 
-  Object.keys(ANOMALY_SEVERITY).forEach((severityLevel) => {
+  Object.keys(ML_ANOMALY_SEVERITY).forEach((severityLevel) => {
     anomalyAnnotations.set(severityLevel.toLowerCase(), { rect: [], color: '' });
   });
 

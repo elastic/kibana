@@ -9,7 +9,7 @@
  * Labels displayed in the ML UI to indicate the severity of the anomaly according
  * to the normalized anomaly score.
  */
-export enum ANOMALY_SEVERITY {
+export enum ML_ANOMALY_SEVERITY {
   /**
    * Anomalies are displayed as critical severity when the score is greater than or equal to 75.
    */
@@ -43,6 +43,6 @@ export enum ANOMALY_SEVERITY {
 }
 
 export interface SeverityType {
-  id: ANOMALY_SEVERITY;
+  id: ML_ANOMALY_SEVERITY;
   label: string;
 }
