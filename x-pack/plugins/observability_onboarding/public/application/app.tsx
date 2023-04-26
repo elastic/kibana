@@ -57,7 +57,10 @@ export const onBoardingTitle = i18n.translate(
   }
 );
 
-export const breadcrumbsApp = { id: 'observabilityOnboarding', label: onBoardingTitle };
+export const breadcrumbsApp = {
+  id: 'observabilityOnboarding',
+  label: onBoardingTitle,
+};
 
 // export const onboardingRoutes: RouteDefinition[] = [
 //   {
