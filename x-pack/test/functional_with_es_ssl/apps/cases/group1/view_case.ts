@@ -626,9 +626,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Files', () => {
-      before(async () => {
-        await createAndNavigateToCase(getPageObject, getService);
-      });
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
       it('adds a file to the case', async () => {
         // navigate to files tab
