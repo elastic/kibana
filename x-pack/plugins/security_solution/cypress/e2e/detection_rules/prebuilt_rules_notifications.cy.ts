@@ -11,7 +11,7 @@ import {
   LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
   UPDATE_PREBUILT_RULES_CALLOUT,
 } from '../../screens/alerts_detection_rules';
-import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
+import { deleteFirstRule, waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import { installAvailableRules, createNewRuleAsset } from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
@@ -67,7 +67,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     });
   });
 
-  describe('Rule installation notification when at least one rule already installed', () => {
+  describe.only('Rule installation notification when at least one rule already installed', () => {
     beforeEach(() => {
       installAvailableRules();
       // Create new rule asset with a different rule_id as the one that was
@@ -80,9 +80,19 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       });
       waitForRulesTableToBeLoaded();
     });
+
     it('should notify user about prebuilt rules package available for installation', () => {
       cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('be.visible');
     });
+
+    it('should notify user a rule is again available for installation if it is deleted', () => {
+      // Install a second rule, assert that the notification is gone
+      // then delete the rule and assert that the notification is back
+      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click();
+      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('not.exist');
+      deleteFirstRule();
+      cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('be.visible');
+    })
   });
 
   describe('Rule update notification', () => {
