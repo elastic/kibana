@@ -165,6 +165,7 @@ export const getTopNavLinks = ({
       const timeRange = timefilter.getTime();
       const refreshInterval = timefilter.getRefreshInterval();
       const { grid, ...otherState } = appState;
+      const filters = services.filterManager.getFilters();
 
       // Share -> Get links -> Snapshot
       const params: DiscoverAppLocatorParams = {
@@ -173,6 +174,7 @@ export const getTopNavLinks = ({
         ...(dataView?.isPersisted()
           ? { dataViewId: dataView?.id }
           : { dataViewSpec: dataView?.toSpec() }),
+        filters,
         timeRange,
         refreshInterval,
       };
