@@ -21,7 +21,7 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
   getEntityFieldList,
   type EntityField,
-  type Influencer,
+  type MlInfluencer,
   type MlRecordForInfluencer,
 } from '@kbn/ml-anomaly-utils';
 
@@ -194,7 +194,7 @@ export async function loadFilteredTopInfluencers(
 
   // Add the influencers from the top scoring anomalies.
   records.forEach((record) => {
-    const influencersByName: Influencer[] = record.influencers || [];
+    const influencersByName: MlInfluencer[] = record.influencers || [];
     influencersByName.forEach((influencer) => {
       const fieldName = influencer.influencer_field_name;
       const fieldValues = influencer.influencer_field_values;

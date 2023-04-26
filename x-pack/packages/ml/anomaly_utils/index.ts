@@ -56,7 +56,7 @@ export { getSeverityType } from './get_severity_type';
 
 export type {
   EntityFieldType,
-  Influencer,
+  MlInfluencer,
   MLAnomalyDoc,
   MlAnomalyCategorizerStatsDoc,
   MlAnomalyRecordDoc,

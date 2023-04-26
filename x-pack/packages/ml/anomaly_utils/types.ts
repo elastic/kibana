@@ -12,7 +12,7 @@ import type { KibanaUrlConfig } from './custom_urls';
  * Influencers are the entities that have contributed to, or are to blame for, the anomalies.
  * Influencer results are available only if an influencer_field_name is specified in the job configuration.
  */
-export interface Influencer {
+export interface MlInfluencer {
   /**
    * The field name of the influencer.
    */
@@ -141,7 +141,7 @@ export interface MlAnomalyRecordDoc {
    * If influencers was specified in the detector configuration, this array contains influencers
    * that contributed to or were to blame for an anomaly.
    */
-  influencers?: Influencer[];
+  influencers?: MlInfluencer[];
 
   /**
    * The field used to split the data. In particular, this property is used for analyzing the splits
