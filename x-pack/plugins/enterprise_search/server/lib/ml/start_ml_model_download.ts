@@ -6,7 +6,6 @@
  */
 
 import { MlPutTrainedModelRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { MlModelDeploymentState, MlModelDeploymentStatus } from '../../../common/types/ml';
@@ -19,10 +18,9 @@ import {
 
 export const startMlModelDownload = async (
   modelName: string,
-  esClient: ElasticsearchClient | undefined,
   trainedModelsProvider: MlTrainedModels | undefined
 ): Promise<MlModelDeploymentStatus> => {
-  if (!trainedModelsProvider || !esClient || !esClient.ml) {
+  if (!trainedModelsProvider) {
     throw new Error('Machine Learning is not enabled');
   }
 
@@ -62,7 +60,7 @@ export const startMlModelDownload = async (
   };
 
   // this will also sync our saved objects for us
-  await esClient.ml.putTrainedModel(putRequest);
+  await trainedModelsProvider.putTrainedModel(putRequest);
 
   // and return our status
   return await getMlModelDeploymentStatus(modelName, trainedModelsProvider);

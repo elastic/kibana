@@ -1005,7 +1005,6 @@ export function registerIndexRoutes({
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const modelName = decodeURIComponent(request.params.modelName);
       const {
-        elasticsearch: { client },
         savedObjects: { client: savedObjectsClient },
       } = await context.core;
       const trainedModelsProvider = ml
@@ -1013,11 +1012,7 @@ export function registerIndexRoutes({
         : undefined;
 
       try {
-        const deployResult = await startMlModelDownload(
-          modelName,
-          client.asCurrentUser,
-          trainedModelsProvider
-        );
+        const deployResult = await startMlModelDownload(modelName, trainedModelsProvider);
 
         return response.ok({
           body: deployResult,
@@ -1051,7 +1046,6 @@ export function registerIndexRoutes({
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const modelName = decodeURIComponent(request.params.modelName);
       const {
-        elasticsearch: { client },
         savedObjects: { client: savedObjectsClient },
       } = await context.core;
       const trainedModelsProvider = ml
@@ -1059,11 +1053,7 @@ export function registerIndexRoutes({
         : undefined;
 
       try {
-        const deployResult = await startMlModelDeployment(
-          modelName,
-          client.asCurrentUser,
-          trainedModelsProvider
-        );
+        const deployResult = await startMlModelDeployment(modelName, trainedModelsProvider);
 
         return response.ok({
           body: deployResult,
