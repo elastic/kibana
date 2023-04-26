@@ -5,23 +5,28 @@
  * 2.0.
  */
 
-import { ACTION, FILTER_TYPE, APPLIES_TO, OPERATOR } from '@kbn/ml-anomaly-utils';
+import {
+  ML_DETECTUR_RULE_ACTION,
+  ML_DETECTUR_RULE_FILTER_TYPE,
+  ML_DETECTUR_RULE_APPLIES_TO,
+  ML_DETECTUR_RULE_OPERATOR,
+} from '@kbn/ml-anomaly-utils';
 
 export interface DetectorRuleScope {
   [id: string]: {
     filter_id: string;
-    filter_type: FILTER_TYPE;
+    filter_type: ML_DETECTUR_RULE_FILTER_TYPE;
   };
 }
 
 export interface DetectorRuleCondition {
-  applies_to: APPLIES_TO;
-  operator: OPERATOR;
+  applies_to: ML_DETECTUR_RULE_APPLIES_TO;
+  operator: ML_DETECTUR_RULE_OPERATOR;
   value: number;
 }
 
 export interface DetectorRule {
-  actions: ACTION[];
+  actions: ML_DETECTUR_RULE_ACTION[];
   scope?: DetectorRuleScope;
   conditions?: DetectorRuleCondition[];
 }

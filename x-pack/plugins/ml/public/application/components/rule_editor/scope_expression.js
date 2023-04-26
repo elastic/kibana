@@ -22,7 +22,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-import { FILTER_TYPE } from '@kbn/ml-anomaly-utils';
+import { ML_DETECTUR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { filterTypeToText } from './utils';
@@ -88,8 +88,14 @@ export class ScopeExpression extends Component {
                 value={filterType}
                 onChange={this.onChangeFilterType}
                 options={[
-                  { value: FILTER_TYPE.INCLUDE, text: filterTypeToText(FILTER_TYPE.INCLUDE) },
-                  { value: FILTER_TYPE.EXCLUDE, text: filterTypeToText(FILTER_TYPE.EXCLUDE) },
+                  {
+                    value: ML_DETECTUR_RULE_FILTER_TYPE.INCLUDE,
+                    text: filterTypeToText(ML_DETECTUR_RULE_FILTER_TYPE.INCLUDE),
+                  },
+                  {
+                    value: ML_DETECTUR_RULE_FILTER_TYPE.EXCLUDE,
+                    text: filterTypeToText(ML_DETECTUR_RULE_FILTER_TYPE.EXCLUDE),
+                  },
                 ]}
               />
             </EuiFlexItem>
@@ -169,7 +175,10 @@ export class ScopeExpression extends Component {
 ScopeExpression.propTypes = {
   fieldName: PropTypes.string.isRequired,
   filterId: PropTypes.string,
-  filterType: PropTypes.oneOf([FILTER_TYPE.INCLUDE, FILTER_TYPE.EXCLUDE]),
+  filterType: PropTypes.oneOf([
+    ML_DETECTUR_RULE_FILTER_TYPE.INCLUDE,
+    ML_DETECTUR_RULE_FILTER_TYPE.EXCLUDE,
+  ]),
   enabled: PropTypes.bool.isRequired,
   filterListIds: PropTypes.array.isRequired,
   updateScope: PropTypes.func.isRequired,

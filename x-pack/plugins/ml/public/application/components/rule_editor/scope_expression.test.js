@@ -11,7 +11,7 @@ jest.mock('../../services/job_service', () => 'mlJobService');
 import React from 'react';
 
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { FILTER_TYPE } from '@kbn/ml-anomaly-utils';
+import { ML_DETECTUR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
 
 import { ScopeExpression } from './scope_expression';
 
@@ -53,7 +53,7 @@ describe('ScopeExpression', () => {
       ...requiredProps,
       filterListIds: testFilterListIds,
       filterId: 'safe_domains',
-      filterType: FILTER_TYPE.INCLUDE,
+      filterType: ML_DETECTUR_RULE_FILTER_TYPE.INCLUDE,
       enabled: true,
     };
 
@@ -67,7 +67,7 @@ describe('ScopeExpression', () => {
       ...requiredProps,
       filterListIds: testFilterListIds,
       filterId: 'safe_domains',
-      filterType: FILTER_TYPE.INCLUDE,
+      filterType: ML_DETECTUR_RULE_FILTER_TYPE.INCLUDE,
       enabled: false,
     };
 

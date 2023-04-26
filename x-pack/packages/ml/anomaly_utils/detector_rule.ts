@@ -10,42 +10,42 @@
  */
 
 /**
- * Enum ACTION
+ * Enum ML_DETECTUR_RULE_ACTION
  * @export
  * @enum {number}
  */
-export enum ACTION {
+export enum ML_DETECTUR_RULE_ACTION {
   SKIP_MODEL_UPDATE = 'skip_model_update',
   SKIP_RESULT = 'skip_result',
 }
 
 /**
- * Enum FILTER_TYPE
+ * Enum ML_DETECTUR_RULE_FILTER_TYPE
  * @export
  * @enum {number}
  */
-export enum FILTER_TYPE {
+export enum ML_DETECTUR_RULE_FILTER_TYPE {
   EXCLUDE = 'exclude',
   INCLUDE = 'include',
 }
 
 /**
- * Enum APPLIES_TO
+ * Enum ML_DETECTUR_RULE_APPLIES_TO
  * @export
  * @enum {number}
  */
-export enum APPLIES_TO {
+export enum ML_DETECTUR_RULE_APPLIES_TO {
   ACTUAL = 'actual',
   DIFF_FROM_TYPICAL = 'diff_from_typical',
   TYPICAL = 'typical',
 }
 
 /**
- * Enum OPERATOR
+ * Enum ML_DETECTUR_RULE_OPERATOR
  * @export
  * @enum {number}
  */
-export enum OPERATOR {
+export enum ML_DETECTUR_RULE_OPERATOR {
   LESS_THAN = 'lt',
   LESS_THAN_OR_EQUAL = 'lte',
   GREATER_THAN = 'gt',
@@ -55,4 +55,9 @@ export enum OPERATOR {
 /**
  * List of detector functions which don't support rules with numeric conditions.
  */
-export const CONDITIONS_NOT_SUPPORTED_FUNCTIONS = ['freq_rare', 'lat_long', 'metric', 'rare'];
+export const ML_DETECTUR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS = [
+  'freq_rare',
+  'lat_long',
+  'metric',
+  'rare',
+];

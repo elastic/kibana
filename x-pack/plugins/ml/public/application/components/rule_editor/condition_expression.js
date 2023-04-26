@@ -25,7 +25,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { APPLIES_TO, OPERATOR } from '@kbn/ml-anomaly-utils';
+import { ML_DETECTUR_RULE_APPLIES_TO, ML_DETECTUR_RULE_OPERATOR } from '@kbn/ml-anomaly-utils';
 
 import { appliesToText, operatorToText } from './utils';
 
@@ -33,15 +33,15 @@ export class ConditionExpression extends Component {
   static propTypes = {
     index: PropTypes.number.isRequired,
     appliesTo: PropTypes.oneOf([
-      APPLIES_TO.ACTUAL,
-      APPLIES_TO.TYPICAL,
-      APPLIES_TO.DIFF_FROM_TYPICAL,
+      ML_DETECTUR_RULE_APPLIES_TO.ACTUAL,
+      ML_DETECTUR_RULE_APPLIES_TO.TYPICAL,
+      ML_DETECTUR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL,
     ]),
     operator: PropTypes.oneOf([
-      OPERATOR.LESS_THAN,
-      OPERATOR.LESS_THAN_OR_EQUAL,
-      OPERATOR.GREATER_THAN,
-      OPERATOR.GREATER_THAN_OR_EQUAL,
+      ML_DETECTUR_RULE_OPERATOR.LESS_THAN,
+      ML_DETECTUR_RULE_OPERATOR.LESS_THAN_OR_EQUAL,
+      ML_DETECTUR_RULE_OPERATOR.GREATER_THAN,
+      ML_DETECTUR_RULE_OPERATOR.GREATER_THAN_OR_EQUAL,
     ]),
     value: PropTypes.number.isRequired,
     updateCondition: PropTypes.func.isRequired,
@@ -112,11 +112,17 @@ export class ConditionExpression extends Component {
             value={this.props.appliesTo}
             onChange={this.changeAppliesTo}
             options={[
-              { value: APPLIES_TO.ACTUAL, text: appliesToText(APPLIES_TO.ACTUAL) },
-              { value: APPLIES_TO.TYPICAL, text: appliesToText(APPLIES_TO.TYPICAL) },
               {
-                value: APPLIES_TO.DIFF_FROM_TYPICAL,
-                text: appliesToText(APPLIES_TO.DIFF_FROM_TYPICAL),
+                value: ML_DETECTUR_RULE_APPLIES_TO.ACTUAL,
+                text: appliesToText(ML_DETECTUR_RULE_APPLIES_TO.ACTUAL),
+              },
+              {
+                value: ML_DETECTUR_RULE_APPLIES_TO.TYPICAL,
+                text: appliesToText(ML_DETECTUR_RULE_APPLIES_TO.TYPICAL),
+              },
+              {
+                value: ML_DETECTUR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL,
+                text: appliesToText(ML_DETECTUR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL),
               },
             ]}
           />
@@ -141,15 +147,21 @@ export class ConditionExpression extends Component {
                 value={this.props.operator}
                 onChange={this.changeOperator}
                 options={[
-                  { value: OPERATOR.LESS_THAN, text: operatorToText(OPERATOR.LESS_THAN) },
                   {
-                    value: OPERATOR.LESS_THAN_OR_EQUAL,
-                    text: operatorToText(OPERATOR.LESS_THAN_OR_EQUAL),
+                    value: ML_DETECTUR_RULE_OPERATOR.LESS_THAN,
+                    text: operatorToText(ML_DETECTUR_RULE_OPERATOR.LESS_THAN),
                   },
-                  { value: OPERATOR.GREATER_THAN, text: operatorToText(OPERATOR.GREATER_THAN) },
                   {
-                    value: OPERATOR.GREATER_THAN_OR_EQUAL,
-                    text: operatorToText(OPERATOR.GREATER_THAN_OR_EQUAL),
+                    value: ML_DETECTUR_RULE_OPERATOR.LESS_THAN_OR_EQUAL,
+                    text: operatorToText(ML_DETECTUR_RULE_OPERATOR.LESS_THAN_OR_EQUAL),
+                  },
+                  {
+                    value: ML_DETECTUR_RULE_OPERATOR.GREATER_THAN,
+                    text: operatorToText(ML_DETECTUR_RULE_OPERATOR.GREATER_THAN),
+                  },
+                  {
+                    value: ML_DETECTUR_RULE_OPERATOR.GREATER_THAN_OR_EQUAL,
+                    text: operatorToText(ML_DETECTUR_RULE_OPERATOR.GREATER_THAN_OR_EQUAL),
                   },
                 ]}
               />

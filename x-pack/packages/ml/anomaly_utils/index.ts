@@ -42,11 +42,11 @@ export {
 } from './custom_urls';
 
 export {
-  ACTION,
-  APPLIES_TO,
-  CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
-  FILTER_TYPE,
-  OPERATOR,
+  ML_DETECTUR_RULE_ACTION,
+  ML_DETECTUR_RULE_APPLIES_TO,
+  ML_DETECTUR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
+  ML_DETECTUR_RULE_FILTER_TYPE,
+  ML_DETECTUR_RULE_OPERATOR,
 } from './detector_rule';
 
 export { getFormattedSeverityScore } from './get_formatted_severity_score';

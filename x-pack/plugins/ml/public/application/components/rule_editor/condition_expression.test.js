@@ -11,7 +11,7 @@ jest.mock('../../services/job_service', () => 'mlJobService');
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
-import { APPLIES_TO, OPERATOR } from '@kbn/ml-anomaly-utils';
+import { ML_DETECTUR_RULE_APPLIES_TO, ML_DETECTUR_RULE_OPERATOR } from '@kbn/ml-anomaly-utils';
 
 import { ConditionExpression } from './condition_expression';
 
@@ -39,8 +39,8 @@ describe('ConditionExpression', () => {
   test('renders with appliesTo, operator and value supplied', () => {
     const props = {
       ...requiredProps,
-      appliesTo: APPLIES_TO.DIFF_FROM_TYPICAL,
-      operator: OPERATOR.GREATER_THAN,
+      appliesTo: ML_DETECTUR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL,
+      operator: ML_DETECTUR_RULE_OPERATOR.GREATER_THAN,
       value: 123,
     };
 
