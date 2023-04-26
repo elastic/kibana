@@ -375,7 +375,7 @@ export interface MlAnomaliesTableRecordExtended extends MlAnomaliesTableRecord {
  * @export
  * @typedef {MlPartitionFieldsType}
  */
-export type PartitionFieldsType = typeof ML_PARTITION_FIELDS[number];
+export type MlPartitionFieldsType = typeof ML_PARTITION_FIELDS[number];
 
 /**
  * Anomaly record document for categorizer stats.

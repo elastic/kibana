@@ -29,7 +29,7 @@ import {
 import { CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type PartitionFieldsType, ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
+import { type MlPartitionFieldsType, ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
 import {
   ANNOTATION_MAX_LENGTH_CHARS,
   ANNOTATION_EVENT_USER,
@@ -218,7 +218,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     if (this.state.applyAnnotationToSeries && chartDetails?.entityData?.entities) {
       chartDetails.entityData.entities.forEach((entity: Entity) => {
         const { fieldName, fieldValue } = entity;
-        const fieldType = entity.fieldType as PartitionFieldsType;
+        const fieldType = entity.fieldType as MlPartitionFieldsType;
         annotation[getAnnotationFieldName(fieldType)] = fieldName;
         annotation[getAnnotationFieldValue(fieldType)] = fieldValue;
       });

@@ -7,14 +7,14 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type PartitionFieldsType, ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
+import { type MlPartitionFieldsType, ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
 import { CriteriaField } from './results_service';
 import { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
 import type { MlClient } from '../../lib/ml_client';
 
 type SearchTerm =
   | {
-      [key in PartitionFieldsType]?: string;
+      [key in MlPartitionFieldsType]?: string;
     }
   | undefined;
 
@@ -32,7 +32,7 @@ export interface PartitionFieldData {
  * @returns {Object}
  */
 function getFieldAgg(
-  fieldType: PartitionFieldsType,
+  fieldType: MlPartitionFieldsType,
   isModelPlotSearch: boolean,
   query?: string,
   fieldConfig?: FieldConfig
@@ -116,9 +116,9 @@ function getFieldAgg(
  * @param aggs - Aggregation response
  */
 function getFieldObject(
-  fieldType: PartitionFieldsType,
+  fieldType: MlPartitionFieldsType,
   aggs: Record<estypes.AggregateName, estypes.AggregationsAggregate>
-): Record<PartitionFieldsType, PartitionFieldData> | {} {
+): Record<MlPartitionFieldsType, PartitionFieldData> | {} {
   const fieldNameKey = `${fieldType}_name` as const;
   const fieldValueKey = `${fieldType}_value` as const;
 
@@ -145,7 +145,7 @@ function getFieldObject(
     : {};
 }
 
-export type PartitionFieldValueResponse = Record<PartitionFieldsType, PartitionFieldData>;
+export type PartitionFieldValueResponse = Record<MlPartitionFieldsType, PartitionFieldData>;
 
 export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
   /**

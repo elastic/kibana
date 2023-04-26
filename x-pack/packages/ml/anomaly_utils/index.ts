@@ -63,6 +63,6 @@ export type {
   MlAnomaliesTableRecord,
   MlAnomaliesTableRecordExtended,
   MlAnomalyResultType,
-  PartitionFieldsType,
+  MlPartitionFieldsType,
   RecordForInfluencer,
 } from './types';
