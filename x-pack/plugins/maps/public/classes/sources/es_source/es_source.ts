@@ -408,7 +408,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     if (!geoField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
-          defaultMessage: `Data view "{indexPatternLabel}"" no longer contains the geo field "{geoField}"`,
+          defaultMessage: `Data view "{indexPatternLabel}" no longer contains the geo field "{geoField}"`,
           values: { indexPatternLabel: indexPattern.getName(), geoField: this.getGeoFieldName() },
         })
       );
