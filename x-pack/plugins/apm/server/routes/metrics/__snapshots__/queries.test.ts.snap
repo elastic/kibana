@@ -336,24 +336,18 @@ Object {
               "minimum_should_match": 1,
               "should": Array [
                 Object {
-                  "bool": Object {
-                    "filter": Array [
-                      Object {
-                        "exists": Object {
-                          "field": "system.process.cgroup.memory.mem.usage.bytes",
-                        },
-                      },
-                      Object {
-                        "exists": Object {
-                          "field": "system.process.cgroup.memory.mem.limit.bytes",
-                        },
-                      },
-                      Object {
-                        "exists": Object {
-                          "field": "system.memory.total",
-                        },
-                      },
-                    ],
+                  "exists": Object {
+                    "field": "system.process.cgroup.memory.mem.usage.bytes",
+                  },
+                },
+                Object {
+                  "exists": Object {
+                    "field": "system.process.cgroup.memory.mem.limit.bytes",
+                  },
+                },
+                Object {
+                  "exists": Object {
+                    "field": "system.memory.total",
                   },
                 },
               ],
@@ -896,24 +890,18 @@ Object {
               "minimum_should_match": 1,
               "should": Array [
                 Object {
-                  "bool": Object {
-                    "filter": Array [
-                      Object {
-                        "exists": Object {
-                          "field": "system.process.cgroup.memory.mem.usage.bytes",
-                        },
-                      },
-                      Object {
-                        "exists": Object {
-                          "field": "system.process.cgroup.memory.mem.limit.bytes",
-                        },
-                      },
-                      Object {
-                        "exists": Object {
-                          "field": "system.memory.total",
-                        },
-                      },
-                    ],
+                  "exists": Object {
+                    "field": "system.process.cgroup.memory.mem.usage.bytes",
+                  },
+                },
+                Object {
+                  "exists": Object {
+                    "field": "system.process.cgroup.memory.mem.limit.bytes",
+                  },
+                },
+                Object {
+                  "exists": Object {
+                    "field": "system.memory.total",
                   },
                 },
               ],
@@ -1435,24 +1423,18 @@ Object {
               "minimum_should_match": 1,
               "should": Array [
                 Object {
-                  "bool": Object {
-                    "filter": Array [
-                      Object {
-                        "exists": Object {
-                          "field": "system.process.cgroup.memory.mem.usage.bytes",
-                        },
-                      },
-                      Object {
-                        "exists": Object {
-                          "field": "system.process.cgroup.memory.mem.limit.bytes",
-                        },
-                      },
-                      Object {
-                        "exists": Object {
-                          "field": "system.memory.total",
-                        },
-                      },
-                    ],
+                  "exists": Object {
+                    "field": "system.process.cgroup.memory.mem.usage.bytes",
+                  },
+                },
+                Object {
+                  "exists": Object {
+                    "field": "system.process.cgroup.memory.mem.limit.bytes",
+                  },
+                },
+                Object {
+                  "exists": Object {
+                    "field": "system.memory.total",
                   },
                 },
               ],
