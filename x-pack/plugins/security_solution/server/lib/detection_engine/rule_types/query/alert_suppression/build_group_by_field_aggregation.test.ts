@@ -16,7 +16,40 @@ describe('build_group_by_field_aggregation', () => {
       groupByFields,
       maxSignals,
       aggregatableTimestampField: 'kibana.combined_timestamp',
+      missingBucket: false,
     });
     expect(agg).toMatchSnapshot();
+  });
+
+  it('should include missing bucket configuration for aggregation if configured', () => {
+    const groupByFields = ['host.name'];
+    const maxSignals = 100;
+
+    const agg = buildGroupByFieldAggregation({
+      groupByFields,
+      maxSignals,
+      aggregatableTimestampField: 'kibana.combined_timestamp',
+      missingBucket: true,
+    });
+    expect(agg.eventGroups.composite.sources[0]['host.name'].terms).toEqual({
+      field: 'host.name',
+      missing_bucket: true,
+      missing_order: 'last',
+    });
+  });
+
+  it('should not include missing bucket configuration for aggregation if not configured', () => {
+    const groupByFields = ['host.name'];
+    const maxSignals = 100;
+
+    const agg = buildGroupByFieldAggregation({
+      groupByFields,
+      maxSignals,
+      aggregatableTimestampField: 'kibana.combined_timestamp',
+      missingBucket: false,
+    });
+    expect(agg.eventGroups.composite.sources[0]['host.name'].terms).toEqual({
+      field: 'host.name',
+    });
   });
 });

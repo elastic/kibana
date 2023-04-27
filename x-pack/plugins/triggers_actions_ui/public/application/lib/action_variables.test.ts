@@ -281,7 +281,7 @@ describe('transformActionVariables', () => {
       state: mockStateVariables(),
       params: mockParamsVariables(),
     });
-    expect(transformActionVariables(alertType.actionVariables, 'all')).toEqual([
+    expect(transformActionVariables(alertType.actionVariables, undefined, 'all')).toEqual([
       ...expectedTransformResult,
       ...expectedParamsTransformResult(),
     ]);
@@ -293,7 +293,7 @@ describe('transformActionVariables', () => {
       state: mockStateVariables(),
       params: mockParamsVariables(),
     });
-    expect(transformActionVariables(alertType.actionVariables, 'keepContext')).toEqual([
+    expect(transformActionVariables(alertType.actionVariables, undefined, 'keepContext')).toEqual([
       ...expectedTransformResult,
       ...expectedContextTransformResult(),
       ...expectedParamsTransformResult(),
@@ -301,7 +301,7 @@ describe('transformActionVariables', () => {
   });
   test('should return correct variables when isAlertSummary = true', async () => {
     const alertType = getAlertType({ context: [], state: [], params: [] });
-    expect(transformActionVariables(alertType.actionVariables, undefined, true)).toEqual(
+    expect(transformActionVariables(alertType.actionVariables, undefined, undefined, true)).toEqual(
       expectedSummaryTransformResult
     );
   });

@@ -2237,6 +2237,84 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeStart.setChromeStyle",
+            "type": "Function",
+            "tags": [],
+            "label": "setChromeStyle",
+            "description": [
+              "\nSets the style type of the chrome."
+            ],
+            "signature": [
+              "(style: ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeStyle",
+                "text": "ChromeStyle"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-common.ChromeStart.setChromeStyle.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "style",
+                "description": [
+                  "The style type to apply to the chrome."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-chrome-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreChromeBrowserPluginApi",
+                    "section": "def-common.ChromeStyle",
+                    "text": "ChromeStyle"
+                  }
+                ],
+                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeStart.getChromeStyle$",
+            "type": "Function",
+            "tags": [],
+            "label": "getChromeStyle$",
+            "description": [
+              "\nGet an observable of the current style type of the chrome."
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeStyle",
+                "text": "ChromeStyle"
+              },
+              ">"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2342,6 +2420,14 @@
             "pluginId": "@kbn/core-chrome-browser",
             "scope": "common",
             "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeHelpExtensionMenuCustomLink",
+            "text": "ChromeHelpExtensionMenuCustomLink"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
             "section": "def-common.ChromeHelpExtensionMenuGitHubLink",
             "text": "ChromeHelpExtensionMenuGitHubLink"
           },
@@ -2360,17 +2446,24 @@
             "docId": "kibKbnCoreChromeBrowserPluginApi",
             "section": "def-common.ChromeHelpExtensionMenuDocumentationLink",
             "text": "ChromeHelpExtensionMenuDocumentationLink"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-common.ChromeHelpExtensionMenuCustomLink",
-            "text": "ChromeHelpExtensionMenuCustomLink"
           }
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.ChromeStyle",
+        "type": "Type",
+        "tags": [],
+        "label": "ChromeStyle",
+        "description": [],
+        "signature": [
+          "\"classic\" | \"project\""
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

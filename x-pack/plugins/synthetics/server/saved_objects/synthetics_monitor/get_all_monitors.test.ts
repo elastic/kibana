@@ -59,6 +59,7 @@ describe('processMonitors', () => {
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
         '7f796001-a795-4c0b-afdb-3ce74edea775',
       ],
+      disabledMonitorQueryIds: ['test-project-id-default'],
       listOfLocations: ['US Central QA', 'US Central Staging', 'North America - US Central'],
       maxPeriod: 600000,
       monitorLocationMap: {
@@ -94,6 +95,7 @@ describe('processMonitors', () => {
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
         '7f796001-a795-4c0b-afdb-3ce74edea775',
       ],
+      disabledMonitorQueryIds: ['test-project-id-default'],
       listOfLocations: [
         'US Central Staging',
         'us_central_qa',
@@ -172,6 +174,7 @@ describe('processMonitors', () => {
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
         '7f796001-a795-4c0b-afdb-3ce74edea775',
       ],
+      disabledMonitorQueryIds: ['test-project-id-default'],
       listOfLocations: ['US Central Staging', 'US Central QA', 'North America - US Central'],
       maxPeriod: 600000,
       monitorLocationMap: {

@@ -157,7 +157,7 @@ describe('kibana index telemetry', () => {
 
       const telemetry = await getTotalCountAggregations({
         esClient,
-        kibanaIndex: 'test',
+        alertIndex: 'test',
         logger,
       });
 
@@ -228,7 +228,7 @@ describe('kibana index telemetry', () => {
 
       const telemetry = await getTotalCountAggregations({
         esClient,
-        kibanaIndex: 'test',
+        alertIndex: 'test',
         logger,
       });
 
@@ -333,7 +333,7 @@ describe('kibana index telemetry', () => {
 
       const telemetry = await getTotalCountInUse({
         esClient,
-        kibanaIndex: 'test',
+        alertIndex: 'test',
         logger,
       });
 
@@ -357,7 +357,7 @@ describe('kibana index telemetry', () => {
 
       const telemetry = await getTotalCountInUse({
         esClient,
-        kibanaIndex: 'test',
+        alertIndex: 'test',
         logger,
       });
 
