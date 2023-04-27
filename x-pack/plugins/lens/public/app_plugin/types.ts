@@ -9,6 +9,7 @@ import type { History } from 'history';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { Observable } from 'rxjs';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import type {
   ApplicationStart,
   AppMountParameters,
@@ -94,6 +95,7 @@ export type RunSave = (
     onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
     newDescription?: string;
     newTags?: string[];
+    panelTimeRange?: TimeRange;
   },
   options: {
     saveToLibrary: boolean;

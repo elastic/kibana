@@ -1923,7 +1923,7 @@
         "label": "createPersistenceRuleTypeWrapper",
         "description": [],
         "signature": [
-          "({ logger, ruleDataClient }: { ruleDataClient: ",
+          "({ logger, ruleDataClient, formatAlert }: { ruleDataClient: ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -1939,7 +1939,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; }) => <TParams extends ",
+          "; formatAlert?: ((alert: unknown) => unknown) | undefined; }) => <TParams extends ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -1955,7 +1955,7 @@
             "section": "def-common.RuleTypeState",
             "text": "RuleTypeState"
           },
-          ", TInstanceContext extends { [x: string]: unknown; } = {}, TActionGroupIds extends string = never>(type: ",
+          ">(type: ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -1963,7 +1963,7 @@
             "section": "def-server.PersistenceAlertType",
             "text": "PersistenceAlertType"
           },
-          "<TParams, TState, TInstanceContext, TActionGroupIds>) => { executor: (options: ",
+          "<TParams, TState, { [x: string]: unknown; }, \"default\">) => { executor: (options: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -1971,15 +1971,7 @@
             "section": "def-server.RuleExecutorOptions",
             "text": "RuleExecutorOptions"
           },
-          "<TParams, TState, { [x: string]: unknown; }, TInstanceContext, ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.WithoutReservedActionGroups",
-            "text": "WithoutReservedActionGroups"
-          },
-          "<TActionGroupIds, never>>) => Promise<{ state: TState; }>; getSummarizedAlerts: ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, alertsFilter, }: ",
+          "<TParams, TState, { [x: string]: unknown; }, { [x: string]: unknown; }, \"default\">) => Promise<{ state: TState; }>; getSummarizedAlerts: ({ start, end, executionUuid, ruleId, spaceId, excludedAlertInstanceIds, alertsFilter, }: ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -2005,7 +1997,7 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<TActionGroupIds>[]; defaultActionGroupId: TActionGroupIds; recoveryActionGroup?: ",
+          "<\"default\">[]; defaultActionGroupId: \"default\"; recoveryActionGroup?: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2066,7 +2058,7 @@
             "id": "def-server.createPersistenceRuleTypeWrapper.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ logger, ruleDataClient }",
+            "label": "{ logger, ruleDataClient, formatAlert }",
             "description": [],
             "signature": [
               "{ ruleDataClient: ",
@@ -2085,7 +2077,7 @@
                 "section": "def-common.Logger",
                 "text": "Logger"
               },
-              "; }"
+              "; formatAlert?: ((alert: unknown) => unknown) | undefined; }"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
             "deprecated": false,
@@ -2269,7 +2261,7 @@
               "\nID of the Kibana feature associated with the index.\nUsed by alerts-as-data RBAC.\n\nNote from @dhurley14\nThe purpose of the `feature` param is to force the user to update\nthe data structure which contains the mapping of consumers to alerts\nas data indices. The idea is it is typed such that it forces the\nuser to go to the code and modify it. At least until a better system\nis put in place or we move the alerts as data client out of rule registry.\n"
             ],
             "signature": [
-              "\"uptime\" | \"siem\" | \"apm\" | \"logs\" | \"infrastructure\" | \"observability\" | \"slo\""
+              "\"uptime\" | \"siem\" | \"apm\" | \"observability\" | \"logs\" | \"infrastructure\" | \"slo\""
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false,
@@ -3824,7 +3816,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; }) => <TParams extends ",
+          "; formatAlert?: ((alert: unknown) => unknown) | undefined; }) => <TParams extends ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -3840,7 +3832,7 @@
             "section": "def-common.RuleTypeState",
             "text": "RuleTypeState"
           },
-          ", TInstanceContext extends { [x: string]: unknown; } = {}, TActionGroupIds extends string = never>(type: ",
+          ">(type: ",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -3848,7 +3840,7 @@
             "section": "def-server.PersistenceAlertType",
             "text": "PersistenceAlertType"
           },
-          "<TParams, TState, TInstanceContext, TActionGroupIds>) => ",
+          "<TParams, TState, { [x: string]: unknown; }, \"default\">) => ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -3856,7 +3848,7 @@
             "section": "def-server.RuleType",
             "text": "RuleType"
           },
-          "<TParams, TParams, TState, { [x: string]: unknown; }, TInstanceContext, TActionGroupIds, never>"
+          "<TParams, TParams, TState, { [x: string]: unknown; }, { [x: string]: unknown; }, \"default\", never>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
         "deprecated": false,
@@ -3887,7 +3879,7 @@
                 "section": "def-common.Logger",
                 "text": "Logger"
               },
-              "; }"
+              "; formatAlert?: ((alert: unknown) => unknown) | undefined; }"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,

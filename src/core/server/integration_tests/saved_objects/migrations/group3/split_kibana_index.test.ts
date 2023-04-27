@@ -117,8 +117,8 @@ describe('split .kibana index into multiple system indices', () => {
       const indicesInfo = await client.indices.get({ index: '.kibana*' });
       expect(indicesInfo).toEqual(
         expect.objectContaining({
-          '.kibana_8.8.0_001': {
-            aliases: { '.kibana': expect.any(Object), '.kibana_8.8.0': expect.any(Object) },
+          '.kibana_8.9.0_001': {
+            aliases: { '.kibana': expect.any(Object), '.kibana_8.9.0': expect.any(Object) },
             mappings: {
               dynamic: 'strict',
               _meta: {
@@ -129,10 +129,10 @@ describe('split .kibana index into multiple system indices', () => {
             },
             settings: { index: expect.any(Object) },
           },
-          '.kibana_so_search_8.8.0_001': {
+          '.kibana_so_search_8.9.0_001': {
             aliases: {
               '.kibana_so_search': expect.any(Object),
-              '.kibana_so_search_8.8.0': expect.any(Object),
+              '.kibana_so_search_8.9.0': expect.any(Object),
             },
             mappings: {
               dynamic: 'strict',
@@ -144,10 +144,10 @@ describe('split .kibana index into multiple system indices', () => {
             },
             settings: { index: expect.any(Object) },
           },
-          '.kibana_so_ui_8.8.0_001': {
+          '.kibana_so_ui_8.9.0_001': {
             aliases: {
               '.kibana_so_ui': expect.any(Object),
-              '.kibana_so_ui_8.8.0': expect.any(Object),
+              '.kibana_so_ui_8.9.0': expect.any(Object),
             },
             mappings: {
               dynamic: 'strict',
