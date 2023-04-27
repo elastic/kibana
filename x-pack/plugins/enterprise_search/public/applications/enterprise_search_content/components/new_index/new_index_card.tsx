@@ -29,13 +29,6 @@ export interface MethodCardOptions {
   title: EuiCardProps['title'];
 }
 
-const NO_DEVELOPMENT_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.content.newIndex.methodCard.noDevelopment.label',
-  {
-    defaultMessage: 'No development required',
-  }
-);
-
 const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
   [INGESTION_METHOD_IDS.CRAWLER]: {
     description: i18n.translate(
@@ -51,7 +44,6 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
           defaultMessage: 'Use a web crawler',
         }
       ),
-      label: NO_DEVELOPMENT_LABEL,
     },
     icon: getIngestionMethodIconType(INGESTION_METHOD_IDS.CRAWLER),
     title: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.crawler.title', {
@@ -73,7 +65,6 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
           defaultMessage: 'Use a connector',
         }
       ),
-      label: NO_DEVELOPMENT_LABEL,
     },
     icon: getIngestionMethodIconType(INGESTION_METHOD_IDS.CONNECTOR),
     title: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.connector.title', {
@@ -90,9 +81,6 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
     footer: {
       buttonLabel: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.api.label', {
         defaultMessage: 'Use the API',
-      }),
-      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.api.footer', {
-        defaultMessage: 'Some development required',
       }),
     },
     icon: getIngestionMethodIconType(INGESTION_METHOD_IDS.API),
@@ -115,8 +103,12 @@ export const NewIndexCard: React.FC<NewIndexCardProps> = ({ onSelect, isSelected
       description={<EuiTextColor color="subdued">{description}</EuiTextColor>}
       footer={
         <>
-          <EuiBadge color="hollow">{footer.label}</EuiBadge>
-          <EuiSpacer size="m" />
+          {footer.label && (
+            <>
+              <EuiBadge color="hollow">{footer.label}</EuiBadge>
+              <EuiSpacer size="m" />
+            </>
+          )}
           <EuiButton
             fullWidth
             onClick={onSelect}
