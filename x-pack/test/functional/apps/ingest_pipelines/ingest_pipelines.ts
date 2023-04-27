@@ -27,6 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
 
   // Failing: See https://github.com/elastic/kibana/issues/156014
+  // Failing: See https://github.com/elastic/kibana/issues/118593
   describe.skip('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
