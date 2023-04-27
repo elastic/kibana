@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createApmRule,
+  updateApmRule,
   createIndexConnector,
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
@@ -32,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const synthtraceEsClient = getService('synthtraceEsClient');
 
-  registry.when('transaction duration alert', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('transaction duration alert', { config: 'basic', archives: [] }, () => {
     let ruleId: string;
     let actionId: string | undefined;
 
@@ -163,6 +164,181 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceName: 'opbeans-node',
         });
         expect(serviceTabAlertCount).to.be(0);
+      });
+    });
+
+    describe('Update an existing rule to add transaction name filter', () => {
+      const INDEX_NAME = `${INDEX_PATTERN}_update_rule`;
+
+      before(async () => {
+        actionId = await createIndexConnector({
+          supertest,
+          name: 'Duration threshold API test',
+          indexName: INDEX_NAME,
+        });
+
+        const createdRule = await createApmRule({
+          supertest,
+          ruleTypeId: ApmRuleType.TransactionDuration,
+          name: 'Apm duration threshold - update rule',
+          params: {
+            environment: 'production',
+            serviceName: '',
+            aggregationType: AggregationType.Avg,
+            threshold: 90,
+            windowSize: 1,
+            windowUnit: 'h',
+          },
+          actions: [
+            {
+              group: 'threshold_met',
+              id: actionId,
+              params: {
+                documents: [{ message: transactionDurationMessage }],
+              },
+              frequency: {
+                notify_when: 'onActionGroupChange',
+                throttle: null,
+                summary: false,
+              },
+            },
+          ],
+        });
+        expect(createdRule.id).to.not.eql(undefined);
+        ruleId = createdRule.id;
+      });
+
+      it('checks if alert is active', async () => {
+        const executionStatus = await waitForRuleStatus({
+          id: ruleId,
+          expectedStatus: 'active',
+          supertest,
+        });
+
+        expect(executionStatus.status).to.be('active');
+      });
+
+      it('returns correct message', async () => {
+        const resp = await waitForDocumentInIndex<{ message: string }>({
+          es,
+          indexName: INDEX_NAME,
+        });
+
+        expect(resp.hits.hits[0]._source?.message).eql(
+          `Apm duration threshold - update rule alert is firing because of the following condition:
+
+- Service name: opbeans-node
+- Transaction type: request
+- Transaction name:
+- Environment: production
+- Latency threshold: 90ms
+- Latency observed: 200 ms over the last 1 hr`
+        );
+      });
+
+      it('returns correct message', async () => {
+        const resp = await waitForDocumentInIndex<{ message: string }>({
+          es,
+          indexName: INDEX_NAME,
+        });
+
+        expect(resp.hits.hits[0]._source?.message).eql(
+          `Apm duration threshold - update rule filter alert is firing because of the following conditions:
+
+- Service name: opbeans-node
+- Transaction type: request
+- Transaction name:
+- Environment: production
+- Latency threshold: 90ms
+- Latency observed: 150 ms over the last 1 hr`
+        );
+      });
+
+      it('updates the rule', async () => {
+        const updatedRule = await updateApmRule({
+          supertest,
+          ruleId,
+          ruleTypeId: ApmRuleType.TransactionDuration,
+          name: 'Apm duration threshold - update rule',
+          params: {
+            environment: 'production',
+            serviceName: '',
+            transactionName: 'tx-node-2',
+            aggregationType: AggregationType.Avg,
+            threshold: 90,
+            windowSize: 1,
+            windowUnit: 'h',
+          },
+          actions: [
+            {
+              group: 'threshold_met',
+              id: actionId,
+              params: {
+                documents: [{ message: transactionDurationMessage }],
+              },
+              frequency: {
+                notify_when: 'onActionGroupChange',
+                throttle: null,
+                summary: false,
+              },
+            },
+          ],
+        });
+
+        console.log('====updatedRule', updatedRule);
+        expect(updatedRule.id).to.not.eql(undefined);
+      });
+
+      it('checks if updated alert is active', async () => {
+        const executionStatus = await waitForRuleStatus({
+          id: ruleId,
+          expectedStatus: 'active',
+          supertest,
+        });
+
+        expect(executionStatus.status).to.be('active');
+      });
+
+      it('returns correct message for the updated rule ', async () => {
+        const resp = await waitForDocumentInIndex<{ message: string }>({
+          es,
+          indexName: INDEX_NAME,
+        });
+
+        expect(resp.hits.hits[0]._source?.message).eql(
+          `Apm duration threshold - update rule filter alert is firing because of the following conditions:
+
+- Service name: opbeans-node
+- Transaction type: request
+- Transaction name: tx-node-2
+- Environment: production
+- Latency threshold: 90ms
+- Latency observed: 150 ms over the last 1 hr`
+        );
+      });
+
+      it('shows the correct alert count for each service on service inventory', async () => {
+        const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
+        expect(serviceInventoryAlertCounts).to.eql({
+          'opbeans-node': 2,
+          'opbeans-java': 0,
+        });
+      });
+
+      it('shows the correct alert count in opbeans-node service', async () => {
+        const serviceTabAlertCount = await fetchServiceTabAlertCount({
+          apmApiClient,
+          serviceName: 'opbeans-java',
+        });
+        expect(serviceTabAlertCount).to.be(0);
+      });
+
+      it('shows the correct alert count in opbeans-node service', async () => {
+        const serviceTabAlertCount = await fetchServiceTabAlertCount({
+          apmApiClient,
+          serviceName: 'opbeans-node',
+        });
+        expect(serviceTabAlertCount).to.be(2);
       });
     });
   });

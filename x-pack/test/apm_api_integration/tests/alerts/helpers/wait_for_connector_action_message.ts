@@ -26,7 +26,7 @@ async function getConnectorActionMessage({
         filter: [
           {
             term: {
-              'message.id': messageId,
+              id: messageId,
             },
           },
         ],
@@ -42,7 +42,7 @@ async function getConnectorActionMessage({
 }
 
 export function waitForConnectorActionMessage({
-  messageId,
+  id,
   esClient,
   log,
 }: {
@@ -51,7 +51,7 @@ export function waitForConnectorActionMessage({
   esClient: Client;
   log: ToolingLog;
 }): Promise<Record<string, any>> {
-  return pRetry(() => getConnectorActionMessage({ messageId, esClient, log }), {
+  return pRetry(() => getConnectorActionMessage({ id, esClient, log }), {
     retries: 10,
     factor: 1.5,
   });
