@@ -81,7 +81,7 @@ export const useDiscoverHistogram = ({
    */
 
   useEffect(() => {
-    const subscription = createStateSyncObservable(unifiedHistogram?.state$)?.subscribe(
+    const subscription = createUnifiedHistogramStateObservable(unifiedHistogram?.state$)?.subscribe(
       (changes) => {
         const { lensRequestAdapter, ...stateChanges } = changes;
         const appState = stateContainer.appState.getState();
@@ -134,16 +134,18 @@ export const useDiscoverHistogram = ({
    */
 
   useEffect(() => {
-    const subscription = stateContainer.appState.state$.subscribe(
-      ({ breakdownField, interval, hideChart: chartHidden }) => {
-        unifiedHistogram?.setBreakdownField(breakdownField);
-
-        if (interval) {
-          unifiedHistogram?.setTimeInterval(interval);
+    const subscription = createAppStateObservable(stateContainer.appState.state$).subscribe(
+      (changes) => {
+        if ('breakdownField' in changes) {
+          unifiedHistogram?.setBreakdownField(changes.breakdownField);
         }
 
-        if (typeof chartHidden === 'boolean') {
-          unifiedHistogram?.setChartHidden(chartHidden);
+        if ('timeInterval' in changes && changes.timeInterval) {
+          unifiedHistogram?.setTimeInterval(changes.timeInterval);
+        }
+
+        if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
+          unifiedHistogram?.setChartHidden(changes.chartHidden);
         }
       }
     );
@@ -320,7 +322,7 @@ export const useDiscoverHistogram = ({
   };
 };
 
-const createStateSyncObservable = (state$?: Observable<UnifiedHistogramState>) => {
+const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistogramState>) => {
   return state$?.pipe(
     pairwise(),
     map(([prev, curr]) => {
@@ -336,6 +338,30 @@ const createStateSyncObservable = (state$?: Observable<UnifiedHistogramState>) =
 
       if (prev.timeInterval !== curr.timeInterval) {
         changes.interval = curr.timeInterval;
+      }
+
+      if (prev.breakdownField !== curr.breakdownField) {
+        changes.breakdownField = curr.breakdownField;
+      }
+
+      return changes;
+    }),
+    filter((changes) => Object.keys(changes).length > 0)
+  );
+};
+
+const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
+  return state$.pipe(
+    pairwise(),
+    map(([prev, curr]) => {
+      const changes: Partial<UnifiedHistogramState> = {};
+
+      if (prev.hideChart !== curr.hideChart) {
+        changes.chartHidden = curr.hideChart;
+      }
+
+      if (prev.interval !== curr.interval) {
+        changes.timeInterval = curr.interval;
       }
 
       if (prev.breakdownField !== curr.breakdownField) {
