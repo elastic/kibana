@@ -25,11 +25,13 @@ import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { isEqual } from 'lodash';
+import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
   isOperationFromCompatibleGroup,
   isOperationFromTheSameGroup,
+  nonNullable,
   renewIDs,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
@@ -41,12 +43,11 @@ import {
 import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
 import type {
   Visualization,
-  AccessorConfig,
   FramePublicAPI,
   Suggestion,
   UserMessage,
-  VisualizeEditorContext,
   AnnotationGroups,
+  VisualizeEditorContext,
 } from '../../types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import {
@@ -80,6 +81,7 @@ import {
   getUniqueLabels,
   onAnnotationDrop,
   isDateHistogram,
+  getSingleColorAnnotationConfig,
 } from './annotations/helpers';
 import {
   checkXAccessorCompatibility,
@@ -315,11 +317,6 @@ export const getXyVisualization = ({
       domElement
     );
   },
-
-  onLayerAction(layerId, actionId, state) {
-    return state;
-  },
-
   onIndexPatternChange(state, indexPatternId, layerId) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
@@ -919,7 +916,7 @@ export const getXyVisualization = ({
       );
     }
 
-    const info = getNotifiableFeatures(state, frame.dataViews);
+    const info = getNotifiableFeatures(state, frame, paletteService, fieldFormats);
 
     return errors.concat(warnings, info);
   },
@@ -964,13 +961,15 @@ export const getXyVisualization = ({
     return suggestion;
   },
 
-  getVisualizationInfo,
-
   isEqual(state1, references1, state2, references2, annotationGroups) {
     return isEqual(
       injectReferences(state1, annotationGroups, references1),
       injectReferences(state2, annotationGroups, references2)
     );
+  },
+
+  getVisualizationInfo(state, frame) {
+    return getVisualizationInfo(state, frame, paletteService, fieldFormats);
   },
 });
 
@@ -1012,18 +1011,26 @@ const getMappedAccessors = ({
   return mappedAccessors;
 };
 
-function getVisualizationInfo(state: XYState) {
+function getVisualizationInfo(
+  state: XYState,
+  frame: Partial<FramePublicAPI> | undefined,
+  paletteService: PaletteRegistry,
+  fieldFormats: FieldFormatsStart
+) {
   const isHorizontal = isHorizontalChart(state.layers);
   const visualizationLayersInfo = state.layers.map((layer) => {
+    const palette = [];
     const dimensions = [];
     let chartType: SeriesType | undefined;
     let icon;
     let label;
+
     if (isDataLayer(layer)) {
       chartType = layer.seriesType;
       const layerVisType = visualizationTypes.find((visType) => visType.id === chartType);
       icon = layerVisType?.icon;
       label = layerVisType?.fullLabel || layerVisType?.label;
+
       if (layer.xAccessor) {
         dimensions.push({
           name: getAxisName('x', { isHorizontal }),
@@ -1039,6 +1046,21 @@ function getVisualizationInfo(state: XYState) {
             dimensionType: 'y',
           });
         });
+        if (frame?.datasourceLayers && frame.activeData) {
+          const sortedAccessors: string[] = getSortedAccessors(
+            frame.datasourceLayers[layer.layerId],
+            layer
+          );
+          const mappedAccessors = getMappedAccessors({
+            state,
+            frame: frame as Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>,
+            layer,
+            fieldFormats,
+            paletteService,
+            accessors: sortedAccessors,
+          });
+          palette.push(...mappedAccessors.flatMap(({ color }) => color));
+        }
       }
       if (layer.splitAccessor) {
         dimensions.push({
@@ -1048,6 +1070,13 @@ function getVisualizationInfo(state: XYState) {
           dimensionType: 'breakdown',
           id: layer.splitAccessor,
         });
+        if (!layer.collapseFn) {
+          palette.push(
+            ...paletteService
+              .get(layer.palette?.name || 'default')
+              .getCategoricalColors(10, layer.palette?.params)
+          );
+        }
       }
     }
     if (isReferenceLayer(layer) && layer.accessors && layer.accessors.length) {
@@ -1064,6 +1093,20 @@ function getVisualizationInfo(state: XYState) {
         defaultMessage: 'Reference lines',
       });
       icon = IconChartBarReferenceLine;
+      if (frame?.datasourceLayers && frame.activeData) {
+        const sortedAccessors: string[] = getSortedAccessors(
+          frame.datasourceLayers[layer.layerId],
+          layer
+        );
+        palette.push(
+          ...getReferenceConfiguration({
+            state,
+            frame: frame as Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>,
+            layer,
+            sortedAccessors,
+          }).groups.flatMap(({ accessors }) => accessors.map(({ color }) => color))
+        );
+      }
     }
     if (isAnnotationsLayer(layer) && layer.annotations && layer.annotations.length) {
       layer.annotations.forEach((annotation) => {
@@ -1079,7 +1122,14 @@ function getVisualizationInfo(state: XYState) {
         defaultMessage: 'Annotations',
       });
       icon = IconChartBarAnnotations;
+      palette.push(
+        ...layer.annotations
+          .filter(({ isHidden }) => !isHidden)
+          .map((annotation) => getSingleColorAnnotationConfig(annotation).color)
+      );
     }
+
+    const finalPalette = palette?.filter(nonNullable);
 
     return {
       layerId: layer.layerId,
@@ -1088,6 +1138,7 @@ function getVisualizationInfo(state: XYState) {
       icon,
       label,
       dimensions,
+      palette: finalPalette.length ? finalPalette : undefined,
     };
   });
   return {
@@ -1097,7 +1148,9 @@ function getVisualizationInfo(state: XYState) {
 
 function getNotifiableFeatures(
   state: XYState,
-  dataViews: FramePublicAPI['dataViews']
+  frame: Pick<FramePublicAPI, 'dataViews'> & Partial<FramePublicAPI>,
+  paletteService: PaletteRegistry,
+  fieldFormats: FieldFormatsStart
 ): UserMessage[] {
   const annotationsWithIgnoreFlag = getAnnotationsLayers(state.layers).filter(
     (layer) => layer.ignoreGlobalFilters
@@ -1105,7 +1158,7 @@ function getNotifiableFeatures(
   if (!annotationsWithIgnoreFlag.length) {
     return [];
   }
-  const visualizationInfo = getVisualizationInfo(state);
+  const visualizationInfo = getVisualizationInfo(state, frame, paletteService, fieldFormats);
 
   return [
     {
@@ -1119,7 +1172,7 @@ function getNotifiableFeatures(
         <IgnoredGlobalFiltersEntries
           layers={annotationsWithIgnoreFlag}
           visualizationInfo={visualizationInfo}
-          dataViews={dataViews}
+          dataViews={frame.dataViews}
         />
       ),
       displayLocations: [{ id: 'embeddableBadge' }],

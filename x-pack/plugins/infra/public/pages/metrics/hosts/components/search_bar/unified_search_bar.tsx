@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { METRICS_APP_DATA_TEST_SUBJ } from '../../../../../apps/metrics_app';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
@@ -101,7 +100,7 @@ const StickyContainer = (props: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
 
   const top = useMemo(() => {
-    const wrapper = document.querySelector(`[data-test-subj="${METRICS_APP_DATA_TEST_SUBJ}"]`);
+    const wrapper = document.querySelector(`[data-test-subj="kibanaChrome"]`);
     if (!wrapper) {
       return `calc(${euiTheme.size.xxxl} * 2)`;
     }

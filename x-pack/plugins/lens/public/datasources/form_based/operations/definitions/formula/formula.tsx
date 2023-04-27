@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
+import { nonNullable } from '../../../../../utils';
 import type {
   BaseIndexPatternColumn,
   FieldBasedOperationErrorMessage,
@@ -14,7 +15,6 @@ import type {
 } from '..';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { IndexPattern } from '../../../../../types';
-import { nonNullable } from '../../../../../types';
 import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
 import { insertOrReplaceFormulaColumn } from './parse';

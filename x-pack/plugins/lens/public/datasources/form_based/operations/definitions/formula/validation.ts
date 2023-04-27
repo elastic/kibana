@@ -18,6 +18,7 @@ import {
   REASON_ID_TYPES,
   validateAbsoluteTimeShift,
 } from '@kbn/data-plugin/common';
+import { nonNullable } from '../../../../../utils';
 import { DateRange } from '../../../../../../common/types';
 import {
   findMathNodes,
@@ -36,7 +37,7 @@ import type {
   GenericOperationDefinition,
 } from '..';
 import type { FormBasedLayer } from '../../../types';
-import { IndexPattern, nonNullable } from '../../../../../types';
+import { IndexPattern } from '../../../../../types';
 import type { TinymathNodeTypes } from './types';
 
 interface ValidationErrors {

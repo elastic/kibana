@@ -127,6 +127,7 @@ import {
 import { MessageList } from '../editor_frame_service/editor_frame/workspace_panel/message_list';
 import type { DocumentToExpressionReturnType } from '../editor_frame_service/editor_frame';
 import { EmbeddableFeatureBadge } from './embeddable_info_badges';
+import { getDatasourceLayers } from '../state_management/utils';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -607,7 +608,7 @@ export class Embeddable
         visualizationMap: this.deps.visualizationMap,
         activeDatasource: this.activeDatasource,
         activeDatasourceState: {
-          isLoading: Boolean(this.activeDatasourceState),
+          isLoading: !this.activeDatasourceState,
           state: this.activeDatasourceState,
         },
         dataViews: {
@@ -628,7 +629,16 @@ export class Embeddable
         indexPatterns: this.indexPatterns,
         indexPatternRefs: this.indexPatternRefs,
       },
-      datasourceLayers: {}, // TODO
+      datasourceLayers: getDatasourceLayers(
+        {
+          [this.activeDatasourceId!]: {
+            isLoading: !this.activeDatasourceState,
+            state: this.activeDatasourceState,
+          },
+        },
+        this.deps.datasourceMap,
+        this.indexPatterns
+      ),
       query: this.savedVis.state.query,
       filters: mergedSearchContext.filters ?? [],
       dateRange: {
@@ -643,7 +653,8 @@ export class Embeddable
         setState: () => {},
         frame: frameDatasourceAPI,
         visualizationInfo: this.activeVisualization?.getVisualizationInfo?.(
-          this.activeVisualizationState
+          this.activeVisualizationState,
+          frameDatasourceAPI
         ),
       }) ?? []),
       ...(this.activeVisualization?.getUserMessages?.(this.activeVisualizationState, {
@@ -798,6 +809,13 @@ export class Embeddable
     );
 
     this.activeData = newActiveData;
+
+    // Refresh messanges if info type is found as with active data
+    // these messages can be enriched
+    if (this._userMessages.some(({ severity }) => severity === 'info')) {
+      this.loadUserMessages();
+      this.renderUserMessages();
+    }
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {

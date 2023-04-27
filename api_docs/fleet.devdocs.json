@@ -5760,6 +5760,22 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-server.MessageSigningServiceInterface.rotateKeyPair",
+            "type": "Function",
+            "tags": [],
+            "label": "rotateKeyPair",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/security/message_signing_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-server.MessageSigningServiceInterface.sign",
             "type": "Function",
             "tags": [],
@@ -23691,7 +23707,7 @@
         "label": "PackageSpecCategory",
         "description": [],
         "signature": [
-          "\"connector\" | \"security\" | \"monitoring\" | \"infrastructure\" | \"observability\" | \"cloud\" | \"custom\" | \"enterprise_search\" | \"analytics_engine\" | \"application_observability\" | \"app_search\" | \"auditd\" | \"authentication\" | \"aws\" | \"azure\" | \"big_data\" | \"cdn_security\" | \"config_management\" | \"connector_client\" | \"connector_package\" | \"containers\" | \"content_source\" | \"crawler\" | \"credential_management\" | \"crm\" | \"custom_logs\" | \"database_security\" | \"datastore\" | \"dns_security\" | \"edr_xdr\" | \"elasticsearch_sdk\" | \"elastic_stack\" | \"email_security\" | \"firewall_security\" | \"google_cloud\" | \"iam\" | \"ids_ips\" | \"java_observability\" | \"kubernetes\" | \"language_client\" | \"languages\" | \"load_balancer\" | \"message_queue\" | \"native_search\" | \"network\" | \"network_security\" | \"notification\" | \"os_system\" | \"process_manager\" | \"productivity\" | \"productivity_security\" | \"proxy_security\" | \"sdk_search\" | \"stream_processing\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"virtualization\" | \"vpn_security\" | \"vulnerability_management\" | \"web\" | \"web_application_firewall\" | \"websphere\" | \"workplace_search\""
+          "\"connector\" | \"security\" | \"monitoring\" | \"observability\" | \"infrastructure\" | \"cloud\" | \"custom\" | \"enterprise_search\" | \"analytics_engine\" | \"application_observability\" | \"app_search\" | \"auditd\" | \"authentication\" | \"aws\" | \"azure\" | \"big_data\" | \"cdn_security\" | \"config_management\" | \"connector_client\" | \"connector_package\" | \"containers\" | \"content_source\" | \"crawler\" | \"credential_management\" | \"crm\" | \"custom_logs\" | \"database_security\" | \"datastore\" | \"dns_security\" | \"edr_xdr\" | \"elasticsearch_sdk\" | \"elastic_stack\" | \"email_security\" | \"firewall_security\" | \"google_cloud\" | \"iam\" | \"ids_ips\" | \"java_observability\" | \"kubernetes\" | \"language_client\" | \"languages\" | \"load_balancer\" | \"message_queue\" | \"native_search\" | \"network\" | \"network_security\" | \"notification\" | \"os_system\" | \"process_manager\" | \"productivity\" | \"productivity_security\" | \"proxy_security\" | \"sdk_search\" | \"stream_processing\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"virtualization\" | \"vpn_security\" | \"vulnerability_management\" | \"web\" | \"web_application_firewall\" | \"websphere\" | \"workplace_search\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
         "deprecated": false,

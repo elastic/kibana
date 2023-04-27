@@ -8,8 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { isObject } from 'lodash';
 import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
+import { nonNullable } from '../../../../../utils';
 import type { DateRange } from '../../../../../../common/types';
-import { IndexPattern, nonNullable } from '../../../../../types';
+import { IndexPattern } from '../../../../../types';
 import {
   OperationDefinition,
   GenericOperationDefinition,
