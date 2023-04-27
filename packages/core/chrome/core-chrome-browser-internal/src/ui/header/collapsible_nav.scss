@@ -1,4 +1,4 @@
-$screenHeightBreakpoint: 15em;
+$screenHeightBreakpoint: $euiSize * 15;
 
 .kbnCollapsibleNav {
   @media (max-height: $screenHeightBreakpoint) {
