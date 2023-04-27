@@ -7,6 +7,7 @@
 import React from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { Router } from 'react-router-dom';
 
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
@@ -63,6 +64,7 @@ export const createAddToNewCaseLensAction = ({
   core,
   plugins,
   storage,
+  history,
   caseContextProps,
 }: CaseUIActionProps) => {
   const { application: applicationService, theme, uiSettings } = core;
@@ -121,19 +123,21 @@ export const createAddToNewCaseLensAction = ({
           }}
         >
           <EuiThemeProvider darkMode={uiSettings.get(DEFAULT_DARK_MODE)}>
-            <CasesProvider
-              value={{
-                ...caseContextProps,
-                owner,
-                permissions: casePermissions,
-              }}
-            >
-              <AddToNewCaseFlyoutWrapper
-                embeddable={embeddable}
-                onClose={onFlyoutClose}
-                onSuccess={onFlyoutClose}
-              />
-            </CasesProvider>
+            <Router history={history}>
+              <CasesProvider
+                value={{
+                  ...caseContextProps,
+                  owner,
+                  permissions: casePermissions,
+                }}
+              >
+                <AddToNewCaseFlyoutWrapper
+                  embeddable={embeddable}
+                  onClose={onFlyoutClose}
+                  onSuccess={onFlyoutClose}
+                />
+              </CasesProvider>
+            </Router>
           </EuiThemeProvider>
         </KibanaContextProvider>,
         { theme$: theme.theme$ }
