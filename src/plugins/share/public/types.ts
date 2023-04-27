@@ -38,10 +38,9 @@ export interface ShareContext {
    * format which makes it possible to use it without having access to any other state
    * like the current session.
    *
-   * If not set, it will be created from `shareableUrlLocatorParams` (if provided), or
-   * default to `window.location.href`.
+   * If not set it will default to `window.location.href`
    */
-  shareableUrl?: string;
+  shareableUrl: string;
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
     locator: LocatorPublic<any>;

@@ -11,6 +11,7 @@ import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { relativeToAbsolute } from '@kbn/core-application-browser-internal';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
@@ -178,6 +179,8 @@ export const getTopNavLinks = ({
         timeRange,
         refreshInterval,
       };
+      const relativeUrl = locator.getRedirectUrl(params);
+      const shareableUrl = relativeToAbsolute(relativeUrl);
 
       // Share -> Get links -> Saved object
       const shareableUrlForSavedObject = await locator.getUrl(
@@ -190,6 +193,7 @@ export const getTopNavLinks = ({
         anchorElement,
         allowEmbed: false,
         allowShortUrl: !!services.capabilities.discover.createShortUrl,
+        shareableUrl,
         shareableUrlForSavedObject,
         shareableUrlLocatorParams: { locator, params },
         objectId: savedSearch.id,
