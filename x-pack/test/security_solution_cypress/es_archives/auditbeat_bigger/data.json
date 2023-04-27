@@ -1,0 +1,769 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nwBOpWiDweStg_A",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "neat host",
+        "architecture" : "x86_64",
+        "name" : "neat host"
+      },
+      "user": {
+        "name": "neat.user"
+      },
+      "source": {
+        "ip": "0.0.0.1"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "neat.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nw7OpWiDweSth_A",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:00.045Z",
+      "host" : {
+        "hostname" : "great host",
+        "architecture" : "x86_64",
+        "name" : "great host"
+      },
+      "user":{
+        "name": "great.user"
+      },
+      "source":{
+        "ip": "0.0.0.2"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "great.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nQ7OpWiDweSth_A",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:23.045Z",
+      "host" : {
+        "hostname" : "awesome host",
+        "architecture" : "x86_64",
+        "name" : "awesome host"
+      },
+      "user":{
+        "name": "awesome.user"
+      },
+      "source":{
+        "ip": "0.0.0.3"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "awesome.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE4nQ7OpWiDweSth_A",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "sweet host",
+        "architecture" : "x86_64",
+        "name" : "sweet host"
+      },
+      "user":{
+        "name": "sweet.user"
+      },
+      "source":{
+        "ip": "0.0.0.4"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "sweet.local"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nwBOpWiDweSth_B",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "neat1 host",
+        "architecture" : "x86_64",
+        "name" : "neat1 host"
+      },
+      "user": {
+        "name": "neat1.user"
+      },
+      "source": {
+        "ip": "0.0.0.11"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "neat.local1"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nw7OpWiDweStP_S",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:00.045Z",
+      "host" : {
+        "hostname" : "great1 host",
+        "architecture" : "x86_64",
+        "name" : "great1 host"
+      },
+      "user":{
+        "name": "great1.user"
+      },
+      "source":{
+        "ip": "0.0.0.21"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "great.local1"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nQ7OpWiDweSth_U",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:23.045Z",
+      "host" : {
+        "hostname" : "awesome1 host",
+        "architecture" : "x86_64",
+        "name" : "awesome1 host"
+      },
+      "user":{
+        "name": "awesome1.user"
+      },
+      "source":{
+        "ip": "0.0.0.31"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "awesome.local1"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_CQE4nQ7OpWiDweSth_D",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "sweet1 host",
+        "architecture" : "x86_64",
+        "name" : "sweet1 host"
+      },
+      "user":{
+        "name": "sweet1.user"
+      },
+      "source":{
+        "ip": "0.0.0.41"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "sweet.local1"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nwBOpWiDweSth_E",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "neat2 host",
+        "architecture" : "x86_64",
+        "name" : "neat2 host"
+      },
+      "user": {
+        "name": "neat2.user"
+      },
+      "source": {
+        "ip": "0.0.0.12"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "neat.local2"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nw7OpWiDweStG_S",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:00.045Z",
+      "host" : {
+        "hostname" : "great2 host",
+        "architecture" : "x86_64",
+        "name" : "great2 host"
+      },
+      "user":{
+        "name": "great2.user"
+      },
+      "source":{
+        "ip": "0.0.0.22"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "great.local2"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nQ7OpWiDweSth_Q",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:23.045Z",
+      "host" : {
+        "hostname" : "awesome2 host",
+        "architecture" : "x86_64",
+        "name" : "awesome2 host"
+      },
+      "user":{
+        "name": "awesome2.user"
+      },
+      "source":{
+        "ip": "0.0.0.32"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "awesome.local2"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_CZE4nQ7OpWiDweSth_D",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "sweet2 host",
+        "architecture" : "x86_64",
+        "name" : "sweet2 host"
+      },
+      "user":{
+        "name": "sweet2.user"
+      },
+      "source":{
+        "ip": "0.0.0.42"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "sweet.local2"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nwBOpWiDweSth_A",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "neat host3",
+        "architecture" : "x86_64",
+        "name" : "neat host3"
+      },
+      "user": {
+        "name": "neat.user3"
+      },
+      "source": {
+        "ip": "0.0.0.13"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "neat.local3"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nw7OpWiDweSth_D",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:00.045Z",
+      "host" : {
+        "hostname" : "great host3",
+        "architecture" : "x86_64",
+        "name" : "great host3"
+      },
+      "user":{
+        "name": "great.user3"
+      },
+      "source":{
+        "ip": "0.0.0.23"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "great.local3"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nQ7OpWiDweSph_D",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:23.045Z",
+      "host" : {
+        "hostname" : "awesome host3",
+        "architecture" : "x86_64",
+        "name" : "awesome host3"
+      },
+      "user":{
+        "name": "awesome.user3"
+      },
+      "source":{
+        "ip": "0.0.0.33"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "awesome.local3"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_CQQ4nQ7OpWiDwePth_D",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "sweet host3",
+        "architecture" : "x86_64",
+        "name" : "sweet host3"
+      },
+      "user":{
+        "name": "sweet.user3"
+      },
+      "source":{
+        "ip": "0.0.0.43"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "sweet.local3"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nwBOpWiDweSth_C",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "neat1 host3",
+        "architecture" : "x86_64",
+        "name" : "neat1 host3"
+      },
+      "user": {
+        "name": "neat1.user3"
+      },
+      "source": {
+        "ip": "0.0.0.113"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "neat.local13"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nw7OpWiDweStH_S",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:00.045Z",
+      "host" : {
+        "hostname" : "great1 host3",
+        "architecture" : "x86_64",
+        "name" : "great1 host3"
+      },
+      "user":{
+        "name": "great1.user3"
+      },
+      "source":{
+        "ip": "0.0.0.213"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "great.local13"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nQ7OpWiDweSqh_D",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:23.045Z",
+      "host" : {
+        "hostname" : "awesome1 host3",
+        "architecture" : "x86_64",
+        "name" : "awesome1 host3"
+      },
+      "user":{
+        "name": "awesome1.user3"
+      },
+      "source":{
+        "ip": "0.0.0.313"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "awesome.local13"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE4nQ7OpWiDweSth_D",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "sweet1 host3",
+        "architecture" : "x86_64",
+        "name" : "sweet1 host3"
+      },
+      "user":{
+        "name": "sweet1.user3"
+      },
+      "source":{
+        "ip": "0.0.0.413"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "sweet.local13"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nwBOpWiDweSth_D",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "neat2 host3",
+        "architecture" : "x86_64",
+        "name" : "neat2 host3"
+      },
+      "user": {
+        "name": "neat2.user3"
+      },
+      "source": {
+        "ip": "0.0.0.123"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "neat.local23"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nw7OpWiDweStF_S",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:00.045Z",
+      "host" : {
+        "hostname" : "great2 host3",
+        "architecture" : "x86_64",
+        "name" : "great2 host3"
+      },
+      "user":{
+        "name": "great2.user3"
+      },
+      "source":{
+        "ip": "0.0.0.223"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "great.local23"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_BZE5nQ7OpWiDweSth_D",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:23.045Z",
+      "host" : {
+        "hostname" : "awesome2 host3",
+        "architecture" : "x86_64",
+        "name" : "awesome2 host3"
+      },
+      "user":{
+        "name": "awesome2.user3"
+      },
+      "source":{
+        "ip": "0.0.0.323"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "awesome.local23"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_CQQ4nQ7OpWiDweSth_D",
+    "index": "auditbeat-2022-bigger",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "sweet2 host3",
+        "architecture" : "x86_64",
+        "name" : "sweet2 host3"
+      },
+      "user":{
+        "name": "sweet2.user3"
+      },
+      "source":{
+        "ip": "0.0.0.423"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "sweet.local23"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}

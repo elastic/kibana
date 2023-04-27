@@ -171,3 +171,6 @@ export const LEGEND_ACTIONS = {
   FILTER_OUT: (ruleName: string) => `[data-test-subj="legend-${ruleName}-filterOut"]`,
   COPY: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_copyToClipboard"]`,
 };
+
+export const GROUP_SELECTOR = '[data-test-subj="group-selector-dropdown"]';
+export const GROUP_OPTION_SELECTOR = (fieldName: string) => `[data-test-subj="panel-${fieldName}"]`;

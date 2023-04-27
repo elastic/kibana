@@ -25,7 +25,7 @@ import { clearSearchBar, kqlSearch } from '../../tasks/security_header';
 describe('risk tab', () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('risk_hosts');
+    esArchiverLoad('users');
     login();
   });
 
@@ -35,7 +35,7 @@ describe('risk tab', () => {
   });
 
   after(() => {
-    esArchiverUnload('risk_hosts');
+    esArchiverUnload('users');
   });
 
   it('renders the table', () => {
