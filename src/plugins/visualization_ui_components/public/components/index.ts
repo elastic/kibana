@@ -26,6 +26,10 @@ export * from './query_input';
 
 export * from './dimension_editor_section';
 
+export * from './dimension_buttons';
+
+export type { AccessorConfig } from './dimension_buttons';
+
 export type { FieldOptionValue, FieldOption, DataType } from './field_picker';
 
 export type { IconSet } from './icon_select';

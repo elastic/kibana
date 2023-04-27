@@ -14,7 +14,8 @@ import {
   defaultAnnotationRangeColor,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-plugin/public';
-import type { AccessorConfig, FramePublicAPI } from '../../types';
+import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
+import type { FramePublicAPI } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { FormatFactory } from '../../../common/types';
 import { isDataLayer, isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';

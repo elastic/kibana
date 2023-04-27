@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AccessorConfig, UserMessage } from '../../../types';
-import { IconError, IconWarning } from '../custom_icons';
+import type { AccessorConfig, Message } from './types';
 
 const baseIconProps = {
   className: 'lnsLayerPanel__colorIndicator',
@@ -22,12 +22,15 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
         {...baseIconProps}
         color={accessorConfig.color}
         type="stopFilled"
-        aria-label={i18n.translate('xpack.lens.editorFrame.colorIndicatorLabel', {
-          defaultMessage: 'Color of this dimension: {hex}',
-          values: {
-            hex: accessorConfig.color,
-          },
-        })}
+        aria-label={i18n.translate(
+          'visualizationUiComponents.dimensionButtonIcon.colorIndicatorLabel',
+          {
+            defaultMessage: 'Color of this dimension: {hex}',
+            values: {
+              hex: accessorConfig.color,
+            },
+          }
+        )}
       />
     )}
     {accessorConfig.triggerIconType === 'disabled' && (
@@ -35,9 +38,12 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
         {...baseIconProps}
         type="stopSlash"
         color="subdued"
-        aria-label={i18n.translate('xpack.lens.editorFrame.noColorIndicatorLabel', {
-          defaultMessage: 'This dimension does not have an individual color',
-        })}
+        aria-label={i18n.translate(
+          'visualizationUiComponents.dimensionButtonIcon.noColorIndicatorLabel',
+          {
+            defaultMessage: 'This dimension does not have an individual color',
+          }
+        )}
       />
     )}
     {accessorConfig.triggerIconType === 'invisible' && (
@@ -45,9 +51,12 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
         {...baseIconProps}
         type="eyeClosed"
         color="subdued"
-        aria-label={i18n.translate('xpack.lens.editorFrame.invisibleIndicatorLabel', {
-          defaultMessage: 'This dimension is currently not visible in the chart',
-        })}
+        aria-label={i18n.translate(
+          'visualizationUiComponents.dimensionButtonIcon.invisibleIndicatorLabel',
+          {
+            defaultMessage: 'This dimension is currently not visible in the chart',
+          }
+        )}
       />
     )}
     {accessorConfig.triggerIconType === 'aggregate' && (
@@ -55,10 +64,13 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
         {...baseIconProps}
         type="fold"
         color="subdued"
-        aria-label={i18n.translate('xpack.lens.editorFrame.aggregateIndicatorLabel', {
-          defaultMessage:
-            'This dimension is not visible in the chart because all individual values are aggregated into a single value',
-        })}
+        aria-label={i18n.translate(
+          'visualizationUiComponents.dimensionButtonIcon.aggregateIndicatorLabel',
+          {
+            defaultMessage:
+              'This dimension is not visible in the chart because all individual values are aggregated into a single value',
+          }
+        )}
       />
     )}
     {accessorConfig.triggerIconType === 'colorBy' && (
@@ -66,9 +78,12 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
         {...baseIconProps}
         type="color"
         color="subdued"
-        aria-label={i18n.translate('xpack.lens.editorFrame.paletteColorIndicatorLabel', {
-          defaultMessage: 'This dimension is using a palette',
-        })}
+        aria-label={i18n.translate(
+          'visualizationUiComponents.dimensionButtonIcon.paletteColorIndicatorLabel',
+          {
+            defaultMessage: 'This dimension is using a palette',
+          }
+        )}
       />
     )}
     {accessorConfig.triggerIconType === 'custom' && accessorConfig.customIcon && (
@@ -76,9 +91,12 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
         {...baseIconProps}
         type={accessorConfig.customIcon}
         color={accessorConfig.color}
-        aria-label={i18n.translate('xpack.lens.editorFrame.customIconIndicatorLabel', {
-          defaultMessage: 'This dimension is using a custom icon',
-        })}
+        aria-label={i18n.translate(
+          'visualizationUiComponents.dimensionButtonIcon.customIconIndicatorLabel',
+          {
+            defaultMessage: 'This dimension is using a custom icon',
+          }
+        )}
       />
     )}
   </>
@@ -86,26 +104,23 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
 
 export function DimensionButtonIcon({
   accessorConfig,
-  message,
+  severity,
   children,
 }: {
   accessorConfig: AccessorConfig;
-  message: UserMessage | undefined;
+  severity?: Message['severity'];
   children: React.ReactChild;
 }) {
   let indicatorIcon = null;
-  if (message || accessorConfig.triggerIconType !== 'none') {
+  if (severity || accessorConfig.triggerIconType !== 'none') {
     indicatorIcon = (
       <>
         {accessorConfig.triggerIconType !== 'none' && (
           <EuiFlexItem grow={false}>{getIconFromAccessorConfig(accessorConfig)}</EuiFlexItem>
         )}
-        {message && (
+        {severity && (
           <EuiFlexItem grow={false}>
-            <EuiIcon
-              {...baseIconProps}
-              type={message.severity === 'error' ? IconError : IconWarning}
-            />
+            <EuiIcon {...baseIconProps} type={severity === 'error' ? 'error' : 'alert'} />
           </EuiFlexItem>
         )}
       </>

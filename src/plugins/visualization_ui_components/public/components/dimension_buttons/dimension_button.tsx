@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -10,18 +11,18 @@ import { EuiButtonIcon, EuiLink, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { DimensionButtonIcon } from '../dimension_button_icon';
-import { PaletteIndicator } from '../palette_indicator';
-import { VisualizationDimensionGroupConfig, AccessorConfig, UserMessage } from '../../../../types';
+import { DimensionButtonIcon } from './dimension_button_icon';
+import { PaletteIndicator } from './palette_indicator';
+import { AccessorConfig, Message } from './types';
 
 const triggerLinkA11yText = (label: string) =>
-  i18n.translate('xpack.lens.configure.editConfig', {
+  i18n.translate('visualizationUiComponents.dimensionButton.editConfig', {
     defaultMessage: 'Edit {label} configuration',
     values: { label },
   });
 
 export function DimensionButton({
-  group,
+  groupLabel,
   children,
   onClick,
   onRemoveClick,
@@ -31,22 +32,19 @@ export function DimensionButton({
   ...otherProps // from Drag&Drop integration
 }: {
   className?: string;
-  group: VisualizationDimensionGroupConfig;
+  groupLabel: string;
   children: React.ReactElement;
   onClick: (id: string) => void;
   onRemoveClick: (id: string) => void;
   accessorConfig: AccessorConfig;
   label: string;
-  message: UserMessage | undefined;
+  message?: Message;
 }) {
   return (
     <div {...otherProps}>
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>
         <EuiFlexItem>
-          <EuiToolTip
-            content={message?.shortMessage || message?.longMessage || undefined}
-            position="left"
-          >
+          <EuiToolTip content={message?.content} position="left">
             <EuiLink
               className="lnsLayerPanel__dimensionLink"
               data-test-subj="lnsLayerPanel-dimensionLink"
@@ -61,7 +59,7 @@ export function DimensionButton({
                   : 'text'
               }
             >
-              <DimensionButtonIcon message={message} accessorConfig={accessorConfig}>
+              <DimensionButtonIcon severity={message?.severity} accessorConfig={accessorConfig}>
                 {children}
               </DimensionButtonIcon>
             </EuiLink>
@@ -74,13 +72,13 @@ export function DimensionButton({
         iconType="trash"
         size="xs"
         color="danger"
-        aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+        aria-label={i18n.translate('visualizationUiComponents.dimensionButton.removeColumnLabel', {
           defaultMessage: 'Remove configuration from "{groupLabel}"',
-          values: { groupLabel: group.groupLabel },
+          values: { groupLabel },
         })}
-        title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+        title={i18n.translate('visualizationUiComponents.dimensionButton.removeColumnLabel', {
           defaultMessage: 'Remove configuration from "{groupLabel}"',
-          values: { groupLabel: group.groupLabel },
+          values: { groupLabel },
         })}
         onClick={() => onRemoveClick(accessorConfig.columnId)}
         css={css`

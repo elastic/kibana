@@ -27,9 +27,16 @@ export {
   validateQuery,
   isQueryValid,
   DimensionEditorSection,
+  DimensionButton,
 } from './components';
 
-export type { DataType, FieldOptionValue, FieldOption, IconSet } from './components';
+export type {
+  DataType,
+  FieldOptionValue,
+  FieldOption,
+  IconSet,
+  AccessorConfig,
+} from './components';
 
 export function plugin() {
   return new VisualizationUiComponentsPlugin();

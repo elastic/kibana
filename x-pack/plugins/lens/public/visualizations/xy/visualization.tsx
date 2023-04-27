@@ -21,6 +21,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -35,13 +36,7 @@ import {
   DimensionEditor,
 } from './xy_config_panel/dimension_editor';
 import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
-import type {
-  Visualization,
-  AccessorConfig,
-  FramePublicAPI,
-  Suggestion,
-  UserMessage,
-} from '../../types';
+import type { Visualization, FramePublicAPI, Suggestion, UserMessage } from '../../types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import {
   type State,
