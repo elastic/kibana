@@ -315,7 +315,7 @@ export const getTopNavConfig = (
                 title: visInstance?.panelTitle || vis.title,
                 visTypeTitle: vis.type.title,
                 description: visInstance?.panelDescription || vis.description,
-                panelTimeRange: visInstance?.panelTimeRange || undefined,
+                panelTimeRange: visInstance?.panelTimeRange,
                 isEmbeddable: Boolean(originatingApp),
               };
               if (navigateToLensConfig) {
