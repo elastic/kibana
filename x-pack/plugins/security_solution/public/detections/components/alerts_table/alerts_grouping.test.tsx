@@ -155,15 +155,9 @@ describe('GroupedAlertsTable', () => {
       if (i.skip) {
         return mockQueryResponse;
       }
-      if (i.query.aggs.groupByFields.multi_terms != null) {
-        return {
-          ...mockQueryResponse,
-          data: groupingSearchResponse.ruleName,
-        };
-      }
       return {
         ...mockQueryResponse,
-        data: i.query.aggs.groupByFields.terms.field != null ? groupingSearchResponse.hostName : {},
+        data: groupingSearchResponse,
       };
     });
   });
