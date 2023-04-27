@@ -16,6 +16,7 @@ import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
 import { useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
 import { useCloneSlo } from '../../hooks/slo/use_clone_slo';
+import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
 import { buildSlo } from '../../data/slo/slo';
@@ -40,6 +41,7 @@ jest.mock('../../hooks/slo/use_fetch_active_alerts');
 jest.mock('../../hooks/slo/use_fetch_slo_details');
 jest.mock('../../hooks/slo/use_fetch_historical_summary');
 jest.mock('../../hooks/slo/use_clone_slo');
+jest.mock('../../hooks/slo/use_delete_slo');
 
 const useKibanaMock = useKibana as jest.Mock;
 const useParamsMock = useParams as jest.Mock;
@@ -49,9 +51,12 @@ const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const useCloneSloMock = useCloneSlo as jest.Mock;
+const useDeleteSloMock = useDeleteSlo as jest.Mock;
 
 const mockNavigate = jest.fn();
 const mockLocator = jest.fn();
+const mockClone = jest.fn();
+const mockDelete = jest.fn();
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -103,7 +108,8 @@ describe('SLO Details Page', () => {
       sloHistoricalSummaryResponse: historicalSummaryData,
     });
     useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: {} });
-    useCloneSloMock.mockReturnValue({ mutateAsync: jest.fn });
+    useCloneSloMock.mockReturnValue({ mutate: mockClone });
+    useDeleteSloMock.mockReturnValue({ mutate: mockDelete });
   });
 
   describe('when the incorrect license is found', () => {
@@ -228,6 +234,16 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(button!);
 
+    const { id, createdAt, enabled, revision, summary, updatedAt, ...newSlo } = slo;
+
+    expect(mockClone).toBeCalledWith({
+      idToCopyFrom: slo.id,
+      slo: {
+        ...newSlo,
+        name: `[Copy] ${newSlo.name}`,
+      },
+    });
+
     await waitFor(() => {
       expect(mockNavigate).toBeCalledWith(paths.observability.slos);
     });
@@ -252,6 +268,11 @@ describe('SLO Details Page', () => {
     const deleteModalConfirmButton = screen.queryByTestId('confirmModalConfirmButton');
 
     fireEvent.click(deleteModalConfirmButton!);
+
+    expect(mockDelete).toBeCalledWith({
+      id: slo.id,
+      name: slo.name,
+    });
 
     await waitFor(() => {
       expect(mockNavigate).toBeCalledWith(paths.observability.slos);
