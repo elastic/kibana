@@ -511,6 +511,22 @@
       },
       "FileKind": {
         "type": "keyword"
+      },
+      "hash": {
+        "properties": {
+          "md5": {
+            "type": "text"
+          },
+          "sha1": {
+            "type": "text"
+          },
+          "sha256": {
+            "type": "text"
+          },
+          "sha512": {
+            "type": "text"
+          }
+        }
       }
     }
   },
@@ -2728,10 +2744,6 @@
     "dynamic": false,
     "properties": {}
   },
-  "metrics-explorer-view": {
-    "dynamic": false,
-    "properties": {}
-  },
   "inventory-view": {
     "dynamic": false,
     "properties": {}
@@ -2743,6 +2755,10 @@
         "type": "text"
       }
     }
+  },
+  "metrics-explorer-view": {
+    "dynamic": false,
+    "properties": {}
   },
   "upgrade-assistant-reindex-operation": {
     "dynamic": false,
