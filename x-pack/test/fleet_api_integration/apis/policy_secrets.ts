@@ -58,7 +58,7 @@ export default function (providerContext: FtrProviderContext) {
       return body.item;
     };
 
-    const getLatestPolicyRevision = async (id: string): Promise<{ data : FullAgentPolicy }> => {
+    const getLatestPolicyRevision = async (id: string): Promise<{ data: FullAgentPolicy }> => {
       const res = await es.search({
         index: '.fleet-policies',
         body: {
