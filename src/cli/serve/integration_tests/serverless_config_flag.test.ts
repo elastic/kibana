@@ -37,7 +37,7 @@ describe('cli serverless project type', () => {
   );
 
   // Skipping this one because on CI it fails to read the config file
-  it.skip.each(['es', 'oblt', 'security'])(
+  it.each(['es', 'oblt', 'security'])(
     'writes the serverless project type %s in config/serverless.recent.yml',
     async (mode) => {
       // Making sure `--serverless` translates into the `serverless` config entry, and validates against the accepted values
@@ -45,8 +45,8 @@ describe('cli serverless project type', () => {
         cwd: REPO_ROOT,
       });
 
-      // Wait for 5 lines in the logs
-      await firstValueFrom(from(child.stdout).pipe(take(5)));
+      // Wait for some lines in the logs
+      await firstValueFrom(from(child.stdout).pipe(take(20)));
 
       expect(
         readFileSync(resolve(getConfigDirectory(), 'serverless.recent.yml'), 'utf-8')
