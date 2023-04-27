@@ -10,6 +10,7 @@ import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 import { HttpResponse } from '@kbn/core/public';
 
 import { ErrorResponse, Status } from '../../../../../../../common/types/api';
+import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { CreateTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
 import { FetchTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
 
@@ -83,7 +84,7 @@ describe('TextExpansionCalloutLogic', () => {
         jest.spyOn(TextExpansionCalloutLogic.actions, 'startPollingTextExpansionModel');
 
         TextExpansionCalloutLogic.actions.createTextExpansionModelSuccess({
-          deploymentState: 'downloading',
+          deploymentState: MlModelDeploymentState.Downloading,
           modelId: 'mock-model-id',
         });
 
@@ -94,7 +95,7 @@ describe('TextExpansionCalloutLogic', () => {
 
     describe('fetchTextExpansionModelSuccess', () => {
       const data = {
-        deploymentState: 'downloading',
+        deploymentState: MlModelDeploymentState.Downloading,
         modelId: 'mock-model-id',
       };
 
@@ -129,7 +130,7 @@ describe('TextExpansionCalloutLogic', () => {
         jest.spyOn(TextExpansionCalloutLogic.actions, 'stopPollingTextExpansionModel');
 
         TextExpansionCalloutLogic.actions.fetchTextExpansionModelSuccess({
-          deploymentState: 'is_fully_downloaded',
+          deploymentState: MlModelDeploymentState.Downloaded,
           modelId: 'mock-model-id',
         });
 
@@ -227,7 +228,7 @@ describe('TextExpansionCalloutLogic', () => {
       });
       it('is set to true if the fetch model API is not idle', () => {
         CreateTextExpansionModelApiLogic.actions.apiSuccess({
-          deploymentState: 'downloading',
+          deploymentState: MlModelDeploymentState.Downloading,
           modelId: 'mock-model-id',
         });
         expect(TextExpansionCalloutLogic.values.isCreateButtonDisabled).toBe(true);
@@ -237,14 +238,14 @@ describe('TextExpansionCalloutLogic', () => {
     describe('isModelDownloadInProgress', () => {
       it('is set to true if the model is downloading', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
-          deploymentState: 'downloading',
+          deploymentState: MlModelDeploymentState.Downloading,
           modelId: 'mock-model-id',
         });
         expect(TextExpansionCalloutLogic.values.isModelDownloadInProgress).toBe(true);
       });
       it('is set to false if the model is downloading', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
-          deploymentState: 'started',
+          deploymentState: MlModelDeploymentState.Started,
           modelId: 'mock-model-id',
         });
         expect(TextExpansionCalloutLogic.values.isModelDownloadInProgress).toBe(false);
@@ -254,14 +255,14 @@ describe('TextExpansionCalloutLogic', () => {
     describe('isModelDownloaded', () => {
       it('is set to true if the model is downloaded', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
-          deploymentState: 'is_fully_downloaded',
+          deploymentState: MlModelDeploymentState.Downloaded,
           modelId: 'mock-model-id',
         });
         expect(TextExpansionCalloutLogic.values.isModelDownloaded).toBe(true);
       });
       it('is set to false if the model is not downloaded', () => {
         FetchTextExpansionModelApiLogic.actions.apiSuccess({
-          deploymentState: 'started',
+          deploymentState: MlModelDeploymentState.NotDeployed,
           modelId: 'mock-model-id',
         });
         expect(TextExpansionCalloutLogic.values.isModelDownloaded).toBe(false);

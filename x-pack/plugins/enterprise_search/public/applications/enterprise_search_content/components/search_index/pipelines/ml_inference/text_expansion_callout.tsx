@@ -44,16 +44,14 @@ export const TextExpansionDismissButton = ({
   dismiss,
 }: Pick<TextExpansionCallOutState, 'dismiss'>) => {
   return (
-    <EuiFlexItem grow={false}>
-      <EuiButtonIcon
-        aria-label={i18n.translate(
-          'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.dismissButton',
-          { defaultMessage: 'Dismiss ELSER call out' }
-        )}
-        iconType="cross"
-        onClick={dismiss}
-      />
-    </EuiFlexItem>
+    <EuiButtonIcon
+      aria-label={i18n.translate(
+        'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.dismissButton',
+        { defaultMessage: 'Dismiss ELSER call out' }
+      )}
+      iconType="cross"
+      onClick={dismiss}
+    />
   );
 };
 
@@ -67,63 +65,75 @@ export const DeployModel = ({
   return (
     <EuiPanel color="success">
       <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="success">
-              <FormattedMessage
-                id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.titleBadge"
-                defaultMessage="New"
-              />
-            </EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow>
-            <EuiTitle size="xs">
-              <h4>
-                <EuiText color="text">
-                  <FormattedMessage
-                    id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.title"
-                    defaultMessage="Improve your results with ELSER"
-                  />
-                </EuiText>
-              </h4>
-            </EuiTitle>
-          </EuiFlexItem>
-          {isDismissable && (
-            <EuiFlexItem grow={false}>
-              <TextExpansionDismissButton dismiss={dismiss} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        <EuiFlexGroup direction="column">
-          <EuiText>
-            <FormattedHTMLMessage
-              id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.body"
-              defaultMessage="ELSER (Elastic Learned Sparse EncodeR) is our <strong>new trained machine learning model</strong> designed to efficiently use context in natural language queries. This model delivers better results than BM25 without further training on your data."
-              tagName="p"
-            />
-          </EuiText>
+        <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-            <EuiButton
-              color="success"
-              disabled={isCreateButtonDisabled}
-              iconType="launch"
-              onClick={() => createTextExpansionModel(undefined)}
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.deployButton.label',
-                {
-                  defaultMessage: 'Deploy',
-                }
-              )}
-            </EuiButton>
-            <EuiLink target="_blank" href={docLinks.elser}>
-              <FormattedMessage
-                id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.learnMoreLink"
-                defaultMessage="Learn more"
-              />
-            </EuiLink>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="success">
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.titleBadge"
+                  defaultMessage="New"
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow>
+              <EuiTitle size="xs">
+                <h4>
+                  <EuiText color="text">
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.title"
+                      defaultMessage="Improve your results with ELSER"
+                    />
+                  </EuiText>
+                </h4>
+              </EuiTitle>
+            </EuiFlexItem>
+            {isDismissable && (
+              <EuiFlexItem grow={false}>
+                <TextExpansionDismissButton dismiss={dismiss} />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
-        </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>
+              <EuiText>
+                <FormattedHTMLMessage
+                  id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.body"
+                  defaultMessage="ELSER (Elastic Learned Sparse EncodeR) is our <strong>new trained machine learning model</strong> designed to efficiently use context in natural language queries. This model delivers better results than BM25 without further training on your data."
+                  tagName="p"
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                <EuiFlexItem>
+                  <EuiButton
+                    color="success"
+                    disabled={isCreateButtonDisabled}
+                    iconType="launch"
+                    onClick={() => createTextExpansionModel(undefined)}
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.deployButton.label',
+                      {
+                        defaultMessage: 'Deploy',
+                      }
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiLink target="_blank" href={docLinks.elser}>
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.learnMoreLink"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );
