@@ -3481,6 +3481,44 @@
           },
           {
             "parentPluginId": "files",
+            "id": "def-server.FileServiceStart.bulkDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDelete",
+            "description": [
+              "\nDelete multiple files at once.\n"
+            ],
+            "signature": [
+              "(args: ",
+              "BulkDeleteFilesArgs",
+              ") => Promise<PromiseSettledResult<void>[]>"
+            ],
+            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-server.FileServiceStart.bulkDelete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- delete files args"
+                ],
+                "signature": [
+                  "BulkDeleteFilesArgs"
+                ],
+                "path": "src/plugins/files/server/file_service/file_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
             "id": "def-server.FileServiceStart.getById",
             "type": "Function",
             "tags": [],
