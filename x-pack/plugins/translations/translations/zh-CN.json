@@ -22497,7 +22497,6 @@
     "xpack.ml.management.jobsList.accessDeniedTitle": "访问被拒绝",
     "xpack.ml.management.jobsList.analyticsDocsLabel": "分析作业文档",
     "xpack.ml.management.jobsList.anomalyDetectionDocsLabel": "异常检测作业文档",
-    "xpack.ml.management.jobsList.insufficientLicenseDescription.link": "开始试用或升级您的订阅",
     "xpack.ml.management.jobsList.insufficientLicenseLabel": "升级以使用订阅功能",
     "xpack.ml.management.jobsList.jobsListTagline": "查看、导出和导入 Machine Learning 分析和异常检测项目。",
     "xpack.ml.management.jobsList.jobsListTitle": "Machine Learning",
