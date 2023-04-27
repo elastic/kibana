@@ -77,7 +77,7 @@ export const ConvertConnector: React.FC = () => {
           <EuiTitle size="xxs">
             <h4>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.converConnector.title',
+                'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.title',
                 {
                   defaultMessage: 'Customize your connector',
                 }
@@ -96,7 +96,7 @@ export const ConvertConnector: React.FC = () => {
               <EuiLink href={docLinks.buildConnector} target="_blank">
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.linkTitle',
-                  { defaultMessage: 'connector client.' }
+                  { defaultMessage: 'connector client' }
                 )}
               </EuiLink>
             ),
