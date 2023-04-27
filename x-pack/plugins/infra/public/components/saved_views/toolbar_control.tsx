@@ -16,8 +16,19 @@ import { UpsertViewModal } from './upsert_modal';
 import { UseInventoryViewsResult } from '../../hooks/use_inventory_views';
 import { UseMetricsExplorerViewsResult } from '../../hooks/use_metrics_explorer_views';
 
+type UseViewProps =
+  | 'currentView'
+  | 'views'
+  | 'isFetchingViews'
+  | 'isFetchingCurrentView'
+  | 'isCreatingView'
+  | 'isUpdatingView';
+
 type UseViewResult = UseInventoryViewsResult | UseMetricsExplorerViewsResult;
-interface Props<ViewState> extends UseInventoryViewsResult, UseMetricsExplorerViewsResult {
+type InventoryViewsResult = Pick<UseInventoryViewsResult, UseViewProps>;
+type MetricsExplorerViewsResult = Pick<UseMetricsExplorerViewsResult, UseViewProps>;
+
+interface Props<ViewState> extends InventoryViewsResult, MetricsExplorerViewsResult {
   viewState: ViewState & { time?: number };
   onCreateView: UseViewResult['createView'];
   onDeleteView: UseViewResult['deleteViewById'];
