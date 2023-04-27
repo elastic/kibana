@@ -94,13 +94,13 @@ export class InternalFileService {
     }
   }
 
-  private async bulkGet(
+  private async bulkGet<M>(
     ids: string[],
     {
       throwIfNotFound = true,
       format = 'array',
     }: { throwIfNotFound?: boolean; format?: BulkGetByIdArgs['format'] } = {}
-  ): Promise<Array<IFile | null> | { [id: string]: IFile | null }> {
+  ): Promise<Array<IFile<M> | null> | { [id: string]: IFile<M> | null }> {
     try {
       const metadatas = await this.metadataClient.bulkGet({ ids, throwIfNotFound: false });
       const result = metadatas.map((fileMetadata, i) => {
@@ -117,12 +117,12 @@ export class InternalFileService {
         }
 
         const { id, metadata } = fileMetadata;
-        return this.toFile(id, metadata, metadata.FileKind);
+        return this.toFile<M>(id, metadata as FileMetadata<M>, metadata.FileKind);
       });
 
       return format === 'array'
         ? result
-        : ids.reduce<{ [id: string]: IFile | null }>(
+        : ids.reduce<{ [id: string]: IFile<M> | null }>(
             (acc, id, i) => ({
               ...acc,
               [id]: result[i],
@@ -139,24 +139,24 @@ export class InternalFileService {
     return await this.get(id);
   }
 
-  public async bulkGetById(
+  public async bulkGetById<M>(
     args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound?: true }
-  ): Promise<IFile[]>;
-  public async bulkGetById(
+  ): Promise<Array<IFile<M>>>;
+  public async bulkGetById<M>(
     args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound?: true; format: 'map' }
-  ): Promise<{ [id: string]: IFile }>;
-  public async bulkGetById(
+  ): Promise<{ [id: string]: IFile<M> }>;
+  public async bulkGetById<M>(
     args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound: false }
-  ): Promise<Array<IFile | null>>;
-  public async bulkGetById(
+  ): Promise<Array<IFile<M> | null>>;
+  public async bulkGetById<M>(
     args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound: false; format: 'map' }
-  ): Promise<{ [id: string]: IFile | null }>;
-  public async bulkGetById({
+  ): Promise<{ [id: string]: IFile<M> | null }>;
+  public async bulkGetById<M>({
     ids,
     throwIfNotFound,
     format,
-  }: BulkGetByIdArgs): Promise<Array<IFile | null> | { [id: string]: IFile | null }> {
-    return await this.bulkGet(ids, { throwIfNotFound, format });
+  }: BulkGetByIdArgs): Promise<Array<IFile<M> | null> | { [id: string]: IFile<M> | null }> {
+    return await this.bulkGet<M>(ids, { throwIfNotFound, format });
   }
 
   public getFileKind(id: string): FileKind {
@@ -184,15 +184,15 @@ export class InternalFileService {
     return this.get(fileId);
   }
 
-  private toFile(
+  private toFile<M>(
     id: string,
-    fileMetadata: FileMetadata,
+    fileMetadata: FileMetadata<M>,
     fileKind: string,
     fileClient?: FileClientImpl
-  ): IFile {
-    return new File(
+  ): IFile<M> {
+    return new File<M>(
       id,
-      toJSON(id, fileMetadata),
+      toJSON<M>(id, fileMetadata),
       fileClient ?? this.createFileClient(fileKind),
       this.logger.get(`file-${id}`)
     );
