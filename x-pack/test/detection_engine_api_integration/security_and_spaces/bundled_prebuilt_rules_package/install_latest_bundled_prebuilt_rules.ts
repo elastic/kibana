@@ -26,9 +26,12 @@ export default ({ getService }: FtrProviderContext): void => {
   const removeBundledPackages = async (bundledFleetPackageDir: string) => {
     const files = await fs.readdir(bundledFleetPackageDir);
 
-    for (const file of files) {
+    // Do not remove mock packages with version 99.0.0 and 99.0.1
+    // which are used to test the installation of prerelease packages
+    const downloadedFiles = files.filter((file) => !file.includes('99')) || [];
+
+    for (const file of downloadedFiles) {
       await fs.unlink(path.join(bundledFleetPackageDir, file));
-      await fs.rm(bundledFleetPackageDir, { recursive: true });
     }
   };
 

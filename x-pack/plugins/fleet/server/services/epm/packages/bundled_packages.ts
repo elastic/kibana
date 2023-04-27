@@ -17,7 +17,7 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
   const config = appContextService.getConfig();
 
   const bundledPackageLocation = config?.developer?.bundledPackageLocation;
-
+  console.log('bundle',{bundledPackageLocation})
   if (!bundledPackageLocation) {
     throw new FleetError('xpack.fleet.developer.bundledPackageLocation is not configured');
   }
