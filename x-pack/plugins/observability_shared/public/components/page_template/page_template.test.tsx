@@ -86,7 +86,6 @@ describe('Page template', () => {
         }}
         getPageTemplateServices={getPageTemplateServices}
         guidedOnboardingApi={guidedOnboardingMock.createStart().guidedOnboardingApi}
-        getChromeStyle$={() => of('classic')}
       >
         <div>Test structure</div>
       </ObservabilityPageTemplate>
@@ -109,7 +108,6 @@ describe('Page template', () => {
           }}
           getPageTemplateServices={getPageTemplateServices}
           guidedOnboardingApi={guidedOnboardingMock.createStart().guidedOnboardingApi}
-          getChromeStyle$={() => of('classic')}
         >
           <div>Test structure</div>
         </ObservabilityPageTemplate>
