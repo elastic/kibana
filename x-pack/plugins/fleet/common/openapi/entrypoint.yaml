@@ -105,6 +105,10 @@ paths:
   /agent_policies/delete:
     $ref: paths/agent_policies@delete.yaml
 
+  # Message signing service
+  /message_signing_service/rotate_key_pair:
+   $ref: paths/message_signing_service@rotate_key_pair.yaml
+
   # Data streams endpoints
   /data_streams:
     $ref: paths/data_streams.yaml

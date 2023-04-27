@@ -35,6 +35,23 @@ describe('MessageSigningService', () => {
     });
   }
 
+  function mockCreatePointInTimeFinderAsInternalUserOnce(savedObjects: unknown[] = []) {
+    esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest
+      .fn()
+      .mockResolvedValueOnce({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: savedObjects };
+        },
+      })
+      .mockResolvedValueOnce({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [] };
+        },
+      });
+  }
+
   function setupMocks(canEncrypt = true) {
     const mockContext = createAppContextStartContractMock();
     mockContext.encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup({
@@ -74,19 +91,49 @@ describe('MessageSigningService', () => {
     it('can correctly generate key pair if none exist', async () => {
       mockCreatePointInTimeFinderAsInternalUser();
 
-      await messageSigningService.generateKeyPair();
+      const generateKeyPairResponse = await messageSigningService.generateKeyPair();
       expect(soClientMock.create).toBeCalledWith(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, {
         private_key: expect.any(String),
         public_key: expect.any(String),
         passphrase: expect.any(String),
       });
+
+      expect(generateKeyPairResponse).toEqual({
+        passphrase: expect.any(String),
+        privateKey: expect.any(String),
+        publicKey: expect.any(String),
+      });
+    });
+
+    it('can correctly rotate existing key pair', async () => {
+      mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
+
+      const rotateKeyPairResponse = await messageSigningService.rotateKeyPair();
+
+      expect(soClientMock.delete).toBeCalledWith(
+        MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+        keyPairObj.id
+      );
+      expect(soClientMock.create).toBeCalledWith(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, {
+        private_key: expect.any(String),
+        public_key: expect.any(String),
+        passphrase: expect.any(String),
+      });
+
+      expect(rotateKeyPairResponse).toEqual(true);
     });
 
     it('does not generate key pair if one exists', async () => {
       mockCreatePointInTimeFinderAsInternalUser([keyPairObj]);
 
-      await messageSigningService.generateKeyPair();
+      const generateKeyPairResponse = await messageSigningService.generateKeyPair();
       expect(soClientMock.create).not.toBeCalled();
+
+      expect(generateKeyPairResponse).toEqual({
+        passphrase: expect.any(String),
+        privateKey: expect.any(String),
+        publicKey: expect.any(String),
+      });
     });
 
     it('can correctly sign messages', async () => {

@@ -88,6 +88,7 @@ packages/content-management/content_editor @elastic/appex-sharedux
 examples/content_management_examples @elastic/appex-sharedux
 src/plugins/content_management @elastic/appex-sharedux
 packages/content-management/table_list @elastic/appex-sharedux
+packages/kbn-content-management-utils @elastic/kibana-data-discovery
 examples/controls_example @elastic/kibana-presentation
 src/plugins/controls @elastic/kibana-presentation
 src/core @elastic/kibana-core
@@ -285,6 +286,9 @@ packages/core/usage-data/core-usage-data-base-server-internal @elastic/kibana-co
 packages/core/usage-data/core-usage-data-server @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-internal @elastic/kibana-core
 packages/core/usage-data/core-usage-data-server-mocks @elastic/kibana-core
+packages/core/user-settings/core-user-settings-server @elastic/kibana-security
+packages/core/user-settings/core-user-settings-server-internal @elastic/kibana-security
+packages/core/user-settings/core-user-settings-server-mocks @elastic/kibana-security
 x-pack/plugins/cross_cluster_replication @elastic/platform-deployment-management
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
@@ -315,7 +319,7 @@ packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-ebt-tools @elastic/kibana-core
 packages/kbn-ecs @elastic/kibana-core @elastic/security-threat-hunting-investigations
-x-pack/packages/kbn-ecs-data-quality-dashboard @elastic/security-threat-hunting-investigations
+x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 x-pack/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
@@ -478,6 +482,7 @@ x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
 x-pack/packages/observability/alert_details @elastic/actionable-observability
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
+x-pack/plugins/observability_onboarding @elastic/apm-ui
 x-pack/plugins/observability @elastic/actionable-observability
 x-pack/plugins/observability_shared @elastic/actionable-observability
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
@@ -544,11 +549,11 @@ x-pack/test/security_api_integration/packages/helpers @elastic/kibana-core
 x-pack/plugins/security @elastic/kibana-security
 x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
 x-pack/plugins/security_solution @elastic/security-solution
-packages/security-solution/side_nav @elastic/security-threat-hunting-explore
-packages/security-solution/storybook/config @elastic/security-threat-hunting-explore
+x-pack/packages/security-solution/side_nav @elastic/security-threat-hunting-explore
+x-pack/packages/security-solution/storybook/config @elastic/security-threat-hunting-explore
 x-pack/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-solution-platform
-x-pack/packages/kbn-securitysolution-data-table @elastic/security-threat-hunting-investigations
+x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-investigations
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-es-utils @elastic/security-solution-platform
 packages/kbn-securitysolution-exception-list-components @elastic/security-solution-platform
@@ -567,6 +572,10 @@ packages/kbn-securitysolution-t-grid @elastic/security-solution-platform
 packages/kbn-securitysolution-utils @elastic/security-solution-platform
 packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-server-route-repository @elastic/apm-ui
+x-pack/plugins/serverless @elastic/appex-sharedux
+packages/serverless/project_switcher @elastic/appex-sharedux
+packages/serverless/storybook/config @elastic/appex-sharedux
+packages/serverless/types @elastic/appex-sharedux
 test/plugin_functional/plugins/session_notifications @elastic/kibana-core
 x-pack/plugins/session_view @elastic/sec-cloudnative-integrations
 packages/kbn-set-map @elastic/kibana-operations
@@ -775,21 +784,20 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 
 ### Observability Plugins
 
-# Observability Shared
-/x-pack/plugins/observability/public/components/shared/date_picker/ @elastic/uptime
+# Observability Shared App
+x-pack/plugins/observability_shared @elastic/observability-ui
 
-# Unified Observability - on hold due to team capacity shortage
-# For now, if you're changing these pages, get a review from someone who understand the changes
-# /x-pack/plugins/observability/public/context @elastic/unified-observability
-# /x-pack/test/observability_functional @elastic/unified-observability
+# Observability App
+x-pack/plugins/observability @elastic/actionable-observability
 
-# Home/Overview/Landing Pages
-/x-pack/plugins/observability/public/pages/home @elastic/observability-ui
-/x-pack/plugins/observability/public/pages/landing @elastic/observability-ui
-/x-pack/plugins/observability/public/pages/overview @elastic/observability-ui
+# Observability App > Overview page
+x-pack/plugins/observability/public/pages/overview @elastic/observability-ui
 
-# Actionable Observability
-/x-pack/test/observability_functional @elastic/actionable-observability
+# Observability App > Alert Details
+x-pack/packages/observability/alert_details @elastic/actionable-observability
+
+# Observability App > Functional Tests
+x-pack/test/observability_functional @elastic/actionable-observability
 
 # Observability robots
 /.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots

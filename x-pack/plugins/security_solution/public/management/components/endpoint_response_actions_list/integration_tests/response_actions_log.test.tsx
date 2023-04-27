@@ -652,10 +652,14 @@ describe('Response actions history', () => {
       });
 
       it('should contain expected output accordions for `execute` action WITH execute operation privilege', async () => {
-        const actionDetails = await getActionListMock({ actionCount: 1, commands: ['execute'] });
+        const actionListApiResponse = await getActionListMock({
+          actionCount: 1,
+          agentIds: ['agent-a'],
+          commands: ['execute'],
+        });
         useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
-          data: actionDetails,
+          data: actionListApiResponse,
         });
 
         mockUseGetFileInfo = {
@@ -669,17 +673,7 @@ describe('Response actions history', () => {
           isFetched: true,
           error: null,
           data: {
-            data: {
-              ...apiMocks.responseProvider.actionDetails({
-                path: `/api/endpoint/action/${actionDetails.data[0].id}`,
-              }).data,
-              outputs: {
-                [actionDetails.data[0].agents[0]]: {
-                  content: {},
-                  type: 'json',
-                },
-              },
-            },
+            data: actionListApiResponse.data[0],
           },
         };
 
@@ -714,7 +708,11 @@ describe('Response actions history', () => {
         });
         useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
-          data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
+          data: await getActionListMock({
+            actionCount: 1,
+            commands: ['execute'],
+            agentIds: ['agent-a'],
+          }),
         });
 
         render();
@@ -723,10 +721,7 @@ describe('Response actions history', () => {
         const expandButton = getByTestId(`${testPrefix}-expand-button`);
         userEvent.click(expandButton);
 
-        const executeAccordions = getByTestId(
-          `${testPrefix}-actionsLogTray-executeResponseOutput-output`
-        );
-        expect(executeAccordions).toBeTruthy();
+        expect(getByTestId(`${testPrefix}-actionsLogTray-executeResponseOutput-output`));
       });
 
       it('should not contain full output download link in expanded row for `execute` action WITHOUT Actions Log privileges', async () => {
