@@ -16,7 +16,7 @@ export const useSavedViewsNotifier = () => {
       toastLifeTimeMs: 3000,
       title:
         message ||
-        i18n.translate('xpack.infra.savedView.errorOnCreate.title', {
+        i18n.translate('xpack.infra.savedView.errorOnDelete.title', {
           defaultMessage: `An error occured deleting the view.`,
         }),
     });

@@ -65,30 +65,32 @@ export const useWaffleViewState = () => {
   };
 
   const onViewChange = useCallback(
-    (newState: { attributes: WaffleViewState }) => {
+    (newState) => {
+      const attributes = newState.attributes as WaffleViewState;
+
       setWaffleOptionsState({
-        sort: newState.attributes.sort,
-        metric: newState.attributes.metric,
-        groupBy: newState.attributes.groupBy,
-        nodeType: newState.attributes.nodeType,
-        view: newState.attributes.view,
-        customOptions: newState.attributes.customOptions,
-        customMetrics: newState.attributes.customMetrics,
-        boundsOverride: newState.attributes.boundsOverride,
-        autoBounds: newState.attributes.autoBounds,
-        accountId: newState.attributes.accountId,
-        region: newState.attributes.region,
-        legend: newState.attributes.legend,
-        timelineOpen: newState.attributes.timelineOpen,
+        sort: attributes.sort,
+        metric: attributes.metric,
+        groupBy: attributes.groupBy,
+        nodeType: attributes.nodeType,
+        view: attributes.view,
+        customOptions: attributes.customOptions,
+        customMetrics: attributes.customMetrics,
+        boundsOverride: attributes.boundsOverride,
+        autoBounds: attributes.autoBounds,
+        accountId: attributes.accountId,
+        region: attributes.region,
+        legend: attributes.legend,
+        timelineOpen: attributes.timelineOpen,
       });
 
-      if (newState.attributes.time) {
+      if (attributes.time) {
         setWaffleTimeState({
-          currentTime: newState.attributes.time,
-          isAutoReloading: newState.attributes.autoReload,
+          currentTime: attributes.time,
+          isAutoReloading: attributes.autoReload,
         });
       }
-      setWaffleFiltersState(newState.attributes.filterQuery);
+      setWaffleFiltersState(attributes.filterQuery);
     },
     [setWaffleOptionsState, setWaffleTimeState, setWaffleFiltersState]
   );
