@@ -35193,7 +35193,6 @@
     "xpack.synthetics.testResults.expandedRow.response_body.notRecorded": "正文未记录。在监测配置的高级选项中将索引响应正文选项设置为“始终打开”以记录正文。",
     "xpack.synthetics.testRun.description": "请在保存前测试您的监测并验证结果",
     "xpack.synthetics.testRun.pushError": "无法推送监测到服务。",
-    "xpack.synthetics.testRun.pushErrorLabel": "推送错误",
     "xpack.synthetics.testRun.pushing.description": "正在推送监测到服务......",
     "xpack.synthetics.testRun.runErrorLabel": "运行测试时出错",
     "xpack.synthetics.testRunDetailsRoute.page.title": "测试运行详情",
