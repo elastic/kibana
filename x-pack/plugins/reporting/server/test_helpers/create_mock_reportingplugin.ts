@@ -31,7 +31,7 @@ import { ReportingConfig, ReportingCore } from '..';
 import { buildConfig, ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
-import { setFieldFormats } from '../services';
+import { setFieldFormats } from '../routes/generate/services';
 
 export const createMockPluginSetup = (
   setupMock: Partial<Record<keyof ReportingInternalSetup, any>>
