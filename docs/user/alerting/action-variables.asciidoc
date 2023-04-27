@@ -241,3 +241,81 @@ The `<time zone>` parameter must be a valid time zone identifier as listed in ht
 The `<date format>` parameter must be a valid date format string as described in the https://momentjs.com/docs/#/displaying/[Moment `format()` documentation].  For example, the date format  `"YYYY-MM-DD hh:mma"` will render in the following format: `"2023-04-24 11:21pm"`.
 
 The date value itself should usually be referenced with triple braces, as some characters in date strings may contain values which are escaped, which would prevent them from being parsed as dates.
+
+[discrete]
+[[mustache-examples]]
+=== Mustache examples
+
+Below is a Mustache template for an email action sent from an elasticsearch query rule.
+
+[source]
+----
+# {{context.title}}
+
+{{#FormatDate}} {{{date}}} ; America/New_York {{/FormatDate}}
+
+{{context.conditions}}
+
+**documents** _[view in Discover]({{{context.link}}})_
+
+| provider | action | duration |
+| -------- | ------ | -------- |
+{{#context.hits}}{{#_source.event}}| {{provider}} | {{action}} | {{#duration}}{{#EvalMath}} round( {{{duration}}} / 1000 / 1000 / 1000 ) {{/EvalMath}} sec{{/duration}} {{^duration}}-n/a-{{/duration}} |{{/_source.event}}
+{{/context.hits}}
+----
+
+Notes:
+
+- `# {{context.title}}` will render the value of the `context.title` variable as a level 1 heading.
+- `{{#FormatDate}} ... {{/FormatDate}}` will render the value of the `date` variable as a formatted date in the America/New_York time zone.
+- `**documents** _[view in Discover]({{{context.link}}})_` show examples of `**bold**`, `_italic_`, and `[text](url)` links
+- The last section is a table with three columns, with one row per element in the `context.hits` array.  From each of those elements, we access the `provider`, `action`, and `duration` fields of the `_source.event` object.  The `duration` field is rendered as a number of seconds, rounded to the nearest second - it's stored as nanoseconds so needs to be divided by a billion to yield seconds.  The duration field is optional, so we use a `{{#duration}} ... {{/duration}}` section to render the duration if it's present, and `-n/a-` if it's not present.
+
+When rendered into Markdown, and then HTML, and viewed in an email client, it will look like this:
+
+[role="screenshot"]
+image:images/email-mustache-template-rendered.png[Email template rendered in an email client]
+
+The template references the following mustache variables:
+
+- `date`
+- `context.title`
+- `context.conditions`
+- `context.link`
+- `context.hits[]._source.event.provider`
+- `context.hits[]._source.event.action`
+- `context.hits[]._source.event.duration`
+
+Some of the relevant data available as mustache variables:
+
+[source,json]
+----
+{
+  "date": "2023-04-27T22:40:34.153Z",
+  "context": {
+    "title": "rule 'esq' matched query for group host-2",
+    "conditions": "Number of matching documents for group \"host-2\" is less than 1000",
+    "link": "https://example.com/this-will-link-to-Discover",
+    "hits": [
+      {
+        "_source": {
+          "event": {
+            "provider": "alerting",
+            "action": "active-instance",
+            "duration": "96023000000"
+          }
+        }
+      },
+      {
+        "_source": {
+          "@timestamp": "2023-04-27T22:40:22.251Z",
+          "event": {
+            "provider": "alerting",
+            "action": "execute-action"
+          }
+        }
+      }
+    ]
+  }
+}
+---
