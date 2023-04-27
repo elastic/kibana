@@ -69,3 +69,25 @@ export class ExportTypesRegistry {
 // TODO: Define a 2nd ExportTypeRegistry instance for "immediate execute" report job types only.
 // It should not require a `CreateJobFn` for its ExportTypeDefinitions, which only makes sense for async.
 // Once that is done, the `any` types below can be removed.
+/*
+ * @return ExportTypeRegistry: the ExportTypeRegistry instance that should be
+ * used to register async export type definitions
+ */
+export function getExportTypesRegistry(): ExportTypesRegistry {
+  const registry = new ExportTypesRegistry();
+  // type CreateFnType = CreateJobFn<any, any>; // can not specify params types because different type of params are not assignable to each other
+  // type RunFnType = any; // can not specify because ImmediateExecuteFn is not assignable to RunTaskFn
+  // const getTypeFns: Array<() => ExportTypeDefinition<CreateFnType | null, RunFnType>> = [
+  //   getTypeCsv,
+  //   getTypeCsvFromSavedObject,
+  //   getTypeCsvFromSavedObjectImmediate,
+  //   getTypePng,
+  //   getTypePngV2,
+  //   getTypePrintablePdf,
+  //   getTypePrintablePdfV2,
+  // ];
+  // getTypeFns.forEach((getType) => {
+  //   registry.register(getType());
+  // });
+  return registry;
+}

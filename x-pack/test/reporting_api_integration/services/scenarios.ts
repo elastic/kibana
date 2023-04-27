@@ -10,12 +10,13 @@ import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,
 } from '@kbn/reporting-plugin/common/constants';
-import { JobParamsCSV } from '@kbn/reporting-export-types/server/export_types/csv_searchsource/types';
-import { JobParamsDownloadCSV } from '@kbn/reporting-export-types/server/export_types/csv_searchsource_immediate/types';
-import { JobParamsPNGDeprecated } from '@kbn/reporting-export-types/common';
-import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types/server/export_types/printable_pdf/types';
+import type { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server';
+import { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/routes/lib';
+import type {
+  JobParamsCSV,
+  JobParamsPNGDeprecated,
+} from '@kbn/reporting-export-types/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
-
 function removeWhitespace(str: string) {
   return str.replace(/\s/g, '');
 }

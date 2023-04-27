@@ -24,3 +24,5 @@ export const plugin = (initContext: PluginInitializerContext<ReportingConfigType
 export type { ReportingConfig } from './config/config';
 // @internal
 export { ReportingCore } from './core';
+
+export type { JobParamsDownloadCSV } from './routes/generate';

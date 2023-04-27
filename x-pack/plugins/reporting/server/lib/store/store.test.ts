@@ -8,7 +8,8 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ReportingCore } from '../..';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
-import { Report, ReportDocument, ReportingStore, SavedReport } from '.';
+import { Report, ReportingStore, SavedReport } from '.';
+import { ReportDocument } from './report';
 
 describe('ReportingStore', () => {
   const mockLogger = loggingSystemMock.createLogger();

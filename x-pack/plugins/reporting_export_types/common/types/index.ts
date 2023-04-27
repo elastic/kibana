@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { registerJobGenerationRoutes } from './generate_from_jobparams';
-export type { JobParamsDownloadCSV } from './csv_searchsource_immediate';
+export type { JobParamsPNGDeprecated } from './png';
+export type { JobParamsCSV } from './csv_searchsource';

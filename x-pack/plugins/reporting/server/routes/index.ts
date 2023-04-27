@@ -18,3 +18,5 @@ export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerJobGenerationRoutes(reporting, logger);
   registerJobInfoRoutes(reporting);
 }
+
+export type { JobParamsDownloadCSV } from './generate/csv_searchsource_immediate';
