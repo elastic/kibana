@@ -117,6 +117,7 @@ export type AbstractESJoinSourceDescriptor = AbstractESAggSourceDescriptor & {
 
 export type ESDistanceSourceDescriptor = AbstractESJoinSourceDescriptor & {
   distance: number; // km
+  geoField: string;
   type: SOURCE_TYPES.ES_DISTANCE_SOURCE;
 };
 

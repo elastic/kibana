@@ -54,7 +54,7 @@ export function createDistanceJoinLayerDescriptor({
     rightSourceId: joinId,
   });
 
-  /*const styleProperties: Partial<VectorStylePropertiesDescriptor> = {
+  const styleProperties: Partial<VectorStylePropertiesDescriptor> = {
     [VECTOR_STYLES.LABEL_TEXT]: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
@@ -65,10 +65,9 @@ export function createDistanceJoinLayerDescriptor({
         },
       },
     }
-  };*/
-  const styleProperties: Partial<VectorStylePropertiesDescriptor> = {};
+  };
 
-  /*const joins = [
+  const joins = [
     {
       leftField: '_id',
       right: {
@@ -83,8 +82,7 @@ export function createDistanceJoinLayerDescriptor({
         applyForceRefresh: true,
       },
     } as JoinDescriptor,
-  ];*/
-  const joins = [];
+  ];
 
   return GeoJsonVectorLayer.createDescriptor({
     joins,

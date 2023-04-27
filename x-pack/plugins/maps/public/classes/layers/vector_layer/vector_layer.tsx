@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { FilterSpecification, Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
-import { Feature, GeoJsonProperties, Geometry, Position } from 'geojson';
+import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -553,6 +553,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
   async _syncJoin({
     join,
+    featureCollection,
     startLoading,
     stopLoading,
     onLoadError,
@@ -561,7 +562,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     isForceRefresh,
     isFeatureEditorOpenForLayer,
     inspectorAdapters,
-  }: { join: InnerJoin } & DataRequestContext): Promise<JoinState> {
+  }: { join: InnerJoin, featureCollection?: FeatureCollection } & DataRequestContext): Promise<JoinState> {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
@@ -602,7 +603,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         leftSourceName,
         join.getLeftField().getName(),
         registerCancelCallback.bind(null, requestToken),
-        inspectorAdapters
+        inspectorAdapters,
+        featureCollection,
       );
       stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
@@ -618,11 +620,11 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     }
   }
 
-  async _syncJoins(syncContext: DataRequestContext, style: IVectorStyle) {
+  async _syncJoins(syncContext: DataRequestContext, style: IVectorStyle, featureCollection?: FeatureCollection) {
     const joinSyncs = this.getValidJoins().map(async (join) => {
       await this._syncJoinStyleMeta(syncContext, join, style);
       await this._syncJoinFormatters(syncContext, join, style);
-      return this._syncJoin({ join, ...syncContext });
+      return this._syncJoin({ join, featureCollection, ...syncContext });
     });
 
     return await Promise.all(joinSyncs);
