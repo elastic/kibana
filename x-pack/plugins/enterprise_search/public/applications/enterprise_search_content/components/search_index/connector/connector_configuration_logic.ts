@@ -163,13 +163,13 @@ function validIntInput(value: string | number | boolean | null): boolean {
 }
 
 function ensureCorrectTyping(
-  type: string,
+  type: FieldType,
   value: string | number | boolean | null
 ): string | number | boolean | null {
   switch (type) {
-    case 'int':
+    case FieldType.INTEGER:
       return validIntInput(value) ? ensureIntType(value) : value;
-    case 'bool':
+    case FieldType.BOOLEAN:
       return ensureBooleanType(value);
     default:
       return ensureStringType(value);
