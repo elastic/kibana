@@ -2024,7 +2024,7 @@ components:
         name:
           type: string
           description: The display name for the connector.
-    connector_response_properties_slack:
+    connector_response_properties_slack_webhook:
       title: Connector response properties for a Slack connector
       type: object
       required:
@@ -2039,6 +2039,33 @@ components:
           description: The type of connector.
           enum:
             - .slack
+        id:
+          type: string
+          description: The identifier for the connector.
+        is_deprecated:
+          $ref: '#/components/schemas/is_deprecated'
+        is_missing_secrets:
+          $ref: '#/components/schemas/is_missing_secrets'
+        is_preconfigured:
+          $ref: '#/components/schemas/is_preconfigured'
+        name:
+          type: string
+          description: The display name for the connector.
+    connector_response_properties_slack_api:
+      title: Connector response properties for a Slack connector
+      type: object
+      required:
+        - connector_type_id
+        - id
+        - is_deprecated
+        - is_preconfigured
+        - name
+      properties:
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .slack_api
         id:
           type: string
           description: The identifier for the connector.
