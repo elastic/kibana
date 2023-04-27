@@ -6,22 +6,8 @@
  * Side Public License, v 1.
  */
 
-export interface ValidFieldDetails {
-  exists: number;
-  total: number;
-  missing: number;
-  buckets: Bucket[];
-}
-
-export interface ErrorFieldDetails {
-  error: string;
-}
-
-export type FieldDetails = ValidFieldDetails | ErrorFieldDetails;
-
-export interface Bucket {
-  display: string;
-  value: string;
-  percent: number;
-  count: number;
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-check-mappings-update-cli'],
+};

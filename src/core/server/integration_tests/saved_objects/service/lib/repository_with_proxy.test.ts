@@ -139,9 +139,11 @@ describe('404s from proxies', () => {
   });
 
   afterAll(async () => {
-    await root.shutdown();
-    await hapiServer.stop({ timeout: 1000 });
-    await esServer.stop();
+    if (root) {
+      await root.shutdown();
+      await hapiServer.stop({ timeout: 1000 });
+      await esServer.stop();
+    }
   });
 
   describe('requests when a proxy relays request/responses with the correct product header', () => {
