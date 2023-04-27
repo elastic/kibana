@@ -87,7 +87,6 @@ export function startDiffingDashboardState(
   this.subscriptions.add(
     checkForUnsavedChangesSubject$
       .pipe(
-        startWith(null),
         debounceTime(CHANGE_CHECK_DEBOUNCE),
         switchMap(() => {
           return new Observable((observer) => {
@@ -121,7 +120,7 @@ export function startDiffingDashboardState(
     }
     next(action);
   };
-  return diffingMiddleware;
+  return { diffingMiddleware, checkForUnsavedChangesSubject$ };
 }
 
 /**
