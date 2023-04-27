@@ -20,7 +20,7 @@ export const spatialJoinWizardConfig: LayerWizard = {
   }),
   icon: null,
   renderWizard: (renderWizardArguments: RenderWizardArguments) => {
-    return <WizardForm />;
+    return <WizardForm {...renderWizardArguments} />;
   },
   title: i18n.translate('xpack.maps.spatialJoinWizard.title', {
     defaultMessage: 'Spatial join',
