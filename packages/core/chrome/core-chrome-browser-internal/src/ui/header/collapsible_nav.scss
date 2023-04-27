@@ -1,5 +1,11 @@
 $screenHeightBreakpoint: 15em;
 
+.kbnCollapsibleNav {
+  @media (max-height: $screenHeightBreakpoint) {
+    overflow-y: auto;
+  }
+}
+
 .kbnCollapsibleNav__recentsListGroup {
   @include euiYScroll;
   max-height: $euiSize * 10;
