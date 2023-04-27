@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it.only('should format the comments correctly', async () => {
+      it('should format the comments correctly', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
           supertest,
           serviceNowSimulatorURL,
