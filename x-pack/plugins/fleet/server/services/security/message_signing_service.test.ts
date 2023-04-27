@@ -122,23 +122,18 @@ describe('MessageSigningService', () => {
     });
 
     it('does not generate key pair on rotation if no key pair exists', async () => {
-      mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
-      // mock delete to return false
-      jest
-        .spyOn(messageSigningService, 'removeKeyPair' as any)
-        .mockReturnValue(Promise.resolve(false));
+      // no previous key pair
+      mockCreatePointInTimeFinderAsInternalUserOnce([]);
 
-      await messageSigningService.rotateKeyPair();
-
-      // can't delete key pair if none exists
-      expect(soClientMock.delete).not.toBeCalled();
-      // doesn't create new key pair
-      expect(soClientMock.create).not.toBeCalled();
+      const response = messageSigningService.rotateKeyPair();
+      await expect(response).rejects.toThrowError(
+        'Error rotating key pair: Error fetching current key pair: No current key pair found!'
+      );
     });
 
-    it('throws getCurrentKeyPairObj error if any on rotate', async () => {
+    it('throws `getCurrentKeyPairObj` error if any on rotate', async () => {
       mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
-      // mock delete to return false
+      // mock delete to throw
       jest
         .spyOn(messageSigningService, 'getCurrentKeyPairObj' as any)
         .mockRejectedValue(Error('foo'));
@@ -149,9 +144,9 @@ describe('MessageSigningService', () => {
       );
     });
 
-    it('throws soClient error if any on rotate', async () => {
+    it('throws `soClient` `delete` error if any on rotate', async () => {
       mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
-      // mock delete to return false
+      // mock delete to throw
       soClientMock.delete.mockRejectedValue(Error('foo'));
 
       const response = messageSigningService.rotateKeyPair();
@@ -160,9 +155,20 @@ describe('MessageSigningService', () => {
       );
     });
 
-    it('throws generateKeyPair error if any on rotate', async () => {
+    it('throws `soClient` `create` error if any on rotate', async () => {
       mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
-      // mock delete to return false
+      // mock delete to throw
+      soClientMock.create.mockRejectedValue(Error('foo'));
+
+      const response = messageSigningService.rotateKeyPair();
+      await expect(response).rejects.toThrowError(
+        'Error rotating key pair: Error creating key pair: foo'
+      );
+    });
+
+    it('throws `generateKeyPair` error if any on rotate', async () => {
+      mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
+      // mock delete to throw
       messageSigningService.generateKeyPair = jest.fn().mockRejectedValue(Error('foo'));
 
       const response = messageSigningService.rotateKeyPair();
