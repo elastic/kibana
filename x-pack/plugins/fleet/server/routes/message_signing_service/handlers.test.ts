@@ -10,7 +10,7 @@ import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
-import { appContextService } from '../../services/app_context';
+import { appContextService } from '../../services';
 import type { FleetRequestHandlerContext } from '../../types';
 
 import { rotateKeyPairHandler } from './handlers';
@@ -44,11 +44,27 @@ describe('FleetMessageSigningServiceHandler', () => {
     appContextService.stop();
   });
 
-  it('POST /message_signing_service/rotate_key_pair?acknowledge=true succeeds with an 200 with `acknowledge=true`', async () => {
-    (appContextService.getMessageSigningService()?.rotateKeyPair as jest.Mock).mockReturnValue(
-      true
-    );
+  it(`POST /message_signing_service/rotate_key_pair?acknowledge=true fails with an 500 with "acknowledge=true" when no messaging service`, async () => {
+    appContextService.start({
+      ...createAppContextStartContractMock(),
+      // @ts-expect-error
+      messageSigningService: undefined,
+    });
 
+    await rotateKeyPairHandler(
+      coreMock.createCustomRequestHandlerContext(context),
+      request,
+      response
+    );
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: {
+        message: 'Failed to rotate key pair. Message signing service is unavailable!',
+      },
+    });
+  });
+
+  it('POST /message_signing_service/rotate_key_pair?acknowledge=true succeeds with `acknowledge=true`', async () => {
     await rotateKeyPairHandler(
       coreMock.createCustomRequestHandlerContext(context),
       request,
@@ -61,9 +77,9 @@ describe('FleetMessageSigningServiceHandler', () => {
     });
   });
 
-  it(`POST /message_signing_service/rotate_key_pair?acknowledge=true fails with an 500 with "acknowledge=true" when rotateKeyPair doesn't succeed`, async () => {
-    (appContextService.getMessageSigningService()?.rotateKeyPair as jest.Mock).mockReturnValue(
-      false
+  it('POST /message_signing_service/rotate_key_pair?acknowledge=true throws errors`', async () => {
+    (appContextService.getMessageSigningService()?.rotateKeyPair as jest.Mock).mockRejectedValue(
+      Error('foo')
     );
 
     await rotateKeyPairHandler(
@@ -71,28 +87,11 @@ describe('FleetMessageSigningServiceHandler', () => {
       request,
       response
     );
+
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 500,
       body: {
-        message: 'Failed to rotate key pair!',
-      },
-    });
-  });
-
-  it(`POST /message_signing_service/rotate_key_pair?acknowledge=true fails with an 500 with "acknowledge=true" when no messaging service`, async () => {
-    (appContextService.getMessageSigningService()?.rotateKeyPair as jest.Mock).mockReturnValue(
-      undefined
-    );
-
-    await rotateKeyPairHandler(
-      coreMock.createCustomRequestHandlerContext(context),
-      request,
-      response
-    );
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 500,
-      body: {
-        message: 'Failed to rotate key pair!',
+        message: 'foo',
       },
     });
   });

@@ -36,6 +36,7 @@ class DocLinks {
   public appSearchWebCrawlerReference: string;
   public behavioralAnalytics: string;
   public behavioralAnalyticsEvents: string;
+  public buildConnector: string;
   public bulkApi: string;
   public clientsGoIndex: string;
   public clientsGuide: string;
@@ -164,6 +165,7 @@ class DocLinks {
     this.appSearchWebCrawlerReference = '';
     this.behavioralAnalytics = '';
     this.behavioralAnalyticsEvents = '';
+    this.buildConnector = '';
     this.bulkApi = '';
     this.clientsGoIndex = '';
     this.clientsGuide = '';
@@ -294,6 +296,7 @@ class DocLinks {
     this.appSearchWebCrawlerReference = docLinks.links.appSearch.webCrawlerReference;
     this.behavioralAnalytics = docLinks.links.enterpriseSearch.behavioralAnalytics;
     this.behavioralAnalyticsEvents = docLinks.links.enterpriseSearch.behavioralAnalyticsEvents;
+    this.buildConnector = docLinks.links.enterpriseSearch.buildConnector;
     this.bulkApi = docLinks.links.enterpriseSearch.bulkApi;
     this.clientsGoIndex = docLinks.links.clients.goIndex;
     this.clientsGuide = docLinks.links.clients.guide;
@@ -317,8 +320,16 @@ class DocLinks {
     this.clientsRustOverview = docLinks.links.clients.rustOverview;
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
     this.connectors = docLinks.links.enterpriseSearch.connectors;
+    this.connectorsAzureBlobStorage = docLinks.links.enterpriseSearch.connectorsAzureBlobStorage;
+    this.connectorsGoogleCloudStorage =
+      docLinks.links.enterpriseSearch.connectorsGoogleCloudStorage;
+    this.connectorsMicrosoftSQL = docLinks.links.enterpriseSearch.connectorsMicrosoftSQL;
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
+    this.connectorsNetworkDrive = docLinks.links.enterpriseSearch.connectorsNetworkDrive;
+    this.connectorsOracle = docLinks.links.enterpriseSearch.connectorsOracle;
+    this.connectorsPostgreSQL = docLinks.links.enterpriseSearch.connectorsPostgreSQL;
+    this.connectorsS3 = docLinks.links.enterpriseSearch.connectorsS3;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
     this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;

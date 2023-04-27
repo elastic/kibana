@@ -26,7 +26,7 @@ import type { SignalSource } from '../../types';
 import { buildBulkBody } from '../../factories/utils/build_bulk_body';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
 
-export interface SuppressionBuckets {
+export interface SuppressionBucket {
   event: estypes.SearchHit<SignalSource>;
   count: number;
   start: Date;
@@ -57,7 +57,7 @@ export const wrapSuppressedAlerts = ({
   ruleExecutionLogger,
   publicBaseUrl,
 }: {
-  suppressionBuckets: SuppressionBuckets[];
+  suppressionBuckets: SuppressionBucket[];
   spaceId: string;
   completeRule: CompleteRule<RuleParams>;
   mergeStrategy: ConfigType['alertMergeStrategy'];

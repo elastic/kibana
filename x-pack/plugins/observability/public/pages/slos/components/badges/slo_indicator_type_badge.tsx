@@ -63,7 +63,7 @@ export function SloIndicatorTypeBadge({ slo }: Props) {
           <EuiToolTip
             position="top"
             content={i18n.translate('xpack.observability.slo.indicatorTypeBadge.exploreInApm', {
-              defaultMessage: 'Explore {service} in APM',
+              defaultMessage: 'View {service} details',
               values: { service: slo.indicator.params.service },
             })}
           >
@@ -73,7 +73,7 @@ export function SloIndicatorTypeBadge({ slo }: Props) {
               onClickAriaLabel={i18n.translate(
                 'xpack.observability.slo.indicatorTypeBadge.exploreInApm',
                 {
-                  defaultMessage: 'Explore {service} in APM',
+                  defaultMessage: 'View {service} details',
                   values: { service: slo.indicator.params.service },
                 }
               )}
