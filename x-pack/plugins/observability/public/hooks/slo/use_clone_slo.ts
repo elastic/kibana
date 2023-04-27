@@ -7,15 +7,19 @@
 
 import { v1 as uuidv1 } from 'uuid';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
 
 export function useCloneSlo() {
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const queryClient = useQueryClient();
 
-  const cloneSlo = useMutation<
+  return useMutation<
     CreateSLOResponse,
     string,
     { slo: CreateSLOInput; idToCopyFrom?: string },
@@ -41,7 +45,10 @@ export function useCloneSlo() {
 
         const optimisticUpdate = {
           ...data,
-          results: [...(data?.results || []), { ...sloUsedToClone, name: slo.name, id: uuidv1() }],
+          results: [
+            ...(data?.results || []),
+            { ...sloUsedToClone, name: slo.name, id: uuidv1(), summary: undefined },
+          ],
           total: data?.total && data.total + 1,
         };
 
@@ -50,20 +57,31 @@ export function useCloneSlo() {
           queryClient.setQueryData(queryKey, optimisticUpdate);
         }
 
+        toasts.addSuccess(
+          i18n.translate('xpack.observability.slo.clone.successNotification', {
+            defaultMessage: 'Successfully created {name}',
+            values: { name: slo.name },
+          })
+        );
+
         // Return a context object with the snapshotted value
         return { previousSloList: data };
       },
       // If the mutation fails, use the context returned from onMutate to roll back
-      onError: (_err, _slo, context) => {
+      onError: (_err, { slo }, context) => {
         if (context?.previousSloList) {
           queryClient.setQueryData(['fetchSloList'], context.previousSloList);
         }
+        toasts.addDanger(
+          i18n.translate('xpack.observability.slo.clone.errorNotification', {
+            defaultMessage: 'Failed to clone {name}',
+            values: { name: slo.name },
+          })
+        );
       },
       onSuccess: () => {
         queryClient.invalidateQueries(['fetchSloList']);
       },
     }
   );
-
-  return cloneSlo;
 }
