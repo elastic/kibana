@@ -88,7 +88,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
             body: {
               success: false,
               help: [
-                i18n.translate('xpack.reporting.diagnostic.screenshotFailureMessage', {
+                i18n.translate('xpack.reportingExportTypes.diagnostic.screenshotFailureMessage', {
                   defaultMessage: `We couldn't screenshot your Kibana install.`,
                 }),
               ],

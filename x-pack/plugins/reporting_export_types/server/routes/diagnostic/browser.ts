@@ -15,7 +15,7 @@ import type { DiagnosticResponse } from '.';
 
 const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
   'error while loading shared libraries': i18n.translate(
-    'xpack.reporting.diagnostic.browserMissingDependency',
+    'xpack.reportingExportTypes.diagnostic.browserMissingDependency',
     {
       defaultMessage: `The browser couldn't start properly due to missing system dependencies. Please see {url}`,
       values: { url: docLinks.links.reporting.browserSystemDependencies },
@@ -23,14 +23,14 @@ const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
   ),
 
   'Could not find the default font': i18n.translate(
-    'xpack.reporting.diagnostic.browserMissingFonts',
+    'xpack.reportingExportTypes.diagnostic.browserMissingFonts',
     {
       defaultMessage: `The browser couldn't locate a default font. Please see {url} to fix this issue.`,
       values: { url: docLinks.links.reporting.browserSystemDependencies },
     }
   ),
 
-  'No usable sandbox': i18n.translate('xpack.reporting.diagnostic.noUsableSandbox', {
+  'No usable sandbox': i18n.translate('xpack.reportingExportTypes.diagnostic.noUsableSandbox', {
     defaultMessage: `Unable to use Chromium sandbox. This can be disabled at your own risk with 'xpack.screenshotting.browser.chromium.disableSandbox'. Please see {url}`,
     values: { url: docLinks.links.reporting.browserSandboxDependencies },
   }),

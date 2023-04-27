@@ -56,6 +56,7 @@
     "xpack.profiling": ["plugins/profiling"],
     "xpack.remoteClusters": "plugins/remote_clusters",
     "xpack.reporting": ["plugins/reporting"],
+    "xpack.reportingExportTypes": ["plugins/reporting_export_types"],
     "xpack.rollupJobs": ["plugins/rollup"],
     "xpack.runtimeFields": "plugins/runtime_fields",
     "xpack.screenshotting": "plugins/screenshotting",
