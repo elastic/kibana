@@ -37,7 +37,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     };
     let indexPatternString: string;
     before(async () => {
-      log.debug('Starting lens before method');
+      await log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
       await kibanaServer.savedObjects.cleanStandardList();
       try {
@@ -71,10 +71,14 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    loadTestFile(require.resolve('./formula')); // 5m 52s
-    loadTestFile(require.resolve('./heatmap')); // 51s
-    loadTestFile(require.resolve('./gauge')); // 1m 17s
-    loadTestFile(require.resolve('./metric')); // 4m 7s
-    loadTestFile(require.resolve('./legacy_metric')); // 29s
+    // total run time ~16m 30s
+    loadTestFile(require.resolve('./dashboard')); // 6m 45s
+    loadTestFile(require.resolve('./show_underlying_data')); // 2m
+    loadTestFile(require.resolve('./show_underlying_data_dashboard')); // 2m 10s
+    loadTestFile(require.resolve('./share')); // 1m 20s
+    loadTestFile(require.resolve('./tsdb')); // 1m
+    loadTestFile(require.resolve('./colors')); // 1m 2s
+    loadTestFile(require.resolve('./chart_data')); // 1m 10s
+    loadTestFile(require.resolve('./time_shift')); // 1m
   });
 };
