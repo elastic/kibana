@@ -122,27 +122,27 @@ export function SloEditForm({ slo }: Props) {
     if (isEditMode) {
       const processedValues = transformValuesToUpdateSLOInput(values);
 
-      await updateSlo({ sloId: slo.id, slo: processedValues });
-
       if (isCreateRuleCheckboxChecked) {
+        await updateSlo({ sloId: slo.id, slo: processedValues });
         navigate(
           basePath.prepend(
             `${paths.observability.sloEdit(slo.id)}?${CREATE_RULE_SEARCH_PARAM}=true`
           )
         );
       } else {
+        updateSlo({ sloId: slo.id, slo: processedValues });
         navigate(basePath.prepend(paths.observability.slos));
       }
     } else {
       const processedValues = transformValuesToCreateSLOInput(values);
 
-      const { id } = await createSlo({ slo: processedValues });
-
       if (isCreateRuleCheckboxChecked) {
+        const { id } = await createSlo({ slo: processedValues });
         navigate(
           basePath.prepend(`${paths.observability.sloEdit(id)}?${CREATE_RULE_SEARCH_PARAM}=true`)
         );
       } else {
+        createSlo({ slo: processedValues });
         navigate(basePath.prepend(paths.observability.slos));
       }
     }

@@ -143,13 +143,18 @@ export function SloListItem({
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexItem>
                   <EuiText size="s">
-                    <EuiLink data-test-subj="o11ySloListItemLink" onClick={handleViewDetails}>
-                      {slo.name}
-                    </EuiLink>
+                    {slo.summary ? (
+                      <EuiLink data-test-subj="o11ySloListItemLink" onClick={handleViewDetails}>
+                        {slo.name}
+                      </EuiLink>
+                    ) : (
+                      <span>{slo.name}</span>
+                    )}
                   </EuiText>
                 </EuiFlexItem>
                 <SloBadges
                   activeAlerts={activeAlerts}
+                  isLoading={!slo.summary}
                   rules={rules}
                   slo={slo}
                   onClickRuleBadge={handleCreateRule}
@@ -158,11 +163,13 @@ export function SloListItem({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <SloSummary
-                slo={slo}
-                historicalSummary={historicalSummary}
-                historicalSummaryLoading={historicalSummaryLoading}
-              />
+              {slo.summary ? (
+                <SloSummary
+                  slo={slo}
+                  historicalSummary={historicalSummary}
+                  historicalSummaryLoading={historicalSummaryLoading}
+                />
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

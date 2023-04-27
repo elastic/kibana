@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { v1 as uuidv1 } from 'uuid';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
-import type { CreateSLOInput, CreateSLOResponse } from '@kbn/slo-schema';
+import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
 
@@ -37,9 +38,36 @@ export function useCreateSlo() {
       onError: (error, { slo: { name } }) => {
         toasts.addError(new Error(String(error)), {
           title: i18n.translate('xpack.observability.slo.create.errorNotification', {
-            defaultMessage: 'Something went wrong',
+            defaultMessage: 'Something went wrong while creating {name}',
+            values: { name },
           }),
         });
+      },
+      onMutate: async ({ slo }) => {
+        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+        await queryClient.cancelQueries(['fetchSloList']);
+
+        const latestFetchSloListRequest = (
+          queryClient.getQueriesData<FindSLOResponse>(['fetchSloList']) || []
+        ).at(0);
+
+        const [queryKey, data] = latestFetchSloListRequest || [];
+
+        const newItem = { ...slo, id: uuidv1() };
+
+        const optimisticUpdate = {
+          ...data,
+          results: [...(data?.results || []), { ...newItem }],
+          total: data?.total ? data.total + 1 : 1,
+        };
+
+        // Optimistically update to the new value
+        if (queryKey) {
+          queryClient.setQueryData(queryKey, optimisticUpdate);
+        }
+
+        // Return a context object with the snapshotted value
+        return { previousSloList: data };
       },
     }
   );

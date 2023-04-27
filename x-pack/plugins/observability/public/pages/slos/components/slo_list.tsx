@@ -85,7 +85,7 @@ export function SloList({ autoRefresh }: Props) {
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <SloListItems sloList={results} loading={isLoading} error={isError} />
+        <SloListItems sloList={results} loading={isLoading || isRefetching} error={isError} />
       </EuiFlexItem>
 
       {results.length ? (
