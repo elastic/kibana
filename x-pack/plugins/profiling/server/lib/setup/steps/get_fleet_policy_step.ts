@@ -106,25 +106,30 @@ export function getFleetPolicyStep({
       // We create the new policy and bind it to the Cloud default agent policy;
       // to do so, force s required to be set to true.
       const cloudAgentPolicyId = 'policy-elastic-agent-on-cloud';
-      await packagePolicyClient.create(soClient, esClient, {
-            policy_id: cloudAgentPolicyId,
-            enabled: true,
-            package: {
-              name: 'profiler_symbolizer',
-              title: 'Universal Profiling Symbolizer',
-              version: '8.8.0-preview'
-            },
-            name: 'elastic-universal-profiling-symbolizer',
-            namespace: 'default',
-            inputs: [{
+      await packagePolicyClient.create(
+        soClient,
+        esClient,
+        {
+          policy_id: cloudAgentPolicyId,
+          enabled: true,
+          package: {
+            name: 'profiler_symbolizer',
+            title: 'Universal Profiling Symbolizer',
+            version: '8.8.0-preview',
+          },
+          name: 'elastic-universal-profiling-symbolizer',
+          namespace: 'default',
+          inputs: [
+            {
               id: 'universal_profiling_symbolizer-pf-elastic-symbolizer',
               enabled: true,
               streams: [],
               type: 'profiler_symbolizer',
-            } ]
-          },
-          {force: true}
-      )
+            },
+          ],
+        },
+        { force: true }
+      );
     },
   };
 }
