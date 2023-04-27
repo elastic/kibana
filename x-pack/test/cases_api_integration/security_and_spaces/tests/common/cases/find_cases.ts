@@ -9,6 +9,7 @@ import { v1 as uuidv1 } from 'uuid';
 
 import expect from '@kbn/expect';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
   CaseResponse,
   CaseSeverity,
@@ -523,7 +524,7 @@ export default ({ getService }: FtrProviderContext): void => {
        */
       const getAllCasesSortedByCreatedAtAsc = async () => {
         const cases = await es.search<CaseAttributes>({
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           body: {
             size: 10000,
             sort: [{ 'cases.created_at': { unmapped_type: 'date', order: 'asc' } }],

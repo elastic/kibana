@@ -110,6 +110,8 @@ export function DashboardEditingToolbar() {
       const newEmbeddable = await dashboard.addNewEmbeddable(embeddableFactory.type, explicitInput);
 
       if (newEmbeddable) {
+        dashboard.setScrollToPanelId(newEmbeddable.id);
+        dashboard.setHighlightPanelId(newEmbeddable.id);
         toasts.addSuccess({
           title: dashboardReplacePanelActionStrings.getSuccessMessage(newEmbeddable.getTitle()),
           'data-test-subj': 'addEmbeddableToDashboardSuccess',

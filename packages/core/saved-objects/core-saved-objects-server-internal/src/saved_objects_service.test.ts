@@ -23,6 +23,7 @@ import { type RawPackageInfo, Env } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
+import { SavedObjectsType, MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
@@ -54,6 +55,14 @@ import { getSavedObjectsDeprecationsProvider } from './deprecations';
 
 jest.mock('./object_types');
 jest.mock('./deprecations');
+
+const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
+  name: 'test-type',
+  hidden: false,
+  namespaceType: 'single',
+  mappings: { properties: {} },
+  ...parts,
+});
 
 describe('SavedObjectsService', () => {
   let deprecationsSetup: ReturnType<typeof createDeprecationRegistryProviderMock>;
@@ -628,6 +637,86 @@ describe('SavedObjectsService', () => {
         ).mock.calls;
 
         expect(includedHiddenTypes).toEqual(['someHiddenType']);
+      });
+    });
+
+    describe('index retrieval APIs', () => {
+      let soService: SavedObjectsService;
+
+      beforeEach(async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        soService = new SavedObjectsService(coreContext);
+
+        typeRegistryInstanceMock.getType.mockImplementation((type: string) => {
+          if (type === 'dashboard') {
+            return createType({
+              name: 'dashboard',
+            });
+          } else if (type === 'foo') {
+            return createType({
+              name: 'foo',
+              indexPattern: '.kibana_foo',
+            });
+          } else if (type === 'bar') {
+            return createType({
+              name: 'bar',
+              indexPattern: '.kibana_bar',
+            });
+          } else if (type === 'bar_too') {
+            return createType({
+              name: 'bar_too',
+              indexPattern: '.kibana_bar',
+            });
+          } else {
+            return undefined;
+          }
+        });
+
+        await soService.setup(createSetupDeps());
+      });
+
+      describe('#getDefaultIndex', () => {
+        it('return the default index', async () => {
+          const { getDefaultIndex } = await soService.start(createStartDeps());
+          expect(getDefaultIndex()).toEqual(MAIN_SAVED_OBJECT_INDEX);
+        });
+      });
+
+      describe('#getIndexForType', () => {
+        it('return the correct index for type specifying its indexPattern', async () => {
+          const { getIndexForType } = await soService.start(createStartDeps());
+          expect(getIndexForType('bar')).toEqual('.kibana_bar');
+        });
+        it('return the correct index for type not specifying its indexPattern', async () => {
+          const { getIndexForType } = await soService.start(createStartDeps());
+          expect(getIndexForType('dashboard')).toEqual(MAIN_SAVED_OBJECT_INDEX);
+        });
+        it('return the default index for unknown type', async () => {
+          const { getIndexForType } = await soService.start(createStartDeps());
+          expect(getIndexForType('unknown_type')).toEqual(MAIN_SAVED_OBJECT_INDEX);
+        });
+      });
+
+      describe('#getIndicesForTypes', () => {
+        it('return the correct indices for specified types', async () => {
+          const { getIndicesForTypes } = await soService.start(createStartDeps());
+          expect(getIndicesForTypes(['dashboard', 'foo', 'bar'])).toEqual([
+            MAIN_SAVED_OBJECT_INDEX,
+            '.kibana_foo',
+            '.kibana_bar',
+          ]);
+        });
+        it('ignore duplicate indices', async () => {
+          const { getIndicesForTypes } = await soService.start(createStartDeps());
+          expect(getIndicesForTypes(['bar', 'bar_too'])).toEqual(['.kibana_bar']);
+        });
+        it('return the default index for unknown type', async () => {
+          const { getIndicesForTypes } = await soService.start(createStartDeps());
+          expect(getIndicesForTypes(['unknown', 'foo'])).toEqual([
+            MAIN_SAVED_OBJECT_INDEX,
+            '.kibana_foo',
+          ]);
+        });
       });
     });
   });

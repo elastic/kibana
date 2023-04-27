@@ -35,7 +35,10 @@ const getText = (node?: Array<string | { _: string }>) => {
 const isLikelyIrrelevant = (name: string, failure: string) => {
   if (
     failure.includes('NoSuchSessionError: This driver instance does not have a valid session ID') ||
-    failure.includes('NoSuchSessionError: Tried to run command without establishing a connection')
+    failure.includes(
+      'NoSuchSessionError: Tried to run command without establishing a connection'
+    ) ||
+    failure.includes('NoSuchSessionError: invalid session id')
   ) {
     return true;
   }

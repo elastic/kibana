@@ -6,18 +6,21 @@
  */
 
 import { useContext } from 'react';
+import { of } from 'rxjs';
 
+import type {
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+  ISearchGeneric,
+} from '@kbn/data-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
-
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-
 import { SharePluginStart } from '@kbn/share-plugin/public';
-
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -34,6 +37,36 @@ const dataViewsStart = dataViewPluginMocks.createStartContract();
 
 // Replace mock to support syntax using `.then()` as used in transform code.
 coreStart.savedObjects.client.find = jest.fn().mockResolvedValue({ savedObjects: [] });
+
+// Replace mock to support tests for `use_index_data`.
+dataStart.search.search = jest.fn(({ params }: IKibanaSearchRequest) => {
+  const hits = [];
+
+  // simulate a cross cluster search result
+  // against a cluster that doesn't support fields
+  if (params.index.includes(':')) {
+    hits.push({
+      _id: 'the-doc',
+      _index: 'the-index',
+    });
+  }
+
+  return of<IKibanaSearchResponse>({
+    rawResponse: {
+      hits: {
+        hits,
+        total: {
+          value: 0,
+          relation: 'eq',
+        },
+        max_score: 0,
+      },
+      timed_out: false,
+      took: 10,
+      _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+    },
+  });
+}) as ISearchGeneric;
 
 const appDependencies: AppDependencies = {
   application: coreStart.application,

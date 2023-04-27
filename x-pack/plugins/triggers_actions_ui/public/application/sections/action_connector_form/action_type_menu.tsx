@@ -22,6 +22,7 @@ interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
   featureId?: string;
   setHasActionsUpgradeableByTrial?: (value: boolean) => void;
+  setAllActionTypes?: (actionsType: ActionTypeIndex) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 
@@ -29,6 +30,7 @@ export const ActionTypeMenu = ({
   onActionTypeChange,
   featureId,
   setHasActionsUpgradeableByTrial,
+  setAllActionTypes,
   actionTypeRegistry,
 }: Props) => {
   const {
@@ -37,7 +39,6 @@ export const ActionTypeMenu = ({
   } = useKibana().services;
   const [loadingActionTypes, setLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
-
   useEffect(() => {
     (async () => {
       try {
@@ -50,6 +51,9 @@ export const ActionTypeMenu = ({
           index[actionTypeItem.id] = actionTypeItem;
         }
         setActionTypesIndex(index);
+        if (setAllActionTypes) {
+          setAllActionTypes(index);
+        }
         // determine if there are actions disabled by license that that
         // would be enabled by upgrading to gold or trial
         if (setHasActionsUpgradeableByTrial) {
@@ -73,9 +77,13 @@ export const ActionTypeMenu = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
-    .filter(([id, details]) => actionTypeRegistry.has(id) && details.enabledInConfig === true)
+    .filter(
+      ([id, details]) =>
+        actionTypeRegistry.has(id) &&
+        details.enabledInConfig === true &&
+        !actionTypeRegistry.get(id).hideInUi
+    )
     .map(([id, actionType]) => {
       const actionTypeModel = actionTypeRegistry.get(id);
       return {
@@ -100,7 +108,9 @@ export const ActionTypeMenu = ({
           title={item.name}
           description={item.selectMessage}
           isDisabled={!checkEnabledResult.isEnabled}
-          onClick={() => onActionTypeChange(item.actionType)}
+          onClick={() => {
+            onActionTypeChange(item.actionType);
+          }}
         />
       );
 
