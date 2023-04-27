@@ -129,16 +129,17 @@ export class CasesUiPlugin
       getFilesClient: plugins.files.filesClientFactory.asScoped,
     });
 
-    registerActions(
+    registerActions({
       core,
       plugins,
-      {
+      caseContextProps: {
         externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
         getFilesClient: plugins.files.filesClientFactory.asScoped,
       },
-      createBrowserHistory()
-    );
+      history: createBrowserHistory(),
+      storage: this.storage,
+    });
 
     return {
       api: createClientAPI({ http: core.http }),

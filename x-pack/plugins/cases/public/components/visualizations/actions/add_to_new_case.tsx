@@ -15,13 +15,12 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { canUseCases } from '../../../client/helpers/can_use_cases';
-import type { CasesPluginStart } from '../../../types';
 import { CommentType } from '../../../../common';
 import { isLensEmbeddable } from './utils';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
 
 import { OWNER_INFO } from '../../../../common/constants';
-import type { DashboardVisualizationEmbeddable, UIActionProps } from './types';
+import type { CaseUIActionProps, DashboardVisualizationEmbeddable } from './types';
 import CasesProvider from '../../cases_context';
 import { ADD_TO_CASE_SUCCESS } from './translations';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
@@ -61,17 +60,12 @@ const AddToNewCaseFlyoutWrapper: React.FC<Props> = ({ embeddable, onClose, onSuc
 AddToNewCaseFlyoutWrapper.displayName = 'AddToNewCaseFlyoutWrapper';
 
 export const createAddToNewCaseLensAction = ({
-  order,
-  coreStart,
+  core,
   plugins,
+  storage,
   caseContextProps,
-}: {
-  order?: number;
-  coreStart: CoreStart;
-  plugins: CasesPluginStart;
-  caseContextProps: UIActionProps;
-}) => {
-  const { application: applicationService, theme, uiSettings } = coreStart;
+}: CaseUIActionProps) => {
+  const { application: applicationService, theme, uiSettings } = core;
   let currentAppId: string | undefined;
   applicationService?.currentAppId$.subscribe((appId) => {
     currentAppId = appId;
@@ -80,7 +74,6 @@ export const createAddToNewCaseLensAction = ({
   return createAction<{ embeddable: DashboardVisualizationEmbeddable; coreStart: CoreStart }>({
     id: ACTION_ID,
     type: 'actionButton',
-    order,
     getIconType: () => 'casesApp',
     getDisplayName: () =>
       i18n.translate('xpack.cases.actions.visualizationActions.addToNewCase.displayName', {
@@ -122,8 +115,9 @@ export const createAddToNewCaseLensAction = ({
       const mount = toMountPoint(
         <KibanaContextProvider
           services={{
-            ...coreStart,
+            ...core,
             ...plugins,
+            storage,
           }}
         >
           <EuiThemeProvider darkMode={uiSettings.get(DEFAULT_DARK_MODE)}>

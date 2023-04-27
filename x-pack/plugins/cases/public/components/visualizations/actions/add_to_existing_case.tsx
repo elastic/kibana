@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { unmountComponentAtNode } from 'react-dom';
-import { Router } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 
@@ -14,19 +13,16 @@ import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type * as H from 'history';
 
 import { canUseCases } from '../../../client/helpers/can_use_cases';
-import type { CasesPluginStart } from '../../../types';
 import { CommentType } from '../../../../common';
 import { isLensEmbeddable } from './utils';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
 
 import CasesProvider from '../../cases_context';
 import { OWNER_INFO } from '../../../../common/constants';
-import type { DashboardVisualizationEmbeddable, UIActionProps } from './types';
+import type { CaseUIActionProps, DashboardVisualizationEmbeddable } from './types';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 
 export const ACTION_ID = 'embeddable_addToExistingCase';
@@ -63,19 +59,12 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({ embeddable, onClose, onS
 AddExistingCaseModalWrapper.displayName = 'AddExistingCaseModalWrapper';
 
 export const createAddToExistingCaseLensAction = ({
-  order,
-  coreStart,
+  core,
   plugins,
+  storage,
   caseContextProps,
-  history,
-}: {
-  order?: number;
-  coreStart: CoreStart;
-  plugins: CasesPluginStart;
-  history: H.History;
-  caseContextProps: UIActionProps;
-}) => {
-  const { application: applicationService, theme, uiSettings } = coreStart;
+}: CaseUIActionProps) => {
+  const { application: applicationService, theme, uiSettings } = core;
   let currentAppId: string | undefined;
   applicationService?.currentAppId$.subscribe((appId) => {
     currentAppId = appId;
@@ -84,7 +73,6 @@ export const createAddToExistingCaseLensAction = ({
   return createAction<{ embeddable: DashboardVisualizationEmbeddable }>({
     id: ACTION_ID,
     type: 'actionButton',
-    order,
     getIconType: () => 'casesApp',
     getDisplayName: () =>
       i18n.translate('xpack.cases.actions.visualizationActions.addToExistingCase.displayName', {
@@ -123,26 +111,25 @@ export const createAddToExistingCaseLensAction = ({
       const mount = toMountPoint(
         <KibanaContextProvider
           services={{
-            ...coreStart,
+            ...core,
             ...plugins,
+            storage,
           }}
         >
           <EuiThemeProvider darkMode={uiSettings.get(DEFAULT_DARK_MODE)}>
-            <Router history={history}>
-              <CasesProvider
-                value={{
-                  ...caseContextProps,
-                  owner,
-                  permissions: casePermissions,
-                }}
-              >
-                <AddExistingCaseModalWrapper
-                  embeddable={embeddable}
-                  onClose={cleanupDom}
-                  onSuccess={cleanupDom}
-                />
-              </CasesProvider>
-            </Router>
+            <CasesProvider
+              value={{
+                ...caseContextProps,
+                owner,
+                permissions: casePermissions,
+              }}
+            >
+              <AddExistingCaseModalWrapper
+                embeddable={embeddable}
+                onClose={cleanupDom}
+                onSuccess={cleanupDom}
+              />
+            </CasesProvider>
           </EuiThemeProvider>
         </KibanaContextProvider>,
         { theme$: theme.theme$ }

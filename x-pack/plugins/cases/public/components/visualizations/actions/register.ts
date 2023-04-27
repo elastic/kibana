@@ -6,43 +6,45 @@
  */
 
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
-import type * as H from 'history';
 
-import type { CasesPluginStart } from '../../../types';
 import { createAddToNewCaseLensAction } from './add_to_new_case';
 import { createAddToExistingCaseLensAction } from './add_to_existing_case';
-import type { UIActionProps } from './types';
+import type { CaseUIActionProps } from './types';
 
-export const registerUIActions = (
-  coreStart: CoreStart,
-  plugins: CasesPluginStart,
-  caseContextProps: UIActionProps,
-  history: H.History
-) => {
-  registerLensActions(coreStart, plugins, caseContextProps, history);
+export const registerUIActions = ({
+  core,
+  plugins,
+  caseContextProps,
+  history,
+  storage,
+}: CaseUIActionProps) => {
+  registerLensActions({ core, plugins, caseContextProps, history, storage });
 };
 
-const registerLensActions = (
-  coreStart: CoreStart,
-  plugins: CasesPluginStart,
-  caseContextProps: UIActionProps,
-  history: H.History
-) => {
+const registerLensActions = ({
+  core,
+  plugins,
+  caseContextProps,
+  history,
+  storage,
+}: CaseUIActionProps) => {
   const addToNewCaseAction = createAddToNewCaseLensAction({
     // order: 42,
-    coreStart,
+    core,
     plugins,
     caseContextProps,
+    history,
+    storage,
   });
   plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToNewCaseAction);
 
   const addToExistingCaseAction = createAddToExistingCaseLensAction({
     // order: 41,
-    coreStart,
+    core,
     plugins,
     caseContextProps,
     history,
+    storage,
   });
   plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToExistingCaseAction);
 };
