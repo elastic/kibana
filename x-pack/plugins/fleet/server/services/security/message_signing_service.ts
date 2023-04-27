@@ -82,16 +82,20 @@ export class MessageSigningService implements MessageSigningServiceInterface {
         }
       : { ...keypairSoObject, passphrase_plain: passphrase };
 
-    await this.soClient.create<Partial<MessageSigningKeys>>(
-      MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
-      keypairSoObject
-    );
+    try {
+      await this.soClient.create<Partial<MessageSigningKeys>>(
+        MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+        keypairSoObject
+      );
 
-    return {
-      privateKey,
-      publicKey,
-      passphrase,
-    };
+      return {
+        privateKey,
+        publicKey,
+        passphrase,
+      };
+    } catch (error) {
+      throw new MessageSigningError(`Error creating key pair: ${error.message}`, error);
+    }
   }
 
   public async sign(
