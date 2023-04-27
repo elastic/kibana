@@ -1,0 +1,2 @@
+uiSettings.overrides.defaultRoute: /app/security/get_started
+xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'
