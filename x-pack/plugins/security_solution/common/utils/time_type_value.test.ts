@@ -18,8 +18,8 @@ describe('getTimeTypeValue', () => {
   ].forEach(({ interval, value, unit }) => {
     it(`should correctly return time duration and time unit when 'interval' is ${interval}`, () => {
       const { value: actualValue, unit: actualUnit } = getTimeTypeValue(interval);
-      expect(actualValue).toEqual(value);
-      expect(actualUnit).toEqual(unit);
+      expect(actualValue).toBe(value);
+      expect(actualUnit).toBe(unit);
     });
   });
 
@@ -37,8 +37,8 @@ describe('getTimeTypeValue', () => {
   ].forEach(({ interval, value, unit }) => {
     it(`should correctly return positive time duration and time unit when 'interval' is negative (${interval})`, () => {
       const { value: actualValue, unit: actualUnit } = getTimeTypeValue(interval);
-      expect(actualValue).toEqual(value);
-      expect(actualUnit).toEqual(unit);
+      expect(actualValue).toBe(value);
+      expect(actualUnit).toBe(unit);
     });
   });
 
@@ -56,8 +56,8 @@ describe('getTimeTypeValue', () => {
   ].forEach(({ interval, value, unit }) => {
     it(`should correctly return time duration equal to '0' when 'interval' does not specify time duration (${interval})`, () => {
       const { value: actualValue, unit: actualUnit } = getTimeTypeValue(interval);
-      expect(actualValue).toEqual(value);
-      expect(actualUnit).toEqual(unit);
+      expect(actualValue).toBe(value);
+      expect(actualUnit).toBe(unit);
     });
   });
 
@@ -71,8 +71,8 @@ describe('getTimeTypeValue', () => {
   ].forEach(({ interval, value, unit }) => {
     it(`should correctly return time unit set to 'ms' as a default value when 'interval' does not specify it (${interval})`, () => {
       const { value: actualValue, unit: actualUnit } = getTimeTypeValue(interval);
-      expect(actualValue).toEqual(value);
-      expect(actualUnit).toEqual(unit);
+      expect(actualValue).toBe(value);
+      expect(actualUnit).toBe(unit);
     });
   });
 
@@ -83,8 +83,8 @@ describe('getTimeTypeValue', () => {
   ].forEach(({ interval, value, unit }) => {
     it(`should correctly return time unit set to 'ms' as a default value when data is invalid (${interval})`, () => {
       const { value: actualValue, unit: actualUnit } = getTimeTypeValue(interval);
-      expect(actualValue).toEqual(value);
-      expect(actualUnit).toEqual(unit);
+      expect(actualValue).toBe(value);
+      expect(actualUnit).toBe(unit);
     });
   });
 });
