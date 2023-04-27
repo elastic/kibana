@@ -12,10 +12,11 @@ import {
   EuiCollapsibleNav,
   EuiPopover,
   EuiThemeProvider,
+  useEuiTheme,
 } from '@elastic/eui';
-import { action } from '@storybook/addon-actions';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
+import { css } from '@emotion/react';
 import { getSolutionPropertiesMock, NavigationStorybookMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import { NavigationProps, NavigationServices } from '../../types';
@@ -24,57 +25,66 @@ import { NavigationProvider } from '../services';
 import { Navigation as Component } from './navigation';
 
 const storybookMock = new NavigationStorybookMock();
-let colorMode = '';
-colorMode = 'LIGHT';
+
+const SIZE_OPEN = 248;
+const SIZE_CLOSED = 40;
 
 const Template = (args: NavigationProps & NavigationServices) => {
   const services = storybookMock.getServices(args);
   const props = storybookMock.getProps(args);
 
-  const { navIsOpen } = services;
-  const collapseAction = action('setNavIsOpen');
+  const { euiTheme, colorMode } = useEuiTheme();
 
-  const setNavIsOpen = (value: boolean) => {
-    collapseAction(value);
+  const [isOpen, setIsOpen] = useState(true);
+
+  const toggleOpen = useCallback(() => {
+    setIsOpen(!isOpen);
+  }, [isOpen, setIsOpen]);
+
+  const collabsibleNavCSS = css`
+    border-inline-end-width: 1,
+    background: ${euiTheme.colors.darkestShade},
+    display: flex,
+    flex-direction: row,
+  `;
+
+  const CollapseButton = () => {
+    const buttonCSS = css`
+      margin-left: -32px;
+      margin-top: 12px;
+      position: fixed;
+      z-index: 1000;
+    `;
+    return (
+      <span css={buttonCSS}>
+        <EuiButtonIcon
+          iconType={isOpen ? 'menuLeft' : 'menuRight'}
+          color="ghost"
+          onClick={toggleOpen}
+        />
+      </span>
+    );
   };
 
   return (
-    <EuiCollapsibleNav
-      isOpen={navIsOpen}
-      isDocked={true}
-      showButtonIfDocked={true}
-      hideCloseButton={true}
-      size={navIsOpen ? 248 : 40}
-      button={
-        <EuiThemeProvider colorMode={colorMode === 'DARK' ? 'LIGHT' : 'DARK'}>
-          <span
-            css={{
-              position: 'fixed',
-              zIndex: 1000,
-              ...(navIsOpen
-                ? { marginLeft: -32, marginTop: 14 }
-                : { marginLeft: -32, marginTop: 45 }),
-            }}
-          >
-            <EuiButtonIcon
-              iconType={navIsOpen ? 'menuLeft' : 'menuRight'}
-              aria-label={navIsOpen ? 'Close navigation' : 'Open navigation'}
-              color="text"
-              onClick={() => {
-                setNavIsOpen(!navIsOpen);
-              }}
-            />
-          </span>
-        </EuiThemeProvider>
-      }
-      onClose={() => {
-        setNavIsOpen(false);
-      }}
-    >
-      <NavigationProvider {...services}>
-        <Component {...props} />
-      </NavigationProvider>
-    </EuiCollapsibleNav>
+    <EuiThemeProvider colorMode={colorMode === 'DARK' ? 'LIGHT' : 'DARK'}>
+      <EuiCollapsibleNav
+        css={collabsibleNavCSS}
+        isOpen={true}
+        showButtonIfDocked={true}
+        onClose={toggleOpen}
+        isDocked={true}
+        size={isOpen ? SIZE_OPEN : SIZE_CLOSED}
+        hideCloseButton={false}
+        button={<CollapseButton />}
+      >
+        {isOpen && (
+          <NavigationProvider {...services}>
+            <Component {...props} />
+          </NavigationProvider>
+        )}
+      </EuiCollapsibleNav>
+    </EuiThemeProvider>
   );
 };
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiCollapsibleNavGroup, EuiIcon, EuiSideNav } from '@elastic/eui';
+import { EuiCollapsibleNavGroup, EuiIcon, EuiSideNav, EuiText } from '@elastic/eui';
 import React from 'react';
 import { NavigationBucketProps } from '../../types';
 import { useNavigation } from '../services';
@@ -19,6 +19,7 @@ export const NavigationBucket = (opts: NavigationBucketProps) => {
   if (navIsOpen) {
     return (
       <EuiCollapsibleNavGroup
+        background="dark"
         id={id}
         title={props.name}
         iconType={props.icon}
@@ -26,7 +27,9 @@ export const NavigationBucket = (opts: NavigationBucketProps) => {
         initialIsOpen={activeNavItemId?.startsWith(id + '.')}
         data-test-subj={`nav-bucket-${id}`}
       >
-        <EuiSideNav items={items} css={styles.euiSideNavItems} />
+        <EuiText color="default">
+          <EuiSideNav items={items} css={styles.euiSideNavItems} />
+        </EuiText>
       </EuiCollapsibleNavGroup>
     );
   }
