@@ -2969,6 +2969,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/check-mappings-update-cli@link:packages/kbn-check-mappings-update-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ci-stats-core@link:packages/kbn-ci-stats-core":
   version "0.0.0"
   uid ""
@@ -4001,7 +4005,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ecs-data-quality-dashboard@link:x-pack/packages/kbn-ecs-data-quality-dashboard":
+"@kbn/ecs-data-quality-dashboard@link:x-pack/packages/security-solution/ecs_data_quality_dashboard":
   version "0.0.0"
   uid ""
 
@@ -4921,11 +4925,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-side-nav@link:packages/security-solution/side_nav":
+"@kbn/security-solution-side-nav@link:x-pack/packages/security-solution/side_nav":
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-storybook-config@link:packages/security-solution/storybook/config":
+"@kbn/security-solution-storybook-config@link:x-pack/packages/security-solution/storybook/config":
   version "0.0.0"
   uid ""
 
@@ -4937,7 +4941,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-data-table@link:x-pack/packages/kbn-securitysolution-data-table":
+"@kbn/securitysolution-data-table@link:x-pack/packages/security-solution/data_table":
   version "0.0.0"
   uid ""
 
@@ -5010,6 +5014,22 @@
   uid ""
 
 "@kbn/server-route-repository@link:packages/kbn-server-route-repository":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-project-switcher@link:packages/serverless/project_switcher":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-storybook-config@link:packages/serverless/storybook/config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-types@link:packages/serverless/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless@link:x-pack/plugins/serverless":
   version "0.0.0"
   uid ""
 
@@ -21295,14 +21315,14 @@ moment-duration-format@^2.3.2:
   resolved "https://registry.yarnpkg.com/moment-duration-format/-/moment-duration-format-2.3.2.tgz#5fa2b19b941b8d277122ff3f87a12895ec0d6212"
   integrity sha512-cBMXjSW+fjOb4tyaVHuaVE/A5TqkukDWiOfxxAjY+PEqmmBQlLwn+8OzwPiG3brouXKY5Un4pBjAeB6UToXHaQ==
 
-moment-timezone@^0.5.34:
-  version "0.5.34"
-  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.34.tgz#a75938f7476b88f155d3504a9343f7519d9a405c"
-  integrity sha512-3zAEHh2hKUs3EXLESx/wsgw6IQdusOT8Bxm3D9UrHPQR7zlMmzwybC8zHEM1tQ4LJwP7fcxrWr8tuBg05fFCbg==
+moment-timezone@^0.5.43:
+  version "0.5.43"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.43.tgz#3dd7f3d0c67f78c23cd1906b9b2137a09b3c4790"
+  integrity sha512-72j3aNyuIsDxdF1i7CEgV2FfxM1r6aaqJyLB2vwb33mXYyoyLly+F1zbWqhA3/bVIoJ4szlUoMbUnVdid32NUQ==
   dependencies:
-    moment ">= 2.9.0"
+    moment "^2.29.4"
 
-"moment@>= 2.9.0", moment@>=1.6.0, moment@>=2.14.0, moment@^2.10.6, moment@^2.29.4:
+moment@>=1.6.0, moment@>=2.14.0, moment@^2.10.6, moment@^2.29.4:
   version "2.29.4"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
   integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
