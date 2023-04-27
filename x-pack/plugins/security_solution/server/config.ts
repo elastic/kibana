@@ -122,6 +122,7 @@ export const configSchema = schema.object({
    * the package is not already installed.
    */
   prebuiltRulesPackageVersion: schema.maybe(schema.string()),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

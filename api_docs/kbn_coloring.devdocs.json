@@ -1866,7 +1866,7 @@
         "label": "RequiredPaletteParamTypes",
         "description": [],
         "signature": [
-          "{ reverse: boolean; name: string; rangeMin: number; rangeType: \"number\" | \"percent\"; continuity: ",
+          "{ reverse: boolean; name: string; rangeType: \"number\" | \"percent\"; continuity: ",
           {
             "pluginId": "@kbn/coloring",
             "scope": "common",
@@ -1874,7 +1874,7 @@
             "section": "def-common.PaletteContinuity",
             "text": "PaletteContinuity"
           },
-          "; progression: \"fixed\"; rangeMax: number; stops: ",
+          "; progression: \"fixed\"; rangeMin: number; rangeMax: number; stops: ",
           {
             "pluginId": "@kbn/coloring",
             "scope": "common",
