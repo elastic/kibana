@@ -1,4 +1,6 @@
 newsfeed.enabled: false
+xpack.security.showNavLinks: false
+xpack.serverless.plugin.enabled: true
 xpack.fleet.enableExperimental: ['fleetServerStandalone']
 xpack.fleet.internal.disableILMPolicies: true
 
@@ -13,5 +15,5 @@ xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
 
 # Other disabled plugins
-xpack.canvas.enabled: false
+#xpack.canvas.enabled: false #only disabable in dev-mode
 xpack.reporting.enabled: false
