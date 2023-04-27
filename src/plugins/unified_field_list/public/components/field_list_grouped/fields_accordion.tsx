@@ -15,7 +15,9 @@ import {
   EuiAccordion,
   EuiLoadingSpinner,
   EuiIconTip,
+  EuiSkipLink,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import classNames from 'classnames';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldListItem, FieldsGroupNames } from '../../types';
@@ -25,7 +27,10 @@ export interface FieldsAccordionProps<T extends FieldListItem> {
   initialIsOpen: boolean;
   onToggle: (open: boolean) => void;
   id: string;
+  buttonId: string;
+  nextButtonId?: string;
   label: string;
+  nextLabel?: string;
   helpTooltip?: string;
   hasLoaded: boolean;
   fieldsCount: number;
@@ -52,7 +57,10 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   initialIsOpen,
   onToggle,
   id,
+  buttonId,
+  nextButtonId,
   label,
+  nextLabel,
   helpTooltip,
   hasLoaded,
   fieldsCount,
@@ -94,8 +102,10 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   }, [label, helpTooltip]);
 
   const extraAction = useMemo(() => {
+    const actions: JSX.Element[] = [];
+
     if (showExistenceFetchError) {
-      return (
+      actions.push(
         <EuiIconTip
           aria-label={i18n.translate('unifiedFieldList.fieldsAccordion.existenceErrorAriaLabel', {
             defaultMessage: 'Existence fetch failed',
@@ -110,9 +120,8 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
           }}
         />
       );
-    }
-    if (showExistenceFetchTimeout) {
-      return (
+    } else if (showExistenceFetchTimeout) {
+      actions.push(
         <EuiIconTip
           aria-label={i18n.translate('unifiedFieldList.fieldsAccordion.existenceTimeoutAriaLabel', {
             defaultMessage: 'Existence fetch timed out',
@@ -124,9 +133,8 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
           })}
         />
       );
-    }
-    if (hasLoaded) {
-      return (
+    } else if (hasLoaded) {
+      actions.push(
         <EuiNotificationBadge
           size="m"
           color={isFiltered ? 'accent' : 'subdued'}
@@ -135,10 +143,41 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
           {fieldsCount}
         </EuiNotificationBadge>
       );
+    } else {
+      actions.push(<EuiLoadingSpinner size="m" data-test-subj={`${id}-countLoading`} />);
     }
 
-    return <EuiLoadingSpinner size="m" data-test-subj={`${id}-countLoading`} />;
-  }, [showExistenceFetchError, showExistenceFetchTimeout, hasLoaded, isFiltered, id, fieldsCount]);
+    if (nextButtonId && nextLabel) {
+      actions.push(
+        <EuiSkipLink
+          destinationId={nextButtonId}
+          position="absolute"
+          overrideLinkBehavior
+          fullWidth={true}
+          css={css`
+            top: 0;
+            left: 0;
+          `}
+        >
+          {i18n.translate('unifiedFieldList.fieldsAccordion.skipLinkLabel', {
+            defaultMessage: 'Skip to {nextLabel}',
+            values: { nextLabel },
+          })}
+        </EuiSkipLink>
+      );
+    }
+
+    return actions;
+  }, [
+    showExistenceFetchError,
+    showExistenceFetchTimeout,
+    hasLoaded,
+    nextButtonId,
+    nextLabel,
+    id,
+    isFiltered,
+    fieldsCount,
+  ]);
 
   return (
     <EuiAccordion
@@ -147,7 +186,13 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
       data-test-subj={id}
       id={id}
       buttonContent={renderButton}
+      buttonProps={{ id: buttonId }}
       extraAction={extraAction}
+      css={css`
+        .euiAccordion__triggerWrapper {
+          position: relative;
+        }
+      `}
     >
       <EuiSpacer size="s" />
       {hasLoaded &&
