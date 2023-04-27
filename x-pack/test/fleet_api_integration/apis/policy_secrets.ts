@@ -9,8 +9,17 @@ import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
+import { setupFleetAndAgents } from './agents/services';
 
-const secretVar = (id) => `$co.elastic.secret{${id}}`;
+const secretVar = (id: string) => `$co.elastic.secret{${id}}`;
+
+const arrayIdsEqual = (a: Array<{ id: string }>, b: Array<{ id: string }>) => {
+  if (a.length !== b.length) {
+    return false;
+  }
+  return a.every(({ id }) => b.find(({ id: bid }) => bid === id));
+};
+
 export default function (providerContext: FtrProviderContext) {
   describe('fleet policy secrets', () => {
     const { getService } = providerContext;
@@ -43,12 +52,59 @@ export default function (providerContext: FtrProviderContext) {
       });
     };
 
-    let createdPackagePolicyId;
-    let packageVarId;
-    let inputVarId;
-    let streamVarId;
-    let expectedCompiledStream;
-    let expectedCompiledInput;
+    const getFullAgentPolicyById = async (id: string) => {
+      const { body } = await supertest.get(`/api/fleet/agent_policies/${id}/full`).expect(200);
+      return body.item;
+    };
+
+    const getLatestPolicyRevision = async (id: string) => {
+      const res = await es.search({
+        index: '.fleet-policies',
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    policy_id: id,
+                  },
+                },
+              ],
+            },
+          },
+          sort: [
+            {
+              revision_idx: {
+                order: 'desc',
+              },
+            },
+          ],
+          size: 1,
+        },
+      });
+      return res.hits.hits[0]._source;
+    };
+    let createdPackagePolicyId: string;
+    let packageVarId: string;
+    let inputVarId: string;
+    let streamVarId: string;
+    let expectedCompiledStream: any;
+    let expectedCompiledInput: any;
+
+    function expectCompiledPolicyVars(policy: any) {
+      expect(
+        arrayIdsEqual(policy.secret_references, [
+          { id: packageVarId },
+          { id: streamVarId },
+          { id: inputVarId },
+        ])
+      ).to.eql(true);
+      expect(policy.inputs[0].package_var_secret).to.eql(secretVar(packageVarId));
+      expect(policy.inputs[0].input_var_secret).to.eql(secretVar(inputVarId));
+      expect(policy.inputs[0].streams[0].package_var_secret).to.eql(secretVar(packageVarId));
+      expect(policy.inputs[0].streams[0].input_var_secret).to.eql(secretVar(inputVarId));
+      expect(policy.inputs[0].streams[0].stream_var_secret).to.eql(secretVar(streamVarId));
+    }
 
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
@@ -58,7 +114,11 @@ export default function (providerContext: FtrProviderContext) {
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
       await maybeCreateSecretsIndex();
+    });
 
+    setupFleetAndAgents(providerContext);
+
+    before(async () => {
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -70,6 +130,7 @@ export default function (providerContext: FtrProviderContext) {
 
       agentPolicyId = agentPolicyResponse.item.id;
     });
+
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await getService('esArchiver').unload(
@@ -120,6 +181,13 @@ export default function (providerContext: FtrProviderContext) {
       streamVarId = createdPackagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.id;
       expect(streamVarId).to.be.an('string');
 
+      expect(
+        arrayIdsEqual(createdPackagePolicy.secret_references, [
+          { id: packageVarId },
+          { id: streamVarId },
+          { id: inputVarId },
+        ])
+      ).to.eql(true);
       expectedCompiledStream = {
         'config.version': 2,
         package_var_secret: secretVar(packageVarId),
@@ -146,8 +214,15 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return the policy correctly from the get policies API', async () => {
       const packagePolicy = await getPackagePolicyById(createdPackagePolicyId);
+      expect(
+        arrayIdsEqual(packagePolicy.secret_references, [
+          { id: packageVarId },
+          { id: streamVarId },
+          { id: inputVarId },
+        ])
+      ).to.eql(true);
       expect(packagePolicy.inputs[0].streams[0].compiled_stream).to.eql(expectedCompiledStream);
-      expect(createdPackagePolicy.inputs[0].compiled_input).to.eql(expectedCompiledInput);
+      expect(packagePolicy.inputs[0].compiled_input).to.eql(expectedCompiledInput);
       expect(packagePolicy.vars.package_var_secret.value.isSecretRef).to.eql(true);
       expect(packagePolicy.vars.package_var_secret.value.id).eql(packageVarId);
       expect(packagePolicy.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(true);
@@ -179,6 +254,17 @@ export default function (providerContext: FtrProviderContext) {
       expect(secretValuesById[packageVarId]).to.eql('package_secret_val');
       expect(secretValuesById[inputVarId]).to.eql('input_secret_val');
       expect(secretValuesById[streamVarId]).to.eql('stream_secret_val');
+    });
+
+    it('should have written the secrets to the .fleet-policies index', async () => {
+      const { data: policyDoc } = await getLatestPolicyRevision(agentPolicyId);
+      expectCompiledPolicyVars(policyDoc);
+    });
+
+    it('should return secret refs from agent policy API', async () => {
+      const agentPolicy = await getFullAgentPolicyById(agentPolicyId);
+
+      expectCompiledPolicyVars(agentPolicy);
     });
   });
 }
