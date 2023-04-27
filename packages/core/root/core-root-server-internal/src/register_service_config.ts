@@ -28,6 +28,7 @@ import { uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
 
 import { config as pluginsConfig } from '@kbn/core-plugins-server-internal';
 import { elasticApmConfig } from './root/elastic_config';
+import { serverlessConfig } from './root/serverless_config';
 
 const rootConfigPath = '';
 
@@ -49,6 +50,7 @@ export function registerServiceConfig(configService: ConfigService) {
     pluginsConfig,
     savedObjectsConfig,
     savedObjectsMigrationConfig,
+    serverlessConfig,
     statusConfig,
     uiSettingsConfig,
   ];
