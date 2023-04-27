@@ -5597,6 +5597,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/visualization-ui-components@link:src/plugins/visualization_ui_components":
+  version "0.0.0"
+  uid ""
+
 "@kbn/visualizations-plugin@link:src/plugins/visualizations":
   version "0.0.0"
   uid ""
