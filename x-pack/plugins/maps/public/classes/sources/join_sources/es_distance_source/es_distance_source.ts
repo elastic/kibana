@@ -146,7 +146,7 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
       searchSource,
       registerCancelCallback,
       requestDescription: i18n.translate('xpack.maps.distanceSource.requestDescription', {
-        defaultMessage: 'Gather within distance metrics from data view: {dataViewName}, geospatial field: {geoFieldName}',
+        defaultMessage: 'Get metrics from data view: {dataViewName}, geospatial field: {geoFieldName}',
         values: {
           dataViewName: indexPattern.getName(),
           geoFieldName: this._descriptor.geoField,

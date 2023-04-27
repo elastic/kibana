@@ -437,10 +437,19 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     const resp = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: layerName,
+      requestName: i18n.translate('xpack.maps.esSearchSource.requestName', {
+        defaultMessage: '{layerName} documents request',
+        values: { layerName }
+      }),
       searchSource,
       registerCancelCallback,
-      requestDescription: 'Elasticsearch document request',
+      requestDescription: i18n.translate('xpack.maps.esSearchSource.requestDescription', {
+        defaultMessage: 'Get documents from data view: {dataViewName}, geospatial field: {geoFieldName}',
+        values: {
+          dataViewName: indexPattern.getName(),
+          geoFieldName: this._descriptor.geoField,
+        }
+      }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_search_source:doc_search' },

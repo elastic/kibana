@@ -157,7 +157,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
       searchSource,
       registerCancelCallback,
       requestDescription: i18n.translate('xpack.maps.termSource.requestDescription', {
-        defaultMessage: 'Gather term metrics from data view: {dataViewName}, term field: {termFieldName}',
+        defaultMessage: 'Get metrics from data view: {dataViewName}, term field: {termFieldName}',
         values: {
           dataViewName: indexPattern.getName(),
           termFieldName: this._termField.getName(),
