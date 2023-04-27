@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { DETECTION_ENGINE_INDEX_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { Client } from '@elastic/elasticsearch';
 import { countDownTest } from './count_down_test';
 
@@ -15,28 +13,27 @@ import { countDownTest } from './count_down_test';
  * Deletes the signals index for use inside of afterEach blocks of tests
  * @param supertest The supertest client library
  */
-export const deleteSignalsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+export const deleteAllSignals = async (
   log: ToolingLog,
-  es: Client
+  es: Client,
+  index: string[] = ['.alerts-security.alerts-default']
 ): Promise<void> => {
   await countDownTest(
     async () => {
-      await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+      await es.deleteByQuery({
+        index,
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+        refresh: true,
+      });
       return {
         passed: true,
       };
     },
-    'deleteSignalsIndex',
+    'deleteAllSignals',
     log
   );
-  await es.deleteByQuery({
-    index: '.alerts-security.alerts-default',
-    body: {
-      query: {
-        match_all: {},
-      },
-    },
-    refresh: true,
-  });
 };

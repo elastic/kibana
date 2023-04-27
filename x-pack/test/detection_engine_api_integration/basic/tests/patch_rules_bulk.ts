@@ -12,13 +12,13 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   getSimpleRuleOutputWithoutRuleId,
   removeServerGeneratedPropertiesIncludingRuleId,
   createRule,
+  deleteAllSignals,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log, es);
+        await deleteAllSignals(log, es);
         await deleteAllRules(supertest, log);
       });
 

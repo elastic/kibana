@@ -17,7 +17,6 @@ import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_e
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
   setSignalStatus,
   getQuerySignalIds,
   deleteAllRules,
@@ -26,6 +25,7 @@ import {
   getSignalsByIds,
   waitForRuleSuccess,
   getRuleForSignalTesting,
+  deleteAllSignals,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log, es);
+        await deleteAllSignals(log, es);
         await deleteAllRules(supertest, log);
       });
 

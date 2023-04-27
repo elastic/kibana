@@ -18,7 +18,7 @@ import {
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllSignals,
   getSimpleRule,
 } from '../../utils';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
     afterEach(async () => {
       await deleteUserAndRole(getService, ROLES.soc_manager);
       await deleteAllExceptions(supertest, log);
-      await deleteSignalsIndex(supertest, log, es);
+      await deleteAllSignals(log, es);
       await deleteAllRules(supertest, log);
     });
 

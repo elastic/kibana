@@ -30,7 +30,7 @@ import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/d
 import {
   createRule,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllSignals,
   getEqlRuleForSignalTesting,
   getOpenSignals,
   getPreviewAlerts,
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
       );
-      await deleteSignalsIndex(supertest, log, es);
+      await deleteAllSignals(log, es);
       await deleteAllRules(supertest, log);
     });
 

@@ -17,7 +17,7 @@ import {
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllSignals,
   getEqlRuleForSignalTesting,
   getRuleForSignalTesting,
   getSignalsById,
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log, es);
+      await deleteAllSignals(log, es);
       await deleteAllRules(supertest, log);
     });
 

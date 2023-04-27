@@ -39,7 +39,7 @@ import {
   previewRule,
   getOpenSignals,
   getPreviewAlerts,
-  deleteSignalsIndex,
+  deleteAllSignals,
   deleteAllRules,
   createRule,
 } from '../../utils';
@@ -154,7 +154,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
-      await deleteSignalsIndex(supertest, log, es);
+      await deleteAllSignals(log, es);
       await deleteAllRules(supertest, log);
     });
 

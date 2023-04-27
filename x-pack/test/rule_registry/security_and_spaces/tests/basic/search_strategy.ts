@@ -11,7 +11,7 @@ import { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common/sea
 import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
-  deleteSignalsIndex,
+  deleteAllSignals,
   createSignalsIndex,
   deleteAllRules,
   getRuleForSignalTesting,
@@ -128,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await deleteSignalsIndex(supertest, log, es);
+        await deleteAllSignals(log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');

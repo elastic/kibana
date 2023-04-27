@@ -17,7 +17,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllSignals,
   getWebHookAction,
   getRuleWithWebHookAction,
   createRule,
@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log, es);
+        await deleteAllSignals(log, es);
         await deleteAllRules(supertest, log);
       });
 

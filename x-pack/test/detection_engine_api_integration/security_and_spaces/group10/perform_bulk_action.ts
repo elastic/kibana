@@ -26,7 +26,7 @@ import {
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllSignals,
   getLegacyActionSO,
   getSimpleMlRule,
   getSimpleRule,
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log, es);
+      await deleteAllSignals(log, es);
       await deleteAllRules(supertest, log);
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });

@@ -12,12 +12,12 @@ import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/d
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
   deleteAllRules,
   waitForRulePartialFailure,
   getRuleForSignalTesting,
   createRuleWithAuth,
   getThresholdRuleForSignalTesting,
+  deleteAllSignals,
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
-      await deleteSignalsIndex(supertest, log, es);
+      await deleteAllSignals(log, es);
     });
 
     beforeEach(async () => {
