@@ -28,6 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   // Failing: See https://github.com/elastic/kibana/issues/156014
   // Failing: See https://github.com/elastic/kibana/issues/118593
+  // Failing: See https://github.com/elastic/kibana/issues/156015
   describe.skip('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
