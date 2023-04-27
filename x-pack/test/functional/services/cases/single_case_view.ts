@@ -65,7 +65,7 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
         '[data-test-subj="euiMarkdownEditorToolbarButton"][aria-label="Visualization"]'
       );
       await addVisualizationButton.click();
-     
+
       await this.findAndSaveVisualization(visName);
 
       await testSubjects.existOrFail('cases-app', { timeout: 10 * 1000 });
@@ -74,7 +74,6 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     },
 
     async findAndSaveVisualization(visName: string) {
-
       await testSubjects.existOrFail('savedObjectsFinderTable', { timeout: 10 * 1000 });
 
       // select visualization
