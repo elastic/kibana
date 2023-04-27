@@ -22,7 +22,6 @@
     "@kbn/shared-ux-page-kibana-template-mocks",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
-    "@kbn/observability-plugin",
     "@kbn/inspector-plugin",
     "@kbn/data-plugin",
     "@kbn/es-types",

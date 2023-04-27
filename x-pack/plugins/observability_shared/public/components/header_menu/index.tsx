@@ -6,8 +6,8 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { HeaderMenuPortalProps } from '@kbn/observability-plugin/public/components/shared/types';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { HeaderMenuPortalProps } from '../../types';
 
 const HeaderMenuPortalLazy = lazy(() => import('./header_menu_portal'));
 
