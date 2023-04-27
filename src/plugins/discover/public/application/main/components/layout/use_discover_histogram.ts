@@ -14,10 +14,11 @@ import {
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useRef, useMemo, useState } from 'react';
-import { distinctUntilChanged, filter, map, Observable } from 'rxjs';
+import { distinctUntilChanged, filter, map, Observable, pairwise } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
 import { FetchStatus } from '../../../types';
@@ -25,10 +26,10 @@ import { useDataState } from '../../hooks/use_data_state';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import type { DataDocuments$ } from '../../services/discover_data_state_container';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 import { addLog } from '../../../../utils/add_log';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
+import type { DiscoverAppState } from '../../services/discover_app_state_container';
 
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
@@ -80,25 +81,26 @@ export const useDiscoverHistogram = ({
    */
 
   useEffect(() => {
-    const subscription = createStateSyncObservable(unifiedHistogram?.state$)?.subscribe((state) => {
-      inspectorAdapters.lensRequests = state.lensRequestAdapter;
+    const subscription = createStateSyncObservable(unifiedHistogram?.state$)?.subscribe(
+      (changes) => {
+        const { lensRequestAdapter, ...stateChanges } = changes;
+        const appState = stateContainer.appState.getState();
+        const oldState = {
+          hideChart: appState.hideChart,
+          interval: appState.interval,
+          breakdownField: appState.breakdownField,
+        };
+        const newState = { ...oldState, ...stateChanges };
 
-      const appState = stateContainer.appState.getState();
-      const oldState = {
-        hideChart: appState.hideChart,
-        interval: appState.interval,
-        breakdownField: appState.breakdownField,
-      };
-      const newState = {
-        hideChart: state.chartHidden,
-        interval: state.timeInterval,
-        breakdownField: state.breakdownField,
-      };
+        if ('lensRequestAdapter' in changes) {
+          inspectorAdapters.lensRequests = lensRequestAdapter;
+        }
 
-      if (!isEqual(oldState, newState)) {
-        stateContainer.appState.update(newState);
+        if (!isEqual(oldState, newState)) {
+          stateContainer.appState.update(newState);
+        }
       }
-    });
+    );
 
     return () => {
       subscription?.unsubscribe();
@@ -132,24 +134,24 @@ export const useDiscoverHistogram = ({
    */
 
   useEffect(() => {
-    if (typeof hideChart === 'boolean') {
-      unifiedHistogram?.setChartHidden(hideChart);
-    }
-  }, [hideChart, unifiedHistogram]);
+    const subscription = stateContainer.appState.state$.subscribe(
+      ({ breakdownField, interval, hideChart: chartHidden }) => {
+        unifiedHistogram?.setBreakdownField(breakdownField);
 
-  const timeInterval = useAppStateSelector((state) => state.interval);
+        if (interval) {
+          unifiedHistogram?.setTimeInterval(interval);
+        }
 
-  useEffect(() => {
-    if (timeInterval) {
-      unifiedHistogram?.setTimeInterval(timeInterval);
-    }
-  }, [timeInterval, unifiedHistogram]);
+        if (typeof chartHidden === 'boolean') {
+          unifiedHistogram?.setChartHidden(chartHidden);
+        }
+      }
+    );
 
-  const breakdownField = useAppStateSelector((state) => state.breakdownField);
-
-  useEffect(() => {
-    unifiedHistogram?.setBreakdownField(breakdownField);
-  }, [breakdownField, unifiedHistogram]);
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [stateContainer.appState.state$, unifiedHistogram]);
 
   /**
    * Columns
@@ -320,18 +322,29 @@ export const useDiscoverHistogram = ({
 
 const createStateSyncObservable = (state$?: Observable<UnifiedHistogramState>) => {
   return state$?.pipe(
-    map(({ lensRequestAdapter, chartHidden, timeInterval, breakdownField }) => ({
-      lensRequestAdapter,
-      chartHidden,
-      timeInterval,
-      breakdownField,
-    })),
-    distinctUntilChanged((prev, curr) => {
-      const { lensRequestAdapter: prevLensRequestAdapter, ...prevRest } = prev;
-      const { lensRequestAdapter: currLensRequestAdapter, ...currRest } = curr;
+    pairwise(),
+    map(([prev, curr]) => {
+      const changes: Partial<DiscoverAppState> & { lensRequestAdapter?: RequestAdapter } = {};
 
-      return prevLensRequestAdapter === currLensRequestAdapter && isEqual(prevRest, currRest);
-    })
+      if (prev.lensRequestAdapter !== curr.lensRequestAdapter) {
+        changes.lensRequestAdapter = curr.lensRequestAdapter;
+      }
+
+      if (prev.chartHidden !== curr.chartHidden) {
+        changes.hideChart = curr.chartHidden;
+      }
+
+      if (prev.timeInterval !== curr.timeInterval) {
+        changes.interval = curr.timeInterval;
+      }
+
+      if (prev.breakdownField !== curr.breakdownField) {
+        changes.breakdownField = curr.breakdownField;
+      }
+
+      return changes;
+    }),
+    filter((changes) => Object.keys(changes).length > 0)
   );
 };
 
