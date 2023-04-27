@@ -6,14 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType, SavedObjectsFieldMapping } from '@kbn/core/server';
-import { FILE_SO_TYPE } from '../../common';
+import { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
+import { MappingProperty as EsMappingProperty } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { FileMetadata } from '../../common';
+import { BaseFileMetadata, FILE_SO_TYPE } from '../../common';
 
 type Properties = Record<
-  keyof Omit<FileMetadata, 'Alt' | 'Compression' | 'ChunkSize' | 'hash'>,
+  keyof Omit<FileMetadata, 'Alt' | 'Compression' | 'ChunkSize'>,
   SavedObjectsFieldMapping
 >;
+
+export type SupportedFileHashAlgorithm = keyof Pick<
+  Required<Required<BaseFileMetadata>['hash']>,
+  'md5' | 'sha1' | 'sha256' | 'sha512'
+>;
+
+export type FileHashObj = Partial<Record<SupportedFileHashAlgorithm, string>>;
+
+const hashProperties: Record<SupportedFileHashAlgorithm, EsMappingProperty> = {
+  md5: { type: 'text' },
+  sha1: { type: 'text' },
+  sha256: { type: 'text' },
+  sha512: { type: 'text' },
+};
 
 const properties: Properties = {
   created: {
@@ -45,6 +60,9 @@ const properties: Properties = {
   },
   FileKind: {
     type: 'keyword',
+  },
+  hash: {
+    properties: hashProperties,
   },
 };
 

@@ -7,8 +7,7 @@
  */
 import { Transform, type TransformCallback } from 'stream';
 import { createHash, type Hash } from 'crypto';
-
-type SupportedFileHashAlgorithm = 'md5' | 'sha1' | 'sha256' | 'sha512';
+import { SupportedFileHashAlgorithm } from '../../../saved_objects/file';
 
 class FileHashTransform extends Transform {
   private readonly hash: Hash;
@@ -51,6 +50,16 @@ class FileHashTransform extends Transform {
  * Creates a `Transform` that will calculate a Hash based on the data provided by a Readable
  * @param algorithm
  */
-export const createFileHashTransform = (algorithm: SupportedFileHashAlgorithm = 'sha256') => {
+export const createFileHashTransform = (
+  algorithm: SupportedFileHashAlgorithm = 'sha256'
+): FileHashTransform => {
   return new FileHashTransform(algorithm);
+};
+
+/**
+ * Type guard to check of a given Transform is a `FileHashTransform`
+ * @param transform
+ */
+export const isFileHashTransform = (transform: Transform): transform is FileHashTransform => {
+  return transform instanceof FileHashTransform;
 };
