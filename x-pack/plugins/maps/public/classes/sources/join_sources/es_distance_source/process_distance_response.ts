@@ -16,6 +16,12 @@ export function processDistanceResponse(response: any, countPropertyName: string
   const buckets: any = response?.aggregations?.distance?.buckets ?? {};
   for (const docId in buckets) {
     const bucket = buckets[docId];
+
+    // skip empty buckets
+    if (bucket[COUNT_PROP_NAME] === 0) {
+      continue;
+    }
+
     const properties = extractPropertiesFromBucket(bucket, IGNORE_LIST);
     // Manually set 'doc_count' so join name, like '__kbnjoin__count__673ff994', is used
     properties[countPropertyName] = bucket[COUNT_PROP_NAME];

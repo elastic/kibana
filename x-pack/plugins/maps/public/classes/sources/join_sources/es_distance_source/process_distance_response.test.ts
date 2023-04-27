@@ -19,9 +19,9 @@ test('should convert elasticsearch response into table', () => {
         }
       },
       '0a-Fv4cB_nxKbZ5eWyyP': {
-        doc_count: 1,
+        doc_count: 0,
         __kbnjoin__avg_of_bytes__673ff994: {
-          value: 5542
+          value: 0
         }
       },
       '1q-Fv4cB_nxKbZ5eWyyP': {
@@ -36,7 +36,7 @@ test('should convert elasticsearch response into table', () => {
   };
   const table = processDistanceResponse(response, '__kbnjoin__count__673ff994');
 
-  expect(table.size).toBe(3);
+  expect(table.size).toBe(2);
 
   const bucketProperties = table.get('1q-Fv4cB_nxKbZ5eWyyP');
   expect(bucketProperties?.__kbnjoin__count__673ff994).toBe(2);
