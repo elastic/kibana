@@ -415,7 +415,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     if (propGridStyle.rowClasses) {
       // Get all row indices with a rowClass.
       const mergedKeys = [
-        ...Object.keys(activeRowClasses),
+        ...Object.keys(mergedGridStyle.rowClasses || {}),
         ...Object.keys(propGridStyle.rowClasses || {}),
       ];
       // Deduplicate keys to avoid extra iterations
