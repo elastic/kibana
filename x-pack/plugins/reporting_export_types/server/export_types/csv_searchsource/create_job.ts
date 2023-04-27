@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { JobParamsCSV } from '@kbn/reporting-export-types/common';
+import { TaskPayloadCSV } from '@kbn/reporting-export-types/common/csv_searchsource';
 import type { CreateJobFn, CreateJobFnFactory } from '@kbn/reporting-plugin/server/types';
-import { JobParamsCSV, TaskPayloadCSV } from '../../../common/types/csv_searchsource';
 
 export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<JobParamsCSV, TaskPayloadCSV>> =
   function createJobFactoryFn() {

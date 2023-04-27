@@ -26,7 +26,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { JobParamsPDFV2 } from '@kbn/reporting-export-types/common/types';
+import type { JobParamsPDFV2 } from '@kbn/reporting-export-types/common';
 import { I18nProvider } from '@kbn/i18n-react';
 import { parsePath } from 'history';
 import moment from 'moment';
@@ -37,7 +37,7 @@ import { takeWhile } from 'rxjs/operators';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
 import type { JobAppParamsPDF } from '@kbn/reporting-plugin/server';
-import type { JobParamsPNGV2 } from '@kbn/reporting-export-types/common/types';
+import type { JobParamsPNGV2 } from '@kbn/reporting-export-types/common';
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 import { useApplicationContext } from '../application_context';
 import { ROUTES } from '../constants';

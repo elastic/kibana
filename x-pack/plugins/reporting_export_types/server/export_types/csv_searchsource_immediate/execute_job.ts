@@ -13,7 +13,7 @@ import type {
   ReportingRequestHandlerContext,
   RunTaskFnFactory,
 } from '@kbn/reporting-plugin/server/types';
-import { JobParamsDownloadCSV } from '../../../common/types/csv_searchsource_immediate';
+import { JobParamsDownloadCSV } from '../../../common/csv_searchsource_immediate';
 import { getFieldFormats } from '../../services/services';
 
 /*

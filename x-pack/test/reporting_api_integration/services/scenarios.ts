@@ -12,10 +12,7 @@ import {
 } from '@kbn/reporting-plugin/common/constants';
 import type { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server';
 import { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/routes/lib';
-import type {
-  JobParamsCSV,
-  JobParamsPNGDeprecated,
-} from '@kbn/reporting-export-types/common/types';
+import type { JobParamsCSV, JobParamsPNGDeprecated } from '@kbn/reporting-export-types/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 function removeWhitespace(str: string) {
   return str.replace(/\s/g, '');

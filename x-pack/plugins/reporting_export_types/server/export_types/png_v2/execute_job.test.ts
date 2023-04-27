@@ -12,7 +12,6 @@ import type { ReportingCore } from '@kbn/reporting-plugin/server';
 import { CancellationToken } from '@kbn/reporting-common';
 import { generatePngObservable } from '../common';
 import { runTaskFnFactory } from './execute_job';
-import { TaskPayloadPNGV2 } from '../../../common/types/png_v2';
 import { cryptoFactory } from '@kbn/reporting-plugin/server/lib';
 import { LocatorParams } from '@kbn/reporting-plugin/common/types';
 import {
@@ -20,6 +19,7 @@ import {
   createMockReportingCore,
   createMockConfig,
 } from '@kbn/reporting-plugin/server/test_helpers';
+import { TaskPayloadPNGV2 } from '@kbn/reporting-export-types/common/png_v2';
 
 jest.mock('../common/generate_png');
 

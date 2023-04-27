@@ -7,12 +7,10 @@
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
-import type {
-  JobParamsCsvFromSavedObject,
-  ReportApiJSON,
-} from '@kbn/reporting-export-types/common';
 import rison from '@kbn/rison';
 import request from 'supertest';
+import { JobParamsCsvFromSavedObject } from '@kbn/reporting-export-types/common';
+import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const LOGSTASH_DATA_ARCHIVE = 'test/functional/fixtures/es_archiver/logstash_functional';

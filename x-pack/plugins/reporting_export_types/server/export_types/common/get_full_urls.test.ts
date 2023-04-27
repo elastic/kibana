@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { TaskPayloadPNG } from '../../../common/types/png';
 import type { ReportingConfig } from '@kbn/reporting-plugin/server';
 import { getFullUrls } from './get_full_urls';
 import { createMockConfig } from '@kbn/reporting-plugin/server/test_helpers';
 import { TaskPayloadPDF } from '@kbn/reporting-plugin/server/routes/lib/request_handler';
+import { TaskPayloadPNG } from '@kbn/reporting-export-types/common/png';
 
 let mockConfig: ReportingConfig;
 

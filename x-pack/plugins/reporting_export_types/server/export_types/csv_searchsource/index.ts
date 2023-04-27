@@ -15,7 +15,8 @@ import {
   PDF_JOB_TYPE_V2 as jobType,
 } from '@kbn/reporting-plugin/common/constants';
 import type { ExportTypeDefinition } from '@kbn/reporting-plugin/server/types';
-import { JobParamsCSV, TaskPayloadCSV } from '../../../common/types/csv_searchsource';
+import { JobParamsCSV } from '@kbn/reporting-export-types/common';
+import { TaskPayloadCSV } from '@kbn/reporting-export-types/common/csv_searchsource';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
