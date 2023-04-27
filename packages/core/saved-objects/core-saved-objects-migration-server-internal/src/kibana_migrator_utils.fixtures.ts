@@ -3147,43 +3147,6 @@ export const INDEX_MAP_BEFORE_SPLIT: IndexMap = {
           },
         },
       },
-      'endpoint:user-artifact': {
-        properties: {
-          identifier: {
-            type: 'keyword',
-          },
-          compressionAlgorithm: {
-            type: 'keyword',
-            index: false,
-          },
-          encryptionAlgorithm: {
-            type: 'keyword',
-            index: false,
-          },
-          encodedSha256: {
-            type: 'keyword',
-          },
-          encodedSize: {
-            type: 'long',
-            index: false,
-          },
-          decodedSha256: {
-            type: 'keyword',
-            index: false,
-          },
-          decodedSize: {
-            type: 'long',
-            index: false,
-          },
-          created: {
-            type: 'date',
-            index: false,
-          },
-          body: {
-            type: 'binary',
-          },
-        },
-      },
       'endpoint:user-artifact-manifest': {
         properties: {
           created: {
