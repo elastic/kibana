@@ -8,5 +8,6 @@
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ServerlessPluginStart {}
+export interface ServerlessPluginStart {
+  setServerlessNavigation: (navigation: JSX.Element) => void;
+}

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { EuiHeader, EuiHeaderLogo, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
+import { EuiHeader, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
 import {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
@@ -33,6 +33,7 @@ interface Props {
   helpSupportUrl$: Observable<string>;
   kibanaVersion: string;
   application: InternalApplicationStart;
+  navigation: JSX.Element | null;
   navControlsRight$: Observable<ChromeNavControl[]>;
 }
 
@@ -40,22 +41,13 @@ export const ProjectHeader = ({
   application,
   kibanaDocLink,
   kibanaVersion,
+  navigation,
   ...observables
 }: Props) => {
-  const renderLogo = () => (
-    <EuiHeaderLogo
-      iconType="logoElastic"
-      href="#"
-      onClick={(e) => e.preventDefault()}
-      aria-label="Go to home page"
-    />
-  );
-
   return (
     <>
       <EuiHeader position="fixed">
         <EuiHeaderSection grow={false}>
-          <EuiHeaderSectionItem border="right">{renderLogo()}</EuiHeaderSectionItem>
           <EuiHeaderSectionItem>
             <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
           </EuiHeaderSectionItem>
@@ -81,9 +73,7 @@ export const ProjectHeader = ({
         </EuiHeaderSection>
       </EuiHeader>
       <Router history={application.history}>
-        <ProjectNavigation>
-          <span />
-        </ProjectNavigation>
+        <ProjectNavigation>{navigation}</ProjectNavigation>
       </Router>
     </>
   );

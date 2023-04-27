@@ -41,7 +41,10 @@ export class ServerlessPlugin implements Plugin<ServerlessPluginSetup, Serverles
 
     core.chrome.setChromeStyle('project');
 
-    return {};
+    return {
+      setServerlessNavigation: (navigation: JSX.Element) =>
+        core.chrome.setProjectNavigation(navigation),
+    };
   }
 
   public stop() {}

@@ -161,4 +161,12 @@ export interface ChromeStart {
    * Get an observable of the current style type of the chrome.
    */
   getChromeStyle$(): Observable<ChromeStyle>;
+
+  /**
+   * Sets the project navigation to render in the chrome.
+   * @param projectNavigation The navigation to render in the chrome.
+   *
+   * @remarks Has no effect if the chrome style is not `project`.
+   */
+  setProjectNavigation(projectNavigation: JSX.Element): void;
 }
