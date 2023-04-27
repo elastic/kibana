@@ -5,17 +5,12 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import type {
-  SavedObject,
-  SavedObjectsClientContract,
-  SavedObjectsFindResult,
-} from '@kbn/core-saved-objects-api-server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { TagAttributes } from '@kbn/saved-objects-tagging-plugin/common';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import type { OutputError } from '@kbn/securitysolution-es-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { SECURITY_TAG_NAME, SECURITY_TAG_DESCRIPTION } from '../../../common/constants';
-import { createTag, findTagsByName } from '../tags/saved_objects/tags';
+import { createTag, findTagsByName } from './saved_objects/tags';
 
 /**
  * Returns the hex representation of a random color (e.g `#F1B7E2`)
@@ -58,37 +53,5 @@ export const getOrCreateSecurityTag = async ({
         error: error ?? transformError(new Error(`Failed to create ${SECURITY_TAG_NAME} tag`)),
       };
     }
-  }
-};
-
-export const getSecuritySolutionDashboards = async ({
-  logger,
-  savedObjectsClient,
-}: {
-  logger: Logger;
-  savedObjectsClient: SavedObjectsClientContract;
-}): Promise<{
-  response: Array<SavedObjectsFindResult<DashboardAttributes>> | null;
-  error?: OutputError;
-}> => {
-  const { response: foundTags } = await findTagsByName({
-    savedObjectsClient,
-    search: SECURITY_TAG_NAME,
-  });
-
-  if (!foundTags || foundTags?.length === 0) {
-    return { response: [] };
-  }
-
-  try {
-    const dashboardsResponse = await savedObjectsClient.find<DashboardAttributes>({
-      type: 'dashboard',
-      hasReference: foundTags.map(({ id: tagId }) => ({ id: tagId, type: 'tag' })),
-    });
-    return { response: dashboardsResponse.saved_objects };
-  } catch (e) {
-    logger.error(`Failed to get SecuritySolution Dashboards - ${JSON.stringify(e?.message)}`);
-
-    return { response: null, error: transformError(e) };
   }
 };

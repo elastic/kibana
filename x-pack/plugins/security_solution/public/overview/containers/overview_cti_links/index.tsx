@@ -72,6 +72,7 @@ export const useCtiDashboardLinks = ({
       path: '',
     };
 
+    console.log({ installedDashboardIds, tiDataSourceDashboardId: tiDataSource.dashboardId });
     if (
       tiDataSource.dashboardId &&
       installedDashboardIds.includes(tiDataSource.dashboardId) &&

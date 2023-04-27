@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RISK_SCORE_TAG_DESCRIPTION, getRiskScoreTagName } from './utils';
 import type { BulkCreateSavedObjectsResult } from '../types';
-import { createTag, findTagsByName } from '../../../dashboards/saved_objects/tags';
+import { createTag, findTagsByName } from '../../../tags/saved_objects/tags';
 
 export const findRiskScoreTag = async ({
   savedObjectsClient,

@@ -71,10 +71,8 @@ import {
   readPrebuiltDevToolContentRoute,
 } from '../lib/risk_score/routes';
 import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_routes';
-import {
-  getSecuritySolutionDashboardsRoute,
-  getSecuritySolutionTagsRoute,
-} from '../lib/dashboards/routes';
+import { getSecuritySolutionDashboardsRoute } from '../lib/dashboards/routes';
+import { getSecuritySolutionTagsRoute } from '../lib/tags/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
