@@ -44,7 +44,6 @@
     "@kbn/shared-ux-router",
     "@kbn/core-application-browser",
     "@kbn/observability-shared-plugin",
-    "@kbn/observability-plugin"
   ],
   "exclude": ["target/**/*"]
 }
