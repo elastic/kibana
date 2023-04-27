@@ -130,6 +130,8 @@ export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj=
 
 export const TOASTER_ERROR_BTN = '[data-test-subj="errorToastBtn"]';
 
+export const TOASTER_CLOSE_ICON = '[data-test-subj="toastCloseButton"]';
+
 export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="importDataModalCheckboxLabel"]';
 
 export const RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX =

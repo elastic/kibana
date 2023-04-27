@@ -4,18 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { getExceptionList, expectedExportedExceptionList } from '../../../../objects/exception';
 import { getNewRule } from '../../../../objects/rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../../../tasks/login';
+import { visitWithoutDateRange, waitForPageWithoutDateRange } from '../../../../tasks/login';
 
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 import {
-  assertExceptionListsExists,
-  duplicateSharedExceptionListFromListsManagementPageByListId,
-  findSharedExceptionListItemsByName,
   deleteExceptionListWithoutRuleReferenceByListId,
   deleteExceptionListWithRuleReferenceByListId,
   exportExceptionList,
@@ -23,30 +19,18 @@ import {
   createSharedExceptionList,
   linkRulesToExceptionList,
   assertNumberLinkedRules,
-  searchForExceptionList,
-  clearSearchSelection,
-  importExceptionLists,
 } from '../../../../tasks/exceptions_table';
 import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
-  EXCEPTIONS_TABLE_LIST_NAME,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
-  IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN,
 } from '../../../../screens/exceptions';
-import {
-  createExceptionList,
-  createExceptionListItem,
-} from '../../../../tasks/api_calls/exceptions';
+import { createExceptionList } from '../../../../tasks/api_calls/exceptions';
 import { esArchiverResetKibana } from '../../../../tasks/es_archiver';
-import { assertNumberOfExceptionItemsExists } from '../../../../tasks/exceptions';
 
-import { TOASTER, TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
+import { TOASTER } from '../../../../screens/alerts_detection_rules';
 
 const EXCEPTION_LIST_NAME = 'My test list';
 const EXCEPTION_LIST_TO_DUPLICATE_NAME = 'A test list 2';
-const EXCEPTION_LIST_ITEM_NAME = 'Sample Exception List Item 1';
-const EXCEPTION_LIST_ITEM_NAME_2 = 'Sample Exception List Item 2';
-const LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_exception_list.ndjson';
 
 const getExceptionList1 = () => ({
   ...getExceptionList(),
@@ -60,11 +44,8 @@ const getExceptionList2 = () => ({
   list_id: 'exception_list_2',
 });
 
-const expiredDate = new Date(Date.now() - 1000000).toISOString();
-const futureDate = new Date(Date.now() + 1000000).toISOString();
-
 describe('Manage lists from "Shared Exception Lists" page', () => {
-  describe('Create/Export/Delete', () => {
+  describe('Create/Export/Delete List', () => {
     before(() => {
       esArchiverResetKibana();
 
@@ -156,205 +137,6 @@ describe('Manage lists from "Shared Exception Lists" page', () => {
       // Using cy.contains because we do not care about the exact text,
       // just checking number of lists shown
       cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
-    });
-  });
-  describe('Duplicate', () => {
-    beforeEach(() => {
-      esArchiverResetKibana();
-      login();
-
-      // Create exception list associated with a rule
-      createExceptionList(getExceptionList2(), getExceptionList2().list_id);
-
-      createExceptionListItem(getExceptionList2().list_id, {
-        list_id: getExceptionList2().list_id,
-        item_id: 'simple_list_item_1',
-        tags: [],
-        type: 'simple',
-        description: 'Test exception item',
-        name: EXCEPTION_LIST_ITEM_NAME,
-        namespace_type: 'single',
-        entries: [
-          {
-            field: 'host.name',
-            operator: 'included',
-            type: 'match_any',
-            value: ['some host', 'another host'],
-          },
-        ],
-        expire_time: expiredDate,
-      });
-      createExceptionListItem(getExceptionList2().list_id, {
-        list_id: getExceptionList2().list_id,
-        item_id: 'simple_list_item_2',
-        tags: [],
-        type: 'simple',
-        description: 'Test exception item',
-        name: EXCEPTION_LIST_ITEM_NAME_2,
-        namespace_type: 'single',
-        entries: [
-          {
-            field: 'host.name',
-            operator: 'included',
-            type: 'match_any',
-            value: ['some host', 'another host'],
-          },
-        ],
-        expire_time: futureDate,
-      });
-
-      visitWithoutDateRange(EXCEPTIONS_URL);
-      waitForExceptionsTableToBeLoaded();
-    });
-
-    it('Duplicate exception list with expired items', function () {
-      duplicateSharedExceptionListFromListsManagementPageByListId(
-        getExceptionList2().list_id,
-        true
-      );
-
-      // After duplication - check for new list
-      assertExceptionListsExists([`${EXCEPTION_LIST_TO_DUPLICATE_NAME} [Duplicate]`]);
-
-      findSharedExceptionListItemsByName(`${EXCEPTION_LIST_TO_DUPLICATE_NAME} [Duplicate]`, [
-        EXCEPTION_LIST_ITEM_NAME,
-        EXCEPTION_LIST_ITEM_NAME_2,
-      ]);
-
-      assertNumberOfExceptionItemsExists(2);
-    });
-
-    it('Duplicate exception list without expired items', function () {
-      duplicateSharedExceptionListFromListsManagementPageByListId(
-        getExceptionList2().list_id,
-        false
-      );
-
-      // After duplication - check for new list
-      assertExceptionListsExists([`${EXCEPTION_LIST_TO_DUPLICATE_NAME} [Duplicate]`]);
-
-      findSharedExceptionListItemsByName(`${EXCEPTION_LIST_TO_DUPLICATE_NAME} [Duplicate]`, [
-        EXCEPTION_LIST_ITEM_NAME_2,
-      ]);
-
-      assertNumberOfExceptionItemsExists(1);
-    });
-  });
-  describe('Filter exceptions table', () => {
-    before(() => {
-      esArchiverResetKibana();
-      login();
-
-      // Create exception list associated with a rule
-      createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
-        createRule({
-          ...getNewRule(),
-          exceptions_list: [
-            {
-              id: response.body.id,
-              list_id: getExceptionList2().list_id,
-              type: getExceptionList2().type,
-              namespace_type: getExceptionList2().namespace_type,
-            },
-          ],
-        })
-      );
-
-      // Create exception list not used by any rules
-      createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
-        'exceptionListResponse'
-      );
-    });
-
-    beforeEach(() => {
-      visitWithoutDateRange(EXCEPTIONS_URL);
-    });
-
-    it('Filters exception lists on search', () => {
-      waitForExceptionsTableToBeLoaded();
-
-      // Using cy.contains because we do not care about the exact text,
-      // just checking number of lists shown
-      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
-
-      // Single word search
-      searchForExceptionList('Endpoint');
-
-      // Using cy.contains because we do not care about the exact text,
-      // just checking number of lists shown
-      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
-      cy.get(EXCEPTIONS_TABLE_LIST_NAME).should('have.text', 'Endpoint Security Exception List');
-
-      // Multi word search
-      clearSearchSelection();
-      searchForExceptionList('test');
-
-      // Using cy.contains because we do not care about the exact text,
-      // just checking number of lists shown
-      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
-      cy.get(EXCEPTIONS_TABLE_LIST_NAME)
-        .eq(1)
-        .should('have.text', EXCEPTION_LIST_TO_DUPLICATE_NAME);
-      cy.get(EXCEPTIONS_TABLE_LIST_NAME).eq(0).should('have.text', EXCEPTION_LIST_NAME);
-
-      // Exact phrase search
-      clearSearchSelection();
-      searchForExceptionList(`"${getExceptionList1().name}"`);
-
-      // Using cy.contains because we do not care about the exact text,
-      // just checking number of lists shown
-      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
-      cy.get(EXCEPTIONS_TABLE_LIST_NAME).should('have.text', getExceptionList1().name);
-
-      // Field search
-      clearSearchSelection();
-      searchForExceptionList('list_id:endpoint_list');
-
-      // Using cy.contains because we do not care about the exact text,
-      // just checking number of lists shown
-      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
-      cy.get(EXCEPTIONS_TABLE_LIST_NAME).should('have.text', 'Endpoint Security Exception List');
-
-      clearSearchSelection();
-
-      // Using cy.contains because we do not care about the exact text,
-      // just checking number of lists shown
-      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
-    });
-  });
-  describe('Import Lists', () => {
-    before(() => {
-      esArchiverResetKibana();
-    });
-    beforeEach(() => {
-      visitWithoutDateRange(EXCEPTIONS_URL);
-      waitForExceptionsTableToBeLoaded();
-    });
-    it('Should import exception list successfully if the list does not exist', () => {
-      cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
-      importExceptionLists(LIST_TO_IMPORT_FILENAME);
-
-      cy.wait('@import').then(({ response }) => {
-        cy.wrap(response?.statusCode).should('eql', 200);
-        cy.get(TOASTER).should('have.text', `Exception list imported`);
-      });
-      cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN).click();
-
-      // Validate table items count
-      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
-    });
-
-    it('Should not import exception list it exists', () => {
-      cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
-      importExceptionLists(LIST_TO_IMPORT_FILENAME);
-
-      cy.wait('@import').then(({ response }) => {
-        cy.wrap(response?.statusCode).should('eql', 200);
-        cy.get(TOASTER).should('have.text', 'There was an error uploading the exception list.');
-        cy.get(TOASTER_BODY).should('contain', 'Found that list_id');
-      });
-      // Validate table items count
-      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
     });
   });
 });

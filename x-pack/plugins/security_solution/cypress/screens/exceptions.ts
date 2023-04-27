@@ -180,7 +180,7 @@ export const IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN =
   '[data-test-subj="exceptionListsImportFormCloseBTN"]';
 
 export const IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_EXISTING_CHECKBOX =
-  'label[data-test-subj="importExceptionListOverwriteExistingCheckbox"]';
+  '[data-test-subj="importExceptionListOverwriteExistingCheckbox"]';
 
 export const IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_CREATE_NEW_CHECKBOX =
   '[data-test-subj="importExceptionListCreateNewCheckbox"]';
