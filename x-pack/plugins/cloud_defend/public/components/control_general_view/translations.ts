@@ -156,6 +156,10 @@ export const errorValueRequired = i18n.translate('xpack.cloudDefend.errorValueRe
   defaultMessage: 'At least one value is required.',
 });
 
+export const errorActionRequired = i18n.translate('xpack.cloudDefend.errorActionRequired', {
+  defaultMessage: 'At least one action is required.',
+});
+
 export const getSelectorIconTooltip = (type: SelectorType) => {
   switch (type) {
     case 'process':
