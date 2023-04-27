@@ -90,13 +90,13 @@ describe('Alert details flyout', () => {
   });
 
   describe('Url state management', { testIsolation: false }, () => {
-    const testRule = getNewRule();
     before(() => {
       cleanKibana();
+      esArchiverLoad('query_alert');
       login();
-      createRule(testRule);
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
+      expandFirstAlert();
     });
 
     it('should store the flyout state in the url when it is opened', () => {
@@ -118,7 +118,7 @@ describe('Alert details flyout', () => {
       cy.reload();
       cy.get(OVERVIEW_RULE).should('be.visible');
       cy.get(OVERVIEW_RULE).then((field) => {
-        expect(field).to.contain(testRule.name);
+        expect(field).to.contain('Endpoint Security');
       });
     });
 
@@ -145,13 +145,10 @@ describe('Alert details flyout', () => {
       expandFirstAlert();
       openTable();
       filterBy('kibana.alert.url');
-      cy.get('[data-test-subj="event-field-kibana.alert.url"]')
-        .invoke('text')
-        .then((url) => {
-          cy.visit(url);
-          cy.get(ALERTS_COUNT).should('have.text', '1 alert');
-          cy.get(OVERVIEW_RULE).should('be.visible');
-        });
+      cy.get('[data-test-subj="formatted-field-kibana.alert.url"]').should(
+        'have.text',
+        'http://localhost:5601/app/security/alerts/redirect/ecc6bd780c84fde32347f45de2d6acf599e1cc4d69575fd90b74244e81d5db6e?index=.alerts-security.alerts-default&timestamp=2023-04-27T11:03:57.908Z'
+      );
     });
   });
 });
