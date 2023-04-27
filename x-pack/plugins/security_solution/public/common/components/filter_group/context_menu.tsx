@@ -71,7 +71,6 @@ export const FilterGroupContextMenu = () => {
       });
     }
 
-    // controlGroup?.reload();
     switchToViewMode();
     setShowFiltersChangedBanner(false);
   }, [

@@ -61,7 +61,7 @@ import { getControlGroupMock } from './control_group';
  *});
  *
  */
-export function getMockedFilterGroupWithCustomFilters(outputFilters: Filter[] | undefined) {
+export function getMockedFilterGroupWithCustomFilters(outputFilters?: Filter[]) {
   const FilterGroup: FC<FilterGroupProps> = ({ onInit, onFilterChange }) => {
     if (onInit) {
       onInit(getControlGroupMock() as unknown as ControlGroupContainer);
