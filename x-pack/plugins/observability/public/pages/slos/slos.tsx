@@ -18,10 +18,10 @@ import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
 import { SloListWelcomePrompt } from './components/slo_list_welcome_prompt';
 import { AutoRefreshButton } from './components/auto_refresh_button';
-import { paths } from '../../config/paths';
-import type { ObservabilityAppServices } from '../../application/types';
 import { HeaderTitle } from './components/header_title';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
+import { paths } from '../../config/paths';
+import type { ObservabilityAppServices } from '../../application/types';
 
 export function SlosPage() {
   const {

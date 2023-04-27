@@ -22,7 +22,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "{ readonly host?: string | undefined; readonly customHeaders?: Readonly<{} & {}> | undefined; readonly ssl: Readonly<{ certificateAuthorities?: string | string[] | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; }>; readonly accessCheckTimeout: number; readonly accessCheckTimeoutWarning: number; readonly canDeployEntSearch: boolean; readonly hasConnectors: boolean; readonly hasDefaultIngestPipeline: boolean; readonly hasNativeConnectors: boolean; readonly hasWebCrawler: boolean; }"
+          "{ readonly host?: string | undefined; readonly customHeaders?: Readonly<{} & {}> | undefined; readonly enabled: boolean; readonly ssl: Readonly<{ certificateAuthorities?: string | string[] | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; }>; readonly accessCheckTimeout: number; readonly accessCheckTimeoutWarning: number; readonly canDeployEntSearch: boolean; readonly hasConnectors: boolean; readonly hasDefaultIngestPipeline: boolean; readonly hasNativeConnectors: boolean; readonly hasWebCrawler: boolean; }"
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
@@ -153,7 +153,15 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{} & {}> | undefined>; hasConnectors: ",
+          "<Readonly<{} & {}> | undefined>; enabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; hasConnectors: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
