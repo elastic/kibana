@@ -425,11 +425,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       const mergedRowClasses = dedupedKeys.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
         (rowClasses, key) => {
           const intKey = parseInt(key, 10);
-          console.log(
-            key,
-            propGridStyle.rowClasses?.[intKey],
-            mergedGridStyle.rowClasses?.[intKey]
-          );
           // Use internal row classes over custom row classes.
           rowClasses[intKey] =
             mergedGridStyle.rowClasses?.[intKey] || propGridStyle.rowClasses?.[intKey] || '';
