@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
+import chroma from 'chroma-js';
 import { VisualizationUiComponentsPlugin } from './plugin';
+
+export { chroma };
 
 export {
   FieldPicker,
