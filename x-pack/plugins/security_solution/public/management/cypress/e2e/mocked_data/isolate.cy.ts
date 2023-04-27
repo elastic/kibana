@@ -7,6 +7,9 @@
 
 import { getEndpointListPath } from '../../../common/routing';
 import {
+  checkEndpointListForOnlyIsolatedHosts,
+  checkFlyoutEndpointIsolation,
+  filterOutIsolatedHosts,
   interceptActionRequests,
   isolateHostWithComment,
   openAlertDetails,
@@ -67,18 +70,9 @@ describe('Isolate command', () => {
     it('should allow filtering endpoint by Isolated status', () => {
       cy.visit(APP_PATH + getEndpointListPath({ name: 'endpointList' }));
       closeAllToasts();
-      cy.getByTestSubj('adminSearchBar')
-        .click()
-        .type('united.endpoint.Endpoint.state.isolation: true');
-      cy.getByTestSubj('querySubmitButton').click();
+      filterOutIsolatedHosts();
       cy.contains('Showing 2 endpoints');
-      cy.getByTestSubj('endpointListTable').within(() => {
-        cy.get('tbody tr').each(($tr) => {
-          cy.wrap($tr).within(() => {
-            cy.get('td').eq(1).should('contain.text', 'Isolated');
-          });
-        });
-      });
+      checkEndpointListForOnlyIsolatedHosts();
     });
   });
 
@@ -161,18 +155,8 @@ describe('Isolate command', () => {
       cy.getByTestSubj('euiFlyoutCloseButton').click();
       cy.wait(1000);
       openAlertDetails();
-      cy.getByTestSubj('event-field-agent.status').then(($status) => {
-        if ($status.find('[title="Isolated"]').length > 0) {
-          cy.contains('Release host').click();
-        } else {
-          cy.getByTestSubj('euiFlyoutCloseButton').click();
-          openAlertDetails();
-          cy.getByTestSubj('event-field-agent.status').within(() => {
-            cy.contains('Isolated');
-          });
-          cy.contains('Release host').click();
-        }
-      });
+
+      checkFlyoutEndpointIsolation();
 
       releaseHostWithComment(releaseComment, hostname);
 

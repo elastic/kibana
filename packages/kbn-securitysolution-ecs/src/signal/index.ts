@@ -26,4 +26,7 @@ export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
   suppression?: {
     docs_count: string[];
   };
+  ancestors?: {
+    index?: string;
+  };
 };

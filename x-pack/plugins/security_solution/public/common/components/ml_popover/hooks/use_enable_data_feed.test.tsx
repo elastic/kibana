@@ -43,9 +43,9 @@ const JOB = {
   isCompatible: true,
 } as SecurityJob;
 
-const mockSetupMlJob = jest.fn().mockReturnValue(Promise.resolve());
-const mockStartDatafeeds = jest.fn().mockReturnValue(Promise.resolve());
-const mockStopDatafeeds = jest.fn().mockReturnValue(Promise.resolve());
+const mockSetupMlJob = jest.fn();
+const mockStartDatafeeds = jest.fn();
+const mockStopDatafeeds = jest.fn();
 
 jest.mock('../api', () => ({
   setupMlJob: () => mockSetupMlJob(),
@@ -69,186 +69,266 @@ jest.mock('../../../lib/kibana', () => {
 
 describe('useSecurityJobsHelpers', () => {
   afterEach(() => {
-    mockSetupMlJob.mockReset();
     mockStartDatafeeds.mockReset();
     mockStopDatafeeds.mockReset();
     mockSetupMlJob.mockReset();
-  });
 
-  it('renders isLoading=true when installing job', async () => {
-    let resolvePromiseCb: (value: unknown) => void;
-    mockSetupMlJob.mockReturnValue(
-      new Promise((resolve) => {
-        resolvePromiseCb = resolve;
-      })
+    mockStartDatafeeds.mockReturnValue(
+      Promise.resolve({ [`datafeed-${jobId}`]: { started: true } })
     );
-    const { result, waitForNextUpdate } = renderHook(() => useEnableDataFeed(), {
-      wrapper,
-    });
-    expect(result.current.isLoading).toBe(false);
+    mockStopDatafeeds.mockReturnValue(
+      Promise.resolve([{ [`datafeed-${jobId}`]: { stopped: true } }])
+    );
+    mockSetupMlJob.mockReturnValue(Promise.resolve());
+  });
 
-    await act(async () => {
-      const enableDataFeedPromise = result.current.enableDatafeed(JOB, TIMESTAMP, false);
-
-      await waitForNextUpdate();
-      expect(result.current.isLoading).toBe(true);
-
-      resolvePromiseCb({});
-      await enableDataFeedPromise;
+  describe('enableDatafeed', () => {
+    it('renders isLoading=true when installing job', async () => {
+      let resolvePromiseCb: (value: unknown) => void;
+      mockSetupMlJob.mockReturnValue(
+        new Promise((resolve) => {
+          resolvePromiseCb = resolve;
+        })
+      );
+      const { result, waitForNextUpdate } = renderHook(() => useEnableDataFeed(), {
+        wrapper,
+      });
       expect(result.current.isLoading).toBe(false);
-    });
-  });
 
-  it('does not call setupMlJob if job is already installed', async () => {
-    mockSetupMlJob.mockReturnValue(Promise.resolve());
-    const { result } = renderHook(() => useEnableDataFeed(), {
-      wrapper,
+      await act(async () => {
+        const enableDataFeedPromise = result.current.enableDatafeed(JOB, TIMESTAMP);
+
+        await waitForNextUpdate();
+        expect(result.current.isLoading).toBe(true);
+
+        resolvePromiseCb({});
+        await enableDataFeedPromise;
+        expect(result.current.isLoading).toBe(false);
+      });
     });
 
-    await act(async () => {
-      await result.current.enableDatafeed({ ...JOB, isInstalled: true }, TIMESTAMP, false);
-    });
-
-    expect(mockSetupMlJob).not.toBeCalled();
-  });
-
-  it('calls setupMlJob if job is uninstalled', async () => {
-    mockSetupMlJob.mockReturnValue(Promise.resolve());
-    const { result } = renderHook(() => useEnableDataFeed(), {
-      wrapper,
-    });
-    await act(async () => {
-      await result.current.enableDatafeed({ ...JOB, isInstalled: false }, TIMESTAMP, false);
-    });
-    expect(mockSetupMlJob).toBeCalled();
-  });
-
-  it('calls startDatafeeds if enable param is true', async () => {
-    const { result } = renderHook(() => useEnableDataFeed(), {
-      wrapper,
-    });
-    await act(async () => {
-      await result.current.enableDatafeed(JOB, TIMESTAMP, true);
-    });
-    expect(mockStartDatafeeds).toBeCalled();
-    expect(mockStopDatafeeds).not.toBeCalled();
-  });
-
-  it('calls stopDatafeeds if enable param is false', async () => {
-    const { result } = renderHook(() => useEnableDataFeed(), {
-      wrapper,
-    });
-    await act(async () => {
-      await result.current.enableDatafeed(JOB, TIMESTAMP, false);
-    });
-    expect(mockStartDatafeeds).not.toBeCalled();
-    expect(mockStopDatafeeds).toBeCalled();
-  });
-
-  it('calls startDatafeeds with 2 weeks old start date', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('1989-03-07'));
-
-    const { result } = renderHook(() => useEnableDataFeed(), {
-      wrapper,
-    });
-    await act(async () => {
-      await result.current.enableDatafeed(JOB, TIMESTAMP, true);
-    });
-    expect(mockStartDatafeeds).toBeCalledWith({
-      datafeedIds: [`datafeed-test_job_id`],
-      start: new Date('1989-02-21').getTime(),
-    });
-  });
-
-  describe('telemetry', () => {
-    it('reports telemetry when installing and enabling a job', async () => {
-      mockSetupMlJob.mockReturnValue(new Promise((resolve) => resolve({})));
+    it('does not call setupMlJob if job is already installed', async () => {
       const { result } = renderHook(() => useEnableDataFeed(), {
         wrapper,
       });
 
       await act(async () => {
-        await result.current.enableDatafeed(JOB, TIMESTAMP, true);
+        await result.current.enableDatafeed({ ...JOB, isInstalled: true }, TIMESTAMP);
       });
 
-      expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
-        status: ML_JOB_TELEMETRY_STATUS.moduleInstalled,
-        isElasticJob: true,
-        jobId,
-        moduleId,
-      });
-
-      expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
-        status: ML_JOB_TELEMETRY_STATUS.started,
-        isElasticJob: true,
-        jobId,
-      });
+      expect(mockSetupMlJob).not.toBeCalled();
     });
 
-    it('reports telemetry when stopping a job', async () => {
+    it('calls setupMlJob if job is uninstalled', async () => {
       const { result } = renderHook(() => useEnableDataFeed(), {
         wrapper,
       });
       await act(async () => {
-        await result.current.enableDatafeed({ ...JOB, isInstalled: true }, TIMESTAMP, false);
+        await result.current.enableDatafeed({ ...JOB, isInstalled: false }, TIMESTAMP);
       });
-
-      expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
-        status: ML_JOB_TELEMETRY_STATUS.stopped,
-        isElasticJob: true,
-        jobId,
-      });
+      expect(mockSetupMlJob).toBeCalled();
     });
 
-    it('reports telemetry when stopping a job fails', async () => {
-      mockStopDatafeeds.mockReturnValue(Promise.reject(new Error('test_error')));
+    it('calls startDatafeeds when enableDatafeed is called', async () => {
       const { result } = renderHook(() => useEnableDataFeed(), {
         wrapper,
       });
       await act(async () => {
-        await result.current.enableDatafeed({ ...JOB, isInstalled: true }, TIMESTAMP, false);
+        await result.current.enableDatafeed(JOB, TIMESTAMP);
       });
+      expect(mockStartDatafeeds).toBeCalled();
+      expect(mockStopDatafeeds).not.toBeCalled();
+    });
 
-      expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
-        status: ML_JOB_TELEMETRY_STATUS.stopError,
-        errorMessage: 'Stop job failure - test_error',
-        isElasticJob: true,
-        jobId,
+    it('calls startDatafeeds with 2 weeks old start date', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('1989-03-07'));
+
+      const { result } = renderHook(() => useEnableDataFeed(), {
+        wrapper,
+      });
+      await act(async () => {
+        await result.current.enableDatafeed(JOB, TIMESTAMP);
+      });
+      expect(mockStartDatafeeds).toBeCalledWith({
+        datafeedIds: [`datafeed-test_job_id`],
+        start: new Date('1989-02-21').getTime(),
       });
     });
 
-    it('reports telemetry when starting a job fails', async () => {
+    it('return enabled:true when startDataFeed successfully installed the job', async () => {
+      const { result } = renderHook(() => useEnableDataFeed(), {
+        wrapper,
+      });
+      await act(async () => {
+        const response = await result.current.enableDatafeed(JOB, TIMESTAMP);
+        expect(response.enabled).toBeTruthy();
+      });
+    });
+
+    it('return enabled:false when startDataFeed promise is rejected while installing a job', async () => {
       mockStartDatafeeds.mockReturnValue(Promise.reject(new Error('test_error')));
       const { result } = renderHook(() => useEnableDataFeed(), {
         wrapper,
       });
       await act(async () => {
-        await result.current.enableDatafeed({ ...JOB, isInstalled: true }, TIMESTAMP, true);
-      });
-
-      expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
-        status: ML_JOB_TELEMETRY_STATUS.startError,
-        errorMessage: 'Start job failure - test_error',
-        isElasticJob: true,
-        jobId,
+        const response = await result.current.enableDatafeed(JOB, TIMESTAMP);
+        expect(response.enabled).toBeFalsy();
       });
     });
 
-    it('reports telemetry when installing a module fails', async () => {
-      mockSetupMlJob.mockReturnValue(Promise.reject(new Error('test_error')));
+    it('return enabled:false when startDataFeed failed to install the job', async () => {
+      mockStartDatafeeds.mockReturnValue(
+        Promise.resolve({ [`datafeed-${jobId}`]: { started: false, error: 'test_error' } })
+      );
+
       const { result } = renderHook(() => useEnableDataFeed(), {
         wrapper,
       });
       await act(async () => {
-        await result.current.enableDatafeed(JOB, TIMESTAMP, true);
+        const response = await result.current.enableDatafeed(JOB, TIMESTAMP);
+        expect(response.enabled).toBeFalsy();
+      });
+    });
+
+    describe('telemetry', () => {
+      it('reports telemetry when installing and enabling a job', async () => {
+        const { result } = renderHook(() => useEnableDataFeed(), {
+          wrapper,
+        });
+
+        await act(async () => {
+          await result.current.enableDatafeed(JOB, TIMESTAMP);
+        });
+
+        expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+          status: ML_JOB_TELEMETRY_STATUS.moduleInstalled,
+          isElasticJob: true,
+          jobId,
+          moduleId,
+        });
+
+        expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+          status: ML_JOB_TELEMETRY_STATUS.started,
+          isElasticJob: true,
+          jobId,
+        });
       });
 
-      expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
-        status: ML_JOB_TELEMETRY_STATUS.installationError,
-        errorMessage: 'Create job failure - test_error',
-        isElasticJob: true,
-        jobId,
-        moduleId,
+      it('reports telemetry when starting a job fails', async () => {
+        mockStartDatafeeds.mockReturnValue(Promise.reject(new Error('test_error')));
+        const { result } = renderHook(() => useEnableDataFeed(), {
+          wrapper,
+        });
+        await act(async () => {
+          await result.current.enableDatafeed({ ...JOB, isInstalled: true }, TIMESTAMP);
+        });
+
+        expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+          status: ML_JOB_TELEMETRY_STATUS.startError,
+          errorMessage: 'Start job failure - test_error',
+          isElasticJob: true,
+          jobId,
+        });
+      });
+
+      it('reports telemetry when installing a module fails', async () => {
+        mockSetupMlJob.mockReturnValue(Promise.reject(new Error('test_error')));
+        const { result } = renderHook(() => useEnableDataFeed(), {
+          wrapper,
+        });
+        await act(async () => {
+          await result.current.enableDatafeed(JOB, TIMESTAMP);
+        });
+
+        expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+          status: ML_JOB_TELEMETRY_STATUS.installationError,
+          errorMessage: 'Create job failure - test_error',
+          isElasticJob: true,
+          jobId,
+          moduleId,
+        });
+      });
+    });
+  });
+
+  describe('disableDatafeed', () => {
+    it('return enabled:false when disableDatafeed successfully uninstalled the job', async () => {
+      const { result } = renderHook(() => useEnableDataFeed(), {
+        wrapper,
+      });
+      await act(async () => {
+        const response = await result.current.disableDatafeed(JOB);
+        expect(response.enabled).toBeFalsy();
+      });
+    });
+
+    it('return enabled:true when promise is rejected while uninstalling the job', async () => {
+      mockStopDatafeeds.mockReturnValue(Promise.reject(new Error('test_error')));
+      const { result } = renderHook(() => useEnableDataFeed(), {
+        wrapper,
+      });
+      await act(async () => {
+        const response = await result.current.disableDatafeed(JOB);
+        expect(response.enabled).toBeTruthy();
+      });
+    });
+
+    it('return enabled:true when disableDatafeed fails to uninstall the job', async () => {
+      mockStopDatafeeds.mockReturnValue(
+        Promise.resolve([{ [`datafeed-${jobId}`]: { stopped: false, error: 'test_error' } }])
+      );
+
+      const { result } = renderHook(() => useEnableDataFeed(), {
+        wrapper,
+      });
+      await act(async () => {
+        const response = await result.current.disableDatafeed(JOB);
+        expect(response.enabled).toBeTruthy();
+      });
+    });
+
+    it('calls stopDatafeeds when disableDatafeed is called', async () => {
+      const { result } = renderHook(() => useEnableDataFeed(), {
+        wrapper,
+      });
+      await act(async () => {
+        await result.current.disableDatafeed(JOB);
+      });
+      expect(mockStartDatafeeds).not.toBeCalled();
+      expect(mockStopDatafeeds).toBeCalled();
+    });
+
+    describe('telemetry', () => {
+      it('reports telemetry when stopping a job', async () => {
+        const { result } = renderHook(() => useEnableDataFeed(), {
+          wrapper,
+        });
+        await act(async () => {
+          await result.current.disableDatafeed({ ...JOB, isInstalled: true });
+        });
+
+        expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+          status: ML_JOB_TELEMETRY_STATUS.stopped,
+          isElasticJob: true,
+          jobId,
+        });
+      });
+
+      it('reports telemetry when stopping a job fails', async () => {
+        mockStopDatafeeds.mockReturnValue(Promise.reject(new Error('test_error')));
+        const { result } = renderHook(() => useEnableDataFeed(), {
+          wrapper,
+        });
+        await act(async () => {
+          await result.current.disableDatafeed({ ...JOB, isInstalled: true });
+        });
+
+        expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+          status: ML_JOB_TELEMETRY_STATUS.stopError,
+          errorMessage: 'Stop job failure - test_error',
+          isElasticJob: true,
+          jobId,
+        });
       });
     });
   });
