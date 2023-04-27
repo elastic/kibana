@@ -44,17 +44,3 @@ $screenHeightBreakpoint: 15em;
     text-decoration: underline; /* 2 */
   }
 }
-
-/**
- * Allows the CollapsibleNavGroups to be viewed on
- * very small screen sizes and when the browser Zoom is high
- */
-@media (max-height: $screenHeightBreakpoint) {
-  .kbnCollapsibleNav {
-    overflow-y: auto;
-
-    .kbnCollapsibleNav__solutions {
-      flex: 1 0 auto;
-    }
-  }
-}
