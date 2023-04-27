@@ -7,6 +7,8 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
+import { nextTick } from '@kbn/test-jest-helpers';
+
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
 import {
@@ -38,6 +40,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
   });
 
   const defaultProps = {
+    dataView: null,
     isLoading: false,
     items: [],
     pageIndex: 0,
@@ -45,6 +48,10 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
     search: '',
     selectedTable: null,
     sorting: null,
+    timeRange: {
+      from: 'now-7d',
+      to: 'now',
+    },
     totalItemsCount: 0,
   };
 
@@ -79,6 +86,10 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
     });
 
     describe('isLoading', () => {
+      beforeEach(() => {
+        mount({ selectedTable: ExploreTables.TopReferrers });
+      });
+
       it('should handle onTableChange', () => {
         AnalyticsCollectionExploreTableLogic.actions.onTableChange({
           page: { index: 2, size: 10 },
@@ -241,11 +252,15 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
       });
     });
 
-    it('should fetch items when search changes', () => {
+    it('should fetch items when search changes', async () => {
+      jest.useFakeTimers({ legacyFakeTimers: true });
       AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
       (KibanaLogic.values.data.search.search as jest.Mock).mockClear();
 
       AnalyticsCollectionExploreTableLogic.actions.setSearch('test');
+      jest.advanceTimersByTime(200);
+      await nextTick();
+
       expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
         indexPattern: undefined,
         sessionId: undefined,

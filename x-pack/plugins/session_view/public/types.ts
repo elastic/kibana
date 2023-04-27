@@ -10,8 +10,15 @@ import { CoreStart } from '@kbn/core/public';
 export type SessionViewServices = CoreStart;
 
 export interface SessionViewDeps {
+  // we pass in the index of the session leader that spawned session_view, this avoids having to query multiple cross cluster indices
+  processIndex: string;
+
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session_leader.entity_id
   sessionEntityId: string;
+
+  // start time is passed in order to scope session_view queries to the appropriate time range, and avoid querying data across all time.
+  sessionStartTime: string;
+
   height?: number;
   isFullScreen?: boolean;
   // if provided, the session view will jump to and select the provided event if it belongs to the session leader
@@ -132,6 +139,7 @@ export interface DetailPanelCloud {
   };
   project: {
     id: string;
+    name: string;
   };
   provider: string;
   region: string;

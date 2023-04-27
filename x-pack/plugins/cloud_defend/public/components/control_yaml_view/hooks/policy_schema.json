@@ -66,10 +66,10 @@
           "required": ["containerImageName"]
         },
         {
-          "required": ["containerImageFullName"]
+          "required": ["containerImageTag"]
         },
         {
-          "required": ["containerImageTag"]
+          "required": ["containerImageFullName"]
         },
         {
           "required": ["kubernetesClusterId"]
@@ -99,6 +99,19 @@
       "properties": {
         "name": {
           "type": "string"
+        },
+        "operation": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "createExecutable",
+              "modifyExecutable",
+              "createFile",
+              "modifyFile",
+              "deleteFile"
+            ]
+          }
         },
         "containerImageName": {
           "type": "array",
@@ -157,19 +170,6 @@
           "minItems": 1,
           "items": {
             "type": "string"
-          }
-        },
-        "operation": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "enum": [
-              "createExecutable",
-              "modifyExecutable",
-              "createFile",
-              "modifyFile",
-              "deleteFile"
-            ]
           }
         },
         "targetFilePath": {
@@ -214,10 +214,10 @@
           "required": ["containerImageName"]
         },
         {
-          "required": ["containerImageFullName"]
+          "required": ["containerImageTag"]
         },
         {
-          "required": ["containerImageTag"]
+          "required": ["containerImageFullName"]
         },
         {
           "required": ["kubernetesClusterId"]
@@ -247,6 +247,13 @@
       "properties": {
         "name": {
           "type": "string"
+        },
+        "operation": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": ["fork", "exec"]
+          }
         },
         "containerImageName": {
           "type": "array",
@@ -305,13 +312,6 @@
           "minItems": 1,
           "items": {
             "type": "string"
-          }
-        },
-        "operation": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "enum": ["fork", "exec"]
           }
         },
         "processExecutable": {
