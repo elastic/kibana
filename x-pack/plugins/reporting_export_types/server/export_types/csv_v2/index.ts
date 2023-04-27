@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  JobParamsCsvFromSavedObject,
-  TaskPayloadCsvFromSavedObject,
-} from '@kbn/reporting-export-types/common/csv_v2';
+import { JobParamsCsvFromSavedObject } from '@kbn/reporting-export-types/common';
+import { TaskPayloadCsvFromSavedObject } from '@kbn/reporting-export-types/common/csv_v2';
 import {
   CSV_REPORT_TYPE_V2 as CSV_JOB_TYPE,
   LICENSE_TYPE_BASIC,
