@@ -44,7 +44,7 @@ export function WizardForm({ previewLayers }: RenderWizardArguments) {
     }
 
     const layerDescriptor = createDistanceJoinLayerDescriptor({
-      distance,
+      distance: typeof distance === 'string' ? parseFloat(distance as string) : distance,
       leftDataViewId: leftDataView!.id,
       leftGeoField: leftGeoField!,
       rightDataViewId: rightDataView!.id,
