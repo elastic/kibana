@@ -59,7 +59,6 @@ describe('cli serverless project type', () => {
     20 * 1000
   );
 
-  // Skipping this one because on CI it fails to read the config file
   it.each(['es', 'oblt', 'security'])(
     'writes the serverless project type %s in config/serverless.recent.yml',
     async (mode) => {
