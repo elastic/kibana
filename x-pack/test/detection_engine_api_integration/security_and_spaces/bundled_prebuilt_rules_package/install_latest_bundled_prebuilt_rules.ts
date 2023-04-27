@@ -37,7 +37,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
   /* This test simulates an air-gapped environment in which the user doesn't have access to EPR.
   /* We first download the package from the registry as done during build time, and then
-  /* attempt to install it from the local file system. */
+  /* attempt to install it from the local file system. The API response from EPM provides
+  /* us with the information of whether the package was installed from the registry or
+  /* from a package that was bundled with Kibana */
   describe('install_bundled_prebuilt_rules', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
