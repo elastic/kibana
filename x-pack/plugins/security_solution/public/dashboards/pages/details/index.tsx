@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 
@@ -49,7 +49,7 @@ const DashboardViewComponent: React.FC = () => {
 
   const { show: canReadDashboard, showWriteControls } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
-  const [currentState, setCurrentState] = useState<DashboardViewPromptState | null>(
+  const [errorState] = useState<DashboardViewPromptState | null>(
     canReadDashboard ? null : DashboardViewPromptState.NoReadPermission
   );
   const [dashboardDetails, setDashboardDetails] = useState<DashboardDetails | undefined>();
@@ -66,12 +66,6 @@ const DashboardViewComponent: React.FC = () => {
 
   const dashboardExists = useMemo(() => dashboardDetails != null, [dashboardDetails]);
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
-
-  useEffect(() => {
-    if (!indicesExist) {
-      setCurrentState(DashboardViewPromptState.IndicesNotFound);
-    }
-  }, [indicesExist]);
 
   return (
     <>
@@ -92,7 +86,7 @@ const DashboardViewComponent: React.FC = () => {
           )}
         </HeaderPage>
 
-        {indicesExist && (
+        {!errorState && (
           <DashboardRenderer
             query={query}
             filters={filters}
@@ -104,7 +98,7 @@ const DashboardViewComponent: React.FC = () => {
           />
         )}
 
-        <StatusPropmpt currentState={currentState} />
+        <StatusPropmpt currentState={errorState} />
         <SpyRoute
           pageName={SecurityPageName.dashboards}
           state={{ dashboardName: dashboardDetails?.title }}
