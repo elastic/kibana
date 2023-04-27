@@ -17,8 +17,8 @@ import {
   waitForEndpointListPageToBeLoaded,
 } from '../../tasks/response_console';
 import {
-  checkEndpointListForOnlyIsolatedHosts,
-  checkEndpointListForOnlyUnIsolatedHosts,
+  checkEndpointIsIsolated,
+  checkEndpointIsNotIsolated,
   interceptActionRequests,
   sendActionResponse,
 } from '../../tasks/isolate';
@@ -53,7 +53,7 @@ describe('Response console', () => {
 
     it('should isolate host from response console', () => {
       waitForEndpointListPageToBeLoaded(endpointHostname);
-      checkEndpointListForOnlyUnIsolatedHosts();
+      checkEndpointIsNotIsolated(endpointHostname);
       openResponseConsoleFromEndpointList();
       performCommandInputChecks('isolate');
       interceptActionRequests((responseBody) => {
@@ -67,7 +67,7 @@ describe('Response console', () => {
       });
       cy.contains('Action completed.', { timeout: 120000 }).should('exist');
       waitForEndpointListPageToBeLoaded(endpointHostname);
-      checkEndpointListForOnlyIsolatedHosts();
+      checkEndpointIsIsolated(endpointHostname);
     });
   });
 
@@ -93,7 +93,7 @@ describe('Response console', () => {
 
     it('should release host from response console', () => {
       waitForEndpointListPageToBeLoaded(endpointHostname);
-      checkEndpointListForOnlyIsolatedHosts();
+      checkEndpointIsIsolated(endpointHostname);
       openResponseConsoleFromEndpointList();
       performCommandInputChecks('release');
       interceptActionRequests((responseBody) => {
@@ -106,7 +106,7 @@ describe('Response console', () => {
       });
       cy.contains('Action completed.', { timeout: 120000 }).should('exist');
       waitForEndpointListPageToBeLoaded(endpointHostname);
-      checkEndpointListForOnlyUnIsolatedHosts();
+      checkEndpointIsNotIsolated(endpointHostname);
     });
   });
 
