@@ -44,7 +44,7 @@ export interface MobileMainStatisticsResponse {
   }>;
 }
 
-type MainStatistics = Array<{
+type MergedQueriesResponse = Array<{
   name: string | number;
   latency: number | null;
   throughput: number;
@@ -159,11 +159,6 @@ export async function getMobileMainStatisticsByField({
               size: 1000,
             },
             aggs: {
-              sessions: {
-                cardinality: {
-                  field: SESSION_ID,
-                },
-              },
               crashes: {
                 filter: {
                   term: {
@@ -191,7 +186,7 @@ export async function getMobileMainStatisticsByField({
     getMobileErrorEventStatistics(),
   ]);
 
-  const mainStatisticsMerged: MainStatistics = merge(
+  const mainStatisticsMerged: MergedQueriesResponse = merge(
     transactioEventStatistics,
     errorEventStatistics
   );
