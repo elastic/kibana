@@ -18,8 +18,6 @@ import { users, roles, casesAllUser, casesAllUser2 } from '../common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
-  const home = getPageObject('home');
-  const common = getPageObject('common');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const cases = getService('cases');
