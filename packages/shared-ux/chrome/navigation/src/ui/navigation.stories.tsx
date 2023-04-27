@@ -13,9 +13,10 @@ import {
   EuiPopover,
   EuiThemeProvider,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React, { useCallback, useState } from 'react';
-import { css } from '@emotion/react';
+import { BehaviorSubject } from 'rxjs';
 import { getSolutionPropertiesMock, NavigationStorybookMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import { NavigationProps, NavigationServices } from '../../types';
@@ -132,7 +133,7 @@ ReducedPlatformLinks.argTypes = storybookMock.getArgumentTypes();
 export const WithRequestsLoading: ComponentStory<typeof Template> = Template.bind({});
 WithRequestsLoading.args = {
   activeNavItemId: 'example_project.root.get_started',
-  loadingCount: 1,
+  loadingCount$: new BehaviorSubject(1),
   solutions: [getSolutionPropertiesMock()],
 };
 WithRequestsLoading.argTypes = storybookMock.getArgumentTypes();

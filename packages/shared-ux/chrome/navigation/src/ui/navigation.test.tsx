@@ -8,6 +8,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { getServicesMock } from '../../mocks/src/jest';
 import { PlatformConfigSet, SolutionProperties } from '../../types';
 import { Platform } from '../model';
@@ -114,7 +115,7 @@ describe('<Navigation />', () => {
   });
 
   test('shows loading state', async () => {
-    services.loadingCount = 5;
+    services.loadingCount$ = new BehaviorSubject(5);
 
     const { findByTestId } = render(
       <NavigationProvider {...services} navIsOpen={true}>

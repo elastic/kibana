@@ -17,7 +17,8 @@ import { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
 export interface NavigationServices {
   activeNavItemId?: string;
   basePath: BasePathService;
-  loadingCount: number;
+  loadingCount$: Observable<number>;
+  recentlyAccessed$: Observable<RecentItem[]>;
   navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
 }

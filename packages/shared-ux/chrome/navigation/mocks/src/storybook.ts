@@ -13,7 +13,12 @@ import { NavigationProps, NavigationServices } from '../../types';
 type Arguments = NavigationProps & NavigationServices;
 export type Params = Pick<
   Arguments,
-  'activeNavItemId' | 'loadingCount' | 'navIsOpen' | 'platformConfig' | 'solutions'
+  | 'activeNavItemId'
+  | 'loadingCount$'
+  | 'recentlyAccessed$'
+  | 'navIsOpen'
+  | 'platformConfig'
+  | 'solutions'
 >;
 
 export class StorybookMock extends AbstractStorybookMock<NavigationProps, NavigationServices> {
