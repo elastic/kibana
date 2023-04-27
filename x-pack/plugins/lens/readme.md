@@ -229,7 +229,7 @@ Run all tests from the `x-pack` root directory
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group1/config.ts`
   - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group2/config.ts`
-  ...
+  - ...
   - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group6/config.ts`
 - API Functional tests:
   - Run `node scripts/functional_tests_server`
