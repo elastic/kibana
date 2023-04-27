@@ -18,8 +18,8 @@ import {
 import { IEventLogService, IEventLogger } from '@kbn/event-log-plugin/server';
 import { IValidatedEvent } from '@kbn/event-log-plugin/server/types';
 import { schema } from '@kbn/config-schema';
-import { EventLogFixtureStartDeps } from './plugin';
 import { queryOptionsSchema } from '@kbn/event-log-plugin/server/event_log_client';
+import { EventLogFixtureStartDeps } from './plugin';
 
 export const logEventRoute = (router: IRouter, eventLogger: IEventLogger, logger: Logger) => {
   router.post(
