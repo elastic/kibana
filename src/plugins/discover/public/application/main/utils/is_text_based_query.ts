@@ -5,23 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  AggregateQuery,
-  Query,
-  isOfAggregateQueryType,
-  getAggregateQueryMode,
-} from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { RecordRawType } from '../services/discover_data_state_container';
+import { getRawRecordType } from './get_raw_record_type';
 
-export function getRawRecordType(query?: Query | AggregateQuery) {
-  if (
-    query &&
-    isOfAggregateQueryType(query) &&
-    (getAggregateQueryMode(query) === 'sql' || getAggregateQueryMode(query) === 'esql')
-  ) {
-    return RecordRawType.PLAIN;
-  }
-
-  return RecordRawType.DOCUMENT;
+/**
+ * Checks if the query is of AggregateQuery type
+ * @param query
+ */
+export function isTextBasedQuery(query?: Query | AggregateQuery): query is AggregateQuery {
+  return getRawRecordType(query) === RecordRawType.PLAIN;
 }

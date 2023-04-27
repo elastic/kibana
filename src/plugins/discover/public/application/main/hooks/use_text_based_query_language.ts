@@ -17,6 +17,7 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { DiscoverStateContainer } from '../services/discover_state';
 import type { DataDocuments$ } from '../services/discover_data_state_container';
+import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
 
 const MAX_NUM_OF_COLUMNS = 50;
@@ -115,7 +116,9 @@ export function useTextBasedQueryLanguage({
         const nextState = {
           ...(addDataViewToState && { index: dataViewObj.id }),
           ...(addColumnsToState && { columns: nextColumns }),
-          ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && { viewMode: VIEW_MODE.DOCUMENT_LEVEL }),
+          ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && {
+            viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
+          }),
         };
         stateContainer.appState.replaceUrlState(nextState);
       } else {
