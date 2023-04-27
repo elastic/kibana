@@ -30,7 +30,7 @@ interface PackageItem {
   name: string;
   result: {
     installSource: string;
-    assets: Array<any>;
+    assets: unknown[];
   };
 }
 

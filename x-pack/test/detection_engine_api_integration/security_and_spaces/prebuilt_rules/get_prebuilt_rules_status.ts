@@ -57,18 +57,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should show that one custom rule is installed when a custom rule is added', async () => {
-      await createRule(supertest, log, getSimpleRule());
-
-      const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
-      expect(body).toMatchObject({
-        rules_custom_installed: 1,
-        rules_installed: 0,
-        rules_not_installed: 0,
-        rules_not_updated: 0,
-      });
-    });
-
     describe(`rule package without historical versions`, () => {
       const getRuleAssetSavedObjects = () => [
         createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1 }),
@@ -134,6 +122,25 @@ export default ({ getService }: FtrProviderContext): void => {
           rules_installed: RULES_COUNT,
           rules_not_installed: 0,
           rules_not_updated: 1,
+        });
+      });
+
+      it('should not return any updates if none are available', async () => {
+        const ruleAssetSavedObjects = getRuleAssetSavedObjects();
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
+        await installPrebuiltRulesAndTimelines(supertest);
+
+        // Clear previous rule assets
+        await deleteAllPrebuiltRuleAssets(es);
+        // Recreate the rules without bumping any versions
+        await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
+
+        const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+        expect(body).toMatchObject({
+          rules_custom_installed: 0,
+          rules_installed: RULES_COUNT,
+          rules_not_installed: 0,
+          rules_not_updated: 0,
         });
       });
     });
