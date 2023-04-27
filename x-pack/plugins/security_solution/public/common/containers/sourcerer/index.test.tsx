@@ -92,17 +92,55 @@ jest.mock('../../lib/kibana', () => ({
         },
       },
       data: {
+        dataViews: {
+          get: mockSearch.mockImplementation(
+            async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
+              Promise.resolve({
+                id: dataViewId,
+                matchedIndices: refreshFields
+                  ? ['hello', 'world', 'refreshed']
+                  : ['hello', 'world'],
+                fields: [
+                  {
+                    name: 'bytes',
+                    type: 'number',
+                    esTypes: ['long'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 10,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: 'ssl',
+                    type: 'boolean',
+                    esTypes: ['boolean'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 20,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: '@timestamp',
+                    type: 'date',
+                    esTypes: ['date'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 30,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                ],
+                getIndexPattern: () => 'hello*,world*,refreshed*',
+              })
+          ),
+        },
         indexPatterns: {
           getTitles: jest.fn().mockImplementation(() => Promise.resolve(mockPatterns)),
-        },
-        search: {
-          search: mockSearch.mockImplementation(() => ({
-            subscribe: jest.fn().mockImplementation(() => ({
-              error: jest.fn(),
-              next: jest.fn(),
-              unsubscribe: jest.fn(),
-            })),
-          })),
         },
       },
       notifications: {},
@@ -202,7 +240,7 @@ describe('Sourcerer Hooks', () => {
           type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
           payload: { loading: false },
         });
-        expect(mockDispatch).toHaveBeenCalledTimes(7);
+        expect(mockDispatch).toHaveBeenCalledTimes(9);
         expect(mockSearch).toHaveBeenCalledTimes(2);
       });
     });

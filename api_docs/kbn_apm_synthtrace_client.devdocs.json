@@ -851,7 +851,7 @@
             "label": "appMetrics",
             "description": [],
             "signature": [
-              "(metrics: Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; }>) => ",
+              "(metrics: Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>) => ",
               "Metricset",
               "<",
               {
@@ -875,7 +875,7 @@
                 "label": "metrics",
                 "description": [],
                 "signature": [
-                  "Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; }>"
+                  "Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>"
                 ],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
                 "deprecated": false,
@@ -1280,6 +1280,104 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.MobileDevice.appMetrics",
+            "type": "Function",
+            "tags": [],
+            "label": "appMetrics",
+            "description": [],
+            "signature": [
+              "(metrics: Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>) => ",
+              "Metricset",
+              "<",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.ApmFields",
+                "text": "ApmFields"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.MobileDevice.appMetrics.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "metrics",
+                "description": [],
+                "signature": [
+                  "Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.MobileDevice.crash",
+            "type": "Function",
+            "tags": [],
+            "label": "crash",
+            "description": [],
+            "signature": [
+              "({ message, groupingName }: { message: string; groupingName?: string | undefined; }) => ",
+              "ApmError"
+            ],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.MobileDevice.crash.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ message, groupingName }",
+                "description": [],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.MobileDevice.crash.$1.message",
+                    "type": "string",
+                    "tags": [],
+                    "label": "message",
+                    "description": [],
+                    "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.MobileDevice.crash.$1.groupingName",
+                    "type": "string",
+                    "tags": [],
+                    "label": "groupingName",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -2322,7 +2420,7 @@
             "section": "def-common.ApmFields",
             "text": "ApmFields"
           },
-          ", \"@timestamp\" | \"ecs.version\" | \"event.ingested\" | \"metricset.name\" | \"observer.type\" | \"observer.version_major\" | \"observer.version\" | \"processor.event\" | \"processor.name\"> & Partial<{ 'labels.etag': string; agent_config_applied: number; 'event.agent_id_status': string; }>"
+          ", \"@timestamp\" | \"ecs.version\" | \"observer.version_major\" | \"processor.event\" | \"event.ingested\" | \"metricset.name\" | \"observer.type\" | \"observer.version\" | \"processor.name\"> & Partial<{ 'labels.etag': string; agent_config_applied: number; 'event.agent_id_status': string; }>"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/agent_config/agent_config_fields.ts",
         "deprecated": false,
@@ -2341,7 +2439,7 @@
           "GeoLocation",
           "; 'client.geo.region_iso_code': string; 'client.geo.region_name': string; 'client.ip': string; 'cloud.account.id': string; 'cloud.account.name': string; 'cloud.availability_zone': string; 'cloud.machine.type': string; 'cloud.project.id': string; 'cloud.project.name': string; 'cloud.provider': string; 'cloud.region': string; 'cloud.service.name': string; 'container.id': string; 'destination.address': string; 'destination.port': number; 'device.id': string; 'device.manufacturer': string; 'device.model.identifier': string; 'device.model.name': string; 'ecs.version': string; 'error.exception': ",
           "ApmException",
-          "[]; 'error.grouping_key': string; 'error.grouping_name': string; 'error.id': string; 'event.ingested': number; 'event.name': string; 'event.outcome': string; 'event.outcome_numeric': number | { sum: number; value_count: number; }; 'faas.coldstart': boolean; 'faas.execution': string; 'faas.id': string; 'faas.name': string; 'faas.trigger.type': string; 'faas.version': string; 'host.architecture': string; 'host.hostname': string; 'host.name': string; 'host.os.full': string; 'host.os.name': string; 'host.os.platform': string; 'host.os.type': string; 'host.os.version': string; 'http.request.method': string; 'http.response.status_code': number; 'kubernetes.pod.name': string; 'kubernetes.pod.uid': string; 'labels.name': string; 'labels.telemetry_auto_version': string; 'metricset.name': string; 'network.carrier.icc': string; 'network.carrier.mcc': string; 'network.carrier.mnc': string; 'network.carrier.name': string; 'network.connection.subtype': string; 'network.connection.type': string; 'observer.type': string; 'observer.version_major': number; 'observer.version': string; 'parent.id': string; 'processor.event': string; 'processor.name': string; 'session.id': string; 'trace.id': string; 'transaction.aggregation.overflow_count': number; 'transaction.duration.us': number; 'transaction.id': string; 'transaction.name': string; 'transaction.type': string; 'transaction.duration.histogram': { values: number[]; counts: number[]; }; 'transaction.result': string; 'transaction.sampled': boolean; 'service.environment': string; 'service.framework.name': string; 'service.framework.version': string; 'service.language.name': string; 'service.language.version': string; 'service.name': string; 'service.node.name': string; 'service.runtime.name': string; 'service.runtime.version': string; 'service.target.name': string; 'service.target.type': string; 'service.version': string; 'span.action': string; 'span.destination.service.resource': string; 'span.destination.service.response_time.count': number; 'span.destination.service.response_time.sum.us': number; 'span.duration.us': number; 'span.id': string; 'span.name': string; 'span.self_time.count': number; 'span.self_time.sum.us': number; 'span.subtype': string; 'span.type': string; 'span.links': { trace: { id: string; }; span: { id: string; }; }[]; 'url.original': string; }> & Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; }> & Partial<{ 'metricset.interval': string; 'transaction.duration.summary': string; }>"
+          "[]; 'error.grouping_key': string; 'error.grouping_name': string; 'error.id': string; 'error.type': string; 'event.ingested': number; 'event.name': string; 'event.outcome': string; 'event.outcome_numeric': number | { sum: number; value_count: number; }; 'faas.coldstart': boolean; 'faas.execution': string; 'faas.id': string; 'faas.name': string; 'faas.trigger.type': string; 'faas.version': string; 'host.architecture': string; 'host.hostname': string; 'host.name': string; 'host.os.full': string; 'host.os.name': string; 'host.os.platform': string; 'host.os.type': string; 'host.os.version': string; 'http.request.method': string; 'http.response.status_code': number; 'kubernetes.pod.name': string; 'kubernetes.pod.uid': string; 'labels.name': string; 'labels.telemetry_auto_version': string; 'metricset.name': string; 'network.carrier.icc': string; 'network.carrier.mcc': string; 'network.carrier.mnc': string; 'network.carrier.name': string; 'network.connection.subtype': string; 'network.connection.type': string; 'observer.type': string; 'observer.version_major': number; 'observer.version': string; 'parent.id': string; 'processor.event': string; 'processor.name': string; 'session.id': string; 'trace.id': string; 'transaction.aggregation.overflow_count': number; 'transaction.duration.us': number; 'transaction.id': string; 'transaction.name': string; 'transaction.type': string; 'transaction.duration.histogram': { values: number[]; counts: number[]; }; 'transaction.result': string; 'transaction.sampled': boolean; 'service.environment': string; 'service.framework.name': string; 'service.framework.version': string; 'service.language.name': string; 'service.language.version': string; 'service.name': string; 'service.node.name': string; 'service.runtime.name': string; 'service.runtime.version': string; 'service.target.name': string; 'service.target.type': string; 'service.version': string; 'span.action': string; 'span.destination.service.resource': string; 'span.destination.service.response_time.count': number; 'span.destination.service.response_time.sum.us': number; 'span.duration.us': number; 'span.id': string; 'span.name': string; 'span.self_time.count': number; 'span.self_time.sum.us': number; 'span.subtype': string; 'span.type': string; 'span.links': { trace: { id: string; }; span: { id: string; }; }[]; 'url.original': string; }> & Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }> & Partial<{ 'metricset.interval': string; 'transaction.duration.summary': string; }>"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/apm_fields.ts",
         "deprecated": false,

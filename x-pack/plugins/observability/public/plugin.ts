@@ -24,7 +24,6 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { ExploratoryViewPublicPluginsStart } from '@kbn/exploratory-view-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type {
@@ -49,7 +48,9 @@ import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/publi
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
+import { RulesLocatorDefinition } from './locators/rules';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { registerDataHandler } from './data_handler';
 import {
@@ -94,7 +95,7 @@ export interface ObservabilityPublicPluginsStart {
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
-  exploratoryView: ExploratoryViewPublicPluginsStart;
+  exploratoryView: ExploratoryViewPublicStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
@@ -190,6 +191,9 @@ export class Plugin
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
+
+    const locator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
+
     pluginsSetup.share.url.locators.create(new RuleDetailsLocatorDefinition());
 
     const mount = async (params: AppMountParameters<unknown>) => {
@@ -310,6 +314,7 @@ export class Plugin
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
+      rulesLocator: locator,
     };
   }
 

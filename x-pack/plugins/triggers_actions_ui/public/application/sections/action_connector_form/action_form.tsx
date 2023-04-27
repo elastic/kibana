@@ -69,6 +69,7 @@ export interface ActionAccordionFormProps {
   ) => void;
   featureId: string;
   messageVariables?: ActionVariables;
+  summaryMessageVariables?: ActionVariables;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -100,6 +101,7 @@ export const ActionForm = ({
   setActionAlertsFilterProperty,
   featureId,
   messageVariables,
+  summaryMessageVariables,
   actionGroups,
   defaultActionMessage,
   setHasActionsDisabled,
@@ -433,6 +435,7 @@ export const ActionForm = ({
               connectors={connectors}
               defaultActionGroupId={defaultActionGroupId}
               messageVariables={messageVariables}
+              summaryMessageVariables={summaryMessageVariables}
               actionGroups={actionGroups}
               defaultActionMessage={defaultActionMessage}
               recoveryActionGroup={recoveryActionGroup}

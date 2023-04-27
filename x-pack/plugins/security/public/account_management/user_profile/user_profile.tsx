@@ -29,10 +29,10 @@ import type { FunctionComponent } from 'react';
 import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, ToastInput, ToastOptions } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
 import { UserAvatar } from '@kbn/user-profile-components';
 
 import type { AuthenticatedUser, UserProfileAvatarData } from '../../../common';
@@ -42,6 +42,7 @@ import {
   getUserAvatarColor,
   getUserAvatarInitials,
 } from '../../../common/model';
+import type { UserSettingsData } from '../../../common/model/user_profile';
 import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
 import {
@@ -60,6 +61,7 @@ export interface UserProfileProps {
   user: AuthenticatedUser;
   data?: {
     avatar?: UserProfileAvatarData;
+    userSettings?: UserSettingsData;
   };
 }
 
@@ -73,6 +75,9 @@ export interface UserProfileFormValues {
       initials: string;
       color: string;
       imageUrl: string;
+    };
+    userSettings: {
+      darkMode: string;
     };
   };
   avatarType: 'initials' | 'image';
@@ -132,6 +137,91 @@ function UserDetailsEditor({ user }: { user: AuthenticatedUser }) {
         fullWidth
       >
         <FormField type="email" name="user.email" fullWidth />
+      </FormRow>
+    </EuiDescribedFormGroup>
+  );
+}
+
+function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfileForm> }) {
+  if (!formik.values.data) {
+    return null;
+  }
+
+  return (
+    <EuiDescribedFormGroup
+      fullWidth
+      fieldFlexItemProps={{ style: { alignSelf: 'flex-start' } }}
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.userSettingsTitle"
+            defaultMessage="Theme"
+          />
+        </h2>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.themeFormGroupDescription"
+          defaultMessage="Select the appearance of your interface."
+        />
+      }
+    >
+      <FormRow
+        name="data.userSettings.darkMode"
+        label={
+          <FormLabel for="data.userSettings.darkMode">
+            <FormattedMessage
+              id="xpack.security.accountManagement.userProfile.userSettings.theme"
+              defaultMessage="Mode"
+            />
+          </FormLabel>
+        }
+        fullWidth
+      >
+        <EuiButtonGroup
+          legend={i18n.translate(
+            'xpack.security.accountManagement.userProfile.userSettings.themeGroupDescription',
+            {
+              defaultMessage: 'Elastic theme',
+            }
+          )}
+          buttonSize="m"
+          data-test-subj="darkModeButton"
+          idSelected={formik.values.data.userSettings.darkMode}
+          options={[
+            {
+              id: '',
+              label: (
+                <FormattedMessage
+                  id="xpack.security.accountManagement.userProfile.defaultModeButton"
+                  defaultMessage="Space default"
+                />
+              ),
+            },
+            {
+              id: 'light',
+              label: (
+                <FormattedMessage
+                  id="xpack.security.accountManagement.userProfile.lightModeButton"
+                  defaultMessage="Light"
+                />
+              ),
+              iconType: 'sun',
+            },
+            {
+              id: 'dark',
+              label: (
+                <FormattedMessage
+                  id="xpack.security.accountManagement.userProfile.darkModeButton"
+                  defaultMessage="Dark"
+                />
+              ),
+              iconType: 'moon',
+            },
+          ]}
+          onChange={(id: string) => formik.setFieldValue('data.userSettings.darkMode', id)}
+          isFullWidth
+        />
       </FormRow>
     </EuiDescribedFormGroup>
   );
@@ -498,81 +588,83 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
   }
 
   return (
-    <FormikProvider value={formik}>
-      <FormChangesProvider value={formChanges}>
-        <Breadcrumb
-          text={i18n.translate('xpack.security.accountManagement.userProfile.title', {
-            defaultMessage: 'Profile',
-          })}
-        >
-          {showChangePasswordForm ? (
-            <ChangePasswordModal
-              username={user.username}
-              onCancel={() => setShowChangePasswordForm(false)}
-              onSuccess={() => setShowChangePasswordForm(false)}
-            />
-          ) : null}
-
-          <EuiPageTemplate
-            className="eui-fullHeight"
-            pageHeader={{
-              pageTitle: (
-                <FormattedMessage
-                  id="xpack.security.accountManagement.userProfile.title"
-                  defaultMessage="Profile"
-                />
-              ),
-              pageTitleProps: { id: titleId },
-              rightSideItems: rightSideItems.reverse().map((item) => (
-                <EuiDescriptionList
-                  textStyle="reverse"
-                  listItems={[
-                    {
-                      title: (
-                        <EuiText color={euiTheme.colors.darkestShade} size="s">
-                          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-                            <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
-                            <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
-                              <EuiIconTip type="questionInCircle" content={item.helpText} />
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiText>
-                      ),
-                      description: (
-                        <span data-test-subj={item.testSubj}>
-                          {item.description || (
-                            <EuiText color={euiTheme.colors.disabledText} size="s">
-                              <FormattedMessage
-                                id="xpack.security.accountManagement.userProfile.noneProvided"
-                                defaultMessage="None provided"
-                              />
-                            </EuiText>
-                          )}
-                        </span>
-                      ),
-                    },
-                  ]}
-                  compressed
-                />
-              )),
-            }}
-            bottomBar={formChanges.count > 0 ? <SaveChangesBottomBar /> : null}
-            bottomBarProps={{ paddingSize: 'm', position: 'fixed' }}
-            restrictWidth={1000}
+    <>
+      <FormikProvider value={formik}>
+        <FormChangesProvider value={formChanges}>
+          <Breadcrumb
+            text={i18n.translate('xpack.security.accountManagement.userProfile.title', {
+              defaultMessage: 'Profile',
+            })}
           >
-            <Form aria-labelledby={titleId}>
-              <UserDetailsEditor user={user} />
-              {isCloudUser ? null : <UserAvatarEditor user={user} formik={formik} />}
-              <UserPasswordEditor
-                user={user}
-                onShowPasswordForm={() => setShowChangePasswordForm(true)}
+            {showChangePasswordForm ? (
+              <ChangePasswordModal
+                username={user.username}
+                onCancel={() => setShowChangePasswordForm(false)}
+                onSuccess={() => setShowChangePasswordForm(false)}
               />
-            </Form>
-            <EuiSpacer />
-          </EuiPageTemplate>
-        </Breadcrumb>
-      </FormChangesProvider>
-    </FormikProvider>
+            ) : null}
+
+            <EuiPageTemplate
+              className="eui-fullHeight"
+              pageHeader={{
+                pageTitle: (
+                  <FormattedMessage
+                    id="xpack.security.accountManagement.userProfile.title"
+                    defaultMessage="Profile"
+                  />
+                ),
+                pageTitleProps: { id: titleId },
+                rightSideItems: rightSideItems.reverse().map((item) => (
+                  <EuiDescriptionList
+                    textStyle="reverse"
+                    listItems={[
+                      {
+                        title: (
+                          <EuiText color={euiTheme.colors.darkestShade} size="s">
+                            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+                              <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
+                              <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
+                                <EuiIconTip type="questionInCircle" content={item.helpText} />
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </EuiText>
+                        ),
+                        description: (
+                          <span data-test-subj={item.testSubj}>
+                            {item.description || (
+                              <EuiText color={euiTheme.colors.disabledText} size="s">
+                                <FormattedMessage
+                                  id="xpack.security.accountManagement.userProfile.noneProvided"
+                                  defaultMessage="None provided"
+                                />
+                              </EuiText>
+                            )}
+                          </span>
+                        ),
+                      },
+                    ]}
+                    compressed
+                  />
+                )),
+              }}
+              bottomBar={formChanges.count > 0 ? <SaveChangesBottomBar /> : null}
+              bottomBarProps={{ paddingSize: 'm', position: 'fixed' }}
+              restrictWidth={1000}
+            >
+              <Form aria-labelledby={titleId}>
+                <UserDetailsEditor user={user} />
+                {isCloudUser ? null : <UserAvatarEditor user={user} formik={formik} />}
+                <UserPasswordEditor
+                  user={user}
+                  onShowPasswordForm={() => setShowChangePasswordForm(true)}
+                />
+                {isCloudUser ? null : <UserSettingsEditor formik={formik} />}
+              </Form>
+            </EuiPageTemplate>
+          </Breadcrumb>
+        </FormChangesProvider>
+      </FormikProvider>
+    </>
   );
 };
 
@@ -592,12 +684,16 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
             color: data.avatar?.color || getUserAvatarColor(user),
             imageUrl: data.avatar?.imageUrl || '',
           },
+          userSettings: {
+            darkMode: data.userSettings?.darkMode || '',
+          },
         }
       : undefined,
     avatarType: data?.avatar?.imageUrl ? 'image' : 'initials',
   });
 
   const [validateOnBlurOrChange, setValidateOnBlurOrChange] = useState(false);
+
   const formik = useFormik<UserProfileFormValues>({
     onSubmit: async (values) => {
       const submitActions = [];
@@ -639,12 +735,59 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
         return;
       }
 
+      let isRefreshRequired = false;
+      if (initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode) {
+        isRefreshRequired = true;
+      }
+
       resetInitialValues(values);
-      services.notifications.toasts.addSuccess(
-        i18n.translate('xpack.security.accountManagement.userProfile.submitSuccessTitle', {
+
+      let successToastInput: ToastInput = {
+        title: i18n.translate('xpack.security.accountManagement.userProfile.submitSuccessTitle', {
           defaultMessage: 'Profile updated',
-        })
-      );
+        }),
+      };
+
+      let successToastOptions: ToastOptions = {};
+
+      if (isRefreshRequired) {
+        successToastOptions = {
+          toastLifeTimeMs: 1000 * 60 * 5,
+        };
+
+        successToastInput = {
+          ...successToastInput,
+          text: toMountPoint(
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <p>
+                  {i18n.translate(
+                    'xpack.security.accountManagement.userProfile.requiresPageReloadToastDescription',
+                    {
+                      defaultMessage:
+                        'One or more settings require you to reload the page to take effect.',
+                    }
+                  )}
+                </p>
+                <EuiButton
+                  size="s"
+                  onClick={() => window.location.reload()}
+                  data-test-subj="windowReloadButton"
+                >
+                  {i18n.translate(
+                    'xpack.security.accountManagement.userProfile.requiresPageReloadToastButtonLabel',
+                    {
+                      defaultMessage: 'Reload page',
+                    }
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        };
+      }
+
+      services.notifications.toasts.addSuccess(successToastInput, successToastOptions);
     },
     initialValues,
     enableReinitialize: true,
