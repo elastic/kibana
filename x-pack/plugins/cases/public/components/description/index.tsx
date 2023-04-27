@@ -136,11 +136,11 @@ export const Description = ({
     isSetCommentRef(descriptionMarkdownRef.current) &&
     descriptionMarkdownRef.current.editor?.textarea &&
     lensDraftComment &&
-    lensDraftComment?.commentId === DESCRIPTION_ID
+    lensDraftComment.commentId === DESCRIPTION_ID
   ) {
     descriptionMarkdownRef.current.setComment(lensDraftComment.comment);
     if (hasIncomingLensState) {
-      openLensModal({ editorRef: descriptionMarkdownRef.current?.editor });
+      openLensModal({ editorRef: descriptionMarkdownRef.current.editor });
     } else {
       clearLensDraftComment();
     }

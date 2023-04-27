@@ -51,7 +51,7 @@ const hasDraftComment = (
   caseId: string,
   commentId: string,
   comment: string
-): Boolean => {
+): boolean => {
   const draftStorageKey = getMarkdownEditorStorageKey(applicationId, caseId, commentId);
 
   const sessionValue = sessionStorage.getItem(draftStorageKey);
@@ -85,7 +85,8 @@ export const createUserAttachmentUserActionBuilder = ({
       className: classNames('userAction__comment', {
         outlined,
         isEdit,
-        draftFooter: !isEdit && !isLoading && hasDraftComment(appId,caseId,comment.id,comment.comment),
+        draftFooter:
+          !isEdit && !isLoading && hasDraftComment(appId, caseId, comment.id, comment.comment),
       }),
       children: (
         <>
@@ -102,7 +103,7 @@ export const createUserAttachmentUserActionBuilder = ({
               version: comment.version,
             })}
           />
-          {!isEdit && !isLoading && hasDraftComment(appId,caseId,comment.id, comment.comment) ? (
+          {!isEdit && !isLoading && hasDraftComment(appId, caseId, comment.id, comment.comment) ? (
             <MyEuiCommentFooter>
               <EuiText color="subdued" size="xs" data-test-subj="user-action-comment-unsaved-draft">
                 {i18n.UNSAVED_DRAFT_COMMENT}
