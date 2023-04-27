@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { expectRowsPerPage, goToTablePage, setRowsPerPageTo } from '../../tasks/table_pagination';
+import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+import { importRule } from '../../tasks/api_calls/rules';
+import {
+  expectRowsPerPage,
+  expectTablePage,
+  goToTablePage,
+  setRowsPerPageTo,
+} from '../../tasks/table_pagination';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { GROUP_OPTION_SELECTOR, GROUP_SELECTOR } from '../../screens/alerts';
 import { ALERT_TABLE_ACTIONS_HEADER } from '../../screens/timeline';
@@ -21,9 +28,9 @@ describe('Alerts grouping', { testIsolation: false }, () => {
     cleanKibana();
     esArchiverLoad('auditbeat_bigger');
     login();
-    // importRule('grouping_rules.ndjson');
+    importRule('grouping_rules.ndjson');
     visit(ALERTS_URL);
-    // waitForAlertsToPopulate();
+    waitForAlertsToPopulate();
   });
   after(() => {
     esArchiverUnload('auditbeat_bigger');
@@ -35,7 +42,7 @@ describe('Alerts grouping', { testIsolation: false }, () => {
       scrollAlertTableColumnIntoView(ALERT_TABLE_ACTIONS_HEADER);
     });
 
-    it('should group by one level', () => {
+    it.only('should reset pagination when selected group changes', () => {
       cy.get(GROUP_SELECTOR).click();
       cy.get(GROUP_OPTION_SELECTOR('kibana.alert.rule.name')).click();
 
@@ -43,6 +50,23 @@ describe('Alerts grouping', { testIsolation: false }, () => {
       setRowsPerPageTo(10);
       expectRowsPerPage(10);
       goToTablePage(2);
+      expectTablePage(2);
+      cy.get(GROUP_OPTION_SELECTOR('host.name')).click();
+      expectTablePage(1);
+      cy.wait(100000);
+    });
+
+    it('should reset pagination when ', () => {
+      cy.get(GROUP_SELECTOR).click();
+      cy.get(GROUP_OPTION_SELECTOR('kibana.alert.rule.name')).click();
+
+      expectRowsPerPage(25);
+      setRowsPerPageTo(10);
+      expectRowsPerPage(10);
+      goToTablePage(2);
+      expectTablePage(2);
+      cy.get(GROUP_OPTION_SELECTOR('host.name')).click();
+      expectTablePage(1);
       cy.wait(100000);
     });
   });
