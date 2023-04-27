@@ -8,6 +8,14 @@ $screenHeightBreakpoint: 15em;
 
 .kbnCollapsibleNav__solutions {
   @include euiYScroll;
+
+  /**
+   * Allows the solutions nav group to be viewed on
+   * very small screen sizes and when the browser Zoom is high
+   */
+  @media (max-height: $screenHeightBreakpoint) {
+    flex: 1 0 auto;
+  }
 }
 
 /**
