@@ -37,8 +37,8 @@ export const DeleteLocation = ({
   const deleteDisabledReason = !canSaveIntegrations
     ? CANNOT_SAVE_INTEGRATION_LABEL
     : i18n.translate('xpack.synthetics.monitorManagement.cannotDelete.description', {
-        defaultMessage: `This location cannot be deleted, because it has {monCount, number} {monCount, plural,one {monitor} other {monitors}} running.
-                Please remove this location from your monitors before deleting this location.`,
+        defaultMessage: `This location cannot be deleted, because it has {monCount, number} {monCount, plural,one {monitor} other {monitors}} configured.
+                Please remove this location from your {monCount, plural,one {monitor} other {monitors}} before deleting this location.`,
         values: { monCount },
       });
 
