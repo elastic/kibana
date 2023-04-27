@@ -9,7 +9,14 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  QueryObserverBaseResult,
+  UseMutateAsyncFunction,
+  UseMutateFunction,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
@@ -24,7 +31,37 @@ import { useUrlState } from '../utils/use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
 
+interface UpdateViewParams {
+  id: string;
+  attributes: UpdateInventoryViewAttributesRequestPayload;
+}
+
+export interface UseInventoryViewsResult {
+  views?: InventoryView[];
+  currentView?: InventoryView | null;
+  createView: UseMutateAsyncFunction<
+    InventoryView,
+    ServerError,
+    CreateInventoryViewAttributesRequestPayload
+  >;
+  deleteViewById: UseMutateFunction<null, ServerError, string, MutationContext>;
+  fetchViews: QueryObserverBaseResult<InventoryView[]>['refetch'];
+  updateViewById: UseMutateAsyncFunction<InventoryView, ServerError, UpdateViewParams>;
+  switchViewById: (id: InventoryViewId) => void;
+  setDefaultViewById: UseMutateFunction<
+    MetricsSourceConfigurationResponse,
+    ServerError,
+    string,
+    MutationContext
+  >;
+  isCreatingView: boolean;
+  isFetchingCurrentView: boolean;
+  isFetchingViews: boolean;
+  isUpdatingView: boolean;
+}
+
 type ServerError = IHttpFetchError<ResponseErrorBody>;
+
 interface MutationContext {
   id?: string;
   previousViews?: InventoryView[];
@@ -36,7 +73,7 @@ const queryKeys = {
   getById: (id: string) => ['inventory-views-get', id] as const,
 };
 
-export const useInventoryViews = () => {
+export const useInventoryViews = (): UseInventoryViewsResult => {
   const { inventoryViews } = useKibanaContextForPlugin().services;
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
 
@@ -100,19 +137,12 @@ export const useInventoryViews = () => {
       queryClient.setQueryData(queryKeys.find, updatedViews);
       return { previousViews }; // 4
     },
-    // If the mutation fails, use the context returned from onMutate to roll back
-    onError: (error: ServerError, _id, context) => {
-      notify.setDefaultViewFailure(error.body?.message ?? error.message);
-      if (context?.previousViews) {
-        queryClient.setQueryData(queryKeys.find, context.previousViews);
+    // If the mutation fails but doesn't retrigger the error, use the context returned from onMutate to roll back
+    onSuccess: (data, _id, context) => {
+      if (!data && context?.previousViews) {
+        return queryClient.setQueryData(queryKeys.find, context.previousViews);
       }
-    },
-    // Always refetch after error or success:
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.get }); // Invalidate all single views cache entries
-    },
-    onSettled: () => {
-      fetchViews(); // Always invalidate views list cache and refetch views on success/error
+      return queryClient.invalidateQueries({ queryKey: queryKeys.get });
     },
   });
 
@@ -128,14 +158,13 @@ export const useInventoryViews = () => {
     onSuccess: (createdView) => {
       queryClient.setQueryData(queryKeys.getById(createdView.id), createdView); // Store in cache created view
       switchViewById(createdView.id); // Update current view and url state
-      fetchViews(); // Invalidate views list cache and refetch views
     },
   });
 
   const { mutateAsync: updateViewById, isLoading: isUpdatingView } = useMutation<
     InventoryView,
     ServerError,
-    { id: string; attributes: UpdateInventoryViewAttributesRequestPayload }
+    UpdateViewParams
   >({
     mutationFn: ({ id, attributes }) => inventoryViews.client.updateInventoryView(id, attributes),
     onError: (error) => {
@@ -143,7 +172,6 @@ export const useInventoryViews = () => {
     },
     onSuccess: (updatedView) => {
       queryClient.setQueryData(queryKeys.getById(updatedView.id), updatedView); // Store in cache updated view
-      fetchViews(); // Invalidate views list cache and refetch views
     },
   });
 
@@ -169,6 +197,7 @@ export const useInventoryViews = () => {
     },
     // If the mutation fails, use the context returned from onMutate to roll back
     onError: (error, _id, context) => {
+      notify.deleteViewFailure(error.body?.message ?? error.message);
       if (context?.previousViews) {
         queryClient.setQueryData(queryKeys.find, context.previousViews);
       }
@@ -200,7 +229,6 @@ export const useInventoryViews = () => {
     isFetchingCurrentView,
     isFetchingViews,
     isUpdatingView,
-    shouldLoadDefault: true,
   };
 };
 

@@ -18,6 +18,6 @@ interface Props {
 }
 
 export const LayoutView = (props: Props) => {
-  const { shouldLoadDefault, currentView } = useInventoryViews();
-  return <Layout shouldLoadDefault={shouldLoadDefault} currentView={currentView} {...props} />;
+  const { currentView } = useInventoryViews();
+  return <Layout currentView={currentView} {...props} />;
 };

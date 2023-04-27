@@ -13,7 +13,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const DEFAULT_CONFIG = {
   defaultOptions: {
-    queries: { keepPreviousData: true },
+    queries: { keepPreviousData: true, refetchOnWindowFocus: false },
   },
 };
 
@@ -43,6 +43,7 @@ function HideableReactQueryDevTools() {
         color="primary"
         style={{ zIndex: 99999, position: 'fixed', bottom: '40px', left: '40px' }}
         onClick={() => setIsHidden(!isHidden)}
+        aria-label="Disable React Query Dev Tools"
       />
       <ReactQueryDevtools initialIsOpen={false} />
     </div>

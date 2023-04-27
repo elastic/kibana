@@ -5,35 +5,43 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { NonEmptyString } from '@kbn/io-ts-utils';
 import { InventoryView } from '../../../common/inventory_views';
 import { SavedViewManageViewsFlyout } from './manage_views_flyout';
 import { useBoolean } from '../../hooks/use_boolean';
 import { UpsertViewModal } from './upsert_modal';
+import { UseInventoryViewsResult } from '../../hooks/use_inventory_views';
 
-interface Props<ViewState> {
+interface Props<UseViewResult extends UseInventoryViewsResult, ViewState> {
   viewState: ViewState & { time?: number };
-  currentView: InventoryView;
-  views: InventoryView[];
-  isFetchingViews: boolean;
-  isFetchingCurrentView: boolean;
-  onCreateView: (attributes: any) => Promise<void>;
-  onUpdateView: ({ id, attributes }: { id: string; attributes: any }) => Promise<void>;
-  onDeleteView: () => void;
-  onLoadViews: () => void;
-  onSetDefaultView: (id: string) => void;
-  onSwitchView: (id: string) => void;
+  currentView: UseViewResult['currentView'];
+  views: UseViewResult['views'];
+  isFetchingViews: UseViewResult['isFetchingViews'];
+  isFetchingCurrentView: UseViewResult['isFetchingCurrentView'];
+  isCreatingView: UseViewResult['isCreatingView'];
+  isUpdatingView: UseViewResult['isUpdatingView'];
+  onCreateView: UseViewResult['createView'];
+  onDeleteView: UseViewResult['deleteViewById'];
+  onUpdateView: UseViewResult['updateViewById'];
+  onLoadViews: UseViewResult['fetchViews'];
+  onSetDefaultView: UseViewResult['setDefaultViewById'];
+  onSwitchView: UseViewResult['switchViewById'];
 }
 
-export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
+export function SavedViewsToolbarControls<ViewState>(
+  props: Props<UseInventoryViewsResult, ViewState>
+) {
   const {
     currentView,
     views,
     isFetchingViews,
     isFetchingCurrentView,
+    isCreatingView,
+    isUpdatingView,
     onCreateView,
     onDeleteView,
     onUpdateView,
@@ -42,32 +50,12 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     onSwitchView,
     viewState,
   } = props;
-  // const {
-  //   views,
-  //   saveView,
-  //   loading,
-  //   updateView,
-  //   deletedId,
-  //   deleteView,
-  //   makeDefault,
-  //   sourceIsLoading,
-  //   find,
-  //   errorOnFind,
-  //   errorOnCreate,
-  //   createdView,
-  //   updatedView,
-  //   currentView,
-  //   setCurrentView,
-  // } = useSavedViewContext();
 
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
   const [isManageFlyoutOpen, { on: openManageFlyout, off: closeManageFlyout }] = useBoolean(false);
-  const [isUpdateModalOpen, { on: openUpdateModal, off: closeUpdateModal }] = useBoolean(false);
-  // const [isLoadModalOpen, { on: openLoadModal, off: closeLoadModal }] = useBoolean(false);
   const [isCreateModalOpen, { on: openCreateModal, off: closeCreateModal }] = useBoolean(false);
-
-  const [isInvalid, setIsInvalid] = useState(false);
+  const [isUpdateModalOpen, { on: openUpdateModal, off: closeUpdateModal }] = useBoolean(false);
 
   const goToManageViews = () => {
     closePopover();
@@ -75,25 +63,17 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     openManageFlyout();
   };
 
-  // const goToLoadView = () => {
-  //   closePopover();
-  //   onLoadViews();
-  //   openLoadModal();
-  // };
-
   const goToCreateView = () => {
     closePopover();
-    setIsInvalid(false);
     openCreateModal();
   };
 
   const goToUpdateView = () => {
     closePopover();
-    setIsInvalid(false);
     openUpdateModal();
   };
 
-  const handleCreateView = (name: string, shouldIncludeTime: boolean = false) => {
+  const handleCreateView = (name: NonEmptyString, shouldIncludeTime: boolean = false) => {
     const attributes = { ...viewState, name };
 
     if (!shouldIncludeTime) {
@@ -103,7 +83,9 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     onCreateView(attributes).then(closeCreateModal);
   };
 
-  const handleUpdateView = (name: string, shouldIncludeTime: boolean = false) => {
+  const handleUpdateView = (name: NonEmptyString, shouldIncludeTime: boolean = false) => {
+    if (!currentView) return;
+
     const attributes = { ...viewState, name };
 
     if (!shouldIncludeTime) {
@@ -155,14 +137,6 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
               defaultMessage: 'Update view',
             })}
           />
-          {/* <EuiListGroupItem
-            data-test-subj="savedViews-loadView"
-            iconType="importAction"
-            onClick={goToLoadView}
-            label={i18n.translate('xpack.infra.savedView.loadView', {
-              defaultMessage: 'Load view',
-            })}
-          /> */}
           <EuiListGroupItem
             data-test-subj="savedViews-saveNewView"
             iconType="save"
@@ -175,7 +149,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
       </EuiPopover>
       {isCreateModalOpen && (
         <UpsertViewModal
-          isInvalid={isInvalid}
+          isSaving={isCreatingView}
           onClose={closeCreateModal}
           onSave={handleCreateView}
           title={
@@ -188,7 +162,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
       )}
       {isUpdateModalOpen && (
         <UpsertViewModal
-          isInvalid={isInvalid}
+          isSaving={isUpdatingView}
           onClose={closeUpdateModal}
           onSave={handleUpdateView}
           initialName={currentView?.attributes.name}
@@ -201,14 +175,6 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
           }
         />
       )}
-      {/* {isLoadModalOpen && (
-        <SavedViewListModal<any>
-          currentView={currentView}
-          views={views}
-          onClose={closeLoadModal}
-          onSwitchView={onSwitchView}
-        />
-      )} */}
       {isManageFlyoutOpen && (
         <SavedViewManageViewsFlyout
           loading={isFetchingViews}

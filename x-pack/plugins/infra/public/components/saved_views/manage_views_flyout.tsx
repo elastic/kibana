@@ -23,14 +23,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InventoryView } from '../../../common/inventory_views';
+import { UseInventoryViewsResult } from '../../hooks/use_inventory_views';
 
-interface Props {
-  views: InventoryView[];
+interface Props<UseViewResult extends UseInventoryViewsResult> {
+  views: UseViewResult['views'];
   loading: boolean;
   onClose(): void;
-  onMakeDefaultView(id: string): void;
-  onSwitchView(id: string): void;
-  onDeleteView(id: string): void;
+  onMakeDefaultView: UseViewResult['setDefaultViewById'];
+  onSwitchView: UseViewResult['switchViewById'];
+  onDeleteView: UseViewResult['deleteViewById'];
 }
 
 interface DeleteConfimationProps {
@@ -70,14 +71,14 @@ const DeleteConfimation = ({ isDisabled, onConfirm }: DeleteConfimationProps) =>
   );
 };
 
-export function SavedViewManageViewsFlyout<ViewState>({
+export function SavedViewManageViewsFlyout({
   onClose,
   views,
   onSwitchView,
   onMakeDefaultView,
   onDeleteView,
   loading,
-}: Props) {
+}: Props<UseInventoryViewsResult>) {
   const renderName = (name: string, item: InventoryView) => (
     <EuiButtonEmpty
       key={item.id}

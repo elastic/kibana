@@ -11,6 +11,17 @@ import { useKibanaContextForPlugin } from './use_kibana';
 export const useSavedViewsNotifier = () => {
   const { notifications } = useKibanaContextForPlugin();
 
+  const deleteViewFailure = (message?: string) => {
+    notifications.toasts.danger({
+      toastLifeTimeMs: 3000,
+      title:
+        message ||
+        i18n.translate('xpack.infra.savedView.errorOnCreate.title', {
+          defaultMessage: `An error occured deleting the view.`,
+        }),
+    });
+  };
+
   const getViewFailure = (message?: string) => {
     notifications.toasts.danger({
       toastLifeTimeMs: 3000,
@@ -18,17 +29,6 @@ export const useSavedViewsNotifier = () => {
         message ||
         i18n.translate('xpack.infra.savedView.findError.title', {
           defaultMessage: `An error occurred while loading views.`,
-        }),
-    });
-  };
-
-  const setDefaultViewFailure = (message?: string) => {
-    notifications.toasts.danger({
-      toastLifeTimeMs: 3000,
-      title:
-        message ||
-        i18n.translate('xpack.infra.savedView.errorOnMakeDefault.title', {
-          defaultMessage: `An error updating the default view.`,
         }),
     });
   };
@@ -45,8 +45,8 @@ export const useSavedViewsNotifier = () => {
   };
 
   return {
+    deleteViewFailure,
     getViewFailure,
-    setDefaultViewFailure,
     upsertViewFailure,
   };
 };
