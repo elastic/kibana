@@ -14,7 +14,7 @@ import {
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useRef, useMemo, useState } from 'react';
-import { distinctUntilChanged, filter, map, Observable, pairwise } from 'rxjs';
+import { distinctUntilChanged, filter, map, Observable, pairwise, startWith } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
@@ -136,16 +136,16 @@ export const useDiscoverHistogram = ({
   useEffect(() => {
     const subscription = createAppStateObservable(stateContainer.appState.state$).subscribe(
       (changes) => {
-        if ('breakdownField' in changes) {
-          unifiedHistogram?.setBreakdownField(changes.breakdownField);
+        if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
+          unifiedHistogram?.setChartHidden(changes.chartHidden);
         }
 
         if ('timeInterval' in changes && changes.timeInterval) {
           unifiedHistogram?.setTimeInterval(changes.timeInterval);
         }
 
-        if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
-          unifiedHistogram?.setChartHidden(changes.chartHidden);
+        if ('breakdownField' in changes) {
+          unifiedHistogram?.setBreakdownField(changes.breakdownField);
         }
       }
     );
@@ -324,23 +324,28 @@ export const useDiscoverHistogram = ({
 
 const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistogramState>) => {
   return state$?.pipe(
+    startWith(undefined),
     pairwise(),
     map(([prev, curr]) => {
       const changes: Partial<DiscoverAppState> & { lensRequestAdapter?: RequestAdapter } = {};
 
-      if (prev.lensRequestAdapter !== curr.lensRequestAdapter) {
+      if (!curr) {
+        return changes;
+      }
+
+      if (prev?.lensRequestAdapter !== curr.lensRequestAdapter) {
         changes.lensRequestAdapter = curr.lensRequestAdapter;
       }
 
-      if (prev.chartHidden !== curr.chartHidden) {
+      if (prev?.chartHidden !== curr.chartHidden) {
         changes.hideChart = curr.chartHidden;
       }
 
-      if (prev.timeInterval !== curr.timeInterval) {
+      if (prev?.timeInterval !== curr.timeInterval) {
         changes.interval = curr.timeInterval;
       }
 
-      if (prev.breakdownField !== curr.breakdownField) {
+      if (prev?.breakdownField !== curr.breakdownField) {
         changes.breakdownField = curr.breakdownField;
       }
 
@@ -352,19 +357,24 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
 
 const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
   return state$.pipe(
+    startWith(undefined),
     pairwise(),
     map(([prev, curr]) => {
       const changes: Partial<UnifiedHistogramState> = {};
 
-      if (prev.hideChart !== curr.hideChart) {
+      if (!curr) {
+        return changes;
+      }
+
+      if (prev?.hideChart !== curr.hideChart) {
         changes.chartHidden = curr.hideChart;
       }
 
-      if (prev.interval !== curr.interval) {
+      if (prev?.interval !== curr.interval) {
         changes.timeInterval = curr.interval;
       }
 
-      if (prev.breakdownField !== curr.breakdownField) {
+      if (prev?.breakdownField !== curr.breakdownField) {
         changes.breakdownField = curr.breakdownField;
       }
 
