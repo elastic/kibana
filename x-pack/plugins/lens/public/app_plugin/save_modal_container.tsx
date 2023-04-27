@@ -292,11 +292,17 @@ export const runSaveLensVisualization = async (
     }
   }
   try {
-    const newInput = (await attributeService.wrapAttributes(
+    let newInput = (await attributeService.wrapAttributes(
       docToSave,
       options.saveToLibrary,
       originalInput
     )) as LensEmbeddableInput;
+    if (saveProps.panelTimeRange) {
+      newInput = {
+        ...newInput,
+        timeRange: saveProps.panelTimeRange,
+      };
+    }
 
     if (saveProps.returnToOrigin && redirectToOrigin) {
       // disabling the validation on app leave because the document has been saved.
