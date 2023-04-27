@@ -9,6 +9,7 @@ import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
   Navigation,
   NavigationKibanaProvider,
+  NavigationProps,
   NavItemProps,
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
@@ -52,6 +53,7 @@ const navItems: NavItemProps[] = [
     ],
   },
 ];
+
 export class ServerlessSearchPlugin
   implements Plugin<ServerlessSearchPluginSetup, ServerlessSearchPluginStart>
 {
@@ -66,6 +68,11 @@ export class ServerlessSearchPlugin
     core: CoreStart,
     { serverless }: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
+    const recentlyAccessedFilter: NavigationProps['recentlyAccessedFilter'] = (items) => {
+      // Example: only allow recent dashboards
+      return items.filter(({ link }) => link.match('/app/dashboards'));
+    };
+
     serverless.setServerlessNavigation(
       <NavigationKibanaProvider core={core}>
         <Navigation
@@ -81,6 +88,7 @@ export class ServerlessSearchPlugin
           platformConfig={{}}
           homeHref="/app/enterprise_search/content/setup_guide"
           linkToCloud="projects"
+          recentlyAccessedFilter={recentlyAccessedFilter}
         />
       </NavigationKibanaProvider>
     );

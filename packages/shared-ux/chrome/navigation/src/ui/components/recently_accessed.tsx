@@ -13,14 +13,20 @@ import { NavigationProps, NavigationServices } from '../../../types';
 import { getI18nStrings } from '../../i18n_strings';
 import { navigationStyles as styles } from '../../styles';
 
-interface Props {
-  recentlyAccessed$: Observable<RecentItem[]>;
-}
+type Props = Pick<NavigationProps, 'recentlyAccessedFilter'>;
+type Services = Pick<NavigationServices, 'recentlyAccessed$'>;
 
-export const RecentlyAccessed = (props: Props) => {
+export const RecentlyAccessed = (props: Props & Services) => {
   const strings = getI18nStrings();
   const recentlyAccessed = useObservable(props.recentlyAccessed$, []);
-  if (recentlyAccessed.length > 0) {
+
+  // consumer may filter objects from recent that are not applicable to the project
+  let filteredRecent = recentlyAccessed;
+  if (props.recentlyAccessedFilter) {
+    filteredRecent = props.recentlyAccessedFilter(recentlyAccessed);
+  }
+
+  if (filteredRecent.length > 0) {
     const navItems: Array<EuiSideNavItemType<unknown>> = [
       {
         name: '', // no list header title

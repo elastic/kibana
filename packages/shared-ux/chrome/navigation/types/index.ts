@@ -125,6 +125,10 @@ export interface NavigationProps {
    * Control of the link that takes the user to their projects or deployments
    */
   linkToCloud?: 'projects' | 'deployments';
+  /**
+   * Filter function to allow consumer to remove items from the recently accessed section
+   */
+  recentlyAccessedFilter?: (items: RecentItem[]) => RecentItem[];
 }
 
 export type NavigationBucketProps = (SolutionProperties &
