@@ -9,20 +9,21 @@ import path from 'path';
 
 export const BUNDLED_PACKAGE_DIR = path.join(path.dirname(__filename), './fleet_bundled_packages');
 
-const registryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
-
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../config.base.ts'));
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('./install_latest_bundled_prebuilt_rules.ts')],
+    testFiles: [
+      require.resolve('./prerelease_packages.ts'),
+      require.resolve('./install_latest_bundled_prebuilt_rules.ts'),
+    ],
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
+        `--xpack.fleet.registryUrl=http://invalidURL:8080`,
         `--xpack.fleet.developer.bundledPackageLocation=${BUNDLED_PACKAGE_DIR}`,
       ],
     },
