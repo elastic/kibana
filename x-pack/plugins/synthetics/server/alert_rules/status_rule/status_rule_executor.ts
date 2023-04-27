@@ -34,7 +34,8 @@ export interface StaleDownConfig extends OverviewStatusMetaData {
   isLocationRemoved?: boolean;
 }
 
-export interface AlertOverviewStatus extends Omit<OverviewStatus, 'disabledCount'> {
+export interface AlertOverviewStatus
+  extends Omit<OverviewStatus, 'disabledCount' | 'disabledMonitorQueryIds'> {
   staleDownConfigs: Record<string, StaleDownConfig>;
 }
 

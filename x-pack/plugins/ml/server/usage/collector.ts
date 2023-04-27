@@ -31,7 +31,10 @@ export interface MlUsageData {
   };
 }
 
-export function registerCollector(usageCollection: UsageCollectionSetup, kibanaIndex: string) {
+export function registerCollector(
+  usageCollection: UsageCollectionSetup,
+  getIndexForType: (type: string) => Promise<string>
+) {
   const collector = usageCollection.makeUsageCollector<MlUsageData>({
     type: 'ml',
     schema: {
@@ -86,11 +89,12 @@ export function registerCollector(usageCollection: UsageCollectionSetup, kibanaI
         },
       },
     },
-    isReady: () => !!kibanaIndex,
+    isReady: () => true,
     fetch: async ({ esClient }) => {
+      const alertIndex = await getIndexForType('alert');
       const result = await esClient.search(
         {
-          index: kibanaIndex,
+          index: alertIndex,
           size: 0,
           body: {
             query: {
@@ -137,7 +141,7 @@ export function registerCollector(usageCollection: UsageCollectionSetup, kibanaI
         };
       }>(
         {
-          index: kibanaIndex,
+          index: alertIndex,
           size: 10000,
           body: {
             query: {

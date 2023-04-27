@@ -30,7 +30,7 @@ export const initGetInventoryViewRoute = ({
     },
     async (_requestContext, request, response) => {
       const { params, query } = request;
-      const { inventoryViews } = (await getStartServices())[2];
+      const [, , { inventoryViews }] = await getStartServices();
       const inventoryViewsClient = inventoryViews.getScopedClient(request);
 
       try {

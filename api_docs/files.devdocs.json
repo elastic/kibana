@@ -305,7 +305,7 @@
             "section": "def-common.FilesMetrics",
             "text": "FilesMetrics"
           },
-          ">; publicDownload: (arg: Omit<{ token: string; fileName?: string | undefined; }, \"kind\">) => any; find: (arg: Omit<{ kind?: string | string[] | undefined; status?: string | string[] | undefined; extension?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
+          ">; publicDownload: (arg: Omit<{ token: string; fileName?: string | undefined; }, \"kind\">) => any; find: (arg: Omit<{ kind?: string | string[] | undefined; kindToExclude?: string | string[] | undefined; status?: string | string[] | undefined; extension?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
           {
             "pluginId": "@kbn/shared-ux-file-types",
             "scope": "common",
@@ -649,9 +649,31 @@
       "label": "FilesStart",
       "description": [],
       "signature": [
-        "{ filesClientFactory: ",
-        "FilesClientFactory",
-        "; }"
+        "Pick<",
+        {
+          "pluginId": "files",
+          "scope": "public",
+          "docId": "kibFilesPluginApi",
+          "section": "def-public.FilesSetup",
+          "text": "FilesSetup"
+        },
+        ", \"filesClientFactory\"> & { getFileKindDefinition: (id: string) => ",
+        {
+          "pluginId": "@kbn/shared-ux-file-types",
+          "scope": "common",
+          "docId": "kibKbnSharedUxFileTypesPluginApi",
+          "section": "def-common.FileKindBrowser",
+          "text": "FileKindBrowser"
+        },
+        "; getAllFindKindDefinitions: () => ",
+        {
+          "pluginId": "@kbn/shared-ux-file-types",
+          "scope": "common",
+          "docId": "kibKbnSharedUxFileTypesPluginApi",
+          "section": "def-common.FileKindBrowser",
+          "text": "FileKindBrowser"
+        },
+        "[]; }"
       ],
       "path": "src/plugins/files/public/plugin.ts",
       "deprecated": false,
@@ -3459,6 +3481,44 @@
           },
           {
             "parentPluginId": "files",
+            "id": "def-server.FileServiceStart.bulkDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDelete",
+            "description": [
+              "\nDelete multiple files at once.\n"
+            ],
+            "signature": [
+              "(args: ",
+              "BulkDeleteFilesArgs",
+              ") => Promise<PromiseSettledResult<void>[]>"
+            ],
+            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-server.FileServiceStart.bulkDelete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- delete files args"
+                ],
+                "signature": [
+                  "BulkDeleteFilesArgs"
+                ],
+                "path": "src/plugins/files/server/file_service/file_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
             "id": "def-server.FileServiceStart.getById",
             "type": "Function",
             "tags": [],
@@ -4137,6 +4197,22 @@
             "label": "kind",
             "description": [
               "\nFile kind(s), see {@link FileKind}."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-server.FindFileArgs.kindToExclude",
+            "type": "Array",
+            "tags": [],
+            "label": "kindToExclude",
+            "description": [
+              "\nFile kind(s) to exclude from search, see {@link FileKind}."
             ],
             "signature": [
               "string[] | undefined"
@@ -5509,6 +5585,22 @@
             ],
             "signature": [
               "number | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-common.FileKindBrowser.managementUiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "managementUiActions",
+            "description": [
+              "\nAllowed actions that can be done in the File Management UI. If not provided, all actions are allowed\n"
+            ],
+            "signature": [
+              "{ list?: { enabled: boolean; } | undefined; delete?: { enabled: boolean; reason?: string | undefined; } | undefined; } | undefined"
             ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,

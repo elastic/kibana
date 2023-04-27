@@ -127,7 +127,7 @@ export class TaskManagerPlugin
       config: this.config!,
       usageCounter: this.usageCounter!,
       kibanaVersion: this.kibanaVersion,
-      kibanaIndexName: core.savedObjects.getKibanaIndex(),
+      kibanaIndexName: core.savedObjects.getDefaultIndex(),
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
       shouldRunTasks: this.shouldRunBackgroundTasks,
@@ -141,7 +141,7 @@ export class TaskManagerPlugin
       config: this.config!,
       usageCounter: this.usageCounter!,
       kibanaVersion: this.kibanaVersion,
-      kibanaIndexName: core.savedObjects.getKibanaIndex(),
+      kibanaIndexName: core.savedObjects.getDefaultIndex(),
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
     });
