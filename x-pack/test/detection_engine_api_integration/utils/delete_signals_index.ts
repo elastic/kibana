@@ -10,8 +10,8 @@ import type { Client } from '@elastic/elasticsearch';
 import { countDownTest } from './count_down_test';
 
 /**
- * Deletes the signals index for use inside of afterEach blocks of tests
- * @param supertest The supertest client library
+ * Deletes all alerts from a given index or indices, defaults to `.alerts-security.alerts-default`
+ * For use inside of afterEach blocks of tests
  */
 export const deleteAllSignals = async (
   log: ToolingLog,
