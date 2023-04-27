@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-import type { SearchNavTab } from '../types';
+import type { SecurityPageName } from '../../../../../common/constants';
 
-export const useGetUrlSearch = (tab: SearchNavTab) => '';
+export const useUrlStateQueryParams = (_pageName: SecurityPageName) => '';
+export const useGetUrlStateQueryParams = () => (_pageName: SecurityPageName) => '';
