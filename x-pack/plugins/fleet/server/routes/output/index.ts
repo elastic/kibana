@@ -106,7 +106,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         fleet: { all: true },
       },
     },
-    putLogstashOutputHandler // create new handler
+    putLogstashOutputHandler
   );
 
   router.post(

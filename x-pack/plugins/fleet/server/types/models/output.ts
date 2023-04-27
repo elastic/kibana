@@ -75,7 +75,7 @@ const OutputBaseSchemaToDeprecate = schema.object({
 export const NewOutputSchema = OutputBaseSchemaToDeprecate;
 
 // New schemas
-const OutputBaseSchema = {
+const OutputBaseSchema = schema.object({
   id: schema.maybe(schema.string()),
   name: schema.string(),
   is_default: schema.boolean({ defaultValue: false }),
@@ -87,51 +87,68 @@ const OutputBaseSchema = {
       key: schema.maybe(schema.string()),
     })
   ),
-};
+});
 
-const ESOrLogstashSchema = schema.object({
+const ESLogstashBaseSchema = {
   ca_sha256: schema.maybe(schema.string()),
   ca_trusted_fingerprint: schema.maybe(schema.string()),
   config_yaml: schema.maybe(schema.string()),
   proxy_id: schema.nullable(schema.string()),
   shipper: schema.maybe(shipperSchema),
-});
-
-const ESSchema = ESOrLogstashSchema.extends({
+};
+const ESSchema = {
+  ...ESLogstashBaseSchema,
   hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
     minSize: 1,
   }),
-});
-const LogstashSchema = ESOrLogstashSchema.extends({
+};
+
+const LogstashSchema = {
+  ...ESLogstashBaseSchema,
   hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
     minSize: 1,
   }),
-});
+};
 
-export const ESOutputSchema = ESSchema.extends(OutputBaseSchema);
-export const LogstashOutputSchema = LogstashSchema.extends(OutputBaseSchema);
+export const ESOutputSchema = OutputBaseSchema.extends(ESSchema);
+export const LogstashOutputSchema = OutputBaseSchema.extends(LogstashSchema);
 
-// Update
-export const UpdateESOutputSchema = ESOutputSchema.extends({
+// Update schemas
+const UpdateOutputBaseSchema = {
+  id: schema.maybe(schema.string()),
+  name: schema.maybe(schema.string()),
+  is_default: schema.maybe(schema.boolean({ defaultValue: false })),
+  is_default_monitoring: schema.maybe(schema.boolean({ defaultValue: false })),
+  ssl: schema.maybe(
+    schema.object({
+      certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+      certificate: schema.maybe(schema.string()),
+      key: schema.maybe(schema.string()),
+    })
+  ),
+};
+const UpdateESSchema = {
+  ...ESLogstashBaseSchema,
   hosts: schema.maybe(
     schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
       minSize: 1,
     })
   ),
-  name: schema.maybe(schema.string()),
-  is_default: schema.maybe(schema.boolean({ defaultValue: false })),
-  is_default_monitoring: schema.maybe(schema.boolean({ defaultValue: false })),
-});
+};
 
-export const UpdateLogstashOutputSchema = ESOutputSchema.extends({
+const UpdateLogstashSchema = {
+  ...ESLogstashBaseSchema,
   hosts: schema.maybe(
     schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
       minSize: 1,
     })
   ),
-  name: schema.maybe(schema.string()),
-  is_default: schema.maybe(schema.boolean({ defaultValue: false })),
-  is_default_monitoring: schema.maybe(schema.boolean({ defaultValue: false })),
+};
+
+export const UpdateESOutputSchema = schema.object({ ...UpdateOutputBaseSchema, ...UpdateESSchema });
+export const UpdateLogstashOutputSchema = schema.object({
+  ...UpdateOutputBaseSchema,
+  ...UpdateLogstashSchema,
 });
 
 // to be removed once the old endpoints are deprecated:
