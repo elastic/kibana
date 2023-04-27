@@ -132,7 +132,7 @@ describe('MetricsExplorerViewsClient class', () => {
 
       infraSources.getSourceConfiguration.mockResolvedValue(basicTestSourceConfiguration);
 
-      savedObjectsClient.update.mockResolvedValue({
+      savedObjectsClient.create.mockResolvedValue({
         ...metricsExplorerViewMock,
         type: metricsExplorerViewSavedObjectName,
         references: [],
@@ -146,7 +146,7 @@ describe('MetricsExplorerViewsClient class', () => {
         {}
       );
 
-      expect(savedObjectsClient.update).toHaveBeenCalled();
+      expect(savedObjectsClient.create).toHaveBeenCalled();
       expect(metricsExplorerView).toEqual(metricsExplorerViewMock);
     });
 

@@ -129,7 +129,7 @@ describe('InventoryViewsClient class', () => {
 
       infraSources.getSourceConfiguration.mockResolvedValue(basicTestSourceConfiguration);
 
-      savedObjectsClient.update.mockResolvedValue({
+      savedObjectsClient.create.mockResolvedValue({
         ...inventoryViewMock,
         type: inventoryViewSavedObjectName,
         references: [],
@@ -143,7 +143,7 @@ describe('InventoryViewsClient class', () => {
         {}
       );
 
-      expect(savedObjectsClient.update).toHaveBeenCalled();
+      expect(savedObjectsClient.create).toHaveBeenCalled();
       expect(inventoryView).toEqual(inventoryViewMock);
     });
 
