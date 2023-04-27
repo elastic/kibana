@@ -50,7 +50,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 300,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -92,7 +91,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 300,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -134,7 +132,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 300,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -176,7 +173,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 300,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -218,7 +214,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 300,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -260,7 +255,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 300,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -302,7 +296,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 300,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -344,7 +337,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 300,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -386,7 +378,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 273,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -428,7 +419,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 273,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -470,7 +460,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 273,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -512,7 +501,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 273,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -554,7 +542,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 273,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -596,7 +583,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 273,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -638,7 +624,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 273,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -680,7 +665,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 273,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -722,7 +706,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 100,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -764,7 +747,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 100,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -806,7 +788,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 100,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -848,7 +829,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 100,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -890,7 +870,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 100,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -932,7 +911,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 100,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -974,7 +952,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 100,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1016,7 +993,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 100,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1058,7 +1034,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 91,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1110,7 +1085,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 75,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1137,7 +1111,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 63,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1164,7 +1137,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 51,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1191,7 +1163,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 42,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1218,7 +1189,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 33,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1245,7 +1215,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 30,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1272,7 +1241,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 27,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1299,7 +1267,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 27,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1326,7 +1293,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 24,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1353,7 +1319,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 24,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1380,7 +1345,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 24,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1407,7 +1371,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 24,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1434,7 +1397,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 24,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1461,7 +1423,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 21,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1488,7 +1449,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 21,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1515,7 +1475,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 21,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1542,7 +1501,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 21,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1569,7 +1527,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 21,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1596,7 +1553,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 21,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1623,7 +1579,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 21,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1650,7 +1605,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 21,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1677,7 +1631,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 21,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1704,7 +1657,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 18,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1731,7 +1683,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 18,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
@@ -1758,7 +1709,6 @@ export const groupingSearchResponse = {
             unitsCount: {
               value: 18,
             },
-            nullGroup: { doc_count: 0 },
             severitiesSubAggregation: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
