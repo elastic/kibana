@@ -1163,10 +1163,6 @@
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
-              },
-              {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx"
               },
