@@ -46,6 +46,7 @@ import { DimensionDataExtraEditor, DimensionEditor, PieToolbar } from './toolbar
 import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
 import { DatasourcePublicAPI } from '../..';
+import { nonNullable } from '../../utils';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
@@ -202,7 +203,7 @@ export const getPieVisualization = ({
       // count multiple metrics as a bucket dimension so that the rest of the dimension
       // groups UI behaves correctly.
       const multiMetricsBucketDimensionCount =
-        layer.metrics.length > 1 && state.shape !== 'mosaic' ? 1 : 0;
+        layer.metrics.length > 1 && state.shape !== PieChartTypes.MOSAIC ? 1 : 0;
 
       const totalNonCollapsedAccessors =
         accessors.reduce(
@@ -223,8 +224,8 @@ export const getPieVisualization = ({
           : undefined;
 
       switch (state.shape) {
-        case 'donut':
-        case 'pie':
+        case PieChartTypes.DONUT:
+        case PieChartTypes.PIE:
           return {
             ...primaryGroupConfigBaseProps,
             groupLabel: i18n.translate('xpack.lens.pie.sliceGroupLabel', {
@@ -239,7 +240,7 @@ export const getPieVisualization = ({
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
             hideGrouping: true,
           };
-        case 'mosaic':
+        case PieChartTypes.MOSAIC:
           return {
             ...primaryGroupConfigBaseProps,
             groupLabel: i18n.translate('xpack.lens.pie.verticalAxisLabel', {
@@ -267,7 +268,7 @@ export const getPieVisualization = ({
             dimensionsTooMany:
               totalNonCollapsedAccessors - PartitionChartsMeta[state.shape].maxBuckets,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
-            hideGrouping: state.shape === 'treemap',
+            hideGrouping: state.shape === PieChartTypes.TREEMAP,
           };
       }
     };
@@ -297,7 +298,7 @@ export const getPieVisualization = ({
       );
 
       switch (state.shape) {
-        case 'mosaic':
+        case PieChartTypes.MOSAIC:
           return {
             ...secondaryGroupConfigBaseProps,
             groupLabel: i18n.translate('xpack.lens.pie.horizontalAxisLabel', {
@@ -374,8 +375,8 @@ export const getPieVisualization = ({
 
     return {
       groups: [getPrimaryGroupConfig(), getSecondaryGroupConfig(), getMetricGroupConfig()].filter(
-        Boolean
-      ) as VisualizationDimensionGroupConfig[],
+        nonNullable
+      ),
     };
   },
 
@@ -595,7 +596,7 @@ export const getPieVisualization = ({
 
         if (
           numericColumn &&
-          state.shape === 'waffle' &&
+          state.shape === PieChartTypes.WAFFLE &&
           layer.primaryGroups.length &&
           checkTableForContainsSmallValues(frame.activeData[layerId], numericColumn.id, 1)
         ) {
@@ -619,7 +620,7 @@ export const getPieVisualization = ({
               return metricColId;
             }
           })
-          .filter(Boolean) as string[];
+          .filter(nonNullable);
 
         if (metricsWithArrayValues.length) {
           const labels = metricsWithArrayValues.map(
@@ -650,9 +651,41 @@ export const getPieVisualization = ({
     return [...errors, ...warningMessages];
   },
 
-  getVisualizationInfo(state: PieVisualizationState) {
+  getVisualizationInfo(state, frame) {
     const layer = state.layers[0];
     const dimensions: VisualizationInfo['layers'][number]['dimensions'] = [];
+
+    const datasource = frame?.datasourceLayers[layer.layerId];
+    const hasSliceBy = layer.primaryGroups.length + (layer.secondaryGroups?.length || 0);
+    const hasMultipleMetrics = layer.allowMultipleMetrics;
+    const palette = [];
+
+    if (!hasSliceBy && datasource) {
+      if (hasMultipleMetrics) {
+        palette.push(
+          ...layer.metrics.map(
+            (columnId) =>
+              layer.colorsByDimension?.[columnId] ??
+              getDefaultColorForMultiMetricDimension({
+                layer,
+                columnId,
+                paletteService,
+                datasource,
+              })
+          )
+        );
+      } else if (!layer.primaryGroups?.length) {
+        // This is a logic integrated in the renderer, here simulated
+        // In the particular case of no color assigned (as no sliceBy dimension defined)
+        // the color is generated on the fly from the default palette
+        palette.push(
+          ...paletteService
+            .get(state.palette?.name || 'default')
+            .getCategoricalColors(Math.max(10, layer.metrics.length))
+            .slice(0, layer.metrics.length)
+        );
+      }
+    }
 
     layer.metrics.forEach((metric) => {
       dimensions.push({
@@ -662,7 +695,7 @@ export const getPieVisualization = ({
       });
     });
 
-    if (state.shape === 'mosaic' && layer.secondaryGroups && layer.secondaryGroups.length) {
+    if (state.shape === PieChartTypes.MOSAIC && layer.secondaryGroups?.length) {
       layer.secondaryGroups.forEach((accessor) => {
         dimensions.push({
           name: i18n.translate('xpack.lens.pie.horizontalAxisLabel', {
@@ -674,18 +707,19 @@ export const getPieVisualization = ({
       });
     }
 
-    if (layer.primaryGroups && layer.primaryGroups.length) {
+    if (layer.primaryGroups?.length) {
       let name = i18n.translate('xpack.lens.pie.treemapGroupLabel', {
         defaultMessage: 'Group by',
       });
       let dimensionType = 'group_by';
-      if (state.shape === 'mosaic') {
+
+      if (state.shape === PieChartTypes.MOSAIC) {
         name = i18n.translate('xpack.lens.pie.verticalAxisLabel', {
           defaultMessage: 'Vertical axis',
         });
         dimensionType = 'vertical_axis';
       }
-      if (state.shape === 'donut' || state.shape === 'pie') {
+      if (state.shape === PieChartTypes.DONUT || state.shape === PieChartTypes.PIE) {
         name = i18n.translate('xpack.lens.pie.sliceGroupLabel', {
           defaultMessage: 'Slice by',
         });
@@ -698,7 +732,17 @@ export const getPieVisualization = ({
           id: accessor,
         });
       });
+
+      if (layer.primaryGroups.some((id) => !isCollapsed(id, layer))) {
+        palette.push(
+          ...paletteService
+            .get(state.palette?.name || 'default')
+            .getCategoricalColors(10, state.palette?.params)
+        );
+      }
     }
+
+    const finalPalette = palette.filter(nonNullable);
 
     return {
       layers: [
@@ -708,6 +752,7 @@ export const getPieVisualization = ({
           chartType: state.shape,
           ...this.getDescription(state),
           dimensions,
+          palette: finalPalette.length ? finalPalette : undefined,
         },
       ],
     };

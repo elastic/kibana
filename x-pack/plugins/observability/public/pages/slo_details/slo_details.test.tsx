@@ -49,15 +49,29 @@ const useCapabilitiesMock = useCapabilities as jest.Mock;
 
 const mockNavigate = jest.fn();
 const mockBasePathPrepend = jest.fn();
+const mockLocator = jest.fn();
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       application: { navigateToUrl: mockNavigate },
-      charts: chartPluginMock.createSetupContract(),
+      charts: chartPluginMock.createStartContract(),
       http: {
         basePath: {
           prepend: mockBasePathPrepend,
+        },
+      },
+      notifications: {
+        toasts: {
+          addSuccess: jest.fn(),
+          addError: jest.fn(),
+        },
+      },
+      share: {
+        url: {
+          locators: {
+            get: mockLocator,
+          },
         },
       },
       triggersActionsUi: {
@@ -158,21 +172,6 @@ describe('SLO Details Page', () => {
     expect(screen.queryAllByTestId('wideChartLoading').length).toBe(0);
   });
 
-  it('renders the active alerts badge', async () => {
-    const slo = buildSlo();
-    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
-    useParamsMock.mockReturnValue(slo.id);
-    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
-    useFetchActiveAlertsMock.mockReturnValue({
-      isLoading: false,
-      data: { [slo.id]: { count: 2, ruleIds: ['rule-1', 'rule-2'] } },
-    });
-
-    render(<SloDetailsPage />);
-
-    expect(screen.getByTestId('o11ySloActiveAlertsBadge')).toBeTruthy();
-  });
-
   it("renders a 'Edit' button under actions menu", async () => {
     const slo = buildSlo();
     useParamsMock.mockReturnValue(slo.id);
@@ -195,6 +194,67 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
     expect(screen.queryByTestId('sloDetailsHeaderControlPopoverCreateRule')).toBeTruthy();
+  });
+
+  it("renders a 'Manage rules' button under actions menu", async () => {
+    const slo = buildSlo();
+    useParamsMock.mockReturnValue(slo.id);
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+    expect(screen.queryByTestId('sloDetailsHeaderControlPopoverManageRules')).toBeTruthy();
+  });
+
+  it("renders a 'Clone' button under actions menu", async () => {
+    const slo = buildSlo();
+    useParamsMock.mockReturnValue(slo.id);
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+    expect(screen.queryByTestId('sloDetailsHeaderControlPopoverClone')).toBeTruthy();
+  });
+
+  it("renders a 'Delete' button under actions menu", async () => {
+    const slo = buildSlo();
+    useParamsMock.mockReturnValue(slo.id);
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+    expect(screen.queryByTestId('sloDetailsHeaderControlPopoverDelete')).toBeTruthy();
+
+    const manageRulesButton = screen.queryByTestId('sloDetailsHeaderControlPopoverManageRules');
+    expect(manageRulesButton).toBeTruthy();
+
+    fireEvent.click(manageRulesButton!);
+
+    expect(mockLocator).toBeCalled();
+  });
+
+  it('renders the Overview tab by default', async () => {
+    const slo = buildSlo();
+    useParamsMock.mockReturnValue(slo.id);
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+    useFetchActiveAlertsMock.mockReturnValue({
+      isLoading: false,
+      data: { [slo.id]: { count: 2, ruleIds: ['rule-1', 'rule-2'] } },
+    });
+
+    render(<SloDetailsPage />);
+
+    expect(screen.queryByTestId('overviewTab')).toBeTruthy();
+    expect(screen.queryByTestId('overviewTab')?.getAttribute('aria-selected')).toBe('true');
+    expect(screen.queryByTestId('alertsTab')).toBeTruthy();
+    expect(screen.queryByTestId('alertsTab')?.getAttribute('aria-selected')).toBe('false');
   });
 
   describe('when an APM SLO is loaded', () => {

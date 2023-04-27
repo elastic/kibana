@@ -40,6 +40,8 @@ export const EPM_API_ROUTES = {
   INFO_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
   INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
   DELETE_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
+
+  REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
 };
 
 // Data stream API routes
@@ -167,6 +169,11 @@ export const ENROLLMENT_API_KEY_ROUTES = {
 export const AGENTS_SETUP_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/agents/setup`,
   CREATE_PATTERN: `${API_ROOT}/agents/setup`,
+};
+
+// Message signing service
+export const MESSAGE_SIGNING_SERVICE_API_ROUTES = {
+  ROTATE_KEY_PAIR: `${API_ROOT}/message_signing_service/rotate_key_pair`,
 };
 
 export const SETUP_API_ROUTE = `${API_ROOT}/setup`;

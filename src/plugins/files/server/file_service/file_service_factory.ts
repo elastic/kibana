@@ -94,7 +94,10 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
         await internalFileService.updateFile(args);
       },
       async delete(args) {
-        return internalFileService.deleteFile(args);
+        return await internalFileService.deleteFile(args);
+      },
+      async bulkDelete(args) {
+        return await internalFileService.bulkDeleteFiles(args);
       },
       async getById<M>(args: GetByIdArgs) {
         return internalFileService.getById(args) as Promise<File<M>>;

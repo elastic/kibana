@@ -166,6 +166,7 @@ export const config: PluginConfigDescriptor = {
         }),
       })
     ),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
 };
 

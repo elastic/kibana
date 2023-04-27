@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 import { IO_EVENTS_ROUTE } from '@kbn/session-view-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
+const MOCK_INDEX = 'logs-endpoint.events.process*';
+const MOCK_SESSION_START_TIME = '2022-05-08T13:44:00.13Z';
 const MOCK_SESSION_ENTITY_ID =
   'MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==';
 const MOCK_IO_EVENT_TOTAL = 8;
@@ -33,7 +35,9 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
 
     it(`${IO_EVENTS_ROUTE} returns a page of IO events`, async () => {
       const response = await supertest.get(IO_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
+        index: MOCK_INDEX,
         sessionEntityId: MOCK_SESSION_ENTITY_ID,
+        sessionStartTime: MOCK_SESSION_START_TIME,
         pageSize: MOCK_PAGE_SIZE,
       });
       expect(response.status).to.be(200);
@@ -53,7 +57,9 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
 
     it(`${IO_EVENTS_ROUTE} returns a page of IO events (w cursor)`, async () => {
       const response = await supertest.get(IO_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
+        index: MOCK_INDEX,
         sessionEntityId: MOCK_SESSION_ENTITY_ID,
+        sessionStartTime: MOCK_SESSION_START_TIME,
         pageSize: MOCK_PAGE_SIZE,
         cursor: MOCK_CURSOR,
       });

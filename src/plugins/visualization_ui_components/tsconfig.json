@@ -22,7 +22,8 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/core-notifications-browser",
     "@kbn/core-doc-links-browser",
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/ui-theme"
   ],
   "exclude": [
     "target/**/*",

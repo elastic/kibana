@@ -15,6 +15,52 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const inspector = getService('inspector');
 
+  const inspectorTrendlineData = [
+    ['2015-09-19 06:00', 'null'],
+    ['2015-09-19 09:00', 'null'],
+    ['2015-09-19 12:00', 'null'],
+    ['2015-09-19 15:00', 'null'],
+    ['2015-09-19 18:00', 'null'],
+    ['2015-09-19 21:00', 'null'],
+    ['2015-09-20 00:00', '6,011.351'],
+    ['2015-09-20 03:00', '5,849.901'],
+    ['2015-09-20 06:00', '5,722.622'],
+    ['2015-09-20 09:00', '5,769.092'],
+    ['2015-09-20 12:00', '5,740.875'],
+    ['2015-09-20 15:00', '5,520.429'],
+    ['2015-09-20 18:00', '5,153.053'],
+    ['2015-09-20 21:00', '6,656.581'],
+    ['2015-09-21 00:00', '5,139.357'],
+    ['2015-09-21 03:00', '5,884.891'],
+    ['2015-09-21 06:00', '5,683.283'],
+    ['2015-09-21 09:00', '5,863.661'],
+    ['2015-09-21 12:00', '5,657.531'],
+    ['2015-09-21 15:00', '5,841.935'],
+  ];
+
+  const inspectorExpectedTrenlineDataWithBreakdown = [
+    ['97.220.3.248', '2015-09-19 06:00', 'null'],
+    ['97.220.3.248', '2015-09-19 09:00', 'null'],
+    ['97.220.3.248', '2015-09-19 12:00', 'null'],
+    ['97.220.3.248', '2015-09-19 15:00', 'null'],
+    ['97.220.3.248', '2015-09-19 18:00', 'null'],
+    ['97.220.3.248', '2015-09-19 21:00', 'null'],
+    ['97.220.3.248', '2015-09-20 00:00', 'null'],
+    ['97.220.3.248', '2015-09-20 03:00', 'null'],
+    ['97.220.3.248', '2015-09-20 06:00', 'null'],
+    ['97.220.3.248', '2015-09-20 09:00', 'null'],
+    ['97.220.3.248', '2015-09-20 12:00', 'null'],
+    ['97.220.3.248', '2015-09-20 15:00', 'null'],
+    ['97.220.3.248', '2015-09-20 18:00', 'null'],
+    ['97.220.3.248', '2015-09-20 21:00', 'null'],
+    ['97.220.3.248', '2015-09-21 00:00', 'null'],
+    ['97.220.3.248', '2015-09-21 03:00', 'null'],
+    ['97.220.3.248', '2015-09-21 06:00', 'null'],
+    ['97.220.3.248', '2015-09-21 09:00', '19,755'],
+    ['97.220.3.248', '2015-09-21 12:00', 'null'],
+    ['97.220.3.248', '2015-09-21 15:00', 'null'],
+  ];
+
   const clickMetric = async (title: string) => {
     const tiles = await PageObjects.lens.getMetricTiles();
     for (const tile of tiles) {
@@ -47,7 +93,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       expect((await PageObjects.lens.getMetricVisualizationData()).length).to.be.equal(1);
+    });
 
+    it('should enable trendlines', async () => {
+      // trendline data without the breakdown
+      await PageObjects.lens.openDimensionEditor(
+        'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
+      );
+      await testSubjects.click('lnsMetric_supporting_visualization_trendline');
+      await PageObjects.lens.closeDimensionEditor();
+
+      await inspector.open('lnsApp_inspectButton');
+
+      const trendLineData = await inspector.getTableDataWithId('inspectorTableChooser1');
+      expect(trendLineData).to.eql(inspectorTrendlineData);
+      await inspector.close();
+      await PageObjects.lens.openDimensionEditor(
+        'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
+      );
+
+      await testSubjects.click('lnsMetric_supporting_visualization_none');
+      await PageObjects.lens.closeDimensionEditor();
+
+      await PageObjects.lens.waitForVisualization('mtrVis');
+    });
+
+    it('should enable metric with breakdown', async () => {
+      // trendline data without the breakdown
       await PageObjects.lens.configureDimension({
         dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',
         operation: 'terms',
@@ -112,7 +184,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           showingBar: false,
         },
       ]);
+    });
 
+    it('should enable bar with max dimension', async () => {
       await PageObjects.lens.openDimensionEditor(
         'lnsMetric_maxDimensionPanel > lns-empty-dimension'
       );
@@ -125,7 +199,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.removeDimension('lnsMetric_maxDimensionPanel');
     });
 
-    it('should enable trendlines', async () => {
+    it('should enable trendlines with breakdown', async () => {
       await PageObjects.lens.openDimensionEditor(
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
       );
@@ -139,11 +213,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           (datum) => datum.showingTrendline
         )
       ).to.be(true);
+      await PageObjects.lens.closeDimensionEditor();
 
       await inspector.open('lnsApp_inspectButton');
 
-      expect(await inspector.getNumberOfTables()).to.equal(2);
-
+      const trendLineData = await inspector.getTableDataWithId('inspectorTableChooser1');
+      expect(trendLineData).to.eql(inspectorExpectedTrenlineDataWithBreakdown);
       await inspector.close();
 
       await PageObjects.lens.openDimensionEditor(

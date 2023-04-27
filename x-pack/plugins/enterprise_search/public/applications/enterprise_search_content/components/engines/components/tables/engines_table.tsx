@@ -56,7 +56,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.content.enginesList.table.column.name', {
-        defaultMessage: 'Engine Name',
+        defaultMessage: 'Search Application Name',
       }),
       mobileOptions: {
         header: true,
@@ -117,7 +117,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
           description: i18n.translate(
             'xpack.enterpriseSearch.content.enginesList.table.column.actions.view.buttonDescription',
             {
-              defaultMessage: 'View this engine',
+              defaultMessage: 'View this search application',
             }
           ),
           type: 'icon',
@@ -134,7 +134,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
           description: i18n.translate(
             'xpack.enterpriseSearch.content.enginesList.table.column.action.delete.buttonDescription',
             {
-              defaultMessage: 'Delete this engine',
+              defaultMessage: 'Delete this search application',
             }
           ),
           type: 'icon',
@@ -144,7 +144,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
             i18n.translate(
               'xpack.enterpriseSearch.content.engineList.table.column.actions.deleteEngineLabel',
               {
-                defaultMessage: 'Delete this engine',
+                defaultMessage: 'Delete this search application',
               }
             ),
           onClick: (engine) => {
