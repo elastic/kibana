@@ -8,3 +8,4 @@
 import type { SecurityPageName } from '../../../../../common/constants';
 
 export const useUrlStateQueryParams = (_pageName: SecurityPageName) => '';
+export const useGetUrlStateQueryParams = () => (_pageName: SecurityPageName) => '';
