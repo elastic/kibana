@@ -37,8 +37,8 @@ import type {
   CommentRequestAlertType,
   CommentRequestExternalReferenceSOType,
   CommentRequestUserType,
-  CommentResponse,
-  CommentsResponse,
+  Comment,
+  Comments,
   User,
 } from '../../common/api';
 import {
@@ -135,7 +135,7 @@ export const flattenCaseSavedObject = ({
 
 export const transformComments = (
   comments: SavedObjectsFindResponse<CommentAttributes>
-): CommentsResponse => ({
+): Comments => ({
   page: comments.page,
   per_page: comments.per_page,
   total: comments.total,
@@ -144,14 +144,14 @@ export const transformComments = (
 
 export const flattenCommentSavedObjects = (
   savedObjects: Array<SavedObject<CommentAttributes>>
-): CommentResponse[] =>
-  savedObjects.reduce((acc: CommentResponse[], savedObject: SavedObject<CommentAttributes>) => {
+): Comment[] =>
+  savedObjects.reduce((acc: Comment[], savedObject: SavedObject<CommentAttributes>) => {
     return [...acc, flattenCommentSavedObject(savedObject)];
   }, []);
 
 export const flattenCommentSavedObject = (
   savedObject: SavedObject<CommentAttributes>
-): CommentResponse => ({
+): Comment => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   ...savedObject.attributes,

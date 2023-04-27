@@ -13,7 +13,7 @@ import type {
   Case,
   CaseConnectors,
   CaseUserActions,
-  Comment,
+  CommentUI,
   UseFetchAlertData,
   CaseUserActionsStats,
 } from '../../containers/types';
@@ -55,7 +55,7 @@ export interface UserActionBuilderArgs {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   caseConnectors: CaseConnectors;
   userAction: CaseUserActions;
-  comments: Comment[];
+  comments: CommentUI[];
   index: number;
   commentRefs: React.MutableRefObject<
     Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>

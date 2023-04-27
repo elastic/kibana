@@ -17,7 +17,7 @@ import {
 } from '@kbn/cases-plugin/common/constants';
 import {
   AttributesTypeUser,
-  CommentsResponse,
+  Comments,
   CaseAttributes,
   CasePostRequest,
   PushedUserAction,
@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(findResponse.cases[0].title).to.eql('A case to export');
       expect(findResponse.cases[0].description).to.eql('a description');
 
-      const { body: commentsResponse }: { body: CommentsResponse } = await supertestService
+      const { body: commentsResponse }: { body: Comments } = await supertestService
         .get(`${CASES_URL}/${findResponse.cases[0].id}/comments/_find`)
         .send()
         .expect(200);

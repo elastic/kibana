@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { CommentsResponse } from '@kbn/cases-plugin/common/api';
+import { Comments } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getPostCaseRequest,
@@ -221,7 +221,7 @@ export default ({ getService }: FtrProviderContext): void => {
             caseID: obsCase.id,
           },
         ]) {
-          const { body: caseComments }: { body: CommentsResponse } = await supertestWithoutAuth
+          const { body: caseComments }: { body: Comments } = await supertestWithoutAuth
             .get(`${getSpaceUrlPrefix(space1)}${CASES_URL}/${scenario.caseID}/comments/_find`)
             .auth(scenario.user.username, scenario.user.password)
             .expect(200);
@@ -279,7 +279,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: obsCase.id,
         });
 
-        const { body: res }: { body: CommentsResponse } = await supertestWithoutAuth
+        const { body: res }: { body: Comments } = await supertestWithoutAuth
           .get(
             `${getSpaceUrlPrefix('space1')}${CASES_URL}/${
               obsCase.id

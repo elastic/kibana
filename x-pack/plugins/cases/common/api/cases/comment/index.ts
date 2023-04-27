@@ -185,7 +185,7 @@ export const CommentRequestRt = rt.union([
   PersistableStateAttachmentRt,
 ]);
 
-export const CommentResponseRt = rt.intersection([
+export const CommentRt = rt.intersection([
   CommentAttributesRt,
   rt.type({
     id: rt.string,
@@ -233,7 +233,7 @@ export const CommentResponseTypePersistableStateRt = rt.intersection([
   }),
 ]);
 
-export const AllCommentsResponseRT = rt.array(CommentResponseRt);
+export const AllCommentsResponseRT = rt.array(CommentRt);
 
 export const CommentPatchRequestRt = rt.intersection([
   /**
@@ -266,14 +266,14 @@ export const CommentPatchAttributesRt = rt.intersection([
   rt.partial(CommentAttributesBasicRt.props),
 ]);
 
-export const CommentsResponseRt = rt.type({
-  comments: rt.array(CommentResponseRt),
+export const CommentsRt = rt.type({
+  comments: rt.array(CommentRt),
   page: rt.number,
   per_page: rt.number,
   total: rt.number,
 });
 
-export const AllCommentsResponseRt = rt.array(CommentResponseRt);
+export const AllCommentsResponseRt = rt.array(CommentRt);
 
 export const FindQueryParamsRt = rt.partial({
   ...SavedObjectFindOptionsRt.props,
@@ -314,7 +314,7 @@ export type CommentAttributesNoSO = rt.TypeOf<typeof CommentAttributesNoSORt>;
 export type CommentAttributesWithoutRefs = rt.TypeOf<typeof CommentAttributesWithoutRefsRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
 export type BulkCreateCommentRequest = rt.TypeOf<typeof BulkCreateCommentRequestRt>;
-export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;
+export type Comment = rt.TypeOf<typeof CommentRt>;
 export type CommentResponseUserType = rt.TypeOf<typeof CommentResponseTypeUserRt>;
 export type CommentResponseAlertsType = rt.TypeOf<typeof CommentResponseTypeAlertsRt>;
 export type CommentResponseTypePersistableState = rt.TypeOf<
@@ -325,7 +325,7 @@ export type CommentResponseExternalReferenceType = rt.TypeOf<
 >;
 export type CommentResponseActionsType = rt.TypeOf<typeof CommentResponseTypeActionsRt>;
 export type AllCommentsResponse = rt.TypeOf<typeof AllCommentsResponseRt>;
-export type CommentsResponse = rt.TypeOf<typeof CommentsResponseRt>;
+export type Comments = rt.TypeOf<typeof CommentsRt>;
 export type CommentPatchRequest = rt.TypeOf<typeof CommentPatchRequestRt>;
 export type CommentPatchAttributes = rt.TypeOf<typeof CommentPatchAttributesRt>;
 export type CommentRequestUserType = rt.TypeOf<typeof ContextTypeUserRt>;

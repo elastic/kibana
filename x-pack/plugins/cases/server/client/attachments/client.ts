@@ -10,8 +10,8 @@ import type {
   AllCommentsResponse,
   BulkGetAttachmentsResponse,
   CaseResponse,
-  CommentResponse,
-  CommentsResponse,
+  Comment,
+  Comments,
 } from '../../../common/api';
 import type { CasesClient } from '../client';
 
@@ -60,7 +60,7 @@ export interface AttachmentsSubClient {
   /**
    * Retrieves all comments matching the search criteria.
    */
-  find(findArgs: FindArgs): Promise<CommentsResponse>;
+  find(findArgs: FindArgs): Promise<Comments>;
   /**
    * Retrieves all alerts attach to a case given a single case ID
    */
@@ -72,7 +72,7 @@ export interface AttachmentsSubClient {
   /**
    * Retrieves a single attachment for a case.
    */
-  get(getArgs: GetArgs): Promise<CommentResponse>;
+  get(getArgs: GetArgs): Promise<Comment>;
   /**
    * Updates a specific attachment.
    *

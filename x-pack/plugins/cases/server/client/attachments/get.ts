@@ -10,10 +10,10 @@ import type {
   AlertResponse,
   AllCommentsResponse,
   AttributesTypeAlerts,
-  CommentResponse,
-  CommentsResponse,
+  Comment,
+  Comments,
 } from '../../../common/api';
-import { AllCommentsResponseRt, CommentResponseRt, CommentsResponseRt } from '../../../common/api';
+import { AllCommentsResponseRt, CommentRt, CommentsRt } from '../../../common/api';
 import {
   defaultSortField,
   transformComments,
@@ -100,7 +100,7 @@ export const getAllAlertsAttachToCase = async (
 export async function find(
   { caseID, queryParams }: FindArgs,
   clientArgs: CasesClientArgs
-): Promise<CommentsResponse> {
+): Promise<Comments> {
   const {
     unsecuredSavedObjectsClient,
     services: { caseService },
@@ -159,7 +159,7 @@ export async function find(
       }))
     );
 
-    return CommentsResponseRt.encode(transformComments(theComments));
+    return CommentsRt.encode(transformComments(theComments));
   } catch (error) {
     throw createCaseError({
       message: `Failed to find comments case id: ${caseID}: ${error}`,
@@ -175,7 +175,7 @@ export async function find(
 export async function get(
   { attachmentID, caseID }: GetArgs,
   clientArgs: CasesClientArgs
-): Promise<CommentResponse> {
+): Promise<Comment> {
   const {
     services: { attachmentService },
     logger,
@@ -192,7 +192,7 @@ export async function get(
       operation: Operations.getComment,
     });
 
-    return CommentResponseRt.encode(flattenCommentSavedObject(comment));
+    return CommentRt.encode(flattenCommentSavedObject(comment));
   } catch (error) {
     throw createCaseError({
       message: `Failed to get comment case id: ${caseID} attachment id: ${attachmentID}: ${error}`,

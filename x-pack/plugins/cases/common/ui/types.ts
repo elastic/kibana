@@ -19,7 +19,7 @@ import type {
   ActionConnector,
   CaseUserActionResponse,
   SingleCaseMetricsResponse,
-  CommentResponse,
+  Comment,
   CaseResponse,
   UserActionFindResponse,
   FindTypeField as UserActionFindTypeField,
@@ -83,7 +83,7 @@ export type CaseViewRefreshPropInterface = null | {
   refreshCase: () => Promise<void>;
 };
 
-export type Comment = SnakeToCamelCase<CommentResponse>;
+export type CommentUI = SnakeToCamelCase<Comment>;
 export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type ExternalReferenceComment = SnakeToCamelCase<CommentResponseExternalReferenceType>;
 export type PersistableComment = SnakeToCamelCase<CommentResponseTypePersistableState>;
@@ -92,7 +92,7 @@ export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>,
   userActions: CaseUserActions[];
 };
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
-export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
+export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: CommentUI[] };
 export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
 export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;

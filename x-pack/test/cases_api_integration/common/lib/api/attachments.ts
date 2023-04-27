@@ -14,8 +14,8 @@ import {
   CaseResponse,
   CommentPatchRequest,
   CommentRequest,
-  CommentResponse,
-  CommentsResponse,
+  Comment,
+  Comments,
   CommentType,
   getCaseFindAttachmentsUrl,
   getCasesDeleteFileAttachmentsUrl,
@@ -224,7 +224,7 @@ export const getComment = async ({
   commentId: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<CommentResponse> => {
+}): Promise<Comment> => {
   const { body: comment } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments/${commentId}`)
     .auth(auth.user.username, auth.user.password)
@@ -295,7 +295,7 @@ export const findAttachments = async ({
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<CommentsResponse> => {
+}): Promise<Comments> => {
   const { body } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${getCaseFindAttachmentsUrl(caseId)}`)
     .set('kbn-xsrf', 'true')
