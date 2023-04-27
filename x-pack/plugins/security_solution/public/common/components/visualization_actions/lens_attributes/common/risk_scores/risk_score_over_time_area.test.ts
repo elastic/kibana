@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import type { XYState } from '@kbn/lens-plugin/public';
 import { wrapper } from '../../../mocks';
 
 import { useLensAttributes } from '../../../use_lens_attributes';
@@ -55,5 +56,43 @@ describe('getRiskScoreOverTimeAreaAttributes', () => {
     );
 
     expect(result?.current).toMatchSnapshot();
+  });
+
+  it('should render a Reference Line with an Alert icon', () => {
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getRiskScoreOverTimeAreaAttributes,
+          stackByField: 'host',
+          extraOptions: {
+            spaceId: 'mockSpaceId',
+          },
+        }),
+      { wrapper }
+    );
+
+    expect(
+      (result?.current?.state.visualization as XYState).layers.find(
+        (layer) => layer.layerType === 'referenceLine'
+      )
+    ).toEqual(
+      expect.objectContaining({
+        layerId: '1dd5663b-f062-43f8-8688-fc8166c2ca8e',
+        layerType: 'referenceLine',
+        accessors: ['1dd5663b-f062-43f8-8688-fc8166c2ca8e'],
+        yConfig: [
+          {
+            forAccessor: '1dd5663b-f062-43f8-8688-fc8166c2ca8e',
+            axisMode: 'left',
+            lineWidth: 2,
+            color: '#aa6556',
+            icon: 'alert',
+            textVisibility: true,
+            fill: 'none',
+            iconPosition: 'left',
+          },
+        ],
+      })
+    );
   });
 });

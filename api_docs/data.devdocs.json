@@ -13543,7 +13543,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -13754,6 +13754,10 @@
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
+              },
+              {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
               },
@@ -13768,10 +13772,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
               },
               {
                 "plugin": "lens",
@@ -13792,6 +13792,10 @@
               {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
               },
               {
                 "plugin": "ml",
@@ -13844,22 +13848,6 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -14010,6 +13998,10 @@
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.ts"
               },
               {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
               },
@@ -14154,18 +14146,6 @@
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
               },
@@ -14184,26 +14164,6 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
               },
               {
                 "plugin": "transform",
@@ -21181,7 +21141,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -21392,6 +21352,10 @@
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
+              },
+              {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
               },
@@ -21406,10 +21370,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
               },
               {
                 "plugin": "lens",
@@ -21430,6 +21390,10 @@
               {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_for_flyout.tsx"
               },
               {
                 "plugin": "ml",
@@ -21482,22 +21446,6 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
               },
               {
                 "plugin": "dataVisualizer",
@@ -21648,6 +21596,10 @@
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.ts"
               },
               {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
               },
@@ -21792,18 +21744,6 @@
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
-              },
-              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
               },
@@ -21822,26 +21762,6 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
               },
               {
                 "plugin": "transform",

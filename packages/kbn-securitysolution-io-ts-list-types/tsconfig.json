@@ -14,7 +14,9 @@
     "@kbn/securitysolution-io-ts-types",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/securitysolution-list-constants",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/core-http-browser",
+    "@kbn/core-notifications-browser"
   ],
   "exclude": [
     "target/**/*",

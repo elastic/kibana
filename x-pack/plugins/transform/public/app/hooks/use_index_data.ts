@@ -33,6 +33,7 @@ import type { StepDefineExposedState } from '../sections/create_transform/compon
 
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
+import { useDataSearch } from './use_data_search';
 
 export const useIndexData = (
   dataView: SearchItems['dataView'],
@@ -43,6 +44,7 @@ export const useIndexData = (
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
 
   const api = useApi();
+  const dataSearch = useDataSearch();
   const toastNotifications = useToastNotifications();
   const {
     ml: {
@@ -78,56 +80,62 @@ export const useIndexData = (
     },
   };
 
-  // Fetch 500 random documents to determine populated fields.
-  // This is a workaround to avoid passing potentially thousands of unpopulated fields
-  // (for example, as part of filebeat/metricbeat/ECS based indices)
-  // to the data grid component which would significantly slow down the page.
-  const fetchDataGridSampleDocuments = async function () {
-    setErrorMessage('');
-    setStatus(INDEX_STATUS.LOADING);
+  useEffect(() => {
+    const abortController = new AbortController();
 
-    const esSearchRequest = {
-      index: indexPattern,
-      body: {
-        fields: ['*'],
-        _source: false,
-        query: {
-          function_score: {
-            query: defaultQuery,
-            random_score: {},
+    // Fetch 500 random documents to determine populated fields.
+    // This is a workaround to avoid passing potentially thousands of unpopulated fields
+    // (for example, as part of filebeat/metricbeat/ECS based indices)
+    // to the data grid component which would significantly slow down the page.
+    const fetchDataGridSampleDocuments = async function () {
+      setErrorMessage('');
+      setStatus(INDEX_STATUS.LOADING);
+
+      const esSearchRequest = {
+        index: indexPattern,
+        body: {
+          fields: ['*'],
+          _source: false,
+          query: {
+            function_score: {
+              query: defaultQuery,
+              random_score: {},
+            },
           },
+          size: 500,
         },
-        size: 500,
-      },
+      };
+
+      const resp = await dataSearch(esSearchRequest, abortController.signal);
+
+      if (!isEsSearchResponse(resp)) {
+        setErrorMessage(getErrorMessage(resp));
+        setStatus(INDEX_STATUS.ERROR);
+        return;
+      }
+
+      const isCrossClusterSearch = indexPattern.includes(':');
+      const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
+
+      const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+
+      // Get all field names for each returned doc and flatten it
+      // to a list of unique field names used across all docs.
+      const allDataViewFields = getFieldsFromKibanaIndexPattern(dataView);
+      const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
+        .filter((d) => allDataViewFields.includes(d))
+        .sort();
+
+      setCcsWarning(isCrossClusterSearch && isMissingFields);
+      setStatus(INDEX_STATUS.LOADED);
+      setDataViewFields(populatedFields);
     };
 
-    const resp = await api.esSearch(esSearchRequest);
-
-    if (!isEsSearchResponse(resp)) {
-      setErrorMessage(getErrorMessage(resp));
-      setStatus(INDEX_STATUS.ERROR);
-      return;
-    }
-
-    const isCrossClusterSearch = indexPattern.includes(':');
-    const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
-
-    const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
-
-    // Get all field names for each returned doc and flatten it
-    // to a list of unique field names used across all docs.
-    const allDataViewFields = getFieldsFromKibanaIndexPattern(dataView);
-    const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
-      .filter((d) => allDataViewFields.includes(d))
-      .sort();
-
-    setCcsWarning(isCrossClusterSearch && isMissingFields);
-    setStatus(INDEX_STATUS.LOADED);
-    setDataViewFields(populatedFields);
-  };
-
-  useEffect(() => {
     fetchDataGridSampleDocuments();
+
+    return () => {
+      abortController.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRangeMs]);
 
@@ -190,96 +198,62 @@ export const useIndexData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify([query, timeRangeMs])]);
 
-  const fetchDataGridData = async function () {
-    setErrorMessage('');
-    setStatus(INDEX_STATUS.LOADING);
-
-    const sort: EsSorting = sortingColumns.reduce((s, column) => {
-      s[column.id] = { order: column.direction };
-      return s;
-    }, {} as EsSorting);
-
-    const esSearchRequest = {
-      index: indexPattern,
-      body: {
-        fields: ['*'],
-        _source: false,
-        query: isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
-        from: pagination.pageIndex * pagination.pageSize,
-        size: pagination.pageSize,
-        ...(Object.keys(sort).length > 0 ? { sort } : {}),
-        ...(isRuntimeMappings(combinedRuntimeMappings)
-          ? { runtime_mappings: combinedRuntimeMappings }
-          : {}),
-      },
-    };
-    const resp = await api.esSearch(esSearchRequest);
-
-    if (!isEsSearchResponse(resp)) {
-      setErrorMessage(getErrorMessage(resp));
-      setStatus(INDEX_STATUS.ERROR);
-      return;
-    }
-
-    const isCrossClusterSearch = indexPattern.includes(':');
-    const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
-
-    const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
-
-    setCcsWarning(isCrossClusterSearch && isMissingFields);
-    setRowCountInfo({
-      rowCount: typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value,
-      rowCountRelation:
-        typeof resp.hits.total === 'number'
-          ? ('eq' as estypes.SearchTotalHitsRelation)
-          : resp.hits.total!.relation,
-    });
-    setTableItems(docs);
-    setStatus(INDEX_STATUS.LOADED);
-  };
-
-  const fetchColumnChartsData = async function () {
-    const allDataViewFieldNames = new Set(dataView.fields.map((f) => f.name));
-    const columnChartsData = await api.getHistogramsForFields(
-      indexPattern,
-      columns
-        .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
-        .map((cT) => {
-          // If a column field name has a corresponding keyword field,
-          // fetch the keyword field instead to be able to do aggregations.
-          const fieldName = cT.id;
-          return hasKeywordDuplicate(fieldName, allDataViewFieldNames)
-            ? {
-                fieldName: `${fieldName}.keyword`,
-                type: getFieldType(undefined),
-              }
-            : {
-                fieldName,
-                type: getFieldType(cT.schema),
-              };
-        }),
-      isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
-      combinedRuntimeMappings
-    );
-
-    if (!isFieldHistogramsResponseSchema(columnChartsData)) {
-      showDataGridColumnChartErrorMessageToast(columnChartsData, toastNotifications);
-      return;
-    }
-
-    setColumnCharts(
-      // revert field names with `.keyword` used to do aggregations to their original column name
-      columnChartsData.map((d) => ({
-        ...d,
-        ...(isKeywordDuplicate(d.id, allDataViewFieldNames)
-          ? { id: removeKeywordPostfix(d.id) }
-          : {}),
-      }))
-    );
-  };
-
   useEffect(() => {
+    const abortController = new AbortController();
+
+    const fetchDataGridData = async function () {
+      setErrorMessage('');
+      setStatus(INDEX_STATUS.LOADING);
+
+      const sort: EsSorting = sortingColumns.reduce((s, column) => {
+        s[column.id] = { order: column.direction };
+        return s;
+      }, {} as EsSorting);
+
+      const esSearchRequest = {
+        index: indexPattern,
+        body: {
+          fields: ['*'],
+          _source: false,
+          query: isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
+          from: pagination.pageIndex * pagination.pageSize,
+          size: pagination.pageSize,
+          ...(Object.keys(sort).length > 0 ? { sort } : {}),
+          ...(isRuntimeMappings(combinedRuntimeMappings)
+            ? { runtime_mappings: combinedRuntimeMappings }
+            : {}),
+        },
+      };
+      const resp = await dataSearch(esSearchRequest, abortController.signal);
+
+      if (!isEsSearchResponse(resp)) {
+        setErrorMessage(getErrorMessage(resp));
+        setStatus(INDEX_STATUS.ERROR);
+        return;
+      }
+
+      const isCrossClusterSearch = indexPattern.includes(':');
+      const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
+
+      const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+
+      setCcsWarning(isCrossClusterSearch && isMissingFields);
+      setRowCountInfo({
+        rowCount: typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value,
+        rowCountRelation:
+          typeof resp.hits.total === 'number'
+            ? ('eq' as estypes.SearchTotalHitsRelation)
+            : resp.hits.total!.relation,
+      });
+      setTableItems(docs);
+      setStatus(INDEX_STATUS.LOADED);
+    };
+
     fetchDataGridData();
+
+    return () => {
+      abortController.abort();
+    };
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -296,6 +270,46 @@ export const useIndexData = (
   ]);
 
   useEffect(() => {
+    const fetchColumnChartsData = async function () {
+      const allDataViewFieldNames = new Set(dataView.fields.map((f) => f.name));
+      const columnChartsData = await api.getHistogramsForFields(
+        indexPattern,
+        columns
+          .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+          .map((cT) => {
+            // If a column field name has a corresponding keyword field,
+            // fetch the keyword field instead to be able to do aggregations.
+            const fieldName = cT.id;
+            return hasKeywordDuplicate(fieldName, allDataViewFieldNames)
+              ? {
+                  fieldName: `${fieldName}.keyword`,
+                  type: getFieldType(undefined),
+                }
+              : {
+                  fieldName,
+                  type: getFieldType(cT.schema),
+                };
+          }),
+        isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
+        combinedRuntimeMappings
+      );
+
+      if (!isFieldHistogramsResponseSchema(columnChartsData)) {
+        showDataGridColumnChartErrorMessageToast(columnChartsData, toastNotifications);
+        return;
+      }
+
+      setColumnCharts(
+        // revert field names with `.keyword` used to do aggregations to their original column name
+        columnChartsData.map((d) => ({
+          ...d,
+          ...(isKeywordDuplicate(d.id, allDataViewFieldNames)
+            ? { id: removeKeywordPostfix(d.id) }
+            : {}),
+        }))
+      );
+    };
+
     if (chartsVisible) {
       fetchColumnChartsData();
     }
