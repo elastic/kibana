@@ -70,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
         );
-        await deleteAllSignals(log, es);
+        await deleteAllSignals(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -219,7 +219,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
-        await deleteAllSignals(log, es);
+        await deleteAllSignals(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -554,7 +554,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
-        await deleteAllSignals(log, es);
+        await deleteAllSignals(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -597,7 +597,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
-        await deleteAllSignals(log, es);
+        await deleteAllSignals(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 
@@ -640,7 +640,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
         );
-        await deleteAllSignals(log, es);
+        await deleteAllSignals(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 

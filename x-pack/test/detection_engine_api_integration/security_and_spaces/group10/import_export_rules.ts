@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
     afterEach(async () => {
       await deleteUserAndRole(getService, ROLES.soc_manager);
       await deleteAllExceptions(supertest, log);
-      await deleteAllSignals(log, es);
+      await deleteAllSignals(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 

@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
-      await deleteAllSignals(log, es, ['.preview.alerts-security.alerts-*']);
+      await deleteAllSignals(supertest, log, es, ['.preview.alerts-security.alerts-*']);
       await deleteAllRules(supertest, log);
     });
 

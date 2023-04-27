@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
 
-        await deleteAllSignals(log, es);
+        await deleteAllSignals(supertest, log, es);
       });
     });
 
@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
-        await deleteAllSignals(log, es);
+        await deleteAllSignals(supertest, log, es);
       });
 
       it('should be able to filter old signals on host.os.name.caseless using runtime field', async () => {
@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
-        await deleteAllSignals(log, es);
+        await deleteAllSignals(supertest, log, es);
       });
 
       it('should be able to filter using a runtime field defined in the request', async () => {
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           });
 
-          await deleteAllSignals(log, es);
+          await deleteAllSignals(supertest, log, es);
         });
 
         it('should not give errors when executing security solution histogram aggs', async () => {
@@ -214,7 +214,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          await deleteAllSignals(log, es);
+          await deleteAllSignals(supertest, log, es);
         });
       });
     });

@@ -115,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteAllSignals(log, es);
+        await deleteAllSignals(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
       it('should successfully import rules without actions when user has no actions privileges', async () => {
@@ -240,7 +240,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteAllSignals(log, es);
+        await deleteAllSignals(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
 

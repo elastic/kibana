@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
-      await deleteAllSignals(log, es);
+      await deleteAllSignals(supertest, log, es);
     });
 
     it('returns no indexes if no signals exist in the specified range', async () => {

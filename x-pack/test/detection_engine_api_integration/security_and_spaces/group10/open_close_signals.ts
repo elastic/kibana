@@ -67,7 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.eql(getSignalStatusEmptyResponse());
 
-        await deleteAllSignals(log, es);
+        await deleteAllSignals(supertest, log, es);
       });
 
       describe('tests with auditbeat data', () => {
@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         afterEach(async () => {
-          await deleteAllSignals(log, es);
+          await deleteAllSignals(supertest, log, es);
           await deleteAllRules(supertest, log);
         });
 

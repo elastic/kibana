@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteAllSignals(log, es);
+        await deleteAllSignals(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/resolve_read_rules/7_14'

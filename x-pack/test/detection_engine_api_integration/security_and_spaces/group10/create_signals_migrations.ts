@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),
       });
-      await deleteAllSignals(log, es);
+      await deleteAllSignals(supertest, log, es);
     });
 
     it('returns the information necessary to finalize the migration', async () => {

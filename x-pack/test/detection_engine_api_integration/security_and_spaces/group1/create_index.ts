@@ -25,7 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('create_index', () => {
     afterEach(async () => {
-      await deleteAllSignals(log, es);
+      await deleteAllSignals(supertest, log, es);
     });
 
     describe('elastic admin', () => {

@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
-      await deleteAllSignals(log, es);
+      await deleteAllSignals(supertest, log, es);
     });
 
     it('returns the deleted migration SavedObjects', async () => {

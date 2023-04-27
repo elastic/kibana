@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteAllSignals(log, es);
+      await deleteAllSignals(supertest, log, es);
       await deleteAllRules(supertest, log);
       await deleteAllEventLogExecutionEvents(es, log);
     });

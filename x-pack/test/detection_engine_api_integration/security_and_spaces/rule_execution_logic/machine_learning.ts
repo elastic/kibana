@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/anomalies');
-      await deleteAllSignals(log, es);
+      await deleteAllSignals(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 
