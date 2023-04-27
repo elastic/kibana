@@ -54,7 +54,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:defaultspace-index-pattern-id",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "timeFieldName": "@timestamp",
@@ -113,7 +113,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:defaultspace-dashboard-id",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "dashboard": {
         "description": "",
@@ -147,7 +147,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:space1-index-pattern-id",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "timeFieldName": "@timestamp",
@@ -208,7 +208,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:space1-dashboard-id",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "dashboard": {
         "description": "",
@@ -242,7 +242,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:space2-index-pattern-id",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "timeFieldName": "@timestamp",
@@ -303,7 +303,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:space2-dashboard-id",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "dashboard": {
         "description": "",
@@ -770,7 +770,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:inbound-reference-origin-match-1-newId",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "inbound-reference-origin-match-1",
       "index-pattern": {
@@ -789,7 +789,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:inbound-reference-origin-match-2a",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "inbound-reference-origin-match-2",
       "index-pattern": {
@@ -808,7 +808,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:inbound-reference-origin-match-2b",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "inbound-reference-origin-match-2",
       "index-pattern": {

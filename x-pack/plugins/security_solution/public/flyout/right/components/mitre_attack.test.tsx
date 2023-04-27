@@ -33,16 +33,12 @@ describe('<MitreAttack />', () => {
       },
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <RightPanelContext.Provider value={contextValue}>
         <MitreAttack />
       </RightPanelContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
 });
