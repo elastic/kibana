@@ -18,7 +18,7 @@ import type {
   CaseUserActionAttributes,
   CaseUserActionAttributesWithoutConnectorId,
   CaseUserActionDeprecatedResponse,
-  CaseUserActionInjectedAttributes,
+  UserAction,
 } from '../../../common/api';
 import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
@@ -38,7 +38,7 @@ import { findReferenceId } from '../../common/references';
 export function transformFindResponseToExternalModel(
   userActions: SavedObjectsFindResponse<CaseUserActionAttributesWithoutConnectorId>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): SavedObjectsFindResponse<CaseUserActionInjectedAttributes> {
+): SavedObjectsFindResponse<UserAction> {
   return {
     ...userActions,
     saved_objects: userActions.saved_objects.map((so) => ({
@@ -51,7 +51,7 @@ export function transformFindResponseToExternalModel(
 export function transformToExternalModel(
   userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): SavedObject<CaseUserActionInjectedAttributes> {
+): SavedObject<UserAction> {
   const { references } = userAction;
 
   const commentId =
@@ -64,7 +64,7 @@ export function transformToExternalModel(
       ...userAction.attributes,
       comment_id: commentId,
       payload,
-    } as CaseUserActionInjectedAttributes,
+    } as UserAction,
   };
 }
 

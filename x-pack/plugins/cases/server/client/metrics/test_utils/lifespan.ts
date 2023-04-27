@@ -6,12 +6,12 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { CaseStatuses, CaseUserActionInjectedAttributes } from '../../../../common/api';
+import type { CaseStatuses, UserAction } from '../../../../common/api';
 
 export function createStatusChangeSavedObject(
   status: CaseStatuses,
   createdAt: Date
-): SavedObject<CaseUserActionInjectedAttributes> {
+): SavedObject<UserAction> {
   return {
     references: [],
     id: '',

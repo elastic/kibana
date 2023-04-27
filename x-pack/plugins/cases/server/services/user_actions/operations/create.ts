@@ -23,7 +23,7 @@ import type {
   CaseUserProfile,
   CommentRequest,
   User,
-  UserAction as Action,
+  ActionCategory as Action,
 } from '../../../../common/api';
 import { Actions, ActionTypes } from '../../../../common/api';
 import { BuilderFactory } from '../builder_factory';

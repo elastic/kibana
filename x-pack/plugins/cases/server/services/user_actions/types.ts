@@ -19,12 +19,12 @@ import type {
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
-  CaseUserActionInjectedAttributes,
+  UserAction,
   CommentUserAction,
   ConnectorUserAction,
   PushedUserAction,
   User,
-  UserAction,
+  ActionCategory,
   UserActionTypes,
 } from '../../../common/api';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
@@ -94,11 +94,11 @@ export interface CommonArguments {
   owner: string;
   attachmentId?: string;
   connectorId?: string;
-  action?: UserAction;
+  action?: ActionCategory;
 }
 
 export interface Attributes {
-  action: UserAction;
+  action: ActionCategory;
   created_at: string;
   created_by: User;
   owner: string;
@@ -113,7 +113,7 @@ export interface SavedObjectParameters {
 
 export interface EventDetails {
   getMessage: (storedUserActionId?: string) => string;
-  action: UserAction;
+  action: ActionCategory;
   descriptiveAction: string;
   savedObjectId: string;
   savedObjectType: string;
@@ -125,7 +125,7 @@ export interface UserActionEvent {
 }
 
 export type CommonBuilderArguments = CommonArguments & {
-  action: UserAction;
+  action: ActionCategory;
   type: UserActionTypes;
   value: unknown;
   valueKey: string;
@@ -144,17 +144,17 @@ export interface ServiceContext {
 }
 
 export interface PushTimeFrameInfo {
-  mostRecent: SavedObject<CaseUserActionInjectedAttributes>;
-  oldest: SavedObject<CaseUserActionInjectedAttributes>;
+  mostRecent: SavedObject<UserAction>;
+  oldest: SavedObject<UserAction>;
 }
 
 export interface CaseConnectorActivity {
   connectorId: string;
-  fields: SavedObject<CaseUserActionInjectedAttributes>;
+  fields: SavedObject<UserAction>;
   push?: PushTimeFrameInfo;
 }
 
-export type CaseConnectorFields = Map<string, SavedObject<CaseUserActionInjectedAttributes>>;
+export type CaseConnectorFields = Map<string, SavedObject<UserAction>>;
 
 export interface PushInfo {
   date: Date;

@@ -69,13 +69,10 @@ const CaseUserActionDeprecatedResponseRt = rt.intersection([
 /**
  * This includes the comment_id but not the action_id or case_id
  */
-const CaseUserActionInjectedAttributesRt = rt.intersection([
-  CaseUserActionBasicRt,
-  CaseUserActionInjectedIdsRt,
-]);
+const UserActionRt = rt.intersection([CaseUserActionBasicRt, CaseUserActionInjectedIdsRt]);
 
 const CaseUserActionResponseRt = rt.intersection([
-  CaseUserActionInjectedAttributesRt,
+  UserActionRt,
   rt.type({
     id: rt.string,
     version: rt.string,
@@ -98,9 +95,14 @@ export type CaseUserActionsDeprecatedResponse = rt.TypeOf<
   typeof CaseUserActionsDeprecatedResponseRt
 >;
 export type CaseUserActionDeprecatedResponse = rt.TypeOf<typeof CaseUserActionDeprecatedResponseRt>;
-export type CaseUserActionInjectedAttributes = rt.TypeOf<typeof CaseUserActionInjectedAttributesRt>;
+export type UserAction = rt.TypeOf<typeof UserActionRt>;
 
-export type UserAction = rt.TypeOf<typeof ActionsRt>;
+/**
+ * This defines the high level category for the user action. Whether the user add, removed, updated something
+ */
+export type ActionCategory = rt.TypeOf<typeof ActionsRt>;
+/**
+ * This defines the type of the user action, meaning what individual action was taken, for example changing the status,
+ * adding an assignee etc.
+ */
 export type UserActionTypes = ActionTypeValues;
-
-export type CaseUserAction = rt.TypeOf<typeof CaseUserActionBasicRt>;

@@ -29,7 +29,7 @@ import type {
   CaseUserActionResponse,
   CaseUserActionsResponse,
   CommentResponse,
-  UserAction,
+  ActionCategory,
   UserActionTypes,
   UserActionWithResponse,
   CommentUserAction,
@@ -611,7 +611,7 @@ export const allCasesSnake: CasesFindResponse = {
 
 export const getUserAction = (
   type: UserActionTypes,
-  action: UserAction,
+  action: ActionCategory,
   overrides?: Record<string, unknown>
 ): CaseUserActions => {
   const commonProperties = {
@@ -744,7 +744,7 @@ export const getUserAction = (
 
 export const getUserActionSnake = (
   type: UserActionTypes,
-  action: UserAction,
+  action: ActionCategory,
   overrides?: Record<string, unknown>
 ): CaseUserActionResponse => {
   return {

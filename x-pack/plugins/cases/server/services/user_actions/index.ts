@@ -17,7 +17,7 @@ import type { KueryNode } from '@kbn/es-query';
 import type {
   CaseUserActionAttributesWithoutConnectorId,
   CaseUserActionDeprecatedResponse,
-  CaseUserActionInjectedAttributes,
+  UserAction,
   User,
 } from '../../../common/api';
 import { ActionTypes } from '../../../common/api';
@@ -304,7 +304,7 @@ export class CaseUserActionService {
 
   public async getMostRecentUserAction(
     caseId: string
-  ): Promise<SavedObject<CaseUserActionInjectedAttributes> | undefined> {
+  ): Promise<SavedObject<UserAction> | undefined> {
     try {
       this.context.log.debug(
         `Attempting to retrieve the most recent user action for case id: ${caseId}`
@@ -411,7 +411,7 @@ export class CaseUserActionService {
         rawFieldsDoc = createCase.mostRecent.hits.hits[0];
       }
 
-      let fieldsDoc: SavedObject<CaseUserActionInjectedAttributes> | undefined;
+      let fieldsDoc: SavedObject<UserAction> | undefined;
       if (rawFieldsDoc != null) {
         const doc =
           this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
@@ -452,9 +452,7 @@ export class CaseUserActionService {
     }
   }
 
-  private getTopHitsDoc(
-    topHits: TopHits
-  ): SavedObject<CaseUserActionInjectedAttributes> | undefined {
+  private getTopHitsDoc(topHits: TopHits): SavedObject<UserAction> | undefined {
     if (topHits.hits.hits.length > 0) {
       const rawPushDoc = topHits.hits.hits[0];
 

@@ -16,7 +16,7 @@ import type {
   UserActionFindRequest,
   ActionTypeValues,
   FindTypeField,
-  CaseUserActionInjectedAttributes,
+  UserAction,
 } from '../../../../common/api';
 import { Actions, ActionTypes, CommentType } from '../../../../common/api';
 import {
@@ -44,7 +44,7 @@ export class UserActionFinder {
     page,
     perPage,
     filter,
-  }: FindOptions): Promise<SavedObjectsFindResponse<CaseUserActionInjectedAttributes>> {
+  }: FindOptions): Promise<SavedObjectsFindResponse<UserAction>> {
     try {
       this.context.log.debug(`Attempting to find user actions for case id: ${caseId}`);
 
@@ -176,7 +176,7 @@ export class UserActionFinder {
   }: {
     caseId: string;
     filter?: KueryNode;
-  }): Promise<Array<SavedObject<CaseUserActionInjectedAttributes>>> {
+  }): Promise<Array<SavedObject<UserAction>>> {
     try {
       this.context.log.debug('Attempting to find status changes');
 
@@ -208,7 +208,7 @@ export class UserActionFinder {
           }
         );
 
-      let userActions: Array<SavedObject<CaseUserActionInjectedAttributes>> = [];
+      let userActions: Array<SavedObject<UserAction>> = [];
       for await (const findResults of finder.find()) {
         userActions = userActions.concat(
           findResults.saved_objects.map((so) =>
