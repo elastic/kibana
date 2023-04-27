@@ -35,6 +35,7 @@ import { IJoinSource } from '../types';
 import type { IESAggSource } from '../../es_agg_source';
 import { IField } from '../../../fields/field';
 import { mergeExecutionContext } from '../../execution_context_utils';
+import { processDistanceResponse } from './process_distance_response';
 
 const TERMS_AGG_NAME = 'join';
 const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
@@ -158,9 +159,8 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
       ),
       requestsAdapter: inspectorAdapters.requests,
     });
-    console.log(JSON.stringify(rawEsData, null, ' '));
     
-    return new Map<string, BucketProperties>();
+    return processDistanceResponse(rawEsData, this.getAggKey(AGG_TYPE.COUNT));
   }
 
   isFilterByMapBounds(): boolean {

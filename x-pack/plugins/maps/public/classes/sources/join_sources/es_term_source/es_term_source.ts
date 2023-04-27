@@ -50,6 +50,7 @@ export function extractPropertiesMap(rawEsData: any, countPropertyName: string):
     }
     propertiesMap.set(termBucket.key.toString(), properties);
   });
+  console.log(propertiesMap);
   return propertiesMap;
 }
 
