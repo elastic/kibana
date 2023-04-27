@@ -31,6 +31,7 @@ import { IndexViewLogic } from '../../index_view_logic';
 import { ConnectorNameAndDescription } from '../connector_name_and_description/connector_name_and_description';
 import { NATIVE_CONNECTORS } from '../constants';
 
+import { ConvertConnector } from './convert_connector';
 import { NativeConnectorAdvancedConfiguration } from './native_connector_advanced_configuration';
 import { NativeConnectorConfigurationConfig } from './native_connector_configuration_config';
 import { ResearchConfiguration } from './research_configuration';
@@ -201,6 +202,11 @@ export const NativeConnectorConfiguration: React.FC = () => {
                     )}
                   </EuiLink>
                 </EuiText>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPanel hasBorder hasShadow={false}>
+                <ConvertConnector />
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>

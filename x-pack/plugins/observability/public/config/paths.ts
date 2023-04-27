@@ -18,6 +18,7 @@ export const paths = {
     ruleDetails: (ruleId?: string | null) =>
       ruleId ? `${RULES_PAGE_LINK}/${encodeURI(ruleId)}` : RULES_PAGE_LINK,
     slos: SLOS_PAGE_LINK,
+    slosWelcome: `${SLOS_PAGE_LINK}/welcome`,
     sloCreate: `${SLOS_PAGE_LINK}/create`,
     sloEdit: (sloId: string) => `${SLOS_PAGE_LINK}/edit/${encodeURI(sloId)}`,
     sloDetails: (sloId: string) => `${SLOS_PAGE_LINK}/${encodeURI(sloId)}`,
