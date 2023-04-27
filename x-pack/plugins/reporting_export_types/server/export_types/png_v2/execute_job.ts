@@ -10,7 +10,7 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import type { RunTaskFn, RunTaskFnFactory } from '@kbn/reporting-plugin/server/types';
-import { TaskPayloadPNGV2 } from '@kbn/reporting-export-types/common/png_v2';
+import { TaskPayloadPNGV2 } from '../../../common/png_v2';
 import { decryptJobHeaders, generatePngObservable } from '../common';
 import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
 

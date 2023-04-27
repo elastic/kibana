@@ -6,11 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import {
-  JobParamsCsvFromSavedObject,
-  TaskPayloadCsvFromSavedObject,
-} from '@kbn/reporting-export-types/common/csv_v2';
 import type { CreateJobFn, CreateJobFnFactory } from '@kbn/reporting-plugin/server/types';
+import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from '../../../common/csv_v2';
 
 type CreateJobFnType = CreateJobFn<JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject>;
 

@@ -11,7 +11,7 @@ import * as Rx from 'rxjs';
 import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-plugin/common/constants';
 import { RunTaskFn, RunTaskFnFactory } from '@kbn/reporting-plugin/server/types';
-import { TaskPayloadPNG } from '@kbn/reporting-export-types/common/png';
+import { TaskPayloadPNG } from '../../../../common/png';
 import { decryptJobHeaders, generatePngObservable, getFullUrls } from '../../common';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =

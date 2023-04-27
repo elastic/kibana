@@ -10,7 +10,7 @@ import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { REPORTING_TRANSACTION_TYPE, TaskRunResult } from '@kbn/reporting-common';
 import type { RunTaskFn, RunTaskFnFactory } from '@kbn/reporting-plugin/server/types';
-import { TaskPayloadPDFV2 } from '@kbn/reporting-export-types/common/printable_pdf_v2';
+import { TaskPayloadPDFV2 } from '../../../common/printable_pdf_v2';
 import { decryptJobHeaders, getCustomLogo } from '../common';
 import { generatePdfObservable } from './lib/generate_pdf';
 

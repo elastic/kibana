@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { JobParamsPNGV2, TaskPayloadPNGV2 } from '@kbn/reporting-export-types/common/png_v2';
 import {
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -15,6 +14,7 @@ import {
   PNG_JOB_TYPE_V2 as jobType,
 } from '@kbn/reporting-plugin/common/constants';
 import type { CreateJobFn, RunTaskFn } from '@kbn/reporting-plugin/server/types';
+import { JobParamsPNGV2, TaskPayloadPNGV2 } from '../../../common/png_v2';
 import { ExportTypeDefinition } from '../types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';

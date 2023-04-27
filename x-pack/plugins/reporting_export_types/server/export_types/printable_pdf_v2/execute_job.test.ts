@@ -20,7 +20,7 @@ import {
   createMockConfigSchema,
   createMockReportingCore,
 } from '@kbn/reporting-plugin/server/test_helpers';
-import { TaskPayloadPDFV2 } from '@kbn/reporting-export-types/common/printable_pdf_v2';
+import { TaskPayloadPDFV2 } from '../../../common/printable_pdf_v2';
 
 let content: string;
 let mockReporting: ReportingCore;

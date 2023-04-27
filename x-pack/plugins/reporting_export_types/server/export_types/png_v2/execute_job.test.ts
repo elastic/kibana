@@ -19,7 +19,7 @@ import {
   createMockReportingCore,
   createMockConfig,
 } from '@kbn/reporting-plugin/server/test_helpers';
-import { TaskPayloadPNGV2 } from '@kbn/reporting-export-types/common/png_v2';
+import { TaskPayloadPNGV2 } from '../../../common/png_v2';
 
 jest.mock('../common/generate_png');
 
