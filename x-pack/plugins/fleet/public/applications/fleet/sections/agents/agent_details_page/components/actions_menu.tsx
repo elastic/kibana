@@ -61,54 +61,58 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     }
   }, [onCancelReassign, setIsReassignFlyoutOpen]);
 
-  const menuItems = [
-    <EuiContextMenuItem
-      icon="pencil"
-      onClick={() => {
-        setIsReassignFlyoutOpen(true);
-      }}
-      disabled={!agent.active || agentPolicy?.is_managed}
-      key="reassignPolicy"
-    >
-      <FormattedMessage
-        id="xpack.fleet.agentList.reassignActionText"
-        defaultMessage="Assign to new policy"
-      />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      icon="trash"
-      disabled={!hasFleetAllPrivileges || !agent.active || agentPolicy?.is_managed}
-      onClick={() => {
-        setIsUnenrollModalOpen(true);
-      }}
-      key="unenrollAgent"
-    >
-      {isUnenrolling ? (
+  const menuItems = [];
+
+  if (!agentPolicy?.is_managed) {
+    menuItems.push(
+      <EuiContextMenuItem
+        icon="pencil"
+        onClick={() => {
+          setIsReassignFlyoutOpen(true);
+        }}
+        disabled={!agent.active && !agentPolicy}
+        key="reassignPolicy"
+      >
         <FormattedMessage
-          id="xpack.fleet.agentList.forceUnenrollOneButton"
-          defaultMessage="Force unenroll"
+          id="xpack.fleet.agentList.reassignActionText"
+          defaultMessage="Assign to new policy"
         />
-      ) : (
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        icon="trash"
+        disabled={!hasFleetAllPrivileges || !agent.active}
+        onClick={() => {
+          setIsUnenrollModalOpen(true);
+        }}
+        key="unenrollAgent"
+      >
+        {isUnenrolling ? (
+          <FormattedMessage
+            id="xpack.fleet.agentList.forceUnenrollOneButton"
+            defaultMessage="Force unenroll"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.agentList.unenrollOneButton"
+            defaultMessage="Unenroll agent"
+          />
+        )}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        icon="refresh"
+        disabled={!isAgentUpgradeable(agent, kibanaVersion)}
+        onClick={() => {
+          setIsUpgradeModalOpen(true);
+        }}
+        key="upgradeAgent"
+      >
         <FormattedMessage
-          id="xpack.fleet.agentList.unenrollOneButton"
-          defaultMessage="Unenroll agent"
+          id="xpack.fleet.agentList.upgradeOneButton"
+          defaultMessage="Upgrade agent"
         />
-      )}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      icon="refresh"
-      disabled={!isAgentUpgradeable(agent, kibanaVersion) || agentPolicy?.is_managed}
-      onClick={() => {
-        setIsUpgradeModalOpen(true);
-      }}
-      key="upgradeAgent"
-    >
-      <FormattedMessage
-        id="xpack.fleet.agentList.upgradeOneButton"
-        defaultMessage="Upgrade agent"
-      />
-    </EuiContextMenuItem>,
-  ];
+      </EuiContextMenuItem>
+    );
+  }
 
   menuItems.push(
     <EuiContextMenuItem
