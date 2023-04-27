@@ -7,14 +7,7 @@
 
 import { login } from '../../tasks/login';
 
-import {
-  NEW_INDEX_PAGE,
-  NEW_INDEX_CARD,
-  CRAWLER_INDEX,
-  INDEX_OVERVIEW,
-  ROUTES,
-  getIndexRoute,
-} from './selectors';
+import { NEW_INDEX_CARD, CRAWLER_INDEX, INDEX_OVERVIEW, ROUTES, getIndexRoute } from './selectors';
 
 describe('Enterprise Search Crawler', () => {
   it('test', () => {
@@ -25,10 +18,7 @@ describe('Enterprise Search Crawler', () => {
     cy.visit(ROUTES.NEW_INDEX);
 
     // Crawler selected by default
-    cy.getBySel(NEW_INDEX_CARD.SELECT_CRAWLER).find('svg');
-
-    // continue to the new Crawler Index page
-    cy.getBySel(NEW_INDEX_PAGE.continueButton).click();
+    cy.getBySel(NEW_INDEX_CARD.SELECT_CRAWLER).click();
 
     // we are in correct route
     cy.url().should('contain', ROUTES.NEW_INDEX);

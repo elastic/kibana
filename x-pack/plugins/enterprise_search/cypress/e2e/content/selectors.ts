@@ -35,10 +35,6 @@ export const CONNECTOR_INDEX = {
     `entSearchContent-connector-configuration-formrow-${rowkey}`,
 };
 
-export const NEW_INDEX_PAGE = {
-  continueButton: 'entSearchContent-newIndexPage-continueButton',
-};
-
 export const NEW_INDEX_CARD = {
   SELECT_CONNECTOR: 'entSearchContent-newIndexCard-button-connector',
   SELECT_CRAWLER: 'entSearchContent-newIndexCard-button-crawler',

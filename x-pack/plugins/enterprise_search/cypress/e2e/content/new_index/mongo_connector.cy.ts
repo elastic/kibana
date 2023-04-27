@@ -11,7 +11,6 @@ import {
   getIndexRoute,
   INDEX_OVERVIEW,
   NEW_INDEX_CARD,
-  NEW_INDEX_PAGE,
   NEW_CONNECTOR_PAGE,
   ROUTES,
   SELECT_CONNECTOR,
@@ -31,16 +30,8 @@ describe('Enterprise Search MongoDB connector', () => {
 
     cy.url().should('eq', baseUrl + ROUTES.NEW_INDEX);
 
-    // default crawler selected
-    cy.getBySel(NEW_INDEX_CARD.SELECT_CRAWLER).find('svg');
-    cy.getBySel(NEW_INDEX_CARD.SELECT_CONNECTOR).find('svg').should('not.exist');
-
     // select connector
     cy.getBySel(NEW_INDEX_CARD.SELECT_CONNECTOR).click();
-    cy.getBySel(NEW_INDEX_CARD.SELECT_CONNECTOR).find('svg');
-
-    // continue to the select connector
-    cy.getBySel(NEW_INDEX_PAGE.continueButton).click();
 
     // we are in correct route
     cy.url().should('contain', ROUTES.SELECT_CONNECTOR);
