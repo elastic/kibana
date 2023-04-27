@@ -21,6 +21,7 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_THRESHOLD_RESULT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   createRule,
   getOpenSignals,
@@ -91,6 +92,32 @@ export default ({ getService }: FtrProviderContext) => {
           from: '2019-02-19T07:12:05.332Z',
         },
       });
+    });
+
+    it('generates max signals warning when circuit breaker is exceeded', async () => {
+      const rule: ThresholdRuleCreateProps = {
+        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        threshold: {
+          field: 'host.id',
+          value: 1, // This value generates 7 alerts with the current esArchive
+        },
+        max_signals: 5,
+      };
+      const { logs } = await previewRule({ supertest, rule });
+      expect(logs[0].warnings).contain(getMaxSignalsWarning());
+    });
+
+    it("doesn't generate max signals warning when circuit breaker is met but not exceeded", async () => {
+      const rule: ThresholdRuleCreateProps = {
+        ...getThresholdRuleForSignalTesting(['auditbeat-*']),
+        threshold: {
+          field: 'host.id',
+          value: 1, // This value generates 7 alerts with the current esArchive
+        },
+        max_signals: 7,
+      };
+      const { logs } = await previewRule({ supertest, rule });
+      expect(logs[0].warnings).not.contain(getMaxSignalsWarning());
     });
 
     it('generates 2 signals from Threshold rules when threshold is met', async () => {

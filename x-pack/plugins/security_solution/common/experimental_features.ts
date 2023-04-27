@@ -96,7 +96,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the `execute` endpoint response action
    */
-  responseActionExecuteEnabled: false,
+  responseActionExecuteEnabled: true,
 
   /**
    * Enables top charts on Alerts Page

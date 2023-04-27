@@ -9,19 +9,20 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { loggerMock } from '@kbn/logging-mocks';
-import { Payload } from 'elastic-apm-node';
-import type {
-  AuthorizationTypeEntry,
-  AuthorizeAndRedactMultiNamespaceReferencesParams,
-  CheckAuthorizationResult,
-  ISavedObjectsSecurityExtension,
-  SavedObjectsMappingProperties,
-  SavedObjectsRawDocSource,
-  SavedObjectsType,
-  SavedObjectsTypeMappingDefinition,
-  SavedObject,
-  SavedObjectReference,
-  AuthorizeFindParams,
+import type { Payload } from 'elastic-apm-node';
+import {
+  type AuthorizationTypeEntry,
+  type AuthorizeAndRedactMultiNamespaceReferencesParams,
+  type CheckAuthorizationResult,
+  type ISavedObjectsSecurityExtension,
+  type SavedObjectsMappingProperties,
+  type SavedObjectsRawDocSource,
+  type SavedObjectsType,
+  type SavedObjectsTypeMappingDefinition,
+  type SavedObject,
+  type SavedObjectReference,
+  type AuthorizeFindParams,
+  MAIN_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBaseOptions,
@@ -47,9 +48,9 @@ import {
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
 import {
-  AuthorizeAndRedactInternalBulkResolveParams,
-  GetFindRedactTypeMapParams,
-  AuthorizationTypeMap,
+  type AuthorizeAndRedactInternalBulkResolveParams,
+  type GetFindRedactTypeMapParams,
+  type AuthorizationTypeMap,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
@@ -601,8 +602,6 @@ export const getMockBulkCreateResponse = (
         managed: docManaged,
       }) => ({
         create: {
-          // status: 1,
-          // _index: '.kibana',
           _id: `${namespace ? `${namespace}:` : ''}${type}:${id}`,
           _source: {
             [type]: attributes,
@@ -726,7 +725,7 @@ export const generateIndexPatternSearchResults = (namespace?: string) => {
       total: 4,
       hits: [
         {
-          _index: '.kibana',
+          _index: MAIN_SAVED_OBJECT_INDEX,
           _id: `${namespace ? `${namespace}:` : ''}index-pattern:logstash-*`,
           _score: 1,
           ...mockVersionProps,
@@ -743,7 +742,7 @@ export const generateIndexPatternSearchResults = (namespace?: string) => {
           },
         },
         {
-          _index: '.kibana',
+          _index: MAIN_SAVED_OBJECT_INDEX,
           _id: `${namespace ? `${namespace}:` : ''}config:6.0.0-alpha1`,
           _score: 2,
           ...mockVersionProps,
@@ -758,7 +757,7 @@ export const generateIndexPatternSearchResults = (namespace?: string) => {
           },
         },
         {
-          _index: '.kibana',
+          _index: MAIN_SAVED_OBJECT_INDEX,
           _id: `${namespace ? `${namespace}:` : ''}index-pattern:stocks-*`,
           _score: 3,
           ...mockVersionProps,
@@ -774,7 +773,7 @@ export const generateIndexPatternSearchResults = (namespace?: string) => {
           },
         },
         {
-          _index: '.kibana',
+          _index: MAIN_SAVED_OBJECT_INDEX,
           _id: `${NAMESPACE_AGNOSTIC_TYPE}:something`,
           _score: 4,
           ...mockVersionProps,

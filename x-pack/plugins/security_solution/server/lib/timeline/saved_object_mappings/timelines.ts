@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { timelinesMigrations } from './migrations/timelines';
 
@@ -317,6 +318,7 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const timelineType: SavedObjectsType = {
   name: timelineSavedObjectType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',

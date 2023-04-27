@@ -164,6 +164,7 @@ export interface VisualizationInfo {
     icon?: IconType;
     label?: string;
     dimensions: Array<{ name: string; id: string; dimensionType: string }>;
+    palette?: string[];
   }>;
 }
 
@@ -1292,7 +1293,7 @@ export interface Visualization<T = unknown, P = T> {
     props: VisualizationStateFromContextChangeProps
   ) => Suggestion<T> | undefined;
 
-  getVisualizationInfo?: (state: T) => VisualizationInfo;
+  getVisualizationInfo?: (state: T, frame?: FramePublicAPI) => VisualizationInfo;
   /**
    * A visualization can return custom dimensions for the reporting tool
    */
