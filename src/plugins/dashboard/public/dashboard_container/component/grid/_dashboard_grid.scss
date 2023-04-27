@@ -38,11 +38,12 @@
 /**
  * When a single panel is expanded, all the other panels moved offscreen.
  * Shifting the rendered panels offscreen prevents a quick flash when redrawing the panels on minimize
+ * 1. We need to mark this as important because react grid layout sets the top/left of the panels inline.
  */
 .dshDashboardGrid__item--hidden {
   position: absolute;
-  top: -9999px;
-  left: -9999px;
+  top: -9999px !important; /* 1 */
+  left: -9999px !important; /* 1 */
 }
 
 /**
