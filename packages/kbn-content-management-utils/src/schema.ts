@@ -68,19 +68,19 @@ export const objectTypeToGetResultSchema = (soSchema: ObjectType<any>) =>
   );
 
 // its recommended to create a subset of this schema for stricter validation
-export const createOptionsSchema = schema.object({
+export const createOptionsSchemas = {
   id: schema.maybe(schema.string()),
   references: schema.maybe(referencesSchema),
   overwrite: schema.maybe(schema.boolean()),
   version: schema.maybe(schema.string()),
   refresh: schema.maybe(schema.boolean()),
   initialNamespaces: schema.maybe(schema.arrayOf(schema.string())),
-});
+};
 
 export const schemaAndOr = schema.oneOf([schema.literal('AND'), schema.literal('OR')]);
 
 // its recommended to create a subset of this schema for stricter validation
-export const searchOptionsSchema = schema.object({
+export const searchOptionsSchemas = {
   page: schema.maybe(schema.number()),
   perPage: schema.maybe(schema.number()),
   sortField: schema.maybe(schema.string()),
@@ -102,17 +102,16 @@ export const searchOptionsSchema = schema.object({
   pit: schema.maybe(
     schema.object({ id: schema.string(), keepAlive: schema.maybe(schema.string()) })
   ),
-});
+};
 
 // its recommended to create a subset of this schema for stricter validation
-export const updateOptionsSchema = (attributesSchema: ObjectType<any>) =>
-  schema.object({
-    references: schema.maybe(referencesSchema),
-    version: schema.maybe(schema.string()),
-    refresh: schema.maybe(schema.oneOf([schema.boolean(), schema.literal('wait_for')])),
-    upsert: schema.maybe(savedObjectSchema(attributesSchema)),
-    retryOnConflict: schema.maybe(schema.number()),
-  });
+export const updateOptionsSchema = {
+  references: schema.maybe(referencesSchema),
+  version: schema.maybe(schema.string()),
+  refresh: schema.maybe(schema.oneOf([schema.boolean(), schema.literal('wait_for')])),
+  upsert: (attributesSchema: ObjectType<any>) => schema.maybe(savedObjectSchema(attributesSchema)),
+  retryOnConflict: schema.maybe(schema.number()),
+};
 
 export const createResultSchema = (soSchema: ObjectType<any>) =>
   schema.object(
