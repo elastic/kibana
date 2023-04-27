@@ -93,11 +93,72 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
     inspectorAdapters: Adapters,
     featureCollection?: FeatureCollection,
   ): Promise<PropertiesMap> {
-    console.log(featureCollection);
+    if (featureCollection === undefined) {
+      throw new Error(i18n.translate('xpack.maps.esDistanceSource.noFeatureCollectionMsg', {
+        defaultMessage: `Unable to perform distance join, features not provided. To enable distance join, select 'Limit results' in 'Scaling'`,
+      }));
+    }
+
     if (!this.hasCompleteConfig()) {
       return new Map<string, BucketProperties>();
     }
 
+    const distance = `${this._descriptor.distance}km`;
+    let hasFilters = false;
+    const filters: Record<string, unknown> = {};
+    for (let i = 0; i < featureCollection.features.length; i++) {
+      const feature = featureCollection.features[i];
+      if (feature.geometry.type === 'Point' && feature?.properties._id) {
+        filters[feature.properties._id] = {
+          'geo_distance': {
+            distance,
+            [this._descriptor.geoField]: feature.geometry.coordinates,
+          }
+        };
+        if (!hasFilters) {
+          hasFilters = true;
+        }
+      }
+    }
+
+    if (!hasFilters) {
+      return new Map<string, BucketProperties>();
+    }
+
+    const indexPattern = await this.getIndexPattern();
+    const searchSource: ISearchSource = await this.makeSearchSource(requestMeta, 0);
+    searchSource.setField('trackTotalHits', false);
+    searchSource.setField('aggs', {
+      distance: {
+        filters: {
+          filters,
+        },
+        aggs: this.getValueAggsDsl(indexPattern),
+      },
+    });
+    const rawEsData = await this._runEsQuery({
+      requestId: this.getId(),
+      requestName: i18n.translate('xpack.maps.distanceSource.requestName', {
+        defaultMessage: '{leftSourceName} within distance join request',
+        values: { leftSourceName }
+      }),
+      searchSource,
+      registerCancelCallback,
+      requestDescription: i18n.translate('xpack.maps.distanceSource.requestDescription', {
+        defaultMessage: 'Gather within distance metrics from data view: {dataViewName}, geospatial field: {geoFieldName}',
+        values: {
+          dataViewName: indexPattern.getName(),
+          geoFieldName: this._descriptor.geoField,
+        },
+      }),
+      searchSessionId: requestMeta.searchSessionId,
+      executionContext: mergeExecutionContext(
+        { description: 'es_distance_source:distance_join_request' },
+        requestMeta.executionContext
+      ),
+      requestsAdapter: inspectorAdapters.requests,
+    });
+    console.log(JSON.stringify(rawEsData, null, ' '));
     
     return new Map<string, BucketProperties>();
   }

@@ -149,14 +149,17 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
 
     const rawEsData = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: `${indexPattern.getName()}.${this._termField.getName()}`,
+      requestName: i18n.translate('xpack.maps.termSource.requestName', {
+        defaultMessage: '{leftSourceName} term join request',
+        values: { leftSourceName }
+      }),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.source.esJoin.joinDescription', {
-        defaultMessage: `Elasticsearch terms aggregation request, left source: {leftSource}, right source: {rightSource}`,
+      requestDescription: i18n.translate('xpack.maps.termSource.requestDescription', {
+        defaultMessage: 'Gather term metrics from data view: {dataViewName}, term field: {termFieldName}',
         values: {
-          leftSource: `${leftSourceName}:${leftFieldName}`,
-          rightSource: `${indexPattern.getName()}:${this._termField.getName()}`,
+          dataViewName: indexPattern.getName(),
+          termFieldName: this._termField.getName(),
         },
       }),
       searchSessionId: requestMeta.searchSessionId,
