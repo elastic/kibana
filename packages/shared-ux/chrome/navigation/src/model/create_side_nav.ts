@@ -21,7 +21,7 @@ export const createSideNavDataFactory = (
   deps: NavigationModelDeps,
   activeNavItemId: string | undefined
 ) => {
-  const { basePath, navigateToUrl, registerNavItemClick } = deps;
+  const { basePath, navigateToUrl } = deps;
   const createSideNavData = (
     parentIds: string | number = '',
     navItems: NavItemProps[],
@@ -43,7 +43,6 @@ export const createSideNavDataFactory = (
         onClick = (event: React.MouseEvent) => {
           event.preventDefault();
           navigateToUrl(basePath.prepend(href));
-          registerNavItemClick(fullId);
         };
       }
 

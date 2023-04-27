@@ -12,11 +12,6 @@ import type { IBasePath } from '@kbn/core-http-browser';
 /**
  * @internal
  */
-export type NavItemClickFn = (id: string) => void;
-
-/**
- * @internal
- */
 export type SetActiveNavItemIdFn = (activeNavItemId: string) => void;
 
 /**

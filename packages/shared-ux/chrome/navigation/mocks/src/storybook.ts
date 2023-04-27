@@ -8,7 +8,6 @@
 
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
-import { BehaviorSubject } from 'rxjs';
 import { NavigationProps, NavigationServices } from '../../types';
 
 type Arguments = NavigationProps & NavigationServices;
@@ -42,19 +41,11 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
       return Promise.resolve();
     };
 
-    const registerNavItemClickAction = action('Register click');
-    const activeNavItemId$ = new BehaviorSubject<string | undefined>(undefined);
-    const registerNavItemClick = (id: string) => {
-      activeNavItemId$.next(id);
-      registerNavItemClickAction(id);
-    };
-
     return {
       ...params,
       basePath: { prepend: (suffix: string) => `/basepath${suffix}` },
       navigateToUrl,
       navIsOpen,
-      registerNavItemClick,
     };
   }
 

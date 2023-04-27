@@ -8,7 +8,7 @@
 
 import type { EuiSideNavItemType, IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import { BasePathService, NavigateToUrlFn, NavItemClickFn, RecentItem } from './internal';
+import { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
 
 /**
  * A list of services that are consumed by this component.
@@ -20,7 +20,6 @@ export interface NavigationServices {
   loadingCount: number;
   navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
-  registerNavItemClick: NavItemClickFn;
 }
 
 /**
@@ -32,10 +31,7 @@ export interface NavigationKibanaDependencies {
   core: {
     application: { navigateToUrl: NavigateToUrlFn };
     chrome: {
-      getActiveNavItemId$: () => Observable<string | undefined>;
-      getProjectNavIsOpen$: () => Observable<boolean>;
       recentlyAccessed: { get$: () => Observable<RecentItem[]> };
-      registerNavItemClick: (id: string) => void;
     };
     http: {
       basePath: BasePathService;

@@ -27,23 +27,17 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   ...dependencies
 }) => {
   const { core } = dependencies;
-  const { chrome, http } = core;
+  const { http } = core;
   const { basePath } = http;
   const { navigateToUrl } = core.application;
 
-  const navIsOpen = useObservable(chrome.getProjectNavIsOpen$(), true);
-  const activeNavItemId = useObservable(chrome.getActiveNavItemId$());
   const loadingCount = useObservable(http.getLoadingCount$(), 0);
 
-  const registerNavItemClick = chrome.registerNavItemClick;
-
   const value: NavigationServices = {
-    activeNavItemId,
     basePath,
     loadingCount,
-    navIsOpen,
     navigateToUrl,
-    registerNavItemClick,
+    navIsOpen: true,
   };
 
   return (
