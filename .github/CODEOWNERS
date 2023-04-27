@@ -573,7 +573,7 @@ packages/kbn-securitysolution-utils @elastic/security-solution-platform
 packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-server-route-repository @elastic/apm-ui
 x-pack/plugins/serverless @elastic/appex-sharedux
-x-pack/plugins/serverless_observability @elastic/appex-sharedux @elastic/observability-ui
+x-pack/plugins/serverless_observability @elastic/appex-sharedux
 packages/serverless/project_switcher @elastic/appex-sharedux
 packages/serverless/storybook/config @elastic/appex-sharedux
 packages/serverless/types @elastic/appex-sharedux
