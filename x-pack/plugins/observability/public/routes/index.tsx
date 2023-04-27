@@ -17,6 +17,7 @@ import { OverviewPage } from '../pages/overview/overview';
 import { RulesPage } from '../pages/rules/rules';
 import { RuleDetailsPage } from '../pages/rule_details';
 import { SlosPage } from '../pages/slos/slos';
+import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';
 import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import { casesPath } from '../../common';
@@ -131,6 +132,13 @@ export const routes = {
   '/slos/create': {
     handler: () => {
       return <SloEditPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/slos/welcome': {
+    handler: () => {
+      return <SlosWelcomePage />;
     },
     params: {},
     exact: true,
