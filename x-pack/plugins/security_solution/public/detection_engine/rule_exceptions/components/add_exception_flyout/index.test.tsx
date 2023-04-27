@@ -15,7 +15,11 @@ import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import {
+  createStubDataView,
+  createStubIndexPattern,
+  stubIndexPattern,
+} from '@kbn/data-plugin/common/stubs';
 
 import { AddExceptionFlyout } from '.';
 import { useFetchIndex } from '../../../../common/containers/source';
@@ -152,7 +156,7 @@ describe('When the add exception modal is opened', () => {
       // Mocks one of the hooks as loading
       mockFetchIndexPatterns.mockImplementation(() => ({
         isLoading: true,
-        indexPatterns: { fields: [], title: 'foo' },
+        indexPatterns: createStubDataView({ spec: { title: 'foo*' } }),
       }));
 
       wrapper = mount(

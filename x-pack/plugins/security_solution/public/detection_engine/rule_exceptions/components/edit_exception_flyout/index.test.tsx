@@ -16,7 +16,11 @@ import { TestProviders } from '../../../../common/mock';
 import { EditExceptionFlyout } from '.';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import {
+  createStubDataView,
+  createStubIndexPattern,
+  stubIndexPattern,
+} from '@kbn/data-plugin/common/stubs';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { Rule } from '../../../rule_management/logic/types';
@@ -167,7 +171,7 @@ describe('When the edit exception modal is opened', () => {
       // Mocks one of the hooks as loading
       mockFetchIndexPatterns.mockImplementation(() => ({
         isLoading: true,
-        indexPatterns: { fields: [], title: 'foo' },
+        indexPatterns: createStubDataView({ spec: { title: 'foo*' } }),
       }));
 
       const wrapper = mount(
