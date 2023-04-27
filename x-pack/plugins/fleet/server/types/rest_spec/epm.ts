@@ -38,6 +38,19 @@ export const GetInstalledPackagesRequestSchema = {
   }),
 };
 
+export const GetDataStreamsRequestSchema = {
+  query: schema.object({
+    type: schema.maybe(
+      schema.oneOf([schema.literal('logs'), schema.literal('metrics'), schema.literal('traces')])
+    ),
+    datasetQuery: schema.maybe(schema.string()),
+    sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      defaultValue: 'asc',
+    }),
+    uncategorisedOnly: schema.boolean({ defaultValue: true }),
+  }),
+};
+
 export const GetLimitedPackagesRequestSchema = {
   query: schema.object({
     prerelease: schema.maybe(schema.boolean()),

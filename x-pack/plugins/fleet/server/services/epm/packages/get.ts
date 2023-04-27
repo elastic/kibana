@@ -167,6 +167,7 @@ export async function getInstalledPackages(options: {
     // Name filter
     ...(nameQuery && { searchFields: ['name'] }),
     ...(nameQuery && { search: `${nameQuery}* | ${nameQuery}` }),
+    // Filter to installed packages only
     filter: nodeBuilder.is(
       `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
       installationStatuses.Installed

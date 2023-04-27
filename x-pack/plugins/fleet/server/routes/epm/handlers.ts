@@ -35,6 +35,7 @@ import type {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetInstalledPackagesRequestSchema,
+  GetDataStreamsRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
   InstallPackageFromRegistryRequestSchema,
@@ -68,6 +69,7 @@ import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type { ReauthorizeTransformRequestSchema } from '../../types';
+import { getDataStreams } from '../../services/epm/data_streams';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -129,6 +131,31 @@ export const getInstalledListHandler: FleetRequestHandler<
     });
 
     const body: GetInstalledPackagesResponse = {
+      // TODO: Add type
+      ...res,
+    };
+
+    return response.ok({
+      body,
+    });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getDataStreamsHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetDataStreamsRequestSchema.query>
+> = async (context, request, response) => {
+  try {
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asInternalUser; // TODO: Visit permissions
+    const res = await getDataStreams({
+      esClient,
+      ...request.query,
+    });
+
+    const body: GetDataStreamsResponse = {
       // TODO: Add type
       ...res,
     };
