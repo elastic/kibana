@@ -42,7 +42,22 @@ export enum ML_ANOMALY_SEVERITY {
   UNKNOWN = 'unknown',
 }
 
+/**
+ * Interface for severity types to be used in ML_ANOMALY_SEVERITY_TYPES.
+ *
+ * @export
+ * @interface MlSeverityType
+ * @typedef {MlSeverityType}
+ */
 export interface MlSeverityType {
+  /**
+   * One of ML_ANOMALY_SEVERITY
+   * @type {ML_ANOMALY_SEVERITY}
+   */
   id: ML_ANOMALY_SEVERITY;
+  /**
+   * Translated ML_ANOMALY_SEVERITY
+   * @type {string}
+   */
   label: string;
 }
