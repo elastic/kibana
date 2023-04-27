@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useEffect } from 'react';
-import type { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
-import { useKibana } from '../lib/kibana';
+import { useState, useEffect, useMemo } from 'react';
+import { SecurityPageName } from '../../../common/constants';
+import { useUrlStateQueryParams } from '../components/navigation/use_get_url_search';
+import { useKibana, useAppUrl } from '../lib/kibana';
 
 export const dashboardRequestBody = (title: string) => ({
   type: 'dashboard',
@@ -14,47 +15,37 @@ export const dashboardRequestBody = (title: string) => ({
   fields: ['title'],
 });
 
-export const useDashboardButtonHref = ({
-  to,
-  from,
-  title,
-}: {
-  to?: string;
-  from?: string;
-  title: string;
-}) => {
-  const {
-    dashboard,
-    savedObjects: { client: savedObjectsClient },
-  } = useKibana().services;
+export const useDashboardHref = ({ title }: { title: string }): string | undefined => {
+  const { dashboard } = useKibana().services;
+  const { getAppUrl } = useAppUrl();
+  const [dashboardId, setDashboardId] = useState<string | undefined>();
 
-  const [buttonHref, setButtonHref] = useState<string | undefined>();
+  const params = useUrlStateQueryParams(SecurityPageName.dashboards);
 
   useEffect(() => {
-    if (dashboard?.locator && savedObjectsClient) {
-      savedObjectsClient.find<SavedObjectAttributes>(dashboardRequestBody(title)).then(
-        async (DashboardsSO?: {
-          savedObjects?: Array<{
-            attributes?: SavedObjectAttributes;
-            id?: string;
-          }>;
-        }) => {
-          if (DashboardsSO?.savedObjects?.length && to && from) {
-            const dashboardUrl = await dashboard?.locator?.getUrl({
-              dashboardId: DashboardsSO.savedObjects[0].id,
-              timeRange: {
-                to,
-                from,
-              },
-            });
-            setButtonHref(dashboardUrl);
-          }
+    let ignore = false;
+    (async () => {
+      if (dashboard && title) {
+        const findDashboardsService = await dashboard?.findDashboardsService();
+        const { id } = (await findDashboardsService.findByTitle(title)) ?? {};
+        if (!ignore) {
+          setDashboardId(id);
         }
-      );
-    }
-  }, [dashboard, from, savedObjectsClient, to, title]);
+      }
+    })();
+    return () => {
+      ignore = true;
+    };
+  }, [dashboard, title]);
 
-  return {
-    buttonHref,
-  };
+  return useMemo(() => {
+    if (dashboardId) {
+      return getAppUrl({
+        deepLinkId: SecurityPageName.dashboards,
+        path: `${dashboardId}${params}`,
+      });
+    } else {
+      return undefined;
+    }
+  }, [dashboardId, getAppUrl, params]);
 };

@@ -12,21 +12,20 @@ import { useGlobalQueryString } from '../../utils/global_query_string';
 
 import { getSearch } from './helpers';
 
-export const useGetUrlSearch = (pageName: SecurityPageName) => {
-  const globalQueryString = useGlobalQueryString();
-  const urlSearch = useMemo(
-    () => getSearch(pageName, globalQueryString),
-    [globalQueryString, pageName]
+export const useUrlStateQueryParams = (pageName: SecurityPageName) => {
+  const getUrlStateQueryParams = useGetUrlStateQueryParams();
+  const urlStateQueryParams = useMemo(
+    () => getUrlStateQueryParams(pageName),
+    [getUrlStateQueryParams, pageName]
   );
-
-  return urlSearch;
+  return urlStateQueryParams;
 };
 
-export const useGetUrlStateQueryString = () => {
+export const useGetUrlStateQueryParams = () => {
   const globalQueryString = useGlobalQueryString();
-  const getUrlStateQueryString = useCallback(() => {
-    return globalQueryString.length > 0 ? `?${globalQueryString}` : '';
-  }, [globalQueryString]);
-
-  return getUrlStateQueryString;
+  const getUrlStateQueryParams = useCallback(
+    (pageName: SecurityPageName) => getSearch(pageName, globalQueryString),
+    [globalQueryString]
+  );
+  return getUrlStateQueryParams;
 };
