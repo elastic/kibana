@@ -9,7 +9,7 @@ import path from 'path';
 
 export const BUNDLED_PACKAGE_DIR = path.join(
   path.dirname(__filename),
-  './fleet_bundled_packages/__fixtures__'
+  './fleet_bundled_packages/fixtures'
 );
 
 // eslint-disable-next-line import/no-default-export
