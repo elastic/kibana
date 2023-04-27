@@ -7,7 +7,7 @@
 
 import { registerDataHandler, getDataHandler } from './data_handler';
 import moment from 'moment';
-import { ApmIndicesConfig } from '../common/typings';
+import { ApmIndicesConfig } from '@kbn/observability-shared-plugin/public';
 
 const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 

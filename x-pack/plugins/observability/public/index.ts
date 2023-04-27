@@ -43,7 +43,6 @@ export const plugin: PluginInitializer<
 
 export * from './components/shared/action_menu';
 
-export type { UXMetrics } from './components/shared/core_web_vitals';
 export { DatePickerContextProvider } from './context/date_picker_context';
 
 export {
@@ -65,8 +64,9 @@ export {
   useUiTracker,
   useTrackMetric,
   METRIC_TYPE,
-  TrackEvent,
 } from './hooks/use_track_metric';
+
+export type { TrackEvent } from './hooks/use_track_metric';
 
 export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout'));
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';

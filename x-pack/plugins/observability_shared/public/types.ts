@@ -33,3 +33,8 @@ export interface HeaderMenuPortalProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
 }
+
+export interface TimePickerTimeDefaults {
+  from: string;
+  to: string;
+}

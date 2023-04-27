@@ -106,7 +106,6 @@ describe('Embeddable', () => {
   it('renders title', async () => {
     const { container, getByText } = render(
       <Embeddable
-        appId={mockAppId}
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
@@ -124,7 +123,6 @@ describe('Embeddable', () => {
   it('renders no title if it is not given', async () => {
     const { container } = render(
       <Embeddable
-        appId={mockAppId}
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
@@ -142,7 +140,6 @@ describe('Embeddable', () => {
   it('renders lens component', () => {
     const { container } = render(
       <Embeddable
-        appId={mockAppId}
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
@@ -177,7 +174,6 @@ describe('Embeddable', () => {
   it('renders AddToCaseAction', () => {
     render(
       <Embeddable
-        appId={mockAppId}
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}

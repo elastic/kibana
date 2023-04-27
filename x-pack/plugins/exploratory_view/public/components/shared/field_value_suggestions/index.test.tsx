@@ -8,8 +8,8 @@
 import React from 'react';
 import { FieldValueSuggestions } from '.';
 import { render, screen, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
-import * as searchHook from '../../../hooks/use_es_search';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import * as searchHook from '@kbn/observability-shared-plugin/public';
 
 jest.setTimeout(30000);
 

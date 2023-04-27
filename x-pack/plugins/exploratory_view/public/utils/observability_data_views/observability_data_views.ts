@@ -14,7 +14,7 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import { RuntimeField } from '@kbn/data-views-plugin/public';
 import { DataViewMissingIndices } from '@kbn/data-views-plugin/common';
-import { getDataHandler } from '@kbn/observability-shared-plugin/public';
+import { getDataHandler } from '../../data_handler';
 import { DataTypesLabels } from '../../components/shared/exploratory_view/labels';
 import { syntheticsRuntimeFields } from '../../components/shared/exploratory_view/configurations/synthetics/runtime_fields';
 import { getApmDataViewTitle } from '../../components/shared/exploratory_view/utils/utils';

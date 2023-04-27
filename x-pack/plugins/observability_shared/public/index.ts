@@ -34,9 +34,19 @@ export {
 } from '../common';
 
 export { useTheme } from './hooks/use_theme';
+export { useEsSearch, createEsParams } from './hooks/use_es_search';
+export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
 export { useKibanaSpace } from './hooks/use_kibana_space';
-export { METRIC_TYPE, useTrackMetric, useUiTracker } from './hooks/use_track_metric';
+export { useBreadcrumbs } from './hooks/use_breadcrumbs';
+export {
+  METRIC_TYPE,
+  useTrackMetric,
+  useUiTracker,
+  useTrackPageview,
+} from './hooks/use_track_metric';
+export type { TrackEvent } from './hooks/use_track_metric';
 export { useQuickTimeRanges } from './hooks/use_quick_time_ranges';
 export { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
 
 export type { ApmIndicesConfig, UXMetrics } from './types';
+export { noCasesPermissions } from './utils/cases_permissions';
