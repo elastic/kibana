@@ -113,14 +113,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.missingOrFail('malwareUserNotificationCustomMessage');
       });
 
+      it('should show a sample custom message', async () => {
+        const customMessageBox = await testSubjects.find('malwareUserNotificationCustomMessage');
+        expect(await customMessageBox.getVisibleText()).equal(
+          'Elastic Security {action} {filename}'
+        );
+      });
+
+      it('should show a tooltip ', async () => {
+        const malwareTooltipIcon = await testSubjects.find('malwareTooltipIcon');
+        await malwareTooltipIcon.moveMouseTo();
+
+        const malwareTooltip = await testSubjects.find('malwareTooltip');
+        expect(await malwareTooltip.getVisibleText()).equal(
+          'Selecting the user notification option will display a notification to the host user when malware is prevented or detected.\nThe user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the filename.'
+        );
+      });
+
       it('should preserve a custom notification message upon saving', async () => {
-        const customMessage = await testSubjects.find('malwareUserNotificationCustomMessage');
-        await customMessage.clearValue();
-        await customMessage.type('a custom malware notification message');
+        const customMessageBox = await testSubjects.find('malwareUserNotificationCustomMessage');
+        await customMessageBox.clearValue();
+        await customMessageBox.type('a custom malware notification message @$% 123');
         await pageObjects.policy.confirmAndSave();
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
         expect(await testSubjects.getVisibleText('malwareUserNotificationCustomMessage')).to.equal(
-          'a custom malware notification message'
+          'a custom malware notification message @$% 123'
         );
       });
     });
