@@ -535,6 +535,51 @@
     "misc": [
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.AGENT",
+        "type": "string",
+        "tags": [],
+        "label": "AGENT",
+        "description": [],
+        "signature": [
+          "\"agent\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.AGENT_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "AGENT_NAME",
+        "description": [],
+        "signature": [
+          "\"agent.name\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.AGENT_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "AGENT_VERSION",
+        "description": [],
+        "signature": [
+          "\"agent.version\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.casesFeatureId",
         "type": "string",
         "tags": [],
@@ -544,6 +589,711 @@
           "\"observabilityCases\""
         ],
         "path": "x-pack/plugins/observability_shared/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.CLIENT_GEO",
+        "type": "string",
+        "tags": [],
+        "label": "CLIENT_GEO",
+        "description": [],
+        "signature": [
+          "\"client.geo\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.CLIENT_GEO_COUNTRY_ISO_CODE",
+        "type": "string",
+        "tags": [],
+        "label": "CLIENT_GEO_COUNTRY_ISO_CODE",
+        "description": [],
+        "signature": [
+          "\"client.geo.country_iso_code\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.CLIENT_GEO_COUNTRY_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "CLIENT_GEO_COUNTRY_NAME",
+        "description": [],
+        "signature": [
+          "\"client.geo.country_name\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.CLOUD",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD",
+        "description": [],
+        "signature": [
+          "\"cloud\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.CLOUD_AVAILABILITY_ZONE",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_AVAILABILITY_ZONE",
+        "description": [],
+        "signature": [
+          "\"cloud.availability_zone\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.CLOUD_MACHINE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_MACHINE_TYPE",
+        "description": [],
+        "signature": [
+          "\"cloud.machine.type\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.CLOUD_PROVIDER",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_PROVIDER",
+        "description": [],
+        "signature": [
+          "\"cloud.provider\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.CLOUD_REGION",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_REGION",
+        "description": [],
+        "signature": [
+          "\"cloud.region\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.CLS_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "CLS_FIELD",
+        "description": [],
+        "signature": [
+          "\"transaction.experience.cls\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.CONTAINER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONTAINER_ID",
+        "description": [],
+        "signature": [
+          "\"container.id\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.DESTINATION_ADDRESS",
+        "type": "string",
+        "tags": [],
+        "label": "DESTINATION_ADDRESS",
+        "description": [],
+        "signature": [
+          "\"destination.address\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.ERROR_CULPRIT",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_CULPRIT",
+        "description": [],
+        "signature": [
+          "\"error.culprit\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.ERROR_EXC_HANDLED",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_EXC_HANDLED",
+        "description": [],
+        "signature": [
+          "\"error.exception.handled\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.ERROR_EXC_MESSAGE",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_EXC_MESSAGE",
+        "description": [],
+        "signature": [
+          "\"error.exception.message\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.ERROR_EXC_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_EXC_TYPE",
+        "description": [],
+        "signature": [
+          "\"error.exception.type\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.ERROR_GROUP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_GROUP_ID",
+        "description": [],
+        "signature": [
+          "\"error.grouping_key\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.ERROR_LOG_LEVEL",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_LOG_LEVEL",
+        "description": [],
+        "signature": [
+          "\"error.log.level\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.ERROR_LOG_MESSAGE",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_LOG_MESSAGE",
+        "description": [],
+        "signature": [
+          "\"error.log.message\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.ERROR_PAGE_URL",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_PAGE_URL",
+        "description": [],
+        "signature": [
+          "\"error.page.url\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.EVENT_OUTCOME",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_OUTCOME",
+        "description": [],
+        "signature": [
+          "\"event.outcome\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.FCP_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "FCP_FIELD",
+        "description": [],
+        "signature": [
+          "\"transaction.marks.agent.firstContentfulPaint\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.FID_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "FID_FIELD",
+        "description": [],
+        "signature": [
+          "\"transaction.experience.fid\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.HOST",
+        "type": "string",
+        "tags": [],
+        "label": "HOST",
+        "description": [],
+        "signature": [
+          "\"host\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.HOST_HOSTNAME",
+        "type": "string",
+        "tags": [],
+        "label": "HOST_HOSTNAME",
+        "description": [],
+        "signature": [
+          "\"host.hostname\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.HOST_OS_PLATFORM",
+        "type": "string",
+        "tags": [],
+        "label": "HOST_OS_PLATFORM",
+        "description": [],
+        "signature": [
+          "\"host.os.platform\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.HTTP_REQUEST_METHOD",
+        "type": "string",
+        "tags": [],
+        "label": "HTTP_REQUEST_METHOD",
+        "description": [],
+        "signature": [
+          "\"http.request.method\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.HTTP_RESPONSE_STATUS_CODE",
+        "type": "string",
+        "tags": [],
+        "label": "HTTP_RESPONSE_STATUS_CODE",
+        "description": [],
+        "signature": [
+          "\"http.response.status_code\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.KUBERNETES",
+        "type": "string",
+        "tags": [],
+        "label": "KUBERNETES",
+        "description": [],
+        "signature": [
+          "\"kubernetes\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.LABEL_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "LABEL_NAME",
+        "description": [],
+        "signature": [
+          "\"labels.name\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.LCP_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "LCP_FIELD",
+        "description": [],
+        "signature": [
+          "\"transaction.marks.agent.largestContentfulPaint\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_CGROUP_MEMORY_LIMIT_BYTES",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_CGROUP_MEMORY_LIMIT_BYTES",
+        "description": [],
+        "signature": [
+          "\"system.process.cgroup.memory.mem.limit.bytes\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_CGROUP_MEMORY_USAGE_BYTES",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_CGROUP_MEMORY_USAGE_BYTES",
+        "description": [],
+        "signature": [
+          "\"system.process.cgroup.memory.mem.usage.bytes\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_JAVA_GC_COUNT",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_JAVA_GC_COUNT",
+        "description": [],
+        "signature": [
+          "\"jvm.gc.count\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_JAVA_GC_TIME",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_JAVA_GC_TIME",
+        "description": [],
+        "signature": [
+          "\"jvm.gc.time\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_JAVA_HEAP_MEMORY_COMMITTED",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_JAVA_HEAP_MEMORY_COMMITTED",
+        "description": [],
+        "signature": [
+          "\"jvm.memory.heap.committed\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_JAVA_HEAP_MEMORY_MAX",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_JAVA_HEAP_MEMORY_MAX",
+        "description": [],
+        "signature": [
+          "\"jvm.memory.heap.max\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_JAVA_HEAP_MEMORY_USED",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_JAVA_HEAP_MEMORY_USED",
+        "description": [],
+        "signature": [
+          "\"jvm.memory.heap.used\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED",
+        "description": [],
+        "signature": [
+          "\"jvm.memory.non_heap.committed\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_JAVA_NON_HEAP_MEMORY_MAX",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_JAVA_NON_HEAP_MEMORY_MAX",
+        "description": [],
+        "signature": [
+          "\"jvm.memory.non_heap.max\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_JAVA_NON_HEAP_MEMORY_USED",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_JAVA_NON_HEAP_MEMORY_USED",
+        "description": [],
+        "signature": [
+          "\"jvm.memory.non_heap.used\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_JAVA_THREAD_COUNT",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_JAVA_THREAD_COUNT",
+        "description": [],
+        "signature": [
+          "\"jvm.thread.count\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_PROCESS_CPU_PERCENT",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_PROCESS_CPU_PERCENT",
+        "description": [],
+        "signature": [
+          "\"system.process.cpu.total.norm.pct\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_SYSTEM_CPU_PERCENT",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_SYSTEM_CPU_PERCENT",
+        "description": [],
+        "signature": [
+          "\"system.cpu.total.norm.pct\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_SYSTEM_CPU_USAGE",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_SYSTEM_CPU_USAGE",
+        "description": [],
+        "signature": [
+          "\"system.cpu.usage\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_SYSTEM_FREE_MEMORY",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_SYSTEM_FREE_MEMORY",
+        "description": [],
+        "signature": [
+          "\"system.memory.actual.free\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_SYSTEM_MEMORY_USAGE",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_SYSTEM_MEMORY_USAGE",
+        "description": [],
+        "signature": [
+          "\"system.memory.usage\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.METRIC_SYSTEM_TOTAL_MEMORY",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_SYSTEM_TOTAL_MEMORY",
+        "description": [],
+        "signature": [
+          "\"system.memory.total\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -580,6 +1330,426 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.OBSERVER_HOSTNAME",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVER_HOSTNAME",
+        "description": [],
+        "signature": [
+          "\"observer.hostname\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.OBSERVER_LISTENING",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVER_LISTENING",
+        "description": [],
+        "signature": [
+          "\"observer.listening\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.OBSERVER_VERSION_MAJOR",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVER_VERSION_MAJOR",
+        "description": [],
+        "signature": [
+          "\"observer.version_major\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.PARENT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PARENT_ID",
+        "description": [],
+        "signature": [
+          "\"parent.id\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.POD_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "POD_NAME",
+        "description": [],
+        "signature": [
+          "\"kubernetes.pod.name\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.PROCESSOR_EVENT",
+        "type": "string",
+        "tags": [],
+        "label": "PROCESSOR_EVENT",
+        "description": [],
+        "signature": [
+          "\"processor.event\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.PROFILE_ALLOC_OBJECTS",
+        "type": "string",
+        "tags": [],
+        "label": "PROFILE_ALLOC_OBJECTS",
+        "description": [],
+        "signature": [
+          "\"profile.alloc_objects.count\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.PROFILE_ALLOC_SPACE",
+        "type": "string",
+        "tags": [],
+        "label": "PROFILE_ALLOC_SPACE",
+        "description": [],
+        "signature": [
+          "\"profile.alloc_space.bytes\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.PROFILE_CPU_NS",
+        "type": "string",
+        "tags": [],
+        "label": "PROFILE_CPU_NS",
+        "description": [],
+        "signature": [
+          "\"profile.cpu.ns\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.PROFILE_DURATION",
+        "type": "string",
+        "tags": [],
+        "label": "PROFILE_DURATION",
+        "description": [],
+        "signature": [
+          "\"profile.duration\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.PROFILE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PROFILE_ID",
+        "description": [],
+        "signature": [
+          "\"profile.id\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.PROFILE_INUSE_OBJECTS",
+        "type": "string",
+        "tags": [],
+        "label": "PROFILE_INUSE_OBJECTS",
+        "description": [],
+        "signature": [
+          "\"profile.inuse_objects.count\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.PROFILE_INUSE_SPACE",
+        "type": "string",
+        "tags": [],
+        "label": "PROFILE_INUSE_SPACE",
+        "description": [],
+        "signature": [
+          "\"profile.inuse_space.bytes\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.PROFILE_SAMPLES_COUNT",
+        "type": "string",
+        "tags": [],
+        "label": "PROFILE_SAMPLES_COUNT",
+        "description": [],
+        "signature": [
+          "\"profile.samples.count\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.PROFILE_STACK",
+        "type": "string",
+        "tags": [],
+        "label": "PROFILE_STACK",
+        "description": [],
+        "signature": [
+          "\"profile.stack\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.PROFILE_TOP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PROFILE_TOP_ID",
+        "description": [],
+        "signature": [
+          "\"profile.top.id\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.PROFILE_WALL_US",
+        "type": "string",
+        "tags": [],
+        "label": "PROFILE_WALL_US",
+        "description": [],
+        "signature": [
+          "\"profile.wall.us\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SERVICE",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE",
+        "description": [],
+        "signature": [
+          "\"service\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SERVICE_ENVIRONMENT",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_ENVIRONMENT",
+        "description": [],
+        "signature": [
+          "\"service.environment\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SERVICE_FRAMEWORK_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_FRAMEWORK_NAME",
+        "description": [],
+        "signature": [
+          "\"service.framework.name\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SERVICE_FRAMEWORK_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_FRAMEWORK_VERSION",
+        "description": [],
+        "signature": [
+          "\"service.framework.version\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SERVICE_LANGUAGE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_LANGUAGE_NAME",
+        "description": [],
+        "signature": [
+          "\"service.language.name\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SERVICE_LANGUAGE_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_LANGUAGE_VERSION",
+        "description": [],
+        "signature": [
+          "\"service.language.version\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SERVICE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_NAME",
+        "description": [],
+        "signature": [
+          "\"service.name\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SERVICE_NODE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_NODE_NAME",
+        "description": [],
+        "signature": [
+          "\"service.node.name\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SERVICE_RUNTIME_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_RUNTIME_NAME",
+        "description": [],
+        "signature": [
+          "\"service.runtime.name\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SERVICE_RUNTIME_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_RUNTIME_VERSION",
+        "description": [],
+        "signature": [
+          "\"service.runtime.version\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SERVICE_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_VERSION",
+        "description": [],
+        "signature": [
+          "\"service.version\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.sloFeatureId",
         "type": "string",
         "tags": [],
@@ -589,6 +1759,486 @@
           "\"slo\""
         ],
         "path": "x-pack/plugins/observability_shared/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SPAN_ACTION",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_ACTION",
+        "description": [],
+        "signature": [
+          "\"span.action\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SPAN_DESTINATION_SERVICE_RESOURCE",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_DESTINATION_SERVICE_RESOURCE",
+        "description": [],
+        "signature": [
+          "\"span.destination.service.resource\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT",
+        "description": [],
+        "signature": [
+          "\"span.destination.service.response_time.count\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM",
+        "description": [],
+        "signature": [
+          "\"span.destination.service.response_time.sum.us\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SPAN_DURATION",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_DURATION",
+        "description": [],
+        "signature": [
+          "\"span.duration.us\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SPAN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_ID",
+        "description": [],
+        "signature": [
+          "\"span.id\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SPAN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_NAME",
+        "description": [],
+        "signature": [
+          "\"span.name\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SPAN_SELF_TIME_SUM",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_SELF_TIME_SUM",
+        "description": [],
+        "signature": [
+          "\"span.self_time.sum.us\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SPAN_SUBTYPE",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_SUBTYPE",
+        "description": [],
+        "signature": [
+          "\"span.subtype\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.SPAN_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_TYPE",
+        "description": [],
+        "signature": [
+          "\"span.type\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TBT_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "TBT_FIELD",
+        "description": [],
+        "signature": [
+          "\"transaction.experience.tbt\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TRACE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "TRACE_ID",
+        "description": [],
+        "signature": [
+          "\"trace.id\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TRANSACTION_DOM_INTERACTIVE",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_DOM_INTERACTIVE",
+        "description": [],
+        "signature": [
+          "\"transaction.marks.agent.domInteractive\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TRANSACTION_DURATION",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_DURATION",
+        "description": [],
+        "signature": [
+          "\"transaction.duration.us\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TRANSACTION_DURATION_HISTOGRAM",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_DURATION_HISTOGRAM",
+        "description": [],
+        "signature": [
+          "\"transaction.duration.histogram\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TRANSACTION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_ID",
+        "description": [],
+        "signature": [
+          "\"transaction.id\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TRANSACTION_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_NAME",
+        "description": [],
+        "signature": [
+          "\"transaction.name\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TRANSACTION_PAGE_URL",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_PAGE_URL",
+        "description": [],
+        "signature": [
+          "\"transaction.page.url\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TRANSACTION_RESULT",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_RESULT",
+        "description": [],
+        "signature": [
+          "\"transaction.result\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TRANSACTION_ROOT",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_ROOT",
+        "description": [],
+        "signature": [
+          "\"transaction.root\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TRANSACTION_SAMPLED",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_SAMPLED",
+        "description": [],
+        "signature": [
+          "\"transaction.sampled\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TRANSACTION_TIME_TO_FIRST_BYTE",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_TIME_TO_FIRST_BYTE",
+        "description": [],
+        "signature": [
+          "\"transaction.marks.agent.timeToFirstByte\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TRANSACTION_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_TYPE",
+        "description": [],
+        "signature": [
+          "\"transaction.type\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.TRANSACTION_URL",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_URL",
+        "description": [],
+        "signature": [
+          "\"url.full\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.URL_FULL",
+        "type": "string",
+        "tags": [],
+        "label": "URL_FULL",
+        "description": [],
+        "signature": [
+          "\"url.full\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.USER_AGENT_DEVICE",
+        "type": "string",
+        "tags": [],
+        "label": "USER_AGENT_DEVICE",
+        "description": [],
+        "signature": [
+          "\"user_agent.device.name\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.USER_AGENT_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "USER_AGENT_NAME",
+        "description": [],
+        "signature": [
+          "\"user_agent.name\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.USER_AGENT_ORIGINAL",
+        "type": "string",
+        "tags": [],
+        "label": "USER_AGENT_ORIGINAL",
+        "description": [],
+        "signature": [
+          "\"user_agent.original\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.USER_AGENT_OS",
+        "type": "string",
+        "tags": [],
+        "label": "USER_AGENT_OS",
+        "description": [],
+        "signature": [
+          "\"user_agent.os.name\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.USER_AGENT_OS_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "USER_AGENT_OS_VERSION",
+        "description": [],
+        "signature": [
+          "\"user_agent.os.version\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.USER_AGENT_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "USER_AGENT_VERSION",
+        "description": [],
+        "signature": [
+          "\"user_agent.version\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.USER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "USER_ID",
+        "description": [],
+        "signature": [
+          "\"user.id\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/elasticsearch_fieldnames.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
