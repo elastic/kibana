@@ -153,8 +153,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.dashboardCreationStartTime = dashboardCreationStartTime;
 
     // start diffing dashboard state
-    const { diffingMiddleware, checkForUnsavedChangesSubject$ } =
-      startDiffingDashboardState.bind(this)(creationOptions);
+    const diffingMiddleware = startDiffingDashboardState.bind(this)(creationOptions);
 
     // build redux embeddable tools
     const reduxTools = reduxToolsPackage.createReduxEmbeddableTools<
@@ -179,8 +178,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.getState = reduxTools.getState;
     this.dispatch = reduxTools.dispatch;
     this.select = reduxTools.select;
-
-    checkForUnsavedChangesSubject$?.next(null);
   }
 
   public getDashboardSavedObjectId() {
