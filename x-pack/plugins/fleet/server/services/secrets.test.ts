@@ -14,9 +14,9 @@
 
 import type { NewPackagePolicy, PackageInfo } from '../types';
 
-import { extractSecretVarsFromPackagePolicy } from './secrets';
+import { getPolicySecretPaths } from './secrets';
 
-describe('extractSecretVarsFromPackagePolicy', () => {
+describe('getPolicySecretPaths', () => {
   describe('integration package with one policy template', () => {
     const mockIntegrationPackage = {
       name: 'mock-package',
@@ -85,7 +85,7 @@ describe('extractSecretVarsFromPackagePolicy', () => {
         inputs: [],
       } as unknown as NewPackagePolicy;
 
-      expect(extractSecretVarsFromPackagePolicy(packagePolicy, mockIntegrationPackage)).toEqual([
+      expect(getPolicySecretPaths(packagePolicy, mockIntegrationPackage)).toEqual([
         {
           path: 'vars.pkg-secret-1',
           value: {
@@ -119,7 +119,7 @@ describe('extractSecretVarsFromPackagePolicy', () => {
         ],
       } as unknown as NewPackagePolicy;
 
-      expect(extractSecretVarsFromPackagePolicy(packagePolicy, mockIntegrationPackage)).toEqual([
+      expect(getPolicySecretPaths(packagePolicy, mockIntegrationPackage)).toEqual([
         {
           path: 'inputs[0].vars.input-secret-1',
           value: { value: 'input-secret-1-val' },
@@ -156,7 +156,7 @@ describe('extractSecretVarsFromPackagePolicy', () => {
         ],
       } as unknown as NewPackagePolicy;
 
-      expect(extractSecretVarsFromPackagePolicy(packagePolicy, mockIntegrationPackage)).toEqual([
+      expect(getPolicySecretPaths(packagePolicy, mockIntegrationPackage)).toEqual([
         {
           path: 'inputs[0].streams[0].vars.stream-secret-1',
           value: { value: 'stream-secret-1-value' },
@@ -345,7 +345,7 @@ describe('extractSecretVarsFromPackagePolicy', () => {
         ],
       };
       expect(
-        extractSecretVarsFromPackagePolicy(
+        getPolicySecretPaths(
           policy as unknown as NewPackagePolicy,
           miniAWsPackage as unknown as PackageInfo
         )
@@ -418,7 +418,7 @@ describe('extractSecretVarsFromPackagePolicy', () => {
       };
 
       expect(
-        extractSecretVarsFromPackagePolicy(
+        getPolicySecretPaths(
           policy as unknown as NewPackagePolicy,
           miniAWsPackage as unknown as PackageInfo
         )
@@ -546,7 +546,7 @@ describe('extractSecretVarsFromPackagePolicy', () => {
       };
 
       expect(
-        extractSecretVarsFromPackagePolicy(
+        getPolicySecretPaths(
           policy as unknown as NewPackagePolicy,
           mockInputPackage as unknown as PackageInfo
         )

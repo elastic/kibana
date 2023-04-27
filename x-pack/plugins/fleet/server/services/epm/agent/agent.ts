@@ -9,6 +9,7 @@ import Handlebars from 'handlebars';
 import { safeLoad, safeDump } from 'js-yaml';
 
 import type { PackagePolicyConfigRecord } from '../../../../common/types';
+import { toCompiledSecretRef } from '../../secrets';
 
 const handlebars = Handlebars.create();
 
@@ -90,7 +91,7 @@ function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateSt
       varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
     } else if (recordEntry.value.isSecretRef) {
-      varPart[lastKeyPart] = `$elastic.co.secret{${recordEntry.value.id}}`;
+      varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
     } else {
       varPart[lastKeyPart] = recordEntry.value;
     }

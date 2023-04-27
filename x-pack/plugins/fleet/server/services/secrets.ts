@@ -115,7 +115,7 @@ export async function extractAndWriteSecrets(opts: {
   esClient: ElasticsearchClient;
 }): Promise<{ packagePolicy: NewPackagePolicy; secret_references: PolicySecretReference[] }> {
   const { packagePolicy, packageInfo, esClient } = opts;
-  const secretPaths = extractSecretVarsFromPackagePolicy(packagePolicy, packageInfo);
+  const secretPaths = getPolicySecretPaths(packagePolicy, packageInfo);
 
   if (!secretPaths.length) {
     return { packagePolicy, secret_references: [] };
@@ -128,7 +128,7 @@ export async function extractAndWriteSecrets(opts: {
 
   const policyWithSecretRefs = JSON.parse(JSON.stringify(packagePolicy));
   secretPaths.forEach((secretPath, i) => {
-    set(policyWithSecretRefs, secretPath.path + '.value', makeVarSecretRef(secrets[i].id));
+    set(policyWithSecretRefs, secretPath.path + '.value', toVarSecretRef(secrets[i].id));
   });
 
   return {
@@ -137,38 +137,44 @@ export async function extractAndWriteSecrets(opts: {
   };
 }
 
-function makeVarSecretRef(id: string): VarSecretReference {
+function isSecretVar(varDef: RegistryVarsEntry) {
+  return varDef.secret === true;
+}
+
+function containsSecretVar(vars?: RegistryVarsEntry[]) {
+  return vars?.some(isSecretVar);
+}
+
+// this is how secrets are stored on the package policy
+function toVarSecretRef(id: string): VarSecretReference {
   return { id, isSecretRef: true };
 }
 
-function isVarSecret(varDef: RegistryVarsEntry) {
-  return varDef.secret;
+// this is how IDs are inserted into compiled templates
+export function toCompiledSecretRef(id: string) {
+  return `$co.elastic.secret{${id}}`;
 }
 
-function hasSecretVar(vars?: RegistryVarsEntry[]) {
-  return vars?.some(isVarSecret);
-}
-
-export function extractSecretVarsFromPackagePolicy(
+export function getPolicySecretPaths(
   packagePolicy: PackagePolicy | NewPackagePolicy,
   packageInfo: PackageInfo
 ): SecretPath[] {
-  const packageLevelVarPaths = _extractPackageLevelSecretPaths(packagePolicy, packageInfo);
+  const packageLevelVarPaths = _getPackageLevelSecretPaths(packagePolicy, packageInfo);
 
   if (!packageInfo?.policy_templates?.length || packageHasNoPolicyTemplates(packageInfo)) {
     return packageLevelVarPaths;
   }
 
-  const inputSecretPaths = _extractInputSecretPaths(packagePolicy, packageInfo);
+  const inputSecretPaths = _getInputSecretPaths(packagePolicy, packageInfo);
 
   return [...packageLevelVarPaths, ...inputSecretPaths];
 }
 
-function _extractPackageLevelSecretPaths(
+function _getPackageLevelSecretPaths(
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo
 ): SecretPath[] {
-  const packageSecretVars = packageInfo.vars?.filter(isVarSecret) || [];
+  const packageSecretVars = packageInfo.vars?.filter(isSecretVar) || [];
   const packageSecretVarsByName = keyBy(packageSecretVars, 'name');
   const packageVars = Object.entries(packagePolicy.vars || {});
 
@@ -183,7 +189,7 @@ function _extractPackageLevelSecretPaths(
   }, [] as SecretPath[]);
 }
 
-function _extractInputSecretPaths(
+function _getInputSecretPaths(
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo
 ): SecretPath[] {
@@ -196,7 +202,7 @@ function _extractInputSecretPaths(
     const inputs = getNormalizedInputs(policyTemplate);
     inputs.forEach((input) => {
       const varDefKey = hasIntegrations ? `${policyTemplate.name}-${input.type}` : input.type;
-      const secretVars = input?.vars?.filter(isVarSecret);
+      const secretVars = input?.vars?.filter(isSecretVar);
       if (secretVars?.length) {
         varDefs[varDefKey] = keyBy(secretVars, 'name');
       }
@@ -217,8 +223,8 @@ function _extractInputSecretPaths(
   const streamSecretVarDefsByDatasetAndInput = Object.entries(streamsByDatasetAndInput).reduce<
     Record<string, Record<string, RegistryVarsEntry>>
   >((varDefs, [path, stream]) => {
-    if (stream.vars && hasSecretVar(stream.vars)) {
-      const secretVars = stream.vars.filter(isVarSecret);
+    if (stream.vars && containsSecretVar(stream.vars)) {
+      const secretVars = stream.vars.filter(isSecretVar);
       varDefs[path] = keyBy(secretVars, 'name');
     }
     return varDefs;

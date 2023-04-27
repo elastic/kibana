@@ -26,6 +26,7 @@ export default function ({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./enrollment_api_keys/crud'));
 
     // Package policies
+    loadTestFile(require.resolve('./policy_secrets'));
     loadTestFile(require.resolve('./package_policy/create'));
     loadTestFile(require.resolve('./package_policy/update'));
     loadTestFile(require.resolve('./package_policy/get'));
