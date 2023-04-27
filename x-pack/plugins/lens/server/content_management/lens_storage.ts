@@ -286,7 +286,7 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
       type: types,
       search: query.text,
       perPage: query.limit,
-      page: query.cursor ? +query.cursor : undefined,
+      page: query.cursor ? Number(query.cursor) : undefined,
       defaultSearchOperator: 'AND',
       searchFields,
       hasReference,
