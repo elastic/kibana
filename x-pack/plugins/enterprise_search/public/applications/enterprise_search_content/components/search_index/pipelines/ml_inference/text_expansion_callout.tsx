@@ -202,7 +202,8 @@ export const ModelDeployed = ({
                 <h4>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedTitle"
-                    defaultMessage="Your ELSER model has deployed but not started." />
+                    defaultMessage="Your ELSER model has deployed but not started."
+                  />
                 </h4>
               </EuiTitle>
             </EuiFlexItem>
@@ -217,7 +218,8 @@ export const ModelDeployed = ({
           <EuiText>
             <FormattedMessage
               id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedBody"
-              defaultMessage="You may start the model in a single-threaded configuration for testing, or tune the performance for a production environment." />
+              defaultMessage="You may start the model in a single-threaded configuration for testing, or tune the performance for a production environment."
+            />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow>
@@ -249,9 +251,11 @@ export const ModelDeployed = ({
                 )}
                 iconSide="left"
                 iconType="wrench"
-                onClick={() => KibanaLogic.values.navigateToUrl('/app/ml/trained_models', {
-                  shouldNotCreateHref: true,
-                })}
+                onClick={() =>
+                  KibanaLogic.values.navigateToUrl('/app/ml/trained_models', {
+                    shouldNotCreateHref: true,
+                  })
+                }
               >
                 {i18n.translate('xpack.enterpriseSearch.content.engine.api.step1.viewKeysButton', {
                   defaultMessage: 'Fine-tune performance',
