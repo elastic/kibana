@@ -12,6 +12,7 @@ import { useActions, useValues } from 'kea';
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../shared/doc_links';
+import { KibanaLogic } from '../../../../../shared/kibana';
 
 import { useTextExpansionCallOutData } from './text_expansion_callout_data';
 import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
@@ -195,7 +197,82 @@ export const ModelDeployed = ({
               <h4>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedTitle"
-                  defaultMessage="Your ELSER model has deployed."
+                  defaultMessage="Your ELSER model has deployed but not started."
+                />
+              </h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          {isDismissable && (
+            <EuiFlexItem grow={false}>
+              <TextExpansionDismissButton dismiss={dismiss} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow>
+        <EuiText>
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedBody"
+            defaultMessage="You may start the model in a single-threaded configuration for testing, or tune the performance for a production environment."
+          />
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow>
+        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+          <EuiFlexItem>
+            <EuiButton
+              color="success"
+              iconType="playFilled"
+              // onClick={() => ()}
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.startModelButton.label',
+                {
+                  defaultMessage: 'Start single-threaded',
+                }
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButtonEmpty
+              iconSide="left"
+              iconType="wrench"
+              data-telemetry-id="entSearchContent-engines-api-step1-viewKeysButton"
+              onClick={() =>
+                KibanaLogic.values.navigateToUrl('/app/ml/trained_models', {
+                  shouldNotCreateHref: true,
+                })
+              }
+            >
+              {i18n.translate('xpack.enterpriseSearch.content.engine.api.step1.viewKeysButton', {
+                defaultMessage: 'Fine-tune performance',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow />
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
+);
+
+export const ModelStarted = ({
+  dismiss,
+  isDismissable,  
+}: Pick<TextExpansionCallOutState, 'dismiss' | 'isDismissable'>) => (
+  <EuiPanel color="success">
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem grow>
+        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="checkInCircleFilled" />
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <EuiTitle size="xs">
+              <h4>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitle"
+                  defaultMessage="Your ELSER model has started."
                 />
               </h4>
             </EuiTitle>
