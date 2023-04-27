@@ -22,10 +22,10 @@ import { useUiTracker } from '@kbn/observability-plugin/public';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { MetricsSourceConfigurationResponse } from '../../common/metrics_sources';
 import {
-  CreateInventoryViewAttributesRequestPayload,
-  UpdateInventoryViewAttributesRequestPayload,
+  CreateMetricsExplorerViewAttributesRequestPayload,
+  UpdateMetricsExplorerViewAttributesRequestPayload,
 } from '../../common/http_api/latest';
-import { InventoryView } from '../../common/inventory_views';
+import { MetricsExplorerView } from '../../common/metrics_explorer_views';
 import { useKibanaContextForPlugin } from './use_kibana';
 import { useUrlState } from '../utils/use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
@@ -33,21 +33,21 @@ import { useSourceContext } from '../containers/metrics_source';
 
 interface UpdateViewParams {
   id: string;
-  attributes: UpdateInventoryViewAttributesRequestPayload;
+  attributes: UpdateMetricsExplorerViewAttributesRequestPayload;
 }
 
-export interface UseInventoryViewsResult {
-  views?: InventoryView[];
-  currentView?: InventoryView | null;
+export interface UseMetricsExplorerViewsResult {
+  views?: MetricsExplorerView[];
+  currentView?: MetricsExplorerView | null;
   createView: UseMutateAsyncFunction<
-    InventoryView,
+    MetricsExplorerView,
     ServerError,
-    CreateInventoryViewAttributesRequestPayload
+    CreateMetricsExplorerViewAttributesRequestPayload
   >;
   deleteViewById: UseMutateFunction<null, ServerError, string, MutationContext>;
-  fetchViews: QueryObserverBaseResult<InventoryView[]>['refetch'];
-  updateViewById: UseMutateAsyncFunction<InventoryView, ServerError, UpdateViewParams>;
-  switchViewById: (id: InventoryViewId) => void;
+  fetchViews: QueryObserverBaseResult<MetricsExplorerView[]>['refetch'];
+  updateViewById: UseMutateAsyncFunction<MetricsExplorerView, ServerError, UpdateViewParams>;
+  switchViewById: (id: MetricsExplorerViewId) => void;
   setDefaultViewById: UseMutateFunction<
     MetricsSourceConfigurationResponse,
     ServerError,
@@ -64,29 +64,29 @@ type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 interface MutationContext {
   id?: string;
-  previousViews?: InventoryView[];
+  previousViews?: MetricsExplorerView[];
 }
 
 const queryKeys = {
-  find: ['inventory-views-find'] as const,
-  get: ['inventory-views-get'] as const,
-  getById: (id: string) => ['inventory-views-get', id] as const,
+  find: ['metrics-explorer-views-find'] as const,
+  get: ['metrics-explorer-views-get'] as const,
+  getById: (id: string) => ['metrics-explorer-views-get', id] as const,
 };
 
-export const useInventoryViews = (): UseInventoryViewsResult => {
-  const { inventoryViews } = useKibanaContextForPlugin().services;
+export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
+  const { metricsExplorerViews } = useKibanaContextForPlugin().services;
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
 
   const queryClient = useQueryClient();
   const { source, updateSourceConfiguration } = useSourceContext();
 
-  const defaultViewId = source?.configuration.inventoryDefaultView ?? '0';
+  const defaultViewId = source?.configuration.metricsExplorerDefaultView ?? '0';
 
-  const [currentViewId, switchViewById] = useUrlState<InventoryViewId>({
+  const [currentViewId, switchViewById] = useUrlState<MetricsExplorerViewId>({
     defaultState: defaultViewId,
     decodeUrlState,
     encodeUrlState,
-    urlStateKey: 'inventoryViewId',
+    urlStateKey: 'metricsExplorerViewId',
     writeDefaultState: true,
   });
 
@@ -98,19 +98,19 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
     isFetching: isFetchingViews,
   } = useQuery({
     queryKey: queryKeys.find,
-    queryFn: () => inventoryViews.client.findInventoryViews(),
+    queryFn: () => metricsExplorerViews.client.findMetricsExplorerViews(),
     enabled: false, // We will manually fetch the list when necessary
     placeholderData: [], // Use a default empty array instead of undefined
     onError: (error: ServerError) => notify.getViewFailure(error.body?.message ?? error.message),
     onSuccess: (data) => {
       const prefix = data.length >= 1000 ? 'over' : 'under';
-      trackMetric({ metric: `${prefix}_1000_saved_objects_for_inventory_view` });
+      trackMetric({ metric: `${prefix}_1000_saved_objects_for_metrics_explorer_view` });
     },
   });
 
   const { data: currentView, isFetching: isFetchingCurrentView } = useQuery({
     queryKey: queryKeys.getById(currentViewId),
-    queryFn: ({ queryKey: [, id] }) => inventoryViews.client.getInventoryView(id),
+    queryFn: ({ queryKey: [, id] }) => metricsExplorerViews.client.getMetricsExplorerView(id),
     onError: (error: ServerError) => notify.getViewFailure(error.body?.message ?? error.message),
     placeholderData: null,
   });
@@ -121,7 +121,7 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
     string,
     MutationContext
   >({
-    mutationFn: (id) => updateSourceConfiguration({ inventoryDefaultView: id }),
+    mutationFn: (id) => updateSourceConfiguration({ metricsExplorerDefaultView: id }),
     /**
      * To provide a quick feedback, we perform an optimistic update on the list
      * when updating the default view.
@@ -132,7 +132,7 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
      */
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.find }); // 1
-      const previousViews = queryClient.getQueryData<InventoryView[]>(queryKeys.find); // 2
+      const previousViews = queryClient.getQueryData<MetricsExplorerView[]>(queryKeys.find); // 2
       const updatedViews = getListWithUpdatedDefault(id, previousViews); // 3
       queryClient.setQueryData(queryKeys.find, updatedViews);
       return { previousViews }; // 4
@@ -147,11 +147,11 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
   });
 
   const { mutateAsync: createView, isLoading: isCreatingView } = useMutation<
-    InventoryView,
+    MetricsExplorerView,
     ServerError,
-    CreateInventoryViewAttributesRequestPayload
+    CreateMetricsExplorerViewAttributesRequestPayload
   >({
-    mutationFn: (attributes) => inventoryViews.client.createInventoryView(attributes),
+    mutationFn: (attributes) => metricsExplorerViews.client.createMetricsExplorerView(attributes),
     onError: (error) => {
       notify.upsertViewFailure(error.body?.message ?? error.message);
     },
@@ -162,11 +162,12 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
   });
 
   const { mutateAsync: updateViewById, isLoading: isUpdatingView } = useMutation<
-    InventoryView,
+    MetricsExplorerView,
     ServerError,
     UpdateViewParams
   >({
-    mutationFn: ({ id, attributes }) => inventoryViews.client.updateInventoryView(id, attributes),
+    mutationFn: ({ id, attributes }) =>
+      metricsExplorerViews.client.updateMetricsExplorerView(id, attributes),
     onError: (error) => {
       notify.upsertViewFailure(error.body?.message ?? error.message);
     },
@@ -176,7 +177,7 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
   });
 
   const { mutate: deleteViewById } = useMutation<null, ServerError, string, MutationContext>({
-    mutationFn: (id: string) => inventoryViews.client.deleteInventoryView(id),
+    mutationFn: (id: string) => metricsExplorerViews.client.deleteMetricsExplorerView(id),
     /**
      * To provide a quick feedback, we perform an optimistic update on the list
      * when deleting a view.
@@ -188,7 +189,7 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.find }); // 1
 
-      const previousViews = queryClient.getQueryData<InventoryView[]>(queryKeys.find); // 2
+      const previousViews = queryClient.getQueryData<MetricsExplorerView[]>(queryKeys.find); // 2
 
       const updatedViews = getListWithoutDeletedView(id, previousViews); // 3
       queryClient.setQueryData(queryKeys.find, updatedViews);
@@ -232,19 +233,19 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
   };
 };
 
-const inventoryViewIdRT = rt.string;
-type InventoryViewId = rt.TypeOf<typeof inventoryViewIdRT>;
+const metricsExplorerViewIdRT = rt.string;
+type MetricsExplorerViewId = rt.TypeOf<typeof metricsExplorerViewIdRT>;
 
-const encodeUrlState = inventoryViewIdRT.encode;
+const encodeUrlState = metricsExplorerViewIdRT.encode;
 const decodeUrlState = (value: unknown) => {
-  const state = pipe(inventoryViewIdRT.decode(value), fold(constant(undefined), identity));
+  const state = pipe(metricsExplorerViewIdRT.decode(value), fold(constant(undefined), identity));
   return state;
 };
 
 /**
  * Helpers
  */
-const getListWithUpdatedDefault = (id: string, views: InventoryView[] = []) => {
+const getListWithUpdatedDefault = (id: string, views: MetricsExplorerView[] = []) => {
   return views.map((view) => ({
     ...view,
     attributes: {
@@ -254,6 +255,6 @@ const getListWithUpdatedDefault = (id: string, views: InventoryView[] = []) => {
   }));
 };
 
-const getListWithoutDeletedView = (id: string, views: InventoryView[] = []) => {
+const getListWithoutDeletedView = (id: string, views: MetricsExplorerView[] = []) => {
   return views.filter((view) => view.id !== id);
 };

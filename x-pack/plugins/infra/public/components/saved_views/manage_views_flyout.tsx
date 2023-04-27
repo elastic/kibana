@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 
 import {
@@ -22,10 +22,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiBasicTableColumn } from '@elastic/eui';
+import { MetricsExplorerView } from '../../../common/metrics_explorer_views';
 import { InventoryView } from '../../../common/inventory_views';
 import { UseInventoryViewsResult } from '../../hooks/use_inventory_views';
+import { UseMetricsExplorerViewsResult } from '../../hooks/use_metrics_explorer_views';
 
-interface Props<UseViewResult extends UseInventoryViewsResult> {
+type View = InventoryView | MetricsExplorerView;
+
+interface Props<UseViewResult extends UseInventoryViewsResult | UseMetricsExplorerViewsResult> {
   views: UseViewResult['views'];
   loading: boolean;
   onClose(): void;
@@ -71,15 +76,22 @@ const DeleteConfimation = ({ isDisabled, onConfirm }: DeleteConfimationProps) =>
   );
 };
 
+const searchConfig = {
+  box: { incremental: true },
+};
+
 export function SavedViewManageViewsFlyout({
   onClose,
-  views,
+  views = [],
   onSwitchView,
   onMakeDefaultView,
   onDeleteView,
   loading,
-}: Props<UseInventoryViewsResult>) {
-  const renderName = (name: string, item: InventoryView) => (
+}: Props<UseInventoryViewsResult | UseMetricsExplorerViewsResult>) {
+  // Add name as top level property to allow in memory search
+  const namedViews = useMemo(() => views.map(addOwnName), [views]);
+
+  const renderName = (name: string, item: View) => (
     <EuiButtonEmpty
       key={item.id}
       data-test-subj="infraRenderNameButton"
@@ -92,7 +104,7 @@ export function SavedViewManageViewsFlyout({
     </EuiButtonEmpty>
   );
 
-  const renderDeleteAction = (item: InventoryView) => {
+  const renderDeleteAction = (item: View) => {
     return (
       <DeleteConfimation
         key={item.id}
@@ -104,7 +116,7 @@ export function SavedViewManageViewsFlyout({
     );
   };
 
-  const renderMakeDefaultAction = (item: InventoryView) => {
+  const renderMakeDefaultAction = (item: View) => {
     return (
       <EuiButtonEmpty
         key={item.id}
@@ -117,9 +129,9 @@ export function SavedViewManageViewsFlyout({
     );
   };
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<View>> = [
     {
-      field: 'attributes.name',
+      field: 'name',
       name: i18n.translate('xpack.infra.openView.columnNames.name', { defaultMessage: 'Name' }),
       sortable: true,
       truncateText: true,
@@ -134,7 +146,7 @@ export function SavedViewManageViewsFlyout({
           render: renderMakeDefaultAction,
         },
         {
-          available: (item: InventoryView) => !item.attributes.isStatic,
+          available: (item) => !item.attributes.isStatic,
           render: renderDeleteAction,
         },
       ],
@@ -156,10 +168,10 @@ export function SavedViewManageViewsFlyout({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiInMemoryTable
-            items={views}
+            items={namedViews}
             columns={columns}
             loading={loading}
-            search={true}
+            search={searchConfig}
             pagination={true}
             sorting={true}
           />
@@ -173,3 +185,8 @@ export function SavedViewManageViewsFlyout({
     </EuiPortal>
   );
 }
+
+/**
+ * Helpers
+ */
+const addOwnName = (view: View) => ({ ...view, name: view.attributes.name });

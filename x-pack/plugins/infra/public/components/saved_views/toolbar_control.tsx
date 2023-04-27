@@ -14,8 +14,12 @@ import { SavedViewManageViewsFlyout } from './manage_views_flyout';
 import { useBoolean } from '../../hooks/use_boolean';
 import { UpsertViewModal } from './upsert_modal';
 import { UseInventoryViewsResult } from '../../hooks/use_inventory_views';
+import { UseMetricsExplorerViewsResult } from '../../hooks/use_metrics_explorer_views';
 
-interface Props<UseViewResult extends UseInventoryViewsResult, ViewState> {
+interface Props<
+  UseViewResult extends UseInventoryViewsResult | UseMetricsExplorerViewsResult,
+  ViewState
+> {
   viewState: ViewState & { time?: number };
   currentView: UseViewResult['currentView'];
   views: UseViewResult['views'];
@@ -32,7 +36,7 @@ interface Props<UseViewResult extends UseInventoryViewsResult, ViewState> {
 }
 
 export function SavedViewsToolbarControls<ViewState>(
-  props: Props<UseInventoryViewsResult, ViewState>
+  props: Props<UseInventoryViewsResult | UseMetricsExplorerViewsResult, ViewState>
 ) {
   const {
     currentView,
@@ -56,9 +60,15 @@ export function SavedViewsToolbarControls<ViewState>(
   const [isCreateModalOpen, { on: openCreateModal, off: closeCreateModal }] = useBoolean(false);
   const [isUpdateModalOpen, { on: openUpdateModal, off: closeUpdateModal }] = useBoolean(false);
 
+  const togglePopoverAndLoad = () => {
+    if (!isPopoverOpen) {
+      onLoadViews();
+    }
+    togglePopover();
+  };
+
   const goToManageViews = () => {
     closePopover();
-    onLoadViews();
     openManageFlyout();
   };
 
@@ -100,7 +110,7 @@ export function SavedViewsToolbarControls<ViewState>(
         data-test-subj="savedViews-popover"
         button={
           <EuiButton
-            onClick={togglePopover}
+            onClick={togglePopoverAndLoad}
             data-test-subj="savedViews-openPopover"
             iconType="arrowDown"
             iconSide="right"

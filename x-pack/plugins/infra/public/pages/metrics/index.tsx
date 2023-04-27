@@ -18,11 +18,7 @@ import { useLinkProps } from '@kbn/observability-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
-import {
-  MetricsExplorerOptionsContainer,
-  useMetricsExplorerOptionsContainerContext,
-  DEFAULT_METRICS_EXPLORER_VIEW_STATE,
-} from './metrics_explorer/hooks/use_metrics_explorer_options';
+import { MetricsExplorerOptionsContainer } from './metrics_explorer/hooks/use_metrics_explorer_options';
 import { WithMetricsExplorerOptionsUrlState } from '../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './inventory_view';
@@ -34,7 +30,6 @@ import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options
 import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters';
 import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
-import { SavedViewProvider } from '../../containers/saved_view/saved_view';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
 import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
@@ -133,19 +128,12 @@ const PageContent = (props: {
   createDerivedIndexPattern: CreateDerivedIndexPattern;
 }) => {
   const { createDerivedIndexPattern, configuration } = props;
-  const { options } = useMetricsExplorerOptionsContainerContext();
 
   return (
-    <SavedViewProvider
-      shouldLoadDefault={options.source === 'default'}
-      viewType={'metrics-explorer-view'}
-      defaultViewState={DEFAULT_METRICS_EXPLORER_VIEW_STATE}
-    >
-      <MetricsExplorerPage
-        derivedIndexPattern={createDerivedIndexPattern()}
-        source={configuration}
-        {...props}
-      />
-    </SavedViewProvider>
+    <MetricsExplorerPage
+      derivedIndexPattern={createDerivedIndexPattern()}
+      source={configuration}
+      {...props}
+    />
   );
 };

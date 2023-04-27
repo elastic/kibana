@@ -19,9 +19,9 @@ import {
   EuiFieldText,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiText,
 } from '@elastic/eui';
-import { EuiSwitchEvent } from '@elastic/eui';
 import { NonEmptyString } from '@kbn/io-ts-utils';
 
 interface Props {
