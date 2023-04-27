@@ -1140,6 +1140,8 @@
       "@kbn/server-route-repository/*": ["packages/kbn-server-route-repository/*"],
       "@kbn/serverless": ["x-pack/plugins/serverless"],
       "@kbn/serverless/*": ["x-pack/plugins/serverless/*"],
+      "@kbn/serverless-observability": ["x-pack/plugins/serverless_observability"],
+      "@kbn/serverless-observability/*": ["x-pack/plugins/serverless_observability/*"],
       "@kbn/serverless-project-switcher": ["packages/serverless/project_switcher"],
       "@kbn/serverless-project-switcher/*": ["packages/serverless/project_switcher/*"],
       "@kbn/serverless-storybook-config": ["packages/serverless/storybook/config"],

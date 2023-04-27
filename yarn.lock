@@ -5012,6 +5012,10 @@
 "@kbn/server-route-repository@link:packages/kbn-server-route-repository":
   version "0.0.0"
   uid ""
+  
+"@kbn/serverless-observability@link:x-pack/plugins/serverless_observability":
+  version "0.0.0"
+  uid ""
 
 "@kbn/serverless-project-switcher@link:packages/serverless/project_switcher":
   version "0.0.0"

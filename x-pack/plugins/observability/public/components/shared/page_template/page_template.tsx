@@ -22,6 +22,7 @@ import type {
   KibanaPageTemplateProps,
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
+import type { ChromeStart } from '@kbn/core-chrome-browser';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { ObservabilityAppServices } from '../../../application/types';
 import type { NavigationSection } from '../../../services/navigation_registry';
@@ -53,9 +54,13 @@ export interface ObservabilityPageTemplateDependencies {
   navigationSections$: Observable<NavigationSection[]>;
   getPageTemplateServices: () => KibanaPageTemplateKibanaDependencies;
   guidedOnboardingApi: GuidedOnboardingPluginStart['guidedOnboardingApi'];
+  getChromeStyle$: ChromeStart['getChromeStyle$'];
 }
 
-export type ObservabilityPageTemplateProps = ObservabilityPageTemplateDependencies &
+export type ObservabilityPageTemplateProps = Omit<
+  ObservabilityPageTemplateDependencies,
+  'getChromeStyle$'
+> &
   WrappedPageTemplateProps;
 
 export function ObservabilityPageTemplate({
@@ -76,7 +81,6 @@ export function ObservabilityPageTemplate({
   const sections = useObservable(navigationSections$, []);
   const currentAppId = useObservable(currentAppId$, undefined);
   const { pathname: currentPath } = useLocation();
-
   const { services } = useKibana<ObservabilityAppServices>();
 
   const sideNavItems = useMemo<Array<EuiSideNavItemType<unknown>>>(
