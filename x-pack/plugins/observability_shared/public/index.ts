@@ -18,6 +18,7 @@ export type {
 } from './components/page_template/page_template';
 
 export type { NavigationEntry } from './components/page_template/page_template';
+export { HeaderMenuPortal } from './components/header_menu';
 
 export { useObservabilityTourContext } from './components/tour';
 
@@ -31,3 +32,11 @@ export {
   casesFeatureId,
   sloFeatureId,
 } from '../common';
+
+export { useTheme } from './hooks/use_theme';
+export { useKibanaSpace } from './hooks/use_kibana_space';
+export { METRIC_TYPE, useTrackMetric, useUiTracker } from './hooks/use_track_metric';
+export { useQuickTimeRanges } from './hooks/use_quick_time_ranges';
+export { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
+
+export type { ApmIndicesConfig, UXMetrics } from './types';

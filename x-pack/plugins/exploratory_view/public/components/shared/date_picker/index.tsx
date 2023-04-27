@@ -6,10 +6,11 @@
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import React, { useCallback } from 'react';
-import { UI_SETTINGS, useKibanaUISettings } from '../../../hooks/use_kibana_ui_settings';
-import { TimePickerQuickRange } from './typings';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useDatePickerContext } from '../../../hooks/use_date_picker_context';
+import { TimePickerQuickRange } from './typings';
 
 export interface DatePickerProps {
   rangeFrom?: string;
@@ -30,7 +31,7 @@ export function DatePicker({
 }: DatePickerProps) {
   const { updateTimeRange, updateRefreshInterval } = useDatePickerContext();
 
-  const timePickerQuickRanges = useKibanaUISettings<TimePickerQuickRange[]>(
+  const timePickerQuickRanges = useUiSetting<TimePickerQuickRange[]>(
     UI_SETTINGS.TIMEPICKER_QUICK_RANGES
   );
 

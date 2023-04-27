@@ -65,6 +65,7 @@ export {
   useUiTracker,
   useTrackMetric,
   METRIC_TYPE,
+  TrackEvent,
 } from './hooks/use_track_metric';
 
 export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout'));
@@ -82,8 +83,11 @@ export { observabilityFeatureId, observabilityAppId } from '../common';
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';
+export { useKibanaSpace } from './hooks/use_kibana_space';
 export { useTimeZone } from './hooks/use_time_zone';
+export { useQuickTimeRanges } from './hooks/use_quick_time_ranges';
 export { useTimeBuckets } from './hooks/use_time_buckets';
+export { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
 export { useLinkProps, shouldHandleLinkEvent } from './hooks/use_link_props';
 export type { LinkDescriptor } from './hooks/use_link_props';
@@ -109,3 +113,5 @@ export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate
 export type { NavigationSection } from './services/navigation_registry';
 export { convertTo } from '../common/utils/formatters/duration';
 export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';
+
+export { getDataHandler } from './data_handler';

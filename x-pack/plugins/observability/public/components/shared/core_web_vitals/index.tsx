@@ -20,18 +20,6 @@ import { WebCoreVitalsTitle } from './web_core_vitals_title';
 import { ServiceName } from './service_name';
 import { CoreVitalProps } from '../types';
 
-export interface UXMetrics {
-  cls: number | null;
-  fid?: number | null;
-  lcp?: number | null;
-  tbt: number;
-  fcp?: number | null;
-  coreVitalPages: number;
-  lcpRanks: number[];
-  fidRanks: number[];
-  clsRanks: number[];
-}
-
 function formatToSec(value?: number | string, fromUnit = 'MicroSec'): string {
   const valueInMs = Number(value ?? 0) / (fromUnit === 'MicroSec' ? 1000 : 1);
 

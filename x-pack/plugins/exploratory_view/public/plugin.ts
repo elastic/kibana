@@ -40,7 +40,6 @@ import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/publi
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
-import { registerDataHandler } from './data_handler';
 import { APP_ROUTE } from './constants';
 
 export interface ExploratoryViewPublicPluginsSetup {
@@ -130,9 +129,7 @@ export class Plugin
       ],
     });
 
-    return {
-      register: registerDataHandler,
-    };
+    return {};
   }
 
   public start(coreStart: CoreStart, pluginsStart: ExploratoryViewPublicPluginsStart) {
