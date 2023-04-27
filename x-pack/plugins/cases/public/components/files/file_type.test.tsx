@@ -101,7 +101,7 @@ describe('getFileType', () => {
       expect(actions[1]).toStrictEqual({
         type: AttachmentActionType.CUSTOM,
         isPrimary: false,
-        label: 'Delete File',
+        label: 'Delete file',
         render: expect.any(Function),
       });
 
@@ -125,7 +125,7 @@ describe('getFileType', () => {
       expect(actions[1]).toStrictEqual({
         type: AttachmentActionType.CUSTOM,
         isPrimary: false,
-        label: 'Delete File',
+        label: 'Delete file',
         render: expect.any(Function),
       });
 
