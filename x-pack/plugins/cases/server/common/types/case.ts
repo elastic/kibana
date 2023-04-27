@@ -7,6 +7,8 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { CaseAttributes } from '../../../common/api';
+import type { ConnectorPersisted } from './connectors';
+import type { ExternalServicePersisted } from './external_service';
 import type { User, UserProfile } from './user';
 
 export enum CasePersistedSeverity {
@@ -22,36 +24,16 @@ export enum CasePersistedStatus {
   CLOSED = 20,
 }
 
-export interface CasePersistedExternalService {
-  connector_name: string;
-  external_id: string;
-  external_title: string;
-  external_url: string;
-  pushed_at: string;
-  pushed_by: User;
-}
-
-export type CasePersistedConnectorFields = Array<{
-  key: string;
-  value: unknown;
-}>;
-
-export interface CasePersistedConnector {
-  name: string;
-  type: string;
-  fields: CasePersistedConnectorFields | null;
-}
-
 export interface CasePersistedAttributes {
   assignees: UserProfile[];
   closed_at: string | null;
   closed_by: User | null;
   created_at: string;
   created_by: User;
-  connector: CasePersistedConnector;
+  connector: ConnectorPersisted;
   description: string;
   duration: number | null;
-  external_service: CasePersistedExternalService | null;
+  external_service: ExternalServicePersisted | null;
   owner: string;
   settings: { syncAlerts: boolean };
   severity: CasePersistedSeverity;
