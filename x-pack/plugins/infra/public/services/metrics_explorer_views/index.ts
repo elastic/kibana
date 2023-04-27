@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './defaults';
-export * from './errors';
+export * from './metrics_explorer_views_client';
+export * from './metrics_explorer_views_service';
 export * from './types';
