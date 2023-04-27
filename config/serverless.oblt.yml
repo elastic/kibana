@@ -1,1 +1,3 @@
+uiSettings.overrides.defaultRoute: /app/observability/overview
 xpack.infra.logs.app_target: discover
+xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
