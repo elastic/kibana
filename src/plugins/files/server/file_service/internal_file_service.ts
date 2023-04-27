@@ -103,7 +103,7 @@ export class InternalFileService {
   ): Promise<Array<IFile | null> | { [id: string]: IFile | null }> {
     try {
       const metadatas = await this.metadataClient.bulkGet({ ids, throwIfNotFound: false });
-      const result = metadatas.map((fileMetadata) => {
+      const result = metadatas.map((fileMetadata, i) => {
         const notFound = !fileMetadata || !fileMetadata.metadata;
         const deleted = fileMetadata?.metadata?.Status === 'DELETED';
 
@@ -112,7 +112,7 @@ export class InternalFileService {
             return null;
           }
           throw new FileNotFoundError(
-            deleted ? 'File has been deleted' : `File [${fileMetadata?.id}] not found`
+            deleted ? 'File has been deleted' : `File [${fileMetadata?.id ?? ids[i]}] not found`
           );
         }
 

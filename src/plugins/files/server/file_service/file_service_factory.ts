@@ -92,6 +92,26 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
       this.logger
     );
 
+    function bulkGetById<M>(
+      args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound?: true }
+    ): Promise<Array<File<M>>>;
+    function bulkGetById<M>(
+      args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound?: true; format: 'map' }
+    ): Promise<{ [id: string]: File<M> }>;
+    function bulkGetById<M>(
+      args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound: false }
+    ): Promise<Array<File<M> | null>>;
+    function bulkGetById<M>(
+      args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound: false; format: 'map' }
+    ): Promise<{ [id: string]: File<M> | null }>;
+    function bulkGetById<M>(
+      args: BulkGetByIdArgs
+    ): Promise<Array<File<M> | null> | { [id: string]: File<M> | null }> {
+      return internalFileService.bulkGetById<M>(
+        args as Parameters<InternalFileService['bulkGetById']>[0]
+      );
+    }
+
     return {
       async create<M>(args: CreateFileArgs<M>) {
         return internalFileService.createFile(args) as Promise<File<M>>;
@@ -108,9 +128,7 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
       async getById<M>(args: GetByIdArgs) {
         return internalFileService.getById(args) as Promise<File<M>>;
       },
-      async bulkGetById<M>(args: BulkGetByIdArgs) {
-        return internalFileService.bulkGetById(args) as Promise<Array<File<M>>>;
-      },
+      bulkGetById,
       async find<M>(args: FindFileArgs) {
         return internalFileService.findFilesJSON(args) as Promise<{
           files: Array<FileJSON<M>>;
