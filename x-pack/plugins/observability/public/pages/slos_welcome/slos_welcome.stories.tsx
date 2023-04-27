@@ -8,12 +8,12 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
-import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { SloListWelcomePrompt as Component } from './slo_list_welcome_prompt';
+import { KibanaReactStorybookDecorator } from '../../utils/kibana_react.storybook_decorator';
+import { SlosWelcomePage as Component } from './slos_welcome';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/SloListWelcomePrompt',
+  title: 'app/SLO/SlosWelcomePage',
   decorators: [KibanaReactStorybookDecorator],
 };
 
