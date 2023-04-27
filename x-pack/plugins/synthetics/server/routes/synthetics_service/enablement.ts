@@ -30,7 +30,8 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = (libs
         });
       }
       const regenerationRequired = !isEnabled || !isValid;
-      const shouldEnableApiKey = server.config.service?.manifestUrl || server.config.service?.devUrl;
+      const shouldEnableApiKey =
+        server.config.service?.manifestUrl || server.config.service?.devUrl;
       if (canEnable && regenerationRequired && shouldEnableApiKey) {
         await generateAndSaveServiceAPIKey({
           request,
