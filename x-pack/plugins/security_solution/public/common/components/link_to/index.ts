@@ -10,7 +10,7 @@ import { useCallback } from 'react';
 import {
   useUrlStateQueryParams,
   useGetUrlStateQueryParams,
-} from '../navigation/use_get_url_search';
+} from '../navigation/use_url_state_query_params';
 import { useAppUrl } from '../../lib/kibana/hooks';
 import type { SecurityPageName } from '../../../app/types';
 

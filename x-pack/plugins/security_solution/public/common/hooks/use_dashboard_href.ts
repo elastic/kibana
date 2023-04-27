@@ -6,7 +6,7 @@
  */
 import { useState, useEffect, useMemo } from 'react';
 import { SecurityPageName } from '../../../common/constants';
-import { useUrlStateQueryParams } from '../components/navigation/use_get_url_search';
+import { useUrlStateQueryParams } from '../components/navigation/use_url_state_query_params';
 import { useKibana, useAppUrl } from '../lib/kibana';
 
 export const dashboardRequestBody = (title: string) => ({
