@@ -13,7 +13,7 @@ import type { ChromeDocTitle } from './doc_title';
 import type { ChromeNavControls } from './nav_controls';
 import type { ChromeHelpExtension } from './help_extension';
 import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
-import type { ChromeBadge, ChromeUserBanner } from './types';
+import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 
 /**
@@ -150,4 +150,15 @@ export interface ChromeStart {
    * Get an observable of the current header banner presence state.
    */
   hasHeaderBanner$(): Observable<boolean>;
+
+  /**
+   * Sets the style type of the chrome.
+   * @param style The style type to apply to the chrome.
+   */
+  setChromeStyle(style: ChromeStyle): void;
+
+  /**
+   * Get an observable of the current style type of the chrome.
+   */
+  getChromeStyle$(): Observable<ChromeStyle>;
 }
