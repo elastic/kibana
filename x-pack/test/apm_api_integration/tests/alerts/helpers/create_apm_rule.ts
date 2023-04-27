@@ -6,11 +6,11 @@
  */
 
 import { SuperTest, Test } from 'supertest';
-import { ApmRuleType } from '../../../../../plugins/apm/common/rules/apm_rule_types';
-import { ApmRuleParamsType } from '../../../../../plugins/apm/common/rules/schema';
+import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
 import { RULE_ENDPOINT } from './constants';
 
-type Action = {
+interface Action {
   group: string;
   id: string;
   params: {
@@ -20,7 +20,7 @@ type Action = {
     notify_when: string;
     summary: boolean;
   };
-};
+}
 export async function createApmRule<T extends ApmRuleType>({
   supertest,
   name,
