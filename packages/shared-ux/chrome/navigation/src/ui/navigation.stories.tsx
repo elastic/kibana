@@ -165,11 +165,3 @@ CustomElements.args = {
   ],
 };
 CustomElements.argTypes = storybookMock.getArgumentTypes();
-
-export const Collapsed: ComponentStory<typeof Template> = Template.bind({});
-Collapsed.args = {
-  activeNavItemId: 'example_project.root.get_started',
-  navIsOpen: false,
-  solutions: [getSolutionPropertiesMock()],
-};
-Collapsed.argTypes = storybookMock.getArgumentTypes();
