@@ -39,7 +39,7 @@ describe('Automated Response Actions', () => {
       });
 
       getEndpointIntegrationVersion().then((version) => {
-        createAgentPolicyTask(version, (data) => {
+        createAgentPolicyTask(version).then((data) => {
           response = data;
         });
       });
