@@ -56,6 +56,7 @@ export function toJSON<M = unknown>(id: string, attrs: FileMetadata<M>): FileJSO
     Alt,
     extension,
     Meta,
+    hash,
   } = attrs;
   return pickBy<FileJSON<M>>(
     {
@@ -71,6 +72,7 @@ export function toJSON<M = unknown>(id: string, attrs: FileMetadata<M>): FileJSO
       meta: Meta,
       updated: Updated,
       fileKind: FileKind,
+      hash,
     },
     (v) => v != null
   ) as FileJSON<M>;
