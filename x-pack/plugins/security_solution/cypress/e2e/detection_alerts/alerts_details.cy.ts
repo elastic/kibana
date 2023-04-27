@@ -21,7 +21,7 @@ import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
-import { getUnmappedRule, getNewRule } from '../../objects/rule';
+import { getUnmappedRule } from '../../objects/rule';
 import { ALERTS_URL } from '../../urls/navigation';
 import { tablePageSelector } from '../../screens/table_pagination';
 import { ALERTS_COUNT } from '../../screens/alerts';
@@ -147,7 +147,7 @@ describe('Alert details flyout', () => {
       filterBy('kibana.alert.url');
       cy.get('[data-test-subj="formatted-field-kibana.alert.url"]').should(
         'have.text',
-        'http://localhost:5601/app/security/alerts/redirect/ecc6bd780c84fde32347f45de2d6acf599e1cc4d69575fd90b74244e81d5db6e?index=.alerts-security.alerts-default&timestamp=2023-04-27T11:03:57.908Z'
+        'http://localhost:5601/app/security/alerts/redirect/eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1?index=.alerts-security.alerts-default&timestamp=2023-04-27T11:03:57.906Z'
       );
     });
   });
