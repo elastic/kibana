@@ -155,6 +155,8 @@ export function toCompiledSecretRef(id: string) {
   return `$co.elastic.secret{${id}}`;
 }
 
+// Given a package policy and a package,
+// returns an array of lodash style paths to all secrets and their current values
 export function getPolicySecretPaths(
   packagePolicy: PackagePolicy | NewPackagePolicy,
   packageInfo: PackageInfo

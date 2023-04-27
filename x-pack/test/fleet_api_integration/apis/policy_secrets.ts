@@ -6,6 +6,7 @@
  */
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
+import { FullAgentPolicy } from '@kbn/fleet-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
@@ -57,7 +58,7 @@ export default function (providerContext: FtrProviderContext) {
       return body.item;
     };
 
-    const getLatestPolicyRevision = async (id: string) => {
+    const getLatestPolicyRevision = async (id: string): Promise<{ data : FullAgentPolicy }> => {
       const res = await es.search({
         index: '.fleet-policies',
         body: {
@@ -82,7 +83,7 @@ export default function (providerContext: FtrProviderContext) {
           size: 1,
         },
       });
-      return res.hits.hits[0]._source;
+      return res.hits.hits[0]._source as any as { data: FullAgentPolicy };
     };
     let createdPackagePolicyId: string;
     let packageVarId: string;
