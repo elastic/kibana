@@ -6,6 +6,10 @@ $screenHeightBreakpoint: 15em;
   margin-right: -$euiSizeS;
 }
 
+.kbnCollapsibleNav__solutions {
+  @include euiYScroll;
+}
+
 /**
  * 1. Increase the hit area of the link (anchor)
  * 2. Only show the text underline when hovering on the text/anchor portion
@@ -27,6 +31,7 @@ $screenHeightBreakpoint: 15em;
   }
 }
 
+
 /**
  * Allows the CollapsibleNavGroups to be viewed on
  * very small screen sizes and when the browser Zoom is high
@@ -36,7 +41,6 @@ $screenHeightBreakpoint: 15em;
     overflow-y: auto;
 
     .kbnCollapsibleNav__solutions {
-      @include euiYScroll;
       flex: 1 0 auto;
     }
   }
