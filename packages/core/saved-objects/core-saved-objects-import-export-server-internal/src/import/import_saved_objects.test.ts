@@ -437,9 +437,85 @@ describe('#importSavedObjectsFromStream', () => {
         };
         expect(mockCreateSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
       });
+    });
 
-      test('creates managed saved objects', async () => {
+    describe('managed option', () => {
+      test('if not provided, calls create without an override', async () => {
+        const options = setupOptions({ createNewCopies: true }); // weithout `managed` set
+        const collectedObjects = [
+          createObject({ type: 'foo', managed: true }),
+          createObject({ type: 'bar', title: 'bar-title', managed: false }),
+        ];
+        const errors = [createError(), createError()];
+        mockCollectSavedObjects.mockResolvedValue({
+          errors: [errors[0]],
+          collectedObjects,
+          importStateMap: new Map([
+            ['foo', {}],
+            ['bar', { isOnlyReference: true }],
+          ]),
+        });
+        mockCheckReferenceOrigins.mockResolvedValue({
+          importStateMap: new Map([['bar', { isOnlyReference: true, destinationId: 'newId' }]]),
+        });
+        mockValidateReferences.mockResolvedValue([errors[1]]);
+        mockRegenerateIds.mockReturnValue(new Map([['foo', { destinationId: `randomId1` }]]));
+
+        await importSavedObjectsFromStream(options);
+        const importStateMap: ImportStateMap = new Map([
+          ['foo', { destinationId: `randomId1` }],
+          ['bar', { isOnlyReference: true, destinationId: 'newId' }],
+        ]);
+        const createSavedObjectsParams = {
+          objects: collectedObjects,
+          accumulatedErrors: errors,
+          savedObjectsClient,
+          importStateMap,
+          overwrite,
+          namespace,
+          managed: undefined,
+        };
+        expect(mockCreateSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
+      }); // assert that the call to create will not override the object props.
+
+      test('creates managed saved objects, overriding existing `managed` value', async () => {
         const options = setupOptions({ createNewCopies: true, managed: true });
+        const collectedObjects = [createObject({ managed: false })];
+        const errors = [createError(), createError()];
+        mockCollectSavedObjects.mockResolvedValue({
+          errors: [errors[0]],
+          collectedObjects,
+          importStateMap: new Map([
+            ['foo', {}],
+            ['bar', { isOnlyReference: true }],
+          ]),
+        });
+        mockCheckReferenceOrigins.mockResolvedValue({
+          importStateMap: new Map([['bar', { isOnlyReference: true, destinationId: 'newId' }]]),
+        });
+        mockValidateReferences.mockResolvedValue([errors[1]]);
+        mockRegenerateIds.mockReturnValue(new Map([['foo', { destinationId: `randomId1` }]]));
+
+        await importSavedObjectsFromStream(options);
+        // assert that the importStateMap is correctly composed of the results from the three modules
+        const importStateMap: ImportStateMap = new Map([
+          ['foo', { destinationId: `randomId1` }],
+          ['bar', { isOnlyReference: true, destinationId: 'newId' }],
+        ]);
+        const createSavedObjectsParams = {
+          objects: collectedObjects,
+          accumulatedErrors: errors,
+          savedObjectsClient,
+          importStateMap,
+          overwrite,
+          namespace,
+          managed: true,
+        };
+        expect(mockCreateSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
+      });
+
+      test('creates and converts objects from managed to unmanaged', async () => {
+        const options = setupOptions({ createNewCopies: true, managed: false });
         const collectedObjects = [createObject({ managed: true })];
         const errors = [createError(), createError()];
         mockCollectSavedObjects.mockResolvedValue({
@@ -469,182 +545,10 @@ describe('#importSavedObjectsFromStream', () => {
           importStateMap,
           overwrite,
           namespace,
-          managed: options.managed,
+          managed: false,
         };
         expect(mockCreateSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
       });
-    });
-
-    describe('managed option', () => {
-      test('if not provided, does not override existing property when already present, defaults to false for others', async () => {
-        const obj1 = createObject({ type: 'foo', managed: true });
-        const obj2 = createObject({ type: 'bar', title: 'bar-title', managed: false });
-
-        const options = setupOptions({
-          createNewCopies: false,
-          getTypeImpl: (type) => {
-            if (type === 'foo') {
-              return {
-                management: { getTitle: () => 'getTitle-foo', icon: `${type}-icon` },
-              };
-            }
-            return {
-              management: { icon: `${type}-icon` },
-            };
-          },
-        });
-
-        mockCheckConflicts.mockResolvedValue({
-          errors: [],
-          filteredObjects: [],
-          importStateMap: new Map(),
-          pendingOverwrites: new Set(),
-        });
-        mockCreateSavedObjects.mockResolvedValue({
-          errors: [],
-          createdObjects: [obj1, { ...obj2, managed: false }], // default applied in createSavedObjects
-        });
-
-        const result = await importSavedObjectsFromStream(options);
-        // successResults only includes the imported object's type, id, managed, and destinationId (if a new one was generated)
-        const successResults = [
-          {
-            type: obj1.type,
-            id: obj1.id,
-            meta: { title: 'getTitle-foo', icon: `${obj1.type}-icon` },
-            managed: true,
-          },
-          {
-            type: obj2.type,
-            id: obj2.id,
-            meta: { title: 'bar-title', icon: `${obj2.type}-icon` },
-            managed: false,
-          },
-        ];
-
-        expect(result).toEqual({
-          success: true,
-          successCount: 2,
-          successResults,
-          warnings: [],
-        });
-      }); // assert that the documents being imported retain their prop or have the default applied
-
-      test('creates and converts objects from unmanaged to managed', async () => {
-        const obj1 = createObject({ type: 'foo', managed: false });
-        const obj2 = createObject({ type: 'bar', title: 'bar-title' });
-
-        const options = setupOptions({
-          createNewCopies: false,
-          managed: true,
-          getTypeImpl: (type) => {
-            if (type === 'foo') {
-              return {
-                management: { getTitle: () => 'getTitle-foo', icon: `${type}-icon` },
-              };
-            }
-            return {
-              management: { icon: `${type}-icon` },
-            };
-          },
-        });
-
-        mockCheckConflicts.mockResolvedValue({
-          errors: [],
-          filteredObjects: [],
-          importStateMap: new Map(),
-          pendingOverwrites: new Set(),
-        });
-        mockCreateSavedObjects.mockResolvedValue({
-          errors: [],
-          createdObjects: [
-            { ...obj1, managed: true },
-            { ...obj2, managed: true },
-          ], // make sure the default isn't applied in createSavedObjects
-        });
-
-        const result = await importSavedObjectsFromStream(options);
-        // successResults only includes the imported object's type, id, managed and destinationId (if a new one was generated)
-        const successResults = [
-          {
-            type: obj1.type,
-            id: obj1.id,
-            meta: { title: 'getTitle-foo', icon: `${obj1.type}-icon` },
-            managed: true,
-          },
-          {
-            type: obj2.type,
-            id: obj2.id,
-            meta: { title: 'bar-title', icon: `${obj2.type}-icon` },
-            managed: true,
-          },
-        ];
-
-        expect(result).toEqual({
-          success: true,
-          successCount: 2,
-          successResults,
-          warnings: [],
-        });
-      }); // assert that the documents being imported retain their prop or have the default applied
-
-      test('creates and converts objects from managed to unmanaged', async () => {
-        const obj1 = createObject({ type: 'foo', managed: true });
-        const obj2 = createObject({ type: 'bar', title: 'bar-title' });
-
-        const options = setupOptions({
-          createNewCopies: false,
-          managed: false,
-          getTypeImpl: (type) => {
-            if (type === 'foo') {
-              return {
-                management: { getTitle: () => 'getTitle-foo', icon: `${type}-icon` },
-              };
-            }
-            return {
-              management: { icon: `${type}-icon` },
-            };
-          },
-        });
-
-        mockCheckConflicts.mockResolvedValue({
-          errors: [],
-          filteredObjects: [],
-          importStateMap: new Map(),
-          pendingOverwrites: new Set(),
-        });
-        mockCreateSavedObjects.mockResolvedValue({
-          errors: [],
-          createdObjects: [
-            { ...obj1, managed: false },
-            { ...obj2, managed: false },
-          ],
-        });
-
-        const result = await importSavedObjectsFromStream(options);
-        // successResults only includes the imported object's type, id, managed and destinationId (if a new one was generated)
-        const successResults = [
-          {
-            type: obj1.type,
-            id: obj1.id,
-            meta: { title: 'getTitle-foo', icon: `${obj1.type}-icon` },
-            managed: false,
-          },
-          {
-            type: obj2.type,
-            id: obj2.id,
-            meta: { title: 'bar-title', icon: `${obj2.type}-icon` },
-            managed: false,
-          },
-        ];
-
-        expect(result).toEqual({
-          success: true,
-          successCount: 2,
-          successResults,
-          warnings: [],
-        });
-      }); // assert that the documents being imported retain their prop or have the default applied
     });
   });
 
