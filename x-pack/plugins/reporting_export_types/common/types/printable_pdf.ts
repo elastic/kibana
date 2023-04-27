@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/routes/lib';
+import type { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/routes/lib';
 
 // Job params: structure of incoming user request data, after being parsed from RISON
 
