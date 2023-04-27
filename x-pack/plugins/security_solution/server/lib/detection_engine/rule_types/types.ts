@@ -100,6 +100,7 @@ export interface RunOpts<TParams extends RuleParams> {
   alertTimestampOverride: Date | undefined;
   alertWithSuppression: SuppressedAlertService;
   refreshOnIndexingAlerts: RefreshTypes;
+  publicBaseUrl: string | undefined;
 }
 
 export type SecurityAlertType<
@@ -129,6 +130,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
   logger: Logger;
   config: ConfigType;
+  publicBaseUrl: string | undefined;
   ruleDataClient: IRuleDataClient;
   ruleExecutionLoggerFactory: IRuleExecutionLogService['createClientForExecutors'];
   version: string;
@@ -137,13 +139,9 @@ export interface CreateSecurityRuleTypeWrapperProps {
 
 export type CreateSecurityRuleTypeWrapper = (
   options: CreateSecurityRuleTypeWrapperProps
-) => <
-  TParams extends RuleParams,
-  TState extends RuleTypeState,
-  TInstanceContext extends AlertInstanceContext = {}
->(
-  type: SecurityAlertType<TParams, TState, TInstanceContext, 'default'>
-) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;
+) => <TParams extends RuleParams, TState extends RuleTypeState>(
+  type: SecurityAlertType<TParams, TState, AlertInstanceContext, 'default'>
+) => RuleType<TParams, TParams, TState, AlertInstanceState, AlertInstanceContext, 'default'>;
 
 export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
@@ -372,6 +370,7 @@ export interface SearchAfterAndBulkCreateParams {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  additionalFilters?: estypes.QueryDslQueryContainer[];
 }
 
 export interface SearchAfterAndBulkCreateReturnType {

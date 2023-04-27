@@ -29,6 +29,7 @@ export const SUPPORTED_PYTORCH_TASKS = {
   TEXT_CLASSIFICATION: 'text_classification',
   TEXT_EMBEDDING: 'text_embedding',
   FILL_MASK: 'fill_mask',
+  // Not supported yet by the Trained Models UI
   TEXT_EXPANSION: 'text_expansion',
 } as const;
 export type SupportedPytorchTasksType =
@@ -39,4 +40,34 @@ export const BUILT_IN_MODEL_TYPE = i18n.translate(
   { defaultMessage: 'built-in' }
 );
 
+export const CURATED_MODEL_TYPE = i18n.translate(
+  'xpack.ml.trainedModels.modelsList.curatedModelLabel',
+  { defaultMessage: 'curated' }
+);
+
 export const BUILT_IN_MODEL_TAG = 'prepackaged';
+
+export const CURATED_MODEL_TAG = 'curated';
+
+export const CURATED_MODEL_DEFINITIONS = {
+  '.elser_model_1_SNAPSHOT': {
+    config: {
+      input: {
+        field_names: ['text_field'],
+      },
+    },
+    description: i18n.translate('xpack.ml.trainedModels.modelsList.elserDescription', {
+      defaultMessage: 'Elastic Learned Sparse EncodeR',
+    }),
+  },
+} as const;
+
+export const MODEL_STATE = {
+  ...DEPLOYMENT_STATE,
+  DOWNLOADING: i18n.translate('xpack.ml.trainedModels.modelsList.downloadingStateLabel', {
+    defaultMessage: 'downloading',
+  }),
+  DOWNLOADED: i18n.translate('xpack.ml.trainedModels.modelsList.downloadedStateLabel', {
+    defaultMessage: 'downloaded',
+  }),
+} as const;
