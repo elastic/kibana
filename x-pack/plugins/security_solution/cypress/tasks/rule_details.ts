@@ -31,6 +31,7 @@ import {
   BACK_TO_RULES_TABLE,
   EXCEPTIONS_TAB_EXPIRED_FILTER,
   EXCEPTIONS_TAB_ACTIVE_FILTER,
+  HIGHLIGHTED_ROWS_IN_TABLE,
 } from '../screens/rule_details';
 import {
   addExceptionConditions,
@@ -157,4 +158,8 @@ export const hasIndexPatterns = (indexPatterns: string) => {
 
 export const goToRuleEditSettings = () => {
   cy.get(EDIT_RULE_SETTINGS_LINK).click();
+};
+
+export const assertRowsAreHighlighted = () => {
+  cy.get(HIGHLIGHTED_ROWS_IN_TABLE).should('exist');
 };
