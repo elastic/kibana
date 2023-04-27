@@ -221,7 +221,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
     // Failing: See https://github.com/elastic/kibana/issues/106650
-    describe.only('Saved Views', () => {
+    describe('Saved Views', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       it('should have save and load controls', async () => {
