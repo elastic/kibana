@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -54,7 +54,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
 
   const handleEdit = () => {
     if (slo) {
-      navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
+      navigate(basePath.prepend(paths.observability.sloEdit(slo.id)));
     }
   };
 
@@ -103,7 +103,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
         transactionType,
       });
 
-      navigateToUrl(basePath.prepend(url));
+      navigate(basePath.prepend(url));
     }
   };
 
@@ -115,9 +115,9 @@ export function HeaderControl({ isLoading, slo }: Props) {
         transformSloResponseToCreateSloInput({ ...slo, name: `[Copy] ${slo.name}` })!
       );
 
-      await cloneSlo({ slo: newSlo, idToCopyFrom: slo.id });
+      cloneSlo({ slo: newSlo, idToCopyFrom: slo.id });
 
-      navigateToUrl(basePath.prepend(paths.observability.slos));
+      navigate(basePath.prepend(paths.observability.slos));
     }
   };
 
@@ -132,11 +132,15 @@ export function HeaderControl({ isLoading, slo }: Props) {
 
   const handleDeleteConfirm = async () => {
     if (slo) {
-      await navigateToUrl(basePath.prepend(paths.observability.slos));
-
       deleteSlo({ id: slo.id, name: slo.name });
+      navigate(basePath.prepend(paths.observability.slos));
     }
   };
+
+  const navigate = useCallback(
+    (url: string) => setTimeout(() => navigateToUrl(url)),
+    [navigateToUrl]
+  );
 
   return (
     <>
