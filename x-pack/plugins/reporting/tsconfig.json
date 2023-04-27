@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", "../reporting_export_types/server/routes/generate/csv_searchsource_immediate.ts"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -38,7 +38,6 @@
     "@kbn/generate-csv",
     "@kbn/reporting-common",
     "@kbn/kibana-utils-plugin",
-    "@kbn/reporting-export-types",
   ],
   "exclude": [
     "target/**/*",

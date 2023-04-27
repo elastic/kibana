@@ -12,6 +12,6 @@ import { ExportTypesPlugin } from './plugin';
 describe('ExportTypesPlugin', () => {
   it('returns', async () => {
     const plugin = new ExportTypesPlugin();
-    const { registerExportType } = await plugin.setup({}, createMockPluginSetup);
+    const { registerExportType } = await plugin.setup({}, createMockPluginSetup(setupMock));
   });
 });
