@@ -12,9 +12,9 @@ import {
   EuiTitle,
   EuiText,
   EuiCard,
-  EuiIcon,
   EuiHorizontalRule,
   EuiButtonEmpty,
+  EuiBadge,
 } from '@elastic/eui';
 import { useBreadcrumbs } from '@kbn/observability-plugin/public';
 import React from 'react';
@@ -26,8 +26,24 @@ export function Home() {
 
   const navigateToKibanaUrl = useKibanaNavigation();
 
-  const handleClickLogsOnboarding = () => {
+  const handleClickSystemLogs = () => {};
+  const handleClickCustomLogs = () => {
     navigateToKibanaUrl('/app/observabilityOnboarding/logs');
+  };
+  const handleClickApmSetupGuide = () => {
+    navigateToKibanaUrl('/app/home#/tutorial/apm');
+  };
+  const handleClickKubernetesSetupGuide = () => {
+    navigateToKibanaUrl('/app/integrations/detail/kubernetes');
+  };
+  const handleClickIntegrations = () => {
+    navigateToKibanaUrl('/app/integrations');
+  };
+  const handleClickSampleData = () => {
+    navigateToKibanaUrl('/app/home#/tutorial_directory/sampleData');
+  };
+  const handleClickSkip = () => {
+    navigateToKibanaUrl('/app/observability/overview');
   };
 
   return (
@@ -46,54 +62,143 @@ export function Home() {
         <EuiText color="subdued" style={{ textAlign: 'center' }}>
           <p>
             Monitor and gain insights across your cloud-native and distributed
-            systems, bringing together application, infrastructure, and user
-            telemetry data for end-to-end observability on a single platform.
+            systems on a single platform.
           </p>
         </EuiText>
         <EuiSpacer size="xl" />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ width: 400 }}>
-        <EuiCard
-          layout="vertical"
-          icon={<EuiIcon size="xl" type="logoLogging" />}
-          title="Collect and analyse logs"
-          betaBadgeProps={{ label: 'Quick Start' }}
-          description="Choose what logs to collect, and onboard your data in up to 5 minutes to start analysing it straight away."
-          onClick={handleClickLogsOnboarding}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiHorizontalRule margin="l" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={false} style={{ width: '100%' }}>
+        <EuiFlexGroup alignItems="stretch">
           <EuiFlexItem>
             <EuiCard
-              title="Integrations"
-              betaBadgeProps={{ label: 'Integrations' }}
-              description="Explore 300+ ways of ingesting data"
-            />
+              icon={
+                <EuiBadge color="hollow" iconType="bolt">
+                  Quickstart
+                </EuiBadge>
+              }
+              title="Collect system logs"
+              selectable={{
+                onClick: handleClickSystemLogs,
+                color: 'primary',
+                fill: true,
+                fullWidth: false,
+                style: { margin: 'auto' },
+              }}
+              paddingSize="xl"
+            >
+              <EuiHorizontalRule
+                margin="m"
+                style={{
+                  marginLeft: 'auto',
+                  marginRight: 'auto',
+                  width: '80%',
+                }}
+              />
+              <EuiText color="subdued" size="s" textAlign="left">
+                <p>
+                  The quickest path to onboard log data and start analysing it
+                  straight away.
+                </p>
+                <p>
+                  Monitor servers, personal computers and more by collecting
+                  logs from your machine.
+                </p>
+              </EuiText>
+            </EuiCard>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCard
-              title="Setup guide"
+              icon={
+                <EuiBadge color="hollow" iconType="launch">
+                  In a few minutes
+                </EuiBadge>
+              }
+              title="Collect custom logs"
+              selectable={{
+                onClick: handleClickCustomLogs,
+                color: 'primary',
+                fill: true,
+                fullWidth: false,
+                style: { margin: 'auto' },
+              }}
+              paddingSize="xl"
+            >
+              <EuiHorizontalRule
+                margin="m"
+                style={{
+                  marginLeft: 'auto',
+                  marginRight: 'auto',
+                  width: '80%',
+                }}
+              />
+              <EuiText color="subdued" size="s" textAlign="left">
+                <p>
+                  Choose what logs to collect, configure an ingest pipeline, and
+                  explore your data.
+                </p>
+                <ul>
+                  <li>Stream custom logs</li>
+                  <li>Collect network streaming logs</li>
+                  <li>Upload log files</li>
+                  <li>... and more</li>
+                </ul>
+              </EuiText>
+            </EuiCard>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ width: '100%' }}>
+        <EuiFlexGroup alignItems="stretch">
+          <EuiFlexItem>
+            <EuiCard
               betaBadgeProps={{ label: 'Setup guide' }}
-              description="Monitor kubernetes clusters"
+              title="Monitor my application performance (APM / tracing)"
+              titleSize="xs"
+              paddingSize="xl"
+              onClick={handleClickApmSetupGuide}
             />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCard
-              title="Sample data"
-              betaBadgeProps={{ label: 'Sample data' }}
-              description="Explore data, visualizations, and dashboards samples"
+              betaBadgeProps={{ label: 'Setup guide' }}
+              title="Monitor my kubernetes clusters"
+              titleSize="xs"
+              paddingSize="xl"
+              onClick={handleClickKubernetesSetupGuide}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ width: '100%' }}>
+        <EuiHorizontalRule margin="l" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ width: '100%' }}>
+        <EuiFlexGroup alignItems="stretch">
+          <EuiFlexItem>
+            <EuiCard
+              betaBadgeProps={{ label: 'Integrations' }}
+              title="Explore 300+ ways of ingesting data with our Integrations"
+              titleSize="xs"
+              paddingSize="xl"
+              onClick={handleClickIntegrations}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCard
+              betaBadgeProps={{ label: 'Sample data' }}
+              title="Explore data, visualizations, and dashboards samples"
+              titleSize="xs"
+              paddingSize="xl"
+              onClick={handleClickSampleData}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ width: '100%' }}>
+        <EuiHorizontalRule margin="l" />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty href="/app/observability/overview">
-          Skip for now
-        </EuiButtonEmpty>
+        <EuiButtonEmpty onClick={handleClickSkip}>Skip for now</EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
