@@ -45,7 +45,9 @@ export interface TextExpansionCalloutValues {
   isCreateButtonDisabled: boolean;
   isModelDownloadInProgress: boolean;
   isModelDownloaded: boolean;
+  isModelStarted: boolean;
   isPollingTextExpansionModelActive: boolean;
+  isStartButtonDisabled: boolean;
   textExpansionModel: FetchTextExpansionModelResponse | undefined;
   textExpansionModelPollTimeoutId: null | ReturnType<typeof setTimeout>;
 }
@@ -75,7 +77,7 @@ export const TextExpansionCalloutLogic = kea<
     ],
     values: [
       CreateTextExpansionModelApiLogic,
-      ['data as createdTextExpansionModel', 'status as createTextExpansionModelStatus'], // error as ...
+      ['data as createdTextExpansionModel', 'status as createTextExpansionModelStatus'],
       FetchTextExpansionModelApiLogic,
       ['data as textExpansionModel'],
     ],
@@ -163,8 +165,11 @@ export const TextExpansionCalloutLogic = kea<
     isModelDownloaded: [
       () => [selectors.textExpansionModel],
       (data: FetchTextExpansionModelResponse) =>
-        data?.deploymentState === MlModelDeploymentState.Downloaded ||
-        // TODO: add button for starting model, then remove these states
+        data?.deploymentState === MlModelDeploymentState.Downloaded,
+    ],
+    isModelStarted: [
+      () => [selectors.textExpansionModel],
+      (data: FetchTextExpansionModelResponse) =>
         data?.deploymentState === MlModelDeploymentState.Starting ||
         data?.deploymentState === MlModelDeploymentState.Started ||
         data?.deploymentState === MlModelDeploymentState.FullyAllocated,
@@ -174,5 +179,9 @@ export const TextExpansionCalloutLogic = kea<
       (pollingTimeoutId: TextExpansionCalloutValues['textExpansionModelPollTimeoutId']) =>
         pollingTimeoutId !== null,
     ],
+    isStartButtonDisabled: [
+      () => [selectors.createTextExpansionModelStatus],
+      (status: Status) => status !== Status.IDLE,
+    ],    
   }),
 });
