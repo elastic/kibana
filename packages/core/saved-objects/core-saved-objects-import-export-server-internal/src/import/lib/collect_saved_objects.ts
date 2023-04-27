@@ -71,7 +71,7 @@ export async function collectSavedObjects({
         ...obj,
         ...(!obj.migrationVersion && !obj.typeMigrationVersion ? { typeMigrationVersion: '' } : {}),
         // override any managed flag on an object with that given as an option otherwise set the default to avoid having to do that with a core migration transform
-        // this is a bulk opperation, applied to all objects being imported
+        // this is a bulk operation, applied to all objects being imported
         ...{ managed: managed ?? obj.managed ?? false },
       };
     }),
