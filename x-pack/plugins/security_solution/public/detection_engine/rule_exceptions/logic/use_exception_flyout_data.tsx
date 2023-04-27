@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { DataViewBase } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 import type { Rule } from '../../rule_management/logic/types';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
@@ -15,7 +15,7 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 export interface ReturnUseFetchExceptionFlyoutData {
   isLoading: boolean;
-  indexPatterns: DataViewBase;
+  indexPatterns: DataView;
 }
 
 /**
@@ -66,7 +66,7 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
     }
   }, [jobs, isMLRule, memoDataViewId, memoNonDataViewIndexPatterns]);
 
-  const [isIndexPatternLoading, { indexPatterns: dataView }] = useFetchIndex(
+  const [isIndexPatternLoading, { dataView }] = useFetchIndex(
     memoRuleIndicesOrDvId,
     false,
     'indexFields',
@@ -75,6 +75,7 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
 
   return {
     isLoading: isIndexPatternLoading || mlJobLoading,
-    indexPatterns: dataView,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    indexPatterns: dataView!,
   };
 };

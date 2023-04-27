@@ -116,7 +116,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onConfirm,
   isNonTimeline = false,
 }: AddExceptionFlyoutProps) {
-  const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
+  const { isLoading, indexPatterns: dataView } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
@@ -501,7 +501,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             allowLargeValueLists={allowLargeValueLists}
             exceptionListItems={initialItems}
             exceptionListType={listType}
-            indexPatterns={indexPatterns}
+            indexPatterns={dataView}
             rules={rules}
             selectedOs={selectedOs}
             showOsTypeOptions={listType === ExceptionListTypeEnum.ENDPOINT && !hasAlertData}

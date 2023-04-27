@@ -17,7 +17,7 @@ describe('useRuleIndices', () => {
     jest.clearAllMocks();
   });
 
-  it.only('should return handle undefined parameters', async () => {
+  it('should return handle undefined parameters', async () => {
     (useGetInstalledJob as jest.Mock).mockImplementation((jobIds: string[]) => {
       expect(jobIds).toEqual([]);
       return { loading: false, jobs: [] };
@@ -29,7 +29,7 @@ describe('useRuleIndices', () => {
     });
   });
 
-  it.only('should return default indices if ML job is not specified', async () => {
+  it('should return default indices if ML job is not specified', async () => {
     (useGetInstalledJob as jest.Mock).mockImplementation((jobIds: string[]) => {
       expect(jobIds).toEqual([]);
       return { loading: false, jobs: [] };
@@ -42,7 +42,7 @@ describe('useRuleIndices', () => {
     });
   });
 
-  it.only('should return default indices if ML job is not specified 1', async () => {
+  it('should return default indices if ML job is not specified 1', async () => {
     const machineLearningJobId = ['ml-job-1', 'ml-job-2'];
     (useGetInstalledJob as jest.Mock).mockImplementation((jobIds: string[]) => {
       expect(jobIds).toEqual(machineLearningJobId);
