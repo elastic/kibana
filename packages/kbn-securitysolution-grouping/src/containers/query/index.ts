@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getFieldTypeMissingValues } from './helpers';
+import { getEmptyValue, getFieldTypeMissingValues } from './helpers';
 import { GroupingBucket } from '../..';
 import { RawBucket } from '../../..';
 import type { GroupingQueryArgs, GroupingQuery } from './types';
@@ -117,6 +117,7 @@ export const parseGroupingQuery = <T>(
 ): Array<RawBucket<T> & GroupingBucket> =>
   buckets.map((group) => {
     const groupKeyArray = Array.isArray(group.key) ? group.key : [group.key];
+    const emptyValue = getEmptyValue();
     return groupKeyArray[0] === groupKeyArray[1]
       ? {
           ...group,
@@ -125,8 +126,8 @@ export const parseGroupingQuery = <T>(
         }
       : {
           ...group,
-          key: ['-'],
-          key_as_string: '-',
+          key: [emptyValue],
+          key_as_string: emptyValue,
           isNullGroup: true,
         };
   });

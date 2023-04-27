@@ -29,3 +29,5 @@ export function getFieldTypeMissingValues(esType: string[]): [number, number] | 
       return ['-', '--'];
   }
 }
+
+export const getEmptyValue = () => '—';
