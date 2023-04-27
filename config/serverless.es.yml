@@ -1,0 +1,2 @@
+uiSettings.overrides.defaultRoute: /app/enterprise_search/content/search_indices
+xpack.serverless.plugin.developer.projectSwitcher.currentType: 'search'
