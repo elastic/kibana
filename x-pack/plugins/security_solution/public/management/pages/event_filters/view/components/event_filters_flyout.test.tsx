@@ -55,6 +55,98 @@ describe('Event filter flyout', () => {
         },
         http: {},
         data: {
+          dataViews: {
+            getIdsWithTitle: async () =>
+              Promise.resolve([{ id: 'myfakeid', title: 'hello*,world*,refreshed*' }]),
+            create: async ({ title }: { title: string }) =>
+              Promise.resolve({
+                id: 'myfakeid',
+                matchedIndices: ['hello', 'world', 'refreshed'],
+                fields: [
+                  {
+                    name: 'bytes',
+                    type: 'number',
+                    esTypes: ['long'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 10,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: 'ssl',
+                    type: 'boolean',
+                    esTypes: ['boolean'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 20,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: '@timestamp',
+                    type: 'date',
+                    esTypes: ['date'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 30,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                ],
+                getIndexPattern: () => title,
+              }),
+            get: jest
+              .fn()
+              .mockImplementation(
+                async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
+                  Promise.resolve({
+                    id: dataViewId,
+                    matchedIndices: refreshFields
+                      ? ['hello', 'world', 'refreshed']
+                      : ['hello', 'world'],
+                    fields: [
+                      {
+                        name: 'bytes',
+                        type: 'number',
+                        esTypes: ['long'],
+                        aggregatable: true,
+                        searchable: true,
+                        count: 10,
+                        readFromDocValues: true,
+                        scripted: false,
+                        isMapped: true,
+                      },
+                      {
+                        name: 'ssl',
+                        type: 'boolean',
+                        esTypes: ['boolean'],
+                        aggregatable: true,
+                        searchable: true,
+                        count: 20,
+                        readFromDocValues: true,
+                        scripted: false,
+                        isMapped: true,
+                      },
+                      {
+                        name: '@timestamp',
+                        type: 'date',
+                        esTypes: ['date'],
+                        aggregatable: true,
+                        searchable: true,
+                        count: 30,
+                        readFromDocValues: true,
+                        scripted: false,
+                        isMapped: true,
+                      },
+                    ],
+                    getIndexPattern: () => 'hello*,world*,refreshed*',
+                  })
+              ),
+          },
           search: {
             search: jest.fn().mockImplementation(() => of(esResponseData())),
           },
