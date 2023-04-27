@@ -15,7 +15,7 @@
         "signature": [
           "React.NamedExoticComponent<Props>"
         ],
-        "path": "x-pack/packages/kbn-ecs-data-quality-dashboard/impl/data_quality/index.tsx",
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -49,7 +49,7 @@
         "signature": [
           "(phase: string) => string"
         ],
-        "path": "x-pack/packages/kbn-ecs-data-quality-dashboard/impl/data_quality/helpers.ts",
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -63,7 +63,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/kbn-ecs-data-quality-dashboard/impl/data_quality/helpers.ts",
+            "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -85,7 +85,7 @@
         "description": [
           "The subtitle displayed on the Data Quality dashboard"
         ],
-        "path": "x-pack/packages/kbn-ecs-data-quality-dashboard/impl/data_quality/translations.ts",
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -102,7 +102,7 @@
         "signature": [
           "\"https://www.elastic.co/guide/en/ecs/current/ecs-reference.html\""
         ],
-        "path": "x-pack/packages/kbn-ecs-data-quality-dashboard/impl/data_quality/data_quality_panel/index_properties/markdown/helpers.ts",
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/data_quality_panel/index_properties/markdown/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -116,7 +116,7 @@
         "description": [
           "The label displayed for the `ILM phase` combo box on the Data Quality dashboard"
         ],
-        "path": "x-pack/packages/kbn-ecs-data-quality-dashboard/impl/data_quality/translations.ts",
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -130,7 +130,7 @@
         "description": [
           "The tooltip for the `ILM phase` combo box on the Data Quality Dashboard"
         ],
-        "path": "x-pack/packages/kbn-ecs-data-quality-dashboard/impl/data_quality/translations.ts",
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -144,7 +144,7 @@
         "description": [
           "The placeholder for the `ILM phase` combo box on the Data Quality Dashboard"
         ],
-        "path": "x-pack/packages/kbn-ecs-data-quality-dashboard/impl/data_quality/translations.ts",
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

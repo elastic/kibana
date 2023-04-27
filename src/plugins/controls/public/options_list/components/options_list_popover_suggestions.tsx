@@ -48,7 +48,7 @@ export const OptionsListPopoverSuggestions = ({
   const canLoadMoreSuggestions = useMemo(
     () =>
       totalCardinality
-        ? Object.keys(availableOptions ?? {}).length <
+        ? (availableOptions ?? []).length <
           Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE)
         : false,
     [availableOptions, totalCardinality]
@@ -61,7 +61,7 @@ export const OptionsListPopoverSuggestions = ({
     [invalidSelections]
   );
   const suggestions = useMemo(() => {
-    return showOnlySelected ? selectedOptions : Object.keys(availableOptions ?? {});
+    return showOnlySelected ? selectedOptions : availableOptions ?? [];
   }, [availableOptions, selectedOptions, showOnlySelected]);
 
   const existsSelectableOption = useMemo<EuiSelectableOption | undefined>(() => {
@@ -79,19 +79,23 @@ export const OptionsListPopoverSuggestions = ({
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
     /* This useEffect makes selectableOptions responsive to search, show only selected, and clear selections */
-    const options: EuiSelectableOption[] = (suggestions ?? []).map((key) => {
+    const options: EuiSelectableOption[] = (suggestions ?? []).map((suggestion) => {
+      if (typeof suggestion === 'string') {
+        // this means that `showOnlySelected` is true, and doc count is not known when this is the case
+        suggestion = { value: suggestion };
+      }
       return {
-        key,
-        label: key,
-        checked: selectedOptionsSet?.has(key) ? 'on' : undefined,
-        'data-test-subj': `optionsList-control-selection-${key}`,
+        key: suggestion.value,
+        label: suggestion.value,
+        checked: selectedOptionsSet?.has(suggestion.value) ? 'on' : undefined,
+        'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
         className:
-          showOnlySelected && invalidSelectionsSet.has(key)
+          showOnlySelected && invalidSelectionsSet.has(suggestion.value)
             ? 'optionsList__selectionInvalid'
             : 'optionsList__validSuggestion',
         append:
-          !showOnlySelected && availableOptions?.[key] ? (
-            <OptionsListPopoverSuggestionBadge documentCount={availableOptions[key].doc_count} />
+          !showOnlySelected && suggestion?.docCount ? (
+            <OptionsListPopoverSuggestionBadge documentCount={suggestion.docCount} />
           ) : undefined,
       };
     });
