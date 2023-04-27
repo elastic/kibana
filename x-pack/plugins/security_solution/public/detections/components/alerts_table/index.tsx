@@ -51,6 +51,9 @@ import * as i18n from './translations';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
+// Highlight rows with building block alerts
+const shouldHighlightRow = (alert: Alert) => !!alert[ALERT_BUILDING_BLOCK_TYPE];
+
 const storage = new Storage(localStorage);
 
 interface GridContainerProps {
@@ -246,12 +249,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     [dispatch, tableId, alertTableRefreshHandlerRef, setQuery]
   );
 
-  // Highlight rows with building block alerts
-  const highlightedRowMapper: AlertsTableStateProps['highlightedRowMapper'] = useCallback(
-    (alert: Alert) => !!alert[ALERT_BUILDING_BLOCK_TYPE],
-    []
-  );
-
   const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
@@ -263,7 +260,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       query: finalBoolQuery,
       showExpandToDetails: false,
       gridStyle,
-      highlightedRowMapper,
+      shouldHighlightRow,
       rowHeightsOptions,
       columns: finalColumns,
       browserFields: finalBrowserFields,
@@ -279,7 +276,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       triggersActionsUi.alertsTableConfigurationRegistry,
       flyoutSize,
       gridStyle,
-      highlightedRowMapper,
       rowHeightsOptions,
       finalColumns,
       finalBrowserFields,

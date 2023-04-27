@@ -294,12 +294,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   // Update highlighted rows when alerts or pagination changes
   const highlightedRowClasses = useMemo(() => {
     let mappedRowClasses: EuiDataGridStyle['rowClasses'] = {};
-    const highlightedRowMapper = props.highlightedRowMapper;
-    if (highlightedRowMapper) {
+    const shouldHighlightRowCheck = props.shouldHighlightRow;
+    if (shouldHighlightRowCheck) {
       mappedRowClasses = alerts.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
         (rowClasses, alert, index) => {
-          const shouldHighlightRow = highlightedRowMapper(alert);
-          if (shouldHighlightRow) {
+          if (shouldHighlightRowCheck(alert)) {
             rowClasses[index + pagination.pageIndex * pagination.pageSize] =
               'alertsTableHighlightedRow';
           }
@@ -309,7 +308,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       );
     }
     return mappedRowClasses;
-  }, [props.highlightedRowMapper, alerts, pagination.pageIndex, pagination.pageSize]);
+  }, [props.shouldHighlightRow, alerts, pagination.pageIndex, pagination.pageSize]);
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
 
