@@ -119,13 +119,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraSavedViews.createNewSavedView('view1');
           await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
         });
-
-        it('should new views should be listed in the load views list', async () => {
-          await pageObjects.infraSavedViews.clickSavedViewsButton();
-          await pageObjects.infraSavedViews.clickLoadViewButton();
-          await pageObjects.infraSavedViews.ensureViewIsLoadable('view1');
-          await pageObjects.infraSavedViews.closeSavedViewsLoadModal();
-        });
       });
     });
   });

@@ -36,10 +36,6 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
       return await testSubjects.find('savedViews-loadView');
     },
 
-    async clickLoadViewButton() {
-      return await testSubjects.click('savedViews-loadView');
-    },
-
     async getManageViewsButton() {
       return await testSubjects.find('savedViews-manageViews');
     },
