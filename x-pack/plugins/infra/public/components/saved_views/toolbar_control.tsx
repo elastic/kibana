@@ -16,17 +16,9 @@ import { UpsertViewModal } from './upsert_modal';
 import { UseInventoryViewsResult } from '../../hooks/use_inventory_views';
 import { UseMetricsExplorerViewsResult } from '../../hooks/use_metrics_explorer_views';
 
-interface Props<
-  UseViewResult extends UseInventoryViewsResult | UseMetricsExplorerViewsResult,
-  ViewState
-> {
+type UseViewResult = UseInventoryViewsResult | UseMetricsExplorerViewsResult;
+interface Props<ViewState> extends UseInventoryViewsResult, UseMetricsExplorerViewsResult {
   viewState: ViewState & { time?: number };
-  currentView: UseViewResult['currentView'];
-  views: UseViewResult['views'];
-  isFetchingViews: UseViewResult['isFetchingViews'];
-  isFetchingCurrentView: UseViewResult['isFetchingCurrentView'];
-  isCreatingView: UseViewResult['isCreatingView'];
-  isUpdatingView: UseViewResult['isUpdatingView'];
   onCreateView: UseViewResult['createView'];
   onDeleteView: UseViewResult['deleteViewById'];
   onUpdateView: UseViewResult['updateViewById'];
@@ -35,9 +27,7 @@ interface Props<
   onSwitchView: UseViewResult['switchViewById'];
 }
 
-export function SavedViewsToolbarControls<ViewState>(
-  props: Props<UseInventoryViewsResult | UseMetricsExplorerViewsResult, ViewState>
-) {
+export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
   const {
     currentView,
     views,
