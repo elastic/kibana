@@ -73,19 +73,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('permalink', function () {
         it('should allow for copying the snapshot URL', async function () {
-          const expectedUrl =
-            baseUrl +
-            '/app/discover?_t=1453775307251#' +
-            '/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time' +
-            ":(from:'2015-09-19T06:31:44.000Z',to:'2015-09" +
-            "-23T18:31:44.000Z'))&_a=(columns:!(),filters:!(),index:'logstash-" +
-            "*',interval:auto,query:(language:kuery,query:'')" +
-            ",sort:!(!('@timestamp',desc)))";
+          const re = new RegExp(baseUrl + '/app/r\\?l=DISCOVER_APP_LOCATOR.+$');
           const actualUrl = await PageObjects.share.getSharedUrl();
-          // strip the timestamp out of each URL
-          expect(actualUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')).to.be(
-            expectedUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')
-          );
+          expect(actualUrl).to.match(re);
         });
 
         it('should allow for copying the snapshot URL as a short URL', async function () {
