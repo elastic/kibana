@@ -122,11 +122,11 @@ export const parseGroupingQuery = <T>(
     const emptyValue = getEmptyValue();
     // If the keys are different means that the `missing` values of the multi_terms aggregation have been applied, we use the default empty string.
     // If the keys are equal means the `missing` values have not been applied, they are stored values.
-    return groupKeyArray[0] === groupKeyArray[1]
+    return group.key[0] === group.key[1]
       ? {
           ...group,
-          key: [groupKeyArray[0]],
-          key_as_string: groupKeyArray[0],
+          key: [group.key[0]],
+          key_as_string: group.key[0],
         }
       : {
           ...group,
