@@ -351,7 +351,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await home.addSampleDataSet('logs');
         await header.waitUntilLoadingHasFinished();
       });
-  
+
       after(async () => {
         await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
           useActualUrl: true,
@@ -363,36 +363,36 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
       it('adds lens visualization in description', async () => {
-          await testSubjects.click('description-edit-icon');
+        await testSubjects.click('description-edit-icon');
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          const editCommentTextArea = await find.byCssSelector(
-            '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
-          );
+        const editCommentTextArea = await find.byCssSelector(
+          '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
+        );
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          await editCommentTextArea.focus();
+        await editCommentTextArea.focus();
 
-          const editableDescription = await testSubjects.find('editable-markdown-form');
+        const editableDescription = await testSubjects.find('editable-markdown-form');
 
-          const addVisualizationButton = await editableDescription.findByCssSelector(
-            '[data-test-subj="euiMarkdownEditorToolbarButton"][aria-label="Visualization"]'
-          );
-          await addVisualizationButton.click();
+        const addVisualizationButton = await editableDescription.findByCssSelector(
+          '[data-test-subj="euiMarkdownEditorToolbarButton"][aria-label="Visualization"]'
+        );
+        await addVisualizationButton.click();
 
-          await cases.singleCase.findAndSaveVisualization('[Logs] Bytes distribution');
+        await cases.singleCase.findAndSaveVisualization('[Logs] Bytes distribution');
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          await testSubjects.click('editable-save-markdown');
+        await testSubjects.click('editable-save-markdown');
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          const description = await find.byCssSelector('[data-test-subj="description"]');
+        const description = await find.byCssSelector('[data-test-subj="description"]');
 
-          await description.findByCssSelector('[data-test-subj="xyVisChart"]');
+        await description.findByCssSelector('[data-test-subj="xyVisChart"]');
       });
 
       it('adds lens visualization in existing comment', async () => {
@@ -416,9 +416,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        const editComment = await find.byCssSelector(
-          '[data-test-subj*="editable-markdown-form"]'
-        );
+        const editComment = await find.byCssSelector('[data-test-subj*="editable-markdown-form"]');
 
         const addVisualizationButton = await editComment.findByCssSelector(
           '[data-test-subj="euiMarkdownEditorToolbarButton"][aria-label="Visualization"]'
@@ -445,7 +443,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-       const newComment = await find.byCssSelector('[data-test-subj*="comment-create-action"]');
+        const newComment = await find.byCssSelector('[data-test-subj*="comment-create-action"]');
 
         await newComment.findByCssSelector('[data-test-subj="xyVisChart"]');
       });
