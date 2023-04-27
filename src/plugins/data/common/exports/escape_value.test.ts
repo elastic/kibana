@@ -14,7 +14,7 @@ describe('escapeValue', function () {
     let escapeValue: (val: string) => string;
     beforeEach(function () {
       escapeValue = createEscapeValue({
-        csvSeparator: ',',
+        separator: ',',
         quoteValues: true,
         escapeFormulaValues: false,
       });
@@ -53,7 +53,7 @@ describe('escapeValue', function () {
     let escapeValue: (val: string) => string;
     beforeEach(function () {
       escapeValue = createEscapeValue({
-        csvSeparator: ',',
+        separator: ',',
         quoteValues: false,
         escapeFormulaValues: false,
       });
@@ -70,7 +70,7 @@ describe('escapeValue', function () {
       let escapeValue: (val: string) => string;
       beforeEach(function () {
         escapeValue = createEscapeValue({
-          csvSeparator: ',',
+          separator: ',',
           quoteValues: true,
           escapeFormulaValues: true,
         });
@@ -89,7 +89,7 @@ describe('escapeValue', function () {
       let escapeValue: (val: string) => string;
       beforeEach(function () {
         escapeValue = createEscapeValue({
-          csvSeparator: ',',
+          separator: ',',
           quoteValues: true,
           escapeFormulaValues: false,
         });
@@ -106,7 +106,7 @@ describe('escapeValue', function () {
   describe('csvSeparator', () => {
     it('should escape when text contains the separator char with quotes enabled', () => {
       const escapeValue = createEscapeValue({
-        csvSeparator: ';',
+        separator: ';',
         quoteValues: true,
         escapeFormulaValues: false,
       });
@@ -115,7 +115,7 @@ describe('escapeValue', function () {
 
     it('should not escape when text contains the separator char if quotes are disabled', () => {
       const escapeValue = createEscapeValue({
-        csvSeparator: ';',
+        separator: ';',
         quoteValues: false,
         escapeFormulaValues: false,
       });
