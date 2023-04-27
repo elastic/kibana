@@ -297,7 +297,7 @@ export const ModelStarted = ({
       <EuiFlexItem grow>
         <EuiText>
           <FormattedMessage
-            id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedBody"
+            id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedBody"
             defaultMessage="Enjoy the power of ELSER in your custom Inference pipeline."
           />
         </EuiText>
