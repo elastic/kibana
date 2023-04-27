@@ -7,7 +7,6 @@
 
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
-  EuiAccordion,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -122,6 +121,10 @@ export const MyLabelButton = styled(EuiButtonEmpty)`
 MyLabelButton.defaultProps = {
   flush: 'right',
 };
+
+export const SuppressionSettings = styled.div`
+  ${({ theme }) => `padding-left: ${theme.eui.euiSizeXL};`}
+`;
 
 const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ $isVisible }) => ({
   style: {
@@ -899,30 +902,24 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           )}
 
-          <EuiSpacer size="l" />
-          <EuiAccordion
-            data-test-subj="alertSuppressionAccordion"
-            id="alertSuppressionAccordion"
-            buttonContent={i18n.ALERT_SUPPRESSION_ACCORDION_BUTTON}
+          <RuleTypeEuiFormRow
+            $isVisible={isQueryRule(ruleType)}
+            data-test-subj="alertSuppressionInput"
           >
-            <EuiSpacer size="l" />
+            <UseField
+              path="groupByFields"
+              component={GroupByFields}
+              componentProps={{
+                browserFields: termsAggregationFields,
+                isDisabled:
+                  !license.isAtLeast(minimumLicenseForSuppression) &&
+                  initialState.groupByFields.length === 0,
+              }}
+            />
+          </RuleTypeEuiFormRow>
 
-            <RuleTypeEuiFormRow
-              $isVisible={isQueryRule(ruleType)}
-              data-test-subj="alertSuppressionInput"
-            >
-              <UseField
-                path="groupByFields"
-                component={GroupByFields}
-                componentProps={{
-                  browserFields: termsAggregationFields,
-                  isDisabled:
-                    !license.isAtLeast(minimumLicenseForSuppression) &&
-                    initialState.groupByFields.length === 0,
-                }}
-              />
-            </RuleTypeEuiFormRow>
-
+          <SuppressionSettings>
+            <EuiSpacer size="s" />
             <RuleTypeEuiFormRow
               $isVisible={isQueryRule(ruleType)}
               data-test-subj="alertSuppressionDuration"
@@ -959,8 +956,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 {AlertsSuppressionMissingFields}
               </UseMultiFields>
             </RuleTypeEuiFormRow>
-          </EuiAccordion>
-          <EuiSpacer size="l" />
+          </SuppressionSettings>
 
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>

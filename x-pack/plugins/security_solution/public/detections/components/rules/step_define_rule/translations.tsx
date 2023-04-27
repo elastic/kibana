@@ -150,13 +150,6 @@ export const RULE_PREVIEW_TITLE = i18n.translate(
   }
 );
 
-export const ALERT_SUPPRESSION_ACCORDION_BUTTON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionAccordionButtonLabel',
-  {
-    defaultMessage: 'Suppression Configuration',
-  }
-);
-
 export const ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsLabel',
   {
