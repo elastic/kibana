@@ -15,6 +15,7 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
@@ -30,7 +31,6 @@ import { docLinks } from '../../../shared/doc_links';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { LicensingLogic } from '../../../shared/licensing';
-import { EXPLORE_PLATINUM_FEATURES_LINK } from '../../../workplace_search/constants';
 import { ENGINES_PATH, ENGINE_CREATION_PATH } from '../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
@@ -52,13 +52,13 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
 
   return (
     <EuiPopover
-      isOpen={disabled && showPopover}
+      isOpen={showPopover}
       closePopover={() => setShowPopover(false)}
       button={
         <div
           data-test-subj="create-engine-button-hover-target"
           onMouseEnter={() => setShowPopover(true)}
-          onFocus={() => setShowPopover(true)}
+          onMouseLeave={() => setShowPopover(false)}
           tabIndex={0}
         >
           <EuiButton
@@ -72,7 +72,7 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
             {i18n.translate(
               'xpack.enterpriseSearch.content.searchApplications.createEngineButtonLabel',
               {
-                defaultMessage: 'Create Search Application',
+                defaultMessage: 'Create',
               }
             )}
           </EuiButton>
@@ -80,22 +80,26 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
       }
     >
       <EuiPopoverTitle>
-        <FormattedMessage
-          id="xpack.enterpriseSearch.content.searchApplications.createEngineDisabledPopover.title"
-          defaultMessage="Platinum only feature"
-        />
+        <EuiFlexGroup justifyContent="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="beaker" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.searchApplications.createEngineTechnicalPreviewPopover.title"
+              defaultMessage="Technical Preview"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPopoverTitle>
       <div style={{ width: '300px' }} data-test-subj="create-engine-button-popover-content">
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiText size="s">
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.searchApplications.createEngineDisabledPopover.body"
-              defaultMessage="Search Applications require a Platinum license or higher and are not available to Standard license self-managed deployments."
+              id="xpack.enterpriseSearch.content.searchApplications.createEngineTechnicalPreviewPopover.body"
+              defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
             />
           </EuiText>
-          <EuiLink target="_blank" href={docLinks.licenseManagement}>
-            {EXPLORE_PLATINUM_FEATURES_LINK}
-          </EuiLink>
         </EuiFlexGroup>
       </div>
     </EuiPopover>

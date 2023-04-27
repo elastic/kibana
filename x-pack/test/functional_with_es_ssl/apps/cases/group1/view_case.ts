@@ -726,6 +726,67 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('case-view-tab-title-alerts');
         await testSubjects.existOrFail('case-view-tab-content-alerts');
       });
+
+      it("shows the 'files' tab when clicked", async () => {
+        await testSubjects.click('case-view-tab-title-files');
+        await testSubjects.existOrFail('case-view-tab-content-files');
+      });
+    });
+
+    describe('Files', () => {
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
+      it('adds a file to the case', async () => {
+        // navigate to files tab
+        await testSubjects.click('case-view-tab-title-files');
+        await testSubjects.existOrFail('case-view-tab-content-files');
+
+        await cases.casesFilesTable.addFile(require.resolve('./elastic_logo.png'));
+
+        // make sure the uploaded file is displayed on the table
+        await find.byButtonText('elastic_logo.png');
+      });
+
+      it('search by file name', async () => {
+        await cases.casesFilesTable.searchByFileName('foobar');
+
+        await cases.casesFilesTable.emptyOrFail();
+
+        await cases.casesFilesTable.searchByFileName('elastic');
+
+        await find.byButtonText('elastic_logo.png');
+      });
+
+      it('displays the file preview correctly', async () => {
+        await cases.casesFilesTable.openFilePreview(0);
+
+        await testSubjects.existOrFail('cases-files-image-preview');
+      });
+
+      it('pressing escape key closes the file preview', async () => {
+        await testSubjects.existOrFail('cases-files-image-preview');
+
+        await browser.pressKeys(browser.keys.ESCAPE);
+
+        await testSubjects.missingOrFail('cases-files-image-preview');
+      });
+
+      it('files added to a case can be deleted', async () => {
+        await cases.casesFilesTable.deleteFile(0);
+
+        await cases.casesFilesTable.emptyOrFail();
+      });
+
+      describe('Files User Activity', () => {
+        it('file user action is displayed correctly', async () => {
+          await cases.casesFilesTable.addFile(require.resolve('./elastic_logo.png'));
+
+          await testSubjects.click('case-view-tab-title-activity');
+          await testSubjects.existOrFail('case-view-tab-content-activity');
+
+          await find.byButtonText('elastic_logo.png');
+        });
+      });
     });
   });
 };

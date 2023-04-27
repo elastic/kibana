@@ -126,6 +126,7 @@ describe('start', () => {
             Array [
               Array [
                 "kbnBody",
+                "kbnBody--classicLayout",
                 "kbnBody--noHeaderBanner",
                 "kbnBody--chromeHidden",
                 "kbnVersion-1-2-3",
@@ -143,6 +144,7 @@ describe('start', () => {
             Array [
               Array [
                 "kbnBody",
+                "kbnBody--classicLayout",
                 "kbnBody--noHeaderBanner",
                 "kbnBody--chromeHidden",
                 "kbnVersion-8-0-0",
