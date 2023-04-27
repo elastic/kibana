@@ -6,27 +6,43 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 import type { UpdateSLOInput, UpdateSLOResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
 
 export function useUpdateSlo() {
-  const { http } = useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const queryClient = useQueryClient();
 
-  const updateSlo = useMutation(
+  return useMutation(
     ({ sloId, slo }: { sloId: string; slo: UpdateSLOInput }) => {
       const body = JSON.stringify(slo);
       return http.put<UpdateSLOResponse>(`/api/observability/slos/${sloId}`, { body });
     },
     {
       mutationKey: ['updateSlo'],
-      onSuccess: () => {
+      onSuccess: (_data, { slo: { name } }) => {
+        toasts.addSuccess(
+          i18n.translate('xpack.observability.slo.update.successNotification', {
+            defaultMessage: 'Successfully updated {name}',
+            values: { name },
+          })
+        );
         queryClient.invalidateQueries(['fetchSloList']);
         queryClient.invalidateQueries(['fetchHistoricalSummary']);
       },
+      onError: (error, { slo: { name } }) => {
+        toasts.addError(new Error(String(error)), {
+          title: i18n.translate('xpack.observability.slo.update.errorNotification', {
+            defaultMessage: 'Something went wrong when updating {name}',
+            values: { name },
+          }),
+        });
+      },
     }
   );
-
-  return updateSlo;
 }
