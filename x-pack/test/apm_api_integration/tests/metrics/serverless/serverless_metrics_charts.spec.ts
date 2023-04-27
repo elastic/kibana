@@ -57,19 +57,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns empty', () => {
-        ['memory_usage_chart', 'cold_start_duration', 'cold_start_count'].map((key) => {
-          const metric = serverlessMetrics.charts.find((chart) => {
-            return chart.key === key;
-          });
-
-          expect(metric?.series).to.be.empty();
+        serverlessMetrics.charts.forEach((chart) => {
+          expect(chart.series).to.be.empty();
         });
-
-        const avgMetric = serverlessMetrics.charts.find((chart) => {
-          return chart.key === 'avg_duration';
-        });
-
-        expect(avgMetric?.series[0].data.every(({ y }) => y === null)).to.be(true);
       });
     }
   );
