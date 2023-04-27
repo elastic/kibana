@@ -8,6 +8,7 @@
 
 import type { GroupingQueryArgs } from './types';
 import { getGroupingQuery, parseGroupingQuery } from '.';
+import { getEmptyValue } from './helpers';
 
 const testProps: GroupingQueryArgs = {
   additionalFilters: [],
@@ -185,8 +186,8 @@ describe('group selector', () => {
         doc_count: 75,
       },
       {
-        key: ['-'],
-        key_as_string: '-',
+        key: [getEmptyValue()],
+        key_as_string: getEmptyValue(),
         isNullGroup: true,
         doc_count: 75,
       },
