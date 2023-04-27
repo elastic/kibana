@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiPageTemplate,
   EuiButton,
@@ -18,13 +18,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useKibana } from '../../../utils/kibana_react';
-import { useLicense } from '../../../hooks/use_license';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { paths } from '../../../config/paths';
+import { useKibana } from '../../utils/kibana_react';
+import { useLicense } from '../../hooks/use_license';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { paths } from '../../config/paths';
 import illustration from './assets/illustration.svg';
 
-export function SloListWelcomePrompt() {
+export function SlosWelcomePage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -32,14 +33,24 @@ export function SloListWelcomePrompt() {
   const { ObservabilityPageTemplate } = usePluginContext();
 
   const { hasAtLeast } = useLicense();
-
   const hasRightLicense = hasAtLeast('platinum');
+
+  const { isLoading, sloList } = useFetchSloList();
+  const { total } = sloList || { total: 0 };
 
   const handleClickCreateSlo = () => {
     navigateToUrl(basePath.prepend(paths.observability.sloCreate));
   };
 
-  return (
+  const hasSlosAndHasPermissions = total > 0 && hasAtLeast('platinum') === true;
+
+  useEffect(() => {
+    if (hasSlosAndHasPermissions) {
+      navigateToUrl(basePath.prepend(paths.observability.slos));
+    }
+  }, [basePath, hasSlosAndHasPermissions, navigateToUrl]);
+
+  return hasSlosAndHasPermissions || isLoading ? null : (
     <ObservabilityPageTemplate data-test-subj="slosPageWelcomePrompt">
       <EuiPageTemplate.EmptyPrompt
         title={
