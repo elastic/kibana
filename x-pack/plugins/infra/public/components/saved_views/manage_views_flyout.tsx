@@ -23,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { MetricsExplorerView } from '../../../common/metrics_explorer_views';
 import { InventoryView } from '../../../common/inventory_views';
 import { UseInventoryViewsResult } from '../../hooks/use_inventory_views';
@@ -67,10 +68,11 @@ const DeleteConfimation = ({ isDisabled, onConfirm }: DeleteConfimationProps) =>
       </EuiButton>
     </EuiFlexGroup>
   ) : (
-    <EuiButtonEmpty
+    <EuiButtonIcon
       data-test-subj="infraDeleteConfimationButton"
       iconType="trash"
       color="danger"
+      size="s"
       onClick={toggleVisibility}
     />
   );
@@ -118,10 +120,11 @@ export function SavedViewManageViewsFlyout({
 
   const renderMakeDefaultAction = (item: View) => {
     return (
-      <EuiButtonEmpty
+      <EuiButtonIcon
         key={item.id}
         data-test-subj="infraRenderMakeDefaultActionButton"
         iconType={item.attributes.isDefault ? 'starFilled' : 'starEmpty'}
+        size="s"
         onClick={() => {
           onMakeDefaultView(item.id);
         }}
