@@ -227,9 +227,9 @@ describe('useDiscoverHistogram', () => {
       expect(Object.keys(params ?? {})).toEqual([
         'totalHitsStatus',
         'totalHitsResult',
-        'chartHidden',
-        'timeInterval',
         'breakdownField',
+        'timeInterval',
+        'chartHidden',
       ]);
     });
 

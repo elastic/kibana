@@ -136,16 +136,16 @@ export const useDiscoverHistogram = ({
   useEffect(() => {
     const subscription = createAppStateObservable(stateContainer.appState.state$).subscribe(
       (changes) => {
-        if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
-          unifiedHistogram?.setChartHidden(changes.chartHidden);
+        if ('breakdownField' in changes) {
+          unifiedHistogram?.setBreakdownField(changes.breakdownField);
         }
 
         if ('timeInterval' in changes && changes.timeInterval) {
           unifiedHistogram?.setTimeInterval(changes.timeInterval);
         }
 
-        if ('breakdownField' in changes) {
-          unifiedHistogram?.setBreakdownField(changes.breakdownField);
+        if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
+          unifiedHistogram?.setChartHidden(changes.chartHidden);
         }
       }
     );
@@ -366,16 +366,16 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
         return changes;
       }
 
-      if (prev?.hideChart !== curr.hideChart) {
-        changes.chartHidden = curr.hideChart;
+      if (prev?.breakdownField !== curr.breakdownField) {
+        changes.breakdownField = curr.breakdownField;
       }
 
       if (prev?.interval !== curr.interval) {
         changes.timeInterval = curr.interval;
       }
 
-      if (prev?.breakdownField !== curr.breakdownField) {
-        changes.breakdownField = curr.breakdownField;
+      if (prev?.hideChart !== curr.hideChart) {
+        changes.chartHidden = curr.hideChart;
       }
 
       return changes;
