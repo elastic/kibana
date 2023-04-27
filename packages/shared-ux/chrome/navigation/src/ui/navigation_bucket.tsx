@@ -19,7 +19,6 @@ export const NavigationBucket = (opts: NavigationBucketProps) => {
   if (navIsOpen) {
     return (
       <EuiCollapsibleNavGroup
-        background="dark"
         id={id}
         title={props.name}
         iconType={props.icon}

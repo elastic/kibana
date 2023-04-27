@@ -12,7 +12,6 @@ import {
   EuiCollapsibleNav,
   EuiPopover,
   EuiThemeProvider,
-  useEuiTheme,
 } from '@elastic/eui';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React, { useCallback, useState } from 'react';
@@ -33,8 +32,6 @@ const Template = (args: NavigationProps & NavigationServices) => {
   const services = storybookMock.getServices(args);
   const props = storybookMock.getProps(args);
 
-  const { euiTheme, colorMode } = useEuiTheme();
-
   const [isOpen, setIsOpen] = useState(true);
 
   const toggleOpen = useCallback(() => {
@@ -43,7 +40,6 @@ const Template = (args: NavigationProps & NavigationServices) => {
 
   const collabsibleNavCSS = css`
     border-inline-end-width: 1,
-    background: ${euiTheme.colors.darkestShade},
     display: flex,
     flex-direction: row,
   `;
@@ -51,7 +47,6 @@ const Template = (args: NavigationProps & NavigationServices) => {
   const CollapseButton = () => {
     const buttonCSS = css`
       margin-left: -32px;
-      margin-top: 12px;
       position: fixed;
       z-index: 1000;
     `;
@@ -59,7 +54,7 @@ const Template = (args: NavigationProps & NavigationServices) => {
       <span css={buttonCSS}>
         <EuiButtonIcon
           iconType={isOpen ? 'menuLeft' : 'menuRight'}
-          color="ghost"
+          color={isOpen ? 'ghost' : 'text'}
           onClick={toggleOpen}
         />
       </span>
@@ -67,7 +62,7 @@ const Template = (args: NavigationProps & NavigationServices) => {
   };
 
   return (
-    <EuiThemeProvider colorMode={colorMode === 'DARK' ? 'LIGHT' : 'DARK'}>
+    <EuiThemeProvider>
       <EuiCollapsibleNav
         css={collabsibleNavCSS}
         isOpen={true}

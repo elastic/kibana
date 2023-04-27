@@ -14,6 +14,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
 import { getI18nStrings } from './i18n_strings';
@@ -26,6 +27,7 @@ import { NavigationBucket } from './navigation_bucket';
 
 export const Navigation = (props: NavigationProps) => {
   const { loadingCount, activeNavItemId, ...services } = useNavigation();
+  const { euiTheme } = useEuiTheme();
 
   const activeNav = activeNavItemId ?? props.activeNavItemId;
 
@@ -106,7 +108,7 @@ export const Navigation = (props: NavigationProps) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="none" style={{ overflowY: 'auto' }}>
       <EuiFlexItem grow={false}>
-        <EuiCollapsibleNavGroup css={{ height: '50px' }}>
+        <EuiCollapsibleNavGroup css={{ background: euiTheme.colors.darkestShade, height: '50px' }}>
           <NavHeader />
         </EuiCollapsibleNavGroup>
 
