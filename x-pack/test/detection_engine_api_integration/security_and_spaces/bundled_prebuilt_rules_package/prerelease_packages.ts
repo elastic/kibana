@@ -14,6 +14,7 @@ import {
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
 } from '../../utils';
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
