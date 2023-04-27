@@ -333,13 +333,15 @@ Object {
           },
           Object {
             "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
+              "filter": Array [
                 Object {
                   "exists": Object {
                     "field": "system.process.cgroup.memory.mem.usage.bytes",
                   },
                 },
+              ],
+              "minimum_should_match": 1,
+              "should": Array [
                 Object {
                   "exists": Object {
                     "field": "system.process.cgroup.memory.mem.limit.bytes",
@@ -887,13 +889,15 @@ Object {
           },
           Object {
             "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
+              "filter": Array [
                 Object {
                   "exists": Object {
                     "field": "system.process.cgroup.memory.mem.usage.bytes",
                   },
                 },
+              ],
+              "minimum_should_match": 1,
+              "should": Array [
                 Object {
                   "exists": Object {
                     "field": "system.process.cgroup.memory.mem.limit.bytes",
@@ -1420,13 +1424,15 @@ Object {
           },
           Object {
             "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
+              "filter": Array [
                 Object {
                   "exists": Object {
                     "field": "system.process.cgroup.memory.mem.usage.bytes",
                   },
                 },
+              ],
+              "minimum_should_match": 1,
+              "should": Array [
                 Object {
                   "exists": Object {
                     "field": "system.process.cgroup.memory.mem.limit.bytes",

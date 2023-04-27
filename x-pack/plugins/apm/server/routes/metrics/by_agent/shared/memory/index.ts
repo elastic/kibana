@@ -71,8 +71,8 @@ export const percentSystemMemoryUsedScript = {
 
 export const cgroupMemoryFilter = {
   bool: {
+    filter: [{ exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } }],
     should: [
-      { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
       { exists: { field: METRIC_CGROUP_MEMORY_LIMIT_BYTES } },
       { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
     ],
