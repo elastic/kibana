@@ -196,6 +196,6 @@ export const TextExpansionCalloutLogic = kea<
     isStartButtonDisabled: [
       () => [selectors.startTextExpansionModelStatus],
       (status: Status) => status !== Status.IDLE,
-    ],    
+    ],
   }),
 });
