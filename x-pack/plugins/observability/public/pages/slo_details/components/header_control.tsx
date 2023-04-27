@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { useIsMutating } from '@tanstack/react-query';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
+import { useCapabilities } from '../../../hooks/slo/use_capabilities';
+import { useKibana } from '../../../utils/kibana_react';
+import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
+import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
 import { sloFeatureId } from '../../../../common';
 import { paths } from '../../../config/paths';
-import { useKibana } from '../../../utils/kibana_react';
-import { ObservabilityAppServices } from '../../../application/types';
-import { useCapabilities } from '../../../hooks/slo/use_capabilities';
-import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
 import {
   transformSloResponseToCreateSloInput,
   transformValuesToCreateSLOInput,
@@ -35,24 +34,23 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
-    notifications: { toasts },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
 
-  const { mutateAsync: cloneSlo } = useCloneSlo();
-  const isDeleting = Boolean(useIsMutating(['deleteSlo', slo?.id]));
+  const { mutate: cloneSlo } = useCloneSlo();
+  const { mutate: deleteSlo } = useDeleteSlo();
 
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
   const closePopover = () => setIsPopoverOpen(false);
 
   const handleEdit = () => {
     if (slo) {
-      navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
+      navigate(basePath.prepend(paths.observability.sloEdit(slo.id)));
     }
   };
 
@@ -94,7 +92,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
         transactionType,
       });
 
-      navigateToUrl(basePath.prepend(url));
+      navigate(basePath.prepend(url));
     }
   };
 
@@ -106,16 +104,9 @@ export function HeaderControl({ isLoading, slo }: Props) {
         transformSloResponseToCreateSloInput({ ...slo, name: `[Copy] ${slo.name}` })!
       );
 
-      await cloneSlo({ slo: newSlo, idToCopyFrom: slo.id });
+      cloneSlo({ slo: newSlo, idToCopyFrom: slo.id });
 
-      toasts.addSuccess(
-        i18n.translate('xpack.observability.slo.sloDetails.headerControl.cloneSuccess', {
-          defaultMessage: 'Successfully created {name}',
-          values: { name: newSlo.name },
-        })
-      );
-
-      navigateToUrl(basePath.prepend(paths.observability.slos));
+      navigate(basePath.prepend(paths.observability.slos));
     }
   };
 
@@ -128,9 +119,17 @@ export function HeaderControl({ isLoading, slo }: Props) {
     setDeleteConfirmationModalOpen(false);
   };
 
-  const handleDeleteSuccess = () => {
-    navigateToUrl(basePath.prepend(paths.observability.slos));
+  const handleDeleteConfirm = async () => {
+    if (slo) {
+      deleteSlo({ id: slo.id, name: slo.name });
+      navigate(basePath.prepend(paths.observability.slos));
+    }
   };
+
+  const navigate = useCallback(
+    (url: string) => setTimeout(() => navigateToUrl(url)),
+    [navigateToUrl]
+  );
 
   return (
     <>
@@ -144,7 +143,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
             iconType="arrowDown"
             iconSize="s"
             onClick={handleActionsClick}
-            disabled={isLoading || isDeleting || !slo}
+            disabled={isLoading || !slo}
           >
             {i18n.translate('xpack.observability.slo.sloDetails.headerControl.actions', {
               defaultMessage: 'Actions',
@@ -254,7 +253,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
         <SloDeleteConfirmationModal
           slo={slo}
           onCancel={handleDeleteCancel}
-          onSuccess={handleDeleteSuccess}
+          onConfirm={handleDeleteConfirm}
         />
       ) : null}
     </>

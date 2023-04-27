@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { useIsMutating, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -45,6 +45,7 @@ export interface SloListItemProps {
   historicalSummary?: HistoricalSummaryResponse[];
   historicalSummaryLoading: boolean;
   activeAlerts?: ActiveAlerts;
+  onConfirmDelete: (slo: SLOWithSummaryResponse) => void;
 }
 
 export function SloListItem({
@@ -53,6 +54,7 @@ export function SloListItem({
   historicalSummary = [],
   historicalSummaryLoading,
   activeAlerts,
+  onConfirmDelete,
 }: SloListItemProps) {
   const {
     application: { navigateToUrl },
@@ -65,7 +67,6 @@ export function SloListItem({
   const filteredRuleTypes = useGetFilteredRuleTypes();
 
   const { mutate: cloneSlo } = useCloneSlo();
-  const isDeletingSlo = Boolean(useIsMutating(['deleteSlo', slo.id]));
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
@@ -114,21 +115,17 @@ export function SloListItem({
     setIsActionsPopoverOpen(false);
   };
 
+  const handleDeleteConfirm = () => {
+    setDeleteConfirmationModalOpen(false);
+    onConfirmDelete(slo);
+  };
+
   const handleDeleteCancel = () => {
     setDeleteConfirmationModalOpen(false);
   };
 
   return (
-    <EuiPanel
-      data-test-subj="sloItem"
-      color={isDeletingSlo ? 'subdued' : undefined}
-      hasBorder
-      hasShadow={false}
-      style={{
-        opacity: isDeletingSlo ? 0.3 : 1,
-        transition: 'opacity 0.1s ease-in',
-      }}
-    >
+    <EuiPanel data-test-subj="sloItem" hasBorder hasShadow={false}>
       <EuiFlexGroup responsive={false} alignItems="center">
         {/* CONTENT */}
         <EuiFlexItem grow>
@@ -137,13 +134,18 @@ export function SloListItem({
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexItem>
                   <EuiText size="s">
-                    <EuiLink data-test-subj="o11ySloListItemLink" onClick={handleViewDetails}>
-                      {slo.name}
-                    </EuiLink>
+                    {slo.summary ? (
+                      <EuiLink data-test-subj="o11ySloListItemLink" onClick={handleViewDetails}>
+                        {slo.name}
+                      </EuiLink>
+                    ) : (
+                      <span>{slo.name}</span>
+                    )}
                   </EuiText>
                 </EuiFlexItem>
                 <SloBadges
                   activeAlerts={activeAlerts}
+                  isLoading={!slo.summary}
                   rules={rules}
                   slo={slo}
                   onClickRuleBadge={handleCreateRule}
@@ -152,11 +154,13 @@ export function SloListItem({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <SloSummary
-                slo={slo}
-                historicalSummary={historicalSummary}
-                historicalSummaryLoading={historicalSummaryLoading}
-              />
+              {slo.summary ? (
+                <SloSummary
+                  slo={slo}
+                  historicalSummary={historicalSummary}
+                  historicalSummaryLoading={historicalSummaryLoading}
+                />
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -267,7 +271,11 @@ export function SloListItem({
       ) : null}
 
       {isDeleteConfirmationModalOpen ? (
-        <SloDeleteConfirmationModal slo={slo} onCancel={handleDeleteCancel} />
+        <SloDeleteConfirmationModal
+          slo={slo}
+          onCancel={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+        />
       ) : null}
     </EuiPanel>
   );
