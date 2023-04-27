@@ -16,34 +16,33 @@ import type { UIActionProps } from './types';
 
 export const registerUIActions = (
   coreStart: CoreStart,
-  uiActions: CasesPluginStart['uiActions'],
+  plugins: CasesPluginStart,
   caseContextProps: UIActionProps,
   history: H.History
 ) => {
-  registerLensActions(coreStart, uiActions, caseContextProps, history);
+  registerLensActions(coreStart, plugins, caseContextProps, history);
 };
 
 const registerLensActions = (
   coreStart: CoreStart,
-  uiActions: CasesPluginStart['uiActions'],
+  plugins: CasesPluginStart,
   caseContextProps: UIActionProps,
   history: H.History
 ) => {
-  const { uiSettings } = coreStart;
   const addToNewCaseAction = createAddToNewCaseLensAction({
     // order: 42,
     coreStart,
+    plugins,
     caseContextProps,
-    uiSettings,
   });
-  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToNewCaseAction);
+  plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToNewCaseAction);
 
   const addToExistingCaseAction = createAddToExistingCaseLensAction({
     // order: 41,
     coreStart,
+    plugins,
     caseContextProps,
-    uiSettings,
     history,
   });
-  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToExistingCaseAction);
+  plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToExistingCaseAction);
 };

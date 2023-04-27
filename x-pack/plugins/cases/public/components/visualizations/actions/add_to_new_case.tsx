@@ -12,24 +12,21 @@ import { createAction } from '@kbn/ui-actions-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
-import { useCasesToast } from '../../../common/use_cases_toast';
-import type { Case } from '../../../../common';
+import type { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { canUseCases } from '../../../client/helpers/can_use_cases';
+import type { CasesPluginStart } from '../../../types';
 import { CommentType } from '../../../../common';
 import { isLensEmbeddable } from './utils';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
 
-import { getUICapabilities } from '../../../client/helpers/capabilities';
 import { OWNER_INFO } from '../../../../common/constants';
 import type { DashboardVisualizationEmbeddable, UIActionProps } from './types';
 import CasesProvider from '../../cases_context';
-import CreateCaseFlyout from '../../create/flyout';
 import { ADD_TO_CASE_SUCCESS } from './translations';
+import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 
 export const ACTION_ID = 'embeddable_addToNewCase';
-export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
-export const APP_NAME = 'Security' as const;
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 
 interface Props {
@@ -40,7 +37,12 @@ interface Props {
 
 const AddToNewCaseFlyoutWrapper: React.FC<Props> = ({ embeddable, onClose, onSuccess }) => {
   const { attributes, timeRange } = embeddable.getInput();
-  const casesToasts = useCasesToast();
+  const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
+    onClose,
+    onSuccess,
+    toastContent: ADD_TO_CASE_SUCCESS,
+  });
+
   const attachments = [
     {
       comment: `!{lens${JSON.stringify({
@@ -51,19 +53,9 @@ const AddToNewCaseFlyoutWrapper: React.FC<Props> = ({ embeddable, onClose, onSuc
     },
   ];
 
-  const onSuccessFlyout = (theCase: Case) => {
-    onSuccess();
+  createNewCaseFlyout.open({ attachments });
 
-    casesToasts.showSuccessAttach({
-      theCase,
-      attachments: attachments ?? [],
-      content: ADD_TO_CASE_SUCCESS,
-    });
-  };
-
-  return (
-    <CreateCaseFlyout onClose={onClose} attachments={attachments} onSuccess={onSuccessFlyout} />
-  );
+  return null;
 };
 
 AddToNewCaseFlyoutWrapper.displayName = 'AddToNewCaseFlyoutWrapper';
@@ -71,15 +63,15 @@ AddToNewCaseFlyoutWrapper.displayName = 'AddToNewCaseFlyoutWrapper';
 export const createAddToNewCaseLensAction = ({
   order,
   coreStart,
-  uiSettings,
+  plugins,
   caseContextProps,
 }: {
   order?: number;
   coreStart: CoreStart;
-  uiSettings: IUiSettingsClient;
+  plugins: CasesPluginStart;
   caseContextProps: UIActionProps;
 }) => {
-  const { application: applicationService, theme } = coreStart;
+  const { application: applicationService, theme, uiSettings } = coreStart;
   let currentAppId: string | undefined;
   applicationService?.currentAppId$.subscribe((appId) => {
     currentAppId = appId;
@@ -89,7 +81,7 @@ export const createAddToNewCaseLensAction = ({
     id: ACTION_ID,
     type: 'actionButton',
     order,
-    getIconType: () => 'plusInCircle',
+    getIconType: () => 'casesApp',
     getDisplayName: () =>
       i18n.translate('xpack.cases.actions.visualizationActions.addToNewCase.displayName', {
         defaultMessage: 'Add to new case',
@@ -98,16 +90,19 @@ export const createAddToNewCaseLensAction = ({
       !isErrorEmbeddable(embeddable) && isLensEmbeddable(embeddable),
     execute: async ({ embeddable }) => {
       const { attributes, timeRange } = embeddable.getInput();
+      const owner = Object.values(OWNER_INFO)
+        .filter((info) => info.appId === currentAppId)
+        .map((i) => i.id);
 
-      const casesCapabilities = getUICapabilities(
-        applicationService.capabilities[CASES_FEATURE_ID]
+      const casePermissions = canUseCases(applicationService.capabilities)(
+        owner.length > 0 ? owner : undefined
       );
 
       if (
         attributes == null ||
         timeRange == null ||
-        !casesCapabilities.create ||
-        !casesCapabilities.read
+        !casePermissions.update ||
+        !casePermissions.read
       ) {
         return;
       }
@@ -124,37 +119,30 @@ export const createAddToNewCaseLensAction = ({
         cleanupDom();
       };
 
-      const owner = Object.values(OWNER_INFO)
-        .filter((info) => info.appId === currentAppId)
-        .map((i) => i.id);
-
-      console.log('-------', owner);
-
       const mount = toMountPoint(
-        wrapWithTheme(
-          <KibanaContextProvider
-            services={{
-              ...coreStart,
-            }}
-          >
-            <EuiThemeProvider darkMode={uiSettings.get(DEFAULT_DARK_MODE)}>
-              <CasesProvider
-                value={{
-                  ...caseContextProps,
-                  owner,
-                  permissions: casesCapabilities,
-                }}
-              >
-                <AddToNewCaseFlyoutWrapper
-                  embeddable={embeddable}
-                  onClose={onFlyoutClose}
-                  onSuccess={cleanupDom}
-                />
-              </CasesProvider>
-            </EuiThemeProvider>
-          </KibanaContextProvider>,
-          theme.theme$
-        )
+        <KibanaContextProvider
+          services={{
+            ...coreStart,
+            ...plugins,
+          }}
+        >
+          <EuiThemeProvider darkMode={uiSettings.get(DEFAULT_DARK_MODE)}>
+            <CasesProvider
+              value={{
+                ...caseContextProps,
+                owner,
+                permissions: casePermissions,
+              }}
+            >
+              <AddToNewCaseFlyoutWrapper
+                embeddable={embeddable}
+                onClose={onFlyoutClose}
+                onSuccess={onFlyoutClose}
+              />
+            </CasesProvider>
+          </EuiThemeProvider>
+        </KibanaContextProvider>,
+        { theme$: theme.theme$ }
       );
 
       mount(targetDomElement);

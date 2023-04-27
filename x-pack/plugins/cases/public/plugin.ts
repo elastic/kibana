@@ -131,7 +131,7 @@ export class CasesUiPlugin
 
     registerActions(
       core,
-      plugins.uiActions,
+      plugins,
       {
         externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
