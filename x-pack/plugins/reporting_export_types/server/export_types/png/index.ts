@@ -15,8 +15,11 @@ import {
   LICENSE_TYPE_TRIAL,
   PNG_JOB_TYPE as jobType,
 } from '@kbn/reporting-plugin/common/constants';
-import type { CreateJobFn, RunTaskFn } from '@kbn/reporting-plugin/server/types';
-import { ExportTypeDefinition } from '../types';
+import type {
+  CreateJobFn,
+  ExportTypeDefinition,
+  RunTaskFn,
+} from '@kbn/reporting-plugin/server/types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';

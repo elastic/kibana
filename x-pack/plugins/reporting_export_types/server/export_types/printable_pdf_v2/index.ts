@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { JobParamsPDFV2 } from '@kbn/reporting-export-types/common';
-import { TaskPayloadPDFV2 } from '@kbn/reporting-export-types/common/printable_pdf_v2';
 import {
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -15,8 +13,12 @@ import {
   LICENSE_TYPE_TRIAL,
   PDF_JOB_TYPE_V2 as jobType,
 } from '@kbn/reporting-plugin/common/constants';
-import type { CreateJobFn, RunTaskFn } from '@kbn/reporting-plugin/server/types';
-import { ExportTypeDefinition } from '../types';
+import { JobParamsPDFV2, TaskPayloadPDFV2 } from '@kbn/reporting-plugin/common/types';
+import type {
+  CreateJobFn,
+  ExportTypeDefinition,
+  RunTaskFn,
+} from '@kbn/reporting-plugin/server/types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';

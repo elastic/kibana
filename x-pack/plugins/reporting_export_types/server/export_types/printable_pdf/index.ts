@@ -15,8 +15,7 @@ import {
 } from '@kbn/reporting-plugin/common/constants';
 import { JobParamsPDFDeprecated } from '@kbn/reporting-plugin/server/routes/lib';
 import { TaskPayloadPDF } from '@kbn/reporting-plugin/server/routes/lib/request_handler';
-import { CreateJobFn, RunTaskFn } from '@kbn/reporting-plugin/server/types';
-import { ExportTypeDefinition } from '../types';
+import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '@kbn/reporting-plugin/server/types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';

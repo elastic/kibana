@@ -14,13 +14,12 @@ import type { ReportingCore } from '@kbn/reporting-plugin/server';
 import { CancellationToken } from '@kbn/reporting-common';
 import { runTaskFnFactory } from './execute_job';
 import { generatePdfObservable } from './lib/generate_pdf';
-import { LocatorParams } from '@kbn/reporting-plugin/common/types';
+import { LocatorParams, TaskPayloadPDFV2 } from '@kbn/reporting-plugin/common/types';
 import { cryptoFactory } from '@kbn/reporting-plugin/server/lib';
 import {
   createMockConfigSchema,
   createMockReportingCore,
 } from '@kbn/reporting-plugin/server/test_helpers';
-import { TaskPayloadPDFV2 } from '@kbn/reporting-export-types/common/printable_pdf_v2';
 
 let content: string;
 let mockReporting: ReportingCore;

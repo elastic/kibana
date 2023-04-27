@@ -7,7 +7,6 @@
  */
 import { PluginInitializerContext } from '@kbn/core-plugins-server';
 import { ExportTypesPlugin } from './plugin';
-export type { ExportTypeDefinition } from './export_types/types';
 export { getExportType as getTypeCsvFromSavedObject } from './export_types/csv_v2';
 export { getExportType as getTypeCsvFromSavedObjectImmediate } from './export_types/csv_searchsource_immediate';
 export { getExportType as getTypeCsv } from './export_types/csv_searchsource';

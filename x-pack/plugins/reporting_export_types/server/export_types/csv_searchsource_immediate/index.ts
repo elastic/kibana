@@ -14,7 +14,7 @@ import {
   LICENSE_TYPE_ENTERPRISE,
   CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
 } from '@kbn/reporting-plugin/common/constants';
-import { ExportTypeDefinition } from '../types';
+import { ExportTypeDefinition } from '@kbn/reporting-plugin/server/types';
 import { ImmediateExecuteFn, runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
 

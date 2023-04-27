@@ -5,17 +5,8 @@
  * 2.0.
  */
 
-import { BaseParams, LocatorParams, BasePayload } from '@kbn/reporting-plugin/common/types';
+import { LocatorParams, BasePayload } from '@kbn/reporting-plugin/common/types';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
-
-// Job params: structure of incoming user request data
-export interface JobParamsPNGV2 extends BaseParams {
-  layout: LayoutParams;
-  /**
-   * This value is used to re-create the same visual state as when the report was requested as well as navigate to the correct page.
-   */
-  locatorParams: LocatorParams;
-}
 
 // Job payload: structure of stored job data provided by create_job
 export interface TaskPayloadPNGV2 extends BasePayload {

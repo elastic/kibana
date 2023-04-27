@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { JobParamsPDFV2 } from '@kbn/reporting-export-types/common';
-import { TaskPayloadPDFV2 } from '@kbn/reporting-export-types/common/printable_pdf_v2';
+import { JobParamsPDFV2, TaskPayloadPDFV2 } from '@kbn/reporting-plugin/common/types';
 import type { CreateJobFn, CreateJobFnFactory } from '@kbn/reporting-plugin/server/types';
 
 export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<JobParamsPDFV2, TaskPayloadPDFV2>> =
