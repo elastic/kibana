@@ -21,7 +21,7 @@ export const analyticsItemSet: NavItemProps[] = [
       {
         name: 'Dashboard',
         id: 'dashboard',
-        href: '/app/dashboard',
+        href: '/app/dashboards',
       },
       {
         name: 'Visualize Library',
