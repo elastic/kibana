@@ -685,46 +685,43 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   ]);
 
   const QueryBarMemo = useMemo(
-    () =>
-      dataView != null ? (
-        <UseField
-          key="QueryBarDefineRule"
-          path="queryBar"
-          config={{
-            ...schema.queryBar,
-            label: i18n.QUERY_BAR_LABEL,
-            labelAppend: (
-              <MyLabelButton
-                data-test-subj="importQueryFromSavedTimeline"
-                onClick={handleOpenTimelineSearch}
-                disabled={formShouldLoadQueryDynamically}
-              >
-                {i18n.IMPORT_TIMELINE_QUERY}
-              </MyLabelButton>
-            ),
-          }}
-          component={QueryBarDefineRule}
-          componentProps={
-            {
-              browserFields,
-              idAria: 'detectionEngineStepDefineRuleQueryBar',
-              indexPattern: dataView,
-              isDisabled: isLoading || formShouldLoadQueryDynamically || timelineQueryLoading,
-              resetToSavedQuery: formShouldLoadQueryDynamically,
-              isLoading: isIndexPatternLoading || timelineQueryLoading,
-              dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
-              openTimelineSearch,
-              onValidityChange: setIsQueryBarValid,
-              onCloseTimelineSearch: handleCloseTimelineSearch,
-              onSavedQueryError: handleSavedQueryError,
-              defaultSavedQuery,
-              onOpenTimeline,
-            } as QueryBarDefineRuleProps
-          }
-        />
-      ) : (
-        <EuiLoadingSpinner />
-      ),
+    () => (
+      <UseField
+        key="QueryBarDefineRule"
+        path="queryBar"
+        config={{
+          ...schema.queryBar,
+          label: i18n.QUERY_BAR_LABEL,
+          labelAppend: (
+            <MyLabelButton
+              data-test-subj="importQueryFromSavedTimeline"
+              onClick={handleOpenTimelineSearch}
+              disabled={formShouldLoadQueryDynamically}
+            >
+              {i18n.IMPORT_TIMELINE_QUERY}
+            </MyLabelButton>
+          ),
+        }}
+        component={QueryBarDefineRule}
+        componentProps={
+          {
+            browserFields,
+            idAria: 'detectionEngineStepDefineRuleQueryBar',
+            indexPattern: dataView,
+            isDisabled: isLoading || formShouldLoadQueryDynamically || timelineQueryLoading,
+            resetToSavedQuery: formShouldLoadQueryDynamically,
+            isLoading: isIndexPatternLoading || timelineQueryLoading,
+            dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+            openTimelineSearch,
+            onValidityChange: setIsQueryBarValid,
+            onCloseTimelineSearch: handleCloseTimelineSearch,
+            onSavedQueryError: handleSavedQueryError,
+            defaultSavedQuery,
+            onOpenTimeline,
+          } as QueryBarDefineRuleProps
+        }
+      />
+    ),
     [
       handleOpenTimelineSearch,
       formShouldLoadQueryDynamically,

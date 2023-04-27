@@ -54,7 +54,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   const isEql = useRef(false);
 
   // selectedTimeline = timeline to set rule from
-  const [selectedTimeline, setRuleFromTimeline] = useState<TimelineModel | null>(null);
+  const [selectedTimeline, setSelectedTimeline] = useState<TimelineModel | null>(null);
 
   const [loading, setLoading] = useState(false);
 
@@ -62,7 +62,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     (timeline: TimelineModel) => {
       // will already be true if timeline set from url
       setLoading(true);
-      setRuleFromTimeline(timeline);
+      setSelectedTimeline(timeline);
 
       if (timeline.dataViewId !== dataViewId && !isEmpty(timeline.indexNames)) {
         // let sourcerer manage the selected browser fields by setting timeline scope to the selected timeline data view

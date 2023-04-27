@@ -106,6 +106,10 @@ export interface TimelineModel {
   expandedDetail: ExpandedDetailTimeline;
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
+
+  /**
+   * @deprecated use dataViewId or dataView.getIndexPattern()
+   */
   indexNames: string[];
   /** The number of items to show in a single page of results */
   itemsPerPage: number;

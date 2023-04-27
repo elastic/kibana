@@ -102,7 +102,10 @@ export const QueryBar = memo<QueryBarComponentProps>(
       [filterManager]
     );
 
-    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+    const indexPatterns = useMemo(
+      () => (indexPattern != null && !isLoading ? [indexPattern] : []),
+      [indexPattern, isLoading]
+    );
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
     return (

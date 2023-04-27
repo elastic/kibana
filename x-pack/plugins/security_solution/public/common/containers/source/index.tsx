@@ -186,11 +186,7 @@ export const useFetchIndex = (
           });
         } catch (exc) {
           setState({
-            browserFields: DEFAULT_BROWSER_FIELDS,
-            indexes: defaultIndexesArray,
-            indexExists: true,
-            indexPatterns: DEFAULT_INDEX_PATTERNS,
-            dataView: undefined,
+            ...state,
             loading: false,
           });
           addError(exc?.message, { title: i18n.ERROR_INDEX_FIELDS_SEARCH });
@@ -199,15 +195,7 @@ export const useFetchIndex = (
 
       asyncSearch();
     },
-    [
-      addError,
-      data.dataViews,
-      dataViewIdOrIndexNames,
-      defaultIndexesArray,
-      includeUnmapped,
-      isIndexNameArray,
-      state,
-    ]
+    [addError, data.dataViews, dataViewIdOrIndexNames, includeUnmapped, isIndexNameArray, state]
   );
 
   useEffect(() => {
