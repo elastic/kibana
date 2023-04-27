@@ -12,25 +12,33 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../../common/constants';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
-import { mockIndexPattern, TestProviders } from '../../../../common/mock';
+import { mockIndexPattern, TestProviders, mockIndexNames } from '../../../../common/mock';
 import { QueryBar } from '../../../../common/components/query_bar';
 import { FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { buildGlobalQuery } from '../helpers';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 
 import type { QueryBarTimelineComponentProps } from '.';
 import { QueryBarTimeline, getDataProviderFilter, TIMELINE_FILTER_DROP_AREA } from '.';
 import { waitFor } from '@testing-library/dom';
+import { createStubDataView } from '@kbn/data-plugin/common/stubs';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/containers/sourcerer');
 
 describe('Timeline QueryBar ', () => {
   const mockSetFilters = jest.fn();
   const mockSetSavedQueryId = jest.fn();
   const mockUpdateReduxTime = jest.fn();
+  (useSourcererDataView as jest.Mock).mockImplementation(() => ({
+    browserFields: [],
+    indexPattern: mockIndexPattern,
+    sourcererDataView: createStubDataView({ spec: { title: mockIndexNames.join() } }),
+  }));
 
   beforeEach(() => {
     mockSetFilters.mockClear();
