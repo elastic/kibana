@@ -7,7 +7,6 @@
 
 import { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import { Ast } from '@kbn/interpreter';
-import memoizeOne from 'memoize-one';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference, noop } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -19,9 +18,8 @@ import {
   EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
 } from '@kbn/event-annotation-plugin/common';
-import {
+import type {
   Datasource,
-  DatasourceLayers,
   DatasourceMap,
   IndexPattern,
   IndexPatternMap,
@@ -33,9 +31,10 @@ import {
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
-import type { DatasourceStates, DataViewsState, VisualizationState } from '../../state_management';
+import type { DatasourceStates, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
+import { getDatasourceLayers } from '../../state_management/utils';
 
 function getIndexPatterns(
   annotationGroupDataviewIds: string[],
@@ -331,30 +330,6 @@ export function initializeDatasources({
   }
   return states;
 }
-
-export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
-  datasourceStates: DatasourceStates,
-  datasourceMap: DatasourceMap,
-  indexPatterns: DataViewsState['indexPatterns']
-) {
-  const datasourceLayers: DatasourceLayers = {};
-  Object.keys(datasourceMap)
-    .filter((id) => datasourceStates[id] && !datasourceStates[id].isLoading)
-    .forEach((id) => {
-      const datasourceState = datasourceStates[id].state;
-      const datasource = datasourceMap[id];
-
-      const layers = datasource.getLayers(datasourceState);
-      layers.forEach((layer) => {
-        datasourceLayers[layer] = datasourceMap[id].getPublicAPI({
-          state: datasourceState,
-          layerId: layer,
-          indexPatterns,
-        });
-      });
-    });
-  return datasourceLayers;
-});
 
 export interface DocumentToExpressionReturnType {
   ast: Ast | null;

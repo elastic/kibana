@@ -14,7 +14,7 @@ import type {
   TinymathVariable,
 } from '@kbn/tinymath';
 import type { Query } from '@kbn/es-query';
-import { nonNullable } from '../../../../../types';
+import { nonNullable } from '../../../../../utils';
 import type {
   OperationDefinition,
   GenericIndexPatternColumn,

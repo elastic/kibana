@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
-import { validateQuery } from '../../shared_components';
+import { validateQuery } from '@kbn/visualization-ui-components/public';
 import { DataViewsState } from '../../state_management';
 import {
   FramePublicAPI,

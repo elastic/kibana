@@ -88,6 +88,7 @@ export class EditInLensAction implements Action<EditInLensContext> {
         searchQuery,
         isEmbeddable: true,
         description: vis.description || embeddable.getOutput().description,
+        panelTimeRange: embeddable.getInput()?.timeRange,
       };
       if (navigateToLensConfig) {
         if (this.currentAppId) {
