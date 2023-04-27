@@ -99,13 +99,6 @@ export const dashboardContainerReducers = {
     state.explicitInput.title = action.payload;
   },
 
-  setSearchSessionId: (
-    state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerInput['searchSessionId']>
-  ) => {
-    state.explicitInput.searchSessionId = action.payload;
-  },
-
   // ------------------------------------------------------------------------------
   // Unsaved Changes Reducers
   // ------------------------------------------------------------------------------
