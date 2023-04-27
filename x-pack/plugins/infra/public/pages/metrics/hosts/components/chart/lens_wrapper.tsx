@@ -15,7 +15,7 @@ import { useIntersectedOnce } from '../../../../../hooks/use_intersection_once';
 import { LensAttributes } from '../../../../../common/visualizations';
 import { ChartLoader } from './chart_loader';
 
-export interface Props {
+export interface LensWrapperProps {
   id: string;
   attributes: LensAttributes | null;
   dateRange: TimeRange;
@@ -42,11 +42,12 @@ export const LensWrapper = ({
   lastReloadRequestTime,
   loading = false,
   hasTitle = false,
-}: Props) => {
+}: LensWrapperProps) => {
   const intersectionRef = useRef(null);
   const [loadedOnce, setLoadedOnce] = useState(false);
 
   const [state, setState] = useState({
+    attributes,
     lastReloadRequestTime,
     query,
     filters,
@@ -65,15 +66,23 @@ export const LensWrapper = ({
   useEffect(() => {
     if ((intersection?.intersectionRatio ?? 0) === 1) {
       setState({
+        attributes,
         lastReloadRequestTime,
         query,
-        dateRange,
         filters,
+        dateRange,
       });
     }
-  }, [dateRange, filters, intersection?.intersectionRatio, lastReloadRequestTime, query]);
+  }, [
+    attributes,
+    dateRange,
+    filters,
+    intersection?.intersectionRatio,
+    lastReloadRequestTime,
+    query,
+  ]);
 
-  const isReady = attributes && intersectedOnce;
+  const isReady = state.attributes && intersectedOnce;
 
   return (
     <div ref={intersectionRef}>
@@ -83,11 +92,11 @@ export const LensWrapper = ({
         style={style}
         hasTitle={hasTitle}
       >
-        {isReady && (
+        {state.attributes && (
           <EmbeddableComponent
             id={id}
             style={style}
-            attributes={attributes}
+            attributes={state.attributes}
             viewMode={ViewMode.VIEW}
             timeRange={state.dateRange}
             query={state.query}

@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
 import { JsonObject } from '@kbn/utility-types';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 
 export async function getSavedObjectFromES<T>(
   es: Client,
@@ -17,7 +18,7 @@ export async function getSavedObjectFromES<T>(
 ): Promise<TransportResult<estypes.SearchResponse<T>, unknown>> {
   return await es.search<T>(
     {
-      index: '.kibana',
+      index: ALL_SAVED_OBJECT_INDICES,
       body: {
         query: {
           bool: {

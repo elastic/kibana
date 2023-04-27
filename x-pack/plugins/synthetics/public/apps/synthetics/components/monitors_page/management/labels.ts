@@ -24,14 +24,14 @@ export const LEARN_MORE_LABEL = i18n.translate(
 export const CALLOUT_MANAGEMENT_DISABLED = i18n.translate(
   'xpack.synthetics.monitorManagement.callout.disabled',
   {
-    defaultMessage: 'Monitor Management is disabled',
+    defaultMessage: 'Monitor Management is currently disabled',
   }
 );
 
 export const CALLOUT_MANAGEMENT_CONTACT_ADMIN = i18n.translate(
   'xpack.synthetics.monitorManagement.callout.disabled.adminContact',
   {
-    defaultMessage: 'Please contact your administrator to enable Monitor Management.',
+    defaultMessage: 'Monitor Management will be enabled when an admin visits the Synthetics app.',
   }
 );
 
@@ -39,7 +39,7 @@ export const CALLOUT_MANAGEMENT_DESCRIPTION = i18n.translate(
   'xpack.synthetics.monitorManagement.callout.description.disabled',
   {
     defaultMessage:
-      'Monitor Management is currently disabled. To run your monitors on Elastic managed Synthetics service, enable Monitor Management. Your existing monitors are paused.',
+      "Monitor Management requires a valid API key to run your monitors on Elastic's global managed testing locations. If you already had enabled Monitor Management previously, the API key may no longer be valid.",
   }
 );
 

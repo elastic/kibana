@@ -12,7 +12,7 @@ import 'react-grid-layout/css/styles.css';
 import { pick } from 'lodash';
 import classNames from 'classnames';
 import { useEffectOnce } from 'react-use/lib';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layout';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -37,6 +37,15 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
   useEffectOnce(() => {
     setTimeout(() => setAnimatePanelTransforms(true), 500);
   });
+
+  useEffect(() => {
+    if (expandedPanelId) {
+      setAnimatePanelTransforms(false);
+    } else {
+      // delaying enabling CSS transforms to the next tick prevents a panel slide animation on minimize
+      setTimeout(() => setAnimatePanelTransforms(true), 0);
+    }
+  }, [expandedPanelId]);
 
   const { onPanelStatusChange } = useDashboardPerformanceTracker({
     panelCount: Object.keys(panels).length,
@@ -98,7 +107,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
     'dshLayout-withoutMargins': !useMargins,
     'dshLayout--viewing': viewMode === ViewMode.VIEW,
     'dshLayout--editing': viewMode !== ViewMode.VIEW,
-    'dshLayout--noAnimation': !animatePanelTransforms,
+    'dshLayout--noAnimation': !animatePanelTransforms || expandedPanelId,
     'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
   });
 

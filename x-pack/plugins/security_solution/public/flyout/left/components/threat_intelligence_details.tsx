@@ -13,6 +13,8 @@ import { ThreatDetailsView } from '../../../common/components/event_details/cti_
 import { useThreatIntelligenceDetails } from './hooks/use_threat_intelligence_details';
 import { THREAT_INTELLIGENCE_DETAILS_SPINNER_TEST_ID } from './test_ids';
 
+export const THREAT_INTELLIGENCE_TAB_ID = 'threat-intelligence-details';
+
 /**
  * Threat intelligence displayed in the document details expandable flyout left section under the Insights tab
  */

@@ -99,13 +99,6 @@ export const dashboardContainerReducers = {
     state.explicitInput.title = action.payload;
   },
 
-  setSearchSessionId: (
-    state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerInput['searchSessionId']>
-  ) => {
-    state.explicitInput.searchSessionId = action.payload;
-  },
-
   // ------------------------------------------------------------------------------
   // Unsaved Changes Reducers
   // ------------------------------------------------------------------------------
@@ -208,5 +201,13 @@ export const dashboardContainerReducers = {
 
   setHasOverlays: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
     state.componentState.hasOverlays = action.payload;
+  },
+
+  setScrollToPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.scrollToPanelId = action.payload;
+  },
+
+  setHighlightPanelId: (state: DashboardReduxState, action: PayloadAction<string | undefined>) => {
+    state.componentState.highlightPanelId = action.payload;
   },
 };
