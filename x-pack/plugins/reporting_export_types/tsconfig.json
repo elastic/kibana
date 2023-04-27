@@ -23,7 +23,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/core-test-helpers-test-utils",
-    "@kbn/reporting-export-types",
   ],
   "exclude": [
     "target/**/*",
