@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach } from '../../helpers';
 
@@ -20,7 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
 
-  describe('Observability alerts', function () {
+  describe('Observability alerts >', function () {
     this.tags('includeFirefox');
 
     const testSubjects = getService('testSubjects');
@@ -49,12 +50,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Alerts table', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs');
         await observability.alerts.common.navigateToTimeWithData();
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs');
       });
 
       it('Renders the table', async () => {
@@ -113,8 +114,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('Correctly applies date picker selections', async () => {
           await retry.try(async () => {
+            await observability.alerts.common.setAlertStatusFilter(ALERT_STATUS_RECOVERED);
             await (await testSubjects.find('superDatePickerToggleQuickMenuButton')).click();
-            // We shouldn't expect any data for the last 15 minutes
+            // We shouldn't expect any recovered alert for the last 15 minutes
             await (await testSubjects.find('superDatePickerCommonlyUsed_Last_15 minutes')).click();
             await observability.alerts.common.getNoDataStateOrFail();
           });

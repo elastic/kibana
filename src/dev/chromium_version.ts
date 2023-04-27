@@ -46,7 +46,7 @@ async function getChromiumRevision(
   kibanaPuppeteerVersion: PuppeteerRelease,
   log: ToolingLog
 ): Promise<ChromiumRevision> {
-  const url = `https://raw.githubusercontent.com/puppeteer/puppeteer/v${kibanaPuppeteerVersion}/src/revisions.ts`;
+  const url = `https://raw.githubusercontent.com/puppeteer/puppeteer/v${kibanaPuppeteerVersion}/packages/puppeteer-core/src/revisions.ts`;
   let body: string;
   try {
     log.info(`Fetching code from Puppeteer source: ${url}`);
@@ -103,7 +103,12 @@ async function getChromiumCommit(
     throw new Error(`Could not find a Chromium commit! Check ${url} in a browser.`);
   }
 
+  const baseUrl = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots';
+
   log.info(`Found Chromium commit ${commit} from revision ${revision}.`);
+  log.info(`Mac x64 download:     ${baseUrl}/Mac/${revision}/chrome-mac.zip`);
+  log.info(`Mac ARM download:     ${baseUrl}/Mac_Arm/${revision}/chrome-mac.zip`);
+  log.info(`Windows x64 download: ${baseUrl}/Win/${revision}/chrome-win.zip`);
   return commit;
 }
 

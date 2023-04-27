@@ -35,7 +35,7 @@ import {
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
   SyntheticsMonitorWithSecrets,
-  SyntheticsParam,
+  SyntheticsParamSO,
   ThrottlingOptions,
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
@@ -473,10 +473,10 @@ export class SyntheticsService {
   async getSyntheticsParams({ spaceId }: { spaceId?: string } = {}) {
     const encryptedClient = this.server.encryptedSavedObjects.getClient();
 
-    const paramsBySpace: Record<string, Record<string, string>> = {};
+    const paramsBySpace: Record<string, Record<string, string>> = Object.create(null);
 
     const finder =
-      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParam>({
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParamSO>({
         type: syntheticsParamType,
         perPage: 1000,
         namespaces: spaceId ? [spaceId] : undefined,
@@ -486,7 +486,7 @@ export class SyntheticsService {
       response.saved_objects.forEach((param) => {
         param.namespaces?.forEach((namespace) => {
           if (!paramsBySpace[namespace]) {
-            paramsBySpace[namespace] = {};
+            paramsBySpace[namespace] = Object.create(null);
           }
           paramsBySpace[namespace][param.attributes.key] = param.attributes.value;
         });
