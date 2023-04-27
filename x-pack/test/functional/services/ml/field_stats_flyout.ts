@@ -89,9 +89,8 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
       fieldType: 'keyword' | 'date' | 'number',
       expectedTopValuesContent?: string[]
     ) {
-      const selector = `mlInspectFieldStatsButton-${fieldName}`;
-
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(3000, async () => {
+        const selector = `mlInspectFieldStatsButton-${fieldName}`;
         const fieldTarget = await testSubjects.find(parentComboBoxSelector);
         await comboBox.openOptionsList(fieldTarget);
 
