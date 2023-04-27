@@ -108,6 +108,10 @@ export class SyntheticsService {
   }
 
   public async setupIndexTemplates() {
+    if (process.env.CI && !this.config?.manifestUrl) {
+      // skip installation on CI
+      return;
+    }
     if (this.indexTemplateExists) {
       // if already installed, don't need to reinstall
       return;
