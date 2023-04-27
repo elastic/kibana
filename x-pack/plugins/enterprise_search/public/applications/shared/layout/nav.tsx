@@ -31,7 +31,6 @@ import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
   const { isSidebarEnabled, productAccess, productFeatures } = useValues(KibanaLogic);
-
   if (!isSidebarEnabled) return undefined;
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [

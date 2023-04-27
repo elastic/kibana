@@ -98,14 +98,14 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     coreStart.chrome
       .getChromeStyle$()
-      .subscribe((style) => (this.isSidebarEnabled = style !== 'project'));
+      .subscribe((style) => (this.isSidebarEnabled = style === 'classic'));
 
     return { core: coreStart, isSidebarEnabled: this.isSidebarEnabled, params, plugins };
   }
 
   private getPluginData() {
     // Small helper for grouping plugin data related args together
-    return { config: this.config, data: this.data };
+    return { config: this.config, data: this.data, isSidebarEnabled: this.isSidebarEnabled };
   }
 
   private hasInitialized: boolean = false;
