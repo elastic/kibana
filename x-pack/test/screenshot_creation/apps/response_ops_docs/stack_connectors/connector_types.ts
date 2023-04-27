@@ -26,32 +26,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const emailConnectorName = 'my-email-connector';
 
   describe('connector types', function () {
-    let emailConnectorId: string;
-    before(async () => {
-      ({ id: emailConnectorId } = await actions.api.createConnector({
-        name: emailConnectorName,
-        config: {
-          service: 'other',
-          from: 'bob@example.com',
-          host: 'some.non.existent.com',
-          port: 25,
-        },
-        secrets: {
-          user: 'bob',
-          password: 'supersecret',
-        },
-        connectorTypeId: '.email',
-      }));
-    });
+    // let emailConnectorId: string;
+    // before(async () => {
+    //   ({ id: emailConnectorId } = await actions.api.createConnector({
+    //     name: emailConnectorName,
+    //     config: {
+    //       service: 'other',
+    //       from: 'bob@example.com',
+    //       host: 'some.non.existent.com',
+    //       port: 25,
+    //     },
+    //     secrets: {
+    //       user: 'bob',
+    //       password: 'supersecret',
+    //     },
+    //     connectorTypeId: '.email',
+    //   }));
+    // });
 
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    after(async () => {
-      await actions.api.deleteConnector(emailConnectorId);
-    });
+    // after(async () => {
+    //   await actions.api.deleteConnector(emailConnectorId);
+    // });
 
     it('server log connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
@@ -83,22 +83,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await flyOutCancelButton.click();
     });
 
-    it('slack connector screenshots', async () => {
+    it('slack api connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await actions.common.openNewConnectorForm('slack');
-      await testSubjects.setValue('nameInput', 'Slack test connector');
-      await testSubjects.click('webApiButton');
+      await testSubjects.click('.slack_apiButton');
+      await testSubjects.setValue('nameInput', 'Slack api test connector');
       await testSubjects.setValue('secrets.token-input', 'xoxb-XXXX-XXXX-XXXX');
-      await commonScreenshots.takeScreenshot('slack-connector-web-api', screenshotDirectories);
-      await testSubjects.click('webhookButton');
+      await commonScreenshots.takeScreenshot('slack-api-connector', screenshotDirectories);
+      await testSubjects.click('create-connector-flyout-save-test-btn');
+      await testSubjects.click('toastCloseButton');
+      await pageObjects.common.closeToast();
+      await commonScreenshots.takeScreenshot('slack-api-params', screenshotDirectories);
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
+
+    it('slack webhook connector screenshots', async () => {
+      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await actions.common.openNewConnectorForm('slack');
+      await testSubjects.setValue('nameInput', 'Slack webhook test connector');
       await testSubjects.setValue(
         'slackWebhookUrlInput',
         'https://hooks.slack.com/services/abcd/ljklmnopqrstuvwxz'
       );
-      await commonScreenshots.takeScreenshot('slack-connector-webhook', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('slack-webhook-connector', screenshotDirectories);
       await testSubjects.click('create-connector-flyout-save-test-btn');
-      await commonScreenshots.takeScreenshot('slack-params-test', screenshotDirectories);
+      await testSubjects.click('toastCloseButton');
+      await commonScreenshots.takeScreenshot('slack-webhook-params', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
 
