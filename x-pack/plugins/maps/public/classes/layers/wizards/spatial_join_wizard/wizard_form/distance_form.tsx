@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFieldNumber,
@@ -14,35 +14,18 @@ import {
 
 interface Props {
   distance: number | string;
+  isDistanceInvalid: boolean;
   onDistanceChange: (distance: number | string) => void;
 }
 
 export function DistanceForm(props: Props) {
-  const [isInvalid, setIsInvalid] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-
-  useEffect(() => {
-    const distanceAsNumber = typeof props.distance === 'string' ? parseFloat(props.distance as string) : props.distance;
-    if (isNaN(distanceAsNumber)) {
-      setIsInvalid(true);
-      return;
-    }
-
-    if (distanceAsNumber <= 0) {
-      setIsInvalid(true);
-      return;
-    }
-
-    setIsInvalid(false);
-  }, [props.distance, setIsInvalid]);
-  
   return (
     <EuiFormRow
       label={i18n.translate('xpack.maps.spatialJoin.wizardForm.distanceLabel', {
         defaultMessage: 'Distance',
       })}
-      isInvalid={isInvalid}
-      error={isInvalid ? [i18n.translate('xpack.maps.spatialJoin.wizardForm.invalidDistanceMessage', {
+      isInvalid={props.isDistanceInvalid}
+      error={props.isDistanceInvalid ? [i18n.translate('xpack.maps.spatialJoin.wizardForm.invalidDistanceMessage', {
         defaultMessage: 'Must be a number greater than 0',
       })] : []}
     >
@@ -53,7 +36,7 @@ export function DistanceForm(props: Props) {
         aria-label={i18n.translate('xpack.maps.spatialJoin.wizardForm.distanceInputAriaLabel', {
           defaultMessage: 'distance input',
         })}
-        isInvalid={isInvalid}
+        isInvalid={props.isDistanceInvalid}
         min={0}
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
           props.onDistanceChange(e.target.value);

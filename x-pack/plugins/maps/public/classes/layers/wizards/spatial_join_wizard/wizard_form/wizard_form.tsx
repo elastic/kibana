@@ -17,6 +17,7 @@ import { createDistanceJoinLayerDescriptor } from './create_spatial_join_layer_d
 
 export function WizardForm({ previewLayers }: RenderWizardArguments) {
   const [distance, setDistance] = useState<number | string>(5);
+  const [isDistanceInvalid, setIsDistanceInvalid] = useState(false);
   const [leftDataView, setLeftDataView] = useState<DataView | undefined>();
   const [leftGeoFields, setLeftGeoFields] = useState<DataViewField[]>([]);
   const [leftGeoField, setLeftGeoField] = useState<string | undefined>();
@@ -29,13 +30,31 @@ export function WizardForm({ previewLayers }: RenderWizardArguments) {
   }
 
   function isRelationshipConfigComplete() {
-    const distanceAsNumber = typeof distance === 'string' ? parseFloat(distance as string) : distance;
-    return !isNaN(distanceAsNumber);
+    return !isDistanceInvalid;
   }
 
   function isRightConfigComplete() {
     return rightDataView !== undefined && rightGeoField !== undefined;
   }
+
+  function getDistanceAsNumber() {
+    return typeof distance === 'string' ? parseFloat(distance as string) : distance;
+  }
+
+  useEffect(() => {
+    const distanceAsNumber = getDistanceAsNumber();
+    if (isNaN(distanceAsNumber)) {
+      setIsDistanceInvalid(true);
+      return;
+    }
+
+    if (distanceAsNumber <= 0) {
+      setIsDistanceInvalid(true);
+      return;
+    }
+
+    setIsDistanceInvalid(false);
+  }, [distance, setIsDistanceInvalid]);
 
   useEffect(() => {
     if (!isLeftConfigComplete() || !isRelationshipConfigComplete() || !isRightConfigComplete()) {
@@ -44,7 +63,7 @@ export function WizardForm({ previewLayers }: RenderWizardArguments) {
     }
 
     const layerDescriptor = createDistanceJoinLayerDescriptor({
-      distance: typeof distance === 'string' ? parseFloat(distance as string) : distance,
+      distance: getDistanceAsNumber(),
       leftDataViewId: leftDataView!.id,
       leftGeoField: leftGeoField!,
       rightDataViewId: rightDataView!.id,
@@ -59,6 +78,7 @@ export function WizardForm({ previewLayers }: RenderWizardArguments) {
         <EuiSpacer size="s" />
         <RelationshipPanel
           distance={distance}
+          isDistanceInvalid={isDistanceInvalid}
           onDistanceChange={setDistance}
         />
       </>

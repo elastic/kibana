@@ -16,6 +16,7 @@ import { DistanceForm } from './distance_form';
 
 interface Props {
   distance: number | string;
+  isDistanceInvalid: boolean;
   onDistanceChange: (distance: number | string) => void;
 }
 
@@ -32,7 +33,7 @@ export function RelationshipPanel(props: Props) {
 
       <EuiSpacer size="m" />
 
-      <DistanceForm distance={props.distance} onDistanceChange={props.onDistanceChange} />
+      <DistanceForm distance={props.distance} isDistanceInvalid={props.isDistanceInvalid} onDistanceChange={props.onDistanceChange} />
 
     </EuiPanel>
   )
