@@ -41,7 +41,7 @@ export const renderApp = (
     params,
     core,
     plugins,
-    isSidebarEnabled,
+    isSidebarEnabled = true,
   }: {
     core: CoreStart;
     isSidebarEnabled: boolean;
