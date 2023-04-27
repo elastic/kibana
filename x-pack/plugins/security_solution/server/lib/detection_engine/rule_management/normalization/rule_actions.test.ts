@@ -177,7 +177,6 @@ describe('Rule actions normalization', () => {
         transformFromAlertThrottle({
           muteAll: false,
           notifyWhen: 'onThrottleInterval',
-          throttle: '1d',
           actions: [],
         } as unknown as RuleAlertType)
       ).toBeUndefined();
