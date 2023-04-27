@@ -23,6 +23,7 @@ import {
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { TimelineId } from '../../../../../common/types';
 import { SecurityPageName } from '../../../../../common/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
@@ -38,6 +39,8 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { useUrlPagination } from '../../../hooks/use_url_pagination';
+import { useDetailPanel } from '../../../../timelines/components/side_panel/hooks/use_detail_panel';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 const emptyValue = getEmptyValue();
 
@@ -58,11 +61,15 @@ const getResponseActionListTableColumns = ({
   itemIdToExpandedRowMap,
   showHostNames,
   onClickCallback,
+  openEventDetailsPanel,
+  withAutomatedActionsFromUrl,
 }: {
   getTestId: (suffix?: string | undefined) => string | undefined;
   itemIdToExpandedRowMap: ExpandedRowMapType;
   showHostNames: boolean;
   onClickCallback: (actionListDataItem: ActionListApiResponse['data'][number]) => () => void;
+  openEventDetailsPanel: (alertId: string) => void;
+  withAutomatedActionsFromUrl: boolean | undefined;
 }) => {
   const columns = [
     {
@@ -147,6 +154,26 @@ const getResponseActionListTableColumns = ({
         );
       },
     },
+    {
+      field: 'alertIds',
+      name: TABLE_COLUMN_NAMES.alert,
+      width: '10%',
+      render: (alertIds: ActionListApiResponse['data'][number]['alertIds']) => {
+        if (!alertIds?.length) {
+          return <></>;
+        }
+        return (
+          <EuiToolTip content={'Show Event Details'} anchorClassName="eui-textTruncate">
+            <EuiButtonIcon
+              onClick={() => {
+                openEventDetailsPanel(alertIds?.[0]);
+              }}
+              iconType={'link'}
+            />
+          </EuiToolTip>
+        );
+      },
+    },
     // conditional hostnames column
     {
       field: 'hosts',
@@ -190,6 +217,7 @@ const getResponseActionListTableColumns = ({
         );
       },
     },
+
     {
       field: 'comment',
       name: TABLE_COLUMN_NAMES.comments,
@@ -256,10 +284,14 @@ const getResponseActionListTableColumns = ({
   ];
   // filter out the `hosts` column
   // if showHostNames is FALSE
+  let filteredColumns = columns;
   if (!showHostNames) {
-    return columns.filter((column) => column.field !== 'hosts');
+    filteredColumns = columns.filter((column) => column.field !== 'hosts');
   }
-  return columns;
+  if (!withAutomatedActionsFromUrl) {
+    filteredColumns = columns.filter((column) => column.field !== 'alertIds');
+  }
+  return filteredColumns;
 };
 
 interface ActionsLogTableProps {
@@ -291,6 +323,13 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
     totalItemCount,
   }) => {
     const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMapType>({});
+
+    const { DetailsPanel, openEventDetailsPanel } = useDetailPanel({
+      isFlyoutView: true,
+      sourcererScope: SourcererScopeName.detections,
+      scopeId: TimelineId.active,
+    });
+    const { withAutomatedActions: withAutomatedActionsFromUrl } = useActionHistoryUrlParams();
 
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { pagination: paginationFromUrlParams } = useUrlPagination();
@@ -412,8 +451,17 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           itemIdToExpandedRowMap,
           onClickCallback,
           showHostNames,
+          openEventDetailsPanel,
+          withAutomatedActionsFromUrl,
         }),
-      [itemIdToExpandedRowMap, getTestId, onClickCallback, showHostNames]
+      [
+        getTestId,
+        itemIdToExpandedRowMap,
+        onClickCallback,
+        showHostNames,
+        openEventDetailsPanel,
+        withAutomatedActionsFromUrl,
+      ]
     );
 
     return (
@@ -432,6 +480,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           loading={loading}
           error={error}
         />
+        {DetailsPanel}
       </>
     );
   }

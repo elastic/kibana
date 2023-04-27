@@ -398,7 +398,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [action.id]: {
         ...state.timelineById[action.id],
         expandedDetail: {
-          ...state.timelineById[action.id].expandedDetail,
+          ...state.timelineById[action.id]?.expandedDetail,
           ...updateTimelineDetailsPanel(action),
         },
       },
