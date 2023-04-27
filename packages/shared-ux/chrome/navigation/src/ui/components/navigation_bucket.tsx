@@ -8,9 +8,9 @@
 
 import { EuiCollapsibleNavGroup, EuiIcon, EuiSideNav, EuiText } from '@elastic/eui';
 import React from 'react';
-import { NavigationBucketProps } from '../../types';
-import { useNavigation } from '../services';
-import { navigationStyles as styles } from '../styles';
+import { NavigationBucketProps } from '../../../types';
+import { useNavigation } from '../../services';
+import { navigationStyles as styles } from '../../styles';
 
 export const NavigationBucket = (opts: NavigationBucketProps) => {
   const { id, items, activeNavItemId, ...props } = opts;
