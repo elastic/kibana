@@ -7,7 +7,10 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
 
-export const BUNDLED_PACKAGE_DIR = path.join(path.dirname(__filename), './fleet_bundled_packages');
+export const BUNDLED_PACKAGE_DIR = path.join(
+  path.dirname(__filename),
+  './fleet_bundled_packages/__fixtures__'
+);
 
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
