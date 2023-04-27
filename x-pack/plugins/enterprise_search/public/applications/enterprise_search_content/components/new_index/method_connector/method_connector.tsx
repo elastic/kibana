@@ -55,7 +55,7 @@ export const MethodConnector: React.FC<MethodConnectorProps> = ({ serviceType })
 
   const isNative =
     Boolean(NATIVE_CONNECTORS.find((connector) => connector.serviceType === serviceType)) &&
-    isCloud;
+    (isCloud || hasPlatinumLicense);
 
   const isGated = isNative && !isCloud && !hasPlatinumLicense;
   const hasLowMemory =
