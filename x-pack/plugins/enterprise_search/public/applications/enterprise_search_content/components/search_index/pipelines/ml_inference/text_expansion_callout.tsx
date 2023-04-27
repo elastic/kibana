@@ -35,6 +35,7 @@ export interface TextExpansionCallOutState {
   dismiss: () => void;
   isCreateButtonDisabled: boolean;
   isDismissable: boolean;
+  isStartButtonDisabled: boolean;
   show: boolean;
 }
 
@@ -184,81 +185,90 @@ export const ModelDeploymentInProgress = ({
 export const ModelDeployed = ({
   dismiss,
   isDismissable,
-}: Pick<TextExpansionCallOutState, 'dismiss' | 'isDismissable'>) => (
-  <EuiPanel color="success">
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem grow>
-        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" />
-          </EuiFlexItem>
-          <EuiFlexItem grow>
-            <EuiTitle size="xs">
-              <h4>
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedTitle"
-                  defaultMessage="Your ELSER model has deployed but not started."
-                />
-              </h4>
-            </EuiTitle>
-          </EuiFlexItem>
-          {isDismissable && (
+  isStartButtonDisabled,
+}: Pick<TextExpansionCallOutState, 'dismiss' | 'isDismissable' | 'isStartButtonDisabled'>) => {
+  const { startTextExpansionModel } = useActions(TextExpansionCalloutLogic);
+
+  return (
+    <EuiPanel color="success">
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem grow>
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <TextExpansionDismissButton dismiss={dismiss} />
+              <EuiIcon type="checkInCircleFilled" />
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedBody"
-            defaultMessage="You may start the model in a single-threaded configuration for testing, or tune the performance for a production environment."
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow>
-        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-          <EuiFlexItem>
-            <EuiButton
-              color="success"
-              iconType="playFilled"
-              // onClick={() => ()}
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.startModelButton.label',
-                {
-                  defaultMessage: 'Start single-threaded',
-                }
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButtonEmpty
-              iconSide="left"
-              iconType="wrench"
-              data-telemetry-id="entSearchContent-engines-api-step1-viewKeysButton"
-              onClick={() =>
-                KibanaLogic.values.navigateToUrl('/app/ml/trained_models', {
+            <EuiFlexItem grow>
+              <EuiTitle size="xs">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedTitle"
+                    defaultMessage="Your ELSER model has deployed but not started." />
+                </h4>
+              </EuiTitle>
+            </EuiFlexItem>
+            {isDismissable && (
+              <EuiFlexItem grow={false}>
+                <TextExpansionDismissButton dismiss={dismiss} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          <EuiText>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedBody"
+              defaultMessage="You may start the model in a single-threaded configuration for testing, or tune the performance for a production environment." />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+            <EuiFlexItem>
+              <EuiButton
+                aria-label={i18n.translate(
+                  'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startModelButton',
+                  { defaultMessage: 'Start ELSER model' }
+                )}
+                color="success"
+                disabled={isStartButtonDisabled}
+                iconType="playFilled"
+                onClick={() => startTextExpansionModel(undefined)}
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.startModelButton.label',
+                  {
+                    defaultMessage: 'Start single-threaded',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButtonEmpty
+                aria-label={i18n.translate(
+                  'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.fineTuneModelButton',
+                  { defaultMessage: 'Fine-tune ELSER model' }
+                )}
+                iconSide="left"
+                iconType="wrench"
+                onClick={() => KibanaLogic.values.navigateToUrl('/app/ml/trained_models', {
                   shouldNotCreateHref: true,
-                })
-              }
-            >
-              {i18n.translate('xpack.enterpriseSearch.content.engine.api.step1.viewKeysButton', {
-                defaultMessage: 'Fine-tune performance',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow />
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiPanel>
-);
+                })}
+              >
+                {i18n.translate('xpack.enterpriseSearch.content.engine.api.step1.viewKeysButton', {
+                  defaultMessage: 'Fine-tune performance',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
 
 export const ModelStarted = ({
   dismiss,
-  isDismissable,  
+  isDismissable,
 }: Pick<TextExpansionCallOutState, 'dismiss' | 'isDismissable'>) => (
   <EuiPanel color="success">
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -298,15 +308,28 @@ export const ModelStarted = ({
 
 export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props) => {
   const { dismiss, isDismissable, show } = useTextExpansionCallOutData(props);
-  const { isCreateButtonDisabled, isModelDownloadInProgress, isModelDownloaded } =
-    useValues(TextExpansionCalloutLogic);
+  const {
+    isCreateButtonDisabled,
+    isModelDownloadInProgress,
+    isModelDownloaded,
+    isModelStarted,
+    isStartButtonDisabled,
+  } = useValues(TextExpansionCalloutLogic);
 
   if (!show) return null;
 
   if (!!isModelDownloadInProgress) {
     return <ModelDeploymentInProgress dismiss={dismiss} isDismissable={isDismissable} />;
   } else if (!!isModelDownloaded) {
-    return <ModelDeployed dismiss={dismiss} isDismissable={isDismissable} />;
+    return (
+      <ModelDeployed
+        dismiss={dismiss}
+        isDismissable={isDismissable}
+        isStartButtonDisabled={isStartButtonDisabled}
+      />
+    );
+  } else if (!!isModelStarted) {
+    return <ModelStarted dismiss={dismiss} isDismissable={isDismissable} />;
   }
 
   return (

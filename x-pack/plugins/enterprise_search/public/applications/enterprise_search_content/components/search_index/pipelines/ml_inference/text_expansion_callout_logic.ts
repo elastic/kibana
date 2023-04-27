@@ -19,6 +19,10 @@ import {
   FetchTextExpansionModelApiLogicActions,
   FetchTextExpansionModelResponse,
 } from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
+import {
+  StartTextExpansionModelApiLogic,
+  StartTextExpansionModelApiLogicActions,
+} from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
 
 const FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION = 5000; // 5 seconds
 const FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
@@ -35,6 +39,8 @@ interface TextExpansionCalloutActions {
     pollTimeoutId: ReturnType<typeof setTimeout>;
   };
   startPollingTextExpansionModel: () => void;
+  startTextExpansionModel: StartTextExpansionModelApiLogicActions['makeRequest'];
+  startTextExpansionModelSuccess: StartTextExpansionModelApiLogicActions['apiSuccess'];
   stopPollingTextExpansionModel: () => void;
   textExpansionModel: FetchTextExpansionModelApiLogicActions['apiSuccess'];
 }
@@ -48,6 +54,7 @@ export interface TextExpansionCalloutValues {
   isModelStarted: boolean;
   isPollingTextExpansionModelActive: boolean;
   isStartButtonDisabled: boolean;
+  startTextExpansionModelStatus: Status;
   textExpansionModel: FetchTextExpansionModelResponse | undefined;
   textExpansionModelPollTimeoutId: null | ReturnType<typeof setTimeout>;
 }
@@ -74,12 +81,16 @@ export const TextExpansionCalloutLogic = kea<
         'apiSuccess as fetchTextExpansionModelSuccess',
         'apiError as fetchTextExpansionModelError',
       ],
+      StartTextExpansionModelApiLogic,
+      ['makeRequest as startTextExpansionModel', 'apiSuccess as startTextExpansionModelSuccess'],
     ],
     values: [
       CreateTextExpansionModelApiLogic,
       ['data as createdTextExpansionModel', 'status as createTextExpansionModelStatus'],
       FetchTextExpansionModelApiLogic,
       ['data as textExpansionModel'],
+      StartTextExpansionModelApiLogic,
+      ['status as startTextExpansionModelStatus'],
     ],
   },
   events: ({ actions, values }) => ({
@@ -135,6 +146,9 @@ export const TextExpansionCalloutLogic = kea<
       }
       actions.createTextExpansionModelPollingTimeout(FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION);
     },
+    startTextExpansionModelSuccess: () => {
+      actions.fetchTextExpansionModel(undefined);
+    },
     stopPollingTextExpansionModel: () => {
       if (values.textExpansionModelPollTimeoutId !== null) {
         clearTimeout(values.textExpansionModelPollTimeoutId);
@@ -180,7 +194,7 @@ export const TextExpansionCalloutLogic = kea<
         pollingTimeoutId !== null,
     ],
     isStartButtonDisabled: [
-      () => [selectors.createTextExpansionModelStatus],
+      () => [selectors.startTextExpansionModelStatus],
       (status: Status) => status !== Status.IDLE,
     ],    
   }),
