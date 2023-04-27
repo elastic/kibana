@@ -137,22 +137,19 @@ export class MessageSigningService implements MessageSigningServiceInterface {
 
   public async rotateKeyPair(): ReturnType<MessageSigningServiceInterface['rotateKeyPair']> {
     try {
-      const removeKeyPairResponse = await this.removeKeyPair();
-      if (!removeKeyPairResponse) {
-        return;
-      }
+      await this.removeKeyPair();
       await this.generateKeyPair();
     } catch (error) {
       throw new MessageSigningError(`Error rotating key pair: ${error.message}`, error);
     }
   }
 
-  private async removeKeyPair(): Promise<boolean> {
+  private async removeKeyPair(): Promise<void> {
     let currentKeyPair: Awaited<ReturnType<typeof this.getCurrentKeyPairObj>>;
     try {
       currentKeyPair = await this.getCurrentKeyPairObj();
       if (!currentKeyPair) {
-        return false;
+        throw new MessageSigningError('No current key pair found!');
       }
     } catch (error) {
       throw new MessageSigningError(`Error fetching current key pair: ${error.message}`, error);
@@ -160,7 +157,6 @@ export class MessageSigningService implements MessageSigningServiceInterface {
 
     try {
       await this.soClient.delete(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, currentKeyPair.id);
-      return true;
     } catch (error) {
       throw new MessageSigningError(`Error deleting current key pair: ${error.message}`, error);
     }
