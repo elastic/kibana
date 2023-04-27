@@ -14,7 +14,7 @@ import { RelationshipPanel } from './relationship_panel';
 import { RightSourcePanel } from './right_source_panel';
 
 export function WizardForm() {
-  const [distance, setDistance] = useState<number>(5);
+  const [distance, setDistance] = useState<number | string>(5);
   const [leftDataView, setLeftDataView] = useState<DataView | undefined>();
   const [leftGeoFields, setLeftGeoFields] = useState<DataViewField[]>([]);
   const [leftGeoField, setLeftGeoField] = useState<string | undefined>();

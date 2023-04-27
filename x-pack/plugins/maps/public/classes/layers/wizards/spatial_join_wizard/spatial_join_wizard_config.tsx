@@ -16,11 +16,11 @@ export const spatialJoinWizardConfig: LayerWizard = {
   order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.spatialJoinWizard.description', {
-    defaultMessage: 'Join by location',
+    defaultMessage: 'Group documents by geospatial relationships',
   }),
   icon: null,
   renderWizard: (renderWizardArguments: RenderWizardArguments) => {
-    return <WizardForm/>;
+    return <WizardForm />;
   },
   title: i18n.translate('xpack.maps.spatialJoinWizard.title', {
     defaultMessage: 'Spatial join',

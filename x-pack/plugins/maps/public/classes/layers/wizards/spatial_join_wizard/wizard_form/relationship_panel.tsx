@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiFormRow,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { DistanceForm } from './distance_form';
 
 interface Props {
-  distance: number;
-  onDistanceChange: (distance: number) => void;
+  distance: number | string;
+  onDistanceChange: (distance: number | string) => void;
 }
 
 export function RelationshipPanel(props: Props) {
@@ -24,13 +24,15 @@ export function RelationshipPanel(props: Props) {
     <EuiPanel>
       <EuiTitle size="xs">
         <h5>
-          {i18n.translate('xxpack.maps.spatialJoin.wizard.relationshipTitle', {
+          {i18n.translate('xpack.maps.spatialJoin.wizard.relationshipTitle', {
             defaultMessage: 'Relationship',
           })}
         </h5>
       </EuiTitle>
 
       <EuiSpacer size="m" />
+
+      <DistanceForm distance={props.distance} onDistanceChange={props.onDistanceChange} />
 
     </EuiPanel>
   )
