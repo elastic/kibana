@@ -565,6 +565,28 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-server",
+            "id": "def-common.CoreSetup.userSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "userSettings",
+            "description": [
+              "{@link UserSettingsServiceSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-settings-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUserSettingsServerPluginApi",
+                "section": "def-common.UserSettingsServiceSetup",
+                "text": "UserSettingsServiceSetup"
+              }
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server",
             "id": "def-common.CoreSetup.deprecations",
             "type": "Object",
             "tags": [],

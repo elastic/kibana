@@ -565,6 +565,7 @@ const CreateRulePageComponent: React.FC = () => {
                             setForm={setFormHook}
                             onSubmit={() => submitStep(RuleStep.ruleActions)}
                             actionMessageParams={actionMessageParams}
+                            summaryActionMessageParams={actionMessageParams}
                             // We need a key to make this component remount when edit/view mode is toggled
                             // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
                             key={isShouldRerenderStep(RuleStep.ruleActions, activeStep)}

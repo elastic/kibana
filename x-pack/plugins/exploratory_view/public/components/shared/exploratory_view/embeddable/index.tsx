@@ -175,6 +175,6 @@ function EmptyState({ height }: { height?: string }) {
   );
 }
 
-const NO_DATA_LABEL = i18n.translate('xpack.exploratoryView.overview.exploratoryView.noData', {
+const NO_DATA_LABEL = i18n.translate('xpack.exploratoryView.noData', {
   defaultMessage: 'No data',
 });
