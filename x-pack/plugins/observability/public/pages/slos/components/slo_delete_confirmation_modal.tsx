@@ -15,11 +15,13 @@ import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 export interface SloDeleteConfirmationModalProps {
   slo: SLOWithSummaryResponse;
   onCancel: () => void;
+  onSuccess?: () => void;
 }
 
 export function SloDeleteConfirmationModal({
   slo: { id, name },
   onCancel,
+  onSuccess,
 }: SloDeleteConfirmationModalProps) {
   const {
     notifications: { toasts },
@@ -31,6 +33,7 @@ export function SloDeleteConfirmationModal({
 
   if (isSuccess) {
     toasts.addSuccess(getDeleteSuccesfulMessage(name));
+    onSuccess?.();
   }
 
   if (isError) {
