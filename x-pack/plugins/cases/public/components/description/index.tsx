@@ -78,7 +78,7 @@ const getDraftDescription = (
   return sessionStorage.getItem(draftStorageKey);
 };
 
-const isSetCommentRef = (
+const isCommentRef = (
   ref: EditableMarkdownRefObject | null | undefined
 ): ref is EditableMarkdownRefObject => {
   const commentRef = ref as EditableMarkdownRefObject;
@@ -133,7 +133,7 @@ export const Description = ({
   }
 
   if (
-    isSetCommentRef(descriptionMarkdownRef.current) &&
+    isCommentRef(descriptionMarkdownRef.current) &&
     descriptionMarkdownRef.current.editor?.textarea &&
     lensDraftComment &&
     lensDraftComment.commentId === DESCRIPTION_ID
