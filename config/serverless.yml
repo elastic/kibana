@@ -15,5 +15,5 @@ xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
 
 # Other disabled plugins
-xpack.canvas.enabled: false
+#xpack.canvas.enabled: false #only disabable in dev-mode
 xpack.reporting.enabled: false

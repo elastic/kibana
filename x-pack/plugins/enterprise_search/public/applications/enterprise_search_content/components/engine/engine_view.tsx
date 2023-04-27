@@ -55,6 +55,7 @@ export const EngineView: React.FC = () => {
         pageChrome={[engineName]}
         pageViewTelemetry={tabId}
         pageHeader={{
+          bottomBorder: false,
           pageTitle: engineName,
           rightSideItems: [],
         }}
@@ -91,6 +92,7 @@ export const EngineView: React.FC = () => {
             pageChrome={[engineName]}
             pageViewTelemetry={tabId}
             pageHeader={{
+              bottomBorder: false,
               pageTitle: engineName,
               rightSideItems: [],
             }}
