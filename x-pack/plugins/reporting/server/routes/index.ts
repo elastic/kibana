@@ -20,3 +20,4 @@ export function registerRoutes(reporting: ReportingCore, logger: Logger) {
 }
 
 export type { JobParamsDownloadCSV } from './generate/csv_searchsource_immediate';
+export type { JobAppParamsPDF } from './lib';

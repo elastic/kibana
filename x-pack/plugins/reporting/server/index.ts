@@ -25,4 +25,4 @@ export type { ReportingConfig } from './config/config';
 // @internal
 export { ReportingCore } from './core';
 
-export type { JobParamsDownloadCSV } from './routes/generate';
+export type { JobParamsDownloadCSV, JobAppParamsPDF } from './routes';

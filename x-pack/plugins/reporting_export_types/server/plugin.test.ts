@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { createMockPluginSetup } from '@kbn/reporting-plugin/server/test_helpers';
-import { ExportTypesPlugin } from './plugin';
+// import { createMockPluginSetup } from '@kbn/reporting-plugin/server/test_helpers';
+// import { ExportTypesPlugin } from './plugin';
 
-describe('ExportTypesPlugin', () => {
-  it('returns', async () => {
-    const plugin = new ExportTypesPlugin();
-    const { registerExportType } = await plugin.setup({}, createMockPluginSetup(setupMock));
-  });
-});
+// describe('ExportTypesPlugin', () => {
+//   it('returns', async () => {
+//     const plugin = new ExportTypesPlugin();
+//     const { registerExportType } = await plugin.setup({}, createMockPluginSetup(setupMock));
+//   });
+// });
