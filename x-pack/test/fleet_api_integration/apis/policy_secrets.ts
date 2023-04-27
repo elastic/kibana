@@ -24,6 +24,32 @@ export default function (providerContext: FtrProviderContext) {
       return body.item;
     };
 
+    const maybeCreateSecretsIndex = async () => {
+      // create mock .secrets index for testing
+      if (await es.indices.exists({ index: '.fleet-test-secrets' })) {
+        await es.indices.delete({ index: '.fleet-test-secrets' });
+      }
+      await es.indices.create({
+        index: '.fleet-test-secrets',
+        body: {
+          mappings: {
+            properties: {
+              value: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      });
+    };
+
+    let createdPackagePolicyId;
+    let packageVarId;
+    let inputVarId;
+    let streamVarId;
+    let expectedCompiledStream;
+    let expectedCompiledInput;
+
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     before(async () => {
@@ -31,6 +57,8 @@ export default function (providerContext: FtrProviderContext) {
       await getService('esArchiver').load(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
+      await maybeCreateSecretsIndex();
+
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -48,24 +76,7 @@ export default function (providerContext: FtrProviderContext) {
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
     });
-    it('Should correctly create secrets', async () => {
-      // create mock .secrets index for testing
-      if (await es.indices.exists({ index: '.fleet-test-secrets' })) {
-        await es.indices.delete({ index: '.fleet-test-secrets' });
-      }
-      await es.indices.create({
-        index: '.fleet-test-secrets',
-        body: {
-          mappings: {
-            properties: {
-              value: {
-                type: 'keyword',
-              },
-            },
-          },
-        },
-      });
-
+    it('Should correctly create the policy with secrets', async () => {
       const { body: createResBody } = await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -101,14 +112,15 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       const createdPackagePolicy = createResBody.item;
-      const packageVarId = createdPackagePolicy.vars.package_var_secret.value.id;
+      createdPackagePolicyId = createdPackagePolicy.id;
+      packageVarId = createdPackagePolicy.vars.package_var_secret.value.id;
       expect(packageVarId).to.be.an('string');
-      const inputVarId = createdPackagePolicy.inputs[0].vars.input_var_secret.value.id;
+      inputVarId = createdPackagePolicy.inputs[0].vars.input_var_secret.value.id;
       expect(inputVarId).to.be.an('string');
-      const streamVarId = createdPackagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.id;
+      streamVarId = createdPackagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.id;
       expect(streamVarId).to.be.an('string');
 
-      const expectedCompiledStream = {
+      expectedCompiledStream = {
         'config.version': 2,
         package_var_secret: secretVar(packageVarId),
         input_var_secret: secretVar(inputVarId),
@@ -118,7 +130,7 @@ export default function (providerContext: FtrProviderContext) {
         expectedCompiledStream
       );
 
-      const expectedCompiledInput = {
+      expectedCompiledInput = {
         package_var_secret: secretVar(packageVarId),
         input_var_secret: secretVar(inputVarId),
       };
@@ -130,9 +142,12 @@ export default function (providerContext: FtrProviderContext) {
       expect(
         createdPackagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef
       ).to.eql(true);
+    });
 
-      const packagePolicy = await getPackagePolicyById(createResBody.item.id);
+    it('should return the policy correctly from the get policies API', async () => {
+      const packagePolicy = await getPackagePolicyById(createdPackagePolicyId);
       expect(packagePolicy.inputs[0].streams[0].compiled_stream).to.eql(expectedCompiledStream);
+      expect(createdPackagePolicy.inputs[0].compiled_input).to.eql(expectedCompiledInput);
       expect(packagePolicy.vars.package_var_secret.value.isSecretRef).to.eql(true);
       expect(packagePolicy.vars.package_var_secret.value.id).eql(packageVarId);
       expect(packagePolicy.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(true);
@@ -141,7 +156,9 @@ export default function (providerContext: FtrProviderContext) {
         true
       );
       expect(packagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.id).eql(streamVarId);
+    });
 
+    it('should have correctly created the secrets', async () => {
       const searchRes = await es.search({
         index: '.fleet-test-secrets',
         body: {
