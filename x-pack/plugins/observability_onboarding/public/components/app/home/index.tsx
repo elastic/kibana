@@ -28,7 +28,7 @@ export function Home() {
 
   const handleClickSystemLogs = () => {};
   const handleClickCustomLogs = () => {
-    navigateToKibanaUrl('/app/observabilityOnboarding/logs');
+    navigateToKibanaUrl('/app/observabilityOnboarding/customLogs');
   };
   const handleClickApmSetupGuide = () => {
     navigateToKibanaUrl('/app/home#/tutorial/apm');

@@ -19,7 +19,7 @@ import { HorizontalSteps } from './wizard/horizontal_steps';
 import { PageTitle } from './wizard/page_title';
 import { breadcrumbsApp } from '../../../application/app';
 
-export function LogsOnboarding() {
+export function CustomLogs() {
   useBreadcrumbs(
     [
       {

@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Home } from '../components/app/home';
-import { LogsOnboarding } from '../components/app/logs_onboarding';
+import { CustomLogs } from '../components/app/custom_logs';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<
   typeof routes[T]['params']
@@ -41,9 +41,9 @@ export const routes = {
     params: {},
     exact: true,
   },
-  '/logs': {
+  '/customLogs': {
     handler: () => {
-      return <LogsOnboarding />;
+      return <CustomLogs />;
     },
     params: {},
     exact: true,
