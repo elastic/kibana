@@ -45,7 +45,10 @@ export function useCloneSlo() {
 
         const optimisticUpdate = {
           ...data,
-          results: [...(data?.results || []), { ...sloUsedToClone, name: slo.name, id: uuidv1() }],
+          results: [
+            ...(data?.results || []),
+            { ...sloUsedToClone, name: slo.name, id: uuidv1(), summary: undefined },
+          ],
           total: data?.total && data.total + 1,
         };
 

@@ -46,7 +46,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
 
-  const { mutateAsync: cloneSlo } = useCloneSlo();
+  const { mutate: cloneSlo } = useCloneSlo();
   const { mutate: deleteSlo } = useDeleteSlo();
 
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
