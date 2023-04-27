@@ -40,11 +40,11 @@ export const getIndexTemplateAndPattern = ({
   const pattern = `${context}.alerts`;
   const patternWithNamespace = `${pattern}-${concreteNamespace}`;
   return {
-    template: `.alerts-${patternWithNamespace}-index-template`,
-    pattern: `.internal.alerts-${patternWithNamespace}-*`,
+    template: `.alerts-${patternWithNamespace}-index-template`, // still used
+    pattern: `.internal.alerts-${patternWithNamespace}-*`, // no longer used
     basePattern: `.alerts-${pattern}-*`,
-    name: `.internal.alerts-${patternWithNamespace}-000001`,
-    alias: `.alerts-${patternWithNamespace}`,
+    name: `.internal.alerts-${patternWithNamespace}-000001`, // no longer used
+    alias: `.alerts-${patternWithNamespace}`, // data stream name
     ...(secondaryAlias ? { secondaryAlias: `${secondaryAlias}-${concreteNamespace}` } : {}),
   };
 };

@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { Either, isLeft } from 'fp-ts/lib/Either';
 
 import { ElasticsearchClient } from '@kbn/core/server';
@@ -118,6 +118,7 @@ export class RuleDataClient implements IRuleDataClient {
             ...request,
             index: indexPattern,
             ignore_unavailable: true,
+            seq_no_primary_term: true,
           })) as unknown as ESSearchResponse<TAlertDoc, TSearchRequest>;
         } catch (err) {
           this.options.logger.error(`Error performing search in RuleDataClient - ${err.message}`);
@@ -235,13 +236,12 @@ export class RuleDataClient implements IRuleDataClient {
       bulk: async (request: estypes.BulkRequest) => {
         try {
           if (this.clusterClient) {
-            const requestWithDefaultParameters = {
-              ...request,
-              require_alias: true,
-              index: alias,
-            };
+            addCreateIndexBulkActionDoc(request, alias);
+            this.options.logger.debug(
+              `writing bulk data: alias: "${alias}" ${JSON.stringify(request, null, 4)}`
+            );
 
-            const response = await this.clusterClient.bulk(requestWithDefaultParameters, {
+            const response = await this.clusterClient.bulk(request, {
               meta: true,
             });
 
@@ -259,5 +259,15 @@ export class RuleDataClient implements IRuleDataClient {
         }
       },
     };
+  }
+}
+
+function addCreateIndexBulkActionDoc(request: estypes.BulkRequest, alias: string) {
+  const docs: Array<Record<string, Record<string, unknown>>> = ((request as any).body as any) || [];
+
+  for (let index = 0; index < docs.length; index += 2) {
+    if (new Set(Object.keys(docs[index])).has('create')) {
+      docs[index].create._index = alias;
+    }
   }
 }

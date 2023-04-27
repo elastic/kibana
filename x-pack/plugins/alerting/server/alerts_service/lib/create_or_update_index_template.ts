@@ -43,7 +43,8 @@ export const getIndexTemplate = ({
   return {
     name: indexPatterns.template,
     body: {
-      index_patterns: [indexPatterns.pattern],
+      data_stream: { hidden: true },
+      index_patterns: [indexPatterns.alias],
       composed_of: componentTemplateRefs,
       template: {
         settings: {
@@ -51,7 +52,7 @@ export const getIndexTemplate = ({
           hidden: true,
           'index.lifecycle': {
             name: ilmPolicyName,
-            rollover_alias: indexPatterns.alias,
+            // rollover_alias: indexPatterns.alias,
           },
           'index.mapping.total_fields.limit': totalFieldsLimit,
         },

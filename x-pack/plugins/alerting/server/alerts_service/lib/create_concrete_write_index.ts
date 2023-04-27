@@ -143,7 +143,7 @@ export const createConcreteWriteIndex = async ({
   indexPatterns,
   totalFieldsLimit,
 }: CreateConcreteWriteIndexOpts) => {
-  logger.info(`Creating concrete write index - ${indexPatterns.name}`);
+  logger.info(`Creating data stream - ${indexPatterns.alias}`);
 
   // check if a concrete write index already exists
   let concreteIndices: ConcreteIndexInfo[] = [];
@@ -151,21 +151,15 @@ export const createConcreteWriteIndex = async ({
     // Specify both the index pattern for the backing indices and their aliases
     // The alias prevents the request from finding other namespaces that could match the -* pattern
     const response = await retryTransientEsErrors(
-      () =>
-        esClient.indices.getAlias({
-          index: indexPatterns.pattern,
-          name: indexPatterns.basePattern,
-        }),
+      () => esClient.indices.getDataStream({ name: indexPatterns.alias, expand_wildcards: 'all' }),
       { logger }
     );
 
-    concreteIndices = Object.entries(response).flatMap(([index, { aliases }]) =>
-      Object.entries(aliases).map(([aliasName, aliasProperties]) => ({
-        index,
-        alias: aliasName,
-        isWriteIndex: aliasProperties.is_write_index ?? false,
-      }))
-    );
+    concreteIndices = response.data_streams.map((dataStream) => ({
+      index: dataStream.name,
+      alias: dataStream.name,
+      isWriteIndex: true,
+    }));
 
     logger.debug(
       `Found ${concreteIndices.length} concrete indices for ${
@@ -182,11 +176,14 @@ export const createConcreteWriteIndex = async ({
     }
   }
 
-  let concreteWriteIndicesExist = false;
+  // let concreteWriteIndicesExist = false;
+  const concreteWriteIndicesExist = concreteIndices.length > 0;
+
   // if a concrete write index already exists, update the underlying mapping
   if (concreteIndices.length > 0) {
     await updateIndexMappings({ logger, esClient, totalFieldsLimit, concreteIndices });
 
+    /*
     const concreteIndicesExist = concreteIndices.some(
       (index) => index.alias === indexPatterns.alias
     );
@@ -201,6 +198,7 @@ export const createConcreteWriteIndex = async ({
         `Indices matching pattern ${indexPatterns.pattern} exist but none are set as the write index for alias ${indexPatterns.alias}`
       );
     }
+    */
   }
 
   // check if a concrete write index already exists
@@ -208,23 +206,18 @@ export const createConcreteWriteIndex = async ({
     try {
       await retryTransientEsErrors(
         () =>
-          esClient.indices.create({
-            index: indexPatterns.name,
-            body: {
-              aliases: {
-                [indexPatterns.alias]: {
-                  is_write_index: true,
-                },
-              },
-            },
+          esClient.indices.createDataStream({
+            name: indexPatterns.alias,
           }),
         { logger }
       );
     } catch (error) {
       logger.error(`Error creating concrete write index - ${error.message}`);
+      throw error;
       // If the index already exists and it's the write index for the alias,
       // something else created it so suppress the error. If it's not the write
       // index, that's bad, throw an error.
+      /*
       if (error?.meta?.body?.error?.type === 'resource_already_exists_exception') {
         const existingIndices = await retryTransientEsErrors(
           () => esClient.indices.get({ index: indexPatterns.name }),
@@ -238,6 +231,7 @@ export const createConcreteWriteIndex = async ({
       } else {
         throw error;
       }
+      */
     }
   }
 };
