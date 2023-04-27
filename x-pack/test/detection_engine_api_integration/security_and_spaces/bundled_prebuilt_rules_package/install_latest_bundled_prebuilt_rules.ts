@@ -27,6 +27,9 @@ export default ({ getService }: FtrProviderContext): void => {
     }
   };
 
+  /* This test simulates an air-gapped environment in which the user doesn't have access to EPR.
+  /* We first download the package from the registry as done during build time, and then
+  /* attempt to install it from the local file system. */
   describe('install_bundled_prebuilt_rules', () => {
     afterEach(async () => {
       await removeBundledPackages(BUNDLED_PACKAGE_DIR);
