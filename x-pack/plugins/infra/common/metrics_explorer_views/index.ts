@@ -5,4 +5,6 @@
  * 2.0.
  */
 
+export * from './defaults';
+export * from './errors';
 export * from './types';

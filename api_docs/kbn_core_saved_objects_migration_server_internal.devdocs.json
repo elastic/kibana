@@ -373,7 +373,7 @@
                 "id": "def-common.KibanaMigrator.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n    waitForMigrationCompletion,\n  }",
+                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n    defaultIndexTypesMap = DEFAULT_INDEX_TYPES_MAP,\n    waitForMigrationCompletion,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -989,7 +989,7 @@
             "section": "def-common.SavedObjectsRawDoc",
             "text": "SavedObjectsRawDoc"
           },
-          ") => ",
+          ", typeIndexMap?: Record<string, string>) => ",
           "BulkIndexOperationTuple"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
@@ -1011,6 +1011,21 @@
                 "section": "def-common.SavedObjectsRawDoc",
                 "text": "SavedObjectsRawDoc"
               }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-common.createBulkIndexOperationTuple.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "typeIndexMap",
+            "description": [],
+            "signature": [
+              "Record<string, string>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
             "deprecated": false,
@@ -3574,6 +3589,21 @@
             "tags": [],
             "label": "waitForMigrationCompletion",
             "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-common.KibanaMigratorOptions.defaultIndexTypesMap",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultIndexTypesMap",
+            "description": [],
+            "signature": [
+              "IndexTypesMap",
+              " | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false

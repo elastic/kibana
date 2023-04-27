@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const { common } = getPageObjects(['common']);
 
-  describe('Event "viewport_resize"', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/155166
+  describe.skip('Event "viewport_resize"', () => {
     beforeEach(async () => {
       // Navigating to `home` with the Welcome prompt because some runs were flaky
       // as we handle the Welcome screen only if the login prompt pops up.
