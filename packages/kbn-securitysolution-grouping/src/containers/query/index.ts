@@ -116,7 +116,9 @@ export const parseGroupingQuery = <T>(
   buckets: Array<RawBucket<T>>
 ): Array<RawBucket<T> & GroupingBucket> =>
   buckets.map((group) => {
-    const groupKeyArray = Array.isArray(group.key) ? group.key : [group.key];
+    if (!Array.isArray(group.key)) {
+      return group;
+    }
     // If the keys are different means that the `missing` values of the multi_terms aggregation have been applied, we use the default empty string.
     // If the keys are equal means the `missing` values have not been applied, they are stored values.
     return groupKeyArray[0] === groupKeyArray[1]
