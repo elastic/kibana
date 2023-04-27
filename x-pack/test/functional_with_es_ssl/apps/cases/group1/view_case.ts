@@ -29,7 +29,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
 
-  describe.only('View case', () => {
+  describe('View case', () => {
     describe('properties', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
