@@ -29,7 +29,7 @@ export function SloList({ autoRefresh }: Props) {
   const [sort, setSort] = useState<SortType>('creationTime');
   const [indicatorTypeFilter, setIndicatorTypeFilter] = useState<FilterType[]>([]);
 
-  const { isLoading, isError, sloList, refetch } = useFetchSloList({
+  const { isInitialLoading, isLoading, isRefetching, isError, sloList, refetch } = useFetchSloList({
     page: activePage + 1,
     name: query,
     sortBy: sort,
@@ -69,7 +69,15 @@ export function SloList({ autoRefresh }: Props) {
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
         <SloListSearchFilterSortBar
-          loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
+          loading={
+            isInitialLoading ||
+            isLoading ||
+            isRefetching ||
+            isCreatingSlo ||
+            isCloningSlo ||
+            isUpdatingSlo ||
+            isDeletingSlo
+          }
           onChangeQuery={handleChangeQuery}
           onChangeSort={handleChangeSort}
           onChangeIndicatorTypeFilter={handleChangeIndicatorTypeFilter}
@@ -77,7 +85,7 @@ export function SloList({ autoRefresh }: Props) {
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <SloListItems sloList={results} loading={isLoading} error={isError} />
+        <SloListItems sloList={results} loading={isLoading || isRefetching} error={isError} />
       </EuiFlexItem>
 
       {results.length ? (

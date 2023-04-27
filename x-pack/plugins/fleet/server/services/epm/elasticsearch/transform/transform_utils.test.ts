@@ -10,38 +10,50 @@ import { getDestinationIndexAliases } from './transform_utils';
 describe('test transform_utils', () => {
   describe('getDestinationIndexAliases()', function () {
     test('return transform alias settings when input is an object', () => {
-      const aliasSettings = {
-        '.alerts-security.host-risk-score-latest.latest': { move_on_creation: true },
-        '.alerts-security.host-risk-score-latest.all': { move_on_creation: false },
-      };
-      expect(getDestinationIndexAliases(aliasSettings)).toStrictEqual([
-        { alias: '.alerts-security.host-risk-score-latest.latest', move_on_creation: true },
-        { alias: '.alerts-security.host-risk-score-latest.all', move_on_creation: false },
+      expect(
+        getDestinationIndexAliases({
+          'alias1.latest': { move_on_creation: true },
+          'alias1.all': { move_on_creation: false },
+        })
+      ).toStrictEqual([
+        { alias: 'alias1.latest', move_on_creation: true },
+        { alias: 'alias1.all', move_on_creation: false },
+      ]);
+
+      expect(
+        getDestinationIndexAliases({
+          'alias1.latest': null,
+          'alias1.all': { move_on_creation: false },
+          alias2: { move_on_creation: true },
+          alias3: undefined,
+          alias4: '',
+          alias5: 'invalid string',
+        })
+      ).toStrictEqual([
+        { alias: 'alias1.latest', move_on_creation: false },
+        { alias: 'alias1.all', move_on_creation: false },
+        { alias: 'alias2', move_on_creation: true },
+        { alias: 'alias3', move_on_creation: false },
+        { alias: 'alias4', move_on_creation: false },
+        { alias: 'alias5', move_on_creation: false },
       ]);
     });
 
     test('return transform alias settings when input is an array', () => {
-      const aliasSettings = [
-        '.alerts-security.host-risk-score-latest.latest',
-        '.alerts-security.host-risk-score-latest.all',
-      ];
+      const aliasSettings = ['alias1.latest', 'alias1.all'];
       expect(getDestinationIndexAliases(aliasSettings)).toStrictEqual([
-        { alias: '.alerts-security.host-risk-score-latest.latest', move_on_creation: true },
-        { alias: '.alerts-security.host-risk-score-latest.all', move_on_creation: false },
+        { alias: 'alias1.latest', move_on_creation: true },
+        { alias: 'alias1.all', move_on_creation: false },
       ]);
     });
 
     test('return transform alias settings when input is a string', () => {
-      expect(
-        getDestinationIndexAliases('.alerts-security.host-risk-score-latest.latest')
-      ).toStrictEqual([
-        { alias: '.alerts-security.host-risk-score-latest.latest', move_on_creation: true },
+      expect(getDestinationIndexAliases('alias1.latest')).toStrictEqual([
+        { alias: 'alias1.latest', move_on_creation: true },
       ]);
 
-      expect(
-        getDestinationIndexAliases('.alerts-security.host-risk-score-latest.all')
-      ).toStrictEqual([
-        { alias: '.alerts-security.host-risk-score-latest.all', move_on_creation: false },
+      expect(getDestinationIndexAliases('alias1.all')).toStrictEqual([
+        { alias: 'alias1.all', move_on_creation: false },
       ]);
     });
 

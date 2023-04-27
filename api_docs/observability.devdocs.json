@@ -292,112 +292,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.createExploratoryViewUrl",
-        "type": "Function",
-        "tags": [],
-        "label": "createExploratoryViewUrl",
-        "description": [],
-        "signature": [
-          "({ reportType, allSeries }: { reportType: ",
-          "ReportViewType",
-          "; allSeries: ",
-          {
-            "pluginId": "observability",
-            "scope": "public",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-public.AllSeries",
-            "text": "AllSeries"
-          },
-          "; }, baseHref: string, appId: string) => string"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.createExploratoryViewUrl.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ reportType, allSeries }",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.createExploratoryViewUrl.$1.reportType",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "reportType",
-                "description": [],
-                "signature": [
-                  "\"heatmap\" | \"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
-                ],
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.createExploratoryViewUrl.$1.allSeries",
-                "type": "Array",
-                "tags": [],
-                "label": "allSeries",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "observability",
-                    "scope": "public",
-                    "docId": "kibObservabilityPluginApi",
-                    "section": "def-public.SeriesUrl",
-                    "text": "SeriesUrl"
-                  },
-                  "[]"
-                ],
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.createExploratoryViewUrl.$2",
-            "type": "string",
-            "tags": [],
-            "label": "baseHref",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.createExploratoryViewUrl.$3",
-            "type": "string",
-            "tags": [],
-            "label": "appId",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.createObservabilityRuleTypeRegistryMock",
         "type": "Function",
         "tags": [],
@@ -524,74 +418,6 @@
                 "trackAdoption": false
               }
             ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.ExploratoryView",
-        "type": "Function",
-        "tags": [],
-        "label": "ExploratoryView",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "ExploratoryViewPageProps",
-          ") => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryView.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "ExploratoryViewPageProps"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.ExploratoryViewContextProvider",
-        "type": "Function",
-        "tags": [],
-        "label": "ExploratoryViewContextProvider",
-        "description": [],
-        "signature": [
-          "({\n  children,\n  reportTypes,\n  dataTypes,\n  reportConfigMap,\n  setHeaderActionMenu,\n  asPanel = true,\n  theme$,\n}: { children: JSX.Element; } & ExploratoryViewContextValue) => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/contexts/exploratory_view_config.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryViewContextProvider.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  children,\n  reportTypes,\n  dataTypes,\n  reportConfigMap,\n  setHeaderActionMenu,\n  asPanel = true,\n  theme$,\n}",
-            "description": [],
-            "signature": [
-              "{ children: JSX.Element; } & ExploratoryViewContextValue"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/contexts/exploratory_view_config.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1441,41 +1267,6 @@
                 "trackAdoption": false
               }
             ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.SelectableUrlList",
-        "type": "Function",
-        "tags": [],
-        "label": "SelectableUrlList",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "SelectableUrlListProps",
-          ") => JSX.Element"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SelectableUrlList.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "SelectableUrlListProps"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -2447,76 +2238,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.ConfigProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "ConfigProps",
-        "description": [],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ConfigProps.dataView",
-            "type": "Object",
-            "tags": [],
-            "label": "dataView",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ConfigProps.series",
-            "type": "Object",
-            "tags": [],
-            "label": "series",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.SeriesUrl",
-                "text": "SeriesUrl"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ConfigProps.spaceId",
-            "type": "string",
-            "tags": [],
-            "label": "spaceId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.Coordinates",
         "type": "Interface",
         "tags": [],
@@ -2718,501 +2439,6 @@
               "\"m\" | \"M\" | \"w\" | \"d\" | \"h\" | \"Y\""
             ],
             "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.ExploratoryEmbeddableProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "ExploratoryEmbeddableProps",
-        "description": [],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.appId",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "appId",
-            "description": [],
-            "signature": [
-              "\"observability\" | \"securitySolutionUI\" | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.appendTitle",
-            "type": "Object",
-            "tags": [],
-            "label": "appendTitle",
-            "description": [],
-            "signature": [
-              "JSX.Element | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.attributes",
-            "type": "Array",
-            "tags": [],
-            "label": "attributes",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.AllSeries",
-                "text": "AllSeries"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.axisTitlesVisibility",
-            "type": "Object",
-            "tags": [],
-            "label": "axisTitlesVisibility",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.AxesSettingsConfig",
-                "text": "AxesSettingsConfig"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.gridlinesVisibilitySettings",
-            "type": "Object",
-            "tags": [],
-            "label": "gridlinesVisibilitySettings",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.AxesSettingsConfig",
-                "text": "AxesSettingsConfig"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.customHeight",
-            "type": "string",
-            "tags": [],
-            "label": "customHeight",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.customLensAttrs",
-            "type": "Any",
-            "tags": [],
-            "label": "customLensAttrs",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.customTimeRange",
-            "type": "Object",
-            "tags": [],
-            "label": "customTimeRange",
-            "description": [],
-            "signature": [
-              "{ from: string; to: string; } | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.dataTypesIndexPatterns",
-            "type": "Object",
-            "tags": [],
-            "label": "dataTypesIndexPatterns",
-            "description": [],
-            "signature": [
-              "Partial<Record<",
-              "AppDataType",
-              ", string>> | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.isSingleMetric",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isSingleMetric",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.legendIsVisible",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "legendIsVisible",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.legendPosition",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "legendPosition",
-            "description": [],
-            "signature": [
-              "Position",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.hideTicks",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hideTicks",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.onBrushEnd",
-            "type": "Function",
-            "tags": [],
-            "label": "onBrushEnd",
-            "description": [],
-            "signature": [
-              "((param: { range: number[]; }) => void) | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.ExploratoryEmbeddableProps.onBrushEnd.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "param",
-                "description": [],
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "observability",
-                    "id": "def-public.ExploratoryEmbeddableProps.onBrushEnd.$1.range",
-                    "type": "Array",
-                    "tags": [],
-                    "label": "range",
-                    "description": [],
-                    "signature": [
-                      "number[]"
-                    ],
-                    "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.onLoad",
-            "type": "Function",
-            "tags": [],
-            "label": "onLoad",
-            "description": [],
-            "signature": [
-              "((loading: boolean) => void) | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.ExploratoryEmbeddableProps.onLoad.$1",
-                "type": "boolean",
-                "tags": [],
-                "label": "loading",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.caseOwner",
-            "type": "string",
-            "tags": [],
-            "label": "caseOwner",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.reportConfigMap",
-            "type": "Object",
-            "tags": [],
-            "label": "reportConfigMap",
-            "description": [],
-            "signature": [
-              "ReportConfigMap",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.reportType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "reportType",
-            "description": [],
-            "signature": [
-              "\"heatmap\" | \"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.showCalculationMethod",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "showCalculationMethod",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.title",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "signature": [
-              "string | JSX.Element | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.withActions",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "withActions",
-            "description": [],
-            "signature": [
-              "boolean | ",
-              "ActionTypes",
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.align",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "align",
-            "description": [],
-            "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.sparklineMode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "sparklineMode",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.noLabel",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "noLabel",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.fontSize",
-            "type": "number",
-            "tags": [],
-            "label": "fontSize",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.lineHeight",
-            "type": "number",
-            "tags": [],
-            "label": "lineHeight",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.dataTestSubj",
-            "type": "string",
-            "tags": [],
-            "label": "dataTestSubj",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.ExploratoryEmbeddableProps.searchSessionId",
-            "type": "string",
-            "tags": [],
-            "label": "searchSessionId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4552,13 +3778,35 @@
             "label": "exploratoryView",
             "description": [],
             "signature": [
+              "{ createExploratoryViewUrl: ({ reportType, allSeries }: { reportType: ",
+              "ReportViewType",
+              "; allSeries: ",
               {
                 "pluginId": "exploratoryView",
                 "scope": "public",
                 "docId": "kibExploratoryViewPluginApi",
-                "section": "def-public.ExploratoryViewPublicPluginsStart",
-                "text": "ExploratoryViewPublicPluginsStart"
-              }
+                "section": "def-public.AllSeries",
+                "text": "AllSeries"
+              },
+              "; }, baseHref?: string) => string; getAppDataView: (appId: ",
+              "AppDataType",
+              ", indexPattern?: string | undefined) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | null | undefined>; ExploratoryViewEmbeddable: (props: ",
+              {
+                "pluginId": "exploratoryView",
+                "scope": "public",
+                "docId": "kibExploratoryViewPluginApi",
+                "section": "def-public.ExploratoryEmbeddableProps",
+                "text": "ExploratoryEmbeddableProps"
+              },
+              ") => JSX.Element | null; }"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -4993,558 +4241,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.SeriesConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "SeriesConfig",
-        "description": [],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.reportType",
-            "type": "string",
-            "tags": [],
-            "label": "reportType",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.xAxisColumn",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "xAxisColumn",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.LastValueIndexPatternColumn",
-                "text": "LastValueIndexPatternColumn"
-              },
-              "> | Partial<",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.DateHistogramIndexPatternColumn",
-                "text": "DateHistogramIndexPatternColumn"
-              },
-              ">"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.yAxisColumns",
-            "type": "Array",
-            "tags": [],
-            "label": "yAxisColumns",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.FieldBasedIndexPatternColumn",
-                "text": "FieldBasedIndexPatternColumn"
-              },
-              ">[]"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.breakdownFields",
-            "type": "Array",
-            "tags": [],
-            "label": "breakdownFields",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.defaultSeriesType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "defaultSeriesType",
-            "description": [],
-            "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.filterFields",
-            "type": "Array",
-            "tags": [],
-            "label": "filterFields",
-            "description": [],
-            "signature": [
-              "(string | { field: string; nested?: string | undefined; isNegated?: boolean | undefined; })[]"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.seriesTypes",
-            "type": "Array",
-            "tags": [],
-            "label": "seriesTypes",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.SeriesType",
-                "text": "SeriesType"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.baseFilters",
-            "type": "Array",
-            "tags": [],
-            "label": "baseFilters",
-            "description": [],
-            "signature": [
-              "(",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.PhraseFilter",
-                "text": "PhraseFilter"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.ExistsFilter",
-                "text": "ExistsFilter"
-              },
-              " | ",
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.PersistableFilter",
-                "text": "PersistableFilter"
-              },
-              ")[] | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.definitionFields",
-            "type": "Array",
-            "tags": [],
-            "label": "definitionFields",
-            "description": [],
-            "signature": [
-              "(string | { field: string; nested?: string | undefined; singleSelection?: boolean | undefined; filters?: (",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.PhraseFilter",
-                "text": "PhraseFilter"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.ExistsFilter",
-                "text": "ExistsFilter"
-              },
-              " | ",
-              {
-                "pluginId": "lens",
-                "scope": "common",
-                "docId": "kibLensPluginApi",
-                "section": "def-common.PersistableFilter",
-                "text": "PersistableFilter"
-              },
-              ")[] | undefined; })[]"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.textDefinitionFields",
-            "type": "Array",
-            "tags": [],
-            "label": "textDefinitionFields",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.metricOptions",
-            "type": "Array",
-            "tags": [],
-            "label": "metricOptions",
-            "description": [],
-            "signature": [
-              "(",
-              "MetricOption",
-              " | { id: string; field?: string | undefined; label: string; items: ",
-              "MetricOption",
-              "[]; columnType?: string | undefined; })[] | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.labels",
-            "type": "Object",
-            "tags": [],
-            "label": "labels",
-            "description": [],
-            "signature": [
-              "{ [x: string]: string; }"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.hasOperationType",
-            "type": "boolean",
-            "tags": [],
-            "label": "hasOperationType",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.palette",
-            "type": "Object",
-            "tags": [],
-            "label": "palette",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/coloring",
-                "scope": "common",
-                "docId": "kibKbnColoringPluginApi",
-                "section": "def-common.PaletteOutput",
-                "text": "PaletteOutput"
-              },
-              "<{ [key: string]: unknown; }> | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.yTitle",
-            "type": "string",
-            "tags": [],
-            "label": "yTitle",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.yConfig",
-            "type": "Array",
-            "tags": [],
-            "label": "yConfig",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.YConfig",
-                "text": "YConfig"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesConfig.query",
-            "type": "Object",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "{ query: string; language: \"kuery\"; } | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.SeriesUrl",
-        "type": "Interface",
-        "tags": [],
-        "label": "SeriesUrl",
-        "description": [],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesUrl.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesUrl.time",
-            "type": "Object",
-            "tags": [],
-            "label": "time",
-            "description": [],
-            "signature": [
-              "{ to: string; from: string; }"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesUrl.breakdown",
-            "type": "string",
-            "tags": [],
-            "label": "breakdown",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesUrl.filters",
-            "type": "Array",
-            "tags": [],
-            "label": "filters",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.UrlFilter",
-                "text": "UrlFilter"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesUrl.seriesType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "seriesType",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.SeriesType",
-                "text": "SeriesType"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesUrl.operationType",
-            "type": "string",
-            "tags": [],
-            "label": "operationType",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesUrl.dataType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "dataType",
-            "description": [],
-            "signature": [
-              "\"uptime\" | \"alerts\" | \"synthetics\" | \"ux\" | \"infra_logs\" | \"infra_metrics\" | \"apm\" | \"mobile\""
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesUrl.reportDefinitions",
-            "type": "Object",
-            "tags": [],
-            "label": "reportDefinitions",
-            "description": [],
-            "signature": [
-              "URLReportDefinition",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesUrl.textReportDefinitions",
-            "type": "Object",
-            "tags": [],
-            "label": "textReportDefinitions",
-            "description": [],
-            "signature": [
-              "URLTextReportDefinition",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesUrl.selectedMetricField",
-            "type": "string",
-            "tags": [],
-            "label": "selectedMetricField",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesUrl.hidden",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hidden",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesUrl.showPercentileAnnotations",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "showPercentileAnnotations",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.SeriesUrl.color",
-            "type": "string",
-            "tags": [],
-            "label": "color",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.Stat",
         "type": "Interface",
         "tags": [],
@@ -5821,87 +4517,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.UrlFilter",
-        "type": "Interface",
-        "tags": [],
-        "label": "UrlFilter",
-        "description": [],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.UrlFilter.field",
-            "type": "string",
-            "tags": [],
-            "label": "field",
-            "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.UrlFilter.values",
-            "type": "Array",
-            "tags": [],
-            "label": "values",
-            "description": [],
-            "signature": [
-              "(string | number)[] | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.UrlFilter.notValues",
-            "type": "Array",
-            "tags": [],
-            "label": "notValues",
-            "description": [],
-            "signature": [
-              "(string | number)[] | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.UrlFilter.wildcards",
-            "type": "Array",
-            "tags": [],
-            "label": "wildcards",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.UrlFilter.notWildcards",
-            "type": "Array",
-            "tags": [],
-            "label": "notWildcards",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.UxFetchDataResponse",
         "type": "Interface",
         "tags": [],
@@ -6169,18 +4784,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.ReportTypes",
-        "type": "Enum",
-        "tags": [],
-        "label": "ReportTypes",
-        "description": [],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -6225,43 +4828,6 @@
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.ALL_VALUES_SELECTED",
-        "type": "string",
-        "tags": [],
-        "label": "ALL_VALUES_SELECTED",
-        "description": [],
-        "signature": [
-          "\"ALL_VALUES\""
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/url_constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.AllSeries",
-        "type": "Type",
-        "tags": [],
-        "label": "AllSeries",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "observability",
-            "scope": "public",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-public.SeriesUrl",
-            "text": "SeriesUrl"
-          },
-          "[]"
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_series_storage.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6356,21 +4922,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.ENVIRONMENT_ALL",
-        "type": "string",
-        "tags": [],
-        "label": "ENVIRONMENT_ALL",
-        "description": [],
-        "signature": [
-          "\"ENVIRONMENT_ALL\""
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.FetchData",
         "type": "Type",
         "tags": [],
@@ -6413,21 +4964,6 @@
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.FILTER_RECORDS",
-        "type": "string",
-        "tags": [],
-        "label": "FILTER_RECORDS",
-        "description": [],
-        "signature": [
-          "\"FILTER_RECORDS\""
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6639,66 +5175,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.OPERATION_COLUMN",
-        "type": "string",
-        "tags": [],
-        "label": "OPERATION_COLUMN",
-        "description": [],
-        "signature": [
-          "\"operation\""
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.RECORDS_FIELD",
-        "type": "string",
-        "tags": [],
-        "label": "RECORDS_FIELD",
-        "description": [],
-        "signature": [
-          "\"___records___\""
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.RECORDS_PERCENTAGE_FIELD",
-        "type": "string",
-        "tags": [],
-        "label": "RECORDS_PERCENTAGE_FIELD",
-        "description": [],
-        "signature": [
-          "\"RecordsPercentage\""
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.REPORT_METRIC_FIELD",
-        "type": "string",
-        "tags": [],
-        "label": "REPORT_METRIC_FIELD",
-        "description": [],
-        "signature": [
-          "\"REPORT_METRIC_FIELD\""
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.SectionLinkProps",
         "type": "Type",
         "tags": [],
@@ -6777,21 +5253,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.TERMS_COLUMN",
-        "type": "string",
-        "tags": [],
-        "label": "TERMS_COLUMN",
-        "description": [],
-        "signature": [
-          "\"TERMS_COLUMN\""
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.TrackMetricOptions",
         "type": "Type",
         "tags": [],
@@ -6859,21 +5320,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.USE_BREAK_DOWN_COLUMN",
-        "type": "string",
-        "tags": [],
-        "label": "USE_BREAK_DOWN_COLUMN",
-        "description": [],
-        "signature": [
-          "\"USE_BREAK_DOWN_COLUMN\""
-        ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -6921,7 +5367,17 @@
         "Options",
         ") => ",
         "LinkProps",
-        "; }"
+        "; rulesLocator: ",
+        {
+          "pluginId": "share",
+          "scope": "common",
+          "docId": "kibSharePluginApi",
+          "section": "def-common.LocatorPublic",
+          "text": "LocatorPublic"
+        },
+        "<",
+        "RulesLocatorParams",
+        ">; }"
       ],
       "path": "x-pack/plugins/observability/public/plugin.ts",
       "deprecated": false,
@@ -11069,7 +9525,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
+          "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -14900,6 +13356,21 @@
         "description": [],
         "signature": [
           "\"RULE_DETAILS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.rulesLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "rulesLocatorID",
+        "description": [],
+        "signature": [
+          "\"RULES_LOCATOR\""
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
         "deprecated": false,

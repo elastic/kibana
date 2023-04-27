@@ -35,6 +35,8 @@ export const getMaintenanceWindowRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
+        licenseState.ensureLicenseForMaintenanceWindow();
+
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
         const { id } = req.params;
         const maintenanceWindow = await maintenanceWindowClient.get({ id });
