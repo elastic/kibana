@@ -196,7 +196,7 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
             {
               id: 'enterpriseSearchEnginePreview',
               name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
-                defaultMessage: 'Preview',
+                defaultMessage: 'Search Preview',
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,

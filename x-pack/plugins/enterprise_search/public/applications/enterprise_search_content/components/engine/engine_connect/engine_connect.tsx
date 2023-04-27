@@ -26,6 +26,8 @@ import { EngineViewLogic } from '../engine_view_logic';
 
 import { SearchApplicationAPI } from './search_application_api';
 
+import '../search_application_layout.scss';
+
 const pageTitle = i18n.translate(
   'xpack.enterpriseSearch.content.searchApplications.connect.pageTitle',
   {
@@ -68,6 +70,8 @@ export const EngineConnect: React.FC = () => {
         pageViewTelemetry={EngineViewTabs.CONNECT}
         isLoading={isLoadingEngine}
         pageHeader={{
+          bottomBorder: false,
+          className: 'searchApplicationHeaderBackgroundColor',
           pageTitle,
           rightSideItems: [],
         }}
@@ -84,6 +88,8 @@ export const EngineConnect: React.FC = () => {
       pageViewTelemetry={EngineViewTabs.CONNECT}
       isLoading={isLoadingEngine}
       pageHeader={{
+        bottomBorder: false,
+        className: 'searchApplicationHeaderBackgroundColor',
         pageTitle,
         rightSideItems: [],
         tabs: [

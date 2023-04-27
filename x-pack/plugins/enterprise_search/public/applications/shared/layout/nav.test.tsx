@@ -287,7 +287,7 @@ describe('useEnterpriseSearchEngineNav', () => {
         {
           href: `/app/enterprise_search/content/engines/${engineName}/preview`,
           id: 'enterpriseSearchEnginePreview',
-          name: 'Preview',
+          name: 'Search Preview',
         },
         {
           href: `/app/enterprise_search/content/engines/${engineName}/content`,
