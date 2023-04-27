@@ -5,34 +5,97 @@
  * 2.0.
  */
 
-import { FLEET_AGENT_LIST_PAGE } from '../screens/fleet';
+import { FLEET_AGENT_LIST_PAGE } from '../../screens/fleet';
 
-import { createAgentDoc } from '../tasks/agents';
-import { setupFleetServer } from '../tasks/fleet_server';
-import { deleteFleetServerDocs, deleteAgentDocs } from '../tasks/cleanup';
+import { createAgentDoc } from '../../tasks/agents';
+import { setupFleetServer } from '../../tasks/fleet_server';
+import { deleteFleetServerDocs, deleteAgentDocs, cleanupAgentPolicies } from '../../tasks/cleanup';
+import type { CreateAgentPolicyRequest } from '../../../common/types';
 
 const createAgentDocs = (kibanaVersion: string) => [
   createAgentDoc('agent-1', 'policy-1'), // this agent will have upgrade available
   createAgentDoc('agent-2', 'policy-2', 'error', kibanaVersion),
-  ...[...Array(15).keys()].map((_, index) => createAgentDoc(`agent-${index + 2}`, 'policy-3')),
+  ...[...Array(2).keys()].map((_, index) =>
+    createAgentDoc(`agent-${index + 3}`, 'policy-3', undefined, undefined, {
+      tags: ['tag1', 'tag2'],
+    })
+  ),
+  ...[...Array(2).keys()].map((_, index) =>
+    createAgentDoc(`agent-${index + 5}`, 'policy-3', undefined, undefined, {
+      tags: ['tag2'],
+    })
+  ),
+  ...[...Array(11).keys()].map((_, index) => createAgentDoc(`agent-${index + 6}`, 'policy-3')),
 ];
 
 let docs: any[] = [];
+
+const POLICIES: Array<CreateAgentPolicyRequest['body']> = [
+  {
+    id: 'policy-1',
+    name: 'Agent policy 1',
+    description: '',
+    namespace: 'default',
+    monitoring_enabled: ['logs', 'metrics'],
+  },
+  {
+    id: 'policy-2',
+    name: 'Agent policy 2',
+    description: '',
+    namespace: 'default',
+    monitoring_enabled: ['logs', 'metrics'],
+  },
+  {
+    id: 'policy-3',
+    name: 'Agent policy 3',
+    description: '',
+    namespace: 'default',
+    monitoring_enabled: ['logs', 'metrics'],
+  },
+  {
+    id: 'policy-4',
+    name: 'Agent policy 4',
+    description: '',
+    namespace: 'default',
+    monitoring_enabled: ['logs', 'metrics'],
+  },
+];
+
+function createAgentPolicy(body: CreateAgentPolicyRequest['body']) {
+  cy.request({
+    method: 'POST',
+    url: '/api/fleet/agent_policies',
+    headers: { 'kbn-xsrf': 'xx' },
+    body,
+  });
+}
+
+function assertTableContainsNAgents(n: number) {
+  cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE)
+    .find('tr')
+    .should('have.length', n + 1); // header
+}
 
 describe('View agents list', () => {
   before(() => {
     deleteFleetServerDocs(true);
     deleteAgentDocs(true);
+    cleanupAgentPolicies();
     setupFleetServer();
 
     cy.getKibanaVersion().then((version) => {
       docs = createAgentDocs(version);
       cy.task('insertDocs', { index: '.fleet-agents', docs });
     });
+
+    for (const policy of POLICIES) {
+      createAgentPolicy(policy);
+    }
   });
   after(() => {
     deleteFleetServerDocs();
     deleteAgentDocs();
+    cleanupAgentPolicies();
   });
   beforeEach(() => {
     cy.intercept('/api/fleet/agents/setup', {
@@ -51,42 +114,6 @@ describe('View agents list', () => {
       other: 0,
       events: 0,
     });
-    cy.intercept(/\/api\/fleet\/agent_policies(\?.*)?$/, {
-      items: [
-        {
-          id: 'policy-1',
-          name: 'Agent policy 1',
-          description: '',
-          namespace: 'default',
-          monitoring_enabled: ['logs', 'metrics'],
-          status: 'active',
-        },
-        {
-          id: 'policy-2',
-          name: 'Agent policy 2',
-          description: '',
-          namespace: 'default',
-          monitoring_enabled: ['logs', 'metrics'],
-          status: 'active',
-        },
-        {
-          id: 'policy-3',
-          name: 'Agent policy 3',
-          description: '',
-          namespace: 'default',
-          monitoring_enabled: ['logs', 'metrics'],
-          status: 'active',
-        },
-        {
-          id: 'policy-4',
-          name: 'Agent policy 4',
-          description: '',
-          namespace: 'default',
-          monitoring_enabled: ['logs', 'metrics'],
-          status: 'active',
-        },
-      ],
-    });
   });
 
   describe('Agent filter suggestions', () => {
@@ -94,7 +121,7 @@ describe('View agents list', () => {
       cy.visit('/app/fleet/agents');
       cy.getBySel(FLEET_AGENT_LIST_PAGE.QUERY_INPUT).type('agent.id: "agent-1"{enter}');
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE);
-      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 2);
+      assertTableContainsNAgents(1);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
     });
   });
@@ -104,7 +131,7 @@ describe('View agents list', () => {
       cy.visit('/app/fleet/agents');
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.SHOW_UPGRADEABLE).click();
-      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 17);
+      assertTableContainsNAgents(16);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
     });
 
@@ -113,7 +140,7 @@ describe('View agents list', () => {
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.SHOW_UPGRADEABLE).click();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.SHOW_UPGRADEABLE).click();
-      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 19);
+      assertTableContainsNAgents(18);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-2');
     });
@@ -181,7 +208,7 @@ describe('View agents list', () => {
 
       cy.get('button').contains('Healthy').click();
 
-      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 18);
+      assertTableContainsNAgents(18);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
     });
 
@@ -192,7 +219,7 @@ describe('View agents list', () => {
 
       cy.get('button').contains('Unhealthy').click();
 
-      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 2);
+      assertTableContainsNAgents(2);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-2');
     });
 
@@ -216,29 +243,101 @@ describe('View agents list', () => {
       cy.get('button').contains('healthy').click();
       cy.get('button').contains('Unhealthy').click();
 
-      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 19);
+      assertTableContainsNAgents(18);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-2');
     });
   });
 
+  describe('Tags filter', () => {
+    it('should allow to filter on one tag (tag1)', () => {
+      cy.visit('/app/fleet/agents');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TAGS_FILTER).click();
+      cy.get('button').contains('tag1').click();
+
+      assertTableContainsNAgents(2);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-3');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-4');
+    });
+
+    it('should allow to filter on multiple tag (tag1, tag2)', () => {
+      cy.visit('/app/fleet/agents');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TAGS_FILTER).click();
+      cy.get('button').contains('tag1').click();
+      cy.get('button').contains('tag2').click();
+
+      assertTableContainsNAgents(4);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-3');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-4');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-5');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-6');
+    });
+
+    it('should allow to clear filters', () => {
+      cy.visit('/app/fleet/agents');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TAGS_FILTER).click();
+      cy.get('button').contains('tag1').click();
+      cy.get('button').contains('tag2').click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TAGS_FILTER).click();
+
+      assertTableContainsNAgents(4);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TAGS_FILTER).click();
+      cy.get('button').contains('Clear all').click();
+      assertTableContainsNAgents(18);
+    });
+  });
+
   describe('Bulk actions', () => {
-    it('should allow to bulk upgrade agents', () => {
+    it('should allow to bulk upgrade agents and cancel that upgrade', () => {
       cy.visit('/app/fleet/agents');
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
 
       cy.get('button').contains('Agent policy 3').click();
-      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 16);
+      assertTableContainsNAgents(16);
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.CHECKBOX_SELECT_ALL).click();
       // Trigger a bulk upgrade
       cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS_BUTTON).click();
       cy.get('button').contains('Upgrade 15 agents').click();
-      cy.get('.euiModalFooter button').contains('Upgrade 15 agents').click();
-      // Cancel upgrade - this assertion is currently flaky
-      // cy.getBySel(CURRENT_BULK_UPGRADES_CALLOUT.ABORT_BTN).click();
-      // cy.get('button').contains('Confirm').click();
+      cy.get('.euiModalFooter button:enabled').contains('Upgrade 15 agents').click();
+
+      // Expect agent status to be Updating
+      cy.get('.euiBadge:contains("Updating")').should('have.length', 15);
+
+      // Cancel upgrade
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.ACTIVITY_BUTTON).click();
+
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.ACTIVITY_FLYOUT.FLYOUT_ID).contains(/Upgrading 15 agents/);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.ACTIVITY_FLYOUT.FLYOUT_ID)
+        .get('button')
+        .contains('Cancel')
+        .click();
+
+      cy.get('button').contains('Confirm').click();
+
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.ACTIVITY_FLYOUT.CLOSE_BUTTON).click();
+
+      // Expect agent status to be Healthy
+      cy.get('.euiBadge:contains("Healthy")').should('have.length', 15);
+    });
+
+    it('should allow to bulk edit agent tags', () => {
+      cy.visit('/app/fleet/agents');
+
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
+
+      cy.get('button').contains('Agent policy 3').click();
+      assertTableContainsNAgents(15);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.CHECKBOX_SELECT_ALL).click();
+      // Trigger a bulk upgrade
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS_BUTTON).click();
+      cy.get('button').contains('Add / remove tags').click();
+
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS.ADD_REMOVE_TAG_INPUT).focus();
+      cy.wait(500);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS.ADD_REMOVE_TAG_INPUT).type('tagtest{enter}');
+      cy.get('button').contains('Create a new tag "tagtest"').click();
     });
   });
 });
