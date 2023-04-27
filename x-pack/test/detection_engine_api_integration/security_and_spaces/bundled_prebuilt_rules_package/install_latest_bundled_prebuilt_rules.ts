@@ -9,12 +9,17 @@ import path from 'path';
 
 import expect from 'expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { getPrebuiltRulesAndTimelinesStatus } from '../../utils';
+import {
+  deleteAllPrebuiltRuleAssets,
+  deleteAllRules,
+  getPrebuiltRulesAndTimelinesStatus,
+} from '../../utils';
 import { BUNDLED_PACKAGE_DIR } from './config';
 import { downloadPackageFromFleet } from '../../utils/prebuilt_rules/download_prebuilt_rules_from_epr';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
+  const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
 
@@ -31,6 +36,11 @@ export default ({ getService }: FtrProviderContext): void => {
   /* We first download the package from the registry as done during build time, and then
   /* attempt to install it from the local file system. */
   describe('install_bundled_prebuilt_rules', () => {
+    beforeEach(async () => {
+      await deleteAllRules(supertest, log);
+      await deleteAllPrebuiltRuleAssets(es);
+    });
+
     afterEach(async () => {
       await removeBundledPackages(BUNDLED_PACKAGE_DIR);
     });
