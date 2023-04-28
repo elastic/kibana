@@ -193,12 +193,12 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
             })}
           </h1>
           <TopNavMenu {...getNavBarProps()} />
-          <EuiPage className={classNames({ dscDocsPage: !isLegacy })} paddingSize="s">
+          <EuiPage className={classNames({ dscDocsPage: !isLegacy })}>
             <EuiPageBody
               panelled
               paddingSize="s"
               className="dscDocsContent"
-              panelProps={{ role: 'main', borderRadius: 'm' }}
+              panelProps={{ role: 'main' }}
             >
               <EuiSpacer size="s" />
               <EuiText data-test-subj="contextDocumentSurroundingHeader">
