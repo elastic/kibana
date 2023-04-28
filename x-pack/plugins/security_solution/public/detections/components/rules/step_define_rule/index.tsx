@@ -122,15 +122,15 @@ MyLabelButton.defaultProps = {
   flush: 'right',
 };
 
-export const SuppressionSettings = styled.div`
-  ${({ theme }) => `padding-left: ${theme.eui.euiSizeXL};`}
-`;
-
 const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ $isVisible }) => ({
   style: {
     display: $isVisible ? 'flex' : 'none',
   },
 }))<{ $isVisible: boolean }>``;
+
+const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
+  ${({ theme }) => `padding-left: ${theme.eui.euiSizeXL};`}
+`;
 
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   addPadding = false,
@@ -918,45 +918,42 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             />
           </RuleTypeEuiFormRow>
 
-          <SuppressionSettings>
-            <EuiSpacer size="s" />
-            <RuleTypeEuiFormRow
-              $isVisible={isQueryRule(ruleType)}
-              data-test-subj="alertSuppressionDuration"
+          <IntendedRuleTypeEuiFormRow
+            $isVisible={isQueryRule(ruleType)}
+            data-test-subj="alertSuppressionDuration"
+          >
+            <UseMultiFields
+              fields={{
+                groupByRadioSelection: {
+                  path: 'groupByRadioSelection',
+                },
+                groupByDurationValue: {
+                  path: 'groupByDuration.value',
+                },
+                groupByDurationUnit: {
+                  path: 'groupByDuration.unit',
+                },
+              }}
             >
-              <UseMultiFields
-                fields={{
-                  groupByRadioSelection: {
-                    path: 'groupByRadioSelection',
-                  },
-                  groupByDurationValue: {
-                    path: 'groupByDuration.value',
-                  },
-                  groupByDurationUnit: {
-                    path: 'groupByDuration.unit',
-                  },
-                }}
-              >
-                {GroupByChildren}
-              </UseMultiFields>
-            </RuleTypeEuiFormRow>
+              {GroupByChildren}
+            </UseMultiFields>
+          </IntendedRuleTypeEuiFormRow>
 
-            <RuleTypeEuiFormRow
-              $isVisible={isQueryRule(ruleType)}
-              data-test-subj="alertSuppressionMissingFields"
-              label={i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL}
+          <IntendedRuleTypeEuiFormRow
+            $isVisible={isQueryRule(ruleType)}
+            data-test-subj="alertSuppressionMissingFields"
+            label={i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL}
+          >
+            <UseMultiFields
+              fields={{
+                suppressionMissingFields: {
+                  path: 'suppressionMissingFields',
+                },
+              }}
             >
-              <UseMultiFields
-                fields={{
-                  suppressionMissingFields: {
-                    path: 'suppressionMissingFields',
-                  },
-                }}
-              >
-                {AlertsSuppressionMissingFields}
-              </UseMultiFields>
-            </RuleTypeEuiFormRow>
-          </SuppressionSettings>
+              {AlertsSuppressionMissingFields}
+            </UseMultiFields>
+          </IntendedRuleTypeEuiFormRow>
 
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
