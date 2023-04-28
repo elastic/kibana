@@ -8,7 +8,7 @@
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { statSync } from 'fs';
+import { statSync, existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
@@ -22,14 +22,14 @@ const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security'];
 
 /**
  * @param {Record<string, unknown>} opts
- * @returns {ServerlessProjectMode | null}
+ * @returns {ServerlessProjectMode | true | null}
  */
 function getServerlessProjectMode(opts) {
   if (!opts.serverless) {
     return null;
   }
 
-  if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless)) {
+  if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless) || opts.serverless === true) {
     return opts.serverless;
   }
 
@@ -95,16 +95,6 @@ function configFileExists(name) {
 }
 
 /**
- * @returns {boolean} Whether the distribution can run in Serverless mode
- */
-function isServerlessCapableDistribution() {
-  // For now, checking if the `serverless.yml` config file exists should be enough
-  // We could also check the following as well, but I don't think it's necessary:
-  // VALID_SERVERLESS_PROJECT_MODE.some((projectType) => configFileExists(`serverless.${projectType}.yml`))
-  return configFileExists('serverless.yml');
-}
-
-/**
  * @param {string} name
  * @param {string[]} configs
  * @param {'push' | 'unshift'} method
@@ -112,6 +102,48 @@ function isServerlessCapableDistribution() {
 function maybeAddConfig(name, configs, method) {
   if (configFileExists(name)) {
     configs[method](resolve(getConfigDirectory(), name));
+  }
+}
+
+/**
+ * @param {string} file
+ * @param {'es' | 'security' | 'oblt' | true} projectType
+ * @param {boolean} isDevMode
+ * @param {string[]} configs
+ * @param {'push' | 'unshift'} method
+ */
+function maybeSetRecentConfig(file, projectType, isDevMode, configs, method) {
+  const path = resolve(getConfigDirectory(), file);
+
+  function writeMode(selectedProjectType) {
+    writeFileSync(
+      path,
+      `${
+        isDevMode ? 'xpack.serverless.plugin.developer.projectSwitcher.enabled: true\n' : ''
+      }serverless: ${selectedProjectType}\n`
+    );
+  }
+
+  try {
+    if (projectType === true) {
+      if (!existsSync(path)) {
+        writeMode('es');
+      }
+    } else {
+      const data = readFileSync(path, 'utf-8');
+      const match = data.match(/serverless: (\w+)\n/);
+      if (!match || match[1] !== projectType) {
+        writeMode(projectType);
+      }
+    }
+
+    configs[method](path);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return;
+    }
+
+    throw err;
   }
 }
 
@@ -251,11 +283,12 @@ export default function (program) {
       .option(
         '--run-examples',
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
+      )
+      .option(
+        '--serverless [oblt|security|es]',
+        'Start Kibana in a specific serverless project mode. ' +
+          'If no mode is provided, it starts Kibana in the most recent serverless project mode (default is es)'
       );
-  }
-
-  if (isServerlessCapableDistribution()) {
-    command.option('--serverless <oblt|security|es>', 'Start Kibana in a serverless project mode');
   }
 
   if (DEV_MODE_SUPPORTED) {
@@ -282,10 +315,8 @@ export default function (program) {
     const configs = [getConfigPath(), ...getEnvConfigs(), ...(opts.config || [])];
     const serverlessMode = getServerlessProjectMode(opts);
 
-    // we "unshift" .serverless. config so that it only overrides defaults
     if (serverlessMode) {
-      maybeAddConfig(`serverless.yml`, configs, 'push');
-      maybeAddConfig(`serverless.${serverlessMode}.yml`, configs, 'unshift');
+      maybeSetRecentConfig('serverless.recent.yml', serverlessMode, opts.dev, configs, 'push');
     }
 
     // .dev. configs are "pushed" so that they override all other config files
@@ -293,7 +324,7 @@ export default function (program) {
       maybeAddConfig('kibana.dev.yml', configs, 'push');
       if (serverlessMode) {
         maybeAddConfig(`serverless.dev.yml`, configs, 'push');
-        maybeAddConfig(`serverless.${serverlessMode}.dev.yml`, configs, 'push');
+        maybeAddConfig('serverless.recent.dev.yml', configs, 'push');
       }
     }
 
@@ -315,7 +346,6 @@ export default function (program) {
       oss: !!opts.oss,
       cache: !!opts.cache,
       dist: !!opts.dist,
-      serverless: !!opts.serverless,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode

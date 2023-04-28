@@ -17,7 +17,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'dashboard',
     'canvas',
   ]);
-
+  const dashboardCustomizePanel = getService('dashboardCustomizePanel');
+  const dashboardBadgeActions = getService('dashboardBadgeActions');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const panelActions = getService('dashboardPanelActions');
@@ -42,6 +44,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
+      await dashboardPanelActions.customizePanel();
+      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
+      await dashboardCustomizePanel.clickToggleQuickMenuButton();
+      await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
+      await dashboardCustomizePanel.clickSaveButton();
+      await dashboard.waitForRenderComplete();
+      await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.openContextMenu();
       await panelActions.clickEdit();
 
@@ -59,6 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       const titles = await dashboard.getPanelTitles();
       expect(titles[0]).to.be('My TSVB to Lens viz 1 (converted)');
+      await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.removePanel();
     });
 
@@ -72,6 +82,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
+      await dashboardPanelActions.customizePanel();
+      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
+      await dashboardCustomizePanel.clickToggleQuickMenuButton();
+      await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
+      await dashboardCustomizePanel.clickSaveButton();
+      await dashboard.waitForRenderComplete();
+      await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.openContextMenu();
       await panelActions.clickEdit();
 
@@ -95,7 +112,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(descendants.length).to.equal(0);
       const titles = await dashboard.getPanelTitles();
       expect(titles[0]).to.be('My TSVB to Lens viz 2 (converted)');
-
+      await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.removePanel();
     });
   });
