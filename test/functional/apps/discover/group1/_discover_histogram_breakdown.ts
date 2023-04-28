@@ -41,12 +41,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.clickLegendFilter('png', '+');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await filterBar.hasFilter('extension.raw', 'png')).to.be(true);
-      await filterBar.removeFilter('extension.raw');
     });
 
     it('should save breakdown field in saved search', async () => {
-      await PageObjects.discover.chooseBreakdownField('extension.raw');
+      await filterBar.removeFilter('extension.raw');
       await PageObjects.discover.saveSearch('with breakdown');
+
       await PageObjects.discover.clickNewSearchButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const prevList = await PageObjects.discover.getHistogramLegendList();
