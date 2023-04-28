@@ -9,7 +9,7 @@
 import type { AnySchema } from 'joi';
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
+import { Type, TypeOptions, ExtendsDeepOptions } from './type';
 import { ValidationError } from '../errors';
 
 export type Props = Record<string, Type<any>>;
@@ -181,29 +181,21 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     return new ObjectType(extendedProps, extendedOptions);
   }
 
-  public extendsDeep<NP extends NullableProps>(
-    newOptions?: ExtendedObjectTypeOptions<P, NP>
-  ): ExtendedObjectType<P, NP> {
+  public extendsDeep(options: ExtendsDeepOptions) {
     const extendedProps = Object.entries(this.props).reduce((memo, [key, value]) => {
       if (value !== null && value !== undefined) {
-        let val = value;
-        if (val instanceof ObjectType) {
-          val = (value as ObjectType).extendsDeep<NP>(
-            newOptions as ExtendedObjectTypeOptions<any, NP>
-          );
-        }
         return {
           ...memo,
-          [key]: val,
+          [key]: value.extendsDeep(options),
         };
       }
       return memo;
-    }, {} as ExtendedProps<P, NP>);
+    }, {} as P);
 
-    const extendedOptions = {
+    const extendedOptions: ObjectTypeOptions<P> = {
       ...this.options,
-      ...newOptions,
-    } as ExtendedObjectTypeOptions<P, NP>;
+      ...(options.unknowns ? { unknowns: options.unknowns } : {}),
+    };
 
     return new ObjectType(extendedProps, extendedOptions);
   }
