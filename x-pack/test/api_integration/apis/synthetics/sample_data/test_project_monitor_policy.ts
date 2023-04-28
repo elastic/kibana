@@ -202,7 +202,7 @@ export const getTestProjectSyntheticsPolicy = (
             },
             enabled: { value: true, type: 'bool' },
             type: { value: 'browser', type: 'text' },
-            name: { value: 'check if title is present', type: 'text' },
+            name: { value: '"check if title is present"', type: 'text' },
             schedule: { value: '"@every 10m"', type: 'text' },
             'service.name': { value: '', type: 'text' },
             timeout: { value: null, type: 'text' },

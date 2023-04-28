@@ -226,7 +226,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         name: {
           type: 'text',
-          value: 'Browser monitor',
+          value: '"Browser monitor"',
         },
         params: {
           type: 'yaml',

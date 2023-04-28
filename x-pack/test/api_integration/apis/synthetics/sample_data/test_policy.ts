@@ -48,7 +48,7 @@ export const getTestSyntheticsPolicy = (
             },
             enabled: { value: true, type: 'bool' },
             type: { value: 'http', type: 'text' },
-            name: { value: name, type: 'text' },
+            name: { value: `"${name}"`, type: 'text' },
             schedule: { value: '"@every 5m"', type: 'text' },
             urls: { value: 'https://nextjs-test-synthetics.vercel.app/api/users', type: 'text' },
             'service.name': { value: '', type: 'text' },

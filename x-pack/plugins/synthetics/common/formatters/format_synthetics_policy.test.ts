@@ -372,7 +372,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 name: {
                   type: 'text',
-                  value: 'Test HTTP Monitor 03',
+                  value: '"Test HTTP Monitor 03"',
                 },
                 origin: {
                   type: 'text',
@@ -550,7 +550,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 name: {
                   type: 'text',
-                  value: 'Test Monitor',
+                  value: '"Test Monitor"',
                 },
                 origin: {
                   type: 'text',

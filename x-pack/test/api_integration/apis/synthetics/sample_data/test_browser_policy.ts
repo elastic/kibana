@@ -177,7 +177,7 @@ export const getTestBrowserSyntheticsPolicy = ({
             },
             enabled: { value: true, type: 'bool' },
             type: { value: 'browser', type: 'text' },
-            name: { value: 'Test HTTP Monitor 03', type: 'text' },
+            name: { value: '"Test HTTP Monitor 03"', type: 'text' },
             schedule: { value: '"@every 3m"', type: 'text' },
             'service.name': { value: '', type: 'text' },
             timeout: { value: '16s', type: 'text' },
