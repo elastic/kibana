@@ -26,7 +26,10 @@ import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
-type Asset = { id: string; type: string };
+interface Asset {
+  id: string;
+  type: string;
+}
 interface PackageItem {
   name: string;
   result: {
