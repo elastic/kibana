@@ -22,13 +22,13 @@ import * as i18n from '../user_actions/translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { EditableMarkdown, ScrollableMarkdown } from '../markdown_editor';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import type { OnUpdateFields } from '../case_view/types';
 import { schema } from './schema';
 
 const DESCRIPTION_ID = 'description';
 export interface DescriptionProps {
-  caseData: Case;
+  caseData: CaseUI;
   isLoadingDescription: boolean;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
 }

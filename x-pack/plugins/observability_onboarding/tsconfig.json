@@ -19,9 +19,9 @@
     "@kbn/i18n",
     "@kbn/core-http-browser",
     "@kbn/ui-theme",
-    "@kbn/typed-react-router-config",
     "@kbn/server-route-repository",
     "@kbn/config-schema",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",
