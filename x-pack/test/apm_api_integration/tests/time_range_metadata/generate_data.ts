@@ -72,12 +72,12 @@ export function overwriteSynthEsClientPipeline({
   additionalTransform?: () => Transform;
 }) {
   return (base: Readable) => {
-    const defaultPipeline = synthtraceEsClient.getDefaultPipeline()(
-      base
-    ) as unknown as NodeJS.ReadableStream;
+    const defaultPipeline = synthtraceEsClient.getDefaultPipeline()(base);
     if (reset) {
       return defaultPipeline;
     }
-    return additionalTransform ? defaultPipeline.pipe(additionalTransform()) : defaultPipeline;
+    return additionalTransform
+      ? (defaultPipeline as unknown as NodeJS.ReadableStream).pipe(additionalTransform())
+      : defaultPipeline;
   };
 }
