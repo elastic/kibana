@@ -7,34 +7,20 @@
 
 import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 import type { TagAttributes } from '@kbn/saved-objects-tagging-plugin/common';
-import type { OutputError } from '@kbn/securitysolution-es-utils';
-import { transformError } from '@kbn/securitysolution-es-utils';
 
 export const findTagsByName = async ({
   savedObjectsClient,
-  search,
+  tagName,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  search: string;
-}): Promise<{
-  response: Array<SavedObjectsFindResult<TagAttributes>> | null;
-  error?: OutputError;
-}> => {
-  try {
-    const tagResponse = await savedObjectsClient.find<TagAttributes>({
-      type: 'tag',
-      search,
-      searchFields: ['name'],
-      sortField: 'updated_at',
-      sortOrder: 'desc',
-    });
-    return {
-      response: tagResponse.saved_objects.filter(({ attributes: { name } }) => name === search),
-    };
-  } catch (e) {
-    return {
-      error: transformError(e),
-      response: null,
-    };
-  }
+  tagName: string;
+}): Promise<Array<SavedObjectsFindResult<TagAttributes>>> => {
+  const tagResponse = await savedObjectsClient.find<TagAttributes>({
+    type: 'tag',
+    search: `"${tagName}"`,
+    searchFields: ['name'],
+    sortField: 'updated_at',
+    sortOrder: 'desc',
+  });
+  return tagResponse.saved_objects.filter(({ attributes: { name } }) => name === tagName);
 };

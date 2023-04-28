@@ -5,44 +5,26 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { useSecurityTags } from '../../../dashboards/context/dashboard_context';
 import { useKibana } from '../../lib/kibana';
-import { getSecurityTagIds } from './utils';
 
 type UseCreateDashboard = () => { isLoading: boolean; url: string };
 
 export const useCreateSecurityDashboardLink: UseCreateDashboard = () => {
-  const { dashboard: { locator } = {}, savedObjectsTagging, http } = useKibana().services;
+  const { dashboard } = useKibana().services;
+  const securityTags = useSecurityTags();
 
-  const [securityTagId, setSecurityTagId] = useState<string[] | null>(null);
-
-  useEffect(() => {
-    let ignore = false;
-    const getOrCreateSecurityTag = async () => {
-      if (http && savedObjectsTagging) {
-        // getSecurityTagIds creates a tag if it coundn't find one
-        const tagIds = await getSecurityTagIds(http);
-
-        if (!ignore && tagIds) {
-          setSecurityTagId(tagIds);
-        }
-      }
+  const result = useMemo(() => {
+    const firstSecurityTagId = securityTags?.[0]?.id;
+    if (!firstSecurityTagId) {
+      return { isLoading: true, url: '' };
+    }
+    return {
+      isLoading: false,
+      url: dashboard?.locator?.getRedirectUrl({ tags: [firstSecurityTagId] }) ?? '',
     };
-
-    getOrCreateSecurityTag();
-
-    return () => {
-      ignore = true;
-    };
-  }, [http, savedObjectsTagging]);
-
-  const result = useMemo(
-    () => ({
-      isLoading: securityTagId == null,
-      url: securityTagId ? locator?.getRedirectUrl({ tags: [securityTagId[0]] }) ?? '' : '',
-    }),
-    [securityTagId, locator]
-  );
+  }, [securityTags, dashboard?.locator]);
 
   return result;
 };

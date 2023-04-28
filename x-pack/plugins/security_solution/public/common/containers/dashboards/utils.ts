@@ -6,25 +6,28 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import { getSecuritySolutionDashboards, getSecuritySolutionTags } from './api';
+import type { Tag } from '@kbn/saved-objects-tagging-plugin/common';
+import { createSecuritySolutionTag, getDashboardsByTags, getSecuritySolutionTags } from './api';
 import type { DashboardTableItem } from './types';
 
 /**
  * Request the security tag saved object and returns the id if exists.
  * It creates one if the tag doesn't exist.
  */
-export const getSecurityTagIds = async (http: HttpSetup): Promise<string[] | undefined> => {
+export const getSecurityTagIds = async (http: HttpSetup): Promise<Tag[]> => {
   const tagResponse = await getSecuritySolutionTags({ http });
-  return tagResponse?.map(({ id }: { id: string }) => id);
+  if (tagResponse.length > 0) {
+    return tagResponse;
+  } else {
+    const tag = await createSecuritySolutionTag({ http });
+    return [tag];
+  }
 };
 
 /**
  * Requests the saved objects of the security tagged dashboards
  */
 export const getSecurityDashboards = async (
-  http: HttpSetup
-): Promise<DashboardTableItem[] | null> => {
-  const dashboardsResponse = await getSecuritySolutionDashboards({ http });
-
-  return dashboardsResponse;
-};
+  http: HttpSetup,
+  securityTagIds: string[]
+): Promise<DashboardTableItem[] | null> => getDashboardsByTags({ http, tagIds: securityTagIds });

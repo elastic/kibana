@@ -6,47 +6,58 @@
  */
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 
+import type { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { INTERNAL_DASHBOARDS_URL } from '../../../../common/constants';
 import type { SetupPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../timeline/utils/common';
-import { getSecuritySolutionDashboards } from '../helpers';
+
+const getDashboardsParamsSchema = schema.object({
+  tagIds: schema.arrayOf(schema.string()),
+});
 
 export const getSecuritySolutionDashboardsRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
   security: SetupPlugins['security']
 ) => {
-  router.get(
+  router.post(
     {
       path: INTERNAL_DASHBOARDS_URL,
-      validate: false,
+      validate: { body: getDashboardsParamsSchema },
       options: {
         tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-
       const frameworkRequest = await buildFrameworkRequest(context, security, request);
       const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
+      const { tagIds } = request.body;
 
-      const { response: dashboards, error } = await getSecuritySolutionDashboards({
-        logger,
-        savedObjectsClient,
-      });
-      if (!error && dashboards != null) {
+      try {
+        const dashboardsResponse = await savedObjectsClient.find<DashboardAttributes>({
+          type: 'dashboard',
+          hasReference: tagIds.map((id) => ({ id, type: 'tag' })),
+        });
+        const dashboards = dashboardsResponse.saved_objects ?? [];
+
         return response.ok({ body: dashboards });
-      } else {
+      } catch (err) {
+        const error = transformError(err);
+        logger.error(`Failed to find dashboards tags - ${JSON.stringify(error.message)}`);
+
+        const siemResponse = buildSiemResponse(response);
         return siemResponse.error({
-          statusCode: error?.statusCode ?? 500,
+          statusCode: error.statusCode ?? 500,
           body: i18n.translate(
             'xpack.securitySolution.dashboards.getSecuritySolutionDashboardsErrorTitle',
             {
-              values: { message: error?.message },
-              defaultMessage: `Failed to get dashboards - {message}`,
+              values: { message: error.message },
+              defaultMessage: `Failed to find dashboards - {message}`,
             }
           ),
         });

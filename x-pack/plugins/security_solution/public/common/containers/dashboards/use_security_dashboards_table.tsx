@@ -16,17 +16,19 @@ import { useFetch, REQUEST_NAMES } from '../../hooks/use_fetch';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
 import { SecurityPageName } from '../../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../components/link_to';
-
 import type { DashboardTableItem } from './types';
+import { useSecurityTags } from '../../../dashboards/context/dashboard_context';
 
 const EMPTY_DESCRIPTION = '-' as const;
 
 export const useSecurityDashboardsTableItems = () => {
   const { http } = useKibana().services;
+  const securityTags = useSecurityTags();
 
   const { fetch, data, isLoading, error } = useFetch(
     REQUEST_NAMES.SECURITY_DASHBOARDS,
-    getSecurityDashboards
+    () => getSecurityDashboards(http, securityTags?.map(({ id }) => id) ?? []),
+    { disabled: securityTags == null }
   );
 
   useEffect(() => {
