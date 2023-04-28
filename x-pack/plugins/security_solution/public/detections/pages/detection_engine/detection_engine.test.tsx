@@ -174,8 +174,7 @@ const state: State = {
 const { storage } = createSecuritySolutionStorageMock();
 
 const getStoreWithCustomState = (newState: State = state) => {
-  const store = createStore(newState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  return store;
+  return createStore(newState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 };
 
 const store = getStoreWithCustomState();
@@ -284,28 +283,34 @@ describe('DetectionEnginePageComponent', () => {
       );
     });
 
-    expect(MockedFilterGroup.mock.calls[0][0].filters[0]).toMatchObject(
+    expect(MockedFilterGroup).toHaveBeenCalledWith(
       expect.objectContaining({
-        meta: {
-          alias: null,
-          negate: true,
-          disabled: false,
-          type: 'exists',
-          key: 'kibana.alert.building_block_type',
-          value: 'exists',
-        },
-        query: {
-          exists: {
-            field: 'kibana.alert.building_block_type',
+        filters: [
+          {
+            meta: {
+              alias: null,
+              negate: true,
+              disabled: false,
+              type: 'exists',
+              key: 'kibana.alert.building_block_type',
+              value: 'exists',
+            },
+            query: {
+              exists: {
+                field: 'kibana.alert.building_block_type',
+              },
+            },
           },
-        },
-      })
+        ],
+      }),
+      expect.anything()
     );
   });
 
   it('should pass threat Indicator filter to the alert Page Controls', async () => {
     const MockedFilterGroup = FilterGroup as jest.Mock;
     MockedFilterGroup.mockImplementationOnce(getMockedFilterGroupWithCustomFilters());
+
     await waitFor(() => {
       render(
         <TestProviders store={getStoreWithCustomState(stateWithThreatIndicatorsAlertEnabled)}>
@@ -316,22 +321,27 @@ describe('DetectionEnginePageComponent', () => {
       );
     });
 
-    expect(MockedFilterGroup.mock.calls[0][0].filters[0]).toMatchObject(
+    expect(MockedFilterGroup).toHaveBeenCalledWith(
       expect.objectContaining({
-        meta: {
-          alias: null,
-          negate: true,
-          disabled: false,
-          type: 'exists',
-          key: 'kibana.alert.building_block_type',
-          value: 'exists',
-        },
-        query: {
-          exists: {
-            field: 'kibana.alert.building_block_type',
+        filters: [
+          {
+            meta: {
+              alias: null,
+              negate: true,
+              disabled: false,
+              type: 'exists',
+              key: 'kibana.alert.building_block_type',
+              value: 'exists',
+            },
+            query: {
+              exists: {
+                field: 'kibana.alert.building_block_type',
+              },
+            },
           },
-        },
-      })
+        ],
+      }),
+      expect.anything()
     );
   });
 

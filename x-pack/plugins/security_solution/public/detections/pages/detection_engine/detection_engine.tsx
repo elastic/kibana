@@ -77,13 +77,13 @@ import { useKibana } from '../../../common/lib/kibana';
 import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-import { DetectionPageFilterSet } from '../../components/detection_page_filters';
 import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
 import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
 import { AlertsTableComponent } from '../../components/alerts_table';
 import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
+import { DetectionPageFilterSet } from '../../components/detection_page_filters';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -95,7 +95,10 @@ const StyledFullHeightContainer = styled.div`
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
-const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = () => {
+const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
+  clearEventsLoading,
+  clearEventsDeleted,
+}) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
@@ -291,7 +294,15 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   }, []);
 
   // Callback for when open/closed filter changes
-  const onFilterGroupChangedCallback = useCallback((newFilterGroup: Status) => {}, []);
+  const onFilterGroupChangedCallback = useCallback(
+    (newFilterGroup: Status) => {
+      const timelineId = TableId.alertsOnAlertsPage;
+      clearEventsLoading({ id: timelineId });
+      clearEventsDeleted({ id: timelineId });
+      setStatusFilter([newFilterGroup]);
+    },
+    [clearEventsLoading, clearEventsDeleted, setStatusFilter]
+  );
 
   const areDetectionPageFiltersLoading = useMemo(() => {
     if (arePageFiltersEnabled) {
