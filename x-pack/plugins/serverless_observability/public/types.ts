@@ -7,9 +7,9 @@
 
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import {
-  ObservabilityPublicSetup,
-  ObservabilityPublicStart,
-} from '@kbn/observability-plugin/public';
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessObservabilityPluginSetup {}
@@ -18,11 +18,11 @@ export interface ServerlessObservabilityPluginSetup {}
 export interface ServerlessObservabilityPluginStart {}
 
 export interface ServerlessObservabilityPluginSetupDependencies {
-  observability: ObservabilityPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
   serverless: ServerlessPluginSetup;
 }
 
 export interface ServerlessObservabilityPluginStartDependencies {
-  observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   serverless: ServerlessPluginStart;
 }

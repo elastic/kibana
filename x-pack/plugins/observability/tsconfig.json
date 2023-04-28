@@ -72,10 +72,7 @@
     "@kbn/core-theme-browser",
     "@kbn/core-elasticsearch-server",
     "@kbn/observability-shared-plugin",
-    "@kbn/exploratory-view-plugin",
-    "@kbn/core-chrome-browser"
+    "@kbn/exploratory-view-plugin"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

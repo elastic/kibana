@@ -14,7 +14,7 @@
     ],
     "requiredPlugins": [
       "serverless",
-      "observability"
+      "observabilityShared"
     ],
     "optionalPlugins": [],
     "requiredBundles": []

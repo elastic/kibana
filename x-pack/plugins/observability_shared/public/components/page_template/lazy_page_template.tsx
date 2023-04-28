@@ -18,17 +18,13 @@ export const LazyObservabilityPageTemplate = React.lazy(() => import('./page_tem
 export type LazyObservabilityPageTemplateProps = WrappedPageTemplateProps;
 
 export function createLazyObservabilityPageTemplate({
-  getChromeStyle$,
+  isSidebarEnabled$,
   ...injectedDeps
 }: ObservabilityPageTemplateDependencies) {
   return (pageTemplateProps: LazyObservabilityPageTemplateProps) => {
-    const chromeStyle = useObservable(getChromeStyle$());
+    const isSidebarEnabled = useObservable(isSidebarEnabled$);
     const { showSolutionNav: showSolutionNavProp, ...props } = pageTemplateProps;
-    let showSolutionNav = showSolutionNavProp;
-
-    if (chromeStyle === 'project') {
-      showSolutionNav = false;
-    }
+    const showSolutionNav = !!showSolutionNavProp && isSidebarEnabled;
 
     return (
       <React.Suspense fallback={null}>

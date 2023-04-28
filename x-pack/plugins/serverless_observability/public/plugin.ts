@@ -25,8 +25,9 @@ export class ServerlessObservabilityPlugin
 
   public start(
     _core: CoreStart,
-    { serverless }: ServerlessObservabilityPluginStartDependencies
+    { observabilityShared }: ServerlessObservabilityPluginStartDependencies
   ): ServerlessObservabilityPluginStart {
+    observabilityShared.setIsSidebarEnabled(false);
     return {};
   }
 

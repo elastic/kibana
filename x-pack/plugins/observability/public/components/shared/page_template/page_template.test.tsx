@@ -56,7 +56,6 @@ describe('Page template', () => {
       navigationSections$: navigationRegistry.sections$,
       getPageTemplateServices,
       guidedOnboardingApi: guidedOnboardingMock.createStart().guidedOnboardingApi,
-      getChromeStyle$: () => of('classic'),
     });
 
     const component = shallow(
