@@ -90,7 +90,7 @@ function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateSt
       const yamlKeyPlaceholder = `##${key}##`;
       varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
-    } else if (recordEntry.value.isSecretRef) {
+    } else if (recordEntry.value && recordEntry.value.isSecretRef) {
       varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
     } else {
       varPart[lastKeyPart] = recordEntry.value;
