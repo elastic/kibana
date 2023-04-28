@@ -77,3 +77,17 @@ export function retryResultSeconds(
     serviceMessage: message,
   };
 }
+
+// This is only modifiable via config, at startup.  The reason we
+// added this was to test with a local simulator for functional tests.
+let SlackApiUrl = 'https://slack.com/api/';
+
+export function internalSetSlackApiURL(url: string): void {
+  console.log('SET URL', url);
+  SlackApiUrl = url;
+}
+
+export function internalGetSlackApiURL(): string {
+  console.log('GET SLACK URL', SlackApiUrl);
+  return SlackApiUrl;
+}

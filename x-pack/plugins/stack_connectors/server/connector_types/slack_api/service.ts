@@ -26,8 +26,9 @@ import {
   errorResult,
   successResult,
 } from '../../../common/slack_api/lib';
-import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
+import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
+import { internalGetSlackApiURL } from '../../../common/slack_api/lib';
 
 const buildSlackExecutorErrorResponse = ({
   slackApiError,
@@ -112,7 +113,7 @@ export const createExternalService = (
   }
 
   const axiosInstance = axios.create({
-    baseURL: SLACK_URL,
+    baseURL: internalGetSlackApiURL(),
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-type': 'application/json; charset=UTF-8',
@@ -140,17 +141,25 @@ export const createExternalService = (
     text,
   }: PostMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
-      const result: AxiosResponse<PostMessageResponse> = await request({
-        axios: axiosInstance,
-        method: 'post',
-        url: 'chat.postMessage',
-        logger,
-        data: { channel: channels[0], text },
-        configurationUtilities,
-      });
+      console.log('trying to post message', channels, text);
+      // console.log(axiosInstance);
+      // const result: AxiosResponse<PostMessageResponse> = await request({
+      //   axios: axiosInstance,
+      //   method: 'post',
+      //   url: internalGetSlackApiURL() + '/chat.postMessage',
+      //   logger,
+      //   data: { channel: channels[0], text },
+      //   configurationUtilities,
+      // });
+      const result: AxiosResponse<PostMessageResponse> = await axios.post(
+        internalGetSlackApiURL() + '/chat.postMessage',
+        { channel: channels[0], text }
+      );
 
+      console.log('OKAY', result.data);
       return buildSlackExecutorSuccessResponse({ slackApiResponseData: result.data });
     } catch (error) {
+      console.log('SOME ERROR', error);
       return buildSlackExecutorErrorResponse({ slackApiError: error, logger });
     }
   };

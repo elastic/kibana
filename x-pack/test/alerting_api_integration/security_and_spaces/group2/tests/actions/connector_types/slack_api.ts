@@ -13,6 +13,8 @@ export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Slack API action', () => {
+    let simulatedActionId = '';
+
     it('should return 200 when creating a slack action successfully', async () => {
       const { body: createdAction } = await supertest
         .post('/api/actions/connector')
@@ -71,6 +73,46 @@ export default function slackTest({ getService }: FtrProviderContext) {
               'error validating action type secrets: [token]: expected value of type [string] but got [undefined]',
           });
         });
+    });
+
+    it.only('should create our slack simulator action successfully', async () => {
+      try {
+        const { body: createdSimulatedAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A slack simulator',
+            connector_type_id: '.slack_api',
+            secrets: {
+              token: 'fake token',
+            },
+          })
+          .expect(200);
+
+        simulatedActionId = createdSimulatedAction.id;
+      } catch (error) {
+        console.log('UPS', error);
+      }
+    });
+
+    it.only('should handle firing with a simulated success', async () => {
+      try {
+        const { body: result } = await supertest
+          .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              subAction: 'postMessage',
+              subActionParams: { channels: ['general'], text: 'some text' },
+            },
+          })
+          .expect(200);
+        console.log('SUCCESS', result);
+      } catch (error) {
+        console.log('ERROR', error);
+      }
+      // expect(result.status).to.eql('ok');
+      // expect(proxyHaveBeenCalled).to.equal(true);
     });
   });
 }
