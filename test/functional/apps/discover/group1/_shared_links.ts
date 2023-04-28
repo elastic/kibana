@@ -73,9 +73,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('permalink', function () {
         it('should allow for copying the snapshot URL', async function () {
-          const re = new RegExp(baseUrl + '/app/r\\?l=DISCOVER_APP_LOCATOR.+$');
+          const expectedUrl =
+            'http://localhost:5620/app/r?l=DISCOVER_APP_LOCATOR&v=8.9.0&lz=N4IgjgrgpgTgniAXKSsGJCANCANgQwDsBzCfYqJEAa' +
+            '2nhAF8cBnAexgBckBtbkAAQ4BLALZRmHfCIAO2EABNxAYxABdVTiWtcEEYWY8NIIYUUAPKrlbEJ%2BZgAsAtACo5JjrABu%2BXFXwQOV' +
+            'jkAMyFcDxgDRG4jeXxJADUhKAB3AEl5S2tbBxc5YTEAJSIKJFBgmFYRKgAmAAYARgBWRzqATkcGtoAVOoA2RABmBsQAFlGAOjrpgC18o' +
+            'Ix65taOmsHuhoAOIZHxqdnGHBgoCvF7NMII719kEGvoJD7p6Zxpf2ZKRA4YaAYGIA%3D';
           const actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).to.match(re);
+          expect(actualUrl).to.equal(expectedUrl);
         });
 
         it('should allow for copying the snapshot URL as a short URL', async function () {
@@ -89,12 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should allow for copying the saved object URL', async function () {
           const expectedUrl =
-            baseUrl +
-            '/app/discover#' +
-            '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' +
-            '?_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A60000)' +
-            "%2Ctime%3A(from%3A'2015-09-19T06%3A31%3A44.000Z'%2C" +
-            "to%3A'2015-09-23T18%3A31%3A44.000Z'))";
+            baseUrl + '/app/discover#' + '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' + '?_g=()';
           await PageObjects.discover.loadSavedSearch('A Saved Search');
           await PageObjects.share.clickShareTopNavButton();
           await PageObjects.share.exportAsSavedObject();
