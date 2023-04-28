@@ -104,7 +104,12 @@ export const MaintenanceWindowsPage = React.memo(() => {
         </EuiPageHeaderSection>
         {!showEmptyPrompt && hasLicense && writeWindowMaintenance ? (
           <EuiPageHeaderSection>
-            <EuiButton onClick={handleClickCreate} iconType="plusInCircle" fill>
+            <EuiButton
+              data-test-subj="mw-create-button"
+              onClick={handleClickCreate}
+              iconType="plusInCircle"
+              fill
+            >
               {i18n.CREATE_NEW_BUTTON}
             </EuiButton>
           </EuiPageHeaderSection>

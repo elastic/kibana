@@ -168,6 +168,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
 
     return (
       <EuiInMemoryTable
+        data-test-subj="mw-table"
         css={tableCss}
         itemId="id"
         loading={loading || isLoadingFinish || isLoadingArchive || isLoadingFinishAndArchive}
