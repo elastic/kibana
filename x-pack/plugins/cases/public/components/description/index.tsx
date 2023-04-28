@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { css } from '@emotion/react';
 import {
@@ -132,19 +132,21 @@ export const Description = ({
     setIsEditable(true);
   }
 
-  if (
-    isCommentRef(descriptionMarkdownRef.current) &&
-    descriptionMarkdownRef.current.editor?.textarea &&
-    lensDraftComment &&
-    lensDraftComment.commentId === DESCRIPTION_ID
-  ) {
-    descriptionMarkdownRef.current.setComment(lensDraftComment.comment);
-    if (hasIncomingLensState) {
-      openLensModal({ editorRef: descriptionMarkdownRef.current.editor });
-    } else {
-      clearLensDraftComment();
+  useEffect(() => {
+    if (
+      isCommentRef(descriptionMarkdownRef.current) &&
+      descriptionMarkdownRef.current.editor?.textarea &&
+      lensDraftComment &&
+      lensDraftComment.commentId === DESCRIPTION_ID
+    ) {
+      descriptionMarkdownRef.current.setComment(lensDraftComment.comment);
+      if (hasIncomingLensState) {
+        openLensModal({ editorRef: descriptionMarkdownRef.current.editor });
+      } else {
+        clearLensDraftComment();
+      }
     }
-  }
+  }, [clearLensDraftComment, lensDraftComment, hasIncomingLensState, openLensModal]);
 
   const hasUnsavedChanges =
     draftDescription && draftDescription !== caseData.description && !isLoadingDescription;
