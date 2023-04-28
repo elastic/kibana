@@ -11,7 +11,7 @@ import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField, DataView, Query } from '@kbn/data-plugin/common';
 import { indexPatterns } from '@kbn/data-plugin/public';
-import { JoinExpression } from './join_expression';
+import { TermJoinExpression } from './term_join_expression';
 import { MetricsExpression } from './metrics_expression';
 import { WhereExpression } from './where_expression';
 import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
@@ -235,7 +235,7 @@ export class Join extends Component<Props, State> {
       <div className="mapJoinItem">
         <EuiFlexGroup className="mapJoinItem__inner" responsive={false} wrap={true} gutterSize="s">
           <EuiFlexItem grow={false}>
-            <JoinExpression
+            <TermJoinExpression
               leftSourceName={leftSourceName}
               leftValue={join.leftField}
               leftFields={leftFields}
