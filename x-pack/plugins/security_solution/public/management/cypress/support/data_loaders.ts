@@ -11,7 +11,7 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
 import {
   sendEndpointActionResponse,
   sendFleetActionResponse,
-} from '../../../../scripts/endpoint/agent_emulator/services/endpoint_response_actions';
+} from '../../../../scripts/endpoint/common/response_actions';
 import type { DeleteAllEndpointDataResponse } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
 import { deleteAllEndpointData } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
 import { waitForEndpointToStreamData } from '../../../../scripts/endpoint/common/endpoint_metadata_services';
