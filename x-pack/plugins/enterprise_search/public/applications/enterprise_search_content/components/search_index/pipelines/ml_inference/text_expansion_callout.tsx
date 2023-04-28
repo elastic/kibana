@@ -232,7 +232,7 @@ export const ModelDeployed = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSpacer size="s" />
-        </EuiFlexItem>        
+        </EuiFlexItem>
         <EuiFlexItem grow>
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
             <EuiFlexItem>
