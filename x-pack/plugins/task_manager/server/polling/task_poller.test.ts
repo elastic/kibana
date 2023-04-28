@@ -9,7 +9,6 @@ import sinon from 'sinon';
 import { of, BehaviorSubject } from 'rxjs';
 import { none } from 'fp-ts/lib/Option';
 import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
-import { sleep, resolvable } from '../test_utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { asOk, asErr } from '../lib/result_type';
 
@@ -17,7 +16,7 @@ describe('TaskPoller', () => {
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
-    clock = sinon.useFakeTimers();
+    clock = sinon.useFakeTimers({ toFake: ['Date', 'setTimeout'] });
   });
 
   afterEach(() => clock.restore());
@@ -39,18 +38,17 @@ describe('TaskPoller', () => {
     expect(work).toHaveBeenCalledTimes(1);
 
     // `work` is async, we have to force a node `tick`
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
     clock.tick(halfInterval);
     expect(work).toHaveBeenCalledTimes(1);
     clock.tick(halfInterval);
 
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
     expect(work).toHaveBeenCalledTimes(2);
 
-    await sleep(0);
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
     clock.tick(pollInterval + 10);
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
     expect(work).toHaveBeenCalledTimes(3);
   });
 
@@ -71,14 +69,14 @@ describe('TaskPoller', () => {
     expect(work).toHaveBeenCalledTimes(1);
 
     // `work` is async, we have to force a node `tick`
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
     clock.tick(pollInterval);
     expect(work).toHaveBeenCalledTimes(2);
 
     pollInterval$.next(pollInterval * 2);
 
     // `work` is async, we have to force a node `tick`
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
     clock.tick(pollInterval);
     expect(work).toHaveBeenCalledTimes(2);
     clock.tick(pollInterval);
@@ -87,7 +85,7 @@ describe('TaskPoller', () => {
     pollInterval$.next(pollInterval / 2);
 
     // `work` is async, we have to force a node `tick`
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
     clock.tick(pollInterval / 2);
     expect(work).toHaveBeenCalledTimes(4);
   });
@@ -109,38 +107,38 @@ describe('TaskPoller', () => {
 
     expect(work).toHaveBeenCalledTimes(1);
 
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
     clock.tick(pollInterval);
     expect(work).toHaveBeenCalledTimes(2);
 
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
     clock.tick(pollInterval);
     expect(work).toHaveBeenCalledTimes(3);
 
     hasCapacity = false;
 
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
     clock.tick(pollInterval);
 
-    await sleep(0);
-    clock.tick(pollInterval);
-    expect(work).toHaveBeenCalledTimes(3);
-
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
     clock.tick(pollInterval);
     expect(work).toHaveBeenCalledTimes(3);
 
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
+    clock.tick(pollInterval);
+    expect(work).toHaveBeenCalledTimes(3);
+
+    await new Promise((resolve) => setImmediate(resolve));
     clock.tick(pollInterval);
     expect(work).toHaveBeenCalledTimes(3);
 
     hasCapacity = true;
 
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
     clock.tick(pollInterval);
     expect(work).toHaveBeenCalledTimes(4);
 
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
     clock.tick(pollInterval);
     expect(work).toHaveBeenCalledTimes(5);
   });
@@ -148,7 +146,7 @@ describe('TaskPoller', () => {
   test('waits for work to complete before emitting the next event', async () => {
     const pollInterval = 100;
 
-    const worker = resolvable();
+    const { promise: worker, resolve: resolveWorker } = createResolvablePromise();
 
     const handler = jest.fn();
     const poller = createTaskPoller<string, string[]>({
@@ -170,14 +168,14 @@ describe('TaskPoller', () => {
     // work should now be in progress
 
     clock.tick(pollInterval);
-    await sleep(pollInterval);
+    await new Promise((resolve) => setImmediate(resolve));
 
     expect(handler).toHaveBeenCalledTimes(0);
 
-    worker.resolve();
+    resolveWorker({});
 
     clock.tick(pollInterval);
-    await sleep(pollInterval);
+    await new Promise((resolve) => setImmediate(resolve));
 
     expect(handler).toHaveBeenCalledTimes(1);
 
@@ -204,7 +202,7 @@ describe('TaskPoller', () => {
     poller.start();
 
     clock.tick(pollInterval);
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
 
     const expectedError = new PollingError<string>(
       'Failed to poll for work: Error: failed to work',
@@ -239,12 +237,12 @@ describe('TaskPoller', () => {
     poller.start();
 
     clock.tick(pollInterval);
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
 
     expect(handler).toHaveBeenCalledWith(asOk(1));
 
     clock.tick(pollInterval);
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
 
     const expectedError = new PollingError<string>(
       'Failed to poll for work: Error: failed to work',
@@ -256,8 +254,16 @@ describe('TaskPoller', () => {
     expect(handler).not.toHaveBeenCalledWith(asOk(2));
 
     clock.tick(pollInterval);
-    await sleep(0);
+    await new Promise((resolve) => setImmediate(resolve));
 
     expect(handler).toHaveBeenCalledWith(asOk(3));
   });
 });
+
+function createResolvablePromise() {
+  let resolve: (value: unknown) => void = () => {};
+  const promise = new Promise((r) => {
+    resolve = r;
+  });
+  return { promise, resolve };
+}
