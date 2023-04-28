@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -30,7 +30,11 @@ import { useLicense } from '../../hooks/use_license';
 import { LicensePrompt } from './components/license_prompt';
 
 export const MaintenanceWindowsPage = React.memo(() => {
-  const { docLinks } = useKibana().services;
+  const {
+    application: { capabilities },
+    chrome,
+    docLinks,
+  } = useKibana().services;
   const { isAtLeastPlatinum } = useLicense();
 
   const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
@@ -44,9 +48,34 @@ export const MaintenanceWindowsPage = React.memo(() => {
   }, [navigateToCreateMaintenanceWindow]);
 
   const refreshData = useCallback(() => refetch(), [refetch]);
-
-  const showEmptyPrompt = !isLoading && maintenanceWindows.length === 0;
+  const showWindowMaintenance = capabilities.maintenanceWindow.show;
+  const writeWindowMaintenance = capabilities.maintenanceWindow.save;
+  const showEmptyPrompt =
+    !isLoading &&
+    maintenanceWindows.length === 0 &&
+    showWindowMaintenance &&
+    writeWindowMaintenance;
   const hasLicense = isAtLeastPlatinum();
+
+  // if the user is read only then display the glasses badge in the global navigation header
+  const setBadge = useCallback(() => {
+    if (showWindowMaintenance && !writeWindowMaintenance) {
+      chrome.setBadge({
+        text: i18n.READ_ONLY_BADGE_TEXT,
+        tooltip: i18n.READ_ONLY_BADGE_TOOLTIP,
+        iconType: 'glasses',
+      });
+    }
+  }, [chrome, showWindowMaintenance, writeWindowMaintenance]);
+
+  useEffect(() => {
+    setBadge();
+
+    // remove the icon after the component unmounts
+    return () => {
+      chrome.setBadge();
+    };
+  }, [setBadge, chrome]);
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
@@ -71,7 +100,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
             <p>{i18n.MAINTENANCE_WINDOWS_DESCRIPTION}</p>
           </EuiText>
         </EuiPageHeaderSection>
-        {!showEmptyPrompt && hasLicense ? (
+        {!showEmptyPrompt && hasLicense && writeWindowMaintenance ? (
           <EuiPageHeaderSection>
             <EuiButton onClick={handleClickCreate} iconType="plusInCircle" fill>
               {i18n.CREATE_NEW_BUTTON}
