@@ -51,6 +51,7 @@ import {
 } from './field_top_values';
 import { FieldSummaryMessage } from './field_summary_message';
 import { FieldNumberSummary, isNumberSummaryValid } from './field_number_summary';
+import { ErrorBoundary } from '../error_boundary';
 
 export interface FieldStatsState {
   isLoading: boolean;
@@ -573,25 +574,6 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   return null;
 };
-
-class ErrorBoundary extends React.Component<{}, { hasError: boolean }> {
-  constructor(props: FieldStatsProps) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return null;
-    }
-
-    return this.props.children;
-  }
-}
 
 /**
  * Component which fetches and renders stats for a data view field

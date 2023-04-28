@@ -20,7 +20,6 @@ import { getServiceLocationsRoute } from './synthetics_service/get_service_locat
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
 import {
   disableSyntheticsRoute,
-  enableSyntheticsRoute,
   getSyntheticsEnablementRoute,
 } from './synthetics_service/enablement';
 import {
@@ -61,7 +60,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   deleteSyntheticsMonitorProjectRoute,
   disableSyntheticsRoute,
   editSyntheticsMonitorRoute,
-  enableSyntheticsRoute,
   getServiceLocationsRoute,
   getSyntheticsMonitorRoute,
   getSyntheticsProjectMonitorsRoute,

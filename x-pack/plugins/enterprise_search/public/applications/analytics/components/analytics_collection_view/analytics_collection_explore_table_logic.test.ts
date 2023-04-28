@@ -7,6 +7,9 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
+import { DataView } from '@kbn/data-views-plugin/common';
+import { nextTick } from '@kbn/test-jest-helpers';
+
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
 import {
@@ -38,6 +41,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
   });
 
   const defaultProps = {
+    dataView: null,
     isLoading: false,
     items: [],
     pageIndex: 0,
@@ -45,6 +49,10 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
     search: '',
     selectedTable: null,
     sorting: null,
+    timeRange: {
+      from: 'now-7d',
+      to: 'now',
+    },
     totalItemsCount: 0,
   };
 
@@ -79,6 +87,11 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
     });
 
     describe('isLoading', () => {
+      beforeEach(() => {
+        mount({ selectedTable: ExploreTables.Referrers });
+        AnalyticsCollectionExploreTableLogic.actions.setDataView({ id: 'test' } as DataView);
+      });
+
       it('should handle onTableChange', () => {
         AnalyticsCollectionExploreTableLogic.actions.onTableChange({
           page: { index: 2, size: 10 },
@@ -101,7 +114,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
       });
 
       it('should handle setSelectedTable', () => {
-        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
+        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.Referrers);
         expect(AnalyticsCollectionExploreTableLogic.values.isLoading).toEqual(true);
       });
 
@@ -128,7 +141,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
         AnalyticsCollectionExploreTableLogic.actions.onTableChange({
           page: { index: 2, size: 10 },
         });
-        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
+        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.Referrers);
         expect(AnalyticsCollectionExploreTableLogic.values.pageIndex).toEqual(0);
       });
 
@@ -161,7 +174,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
         AnalyticsCollectionExploreTableLogic.actions.onTableChange({
           page: { index: 2, size: 10 },
         });
-        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
+        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.Referrers);
         expect(AnalyticsCollectionExploreTableLogic.values.pageSize).toEqual(10);
       });
 
@@ -182,7 +195,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
       it('should handle setSelectedTable', () => {
         AnalyticsCollectionExploreTableLogic.actions.setSearch('test');
-        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
+        AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.Referrers);
         expect(AnalyticsCollectionExploreTableLogic.values.search).toEqual('');
       });
 
@@ -200,10 +213,16 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
   });
 
   describe('listeners', () => {
+    const mockDataView = { id: 'test' } as DataView;
+    beforeEach(() => {
+      mount({ selectedTable: ExploreTables.Referrers });
+      AnalyticsCollectionExploreTableLogic.actions.setDataView(mockDataView);
+    });
+
     it('should fetch items when selectedTable changes', () => {
-      AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.TopReferrers);
+      AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.Referrers);
       expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
-        indexPattern: undefined,
+        indexPattern: mockDataView,
         sessionId: undefined,
       });
     });
@@ -214,7 +233,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
       AnalyticsCollectionToolbarLogic.actions.setTimeRange({ from: 'now-7d', to: 'now' });
       expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
-        indexPattern: undefined,
+        indexPattern: mockDataView,
         sessionId: undefined,
       });
     });
@@ -225,7 +244,7 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
       AnalyticsCollectionToolbarLogic.actions.setSearchSessionId('1234');
       expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
-        indexPattern: undefined,
+        indexPattern: mockDataView,
         sessionId: '1234',
       });
     });
@@ -236,18 +255,22 @@ describe('AnalyticsCollectionExplorerTablesLogic', () => {
 
       AnalyticsCollectionExploreTableLogic.actions.onTableChange({});
       expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
-        indexPattern: undefined,
+        indexPattern: mockDataView,
         sessionId: undefined,
       });
     });
 
-    it('should fetch items when search changes', () => {
+    it('should fetch items when search changes', async () => {
+      jest.useFakeTimers({ legacyFakeTimers: true });
       AnalyticsCollectionExploreTableLogic.actions.setSelectedTable(ExploreTables.WorsePerformers);
       (KibanaLogic.values.data.search.search as jest.Mock).mockClear();
 
       AnalyticsCollectionExploreTableLogic.actions.setSearch('test');
+      jest.advanceTimersByTime(200);
+      await nextTick();
+
       expect(KibanaLogic.values.data.search.search).toHaveBeenCalledWith(expect.any(Object), {
-        indexPattern: undefined,
+        indexPattern: mockDataView,
         sessionId: undefined,
       });
     });

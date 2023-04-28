@@ -26,6 +26,7 @@ import {
   ALERT_ORIGINAL_EVENT_CATEGORY,
   ALERT_GROUP_ID,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   createRule,
   deleteAllRules,
@@ -173,6 +174,14 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId, size: maxSignals * 2 });
       expect(previewAlerts.length).eql(maxSignals);
+    });
+
+    it('generates max signals warning when circuit breaker is hit', async () => {
+      const rule: EqlRuleCreateProps = {
+        ...getEqlRuleForSignalTesting(['auditbeat-*']),
+      };
+      const { logs } = await previewRule({ supertest, rule });
+      expect(logs[0].warnings).contain(getMaxSignalsWarning());
     });
 
     it('uses the provided event_category_override', async () => {

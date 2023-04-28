@@ -59,7 +59,7 @@ export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps>
           {i18n.translate(
             'xpack.enterpriseSearch.content.engine.api.generateEngineApiKeyModal.title',
             {
-              defaultMessage: 'Create Engine read-only API Key',
+              defaultMessage: 'Create Search application read-only API Key',
             }
           )}
         </EuiModalHeaderTitle>

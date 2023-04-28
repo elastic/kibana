@@ -31,11 +31,12 @@ describe('importDashboards(req)', () => {
         type: 'visualization',
         attributes: { visState: '{}' },
         references: [],
+        managed: true,
       },
     ];
   });
 
-  test('should call bulkCreate with each asset, filtering out any version if present', async () => {
+  test('should call bulkCreate with each asset, filtering out any version and managed if present', async () => {
     await importDashboards(savedObjectClient, importedObjects, { overwrite: false, exclude: [] });
 
     expect(savedObjectClient.bulkCreate).toHaveBeenCalledTimes(1);

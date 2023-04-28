@@ -20,7 +20,7 @@ import type {
   CheckVersionIndexReadyActions,
   CleanupUnknownAndExcluded,
   CleanupUnknownAndExcludedWaitForTaskState,
-  CloneTempToSource,
+  CloneTempToTarget,
   CreateNewTargetState,
   CreateReindexTempState,
   FatalState,
@@ -51,6 +51,8 @@ import type {
   UpdateTargetMappingsPropertiesState,
   UpdateTargetMappingsPropertiesWaitForTaskState,
   WaitForYellowSourceState,
+  ReadyToReindexSyncState,
+  DoneReindexingSyncState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
@@ -58,6 +60,7 @@ import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
 import type { BulkIndexOperationTuple, BulkOperation } from './create_batches';
+import { DEFAULT_INDEX_TYPES_MAP } from '../kibana_migrator_constants';
 
 describe('migrations v2 model', () => {
   const indexMapping: IndexMapping = {
@@ -115,6 +118,8 @@ describe('migrations v2 model', () => {
       clusterShardLimitExceeded: 'clusterShardLimitExceeded',
     },
     waitForMigrationCompletion: false,
+    mustRelocateDocuments: false,
+    indexTypesMap: DEFAULT_INDEX_TYPES_MAP,
   };
   const postInitState = {
     ...baseState,
@@ -732,7 +737,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
         });
-        test('INIT -> CREATE_NEW_TARGET when no indices/aliases exist', () => {
+        test('INIT -> CREATE_NEW_TARGET when the index does not exist and the migrator is NOT involved in a relocation', () => {
           const res: ResponseType<'INIT'> = Either.right({});
           const newState = model(initState, res);
 
@@ -740,6 +745,29 @@ describe('migrations v2 model', () => {
             controlState: 'CREATE_NEW_TARGET',
             sourceIndex: Option.none,
             targetIndex: '.kibana_7.11.0_001',
+          });
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
+        });
+        test('INIT -> CREATE_REINDEX_TEMP when the index does not exist and the migrator is involved in a relocation', () => {
+          const res: ResponseType<'INIT'> = Either.right({});
+          const newState = model(
+            {
+              ...initState,
+              mustRelocateDocuments: true,
+            },
+            res
+          );
+
+          expect(newState).toMatchObject({
+            controlState: 'CREATE_REINDEX_TEMP',
+            sourceIndex: Option.none,
+            targetIndex: '.kibana_7.11.0_001',
+            versionIndexReadyActions: Option.some([
+              { add: { index: '.kibana_7.11.0_001', alias: '.kibana' } },
+              { add: { index: '.kibana_7.11.0_001', alias: '.kibana_7.11.0' } },
+              { remove_index: { index: '.kibana_7.11.0_reindex_temp' } },
+            ]),
           });
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
@@ -1146,12 +1174,29 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(0);
         });
 
-        test('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES', () => {
-          const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
-          const newState = model(waitForYellowSourceState, res);
+        describe('if the migrator is NOT involved in a relocation', () => {
+          test('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES', () => {
+            const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
+            const newState = model(waitForYellowSourceState, res);
 
-          expect(newState).toMatchObject({
-            controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+            expect(newState).toMatchObject({
+              controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+            });
+          });
+        });
+
+        describe('if the migrator is involved in a relocation', () => {
+          // no need to attempt to update the mappings, we are going to reindex
+          test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS', () => {
+            const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
+            const newState = model(
+              { ...waitForYellowSourceState, mustRelocateDocuments: true },
+              res
+            );
+
+            expect(newState).toMatchObject({
+              controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+            });
           });
         });
       });
@@ -1630,13 +1675,27 @@ describe('migrations v2 model', () => {
         sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
         tempIndexMappings: { properties: {} },
       };
-      it('CREATE_REINDEX_TEMP -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT if action succeeds', () => {
-        const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
-        const newState = model(state, res);
-        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
-        expect(newState.retryCount).toEqual(0);
-        expect(newState.retryDelay).toEqual(0);
+
+      describe('if the migrator is NOT involved in a relocation', () => {
+        it('CREATE_REINDEX_TEMP -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT if action succeeds', () => {
+          const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
+          const newState = model(state, res);
+          expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
+        });
       });
+
+      describe('if the migrator is involved in a relocation', () => {
+        it('CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC if action succeeds', () => {
+          const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
+          const newState = model({ ...state, mustRelocateDocuments: true }, res);
+          expect(newState.controlState).toEqual('READY_TO_REINDEX_SYNC');
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
+        });
+      });
+
       it('CREATE_REINDEX_TEMP -> CREATE_REINDEX_TEMP if action fails with index_not_green_timeout', () => {
         const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.left({
           message: '[index_not_green_timeout] Timeout waiting for ...',
@@ -1673,6 +1732,52 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('FATAL');
         expect((newState as FatalState).reason).toMatchInlineSnapshot(
           `"[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources. See clusterShardLimitExceeded"`
+        );
+      });
+    });
+
+    describe('READY_TO_REINDEX_SYNC', () => {
+      const state: ReadyToReindexSyncState = {
+        ...postInitState,
+        controlState: 'READY_TO_REINDEX_SYNC',
+      };
+
+      describe('if the migrator source index did NOT exist', () => {
+        test('READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC', () => {
+          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right(
+            'synchronized_successfully' as const
+          );
+          const newState = model(state, res);
+          expect(newState.controlState).toEqual('DONE_REINDEXING_SYNC');
+        });
+      });
+
+      describe('if the migrator source index did exist', () => {
+        test('READY_TO_REINDEX_SYNC -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT', () => {
+          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right(
+            'synchronized_successfully' as const
+          );
+          const newState = model(
+            {
+              ...state,
+              sourceIndex: Option.fromNullable('.kibana'),
+              sourceIndexMappings: Option.fromNullable({} as IndexMapping),
+            },
+            res
+          );
+          expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
+        });
+      });
+
+      test('READY_TO_REINDEX_SYNC -> FATAL if the synchronization between migrators fails', () => {
+        const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.left({
+          type: 'sync_failed',
+          error: new Error('Other migrators failed to reach the synchronization point'),
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"An error occurred whilst waiting for other migrators to get to this step."`
         );
       });
     });
@@ -1812,11 +1917,50 @@ describe('migrations v2 model', () => {
         tempIndexMappings: { properties: {} },
       };
 
-      it('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> SET_TEMP_WRITE_BLOCK if action succeeded', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT'> = Either.right({});
-        const newState = model(state, res) as ReindexSourceToTempTransform;
-        expect(newState.controlState).toBe('SET_TEMP_WRITE_BLOCK');
-        expect(newState.sourceIndex).toEqual(state.sourceIndex);
+      describe('if the migrator is NOT involved in a relocation', () => {
+        it('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> SET_TEMP_WRITE_BLOCK if action succeeded', () => {
+          const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT'> = Either.right({});
+          const newState = model(state, res) as ReindexSourceToTempTransform;
+          expect(newState.controlState).toBe('SET_TEMP_WRITE_BLOCK');
+          expect(newState.sourceIndex).toEqual(state.sourceIndex);
+        });
+      });
+
+      describe('if the migrator is involved in a relocation', () => {
+        it('REINDEX_SOURCE_TO_TEMP_CLOSE_PIT -> DONE_REINDEXING_SYNC if action succeeded', () => {
+          const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_CLOSE_PIT'> = Either.right({});
+          const newState = model(
+            { ...state, mustRelocateDocuments: true },
+            res
+          ) as ReindexSourceToTempTransform;
+          expect(newState.controlState).toBe('DONE_REINDEXING_SYNC');
+        });
+      });
+    });
+
+    describe('DONE_REINDEXING_SYNC', () => {
+      const state: DoneReindexingSyncState = {
+        ...postInitState,
+        controlState: 'DONE_REINDEXING_SYNC',
+      };
+
+      test('DONE_REINDEXING_SYNC -> SET_TEMP_WRITE_BLOCK if synchronization succeeds', () => {
+        const res: ResponseType<'DONE_REINDEXING_SYNC'> = Either.right(
+          'synchronized_successfully' as const
+        );
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('SET_TEMP_WRITE_BLOCK');
+      });
+      test('DONE_REINDEXING_SYNC -> FATAL if the synchronization between migrators fails', () => {
+        const res: ResponseType<'DONE_REINDEXING_SYNC'> = Either.left({
+          type: 'sync_failed',
+          error: new Error('Other migrators failed to reach the synchronization point'),
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('FATAL');
+        expect((newState as FatalState).reason).toMatchInlineSnapshot(
+          `"An error occurred whilst waiting for other migrators to get to this step."`
+        );
       });
     });
 
@@ -1977,7 +2121,7 @@ describe('migrations v2 model', () => {
     });
 
     describe('CLONE_TEMP_TO_TARGET', () => {
-      const state: CloneTempToSource = {
+      const state: CloneTempToTarget = {
         ...postInitState,
         controlState: 'CLONE_TEMP_TO_TARGET',
         sourceIndex: Option.some('.kibana') as Option.Some<string>,

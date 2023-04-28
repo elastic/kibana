@@ -15,7 +15,6 @@ export * from '../common/types/modules';
 export * from '../common/types/audit_message';
 
 export * from '../common/util/anomaly_utils';
-export * from '../common/util/errors';
 export * from '../common/util/validators';
 export * from '../common/util/date_utils';
 

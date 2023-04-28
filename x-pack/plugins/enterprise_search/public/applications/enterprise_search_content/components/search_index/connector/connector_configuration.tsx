@@ -124,7 +124,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           values={{
                             link: (
                               <EuiLink
-                                href="https://github.com/elastic/connectors-ruby/tree/main/lib/connectors"
+                                href="https://github.com/elastic/connectors-python/tree/main/connectors"
                                 target="_blank"
                                 external
                               >
@@ -145,7 +145,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           values={{
                             link: (
                               <EuiLink
-                                href="https://github.com/elastic/connectors-ruby/tree/main/config"
+                                href="https://github.com/elastic/connectors-python/blob/main/config.yml"
                                 target="_blank"
                                 external
                               >
@@ -275,6 +275,7 @@ export const ConnectorConfiguration: React.FC = () => {
                         <EuiFlexGroup>
                           <EuiFlexItem grow={false}>
                             <EuiButtonTo
+                              data-test-subj="entSearchContent-connector-configuration-setScheduleAndSync"
                               data-telemetry-id="entSearchContent-connector-configuration-setScheduleAndSync"
                               to={`${generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
                                 indexName,
@@ -356,7 +357,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiLink
-                      href="https://github.com/elastic/connectors-ruby#readme"
+                      href="https://github.com/elastic/connectors-python/blob/main/README.md"
                       target="_blank"
                     >
                       {i18n.translate(
@@ -382,7 +383,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiLink
-                      href="https://github.com/elastic/connectors-ruby/issues"
+                      href="https://github.com/elastic/connectors-python/issues"
                       target="_blank"
                     >
                       {i18n.translate(
