@@ -11,6 +11,7 @@ import { createAgentDoc } from '../../tasks/agents';
 import { setupFleetServer } from '../../tasks/fleet_server';
 import { deleteFleetServerDocs, deleteAgentDocs, cleanupAgentPolicies } from '../../tasks/cleanup';
 import type { CreateAgentPolicyRequest } from '../../../common/types';
+import { setUISettings } from '../../tasks/ui_settings';
 
 const createAgentDocs = (kibanaVersion: string) => [
   createAgentDoc('agent-1', 'policy-1'), // this agent will have upgrade available
@@ -86,6 +87,7 @@ describe('View agents list', () => {
     deleteAgentDocs(true);
     cleanupAgentPolicies();
     setupFleetServer();
+    setUISettings('hideAgentActivityTour', true);
 
     cy.getKibanaVersion().then((version) => {
       docs = createAgentDocs(version);
@@ -118,6 +120,7 @@ describe('View agents list', () => {
       other: 0,
       events: 0,
     });
+    cy.intercept('GET', /\/api\/fleet\/agents/).as('getAgents');
   });
 
   describe('Agent filter suggestions', () => {
@@ -204,6 +207,7 @@ describe('View agents list', () => {
       cy.get('button').contains('Updating').click();
       cy.get('button').contains('Offline').click();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
+      cy.wait('@getAgents');
     };
     it('should filter on healthy (16 result)', () => {
       cy.visit('/app/fleet/agents');
@@ -211,6 +215,7 @@ describe('View agents list', () => {
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
       cy.get('button').contains('Healthy').click();
+      cy.wait('@getAgents');
 
       assertTableContainsNAgents(18);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
@@ -222,6 +227,7 @@ describe('View agents list', () => {
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
       cy.get('button').contains('Unhealthy').click();
+      cy.wait('@getAgents');
 
       assertTableContainsNAgents(1);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-2');
@@ -244,8 +250,9 @@ describe('View agents list', () => {
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
-      cy.get('button').contains('healthy').click();
+      cy.get('button').contains('Healthy').click();
       cy.get('button').contains('Unhealthy').click();
+      cy.wait('@getAgents');
 
       assertTableContainsNAgents(18);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
@@ -269,6 +276,7 @@ describe('View agents list', () => {
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TAGS_FILTER).click();
       cy.get('button').contains('tag1').click();
       cy.get('button').contains('tag2').click();
+      cy.wait('@getAgents');
 
       assertTableContainsNAgents(4);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-3');
@@ -344,12 +352,12 @@ describe('View agents list', () => {
       cy.get('button').contains('Create a new tag "tagtest"').click();
     });
 
-    it('should allow to bulk reassing agent to another policy', () => {
+    it('should allow to bulk reassign agent to another policy', () => {
       cy.visit('/app/fleet/agents');
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
-
       cy.get('button').contains('Agent policy 3').click();
+      cy.wait('@getAgents');
       assertTableContainsNAgents(15);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.CHECKBOX_SELECT_ALL).click();
       // Trigger a bulk upgrade
@@ -357,12 +365,13 @@ describe('View agents list', () => {
       cy.get('button').contains('Assign to new policy').click();
       cy.get('.euiModalBody select').select('Agent policy 4');
       cy.get('.euiModalFooter button:enabled').contains('Assign policy').click();
-
+      cy.wait('@getAgents');
       assertTableIsEmpty();
-
+      cy.pause();
       // Select new policy is filters
       cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
       cy.get('button').contains('Agent policy 4').click();
+      cy.wait('@getAgents');
       assertTableContainsNAgents(15);
 
       // Change back those agents to Agent policy 3
