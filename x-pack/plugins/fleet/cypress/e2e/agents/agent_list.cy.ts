@@ -76,6 +76,10 @@ function assertTableContainsNAgents(n: number) {
     .should('have.length', n + 1); // header
 }
 
+function assertTableIsEmpty() {
+  cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('No agents found');
+}
+
 describe('View agents list', () => {
   before(() => {
     deleteFleetServerDocs(true);
@@ -164,7 +168,7 @@ describe('View agents list', () => {
 
       cy.get('button').contains('Agent policy 4').click();
 
-      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('No agents found');
+      assertTableIsEmpty();
     });
 
     it('should filter on single policy', () => {
@@ -338,6 +342,36 @@ describe('View agents list', () => {
       cy.wait(500);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS.ADD_REMOVE_TAG_INPUT).type('tagtest{enter}');
       cy.get('button').contains('Create a new tag "tagtest"').click();
+    });
+
+    it('should allow to bulk reassing agent to another policy', () => {
+      cy.visit('/app/fleet/agents');
+
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
+
+      cy.get('button').contains('Agent policy 3').click();
+      assertTableContainsNAgents(15);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.CHECKBOX_SELECT_ALL).click();
+      // Trigger a bulk upgrade
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS_BUTTON).click();
+      cy.get('button').contains('Assign to new policy').click();
+      cy.get('.euiModalBody select').select('Agent policy 4');
+      cy.get('.euiModalFooter button:enabled').contains('Assign policy').click();
+
+      assertTableIsEmpty();
+
+      // Select new policy is filters
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
+      cy.get('button').contains('Agent policy 4').click();
+      assertTableContainsNAgents(15);
+
+      // Change back those agents to Agent policy 3
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.CHECKBOX_SELECT_ALL).click();
+      // Trigger a bulk upgrade
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS_BUTTON).click();
+      cy.get('button').contains('Assign to new policy').click();
+      cy.get('.euiModalBody select').select('Agent policy 3');
+      cy.get('.euiModalFooter button:enabled').contains('Assign policy').click();
     });
   });
 });
