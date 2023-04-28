@@ -54,3 +54,10 @@ export const DEFAULT_UNIT = (totalCount: number) =>
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {event} other {events}}`,
   });
+
+export const NULL_GROUP = (selectedGroup: string, unit: string) =>
+  i18n.translate('grouping.nullGroup.title', {
+    values: { selectedGroup, unit },
+    defaultMessage:
+      'The selected group by field, {selectedGroup}, is missing a value for this group of {unit}.',
+  });
