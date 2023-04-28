@@ -73,6 +73,8 @@ const documentsSelector = (state: PreviewState) => {
   };
 };
 
+const isFetchingDocumentSelector = (state: PreviewState) => state.isFetchingDocument;
+
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
   controller,
   children,
@@ -120,7 +122,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   /** Flag to show/hide the preview panel */
   const [isPanelVisible, setIsPanelVisible] = useState(true);
   /** Flag to indicate if we are loading document from cluster */
-  const [isFetchingDocument, setIsFetchingDocument] = useState(false);
+  // const [isFetchingDocument, setIsFetchingDocument] = useState(false);
   /** Flag to indicate if we are calling the _execute API */
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
@@ -136,6 +138,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   // a custom doc ID) then we disable preview as the script field validation expect the result
   // of the preview to before resolving. If there are no documents we can't have a preview
   // (the _execute API expects one) and thus the validation should not expect a value.
+  const isFetchingDocument = useStateSelector(controller.state$, isFetchingDocumentSelector);
   if (!isFetchingDocument && !customDocIdToLoad && totalDocs === 0) {
     isPreviewAvailable = false;
   }
@@ -169,7 +172,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       }
 
       lastExecutePainlessRequestParams.current.documentId = undefined;
-      setIsFetchingDocument(true);
+      controller.setIsFetchingDocument(true);
       controller.setPreviewResponse({ fields: [], error: null });
 
       const [response, searchError] = await search
@@ -186,7 +189,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         .then((res) => [res, null])
         .catch((err) => [null, err]);
 
-      setIsFetchingDocument(false);
+      controller.setIsFetchingDocument(false);
       setCustomDocIdToLoad(null);
 
       const error: FetchDocError | null = Boolean(searchError)
@@ -220,7 +223,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       }
 
       lastExecutePainlessRequestParams.current.documentId = undefined;
-      setIsFetchingDocument(true);
+      controller.setIsFetchingDocument(true);
 
       const [response, searchError] = await search
         .search({
@@ -241,7 +244,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         .then((res) => [res, null])
         .catch((err) => [null, err]);
 
-      setIsFetchingDocument(false);
+      controller.setIsFetchingDocument(false);
 
       const isDocumentFound = response?.rawResponse.hits.total > 0;
       const loadedDocuments: EsDocument[] = isDocumentFound ? response.rawResponse.hits.hits : [];
@@ -438,7 +441,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     controller.setDocuments([]);
     controller.setPreviewResponse({ fields: [], error: null });
     setIsLoadingPreview(false);
-    setIsFetchingDocument(false);
+    controller.setIsFetchingDocument(false);
   }, [controller]);
 
   const ctx = useMemo<Context>(
@@ -506,7 +509,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   useEffect(() => {
     controller.setCustomId(customDocIdToLoad || undefined);
     if (customDocIdToLoad !== null && Boolean(customDocIdToLoad.trim())) {
-      setIsFetchingDocument(true);
+      controller.setIsFetchingDocument(true);
     }
   }, [customDocIdToLoad, controller]);
 

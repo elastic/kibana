@@ -41,6 +41,7 @@ const previewStateDefault: PreviewState = {
   /** Keep track if the script painless syntax is being validated and if it is valid  */
   scriptEditorValidation: { isValidating: false, isValid: true, message: null },
   previewResponse: { fields: [], error: null },
+  isFetchingDocument: false,
 };
 
 export class PreviewController {
@@ -141,6 +142,10 @@ export class PreviewController {
     });
   };
 
+  setIsFetchingDocument = (isFetchingDocument: boolean) => {
+    this.updateState({ isFetchingDocument });
+  };
+
   valueFormatter = ({
     value,
     format,
@@ -167,4 +172,55 @@ export class PreviewController {
 
     return defaultValueFormatter(value);
   };
+  /*
+
+  fetchSampleDocuments = async (limit: number = 50) => {
+    if (typeof limit !== 'number') {
+      // We guard ourself from passing an <input /> event accidentally
+      throw new Error('The "limit" option must be a number');
+    }
+
+    lastExecutePainlessRequestParams.current.documentId = undefined;
+    setIsFetchingDocument(true);
+    this.setPreviewResponse({ fields: [], error: null });
+
+    const [response, searchError] = await this.search
+      .search({
+        params: {
+          index: this.dataView.getIndexPattern(),
+          body: {
+            fields: ['*'],
+            size: limit,
+          },
+        },
+      })
+      .toPromise()
+      .then((res) => [res, null])
+      .catch((err) => [null, err]);
+
+    setIsFetchingDocument(false);
+    setCustomDocIdToLoad(null);
+
+    const error: FetchDocError | null = Boolean(searchError)
+      ? {
+          code: 'ERR_FETCHING_DOC',
+          error: {
+            message: searchError.toString(),
+            reason: i18n.translate(
+              'indexPatternFieldEditor.fieldPreview.error.errorLoadingSampleDocumentsDescription',
+              {
+                defaultMessage: 'Error loading sample documents.',
+              }
+            ),
+          },
+        }
+      : null;
+
+    setFetchDocError(error);
+
+    if (error === null) {
+      this.setDocuments(response ? response.rawResponse.hits.hits : []);
+    }
+  };
+  */
 }

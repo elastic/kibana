@@ -60,6 +60,7 @@ export interface PreviewState {
     fields: FieldPreview[];
     error: PreviewError | null;
   };
+  isFetchingDocument: boolean;
 }
 
 export interface FetchDocError {
