@@ -57,7 +57,7 @@ export const useBreadcrumbs = (
       {
         text:
           app?.label ??
-          i18n.translate('xpack.observability.breadcrumbs.observabilityLinkText', {
+          i18n.translate('xpack.observabilityShared.breadcrumbs.observabilityLinkText', {
             defaultMessage: 'Observability',
           }),
         href: appPath + '/overview',

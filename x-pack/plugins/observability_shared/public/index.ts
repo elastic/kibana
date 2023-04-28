@@ -34,6 +34,8 @@ export {
 } from '../common';
 
 export { useTheme } from './hooks/use_theme';
+export { InspectorContextProvider } from './contexts/inspector/inspector_context';
+export { useInspectorContext } from './contexts/inspector/use_inspector_context';
 export { useEsSearch, createEsParams } from './hooks/use_es_search';
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
 export { useKibanaSpace } from './hooks/use_kibana_space';

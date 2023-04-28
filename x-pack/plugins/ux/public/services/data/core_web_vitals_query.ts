@@ -6,7 +6,7 @@
  */
 
 import type { ESSearchResponse } from '@kbn/es-types';
-import { UXMetrics } from '@kbn/observability-plugin/public';
+import { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import {
   TBT_FIELD,
   FCP_FIELD,
