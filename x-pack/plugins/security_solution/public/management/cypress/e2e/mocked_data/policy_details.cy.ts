@@ -21,12 +21,33 @@ describe('Policy Details', () => {
     removeAllArtifacts();
   });
 
-  it('Malware Protection - user should be able to see related rules', () => {
-    login();
-    visitPolicyDetailsPage();
+  describe('Malware Protection card', () => {
+    beforeEach(() => {
+      login();
+      visitPolicyDetailsPage();
+    });
 
-    cy.getByTestSubj('malwareProtectionsForm').contains('related detection rules').click();
+    it('user should be able to see related rules', () => {
+      cy.getByTestSubj('malwareProtectionsForm').contains('related detection rules').click();
 
-    cy.url().should('contain', 'app/security/rules/management');
+      cy.url().should('contain', 'app/security/rules/management');
+    });
+
+    it('changing protection level should enable or disable user notification', () => {
+      cy.getByTestSubj('malwareProtectionSwitch').click();
+      cy.getByTestSubj('malwareProtectionSwitch').should('have.attr', 'aria-checked', 'true');
+
+      // Default: Prevent + Notify user enabled
+      cy.getByTestSubj('malwareProtectionMode_prevent').find('input').should('be.checked');
+      cy.getByTestSubj('malwareUserNotificationCheckbox').should('be.checked');
+
+      // Changing to Detect -> Notify user disabled
+      cy.getByTestSubj('malwareProtectionMode_detect').find('label').click();
+      cy.getByTestSubj('malwareUserNotificationCheckbox').should('not.be.checked');
+
+      // Changing back to Prevent -> Notify user enabled
+      cy.getByTestSubj('malwareProtectionMode_prevent').find('label').click();
+      cy.getByTestSubj('malwareUserNotificationCheckbox').should('be.checked');
+    });
   });
 });

@@ -89,6 +89,7 @@ export const ProtectionRadio = React.memo(
         checked={selected === protectionMode}
         onChange={handleRadioChange}
         disabled={!showEditableFormFields || selected === ProtectionModes.off}
+        data-test-subj={`${protection}ProtectionMode_${protectionMode}`}
       />
     );
   }
