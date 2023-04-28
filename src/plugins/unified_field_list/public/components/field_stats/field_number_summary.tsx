@@ -89,6 +89,7 @@ export const FieldNumberSummary: React.FC<FieldNumberSummaryProps> = ({
       columns={summaryTableColumns}
       tableCaption={summaryTableTitle}
       data-test-subj={`${dataTestSubject}-numberSummary`}
+      responsive={false}
       css={css`
         & .euiTableHeaderCell {
           display: none;
