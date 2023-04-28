@@ -43,6 +43,7 @@ export const MonitorFailedTests = ({
         reportType="heatmap"
         axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
         legendIsVisible={false}
+        skipLoadingWrapper={true}
         attributes={[
           {
             time,
