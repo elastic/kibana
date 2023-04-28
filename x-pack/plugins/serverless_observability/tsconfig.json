@@ -17,7 +17,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
-    "@kbn/observability-plugin",
     "@kbn/serverless",
+    "@kbn/observability-shared-plugin",
   ]
 }
