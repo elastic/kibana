@@ -294,7 +294,11 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+    const indexPatterns = useMemo(
+      () => (indexPattern != null && !isLoading ? [indexPattern] : []),
+      [indexPattern, isLoading]
+    );
+
     const onTimeRangeChange = useCallback(
       ({ query, dateRange }) => {
         const isQuickSelection = dateRange.from.includes('now') || dateRange.to.includes('now');

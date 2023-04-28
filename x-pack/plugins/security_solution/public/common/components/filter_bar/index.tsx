@@ -44,7 +44,10 @@ export const FilterBar = memo<FilterBarComponentProps>(
       [filterManager]
     );
 
-    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+    const indexPatterns = useMemo(
+      () => (indexPattern != null && !isLoading ? [indexPattern] : []),
+      [indexPattern, isLoading]
+    );
 
     return (
       <SearchBar
