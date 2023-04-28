@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -73,13 +74,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('permalink', function () {
         it('should allow for copying the snapshot URL', async function () {
-          const expectedUrl =
-            'http://localhost:5620/app/r?l=DISCOVER_APP_LOCATOR&v=8.9.0&lz=N4IgjgrgpgTgniAXKSsGJCANCANgQwDsBzCfYqJEAa' +
-            '2nhAF8cBnAexgBckBtbkAAQ4BLALZRmHfCIAO2EABNxAYxABdVTiWtcEEYWY8NIIYUUAPKrlbEJ%2BZgAsAtACo5JjrABu%2BXFXwQOV' +
-            'jkAMyFcDxgDRG4jeXxJADUhKAB3AEl5S2tbBxc5YTEAJSIKJFBgmFYRKgAmAAYARgBWRzqATkcGtoAVOoA2RABmBsQAFlGAOjrpgC18o' +
-            'Ix65taOmsHuhoAOIZHxqdnGHBgoCvF7NMII719kEGvoJD7p6Zxpf2ZKRA4YaAYGIA%3D';
+          const lz =
+            'N4IgjgrgpgTgniAXKSsGJCANCANgQwDsBzCfYqJEAa2nhAF8cBnAexgBckBtbkAAQ4BLALZRmHfCIAO2EABNxAYxABdVTiWtcEEYWY8N' +
+            'IIYUUAPKrlbEJ%2BZgAsAtACo5JjrABu%2BXFXwQOVjkAMyFcDxgDRG4jeXxJADUhKAB3AEl5S2tbBxc5YTEAJSIKJFBgmFYRKgAmAAY' +
+            'ARgBWRzqATkcGtoAVOoA2RABmBsQAFlGAOjrpgC18oIx65taOmsHuhoAOIZHxqdnGHBgoCvF7NMII719kEGvoJD7p6Zxpf2ZKRA4YaAY' +
+            'GIA%3D';
           const actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).to.equal(expectedUrl);
+          expect(actualUrl).to.contain(`?l=${DISCOVER_APP_LOCATOR}`);
+          expect(actualUrl).to.contain(`&lz=${lz}`);
         });
 
         it('should allow for copying the snapshot URL as a short URL', async function () {
