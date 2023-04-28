@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { selectGroup } from '../../tasks/alerts_grouping';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { importRule } from '../../tasks/api_calls/rules';
 import {
@@ -14,7 +15,7 @@ import {
   setRowsPerPageTo,
 } from '../../tasks/table_pagination';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { GROUP_OPTION_SELECTOR, GROUP_SELECTOR } from '../../screens/alerts';
+import { GROUP_SELECTOR } from '../../screens/alerts';
 import { ALERT_TABLE_ACTIONS_HEADER } from '../../screens/timeline';
 
 import { scrollAlertTableColumnIntoView } from '../../tasks/alerts';
@@ -43,29 +44,27 @@ describe('Alerts grouping', { testIsolation: false }, () => {
     });
 
     it.only('should reset pagination when selected group changes', () => {
-      cy.get(GROUP_SELECTOR).click();
-      cy.get(GROUP_OPTION_SELECTOR('kibana.alert.rule.name')).click();
+      selectGroup('kibana.alert.rule.name');
 
       expectRowsPerPage(25);
       setRowsPerPageTo(10);
       expectRowsPerPage(10);
       goToTablePage(2);
       expectTablePage(2);
-      cy.get(GROUP_OPTION_SELECTOR('host.name')).click();
+      selectGroup('host.name');
       expectTablePage(1);
       cy.wait(100000);
     });
 
     it('should reset pagination when ', () => {
       cy.get(GROUP_SELECTOR).click();
-      cy.get(GROUP_OPTION_SELECTOR('kibana.alert.rule.name')).click();
-
+      selectGroup('kibana.alert.rule.name');
       expectRowsPerPage(25);
       setRowsPerPageTo(10);
       expectRowsPerPage(10);
       goToTablePage(2);
       expectTablePage(2);
-      cy.get(GROUP_OPTION_SELECTOR('host.name')).click();
+      selectGroup('host.name');
       expectTablePage(1);
       cy.wait(100000);
     });
