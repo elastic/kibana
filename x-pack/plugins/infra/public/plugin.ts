@@ -145,7 +145,7 @@ export class Plugin implements InfraClientPluginClass {
       new LogStreamEmbeddableFactoryDefinition(core.getStartServices)
     );
 
-    if (this.appTarget === DISCOVER_APP_TARGET) {
+    if (this.appTarget !== DISCOVER_APP_TARGET) {
       core.application.register({
         id: 'logs-to-discover',
         title: '',
@@ -153,16 +153,16 @@ export class Plugin implements InfraClientPluginClass {
         appRoute: '/app/logs',
         mount: async (params: AppMountParameters) => {
           // mount callback should not use setup dependencies, get start dependencies instead
-          const [coreStart, plugins, pluginStart] = await core.getStartServices();
+          const [, , pluginStart] = await core.getStartServices();
 
-          const { renderApp } = await import('./apps/discover_app');
+          pluginStart.locators.logsLocator.navigate({}, { replace: true });
 
-          return renderApp(coreStart, plugins, pluginStart, params);
+          return () => true;
         },
       });
     }
 
-    if (this.appTarget === LOGS_APP_TARGET) {
+    if (this.appTarget !== LOGS_APP_TARGET) {
       core.application.register({
         id: 'logs',
         title: i18n.translate('xpack.infra.logs.pluginTitle', {

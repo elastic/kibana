@@ -101,7 +101,7 @@ const decodePositionQueryValueFromUrl = (queryValueFromUrl: unknown) => {
 };
 
 // Used by linkTo components
-export const replaceLogPositionInQueryString = (time: number) =>
+export const replaceLogPositionInQueryString = (time?: number) =>
   Number.isNaN(time)
     ? (value: string) => value
     : replaceStateKeyInQueryString<PositionStateInUrl>(defaultPositionStateKey, {

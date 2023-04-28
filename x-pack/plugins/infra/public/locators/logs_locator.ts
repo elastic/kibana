@@ -14,7 +14,7 @@ const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 
 export interface LogsLocatorParams extends SerializableRecord {
   /** Defines log position */
-  time: number;
+  time?: number;
   /**
    * Optionally set the time range in the time picker.
    */
@@ -37,10 +37,9 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
 
   public readonly getLocation = async (params: LogsLocatorParams) => {
     const { parseSearchString, getLocationToDiscover } = await import('./helpers');
-    const { filter, timeRange } = params;
 
     if (this.deps.appTarget === DISCOVER_APP_TARGET) {
-      return await getLocationToDiscover({ core: this.deps.core, timeRange, filter });
+      return await getLocationToDiscover({ core: this.deps.core, ...params });
     }
 
     const searchString = parseSearchString(params);

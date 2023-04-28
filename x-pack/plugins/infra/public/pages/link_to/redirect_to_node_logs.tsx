@@ -39,9 +39,6 @@ export const RedirectToNodeLogs = ({
     load();
   });
 
-  const filter = getFilterFromLocation(location);
-  const time = getTimeFromLocation(location);
-
   if (isLoading) {
     return (
       <LoadingPage
@@ -55,6 +52,9 @@ export const RedirectToNodeLogs = ({
       />
     );
   }
+
+  const filter = getFilterFromLocation(location);
+  const time = getTimeFromLocation(location);
 
   services.locators.nodeLogsLocator.navigate({
     nodeId,

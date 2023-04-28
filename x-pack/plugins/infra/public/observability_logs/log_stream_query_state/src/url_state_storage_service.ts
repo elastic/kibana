@@ -302,14 +302,6 @@ export const replaceLogFilterInQueryString = (
     refreshInterval: DEFAULT_REFRESH_INTERVAL,
   });
 
-const defaultTimeRangeFromPositionOffset: DurationInputObject = { hours: 1 };
-
-const getTimeRangeStartFromTime = (time: number): string =>
-  moment(time).subtract(defaultTimeRangeFromPositionOffset).toISOString();
-
-const getTimeRangeEndFromTime = (time: number): string =>
-  moment(time).add(defaultTimeRangeFromPositionOffset).toISOString();
-
 const getTimeRange = (time?: number, timeRange?: QueryTimeRange) => {
   if (timeRange) {
     return {
@@ -329,3 +321,11 @@ const getTimeRange = (time?: number, timeRange?: QueryTimeRange) => {
     return {};
   }
 };
+
+const defaultTimeRangeFromPositionOffset: DurationInputObject = { hours: 1 };
+
+const getTimeRangeStartFromTime = (time: number): string =>
+  moment(time).subtract(defaultTimeRangeFromPositionOffset).toISOString();
+
+const getTimeRangeEndFromTime = (time: number): string =>
+  moment(time).add(defaultTimeRangeFromPositionOffset).toISOString();
