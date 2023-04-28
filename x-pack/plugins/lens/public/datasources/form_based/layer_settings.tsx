@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RandomSamplingSlider } from '@kbn/random-sampling';
-import { TooltipWrapper } from '@kbn/visualization-ui-components/public';
 import type { DatasourceLayerSettingsProps } from '../../types';
 import type { FormBasedPrivateState } from './types';
 import { isSamplingValueEnabled } from './utils';
