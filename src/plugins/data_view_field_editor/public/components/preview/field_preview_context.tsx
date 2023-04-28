@@ -176,59 +176,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     );
   }, [type, script, currentDocId, lastExecutePainlessRequestParams]);
 
-  const fetchSampleDocuments = useCallback(
-    async (limit: number = 50) => {
-      if (typeof limit !== 'number') {
-        // We guard ourself from passing an <input /> event accidentally
-        throw new Error('The "limit" option must be a number');
-      }
-
-      // lastExecutePainlessRequestParams.current.documentId = undefined;
-      controller.setLastExecutePainlessRequestParams({ documentId: undefined });
-      controller.setIsFetchingDocument(true);
-      controller.setPreviewResponse({ fields: [], error: null });
-
-      const [response, searchError] = await search
-        .search({
-          params: {
-            index: dataView.getIndexPattern(),
-            body: {
-              fields: ['*'],
-              size: limit,
-            },
-          },
-        })
-        .toPromise()
-        .then((res) => [res, null])
-        .catch((err) => [null, err]);
-
-      controller.setIsFetchingDocument(false);
-      controller.setCustomDocIdToLoad(null);
-
-      const error: FetchDocError | null = Boolean(searchError)
-        ? {
-            code: 'ERR_FETCHING_DOC',
-            error: {
-              message: searchError.toString(),
-              reason: i18n.translate(
-                'indexPatternFieldEditor.fieldPreview.error.errorLoadingSampleDocumentsDescription',
-                {
-                  defaultMessage: 'Error loading sample documents.',
-                }
-              ),
-            },
-          }
-        : null;
-
-      controller.setFetchDocError(error);
-
-      if (error === null) {
-        controller.setDocuments(response ? response.rawResponse.hits.hits : []);
-      }
-    },
-    [dataView, search, controller]
-  );
-
   const loadDocument = useCallback(
     async (id: string) => {
       if (!Boolean(id.trim())) {
@@ -478,7 +425,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       },
       documents: {
         loadSingle: (id: string) => controller.setCustomDocIdToLoad(id),
-        loadFromCluster: fetchSampleDocuments,
+        loadFromCluster: () => controller.fetchSampleDocuments(),
         fetchDocError,
       },
       navigation: {
@@ -503,7 +450,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       isPreviewAvailable,
       isLoadingPreview,
       updateParams,
-      fetchSampleDocuments,
       totalDocs,
       isPanelVisible,
       reset,
@@ -539,9 +485,9 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
    */
   useEffect(() => {
     if (isPanelVisible) {
-      fetchSampleDocuments();
+      controller.fetchSampleDocuments();
     }
-  }, [isPanelVisible, fetchSampleDocuments, fieldTypeToProcess]);
+  }, [isPanelVisible, fieldTypeToProcess, controller]);
 
   /**
    * Each time the current document changes we update the parameters
