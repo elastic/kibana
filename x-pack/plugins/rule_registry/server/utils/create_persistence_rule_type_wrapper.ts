@@ -22,10 +22,11 @@ import {
   VERSION,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
+import { Alert } from '@kbn/alerts-as-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
-import { AlertDocument, createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
+import { createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
 import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
 
 export const ALERT_GROUP_INDEX = `${ALERT_NAMESPACE}.group.index` as const;
@@ -409,7 +410,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
         ruleDataClient,
         useNamespace: true,
         isLifecycleAlert: false,
-        formatAlert: formatAlert as (alert: AlertDocument) => AlertDocument,
+        formatAlert: formatAlert as (alert: Alert) => Alert,
       })(),
     };
   };
