@@ -5029,6 +5029,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/serverless-search@link:x-pack/plugins/serverless_search":
+  version "0.0.0"
+  uid ""
+
 "@kbn/serverless@link:x-pack/plugins/serverless":
   version "0.0.0"
   uid ""
@@ -5090,6 +5094,10 @@
   uid ""
 
 "@kbn/shared-ux-card-no-data@link:packages/shared-ux/card/no_data/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-chrome-navigation@link:packages/shared-ux/chrome/navigation":
   version "0.0.0"
   uid ""
 
