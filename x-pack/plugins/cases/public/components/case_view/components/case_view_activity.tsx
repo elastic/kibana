@@ -18,7 +18,7 @@ import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import type { CaseSeverity } from '../../../../common/api';
 import type { CaseUsers, UseFetchAlertData } from '../../../../common/ui/types';
-import type { Case, CaseStatuses } from '../../../../common';
+import type { CaseUI, CaseStatuses } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
 import type { CasesNavigation } from '../../links';
 import { StatusActionButton } from '../../status/button';
@@ -81,7 +81,7 @@ export const CaseViewActivity = ({
   useFetchAlertData,
 }: {
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
-  caseData: Case;
+  caseData: CaseUI;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
