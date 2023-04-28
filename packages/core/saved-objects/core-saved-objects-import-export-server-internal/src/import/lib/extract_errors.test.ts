@@ -31,6 +31,7 @@ describe('extractErrors()', () => {
         type: 'dashboard',
         attributes: { title: 'My Dashboard 1' },
         references: [],
+        managed: false,
       },
       {
         id: '2',
@@ -38,6 +39,7 @@ describe('extractErrors()', () => {
         attributes: { title: 'My Dashboard 2' },
         references: [],
         error: SavedObjectsErrorHelpers.createConflictError('dashboard', '2').output.payload,
+        managed: false,
       },
       {
         id: '3',
@@ -45,6 +47,7 @@ describe('extractErrors()', () => {
         attributes: { title: 'My Dashboard 3' },
         references: [],
         error: SavedObjectsErrorHelpers.createBadRequestError().output.payload,
+        managed: false,
       },
       {
         id: '4',
@@ -53,6 +56,7 @@ describe('extractErrors()', () => {
         references: [],
         error: SavedObjectsErrorHelpers.createConflictError('dashboard', '4').output.payload,
         destinationId: 'foo',
+        managed: false,
       },
     ];
     const result = extractErrors(savedObjects, savedObjects, [], new Map());
@@ -63,6 +67,7 @@ describe('extractErrors()', () => {
             "type": "conflict",
           },
           "id": "2",
+          "managed": false,
           "meta": Object {
             "title": "My Dashboard 2",
           },
@@ -76,6 +81,7 @@ describe('extractErrors()', () => {
             "type": "unknown",
           },
           "id": "3",
+          "managed": false,
           "meta": Object {
             "title": "My Dashboard 3",
           },
@@ -87,6 +93,7 @@ describe('extractErrors()', () => {
             "type": "conflict",
           },
           "id": "4",
+          "managed": false,
           "meta": Object {
             "title": "My Dashboard 4",
           },
@@ -104,6 +111,7 @@ describe('extractErrors()', () => {
         attributes: { title: 'My Dashboard 1' },
         references: [],
         destinationId: 'one',
+        managed: false,
       },
       {
         id: '2',
@@ -111,6 +119,7 @@ describe('extractErrors()', () => {
         attributes: { title: 'My Dashboard 2' },
         references: [],
         error: SavedObjectsErrorHelpers.createConflictError('dashboard', '2').output.payload,
+        managed: false,
       },
       {
         id: '3',
@@ -118,6 +127,7 @@ describe('extractErrors()', () => {
         attributes: { title: 'My Dashboard 3' },
         references: [],
         destinationId: 'three',
+        managed: false,
       },
     ];
 
@@ -135,6 +145,7 @@ describe('extractErrors()', () => {
             purpose: 'savedObjectImport',
           },
           references: [],
+          managed: false,
         },
       ],
       [
@@ -150,6 +161,7 @@ describe('extractErrors()', () => {
             purpose: 'savedObjectImport',
           },
           references: [],
+          managed: false,
         },
       ],
     ]);
@@ -176,6 +188,7 @@ describe('extractErrors()', () => {
             "type": "conflict",
           },
           "id": "2",
+          "managed": false,
           "meta": Object {
             "title": "My Dashboard 2",
           },
@@ -189,6 +202,7 @@ describe('extractErrors()', () => {
             "type": "unknown",
           },
           "id": "default:dashboard:3",
+          "managed": false,
           "meta": Object {
             "title": "Legacy URL alias (3 -> three)",
           },

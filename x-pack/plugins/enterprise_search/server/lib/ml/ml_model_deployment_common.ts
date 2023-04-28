@@ -11,7 +11,7 @@ import {
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
 
-export const acceptableModelNames = ['.elser_model_1_SNAPSHOT'];
+export const acceptableModelNames = ['.elser_model_1', '.elser_model_1_SNAPSHOT'];
 
 export function isNotFoundExceptionError(error: unknown): boolean {
   return (

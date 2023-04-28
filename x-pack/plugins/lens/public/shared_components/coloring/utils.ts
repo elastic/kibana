@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import chroma from 'chroma-js';
+import { chroma } from '@kbn/visualization-ui-components/public';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { isColorDark } from '@elastic/eui';
 
