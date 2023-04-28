@@ -189,7 +189,6 @@ export const actionCreateService = (
 
     if (!doc.error) {
       // add signature to doc
-
       const fleetActionDoc = {
         ...doc.EndpointActions,
         '@timestamp': doc['@timestamp'],
@@ -247,6 +246,7 @@ export const actionCreateService = (
         throw e;
       }
     }
+
     if (casesClient) {
       // convert any alert IDs into cases
       let caseIDs: string[] = payload.case_ids?.slice() || [];
