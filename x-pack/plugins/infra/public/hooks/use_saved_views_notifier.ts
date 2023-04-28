@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { useMemo } from 'react';
 import { useKibanaContextForPlugin } from './use_kibana';
 
 export const useSavedViewsNotifier = () => {
@@ -44,9 +45,12 @@ export const useSavedViewsNotifier = () => {
     });
   };
 
-  return {
-    deleteViewFailure,
-    getViewFailure,
-    upsertViewFailure,
-  };
+  return useMemo(
+    () => ({
+      deleteViewFailure,
+      getViewFailure,
+      upsertViewFailure,
+    }),
+    []
+  );
 };

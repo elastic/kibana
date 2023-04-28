@@ -111,7 +111,10 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
   const { data: currentView, isFetching: isFetchingCurrentView } = useQuery({
     queryKey: queryKeys.getById(currentViewId),
     queryFn: ({ queryKey: [, id] }) => inventoryViews.client.getInventoryView(id),
-    onError: (error: ServerError) => notify.getViewFailure(error.body?.message ?? error.message),
+    onError: (error: ServerError) => {
+      notify.getViewFailure(error.body?.message ?? error.message);
+      switchViewById(defaultViewId);
+    },
     placeholderData: null,
   });
 

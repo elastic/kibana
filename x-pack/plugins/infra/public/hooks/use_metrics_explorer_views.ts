@@ -111,7 +111,10 @@ export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
   const { data: currentView, isFetching: isFetchingCurrentView } = useQuery({
     queryKey: queryKeys.getById(currentViewId),
     queryFn: ({ queryKey: [, id] }) => metricsExplorerViews.client.getMetricsExplorerView(id),
-    onError: (error: ServerError) => notify.getViewFailure(error.body?.message ?? error.message),
+    onError: (error: ServerError) => {
+      notify.getViewFailure(error.body?.message ?? error.message);
+      switchViewById(defaultViewId);
+    },
     placeholderData: null,
   });
 
