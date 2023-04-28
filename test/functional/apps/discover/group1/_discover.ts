@@ -336,7 +336,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           const currentHash = await browser.execute<[], string>('return window.location.hash');
           expect(currentHash).to.be(originalHash);
-          expect(await testSubjects.exists('dscDataViewNotFoundShowDefaultWarning')).to.be(true);
+          expect(await testSubjects.exists('dscDataViewNotFoundShowSavedWarning')).to.be(true);
         });
       });
     });
