@@ -73,7 +73,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       });
     });
 
-    it.only('should install rules from the Fleet package when user clicks on CTA', () => {
+    it('should install rules from the Fleet package when user clicks on CTA', () => {
       cy.intercept('POST', '/api/fleet/epm/packages/_bulk*').as('installPackage');
 
       /* Retrieve how many rules were installed from the Fleet package */
@@ -86,11 +86,11 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           ({ type }: Asset) => type === 'security-rule'
         );
 
-        // Get unique rules to install by removing version appendix 
+        // Get unique rules to install by removing version appendix
         // from rule id and then removing duplicates
-        const numberOfRulesToInstall = [...new Set(rulesWithHistoricalVersions.map(
-          ({ id }: Asset) => id.split('_')[0]
-        ))].length;
+        const numberOfRulesToInstall = [
+          ...new Set(rulesWithHistoricalVersions.map(({ id }: Asset) => id.split('_')[0])),
+        ].length;
 
         cy.get(LOAD_PREBUILT_RULES_BTN).click();
         cy.get(LOAD_PREBUILT_RULES_BTN).should('have.attr', 'disabled');
