@@ -242,6 +242,17 @@ describe('versionCheck post-auth handler', () => {
   });
 });
 
+describe('restrictInternal post-auth handler', () => {
+  let toolkit: ToolkitMock;
+  let responseFactory: ReturnType<typeof mockRouter.createResponseFactory>;
+  beforeEach(() => {
+    toolkit = createToolkit();
+    responseFactory = mockRouter.createResponseFactory();
+  });
+  it.todo('returns a badRequest error if header is missing and required');
+  it.todo('forward the request to the next interceptor if header is required and present');
+});
+
 describe('customHeaders pre-response handler', () => {
   let toolkit: ToolkitMock;
 

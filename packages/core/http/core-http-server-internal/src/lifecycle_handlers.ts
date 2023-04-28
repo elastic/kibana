@@ -15,6 +15,7 @@ import { LifecycleRegistrar } from './http_server';
 const VERSION_HEADER = 'kbn-version';
 const XSRF_HEADER = 'kbn-xsrf';
 const KIBANA_NAME_HEADER = 'kbn-name';
+const INTERNAL_ACCESS_ONLY_HEADER = 'x-elastic-internal-origin';
 
 export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler => {
   const { allowlist, disableProtection } = config.xsrf;
@@ -35,6 +36,25 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
       return response.badRequest({ body: `Request must contain a ${XSRF_HEADER} header.` });
     }
 
+    return toolkit.next();
+  };
+};
+// TODO: implement check to ensure the required header is present on requests to internal routes. See https://github.com/elastic/kibana/issues/151940
+// validates the incomming request has the required header if route options access === internal
+export const createRestrictInternalRoutesPostAuthHandler = (
+  config: HttpConfig
+): OnPostAuthHandler => {
+  const isProductRequestEnforced = config.enforceProductRequest;
+
+  return (request, response, toolkit) => {
+    const isInternalRoute = request.route.options.access === 'internal';
+    const hasInternalKibanaRequestHeader = INTERNAL_ACCESS_ONLY_HEADER in request.headers;
+    if (isProductRequestEnforced && isInternalRoute && !hasInternalKibanaRequestHeader) {
+      // throw 400
+      return response.badRequest({
+        body: `uri [${request.url}] with method [${request.route.method}] exists but is not available with the current configuration`,
+      });
+    }
     return toolkit.next();
   };
 };
@@ -60,7 +80,6 @@ export const createVersionCheckPostAuthHandler = (kibanaVersion: string): OnPost
   };
 };
 
-// TODO: implement header required for accessing internal routes. See https://github.com/elastic/kibana/issues/151940
 export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPreResponseHandler => {
   const {
     name: serverName,
@@ -76,7 +95,6 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
       'Content-Security-Policy': cspHeader,
       [KIBANA_NAME_HEADER]: serverName,
     };
-
     return toolkit.next({ headers: additionalHeaders });
   };
 };
@@ -86,7 +104,12 @@ export const registerCoreHandlers = (
   config: HttpConfig,
   env: Env
 ) => {
+  // add headers based on config
   registrar.registerOnPreResponse(createCustomHeadersPreResponseHandler(config));
+  // add extra request checks stuff
   registrar.registerOnPostAuth(createXsrfPostAuthHandler(config));
+  // add check on version
   registrar.registerOnPostAuth(createVersionCheckPostAuthHandler(env.packageInfo.version));
+  // add check on header if the route is internal
+  registrar.registerOnPostAuth(createRestrictInternalRoutesPostAuthHandler(config)); // strictly speaking, we should have access to route.options.access from the request on postAuth
 };

@@ -373,7 +373,7 @@ export class HttpServer {
       return responseToolkit.continue;
     });
   }
-
+// 2
   private registerOnPreAuth(fn: OnPreAuthHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
@@ -384,7 +384,7 @@ export class HttpServer {
 
     this.server.ext('onPreAuth', adoptToHapiOnPreAuth(fn, this.log));
   }
-
+// 3: validate.headers, validate.params, jsonp, validate.query, validate.payload
   private registerOnPostAuth(fn: OnPostAuthHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
@@ -395,7 +395,7 @@ export class HttpServer {
 
     this.server.ext('onPostAuth', adoptToHapiOnPostAuthFormat(fn, this.log));
   }
-
+ // 1
   private registerOnPreRouting(fn: OnPreRoutingHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
@@ -406,7 +406,7 @@ export class HttpServer {
 
     this.server.ext('onRequest', adoptToHapiOnRequest(fn, this.log));
   }
-
+// 4 request-error, send response
   private registerOnPreResponse(fn: OnPreResponseHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
@@ -440,7 +440,7 @@ export class HttpServer {
     );
     return sessionStorageFactory;
   }
-
+// during auth
   private registerAuth<T>(fn: AuthenticationHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
@@ -514,13 +514,13 @@ export class HttpServer {
       },
     });
   }
-
+// in start, after server & router setup, while routes are registered.
   private configureRoute(route: RouterRoute) {
     const optionsLogger = this.log.get('options');
     this.log.debug(`registering route handler for [${route.path}]`);
     // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
     const validate = isSafeMethod(route.method) ? undefined : { payload: true };
-    const { authRequired, tags, body = {}, timeout } = route.options;
+    const { authRequired, tags, body = {}, timeout } = route.options; // includes access: see kibanaRouteOptions
     const { accepts: allow, maxBytes, output, parse } = body;
 
     const kibanaRouteOptions: KibanaRouteOptions = {
@@ -540,7 +540,7 @@ export class HttpServer {
       path: route.path,
       options: {
         auth: this.getAuthOption(authRequired),
-        app: kibanaRouteOptions,
+        app: kibanaRouteOptions, // includes access
         tags: tags ? Array.from(tags) : undefined,
         // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
         // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
