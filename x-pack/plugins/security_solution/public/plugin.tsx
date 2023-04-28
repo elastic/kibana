@@ -154,11 +154,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const [coreStart, startPluginsDeps] = await core.getStartServices();
       const { apm } = await import('@elastic/apm-rum');
       const { SecuritySolutionTemplateWrapper } = await import('./app/home/template_wrapper');
-      const chromeStyle$ = coreStart.chrome.getChromeStyle$();
-
-      chromeStyle$.subscribe((style) => {
-        this.isSidebarEnabled$.next(style === 'classic');
-      });
 
       const { savedObjectsTaggingOss, ...startPlugins } = startPluginsDeps;
 
@@ -316,6 +311,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     return {
       navLinks$,
+      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
+        this.isSidebarEnabled$.next(isSidebarEnabled),
     };
   }
 

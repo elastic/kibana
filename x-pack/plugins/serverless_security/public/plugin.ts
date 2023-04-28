@@ -30,9 +30,10 @@ export class ServerlessSecurityPlugin
   }
 
   public start(
-    core: CoreStart,
-    startDeps: ServerlessSecurityPluginStartDependencies
+    _core: CoreStart,
+    { securitySolution }: ServerlessSecurityPluginStartDependencies
   ): ServerlessSecurityPluginStart {
+    securitySolution.setIsSidebarEnabled(false);
     return {};
   }
 

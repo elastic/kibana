@@ -142,6 +142,7 @@ export interface PluginSetup {
 
 export interface PluginStart {
   navLinks$: Observable<NavigationLink[]>;
+  setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
 }
 
 export interface AppObservableLibs {
