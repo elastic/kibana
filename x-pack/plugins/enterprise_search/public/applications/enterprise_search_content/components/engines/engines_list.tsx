@@ -196,8 +196,8 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
           rightSideItems: isLoading
             ? []
             : !hasNoEngines
-              ? [<CreateEngineButton disabled={isGated} />]
-              : [],
+            ? [<CreateEngineButton disabled={isGated} />]
+            : [],
         }}
         pageViewTelemetry="Search Applications"
         isLoading={isLoading && !isGated}
