@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -229,6 +230,9 @@ export const ModelDeployed = ({
             </p>
           </EuiText>
         </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSpacer size="s" />
+        </EuiFlexItem>        
         <EuiFlexItem grow>
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
             <EuiFlexItem>
