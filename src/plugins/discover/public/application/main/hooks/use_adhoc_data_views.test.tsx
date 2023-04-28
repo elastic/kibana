@@ -15,6 +15,7 @@ import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
 import { setUrlTracker } from '../../../kibana_services';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../services/discover_state_provider';
+import { discoverServiceMock } from '../../../__mocks__/services';
 
 jest.mock('../../../hooks/use_confirm_persistence_prompt', () => {
   const createdDataView = {
@@ -77,6 +78,7 @@ describe('useAdHocDataViews', () => {
       () =>
         useAdHocDataViews({
           stateContainer,
+          services: discoverServiceMock,
         }),
       {
         wrapper: ({ children }: { children: React.ReactElement }) => (

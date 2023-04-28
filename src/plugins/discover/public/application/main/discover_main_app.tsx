@@ -54,7 +54,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    */
   const { persistDataView } = useAdHocDataViews({
     stateContainer,
-    trackUiMetric: services.trackUiMetric,
+    services,
   });
 
   /**

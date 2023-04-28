@@ -175,8 +175,8 @@ export const loadAndResolveDataView = async (
   }: { internalStateContainer: DiscoverInternalStateContainer; services: DiscoverServices }
 ) => {
   const { adHocDataViews, savedDataViews } = internalStateContainer.getState();
-  const adHodDataView = adHocDataViews.find((dataView) => dataView.id === id);
-  if (adHodDataView) return { fallback: false, dataView: adHodDataView };
+  const adHocDataView = adHocDataViews.find((dataView) => dataView.id === id);
+  if (adHocDataView) return { fallback: false, dataView: adHocDataView };
 
   const nextDataViewData = await loadDataView({
     services,

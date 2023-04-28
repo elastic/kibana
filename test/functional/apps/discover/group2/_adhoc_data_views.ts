@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
+  const toasts = getService('toasts');
   const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
@@ -238,6 +239,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
       expect(prevDataViewId).not.to.equal(newDataViewId);
+    });
+
+    it('should notify about invalid filter reffs', async () => {
+      await PageObjects.discover.createAdHocDataView('logstas', true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await filterBar.addFilter({
+        field: 'nestedField.child',
+        operation: 'is',
+        value: 'nestedValue',
+      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'jpg' });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const first = await PageObjects.discover.getCurrentDataViewId();
+      // trigger data view id update
+      await PageObjects.discover.addRuntimeField(
+        '_bytes-runtimefield',
+        `emit((doc["bytes"].value * 2).toString())`
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const second = await PageObjects.discover.getCurrentDataViewId();
+      expect(first).not.equal(second);
+
+      await toasts.dismissAllToasts();
+
+      await browser.goBack();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const [firstToast, secondToast] = await toasts.getAllToastElements();
+
+      expect([await firstToast.getVisibleText(), await secondToast.getVisibleText()].sort()).to.eql(
+        [
+          `"${first}" is not a configured data view ID\nShowing the saved data view: "logstas*" (${second})`,
+          `Different index references\nData view id references in some of the applied filters differ from the current data view.`,
+        ].sort()
+      );
     });
   });
 }

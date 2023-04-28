@@ -61,7 +61,7 @@ export const buildStateSubscribe =
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.index && dataViewChanged) {
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView(
-        { id: nextState.index },
+        { id: nextState.index, savedSearch },
         { internalStateContainer: internalState, services }
       );
 

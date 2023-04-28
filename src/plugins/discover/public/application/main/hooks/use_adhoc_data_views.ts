@@ -8,34 +8,43 @@
 
 import { useCallback, useEffect } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { DiscoverServices } from '../../../build_services';
+import { useSavedSearch } from '../services/discover_state_provider';
 import { isTextBasedQuery } from '../utils/is_text_based_query';
 import { useAppStateSelector } from '../services/discover_app_state_container';
 import { useInternalStateSelector } from '../services/discover_internal_state_container';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
 import { DiscoverStateContainer } from '../services/discover_state';
+import { useFiltersValidation } from './use_filters_validation';
 
 export const useAdHocDataViews = ({
   stateContainer,
-  trackUiMetric,
+  services,
 }: {
   stateContainer: DiscoverStateContainer;
-  trackUiMetric?: (metricType: string, eventName: string | string[], count?: number) => void;
+  services: DiscoverServices;
 }) => {
   const query = useAppStateSelector((state) => state.query);
   const dataView = useInternalStateSelector((state) => state.dataView);
+  const savedSearch = useSavedSearch();
   const isTextBasedMode = isTextBasedQuery(query);
+  const { filterManager, toastNotifications } = services;
 
   useEffect(() => {
     if (dataView && !dataView.isPersisted()) {
-      trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
+      services.trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
     }
-  }, [dataView, isTextBasedMode, trackUiMetric]);
+  }, [dataView, isTextBasedMode, services]);
+
+  /**
+   * Takes care of checking data view id references in filters
+   */
+  useFiltersValidation({ savedSearch, filterManager, toastNotifications });
 
   const { openConfirmSavePrompt, updateSavedSearch } = useConfirmPersistencePrompt(stateContainer);
   const persistDataView = useCallback(async () => {
     const currentDataView = stateContainer.internalState.getState().dataView;
-    const savedSearch = stateContainer.savedSearchState.getState();
     if (!currentDataView || currentDataView.isPersisted()) {
       return currentDataView;
     }
@@ -52,7 +61,7 @@ export const useAdHocDataViews = ({
     }
 
     return createdDataView;
-  }, [stateContainer, openConfirmSavePrompt, updateSavedSearch]);
+  }, [stateContainer, openConfirmSavePrompt, updateSavedSearch, savedSearch]);
 
   return { persistDataView };
 };
