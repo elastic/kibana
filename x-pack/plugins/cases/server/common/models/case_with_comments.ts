@@ -13,26 +13,21 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import type {
-  CaseResponse,
+  Case,
   CommentAttributes,
   CommentPatchRequest,
   CommentRequest,
   CommentRequestUserType,
   CommentRequestAlertType,
 } from '../../../common/api';
-import {
-  CaseResponseRt,
-  CaseStatuses,
-  CommentType,
-  ActionTypes,
-  Actions,
-} from '../../../common/api';
+import { CaseRt, CaseStatuses, CommentType, ActionTypes, Actions } from '../../../common/api';
 import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
 import { AttachmentLimitChecker } from '../limiter_checker';
-import type { AlertInfo, CaseSavedObject } from '../types';
+import type { AlertInfo } from '../types';
+import type { CaseSavedObjectTransformed } from '../types/case';
 import {
   countAlertsForID,
   flattenCommentSavedObjects,
@@ -51,9 +46,9 @@ type CommentRequestWithId = Array<{ id: string } & CommentRequest>;
  */
 export class CaseCommentModel {
   private readonly params: CaseCommentModelParams;
-  private readonly caseInfo: CaseSavedObject;
+  private readonly caseInfo: CaseSavedObjectTransformed;
 
-  private constructor(caseInfo: CaseSavedObject, params: CaseCommentModelParams) {
+  private constructor(caseInfo: CaseSavedObjectTransformed, params: CaseCommentModelParams) {
     this.caseInfo = caseInfo;
     this.params = params;
   }
@@ -69,7 +64,7 @@ export class CaseCommentModel {
     return new CaseCommentModel(savedObject, options);
   }
 
-  public get savedObject(): CaseSavedObject {
+  public get savedObject(): CaseSavedObjectTransformed {
     return this.caseInfo;
   }
 
@@ -179,7 +174,7 @@ export class CaseCommentModel {
     }
   }
 
-  private newObjectWithInfo(caseInfo: CaseSavedObject): CaseCommentModel {
+  private newObjectWithInfo(caseInfo: CaseSavedObjectTransformed): CaseCommentModel {
     return new CaseCommentModel(caseInfo, this.params);
   }
 
@@ -434,7 +429,7 @@ export class CaseCommentModel {
     };
   }
 
-  public async encodeWithComments(): Promise<CaseResponse> {
+  public async encodeWithComments(): Promise<Case> {
     try {
       const comments = await this.params.services.caseService.getAllCaseComments({
         id: this.caseInfo.id,
@@ -453,7 +448,7 @@ export class CaseCommentModel {
         ...this.formatForEncoding(comments.total),
       };
 
-      return CaseResponseRt.encode(caseResponse);
+      return CaseRt.encode(caseResponse);
     } catch (error) {
       throw createCaseError({
         message: `Failed encoding the commentable case, case id: ${this.caseInfo.id}: ${error}`,
