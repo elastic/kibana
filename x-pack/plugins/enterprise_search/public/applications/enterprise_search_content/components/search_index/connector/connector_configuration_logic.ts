@@ -133,31 +133,30 @@ function validateConnectorConfiguration(config: ConfigEntry[]): ConfigEntry[] {
 
     configEntry.validation_errors = [];
 
-    switch (configEntry.type) {
-      case FieldType.INTEGER:
-        if (!validIntInput(configEntry.value)) {
-          configEntry.validation_errors.push(
-            i18n.translate(
-              'xpack.enterpriseSearch.content.indices.configurationConnector.config.invalidInteger',
-              {
-                defaultMessage: '{label} must be an integer.',
-                values: { label },
-              }
-            )
-          );
-        }
+    if (configEntry.type === FieldType.INTEGER && !validIntInput(configEntry.value)) {
+      configEntry.validation_errors.push(
+        i18n.translate(
+          'xpack.enterpriseSearch.content.indices.configurationConnector.config.invalidInteger',
+          {
+            defaultMessage: '{label} must be an integer.',
+            values: { label },
+          }
+        )
+      );
     }
 
-    configEntry.is_valid = configEntry.validation_errors.length > 0 ? false : true;
+    configEntry.is_valid = configEntry.validation_errors.length <= 0;
 
     return configEntry;
   });
 }
 
 function validIntInput(value: string | number | boolean | null): boolean {
-  // reject non integers (including floats), but don't validate if empty
+  // reject non integers (including x.0 floats), but don't validate if empty
   return (value !== null || value !== '') &&
-    (isNaN(Number(value)) || ensureStringType(value).indexOf('.') >= 0)
+    (isNaN(Number(value)) ||
+      !Number.isSafeInteger(value) ||
+      ensureStringType(value).indexOf('.') >= 0)
     ? false
     : true;
 }
