@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { AlertsGroupingAggregation } from '@kbn/security-solution-plugin/public/detections/components/alerts_table/grouping_settings/types';
 import { getEmptyValue, getFieldTypeMissingValues } from './helpers';
-import { GroupingBucket } from '../..';
-import { RawBucket } from '../../..';
+import { GroupingAggregation } from '../..';
 import type { GroupingQueryArgs, GroupingQuery } from './types';
 /** The maximum number of groups to render */
 export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;
@@ -45,7 +45,7 @@ export const getGroupingQuery = ({
   runtimeMappings,
   selectedGroupEsTypes,
   size = DEFAULT_GROUP_BY_FIELD_SIZE,
-  sort,
+  sort = [{ unitsCount: { order: 'desc' } }],
   statsAggregations,
   to,
 }: GroupingQueryArgs): GroupingQuery => ({
@@ -84,6 +84,16 @@ export const getGroupingQuery = ({
           : {}),
       },
     },
+
+    unitsCountWithoutNull: { value_count: { field: groupByField } },
+    unitsCount: {
+      value_count: {
+        field: groupByField,
+        missing: getFieldTypeMissingValues(selectedGroupEsTypes)[0],
+      },
+    },
+    groupsCount: { cardinality: { field: groupByField } },
+
     ...(rootAggregations
       ? rootAggregations.reduce((aggObj, subAgg) => Object.assign(aggObj, subAgg), {})
       : {}),
@@ -113,9 +123,12 @@ export const getGroupingQuery = ({
  * @param buckets buckets returned from the grouping query
  */
 export const parseGroupingQuery = <T>(
-  buckets: Array<RawBucket<T>>
-): Array<RawBucket<T> & GroupingBucket> =>
-  buckets.map((group) => {
+  aggs?: GroupingAggregation<AlertsGroupingAggregation>
+): GroupingAggregation<AlertsGroupingAggregation> | {} => {
+  if (!aggs) {
+    return {};
+  }
+  const groupByFields = aggs?.groupByFields?.buckets?.map((group) => {
     if (!Array.isArray(group.key)) {
       return group;
     }
@@ -135,3 +148,15 @@ export const parseGroupingQuery = <T>(
           isNullGroup: true,
         };
   });
+
+  return {
+    ...aggs,
+    groupByFields: { buckets: groupByFields },
+    groupsCount: {
+      value:
+        aggs.unitsCount?.value !== aggs.unitsCountWithoutNull?.value
+          ? (aggs.groupsCount?.value ?? 0) + 1
+          : aggs.groupsCount?.value,
+    },
+  };
+};
