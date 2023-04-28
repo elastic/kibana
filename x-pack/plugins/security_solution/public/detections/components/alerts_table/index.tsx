@@ -12,6 +12,8 @@ import type { FC } from 'react';
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
+import type { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ALERT_BUILDING_BLOCK_TYPE } from '@kbn/rule-data-utils';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
@@ -48,6 +50,9 @@ import * as i18n from './translations';
 import { eventRenderedViewColumns } from '../../configurations/security_solution_detections/columns';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
+
+// Highlight rows with building block alerts
+const shouldHighlightRow = (alert: Alert) => !!alert[ALERT_BUILDING_BLOCK_TYPE];
 
 const storage = new Storage(localStorage);
 
@@ -255,6 +260,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       query: finalBoolQuery,
       showExpandToDetails: false,
       gridStyle,
+      shouldHighlightRow,
       rowHeightsOptions,
       columns: finalColumns,
       browserFields: finalBrowserFields,

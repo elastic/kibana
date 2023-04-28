@@ -28,6 +28,7 @@ interface SLOListParams {
 export interface UseFetchSloListResponse {
   isInitialLoading: boolean;
   isLoading: boolean;
+  isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
   sloList: FindSLOResponse | undefined;
@@ -96,14 +97,19 @@ export function useFetchSloList({
         queryClient.invalidateQueries(['fetchActiveAlerts'], {
           exact: false,
         });
+
+        queryClient.invalidateQueries(['fetchRulesForSlo'], {
+          exact: false,
+        });
       },
     }
   );
 
   return {
     sloList: data,
-    isLoading: isLoading || isRefetching,
     isInitialLoading,
+    isLoading,
+    isRefetching,
     isSuccess,
     isError,
     refetch,

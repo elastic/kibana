@@ -70,6 +70,10 @@ export type AlertsTableStateProps = {
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
   showAlertStatusWithFlapping?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
+  /**
+   * Allows to consumers of the table to decide to highlight a row based on the current alert.
+   */
+  shouldHighlightRow?: (alert: Alert) => boolean;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -138,6 +142,7 @@ const AlertsTableStateWithQueryProvider = ({
   onUpdate,
   showAlertStatusWithFlapping,
   toolbarVisibility,
+  shouldHighlightRow,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
 
@@ -358,6 +363,7 @@ const AlertsTableStateWithQueryProvider = ({
       controls: persistentControls,
       showInspectButton,
       toolbarVisibility,
+      shouldHighlightRow,
     }),
     [
       alertsTableConfiguration,
@@ -384,6 +390,7 @@ const AlertsTableStateWithQueryProvider = ({
       persistentControls,
       showInspectButton,
       toolbarVisibility,
+      shouldHighlightRow,
     ]
   );
 
