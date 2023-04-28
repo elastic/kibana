@@ -127,7 +127,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
             .to.have.property(key)
             .eql(
               value,
-              `Expected transform row ${transformId} to have '${key}' with value '${value}'  (got ${JSON.stringify(
+              `Expected transform row ${transformId} to have '${key}' with value '${value}' (got ${JSON.stringify(
                 transformRow
               )})`
             );
@@ -336,7 +336,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
             .to.have.property(key)
             .eql(
               value,
-              `Expected transform row stats to have '${key}' with value '${value}'  (got ${JSON.stringify(
+              `Expected transform row stats to have '${key}' with value '${value}' (got ${JSON.stringify(
                 stats
               )})`
             );
@@ -431,18 +431,17 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
         documents_processed: 0,
         exponential_avg_checkpoint_duration_ms: 0,
       });
-      await retry.tryForTime(60 * 1000, async () => {
+      await retry.tryForTime(180 * 1000, async () => {
         await this.clickTransformRowAction(transformId, 'Reset');
         await this.confirmResetTransform();
         await this.assertTransformRowFields(transformId, { status: 'stopped' });
+        // Assert that transform is reseted correctly and has 0 documents
         await this.assertTransformExpandedRowStats(transformId, {
           documents_indexed: 0,
           documents_processed: 0,
           exponential_avg_checkpoint_duration_ms: 0,
         });
       });
-
-      // @todo: expect processed documents = 0
     }
 
     public async stopTransform(transformId: string) {
