@@ -265,5 +265,6 @@ function createResolvablePromise() {
   const promise = new Promise((r) => {
     resolve = r;
   });
+  // The "resolve = r;" code path is called before this
   return { promise, resolve };
 }
