@@ -10,8 +10,8 @@
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-import { AlertFlattenedSchema, AlertSchema } from './alert_schema';
-import { LegacyAlertFlattenedSchema, LegacyAlertSchema } from './legacy_alert_schema';
+import { AlertSchema } from './alert_schema';
+import { LegacyAlertSchema } from './legacy_alert_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(
   'IsoDateString',
@@ -66,28 +66,6 @@ export const schemaGeoPoint = rt.union([
   schemaGeoPointLocationString,
 ]);
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
-// prettier-ignore
-const ObservabilityUptimeAlertRequiredFlattened = rt.type({
-});
-const ObservabilityUptimeAlertOptionalFlattened = rt.partial({
-  'agent.name': schemaString,
-  'anomaly.bucket_span.minutes': schemaString,
-  'anomaly.start': schemaDate,
-  'error.message': schemaString,
-  'kibana.alert.evaluation.threshold': schemaStringOrNumber,
-  'kibana.alert.evaluation.value': schemaStringOrNumber,
-  'kibana.alert.evaluation.values': schemaStringOrNumberArray,
-  'monitor.id': schemaString,
-  'monitor.name': schemaString,
-  'monitor.type': schemaString,
-  'observer.geo.name': schemaString,
-  'tls.server.hash.sha256': schemaString,
-  'tls.server.x509.issuer.common_name': schemaString,
-  'tls.server.x509.not_after': schemaDate,
-  'tls.server.x509.not_before': schemaDate,
-  'tls.server.x509.subject.common_name': schemaString,
-  'url.full': schemaString,
-});
 // prettier-ignore
 const ObservabilityUptimeAlertRequired = rt.type({
 });
@@ -144,11 +122,6 @@ const ObservabilityUptimeAlertOptional = rt.partial({
     full: schemaString,
   }),
 });
-
-// prettier-ignore
-export const ObservabilityUptimeAlertFlattenedSchema = rt.intersection([ObservabilityUptimeAlertRequiredFlattened, ObservabilityUptimeAlertOptionalFlattened, AlertFlattenedSchema, LegacyAlertFlattenedSchema]);
-// prettier-ignore
-export type ObservabilityUptimeAlertFlattened = rt.TypeOf<typeof ObservabilityUptimeAlertFlattenedSchema>;
 
 // prettier-ignore
 export const ObservabilityUptimeAlertSchema = rt.intersection([ObservabilityUptimeAlertRequired, ObservabilityUptimeAlertOptional, AlertSchema, LegacyAlertSchema]);

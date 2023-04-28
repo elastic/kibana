@@ -21,20 +21,39 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 export default function checkAlertSchemasTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
+  // We are using this test to generate the schemas and types for alerts as data objects
+  // because we need to access the alert definition that rule types provide on registration,
+  // which is easiest to do after Kibana has started up and we can get the list of registered
+  // rule types. If you add a new field to the alert field map or to the field map specific
+  // to your rule type, this test will fail. To resolve, run this test locally
+  //
+  // node scripts/functional_tests_server.js --config x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group4/config.ts
+  // node scripts/functional_test_runner --config=x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group4/config.ts --grep "check alert schemas"
+  //
+  // and check in the changed schema files in packages/kbn-alerts-as-data-utils/src/schemas/generated/
+
   describe('check alert schemas', () => {
-    it('should', async () => {
+    it('should successfully generate alert schemas', async () => {
       // Generate base alert schema
-      createSchemaFromFieldMap(`schemas/generated/alert_schema.ts`, alertFieldMap, 'Alert');
+      createSchemaFromFieldMap({
+        outputFile: `schemas/generated/alert_schema.ts`,
+        fieldMap: alertFieldMap,
+        schemaPrefix: 'Alert',
+      });
 
       // Generate legacy alert schema
-      createSchemaFromFieldMap(
-        `schemas/generated/legacy_alert_schema.ts`,
-        legacyAlertFieldMap,
-        'LegacyAlert'
-      );
+      createSchemaFromFieldMap({
+        outputFile: `schemas/generated/legacy_alert_schema.ts`,
+        fieldMap: legacyAlertFieldMap,
+        schemaPrefix: 'LegacyAlert',
+      });
 
       // Generate ECS schema
-      createSchemaFromFieldMap(`schemas/generated/ecs_schema.ts`, ecsFieldMap, 'Ecs');
+      createSchemaFromFieldMap({
+        outputFile: `schemas/generated/ecs_schema.ts`,
+        fieldMap: ecsFieldMap,
+        schemaPrefix: 'Ecs',
+      });
 
       const ruleTypes = await supertest
         .get('/api/alerting/rule_types')
@@ -50,14 +69,17 @@ export default function checkAlertSchemasTest({ getService }: FtrProviderContext
             // Generate schema for this context
             const name = contextToSchemaName(alertsDefinition.context);
 
-            createSchemaFromFieldMap(
-              `schemas/generated/${alertsDefinition.context.replaceAll('.', '_')}_schema.ts`,
-              alertsDefinition.mappings.fieldMap,
-              name,
-              true,
-              alertsDefinition.useEcs ?? false,
-              alertsDefinition.useLegacyAlerts ?? false
-            );
+            createSchemaFromFieldMap({
+              outputFile: `schemas/generated/${alertsDefinition.context.replaceAll(
+                '.',
+                '_'
+              )}_schema.ts`,
+              fieldMap: alertsDefinition.mappings.fieldMap,
+              schemaPrefix: name,
+              useAlert: true,
+              useEcs: alertsDefinition.useEcs ?? false,
+              useLegacyAlerts: alertsDefinition.useLegacyAlerts ?? false,
+            });
             processedContexts.push(alertsDefinition.context);
           }
         });

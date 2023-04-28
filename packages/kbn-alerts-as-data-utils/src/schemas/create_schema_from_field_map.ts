@@ -15,46 +15,46 @@ import { createLineWriter, LineWriter } from './lib/line_writer';
 
 const PLUGIN_DIR = path.resolve(path.join(__dirname, '..'));
 
-export const createSchemaFromFieldMap = (
-  outputFile: string,
-  fieldMap: FieldMap,
-  schemaPrefix: string,
-  useAlert: boolean = false,
-  useEcs: boolean = false,
-  useLegacyAlerts: boolean = false
-) => {
+interface CreateSchemaFromFieldMapOpts {
+  outputFile: string;
+  fieldMap: FieldMap;
+  schemaPrefix: string;
+  useAlert?: boolean;
+  useEcs?: boolean;
+  useLegacyAlerts?: boolean;
+  flattened?: boolean;
+}
+export const createSchemaFromFieldMap = ({
+  outputFile,
+  fieldMap,
+  schemaPrefix,
+  useAlert = false,
+  useEcs = false,
+  useLegacyAlerts = false,
+  flattened = false,
+}: CreateSchemaFromFieldMapOpts) => {
   const lineWriters = {
     IMPORTS: createLineWriter(),
-    REQUIRED_FIELDS_FLATTENED: createLineWriter(),
-    OPTIONAL_FIELDS_FLATTENED: createLineWriter(),
-    REQUIRED_FIELDS_UNFLATTENED: createLineWriter(),
-    OPTIONAL_FIELDS_UNFLATTENED: createLineWriter(),
-    INCLUDED_SCHEMAS_FLATTENED: createLineWriter(''),
-    INCLUDED_SCHEMAS_UNFLATTENED: createLineWriter(''),
+    REQUIRED_FIELDS: createLineWriter(),
+    OPTIONAL_FIELDS: createLineWriter(),
+    INCLUDED_SCHEMAS: createLineWriter(''),
   };
 
   if (useAlert) {
-    lineWriters.IMPORTS.addLine(
-      `import { AlertFlattenedSchema, AlertSchema } from './alert_schema';`
-    );
-    lineWriters.INCLUDED_SCHEMAS_FLATTENED.addLine(`, AlertFlattenedSchema`);
-    lineWriters.INCLUDED_SCHEMAS_UNFLATTENED.addLine(`, AlertSchema`);
+    lineWriters.IMPORTS.addLine(`import { AlertSchema } from './alert_schema';`);
+    lineWriters.INCLUDED_SCHEMAS.addLine(`, AlertSchema`);
   }
 
   if (useEcs) {
-    lineWriters.IMPORTS.addLine(`import { EcsFlattenedSchema, EcsSchema } from './ecs_schema';`);
-    lineWriters.INCLUDED_SCHEMAS_FLATTENED.addLine(`, EcsFlattenedSchema`);
-    lineWriters.INCLUDED_SCHEMAS_UNFLATTENED.addLine(`, EcsSchema`);
+    lineWriters.IMPORTS.addLine(`import { EcsSchema } from './ecs_schema';`);
+    lineWriters.INCLUDED_SCHEMAS.addLine(`, EcsSchema`);
   }
   if (useLegacyAlerts) {
-    lineWriters.IMPORTS.addLine(
-      `import { LegacyAlertFlattenedSchema, LegacyAlertSchema } from './legacy_alert_schema';`
-    );
-    lineWriters.INCLUDED_SCHEMAS_FLATTENED.addLine(`, LegacyAlertFlattenedSchema`);
-    lineWriters.INCLUDED_SCHEMAS_UNFLATTENED.addLine(`, LegacyAlertSchema`);
+    lineWriters.IMPORTS.addLine(`import { LegacyAlertSchema } from './legacy_alert_schema';`);
+    lineWriters.INCLUDED_SCHEMAS.addLine(`, LegacyAlertSchema`);
   }
 
-  generateSchemaFromFieldMap({ lineWriters, fieldMap });
+  generateSchemaFromFieldMap({ lineWriters, fieldMap, flattened });
 
   const contents = getSchemaFileContents(lineWriters, schemaPrefix);
 
@@ -64,8 +64,13 @@ export const createSchemaFromFieldMap = (
 interface GenerateSchemaFromFieldMapOpts {
   lineWriters: Record<string, LineWriter>;
   fieldMap: FieldMap;
+  flattened: boolean;
 }
-const generateSchemaFromFieldMap = ({ lineWriters, fieldMap }: GenerateSchemaFromFieldMapOpts) => {
+const generateSchemaFromFieldMap = ({
+  lineWriters,
+  fieldMap,
+  flattened,
+}: GenerateSchemaFromFieldMapOpts) => {
   const requiredFieldMap = { properties: {} };
   const optionalFieldMap = { properties: {} };
 
@@ -78,17 +83,10 @@ const generateSchemaFromFieldMap = ({ lineWriters, fieldMap }: GenerateSchemaFro
       set(requiredFieldMap.properties, getKeyWithProperties(key), fieldMap[key])
     );
   generateSchemaLines({
-    lineWriter: lineWriters.REQUIRED_FIELDS_FLATTENED,
+    lineWriter: lineWriters.REQUIRED_FIELDS,
     propertyKey: null,
     required: true,
-    flattened: true,
-    fieldMap: requiredFieldMap,
-  });
-  generateSchemaLines({
-    lineWriter: lineWriters.REQUIRED_FIELDS_UNFLATTENED,
-    propertyKey: null,
-    required: true,
-    flattened: false,
+    flattened,
     fieldMap: requiredFieldMap,
   });
 
@@ -99,17 +97,10 @@ const generateSchemaFromFieldMap = ({ lineWriters, fieldMap }: GenerateSchemaFro
       set(optionalFieldMap.properties, getKeyWithProperties(key), fieldMap[key])
     );
   generateSchemaLines({
-    lineWriter: lineWriters.OPTIONAL_FIELDS_FLATTENED,
+    lineWriter: lineWriters.OPTIONAL_FIELDS,
     propertyKey: null,
     required: false,
-    flattened: true,
-    fieldMap: optionalFieldMap,
-  });
-  generateSchemaLines({
-    lineWriter: lineWriters.OPTIONAL_FIELDS_UNFLATTENED,
-    propertyKey: null,
-    required: false,
-    flattened: false,
+    flattened,
     fieldMap: optionalFieldMap,
   });
 };
@@ -329,19 +320,11 @@ export const schemaGeoPoint = rt.union([
 ]);
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
-const %%schemaPrefix%%RequiredFlattened = %%REQUIRED_FIELDS_FLATTENED%%;
-const %%schemaPrefix%%OptionalFlattened = %%OPTIONAL_FIELDS_FLATTENED%%;
-// prettier-ignore
-const %%schemaPrefix%%Required = %%REQUIRED_FIELDS_UNFLATTENED%%;
-const %%schemaPrefix%%Optional = %%OPTIONAL_FIELDS_UNFLATTENED%%;
+const %%schemaPrefix%%Required = %%REQUIRED_FIELDS%%;
+const %%schemaPrefix%%Optional = %%OPTIONAL_FIELDS%%;
 
 // prettier-ignore
-export const %%schemaPrefix%%FlattenedSchema = rt.intersection([%%schemaPrefix%%RequiredFlattened, %%schemaPrefix%%OptionalFlattened%%INCLUDED_SCHEMAS_FLATTENED%%]);
-// prettier-ignore
-export type %%schemaPrefix%%Flattened = rt.TypeOf<typeof %%schemaPrefix%%FlattenedSchema>;
-
-// prettier-ignore
-export const %%schemaPrefix%%Schema = rt.intersection([%%schemaPrefix%%Required, %%schemaPrefix%%Optional%%INCLUDED_SCHEMAS_UNFLATTENED%%]);
+export const %%schemaPrefix%%Schema = rt.intersection([%%schemaPrefix%%Required, %%schemaPrefix%%Optional%%INCLUDED_SCHEMAS%%]);
 // prettier-ignore
 export type %%schemaPrefix%% = rt.TypeOf<typeof %%schemaPrefix%%Schema>;
 

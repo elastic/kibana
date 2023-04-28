@@ -10,8 +10,8 @@
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-import { AlertFlattenedSchema, AlertSchema } from './alert_schema';
-import { LegacyAlertFlattenedSchema, LegacyAlertSchema } from './legacy_alert_schema';
+import { AlertSchema } from './alert_schema';
+import { LegacyAlertSchema } from './legacy_alert_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(
   'IsoDateString',
@@ -67,22 +67,6 @@ export const schemaGeoPoint = rt.union([
 ]);
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
-const ObservabilityApmAlertRequiredFlattened = rt.type({
-});
-const ObservabilityApmAlertOptionalFlattened = rt.partial({
-  'agent.name': schemaString,
-  'error.grouping_key': schemaString,
-  'kibana.alert.evaluation.threshold': schemaStringOrNumber,
-  'kibana.alert.evaluation.value': schemaStringOrNumber,
-  'kibana.alert.evaluation.values': schemaStringOrNumberArray,
-  'processor.event': schemaString,
-  'service.environment': schemaString,
-  'service.language.name': schemaString,
-  'service.name': schemaString,
-  'transaction.name': schemaString,
-  'transaction.type': schemaString,
-});
-// prettier-ignore
 const ObservabilityApmAlertRequired = rt.type({
 });
 const ObservabilityApmAlertOptional = rt.partial({
@@ -116,11 +100,6 @@ const ObservabilityApmAlertOptional = rt.partial({
     type: schemaString,
   }),
 });
-
-// prettier-ignore
-export const ObservabilityApmAlertFlattenedSchema = rt.intersection([ObservabilityApmAlertRequiredFlattened, ObservabilityApmAlertOptionalFlattened, AlertFlattenedSchema, LegacyAlertFlattenedSchema]);
-// prettier-ignore
-export type ObservabilityApmAlertFlattened = rt.TypeOf<typeof ObservabilityApmAlertFlattenedSchema>;
 
 // prettier-ignore
 export const ObservabilityApmAlertSchema = rt.intersection([ObservabilityApmAlertRequired, ObservabilityApmAlertOptional, AlertSchema, LegacyAlertSchema]);

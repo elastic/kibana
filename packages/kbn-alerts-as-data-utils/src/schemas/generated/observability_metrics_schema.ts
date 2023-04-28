@@ -10,9 +10,9 @@
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-import { AlertFlattenedSchema, AlertSchema } from './alert_schema';
-import { EcsFlattenedSchema, EcsSchema } from './ecs_schema';
-import { LegacyAlertFlattenedSchema, LegacyAlertSchema } from './legacy_alert_schema';
+import { AlertSchema } from './alert_schema';
+import { EcsSchema } from './ecs_schema';
+import { LegacyAlertSchema } from './legacy_alert_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(
   'IsoDateString',
@@ -68,14 +68,6 @@ export const schemaGeoPoint = rt.union([
 ]);
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
-const ObservabilityMetricsAlertRequiredFlattened = rt.type({
-});
-const ObservabilityMetricsAlertOptionalFlattened = rt.partial({
-  'kibana.alert.evaluation.threshold': schemaStringOrNumber,
-  'kibana.alert.evaluation.value': schemaStringOrNumber,
-  'kibana.alert.evaluation.values': schemaStringOrNumberArray,
-});
-// prettier-ignore
 const ObservabilityMetricsAlertRequired = rt.type({
 });
 const ObservabilityMetricsAlertOptional = rt.partial({
@@ -89,11 +81,6 @@ const ObservabilityMetricsAlertOptional = rt.partial({
     }),
   }),
 });
-
-// prettier-ignore
-export const ObservabilityMetricsAlertFlattenedSchema = rt.intersection([ObservabilityMetricsAlertRequiredFlattened, ObservabilityMetricsAlertOptionalFlattened, AlertFlattenedSchema, EcsFlattenedSchema, LegacyAlertFlattenedSchema]);
-// prettier-ignore
-export type ObservabilityMetricsAlertFlattened = rt.TypeOf<typeof ObservabilityMetricsAlertFlattenedSchema>;
 
 // prettier-ignore
 export const ObservabilityMetricsAlertSchema = rt.intersection([ObservabilityMetricsAlertRequired, ObservabilityMetricsAlertOptional, AlertSchema, EcsSchema, LegacyAlertSchema]);

@@ -66,42 +66,6 @@ export const schemaGeoPoint = rt.union([
 ]);
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
-const LegacyAlertRequiredFlattened = rt.type({
-});
-const LegacyAlertOptionalFlattened = rt.partial({
-  'ecs.version': schemaString,
-  'event.action': schemaString,
-  'event.kind': schemaString,
-  'kibana.alert.risk_score': schemaNumber,
-  'kibana.alert.rule.author': schemaString,
-  'kibana.alert.rule.created_at': schemaDate,
-  'kibana.alert.rule.created_by': schemaString,
-  'kibana.alert.rule.description': schemaString,
-  'kibana.alert.rule.enabled': schemaString,
-  'kibana.alert.rule.from': schemaString,
-  'kibana.alert.rule.interval': schemaString,
-  'kibana.alert.rule.license': schemaString,
-  'kibana.alert.rule.note': schemaString,
-  'kibana.alert.rule.references': schemaStringArray,
-  'kibana.alert.rule.rule_id': schemaString,
-  'kibana.alert.rule.rule_name_override': schemaString,
-  'kibana.alert.rule.to': schemaString,
-  'kibana.alert.rule.type': schemaString,
-  'kibana.alert.rule.updated_at': schemaDate,
-  'kibana.alert.rule.updated_by': schemaString,
-  'kibana.alert.rule.version': schemaString,
-  'kibana.alert.severity': schemaString,
-  'kibana.alert.suppression.docs_count': schemaStringOrNumber,
-  'kibana.alert.suppression.end': schemaDate,
-  'kibana.alert.suppression.start': schemaDate,
-  'kibana.alert.suppression.terms.field': schemaStringArray,
-  'kibana.alert.suppression.terms.value': schemaStringArray,
-  'kibana.alert.system_status': schemaString,
-  'kibana.alert.workflow_reason': schemaString,
-  'kibana.alert.workflow_user': schemaString,
-  tags: schemaStringArray,
-});
-// prettier-ignore
 const LegacyAlertRequired = rt.type({
 });
 const LegacyAlertOptional = rt.partial({
@@ -151,11 +115,6 @@ const LegacyAlertOptional = rt.partial({
   }),
   tags: schemaStringArray,
 });
-
-// prettier-ignore
-export const LegacyAlertFlattenedSchema = rt.intersection([LegacyAlertRequiredFlattened, LegacyAlertOptionalFlattened]);
-// prettier-ignore
-export type LegacyAlertFlattened = rt.TypeOf<typeof LegacyAlertFlattenedSchema>;
 
 // prettier-ignore
 export const LegacyAlertSchema = rt.intersection([LegacyAlertRequired, LegacyAlertOptional]);
