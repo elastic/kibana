@@ -5093,6 +5093,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-chrome-navigation@link:packages/shared-ux/chrome/navigation":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-file-context@link:packages/shared-ux/file/context":
   version "0.0.0"
   uid ""
