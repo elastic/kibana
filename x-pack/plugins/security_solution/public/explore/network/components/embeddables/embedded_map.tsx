@@ -242,22 +242,49 @@ export const EmbeddedMapComponent = ({
     }
   }, [embeddable, query]);
 
+  const timeRangeFilter: Filter[] = useMemo(
+    () =>
+      startDate != null && endDate != null
+        ? [
+            {
+              meta: {
+                disabled: false,
+                negate: false,
+                alias: null,
+                key: '@timestamp',
+                field: '@timestamp',
+                params: {
+                  gte: new Date(startDate).toISOString(),
+                  lt: new Date(endDate).toISOString(),
+                },
+                value: JSON.stringify({
+                  gte: new Date(startDate).toISOString(),
+                  lt: new Date(endDate).toISOString(),
+                }),
+                type: 'range',
+              },
+              query: {
+                range: {
+                  '@timestamp': {
+                    gte: new Date(startDate).toISOString(),
+                    lt: new Date(endDate).toISOString(),
+                  },
+                },
+              },
+            },
+          ]
+        : [],
+    [startDate, endDate]
+  );
+
   useEffect(() => {
     if (embeddable != null) {
-      embeddable.updateInput({ filters });
+      // pass time range as filter instead of via timeRange param
+      // if user's data view does not have a time field, the timeRange param is not applied
+      // using filter will always apply the time range
+      embeddable.updateInput({ filters: [...filters, ...timeRangeFilter] });
     }
-  }, [embeddable, filters]);
-
-  // DateRange updated useEffect
-  useEffect(() => {
-    if (embeddable != null && startDate != null && endDate != null) {
-      const timeRange = {
-        from: new Date(startDate).toISOString(),
-        to: new Date(endDate).toISOString(),
-      };
-      embeddable.updateInput({ timeRange });
-    }
-  }, [embeddable, startDate, endDate]);
+  }, [embeddable, filters, timeRangeFilter]);
 
   const setDefaultMapVisibility = useCallback(
     (isOpen: boolean) => {
