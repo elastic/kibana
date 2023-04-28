@@ -33,6 +33,7 @@ import { createMetricsFetchData, createMetricsHasData } from './metrics_overview
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
 import { LogViewsService } from './services/log_views';
+import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
 import { TelemetryService } from './services/telemetry';
 import {
   InfraClientCoreSetup,
@@ -49,6 +50,7 @@ export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
   private inventoryViews: InventoryViewsService;
   private logViews: LogViewsService;
+  private metricsExplorerViews: MetricsExplorerViewsService;
   private telemetry: TelemetryService;
   private locators?: InfraLocators;
   private appTarget: string;
@@ -61,6 +63,7 @@ export class Plugin implements InfraClientPluginClass {
       messageFields:
         this.config.sources?.default?.fields?.message ?? defaultLogViewsStaticConfig.messageFields,
     });
+    this.metricsExplorerViews = new MetricsExplorerViewsService();
     this.telemetry = new TelemetryService();
     this.appTarget = this.config.logs.app_target;
   }
@@ -320,11 +323,16 @@ export class Plugin implements InfraClientPluginClass {
       search: plugins.data.search,
     });
 
+    const metricsExplorerViews = this.metricsExplorerViews.start({
+      http: core.http,
+    });
+
     const telemetry = this.telemetry.start();
 
     const startContract: InfraClientStartExports = {
       inventoryViews,
       logViews,
+      metricsExplorerViews,
       telemetry,
       locators: this.locators!,
       ContainerMetricsTable: createLazyContainerMetricsTable(getStartServices),
