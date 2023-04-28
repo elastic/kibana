@@ -14,7 +14,7 @@ import type { SetupPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../timeline/utils/common';
-import { createTag, findTagsByName } from '../saved_objects/tags';
+import { createTag, findTagsByName } from '../saved_objects';
 
 const getTagsParamsSchema = schema.object({
   name: schema.string(),
@@ -26,6 +26,15 @@ const putTagParamsSchema = schema.object({
 });
 
 export const getSecuritySolutionTagsRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger,
+  security: SetupPlugins['security']
+) => {
+  getTagsRoute(router, logger, security);
+  putTagRoute(router, logger, security);
+};
+
+export const getTagsRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
   security: SetupPlugins['security']
@@ -71,7 +80,13 @@ export const getSecuritySolutionTagsRoute = (
       }
     }
   );
+};
 
+export const putTagRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger,
+  security: SetupPlugins['security']
+) => {
   router.put(
     {
       path: INTERNAL_TAGS_URL,
@@ -84,7 +99,6 @@ export const getSecuritySolutionTagsRoute = (
       const frameworkRequest = await buildFrameworkRequest(context, security, request);
       const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
       const { name: tagName, description, color } = request.body;
-
       try {
         const tag = await createTag({
           savedObjectsClient,
