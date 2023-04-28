@@ -31,7 +31,7 @@ export enum TestRunStatus {
   COMPLETED = 'completed',
 }
 
-export const testIsRunning = (testRun?: ManualTestRun) =>
+export const isTestRunning = (testRun?: ManualTestRun) =>
   testRun?.status === TestRunStatus.IN_PROGRESS || testRun?.status === TestRunStatus.LOADING;
 
 export interface ManualTestRun {

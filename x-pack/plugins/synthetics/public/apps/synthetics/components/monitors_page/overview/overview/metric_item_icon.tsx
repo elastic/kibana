@@ -27,7 +27,7 @@ import { useRef } from 'react';
 import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
 import { useErrorDetailsLink } from '../../../common/links/error_details_link';
 import { MonitorOverviewItem, OverviewPing } from '../../../../../../../common/runtime_types';
-import { manualTestRunSelector, testIsRunning } from '../../../../state/manual_test_runs';
+import { manualTestRunSelector, isTestRunning } from '../../../../state/manual_test_runs';
 import { useFormatTestRunAt } from '../../../../utils/monitor_test_result/test_time_formats';
 
 const Container = styled.div`
@@ -62,7 +62,7 @@ export const MetricItemIcon = ({
     dispatch(toggleErrorPopoverOpen(configIdByLocation));
   };
 
-  const inProgress = testIsRunning(testNowRun);
+  const inProgress = isTestRunning(testNowRun);
 
   const errorLink = useErrorDetailsLink({
     configId: monitor.configId,
