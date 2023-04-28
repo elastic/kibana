@@ -27,6 +27,7 @@ describe('getFileType', () => {
       icon: 'document',
       displayName: 'File Attachment Type',
       getAttachmentViewObject: expect.any(Function),
+      getAttachmentRemovalObject: expect.any(Function),
     });
   });
 
@@ -182,6 +183,13 @@ describe('getFileType', () => {
           hideDefaultActions: true,
         })
       );
+    });
+  });
+
+  describe('getFileAttachmentRemovalObject', () => {
+    it('event renders the right message', async () => {
+      // @ts-ignore
+      expect(fileType.getAttachmentRemovalObject().event).toBe('removed file');
     });
   });
 });
