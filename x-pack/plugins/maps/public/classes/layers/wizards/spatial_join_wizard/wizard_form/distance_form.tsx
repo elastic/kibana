@@ -5,44 +5,102 @@
  * 2.0.
  */
 
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonEmpty,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFieldNumber,
   EuiFormRow,
+  EuiPopoverFooter,
 } from '@elastic/eui';
+import { panelStrings } from '../../../../../connected_components/panel_strings';
+
+export const KM_ABBREVIATION = i18n.translate('xpack.maps.spatialJoin.wizardForm.kilometersAbbreviation', {
+  defaultMessage: 'km',
+})
 
 interface Props {
-  distance: number | string;
-  isDistanceInvalid: boolean;
-  onDistanceChange: (distance: number | string) => void;
+  initialDistance: number;
+  onClose: () => void;
+  onDistanceChange: (distance: number) => void;
 }
 
 export function DistanceForm(props: Props) {
+  const [distance, setDistance] = useState<number | string>(props.initialDistance);
+  const [isDistanceInvalid, setIsDistanceInvalid] = useState(false);
+
+  function getDistanceAsNumber(): number {
+    return typeof distance === 'string' ? parseFloat(distance as string) : distance;
+  }
+  
+  useEffect(() => {
+    const distanceAsNumber = getDistanceAsNumber();
+    if (isNaN(distanceAsNumber)) {
+      setIsDistanceInvalid(true);
+      return;
+    }
+
+    if (distanceAsNumber <= 0) {
+      setIsDistanceInvalid(true);
+      return;
+    }
+
+    setIsDistanceInvalid(false);
+  }, [distance, setIsDistanceInvalid]);
+
+  useEffect(() => {
+    console.log('onMount', props.initialDistance);
+  }, []);
+
   return (
-    <EuiFormRow
-      label={i18n.translate('xpack.maps.spatialJoin.wizardForm.distanceLabel', {
-        defaultMessage: 'Distance',
-      })}
-      isInvalid={props.isDistanceInvalid}
-      error={props.isDistanceInvalid ? [i18n.translate('xpack.maps.spatialJoin.wizardForm.invalidDistanceMessage', {
-        defaultMessage: 'Must be a number greater than 0',
-      })] : []}
-    >
-      <EuiFieldNumber
-        append={i18n.translate('xpack.maps.spatialJoin.wizardForm.kilometersAbbreviation', {
-          defaultMessage: 'km',
+    <>
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.spatialJoin.wizardForm.distanceLabel', {
+          defaultMessage: 'Distance',
         })}
-        aria-label={i18n.translate('xpack.maps.spatialJoin.wizardForm.distanceInputAriaLabel', {
-          defaultMessage: 'distance input',
-        })}
-        isInvalid={props.isDistanceInvalid}
-        min={0}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-          props.onDistanceChange(e.target.value);
-        }}
-        value={props.distance}
-      />
-    </EuiFormRow>
-  )
+        isInvalid={isDistanceInvalid}
+        error={isDistanceInvalid ? [i18n.translate('xpack.maps.spatialJoin.wizardForm.invalidDistanceMessage', {
+          defaultMessage: 'Value must be a number greater than 0',
+        })] : []}
+      >
+        <EuiFieldNumber
+          append={KM_ABBREVIATION}
+          aria-label={i18n.translate('xpack.maps.spatialJoin.wizardForm.distanceInputAriaLabel', {
+            defaultMessage: 'distance input',
+          })}
+          isInvalid={isDistanceInvalid}
+          min={0}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            setDistance(e.target.value);
+          }}
+          value={distance}
+        />
+      </EuiFormRow>
+      <EuiPopoverFooter paddingSize="s">
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiButtonEmpty onClick={props.onClose} size="s">
+              {panelStrings.close}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButton
+              fill
+              isDisabled={isDistanceInvalid || props.initialDistance.toString() === distance.toString()}
+              onClick={() => {
+                props.onDistanceChange(getDistanceAsNumber());
+                props.onClose();
+              }}
+              size="s"
+            >
+              {panelStrings.apply}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverFooter>
+    </>
+  );
 }

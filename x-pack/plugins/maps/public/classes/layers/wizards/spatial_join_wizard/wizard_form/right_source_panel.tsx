@@ -15,24 +15,27 @@ import {
 } from '@elastic/eui';
 import { GeoIndexPatternSelect } from '../../../../../components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../../../../../components/single_field_select';
+import { RelationshipExpression } from './relationship_expression';
 
 interface Props {
   dataView?: DataView;
+  distance: number;
   geoField: string | undefined;
   geoFields: DataViewField[];
   onDataViewSelect: (dataView: DataView) => void;
+  onDistanceChange: (distance: number) => void;
   onGeoFieldSelect: (fieldName?: string) => void;
 }
 
 export function RightSourcePanel(props: Props) {
   const geoFieldSelect = props.geoFields.length 
     ? <EuiFormRow
-        label={i18n.translate('xpack.maps.spatialJoin.wizard.geofieldLabel', {
+        label={i18n.translate('xpack.maps.spatialJoin.wizardForm.geofieldLabel', {
           defaultMessage: 'Geospatial field',
         })}
       >
         <SingleFieldSelect
-          placeholder={i18n.translate('xpack.maps.choropleth.geofieldPlaceholder', {
+          placeholder={i18n.translate('xpack.maps.spatialJoin.wizardForm.geofieldPlaceholder', {
             defaultMessage: 'Select geo field',
           })}
           value={props.geoField ? props.geoField : null}
@@ -47,13 +50,21 @@ export function RightSourcePanel(props: Props) {
     <EuiPanel>
       <EuiTitle size="xs">
         <h5>
-          {i18n.translate('xxpack.maps.spatialJoin.wizard.leftSourceTitle', {
+          {i18n.translate('xxpack.maps.spatialJoin.wizardForm.rightSourceTitle', {
             defaultMessage: 'Join source',
           })}
         </h5>
       </EuiTitle>
 
       <EuiSpacer size="m" />
+
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.spatialJoin.wizardForm.relationshipLabel', {
+          defaultMessage: 'Relationship',
+        })}
+      >
+        <RelationshipExpression distance={props.distance} onDistanceChange={props.onDistanceChange} />
+      </EuiFormRow>
 
       <GeoIndexPatternSelect
         value={props.dataView ? props.dataView.id : ''}

@@ -16,8 +16,7 @@ import { RightSourcePanel } from './right_source_panel';
 import { createDistanceJoinLayerDescriptor } from './create_spatial_join_layer_descriptor';
 
 export function WizardForm({ previewLayers }: RenderWizardArguments) {
-  const [distance, setDistance] = useState<number | string>(5);
-  const [isDistanceInvalid, setIsDistanceInvalid] = useState(false);
+  const [distance, setDistance] = useState<number>(5);
   const [leftDataView, setLeftDataView] = useState<DataView | undefined>();
   const [leftGeoFields, setLeftGeoFields] = useState<DataViewField[]>([]);
   const [leftGeoField, setLeftGeoField] = useState<string | undefined>();
@@ -29,41 +28,18 @@ export function WizardForm({ previewLayers }: RenderWizardArguments) {
     return leftDataView !== undefined && leftGeoField !== undefined;
   }
 
-  function isRelationshipConfigComplete() {
-    return !isDistanceInvalid;
-  }
-
   function isRightConfigComplete() {
     return rightDataView !== undefined && rightGeoField !== undefined;
   }
 
-  function getDistanceAsNumber() {
-    return typeof distance === 'string' ? parseFloat(distance as string) : distance;
-  }
-
   useEffect(() => {
-    const distanceAsNumber = getDistanceAsNumber();
-    if (isNaN(distanceAsNumber)) {
-      setIsDistanceInvalid(true);
-      return;
-    }
-
-    if (distanceAsNumber <= 0) {
-      setIsDistanceInvalid(true);
-      return;
-    }
-
-    setIsDistanceInvalid(false);
-  }, [distance, setIsDistanceInvalid]);
-
-  useEffect(() => {
-    if (!isLeftConfigComplete() || !isRelationshipConfigComplete() || !isRightConfigComplete()) {
+    if (!isLeftConfigComplete() || !isRightConfigComplete()) {
       previewLayers([]);
       return;
     }
 
     const layerDescriptor = createDistanceJoinLayerDescriptor({
-      distance: getDistanceAsNumber(),
+      distance,
       leftDataViewId: leftDataView!.id,
       leftGeoField: leftGeoField!,
       rightDataViewId: rightDataView!.id,
@@ -73,33 +49,21 @@ export function WizardForm({ previewLayers }: RenderWizardArguments) {
     previewLayers([layerDescriptor]);
   }, [distance, leftDataView, leftGeoField, rightDataView, rightGeoField]);
 
-  const relationshipPanel = isLeftConfigComplete()
-    ? <>
-        <EuiSpacer size="s" />
-        <RelationshipPanel
-          distance={distance}
-          isDistanceInvalid={isDistanceInvalid}
-          onDistanceChange={setDistance}
-        />
-      </>
-    : null;
-
   const rightSourcePanel = isLeftConfigComplete()
-    ? <>
-        <EuiSpacer size="s" />
-        <RightSourcePanel
-          dataView={rightDataView}
-          geoField={rightGeoField}
-          geoFields={rightGeoFields}
-          onDataViewSelect={(dataView: DataView) => {
-            setRightDataView(dataView);
-            const geoFields = getGeoFields(dataView.fields);
-            setRightGeoFields(geoFields);
-            setRightGeoField(geoFields.length ? geoFields[0].name : undefined);
-          }}
-          onGeoFieldSelect={setRightGeoField}
-        />
-      </>
+    ? <RightSourcePanel
+        dataView={rightDataView}
+        distance={distance}
+        geoField={rightGeoField}
+        geoFields={rightGeoFields}
+        onDataViewSelect={(dataView: DataView) => {
+          setRightDataView(dataView);
+          const geoFields = getGeoFields(dataView.fields);
+          setRightGeoFields(geoFields);
+          setRightGeoField(geoFields.length ? geoFields[0].name : undefined);
+        }}
+        onDistanceChange={setDistance}
+        onGeoFieldSelect={setRightGeoField}
+      />
     : null;
 
   return (
@@ -117,7 +81,7 @@ export function WizardForm({ previewLayers }: RenderWizardArguments) {
         onGeoFieldSelect={setLeftGeoField}
       />
 
-      {relationshipPanel}
+      <EuiSpacer size="s" />
 
       {rightSourcePanel}
     </>
