@@ -238,12 +238,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     if ('isFeatureEditorOpenForLayer' in requestMeta) {
       isFeatureEditorOpenForLayer = requestMeta.isFeatureEditorOpenForLayer;
     }
-    console.log('isTrue???', {
-      con1: requestMeta.applyGlobalTime,
-      con2: await this.isTimeAware(),
-      con3: !isFeatureEditorOpenForLayer,
-    });
-    // debugger;
+
     if (requestMeta.applyGlobalTime && (await this.isTimeAware()) && !isFeatureEditorOpenForLayer) {
       const timeRange = requestMeta.timeslice
         ? {
@@ -252,9 +247,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
             mode: 'absolute' as 'absolute',
           }
         : requestMeta.timeFilters;
-
       const filter = getTimeFilter().createFilter(indexPattern, timeRange);
-      console.log({ timeRange, filter });
       if (filter) {
         allFilters.push(filter);
       }
