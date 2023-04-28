@@ -18,6 +18,7 @@ import {
   EuiIcon,
   EuiIconProps,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   StepPanel,
   StepPanelContent,
@@ -31,33 +32,48 @@ export function SelectLogs() {
   const { goToStep, getState, setState } = useWizard();
 
   function onBack() {
-    navigateToKibanaUrl('/app/observabilityOnboarding');
+    navigateToKibanaUrl('/app/observabilityOnboarding/customLogs');
   }
 
   return (
-    <StepPanel title="Choose what logs to collect">
+    <StepPanel
+      title={i18n.translate(
+        'xpack.observability_onboarding.selectLogs.chooseType',
+        {
+          defaultMessage: 'Choose what logs to collect',
+        }
+      )}
+    >
       <StepPanelContent>
-        <LogsTypeSection title="Stream logs">
+        <LogsTypeSection
+          title={i18n.translate(
+            'xpack.observability_onboarding.selectLogs.customLogs',
+            {
+              defaultMessage: 'Custom logs',
+            }
+          )}
+        >
           <EuiFlexGroup>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ width: '50%' }}>
               <OptionCard
-                title="System logs"
-                iconType="inspect"
-                onClick={() => {}}
-                isSelected={false}
-                description="Monitor servers, personal computers, and more by collecting logs from your machines"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <OptionCard
-                title="Stream log files"
+                title={i18n.translate(
+                  'xpack.observability_onboarding.selectLogs.streamLogFiles',
+                  {
+                    defaultMessage: 'Stream log files',
+                  }
+                )}
                 iconType="desktop"
                 onClick={() => {
                   setState({ ...getState(), logsType: 'log-file' });
                   goToStep('configureLogs');
                 }}
                 isSelected={false}
-                description="Example of a card’s description. Stick to one or two sentences."
+                description={i18n.translate(
+                  'xpack.observability_onboarding.selectLogs.streamLogFiles.description',
+                  {
+                    defaultMessage: 'Ingest arbitrary custom log files.',
+                  }
+                )}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -67,20 +83,42 @@ export function SelectLogs() {
           <EuiFlexGroup>
             <EuiFlexItem>
               <OptionCard
-                title="Syslog"
+                title={i18n.translate(
+                  'xpack.observability_onboarding.selectLogs.sysLog',
+                  {
+                    defaultMessage: 'Syslog logs',
+                  }
+                )}
                 iconType="documents"
                 onClick={() => {}}
                 isSelected={false}
-                description="Collect raw log data from listening ports."
+                description={i18n.translate(
+                  'xpack.observability_onboarding.selectLogs.sysLog.description',
+                  {
+                    defaultMessage:
+                      'Collect raw log data from listening ports.',
+                  }
+                )}
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <OptionCard
-                title="HTTP Endpoint logs"
+                title={i18n.translate(
+                  'xpack.observability_onboarding.selectLogs.httpEndpointLogs',
+                  {
+                    defaultMessage: 'HTTP Endpoint logs',
+                  }
+                )}
                 iconType="documents"
                 onClick={() => {}}
                 isSelected={false}
-                description="Collect JSON data from listening HTTP port."
+                description={i18n.translate(
+                  'xpack.observability_onboarding.selectLogs.httpEndpointLogs.description',
+                  {
+                    defaultMessage:
+                      'Collect JSON data from listening HTTP port.',
+                  }
+                )}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -95,20 +133,42 @@ export function SelectLogs() {
           <EuiFlexGroup>
             <EuiFlexItem>
               <OptionCard
-                title="Upload log files"
+                title={i18n.translate(
+                  'xpack.observability_onboarding.selectLogs.uploadLogFiles',
+                  {
+                    defaultMessage: 'Upload log files',
+                  }
+                )}
                 iconType="exportAction"
                 onClick={() => {}}
                 isSelected={false}
-                description="Upload data from a CSV, TSV, JSON or other log file type for analysis."
+                description={i18n.translate(
+                  'xpack.observability_onboarding.selectLogs.uploadLogFiles.description',
+                  {
+                    defaultMessage:
+                      'Upload data from a CSV, TSV, JSON or other log file type for analysis.',
+                  }
+                )}
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <OptionCard
-                title="Use my own shipper"
+                title={i18n.translate(
+                  'xpack.observability_onboarding.selectLogs.useOwnShipper',
+                  {
+                    defaultMessage: 'Get an API key',
+                  }
+                )}
                 iconType="package"
                 onClick={() => {}}
                 isSelected={false}
-                description="Use your own shipper for your logs data collection by generating your own API key."
+                description={i18n.translate(
+                  'xpack.observability_onboarding.selectLogs.useOwnShipper.description',
+                  {
+                    defaultMessage:
+                      'Use your own shipper to collect logs data by generating an API key.',
+                  }
+                )}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -117,7 +177,9 @@ export function SelectLogs() {
       <StepPanelFooter
         items={[
           <EuiButton color="ghost" fill onClick={onBack}>
-            Back
+            {i18n.translate('xpack.observability_onboarding.steps.back', {
+              defaultMessage: 'Back',
+            })}
           </EuiButton>,
           <></>,
         ]}

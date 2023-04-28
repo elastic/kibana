@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiStepsHorizontal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useWizard } from '.';
 
 export function HorizontalSteps() {
@@ -27,22 +28,42 @@ export function HorizontalSteps() {
     <EuiStepsHorizontal
       steps={[
         {
-          title: 'Select logs',
+          title: i18n.translate(
+            'xpack.observability_onboarding.steps.selectLogs',
+            {
+              defaultMessage: 'Select logs',
+            }
+          ),
           status: getStatus('selectLogs'),
           onClick: () => {},
         },
         {
-          title: 'Configure logs',
+          title: i18n.translate(
+            'xpack.observability_onboarding.steps.configureLogs',
+            {
+              defaultMessage: 'Configure logs',
+            }
+          ),
           status: getStatus('configureLogs'),
           onClick: () => {},
         },
         {
-          title: 'Install shipper',
+          title: i18n.translate(
+            'xpack.observability_onboarding.steps.installShipper',
+            {
+              defaultMessage: 'Install shipper',
+            }
+          ),
           status: getStatus('installElasticAgent'),
           onClick: () => {},
         },
         {
-          title: 'Import data',
+          title: i18n.translate(
+            'xpack.observability_onboarding.steps.installShipper',
+            {
+              defaultMessage: 'Import data',
+            }
+          ),
           status: getStatus('importData'),
           onClick: () => {},
         },
