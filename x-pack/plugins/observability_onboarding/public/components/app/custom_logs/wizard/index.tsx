@@ -9,7 +9,7 @@ import { ConfigureLogs } from './configure_logs';
 import { SelectLogs } from './select_logs';
 import { InstallElasticAgent } from './install_elastic_agent';
 import { createWizardContext } from '../../../../context/create_wizard_context';
-import { ImportData } from './import_data';
+import { CollectLogs } from './collect_logs';
 import { Inspect } from './inspect';
 
 interface WizardState {
@@ -50,7 +50,7 @@ const { Provider, Step, useWizard } = createWizardContext({
     selectLogs: SelectLogs,
     configureLogs: ConfigureLogs,
     installElasticAgent: InstallElasticAgent,
-    importData: ImportData,
+    collectLogs: CollectLogs,
     inspect: Inspect,
   },
 });

@@ -26,7 +26,7 @@ import {
   StepPanelFooter,
 } from '../../../shared/step_panel';
 
-export function ImportData() {
+export function CollectLogs() {
   const { goToStep, goBack } = useWizard();
 
   const { data } = useFetcher((callApi) => {

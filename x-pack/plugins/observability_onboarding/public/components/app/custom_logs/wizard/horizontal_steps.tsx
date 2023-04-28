@@ -59,12 +59,12 @@ export function HorizontalSteps() {
         },
         {
           title: i18n.translate(
-            'xpack.observability_onboarding.steps.installShipper',
+            'xpack.observability_onboarding.steps.collectLogs',
             {
-              defaultMessage: 'Import data',
+              defaultMessage: 'Collect logs',
             }
           ),
-          status: getStatus('importData'),
+          status: getStatus('collectLogs'),
           onClick: () => {},
         },
       ]}
