@@ -8,7 +8,7 @@
 import { merge } from 'lodash';
 import type { PublicContract } from '@kbn/utility-types';
 import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
-import type { GetSummarizedAlertsFnOpts } from '@kbn/alerting-plugin/server';
+import type { SummarizedAlertsChunk, GetSummarizedAlertsFnOpts } from '@kbn/alerting-plugin/server';
 import {
   ALERT_END,
   ALERT_RULE_EXECUTION_UUID,
@@ -24,7 +24,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertsFilter } from '@kbn/alerting-plugin/common';
 import { Alert } from '@kbn/alerts-as-data-utils';
-import { AlertHit } from '@kbn/alerting-plugin/server/types';
+import { AlertHit, SummarizedAlerts } from '@kbn/alerting-plugin/server/types';
 import { IRuleDataClient, IRuleDataReader } from '../rule_data_client';
 
 const MAX_ALERT_DOCS_TO_RETURN = 100;
@@ -47,7 +47,7 @@ export const createGetSummarizedAlertsFn =
     spaceId,
     excludedAlertInstanceIds,
     alertsFilter,
-  }: GetSummarizedAlertsFnOpts) => {
+  }: GetSummarizedAlertsFnOpts): Promise<SummarizedAlerts> => {
     if (!ruleId || !spaceId) {
       throw new Error(`Must specify both rule ID and space ID for summarized alert query.`);
     }
@@ -110,7 +110,7 @@ const getAlertsByExecutionUuid = async ({
   excludedAlertInstanceIds,
   formatAlert,
   alertsFilter,
-}: GetAlertsByExecutionUuidOpts) => {
+}: GetAlertsByExecutionUuidOpts): Promise<SummarizedAlerts> => {
   if (isLifecycleAlert) {
     return getLifecycleAlertsByExecutionUuid({
       executionUuid,
@@ -148,7 +148,7 @@ const getPersistentAlertsByExecutionUuid = async <TSearchRequest extends ESSearc
   excludedAlertInstanceIds,
   formatAlert,
   alertsFilter,
-}: GetAlertsByExecutionUuidHelperOpts) => {
+}: GetAlertsByExecutionUuidHelperOpts): Promise<SummarizedAlerts> => {
   // persistent alerts only create new alerts so query by execution UUID to
   // get all alerts created during an execution
   const request = getQueryByExecutionUuid({
@@ -179,7 +179,7 @@ const getLifecycleAlertsByExecutionUuid = async ({
   excludedAlertInstanceIds,
   formatAlert,
   alertsFilter,
-}: GetAlertsByExecutionUuidHelperOpts) => {
+}: GetAlertsByExecutionUuidHelperOpts): Promise<SummarizedAlerts> => {
   // lifecycle alerts assign a different action to an alert depending
   // on whether it is new/ongoing/recovered. query for each action in order
   // to get the count of each action type as well as up to the maximum number
@@ -238,7 +238,7 @@ const expandFlattenedAlert = (alert: object) => {
 const getHitsWithCount = <TSearchRequest extends ESSearchRequest>(
   response: ESSearchResponse<AlertHit, TSearchRequest>,
   formatAlert?: (alert: Alert) => Alert
-) => {
+): SummarizedAlertsChunk => {
   return {
     count: (response.hits.total as SearchTotalHits).value,
     data: response.hits.hits.map((hit) => {
@@ -251,7 +251,7 @@ const getHitsWithCount = <TSearchRequest extends ESSearchRequest>(
         _id,
         _index,
         ...expandedSource,
-      };
+      } as AlertHit;
     }),
   };
 };
@@ -260,7 +260,7 @@ const doSearch = async (
   ruleDataClientReader: IRuleDataReader,
   request: ESSearchRequest,
   formatAlert?: (alert: Alert) => Alert
-) => {
+): Promise<SummarizedAlertsChunk> => {
   const response = await ruleDataClientReader.search(request);
   return getHitsWithCount(response as ESSearchResponse<AlertHit>, formatAlert);
 };
@@ -348,7 +348,7 @@ const getAlertsByTimeRange = async ({
   excludedAlertInstanceIds,
   formatAlert,
   alertsFilter,
-}: GetAlertsByTimeRangeOpts) => {
+}: GetAlertsByTimeRangeOpts): Promise<SummarizedAlerts> => {
   if (isLifecycleAlert) {
     return getLifecycleAlertsByTimeRange({
       start,
@@ -429,7 +429,7 @@ const getLifecycleAlertsByTimeRange = async ({
   formatAlert,
   excludedAlertInstanceIds,
   alertsFilter,
-}: GetAlertsByTimeRangeHelperOpts) => {
+}: GetAlertsByTimeRangeHelperOpts): Promise<SummarizedAlerts> => {
   const requests = [
     getQueryByTimeRange(start, end, ruleId, excludedAlertInstanceIds, AlertTypes.NEW, alertsFilter),
     getQueryByTimeRange(

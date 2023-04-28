@@ -167,7 +167,7 @@ export type AlertHit = Alert & {
   _id: string;
   _index: string;
 };
-interface SummarizedAlertsChunk {
+export interface SummarizedAlertsChunk {
   count: number;
   data: AlertHit[];
 }
