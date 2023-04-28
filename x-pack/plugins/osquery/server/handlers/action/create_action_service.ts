@@ -17,7 +17,7 @@ export const createActionService = (osqueryContext: OsqueryAppContext) => {
   let licenseSubscription: Subscription | null = null;
   const licenses: OsqueryActiveLicenses = { isActivePlatinumLicense: false };
 
-  licenseSubscription = osqueryContext.licensing.license$.subscribe(async (license) => {
+  licenseSubscription = osqueryContext.licensing.license$.subscribe((license) => {
     licenses.isActivePlatinumLicense = license.isActive && license.hasAtLeast('platinum');
   });
 

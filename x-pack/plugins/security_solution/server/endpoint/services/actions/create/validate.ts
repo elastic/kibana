@@ -6,10 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { LicenseType } from '@kbn/licensing-plugin/server';
 import type { LicenseService } from '../../../../../common/license';
 
-export const validateEndpointLicense = (license: LicenseService) => {
-  const hasEnterpriseLicense = license.isAtLeast('enterprise');
+export const validateEndpointLicense = (license: LicenseService, licenseType: LicenseType) => {
+  const hasEnterpriseLicense = license.isAtLeast(licenseType);
 
   if (!hasEnterpriseLicense) {
     return LICENSE_TOO_LOW;

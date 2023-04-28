@@ -18,7 +18,7 @@ import {
   getEndpointIntegrationVersion,
   reassignAgentPolicy,
 } from '../../tasks/fleet';
-import { changeAlertsFilter, refreshEventDetailsFlyoutAndCheckStatus } from '../../tasks/alerts';
+import { changeAlertsFilter } from '../../tasks/alerts';
 
 describe('Automated Response Actions', () => {
   const endpointHostname = Cypress.env(ENDPOINT_VM_NAME);
@@ -73,43 +73,35 @@ describe('Automated Response Actions', () => {
       closeAllToasts();
 
       changeAlertsFilter('event.category: "file"');
-
-      // wait for Endpoint to get isolated
       cy.getByTestSubj('expand-event').first().click();
       cy.getByTestSubj('endpointViewTab').click();
       cy.getByTestSubj('endpoint-actions-notification').should('not.have.text', '0');
-      cy.get('body').then(($body) => {
-        if ($body.text().includes('Pending')) {
-          refreshEventDetailsFlyoutAndCheckStatus();
-        }
-      });
       cy.getByTestSubj('endpoint-actions-results-table').within(() => {
-        cy.getByTestSubj('endpoint-actions-results-table-column-hostname').contains(
-          endpointHostname
-        );
-        cy.getByTestSubj('endpoint-actions-results-table-column-hostname').contains(unenrolledHost);
         cy.get('tbody tr').each(($tr, index) => {
           cy.wrap($tr).within(() => {
             cy.contains('Triggered by rule');
-            cy.getByTestSubj('endpoint-actions-results-table-column-hostname').then(($host) => {
-              // assert on the text
-              if ($host.text().includes(unenrolledHost)) {
-                cy.getByTestSubj('endpoint-actions-results-table-column-status').contains('Failed');
-                cy.getByTestSubj('endpoint-actions-results-table-expand-button').click();
-                cy.wrap($tr)
-                  .parent()
-                  .contains('The host does not have Elastic Defend integration installed');
-              } else {
-                cy.getByTestSubj('endpoint-actions-results-table-column-hostname').contains(
-                  endpointHostname
-                );
-                cy.getByTestSubj('endpoint-actions-results-table-column-status').contains(
-                  'Successful'
-                );
-                cy.getByTestSubj('endpoint-actions-results-table-expand-button').click();
-                cy.wrap($tr).parent().contains('isolate completed successfully');
-              }
-            });
+            if (index === 0) {
+              cy.getByTestSubj('endpoint-actions-results-table-column-hostname').contains(
+                endpointHostname
+              );
+              cy.getByTestSubj('endpoint-actions-results-table-column-status', {
+                timeout: 60000,
+              }).should(($status) => {
+                expect($status).to.contain('Successful');
+              });
+              cy.getByTestSubj('endpoint-actions-results-table-expand-button').click();
+              cy.wrap($tr).siblings().contains('isolate completed successfully');
+            }
+            if (index === 1) {
+              cy.getByTestSubj('endpoint-actions-results-table-column-hostname').contains(
+                unenrolledHost
+              );
+              cy.getByTestSubj('endpoint-actions-results-table-column-status').contains('Failed');
+              cy.getByTestSubj('endpoint-actions-results-table-expand-button').click();
+              cy.wrap($tr)
+                .siblings()
+                .contains('The host does not have Elastic Defend integration installed');
+            }
           });
         });
       });

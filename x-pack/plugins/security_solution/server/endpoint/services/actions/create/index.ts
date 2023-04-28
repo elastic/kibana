@@ -17,6 +17,7 @@ import type { AuthenticationServiceStart } from '@kbn/security-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { IndexResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { validateAgents, validateEndpointLicense } from './validate';
 import type { LicenseService } from '../../../../../common/license/license';
 import type { ResponseActionBodySchema } from '../../../../../common/endpoint/schema/actions';
@@ -63,7 +64,8 @@ type CreateActionPayload = TypeOf<typeof ResponseActionBodySchema> & {
 
 interface CreateActionMetadata {
   casesClient?: CasesClient;
-  license?: LicenseService;
+  minimumLicenseRequired?: LicenseType;
+  enableActionsWithErrors?: boolean;
 }
 
 export const actionCreateService = (
@@ -72,12 +74,15 @@ export const actionCreateService = (
   licenseService: LicenseService
 ) => {
   const createActionFromAlert = (payload: CreateActionPayload) => {
-    return createAction({ ...payload }, { license: licenseService });
+    return createAction(
+      { ...payload },
+      { enableActionsWithErrors: true, minimumLicenseRequired: 'enterprise' }
+    );
   };
 
   const createAction = async (
     payload: CreateActionPayload,
-    { casesClient, license }: CreateActionMetadata
+    { casesClient, minimumLicenseRequired = 'basic', enableActionsWithErrors }: CreateActionMetadata
   ): Promise<ActionDetails> => {
     const featureKey = commandToFeatureKeyMap.get(payload.command) as FeatureKeys;
     if (featureKey) {
@@ -114,7 +119,12 @@ export const actionCreateService = (
       return payload.parameters ?? undefined;
     };
 
-    const alertActionError = checkForAlertErrors(agents, license);
+    const alertActionError = checkForAlertErrors({
+      agents,
+      licenseService,
+      minimumLicenseRequired,
+      enableActionsWithErrors,
+    });
 
     const doc = {
       '@timestamp': moment().toISOString(),
@@ -332,9 +342,20 @@ const createFailedActionResponseEntry = async ({
   }
 };
 
-const checkForAlertErrors = (agents: string[], license?: LicenseService) => {
-  if (!license) {
-    return;
-  }
-  return validateEndpointLicense(license) || validateAgents(agents);
+interface CheckForAlertsArgs {
+  agents: string[];
+  licenseService: LicenseService;
+  minimumLicenseRequired: LicenseType;
+  enableActionsWithErrors?: boolean;
+}
+const checkForAlertErrors = ({
+  agents,
+  licenseService,
+  minimumLicenseRequired = 'basic',
+  enableActionsWithErrors,
+}: CheckForAlertsArgs) => {
+  const licenseError = validateEndpointLicense(licenseService, minimumLicenseRequired);
+  const agentsError = enableActionsWithErrors && validateAgents(agents);
+
+  return licenseError || agentsError;
 };
