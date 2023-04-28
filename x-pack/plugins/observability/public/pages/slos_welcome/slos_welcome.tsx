@@ -182,7 +182,7 @@ export function SlosWelcomePage() {
             &nbsp;
             <EuiLink
               data-test-subj="o11ySloListWelcomePromptReadTheDocsLink"
-              href="#"
+              href="https://www.elastic.co/guide/en/observability/current/slo.html"
               target="_blank"
             >
               {i18n.translate('xpack.observability.slo.sloList.welcomePrompt.learnMoreLink', {
