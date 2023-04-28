@@ -26,11 +26,12 @@ import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
+type Asset = { id: string; type: string };
 interface PackageItem {
   name: string;
   result: {
     installSource: string;
-    assets: unknown[];
+    assets: Asset[];
   };
 }
 
@@ -72,25 +73,31 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       });
     });
 
-    it('should install rules from the Fleet package when user clicks on CTA', () => {
+    it.only('should install rules from the Fleet package when user clicks on CTA', () => {
       cy.intercept('POST', '/api/fleet/epm/packages/_bulk*').as('installPackage');
 
-      let numberOfRulesToInstall;
       /* Retrieve how many rules were installed from the Fleet package */
       cy.wait('@installPackage').then(({ response }) => {
-        numberOfRulesToInstall = response?.body.items.find(
+        const packageAssets = response?.body.items.find(
           ({ name }: PackageItem) => name === 'security_detection_engine'
-        ).result.assets.length;
+        ).result.assets;
+
+        const rulesWithHistoricalVersions = packageAssets.filter(
+          ({ type }: Asset) => type === 'security-rule'
+        );
+
+        // Get unique rules to install by removing version appendix 
+        // from rule id and then removing duplicates
+        const numberOfRulesToInstall = [...new Set(rulesWithHistoricalVersions.map(
+          ({ id }: Asset) => id.split('_')[0]
+        ))].length;
 
         cy.get(LOAD_PREBUILT_RULES_BTN).click();
         cy.get(LOAD_PREBUILT_RULES_BTN).should('have.attr', 'disabled');
         cy.get(LOAD_PREBUILT_RULES_BTN).should('not.exist');
         cy.get(TOASTER).should('be.visible').contains('Installed pre-packaged rules');
 
-        /* Assert that correct number of rules were installed from the Fleet package */
-        // TODO: For some reason, the number of rules installed is always 3 less than the actual number of rules in the package
-        // Figure out why and fix this test
-        cy.get(ELASTIC_RULES_BTN).contains(numberOfRulesToInstall - 3);
+        cy.get(ELASTIC_RULES_BTN).contains(numberOfRulesToInstall);
       });
     });
   });
