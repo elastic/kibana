@@ -191,7 +191,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (opts.operation === 'formula') {
         await this.switchToFormula();
       } else {
-        this.selectOperation(opts.operation, opts.isPreviousIncompatible);
+        await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
       }
       if (opts.field) {
         await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
