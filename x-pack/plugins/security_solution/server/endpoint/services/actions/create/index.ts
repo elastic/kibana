@@ -73,16 +73,13 @@ export const actionCreateService = (
   endpointContext: EndpointAppContext,
   licenseService: LicenseService
 ) => {
-  const createActionFromAlert = (payload: CreateActionPayload) => {
-    return createAction(
-      { ...payload },
-      { enableActionsWithErrors: true, minimumLicenseRequired: 'enterprise' }
-    );
+  const createActionFromAlert = async (payload: CreateActionPayload) => {
+    return createAction({ ...payload }, { minimumLicenseRequired: 'enterprise' });
   };
 
   const createAction = async (
     payload: CreateActionPayload,
-    { casesClient, minimumLicenseRequired = 'basic', enableActionsWithErrors }: CreateActionMetadata
+    { casesClient, minimumLicenseRequired = 'basic' }: CreateActionMetadata
   ): Promise<ActionDetails> => {
     const featureKey = commandToFeatureKeyMap.get(payload.command) as FeatureKeys;
     if (featureKey) {
@@ -123,7 +120,6 @@ export const actionCreateService = (
       agents,
       licenseService,
       minimumLicenseRequired,
-      enableActionsWithErrors,
     });
 
     const doc = {
@@ -346,16 +342,14 @@ interface CheckForAlertsArgs {
   agents: string[];
   licenseService: LicenseService;
   minimumLicenseRequired: LicenseType;
-  enableActionsWithErrors?: boolean;
 }
 const checkForAlertErrors = ({
   agents,
   licenseService,
   minimumLicenseRequired = 'basic',
-  enableActionsWithErrors,
 }: CheckForAlertsArgs) => {
   const licenseError = validateEndpointLicense(licenseService, minimumLicenseRequired);
-  const agentsError = enableActionsWithErrors && validateAgents(agents);
+  const agentsError = validateAgents(agents);
 
   return licenseError || agentsError;
 };

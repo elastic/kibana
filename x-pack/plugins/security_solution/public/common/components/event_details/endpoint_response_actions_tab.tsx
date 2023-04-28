@@ -50,11 +50,9 @@ export const useEndpointResponseActionsTab = ({
 
   useEffect(
     () =>
-      setIsLive(() => {
-        return some(actionList?.data, (item) => {
-          return !item.errors?.length && item.status === 'pending';
-        });
-      }),
+      setIsLive(() =>
+        some(actionList?.data, (action) => !action.errors?.length && action.status === 'pending')
+      ),
     [actionList?.data]
   );
 
