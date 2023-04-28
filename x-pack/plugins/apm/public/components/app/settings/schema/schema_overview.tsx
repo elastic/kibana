@@ -248,7 +248,7 @@ function getDisabledReason({
       )
     );
   }
-  if (!hasCloudAgentPolicy) {
+  if (hasRequiredRole && !hasCloudAgentPolicy) {
     reasons.push(
       i18n.translate(
         'xpack.apm.settings.schema.disabledReason.hasCloudAgentPolicy',

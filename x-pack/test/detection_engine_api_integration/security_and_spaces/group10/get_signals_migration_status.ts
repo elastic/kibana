@@ -20,6 +20,19 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
 
+  const getSignalsMigrationStatus = async (query: any) => {
+    const { body } = await supertest
+      .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
+      .query(query)
+      .set('kbn-xsrf', 'true')
+      .expect(200);
+
+    const filteredIndices = body.indices.filter(
+      (index: any) => index?.index !== '.internal.alerts-security.alerts-default-000001'
+    );
+    return filteredIndices;
+  };
+
   describe('Signals migration status', () => {
     let legacySignalsIndexName: string;
     beforeEach(async () => {
@@ -35,24 +48,12 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('returns no indexes if no signals exist in the specified range', async () => {
-      const { body } = await supertest
-        .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
-        .query({ from: '2020-10-20' })
-        .set('kbn-xsrf', 'true')
-        .expect(200);
-
-      expect(body.indices).to.eql([]);
+      const indices = await getSignalsMigrationStatus({ from: '2020-10-20' });
+      expect(indices).to.eql([]);
     });
 
     it('includes an index if its signals are within the specified range', async () => {
-      const {
-        body: { indices },
-      } = await supertest
-        .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
-        .query({ from: '2020-10-10' })
-        .set('kbn-xsrf', 'true')
-        .expect(200);
-
+      const indices = await getSignalsMigrationStatus({ from: '2020-10-10' });
       expect(indices).length(1);
       expect(indices[0].index).to.eql(legacySignalsIndexName);
     });
@@ -62,13 +63,8 @@ export default ({ getService }: FtrProviderContext): void => {
         await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
 
-      const { body } = await supertest
-        .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
-        .query({ from: '2020-10-10' })
-        .set('kbn-xsrf', 'true')
-        .expect(200);
-
-      expect(body.indices).to.eql([
+      const indices = await getSignalsMigrationStatus({ from: '2020-10-10' });
+      expect(indices).to.eql([
         {
           index: legacySignalsIndexName,
           is_outdated: true,

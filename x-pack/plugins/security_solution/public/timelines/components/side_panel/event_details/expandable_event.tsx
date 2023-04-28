@@ -8,12 +8,14 @@
 import { isEmpty } from 'lodash/fp';
 import {
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiTextColor,
   EuiLoadingContent,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiCopy,
 } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
@@ -32,6 +34,7 @@ import type { TimelineEventsDetailsItem } from '../../../../../common/search_str
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { SecurityPageName } from '../../../../../common/constants';
+import { useGetAlertDetailsFlyoutLink } from './use_get_alert_details_flyout_link';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -52,10 +55,11 @@ interface Props {
 
 interface ExpandableEventTitleProps {
   eventId: string;
+  eventIndex: string;
   isAlert: boolean;
   loading: boolean;
   ruleName?: string;
-  timestamp?: string;
+  timestamp: string;
   handleOnEventClosed?: HandleOnEventClosed;
 }
 
@@ -76,12 +80,19 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 `;
 
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
-  ({ eventId, isAlert, loading, handleOnEventClosed, ruleName, timestamp }) => {
+  ({ eventId, eventIndex, isAlert, loading, handleOnEventClosed, ruleName, timestamp }) => {
     const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
     const { onClick } = useGetSecuritySolutionLinkProps()({
       deepLinkId: SecurityPageName.alerts,
       path: eventId && isAlert ? getAlertDetailsUrl(eventId) : '',
     });
+
+    const alertDetailsLink = useGetAlertDetailsFlyoutLink({
+      _id: eventId,
+      _index: eventIndex,
+      timestamp,
+    });
+
     return (
       <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
         <EuiFlexItem grow={false}>
@@ -112,11 +123,32 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
             </>
           )}
         </EuiFlexItem>
-        {handleOnEventClosed && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={handleOnEventClosed} />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column" alignItems="flexEnd">
+            {handleOnEventClosed && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="cross"
+                  aria-label={i18n.CLOSE}
+                  onClick={handleOnEventClosed}
+                />
+              </EuiFlexItem>
+            )}
+            {isAlert && alertDetailsLink && (
+              <EuiCopy textToCopy={alertDetailsLink}>
+                {(copy) => (
+                  <EuiButtonEmpty
+                    onClick={copy}
+                    iconType="share"
+                    data-test-subj="copy-alert-flyout-link"
+                  >
+                    {i18n.SHARE_ALERT}
+                  </EuiButtonEmpty>
+                )}
+              </EuiCopy>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </StyledEuiFlexGroup>
     );
   }

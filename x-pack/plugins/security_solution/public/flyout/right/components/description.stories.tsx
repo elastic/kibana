@@ -8,12 +8,8 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import type { Story } from '@storybook/react';
-import { RIGHT_SECTION_WIDTH } from '../..';
 import { Description } from './description';
 import { RightPanelContext } from '../context';
-
-const PADDING = 24;
-const WIDTH = RIGHT_SECTION_WIDTH - 2 * PADDING;
 
 const ruleUuid = {
   category: 'kibana',
@@ -46,7 +42,7 @@ export const RuleExpand: Story<void> = () => {
     <RightPanelContext.Provider value={panelContextValue}>
       <div
         css={css`
-          width: ${WIDTH}px; // this mimics the current 500 width of the right panel
+          width: 500px;
         `}
       >
         <Description />
@@ -64,7 +60,7 @@ export const RuleCollapse: Story<void> = () => {
     <RightPanelContext.Provider value={panelContextValue}>
       <div
         css={css`
-          width: ${WIDTH}px; // this mimics the current 500 width of the right panel
+          width: 500px;
         `}
       >
         <Description expanded={true} />
@@ -90,7 +86,7 @@ export const Document: Story<void> = () => {
     <RightPanelContext.Provider value={panelContextValue}>
       <div
         css={css`
-          width: ${WIDTH}px; // this mimics the current 500 width of the right panel
+          width: 500px;
         `}
       >
         <Description />
@@ -116,7 +112,7 @@ export const EmptyDescription: Story<void> = () => {
     <RightPanelContext.Provider value={panelContextValue}>
       <div
         css={css`
-          width: ${WIDTH}px; // this mimics the current 500 width of the right panel
+          width: 500px;
         `}
       >
         <Description expanded={true} />
@@ -131,7 +127,7 @@ export const Empty: Story<void> = () => {
     <RightPanelContext.Provider value={panelContextValue}>
       <div
         css={css`
-          width: ${WIDTH}px; // this mimics the current 500 width of the right panel
+          width: 500px;
         `}
       >
         <Description expanded={true} />

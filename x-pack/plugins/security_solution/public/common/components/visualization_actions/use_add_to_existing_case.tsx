@@ -37,14 +37,16 @@ export const useAddToExistingCase = ({
 
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal({
     onClose: onAddToCaseClicked,
-    toastContent: ADD_TO_CASE_SUCCESS,
+    successToaster: {
+      title: ADD_TO_CASE_SUCCESS,
+    },
   });
 
   const onAddToExistingCaseClicked = useCallback(() => {
     if (onAddToCaseClicked) {
       onAddToCaseClicked();
     }
-    selectCaseModal.open({ attachments });
+    selectCaseModal.open({ getAttachments: () => attachments });
   }, [attachments, onAddToCaseClicked, selectCaseModal]);
 
   return {

@@ -55,6 +55,10 @@ export const MetadataSortMethod: estypes.SortCombinations[] = [
   },
 ];
 
+const UnitedMetadataSortMethod: estypes.SortCombinations[] = [
+  { 'united.agent.enrolled_at': { order: 'desc', unmapped_type: 'date' } },
+];
+
 export function getESQueryHostMetadataByID(agentID: string): estypes.SearchRequest {
   return {
     body: {
@@ -206,7 +210,7 @@ export async function buildUnitedIndexQuery(
     body: {
       query,
       track_total_hits: true,
-      sort: MetadataSortMethod,
+      sort: UnitedMetadataSortMethod,
       fields,
       runtime_mappings: runtimeMappings,
     },

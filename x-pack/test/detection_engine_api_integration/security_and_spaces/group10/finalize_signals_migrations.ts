@@ -48,6 +48,19 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
 
+  const getSignalsMigrationStatus = async (query: any) => {
+    const { body } = await supertest
+      .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
+      .query(query)
+      .set('kbn-xsrf', 'true')
+      .expect(200);
+
+    const filteredIndices = body.indices.filter(
+      (index: any) => index?.index !== '.internal.alerts-security.alerts-default-000001'
+    );
+    return filteredIndices;
+  };
+
   describe('Finalizing signals migrations', () => {
     let legacySignalsIndexName: string;
     let outdatedSignalsIndexName: string;
@@ -93,12 +106,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('replaces the original index alias with the migrated one', async () => {
-      const { body } = await supertest
-        .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
-        .query({ from: '2020-10-10' })
-        .set('kbn-xsrf', 'true')
-        .expect(200);
-      const statusResponses: StatusResponse[] = body.indices;
+      const statusResponses: StatusResponse[] = await getSignalsMigrationStatus({
+        from: '2020-10-10',
+      });
       const indicesBefore = statusResponses.map((index) => index.index);
 
       expect(indicesBefore).to.contain(createdMigration.index);
@@ -170,17 +180,11 @@ export default ({ getService }: FtrProviderContext): void => {
         log
       );
 
-      const { body: bodyAfter } = await supertest
-        .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
-        .query({ from: '2020-10-10' })
-        .set('kbn-xsrf', 'true')
-        .expect(200);
-
-      const statusAfter: StatusResponse[] = bodyAfter.indices;
-      expect(statusAfter.map((s) => s.index)).to.eql([
+      const indices = await getSignalsMigrationStatus({ from: '2020-10-10' });
+      expect(indices.map((s: any) => s.index)).to.eql([
         ...createdMigrations.map((c) => c.migration_index),
       ]);
-      expect(statusAfter.map((s) => s.is_outdated)).to.eql([false, false]);
+      expect(indices.map((s: any) => s.is_outdated)).to.eql([false, false]);
     });
 
     // This fails and should be investigated or removed if it no longer applies

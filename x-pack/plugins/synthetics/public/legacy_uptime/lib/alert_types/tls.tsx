@@ -12,7 +12,7 @@ import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plu
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { TLSParams } from '../../../../common/runtime_types/alerts/tls';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
-import { TlsTranslations } from '../../../../common/translations';
+import { TlsTranslations } from '../../../../common/rules/legacy_uptime/translations';
 import { AlertTypeInitializer } from '.';
 
 import { CERTIFICATES_ROUTE } from '../../../../common/constants/ui';

@@ -59,6 +59,13 @@ export function useFetchActiveAlerts({ sloIds = [] }: Params): UseFetchActiveAle
               bool: {
                 filter: [
                   {
+                    range: {
+                      '@timestamp': {
+                        gte: 'now-15m/m',
+                      },
+                    },
+                  },
+                  {
                     term: {
                       'kibana.alert.rule.rule_type_id': 'slo.rules.burnRate',
                     },

@@ -24,7 +24,7 @@ type SpyRouteProps = RouteComponentProps<{
   flowTarget: FlowTarget | undefined;
 }> & {
   location: H.Location;
-  state?: Record<string, string | undefined>;
+  state?: Record<string, string | boolean | undefined>;
   pageName?: SecurityPageName;
 };
 

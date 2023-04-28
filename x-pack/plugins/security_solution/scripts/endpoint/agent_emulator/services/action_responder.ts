@@ -45,6 +45,7 @@ export class ActionResponderService extends BaseRunningService {
         const { data: actions } = await fetchEndpointActionList(kbnClient, {
           page: nextPage++,
           pageSize: 100,
+          withAutomatedActions: true,
         });
 
         if (actions.length === 0) {

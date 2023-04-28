@@ -81,7 +81,7 @@ describe('getJourneyScreenshot', () => {
     const mockFetch = jest.fn().mockResolvedValue(mockResponse);
     global.fetch = mockFetch;
 
-    const result = await getJourneyScreenshot(url, false);
+    const result = await getJourneyScreenshot(url, { shouldBackoff: false });
     expect(result).toBeNull();
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
@@ -146,7 +146,11 @@ describe('getJourneyScreenshot', () => {
     const mockFetch = jest.fn().mockReturnValue(mockResponse);
     global.fetch = mockFetch;
 
-    const result = await getJourneyScreenshot(url, true, maxRetry, initialBackoff);
+    const result = await getJourneyScreenshot(url, {
+      shouldBackoff: true,
+      maxRetry,
+      initialBackoff,
+    });
     expect(result).toBeNull();
     expect(mockFetch).toBeCalledTimes(maxRetry + 1);
   });

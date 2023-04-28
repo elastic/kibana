@@ -6,7 +6,6 @@
  */
 
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { TableId, TimelineId } from '../../../../common/types';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -17,6 +16,8 @@ import { createStore } from '../../../common/store';
 import { createFilterOutCellActionFactory } from './filter_out';
 import type { SecurityCellActionExecutionContext } from '../../types';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import { TimelineId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 const services = createStartServicesMock();
 const mockFilterManager = services.data.query.filterManager;

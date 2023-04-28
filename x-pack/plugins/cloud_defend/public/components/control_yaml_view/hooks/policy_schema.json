@@ -66,10 +66,10 @@
           "required": ["containerImageName"]
         },
         {
-          "required": ["containerImageFullName"]
+          "required": ["containerImageTag"]
         },
         {
-          "required": ["containerImageTag"]
+          "required": ["containerImageFullName"]
         },
         {
           "required": ["kubernetesClusterId"]
@@ -100,6 +100,19 @@
         "name": {
           "type": "string"
         },
+        "operation": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "createExecutable",
+              "modifyExecutable",
+              "createFile",
+              "modifyFile",
+              "deleteFile"
+            ]
+          }
+        },
         "containerImageName": {
           "type": "array",
           "minItems": 1,
@@ -115,7 +128,7 @@
             "type": "string"
           }
         },
-        "fullContainerImageName": {
+        "containerImageFullName": {
           "type": "array",
           "minItems": 1,
           "items": {
@@ -159,24 +172,12 @@
             "type": "string"
           }
         },
-        "operation": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "enum": [
-              "createExecutable",
-              "modifyExecutable",
-              "createFile",
-              "modifyFile",
-              "deleteFile"
-            ]
-          }
-        },
         "targetFilePath": {
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^(?:\\/[^\\/\\*]+)+(?:\\/\\*|\\/\\*\\*)?$"
           }
         },
         "ignoreVolumeMounts": {
@@ -194,7 +195,7 @@
             "required": ["ignoreVolumeFiles"]
           }
         },
-        "fullContainerImageName": {
+        "containerImageFullName": {
           "not": {
             "required": ["containerImageName"]
           }
@@ -213,10 +214,10 @@
           "required": ["containerImageName"]
         },
         {
-          "required": ["fullContainerImageName"]
+          "required": ["containerImageTag"]
         },
         {
-          "required": ["containerImageTag"]
+          "required": ["containerImageFullName"]
         },
         {
           "required": ["kubernetesClusterId"]
@@ -240,18 +241,19 @@
           "required": ["processName"]
         },
         {
-          "required": ["processUserId"]
-        },
-        {
           "required": ["sessionLeaderInteractive"]
-        },
-        {
-          "required": ["sessionLeaderName"]
         }
       ],
       "properties": {
         "name": {
           "type": "string"
+        },
+        "operation": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": ["fork", "exec"]
+          }
         },
         "containerImageName": {
           "type": "array",
@@ -268,7 +270,7 @@
             "type": "string"
           }
         },
-        "fullContainerImageName": {
+        "containerImageFullName": {
           "type": "array",
           "minItems": 1,
           "items": {
@@ -312,18 +314,12 @@
             "type": "string"
           }
         },
-        "operation": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "enum": ["fork", "exec"]
-          }
-        },
         "processExecutable": {
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^(?:\\/[^\\/\\*]+)+(?:\\/\\*|\\/\\*\\*)?$"
           }
         },
         "processName": {
@@ -333,27 +329,12 @@
             "type": "string"
           }
         },
-        "processUserId": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "integer"
-          }
-        },
         "sessionLeaderInteractive": {
           "type": "boolean"
-        },
-        "sessionLeaderName": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "string",
-            "maxLength": 8
-          }
         }
       },
       "dependencies": {
-        "fullContainerImageName": {
+        "containerImageFullName": {
           "not": {
             "required": ["containerImageName"]
           }

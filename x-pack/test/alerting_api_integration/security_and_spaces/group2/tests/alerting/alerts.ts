@@ -33,12 +33,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const taskManagerUtils = new TaskManagerUtils(es, retry);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/154127
-  // FLAKY: https://github.com/elastic/kibana/issues/154128
-  // FLAKY: https://github.com/elastic/kibana/issues/154129
-  // FLAKY: https://github.com/elastic/kibana/issues/154130
-  // FLAKY: https://github.com/elastic/kibana/issues/154131
-  describe.skip('alerts', () => {
+  describe('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
     const objectRemover = new ObjectRemover(supertest);
@@ -52,7 +47,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      await es.indices.delete({ index: alertAsDataIndex });
+      await es.deleteByQuery({ index: alertAsDataIndex, query: { match_all: {} } });
     });
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -1249,8 +1244,7 @@ instanceStateValue: true
             throttle: null,
             summary: true,
             alertsFilter: {
-              timeframe: null,
-              query: { kql: 'kibana.alert.rule.name:abc' },
+              query: { kql: 'kibana.alert.rule.name:abc', filters: [] },
             },
           });
 
@@ -1312,8 +1306,7 @@ instanceStateValue: true
             throttle: null,
             summary: true,
             alertsFilter: {
-              timeframe: null,
-              query: { kql: 'kibana.alert.instance.id:1' },
+              query: { kql: 'kibana.alert.instance.id:1', filters: [] },
             },
           });
 
@@ -1388,7 +1381,6 @@ instanceStateValue: true
                 timezone: 'UTC',
                 hours: { start, end },
               },
-              query: null,
             },
           });
 

@@ -25,11 +25,13 @@ When adding visualizations to a solution page, there are multiple ways to approa
   Pros:
    * No need to manage searches and rendering logic on your own
    * "Open in Lens" comes for free
+   * Simple extended visualization options - if Lens can't do it, there's also a limited set of overrides to customize the final result
   
   Cons:
    * Each panel does its own data fetching and rendering (can lead to performance problems for high number of embeddables on a single page, e.g. more than 20)
    * Limited data processing options - if the Lens UI doesn't support it, it can't be used
-   * Limited visualization options - if Lens can't do it, it's not possible
+
+
 * #### **Using custom data fetching and rendering**
   In case the disadvantages of using the Lens embeddable heavily affect your use case, it sometimes makes sense to roll your own data fetching and rendering by using the underlying APIs of search service and `elastic-charts` directly. This allows a high degree of flexibility when it comes to data processing, efficiently querying data for multiple charts in a single query and adjusting small details in how charts are rendered. However, do not choose these option lightly as maintenance as well as initial development effort will most likely be much higher than by using the Lens embeddable directly. In this case, almost always an "Open in Lens" button can still be offered to the user to drill down and further explore the data by generating a Lens configuration which is similar to the displayed visualization given the possibilities of Lens. Keep in mind that for the "Open in Lens" flow, the most important property isn't perfect fidelity of the chart but retaining the mental context of the user when switching so they don't have to start over. It's also possible to mix this approach with Lens embeddables on a single page.  **Note**: In this situation, please let the Visualizations team know what features you are missing / why you chose not to use Lens.
 
@@ -95,6 +97,22 @@ Filters and query `state.filters`/`state.query` define the visualization-global 
 ### Callbacks
 
 The `EmbeddableComponent` also takes a set of callbacks to react to user interactions with the embedded Lens visualization to integrate the visualization with the surrounding app: `onLoad`, `onBrushEnd`, `onFilter`, `onTableRowClick`. A common pattern is to keep state in the solution app which is updated within these callbacks - re-rendering the surrounding application will change the Lens attributes passed to the component which will re-render the visualization (including re-fetching data if necessary).
+
+#### Preventing defaults
+
+In some scenarios it can be useful to customize the default behaviour and avoid the default Kibana triggers for a specific action, like add a filter on a bar chart/pie slice click. For this specific requirement the `data` object returned by the `onBrushEnd`, `onFilter`, `onTableRowClick` callbacks has a special `preventDefault()` function that will prevent other registered event triggers to execute:
+
+```tsx
+<EmbeddableComponent
+  // ...
+  onFilter={(data) => {
+    // custom behaviour on "filter" event
+    ...
+    // now prevent to add a filter in Kibana 
+    data.preventDefault();
+  }}
+/>
+```
 
 ## Handling data views
 
@@ -182,6 +200,23 @@ The Lens embeddable is handling both data fetching and rendering - all the user 
 />
 ```
 
+## Overrides
+
+The Lens embeddable offers a way to extends the current set of visualization feature provided within the Lens editor, via the `overrides` property, which enables the consumer to override some visualization configurations in the embeddable instance.
+
+```tsx
+<EmbeddableComponent
+  // ...
+  overrides={{
+    settings: {legendAction: 'ignore'},
+    axisX: {hide: true}
+  }}
+/>
+```
+
+The each override is component-specific and it inherits the prop from its `elastic-charts` definition directly. Callback/handlers are not supported as functions, but the special value `"ignore"` can be provided in order to disable them in the embeddable rendering.
+**Note**: overrides are only applied to the local embeddable instance and will disappear when the visualization is open in the Lens editor.
+
 # Lens Development
 
 The following sections are concerned with developing the Lens plugin itself.
@@ -194,7 +229,8 @@ Run all tests from the `x-pack` root directory
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group1/config.ts`
   - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group2/config.ts`
-  - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group3/config.ts`
+  - ...
+  - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group6/config.ts`
 - API Functional tests:
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/api_integration/config.ts --grep=Lens`

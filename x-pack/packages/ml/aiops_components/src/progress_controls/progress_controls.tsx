@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type FC } from 'react';
 
 import {
   useEuiTheme,
@@ -34,19 +34,20 @@ interface ProgressControlProps {
   shouldRerunAnalysis: boolean;
 }
 
-export function ProgressControls({
+export const ProgressControls: FC<ProgressControlProps> = ({
+  children,
   progress,
   progressMessage,
   onRefresh,
   onCancel,
   isRunning,
   shouldRerunAnalysis,
-}: ProgressControlProps) {
+}) => {
   const { euiTheme } = useEuiTheme();
   const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem data-test-subj="aiopProgressTitle">
@@ -78,6 +79,7 @@ export function ProgressControls({
             size="s"
             onClick={onRefresh}
             color={shouldRerunAnalysis ? 'warning' : 'primary'}
+            fill
           >
             <EuiFlexGroup>
               <EuiFlexItem>
@@ -105,11 +107,12 @@ export function ProgressControls({
           </EuiButton>
         )}
         {isRunning && (
-          <EuiButton data-test-subj="aiopsCancelAnalysisButton" size="s" onClick={onCancel}>
+          <EuiButton data-test-subj="aiopsCancelAnalysisButton" size="s" onClick={onCancel} fill>
             <FormattedMessage id="xpack.aiops.cancelAnalysisButtonTitle" defaultMessage="Cancel" />
           </EuiButton>
         )}
       </EuiFlexItem>
+      {children}
     </EuiFlexGroup>
   );
-}
+};

@@ -21,4 +21,5 @@ export enum SYNTHETICS_API_URLS {
   JOURNEY_FAILED_STEPS = `/internal/synthetics/journeys/failed_steps`,
   NETWORK_EVENTS = `/internal/synthetics/network_events`,
   JOURNEY_SCREENSHOT = `/internal/synthetics/journey/screenshot/{checkGroup}/{stepIndex}`,
+  DELETE_PACKAGE_POLICY = `/internal/synthetics/monitor/policy/{packagePolicyId}`,
 }

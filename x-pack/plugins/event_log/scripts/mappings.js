@@ -86,6 +86,14 @@ exports.EcsCustomPropertyMappings = {
           flapping: {
             type: 'boolean',
           },
+          maintenance_window_ids: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          uuid: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
           rule: {
             properties: {
               consumer: {
@@ -168,6 +176,9 @@ exports.EcsCustomPropertyMappings = {
                     },
                   },
                 },
+              },
+              revision: {
+                type: 'long',
               },
               rule_type_id: {
                 type: 'keyword',
@@ -270,4 +281,5 @@ exports.EcsEventLogMultiValuedProperties = [
   'event.type',
   'rule.author',
   'kibana.space_ids',
+  'kibana.alert.maintenance_window_ids',
 ];

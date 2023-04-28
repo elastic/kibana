@@ -75,12 +75,24 @@ export async function fetchLastSuccessfulCheck({
   );
 }
 
+export interface BackoffOptions {
+  shouldBackoff?: boolean;
+  maxRetry?: number;
+  initialBackoff?: number;
+}
+
+const DEFAULT_SHOULD_BACKOFF = true;
+const DEFAULT_MAX_RETRY = 8;
+const DEFAULT_INITIAL_BACKOFF = 100;
+
 export async function getJourneyScreenshot(
   imgSrc: string,
-  shouldBackoff = true,
-  maxRetry = 15,
-  initialBackoff = 100
+  options?: Partial<BackoffOptions>
 ): Promise<ScreenshotImageBlob | ScreenshotRefImageData | null> {
+  const shouldBackoff = options?.shouldBackoff ?? DEFAULT_SHOULD_BACKOFF;
+  const maxRetry = options?.maxRetry ?? DEFAULT_MAX_RETRY;
+  const initialBackoff = options?.initialBackoff ?? DEFAULT_INITIAL_BACKOFF;
+
   try {
     let retryCount = 0;
 
@@ -89,8 +101,12 @@ export async function getJourneyScreenshot(
     while (response?.status !== 200) {
       const imgRequest = new Request(imgSrc);
 
+      if (retryCount > maxRetry) break;
+
       response = await fetch(imgRequest);
-      if (!shouldBackoff || retryCount >= maxRetry || response.status !== 404) break;
+
+      if (!shouldBackoff || response.status !== 404) break;
+
       await new Promise((r) => setTimeout(r, (backoff *= 2)));
       retryCount++;
     }

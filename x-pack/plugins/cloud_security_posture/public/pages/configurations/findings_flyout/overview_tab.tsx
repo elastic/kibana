@@ -23,6 +23,7 @@ import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
   INTERNAL_FEATURE_FLAGS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX_PATTERN,
 } from '../../../../common/constants';
 import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
@@ -151,7 +152,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
   const {
     services: { discover },
   } = useKibana();
-  const latestFindingsDataView = useLatestFindingsDataView();
+  const latestFindingsDataView = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
 
   const discoverIndexLink = useMemo(
     () =>

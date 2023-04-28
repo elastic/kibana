@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/core/server';
 import {
+  CoreStart,
   IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
@@ -16,6 +17,9 @@ import {
 
 import { LicensingPluginSetup, LicenseType } from '@kbn/licensing-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import { createExecutionContext } from '@kbn/ml-route-utils';
+
+import { PLUGIN } from '../../common/constants';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -27,6 +31,9 @@ interface SetupSettings {
   pluginId: string;
   minimumLicenseType: LicenseType;
   defaultErrorMessage: string;
+  licensing: LicensingPluginSetup;
+  logger: Logger;
+  coreStart: CoreStart;
 }
 
 type TransformRequestHandlerContext = CustomRequestHandlerContext<{
@@ -34,16 +41,22 @@ type TransformRequestHandlerContext = CustomRequestHandlerContext<{
 }>;
 
 export class License {
+  private coreStart: CoreStart;
   private licenseStatus: LicenseStatus = {
     isValid: false,
     isSecurityEnabled: false,
     message: 'Invalid License',
   };
 
-  setup(
-    { pluginId, minimumLicenseType, defaultErrorMessage }: SetupSettings,
-    { licensing, logger }: { licensing: LicensingPluginSetup; logger: Logger }
-  ) {
+  constructor({
+    pluginId,
+    minimumLicenseType,
+    defaultErrorMessage,
+    licensing,
+    logger,
+    coreStart,
+  }: SetupSettings) {
+    this.coreStart = coreStart;
     licensing.license$.subscribe((license) => {
       const { state, message } = license.check(pluginId, minimumLicenseType);
       const hasRequiredLicense = state === 'valid';
@@ -74,12 +87,17 @@ export class License {
   ) {
     const license = this;
 
-    return function licenseCheck(
+    return async function licenseCheck(
       ctx: TransformRequestHandlerContext,
       request: KibanaRequest<Params, Query, Body>,
       response: KibanaResponseFactory
-    ): IKibanaResponse<any> | Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse<any>> {
       const licenseStatus = license.getStatus();
+      const executionContext = createExecutionContext(
+        license.coreStart,
+        PLUGIN.ID,
+        request.route.path
+      );
 
       if (!licenseStatus.isValid) {
         return response.customError({
@@ -90,7 +108,9 @@ export class License {
         });
       }
 
-      return handler(ctx, request, response);
+      return await license.coreStart.executionContext.withContext(executionContext, () =>
+        handler(ctx, request, response)
+      );
     };
   }
 

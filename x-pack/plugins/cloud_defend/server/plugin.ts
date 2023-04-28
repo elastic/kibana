@@ -4,8 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type { PackagePolicy, NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   CloudDefendPluginSetup,
   CloudDefendPluginStart,
@@ -15,6 +22,7 @@ import {
 import { setupRoutes } from './routes/setup_routes';
 import { isCloudDefendPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
+import { onPackagePolicyPostCreateCallback } from './lib/fleet_util';
 
 export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDefendPluginStart> {
   private readonly logger: Logger;
@@ -60,6 +68,21 @@ export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDe
         }
       );
     });
+
+    plugins.fleet.registerExternalCallback(
+      'packagePolicyPostCreate',
+      async (
+        packagePolicy: PackagePolicy,
+        soClient: SavedObjectsClientContract
+      ): Promise<PackagePolicy> => {
+        if (isCloudDefendPackage(packagePolicy.package?.name)) {
+          await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
+          return packagePolicy;
+        }
+
+        return packagePolicy;
+      }
+    );
 
     return {};
   }

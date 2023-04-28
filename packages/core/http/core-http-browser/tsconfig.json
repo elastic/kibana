@@ -12,7 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/utility-types",
-    "@kbn/core-execution-context-common"
+    "@kbn/core-execution-context-common",
+    "@kbn/core-http-common"
   ],
   "exclude": [
     "target/**/*",

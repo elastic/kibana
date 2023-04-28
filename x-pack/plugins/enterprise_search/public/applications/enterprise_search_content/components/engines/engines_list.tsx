@@ -5,12 +5,23 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 import useThrottle from 'react-use/lib/useThrottle';
 
-import { EuiButton, EuiFlexItem, EuiFieldSearch, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
@@ -20,6 +31,7 @@ import { docLinks } from '../../../shared/doc_links';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { LicensingLogic } from '../../../shared/licensing';
+import { ENGINES_PATH, ENGINE_CREATION_PATH } from '../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { LicensingCallout, LICENSING_FEATURE } from '../shared/licensing_callout/licensing_callout';
@@ -32,44 +44,88 @@ import { EngineListIndicesFlyout } from './engines_list_flyout';
 import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 import { EnginesListLogic } from './engines_list_logic';
 
-export const CreateEngineButton: React.FC<{ disabled: boolean }> = ({ disabled }) => {
-  const { openEngineCreate } = useActions(EnginesListLogic);
+interface CreateEngineButtonProps {
+  disabled: boolean;
+}
+export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled }) => {
+  const [showPopover, setShowPopover] = useState<boolean>(false);
+
   return (
-    <EuiButton
-      fill
-      iconType="plusInCircle"
-      data-test-subj="enterprise-search-content-engines-creation-button"
-      data-telemetry-id="entSearchContent-engines-list-createEngine"
-      disabled={disabled}
-      onClick={openEngineCreate}
+    <EuiPopover
+      isOpen={showPopover}
+      closePopover={() => setShowPopover(false)}
+      button={
+        <div
+          data-test-subj="create-engine-button-hover-target"
+          onMouseEnter={() => setShowPopover(true)}
+          onMouseLeave={() => setShowPopover(false)}
+          tabIndex={0}
+        >
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            data-test-subj="enterprise-search-content-engines-creation-button"
+            data-telemetry-id="entSearchContent-engines-list-createEngine"
+            isDisabled={disabled}
+            onClick={() => KibanaLogic.values.navigateToUrl(ENGINE_CREATION_PATH)}
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.searchApplications.createEngineButtonLabel',
+              {
+                defaultMessage: 'Create',
+              }
+            )}
+          </EuiButton>
+        </div>
+      }
     >
-      {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
-        defaultMessage: 'Create Search Application',
-      })}
-    </EuiButton>
+      <EuiPopoverTitle>
+        <EuiFlexGroup justifyContent="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="beaker" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.searchApplications.createEngineTechnicalPreviewPopover.title"
+              defaultMessage="Technical Preview"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverTitle>
+      <div style={{ width: '300px' }} data-test-subj="create-engine-button-popover-content">
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.searchApplications.createEngineTechnicalPreviewPopover.body"
+              defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+            />
+          </EuiText>
+        </EuiFlexGroup>
+      </div>
+    </EuiPopover>
   );
 };
+interface ListProps {
+  createEngineFlyoutOpen?: boolean;
+}
 
-export const EnginesList: React.FC = () => {
+export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => {
   const {
     closeDeleteEngineModal,
-    closeEngineCreate,
     fetchEngines,
     onPaginate,
     openDeleteEngineModal,
     setSearchQuery,
     setIsFirstRequest,
   } = useActions(EnginesListLogic);
-
   const { openFetchEngineFlyout } = useActions(EnginesListFlyoutLogic);
 
-  const { isCloud } = useValues(KibanaLogic);
+  const { isCloud, navigateToUrl } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const isGated = !isCloud && !hasPlatinumLicense;
 
   const {
-    createEngineFlyoutOpen,
     deleteModalEngineName,
     hasNoEngines,
     isDeleteModalVisible,
@@ -82,7 +138,7 @@ export const EnginesList: React.FC = () => {
   const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
 
   useEffect(() => {
-    // Don't fetch engines if we don't have a valid license
+    // Don't fetch search applications if we don't have a valid license
     if (!isGated) {
       fetchEngines();
     }
@@ -103,18 +159,18 @@ export const EnginesList: React.FC = () => {
       ) : null}
 
       <EngineListIndicesFlyout />
-      {createEngineFlyoutOpen && <CreateEngineFlyout onClose={closeEngineCreate} />}
+      {createEngineFlyoutOpen && <CreateEngineFlyout onClose={() => navigateToUrl(ENGINES_PATH)} />}
       <EnterpriseSearchEnginesPageTemplate
         pageChrome={[
-          i18n.translate('xpack.enterpriseSearch.content.engines.breadcrumb', {
+          i18n.translate('xpack.enterpriseSearch.content.searchApplications.breadcrumb', {
             defaultMessage: 'Search Applications',
           }),
         ]}
         pageHeader={{
           description: (
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.engines.description"
-              defaultMessage="Search Applications allow you to query indexed data with a complete set of relevance, analytics and personalization tools. To learn more about how engines work in Enterprise search {documentationUrl}"
+              id="xpack.enterpriseSearch.content.searchApplications.description"
+              defaultMessage="Search Applications help make your Elasticsearch data easily searchable for end users. Create, build, and manage all your search applications here. To learn more, {documentationUrl}."
               values={{
                 documentationUrl: (
                   <EuiLink
@@ -123,15 +179,18 @@ export const EnginesList: React.FC = () => {
                     target="_blank"
                     data-telemetry-id="entSearchContent-engines-documentation-viewDocumentaion"
                   >
-                    {i18n.translate('xpack.enterpriseSearch.content.engines.documentation', {
-                      defaultMessage: 'explore our Search Applications documentation',
-                    })}
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.searchApplications.documentation',
+                      {
+                        defaultMessage: 'explore our Search Applications documentation',
+                      }
+                    )}
                   </EuiLink>
                 ),
               }}
             />
           ),
-          pageTitle: i18n.translate('xpack.enterpriseSearch.content.engines.title', {
+          pageTitle: i18n.translate('xpack.enterpriseSearch.content.searchApplications.title', {
             defaultMessage: 'Search Applications',
           }),
           rightSideItems: isLoading
@@ -140,7 +199,7 @@ export const EnginesList: React.FC = () => {
             ? [<CreateEngineButton disabled={isGated} />]
             : [],
         }}
-        pageViewTelemetry="Engines"
+        pageViewTelemetry="Search Applications"
         isLoading={isLoading && !isGated}
       >
         {isGated && (
@@ -155,15 +214,15 @@ export const EnginesList: React.FC = () => {
               <EuiFieldSearch
                 value={searchQuery}
                 placeholder={i18n.translate(
-                  'xpack.enterpriseSearch.content.engines.searchPlaceholder',
+                  'xpack.enterpriseSearch.content.searchApplications.searchPlaceholder',
                   {
-                    defaultMessage: 'Search engines',
+                    defaultMessage: 'Search Applications',
                   }
                 )}
                 aria-label={i18n.translate(
-                  'xpack.enterpriseSearch.content.engines.searchBar.ariaLabel',
+                  'xpack.enterpriseSearch.content.searchApplications.searchBar.ariaLabel',
                   {
-                    defaultMessage: 'Search engines',
+                    defaultMessage: 'Search Applications',
                   }
                 )}
                 fullWidth
@@ -175,9 +234,10 @@ export const EnginesList: React.FC = () => {
             <EuiSpacer size="s" />
             <EuiText color="subdued" size="s">
               {i18n.translate(
-                'xpack.enterpriseSearch.content.engines.searchPlaceholder.description',
+                'xpack.enterpriseSearch.content.searchApplications.searchPlaceholder.description',
                 {
-                  defaultMessage: 'Locate an engine via name or by its included indices.',
+                  defaultMessage:
+                    'Locate a search application via name or by its included indices.',
                 }
               )}
             </EuiText>
@@ -185,7 +245,7 @@ export const EnginesList: React.FC = () => {
             <EuiSpacer />
             <EuiText size="s">
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.engines.enginesList.description"
+                id="xpack.enterpriseSearch.content.searchApplications.enginesList.description"
                 defaultMessage="Showing {from}-{to} of {total}"
                 values={{
                   from: (

@@ -7,7 +7,7 @@
 
 import { useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useLocalDataView } from './use_local_data_view';
 import { ExploratoryEmbeddableProps, ExploratoryViewPublicPluginsStart } from '../../../..';
 import type { DataViewState } from '../hooks/use_app_data_view';

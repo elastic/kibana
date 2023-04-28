@@ -94,6 +94,7 @@ export const DatasetComboBox: React.FC<{
         })}
         isClearable={false}
         isDisabled={isDisabled}
+        data-test-subj="datasetComboBox"
       />
       {valueAsOption && valueAsOption.value.package !== pkgName && (
         <>

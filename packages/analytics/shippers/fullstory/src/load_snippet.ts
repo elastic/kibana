@@ -36,7 +36,7 @@ export interface FullStorySnippetConfig {
 }
 
 export function loadSnippet({
-  scriptUrl = 'edge.fullstory.com/s/fs.js',
+  scriptUrl = 'https://edge.fullstory.com/s/fs.js',
   fullStoryOrgId,
   host = 'fullstory.com',
   namespace = 'FS',

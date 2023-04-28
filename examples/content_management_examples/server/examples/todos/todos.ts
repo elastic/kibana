@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { BulkGetResult } from '@kbn/content-management-plugin/common';
 import {
   ContentStorage,
   StorageContext,
@@ -39,7 +40,7 @@ export const registerTodoContentType = ({
   });
 };
 
-class TodosStorage implements ContentStorage {
+class TodosStorage implements ContentStorage<Todo> {
   private db: Map<string, Todo> = new Map();
 
   constructor() {
@@ -58,11 +59,15 @@ class TodosStorage implements ContentStorage {
   }
 
   async get(ctx: StorageContext, id: string): Promise<TodoGetOut> {
-    return this.db.get(id)!;
+    return {
+      item: this.db.get(id)!,
+    };
   }
 
-  async bulkGet(ctx: StorageContext, ids: string[]): Promise<TodoGetOut[]> {
-    return ids.map((id) => this.db.get(id)!);
+  async bulkGet(ctx: StorageContext, ids: string[]): Promise<BulkGetResult<Todo>> {
+    return {
+      hits: ids.map((id) => ({ item: this.db.get(id)! })),
+    };
   }
 
   async create(ctx: StorageContext, data: TodoCreateIn['data']): Promise<TodoCreateOut> {
@@ -74,7 +79,9 @@ class TodosStorage implements ContentStorage {
 
     this.db.set(todo.id, todo);
 
-    return todo;
+    return {
+      item: todo,
+    };
   }
 
   async update(
@@ -94,17 +101,36 @@ class TodosStorage implements ContentStorage {
 
     this.db.set(id, updatedContent);
 
-    return updatedContent;
+    return {
+      item: updatedContent,
+    };
   }
 
   async delete(ctx: StorageContext, id: string): Promise<TodoDeleteOut> {
     this.db.delete(id);
+    return { success: true };
   }
 
-  async search(ctx: StorageContext, query: TodoSearchIn['query']): Promise<TodoSearchOut> {
-    const hits = Array.from(this.db.values());
-    if (query.filter === 'todo') return { hits: hits.filter((t) => !t.completed) };
-    if (query.filter === 'completed') return { hits: hits.filter((t) => t.completed) };
-    return { hits };
+  async search(
+    ctx: StorageContext,
+    _: TodoSearchIn['query'],
+    options: TodoSearchIn['options']
+  ): Promise<TodoSearchOut> {
+    let hits = Array.from(this.db.values());
+
+    if (options?.filter === 'todo') {
+      hits = hits.filter((t) => !t.completed);
+    }
+
+    if (options?.filter === 'completed') {
+      hits = hits.filter((t) => t.completed);
+    }
+
+    return {
+      hits,
+      pagination: {
+        total: hits.length,
+      },
+    };
   }
 }

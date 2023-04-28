@@ -7,6 +7,7 @@
 
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ESQuery } from '../../../../../common/typed_json';
+import type { VisualizationResponse } from '../../../../common/components/visualization_actions/types';
 
 interface StatusBySeverity {
   doc_count_error_upper_bound: number;
@@ -51,21 +52,6 @@ export interface AlertsByStatusResponse<Hit = {}, Aggregations = {} | undefined>
   };
 }
 
-export interface VisualizationAlertsByStatusResponse<Hit = {}, Aggregations = {} | undefined> {
-  took: number;
-  _shards: {
-    total: number;
-    successful: number;
-    skipped: number;
-    failed: number;
-  };
-  aggregations?: Aggregations;
-  hits: {
-    total: number;
-    hits: Hit[];
-  };
-}
-
 export interface SeverityBuckets {
   key: Severity;
   value: number;
@@ -78,13 +64,13 @@ export type ParsedAlertsData = Partial<
 export type AlertsByStatus = 'open' | 'acknowledged' | 'closed';
 
 export interface VisualizationAlertsByStatusData {
-  responses: VisualizationAlertsByStatusResponse[];
+  responses: VisualizationResponse[];
   requests: ESQuery[];
   isLoading: boolean;
 }
 export interface VisualizationInspectQuery {
   dsl: ESQuery[];
-  response: VisualizationAlertsByStatusResponse[];
+  response: VisualizationResponse[];
 }
 
 export const DETECTION_RESPONSE_ALERTS_BY_STATUS_ID = 'detection-response-alerts-by-status';

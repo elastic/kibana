@@ -50,31 +50,34 @@ export class ProfilingPlugin implements Plugin {
     const kuerySubject = new BehaviorSubject<string>('');
 
     const section$ = combineLatest([from(coreSetup.getStartServices()), kuerySubject]).pipe(
-      map(([_, kuery]) => {
-        const sections: NavigationSection[] = [
-          {
-            label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
-              defaultMessage: 'Universal Profiling',
-            }),
-            isBetaFeature: true,
-            entries: links.map((link) => {
-              return {
-                app: 'profiling',
-                label: link.title,
-                path: `${link.path}?kuery=${kuery ?? ''}`,
-                matchPath: (path) => {
-                  return path.startsWith(link.path);
-                },
-              };
-            }),
-            sortKey: 700,
-          },
-        ];
-        return sections;
+      map(([[coreStart], kuery]) => {
+        if (coreStart.application.capabilities.profiling.show) {
+          const sections: NavigationSection[] = [
+            {
+              label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
+                defaultMessage: 'Universal Profiling',
+              }),
+              isBetaFeature: true,
+              entries: links.map((link) => {
+                return {
+                  app: 'profiling',
+                  label: link.title,
+                  path: `${link.path}?kuery=${kuery ?? ''}`,
+                  matchPath: (path) => {
+                    return path.startsWith(link.path);
+                  },
+                };
+              }),
+              sortKey: 700,
+            },
+          ];
+          return sections;
+        }
+        return [];
       })
     );
 
-    pluginsSetup.observability.navigation.registerSections(section$);
+    pluginsSetup.observabilityShared.navigation.registerSections(section$);
 
     coreSetup.application.register({
       id: 'profiling',

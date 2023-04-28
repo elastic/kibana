@@ -163,7 +163,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // edit and save dashboard
         await PageObjects.dashboard.gotoDashboardEditMode('dashboard 4 with real data (tag-1)');
         await PageObjects.dashboard.openSettingsFlyout();
-        await dashboardSettings.toggleUseMarginsBetweenPanels(false); // turn margins off to cause quicksave to be enabled
+        await dashboardSettings.setCustomPanelDescription('this should trigger unsaved changes'); // change description to cause quicksave to be enabled
         await dashboardSettings.clickApplyButton();
         await PageObjects.dashboard.clickQuickSave();
 

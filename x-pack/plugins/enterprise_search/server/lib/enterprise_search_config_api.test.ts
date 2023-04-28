@@ -72,7 +72,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
       name: 'someuser',
       access: {
         app_search: true,
-        search_engines: true,
         workplace_search: false,
       },
       app_search: {
@@ -126,12 +125,10 @@ describe('callEnterpriseSearchConfigAPI', () => {
       kibanaVersion: '1.0.0',
       access: {
         hasAppSearchAccess: true,
-        hasSearchEnginesAccess: true,
         hasWorkplaceSearchAccess: false,
       },
       features: {
         hasNativeConnectors: true,
-        hasSearchApplications: true,
         hasWebCrawler: true,
       },
       publicUrl: 'http://some.vanity.url',
@@ -145,12 +142,10 @@ describe('callEnterpriseSearchConfigAPI', () => {
       kibanaVersion: '1.0.0',
       access: {
         hasAppSearchAccess: false,
-        hasSearchEnginesAccess: false,
         hasWorkplaceSearchAccess: false,
       },
       features: {
         hasNativeConnectors: true,
-        hasSearchApplications: false,
         hasWebCrawler: true,
       },
       publicUrl: undefined,
@@ -210,7 +205,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
       hasConnectors: false,
       hasDefaultIngestPipeline: false,
       hasNativeConnectors: false,
-      hasSearchApplications: false,
       hasWebCrawler: false,
       host: '',
     };
@@ -218,14 +212,12 @@ describe('callEnterpriseSearchConfigAPI', () => {
     expect(await callEnterpriseSearchConfigAPI({ ...mockDependencies, config })).toEqual({
       access: {
         hasAppSearchAccess: false,
-        hasSearchEnginesAccess: false,
         hasWorkplaceSearchAccess: false,
       },
       features: {
         hasConnectors: false,
         hasDefaultIngestPipeline: false,
         hasNativeConnectors: false,
-        hasSearchApplications: false,
         hasWebCrawler: false,
       },
       kibanaVersion: '1.0.0',

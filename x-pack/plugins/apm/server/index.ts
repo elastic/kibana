@@ -53,6 +53,10 @@ const configSchema = schema.object({
     onboarding: schema.string({ defaultValue: 'apm-*' }),
   }),
   forceSyntheticSource: schema.boolean({ defaultValue: false }),
+  latestAgentVersionsUrl: schema.string({
+    defaultValue: 'https://apm-agent-versions.elastic.co/versions.json',
+  }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 // plugin config
@@ -110,6 +114,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
   exposeToBrowser: {
     serviceMapEnabled: true,
     ui: true,
+    latestAgentVersionsUrl: true,
   },
   schema: configSchema,
 };
