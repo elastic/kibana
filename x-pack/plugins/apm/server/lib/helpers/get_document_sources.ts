@@ -183,10 +183,6 @@ export async function getDocumentSources({
     .filter((source) => !source.checkSummaryExistsField)
     .some((source) => source.hasDataBefore);
 
-  const hasAnySummaryDataBefore = checkedSources
-    .filter((source) => source.checkSummaryExistsField)
-    .some((source) => source.hasDataBefore);
-
   const sources: TimeRangeMetadata['sources'] = [];
 
   checkedSources.forEach((source) => {
@@ -233,7 +229,7 @@ export async function getDocumentSources({
           documentType,
           rollupInterval,
           hasDocs: hasDocsData,
-          isSummaryFieldAvailable: hasAnySummaryDataBefore
+          isSummaryFieldAvailable: hasAnyDataBefore
             ? equivalentSourceWithSummary.hasDataBefore
             : hasSummaryData,
         });

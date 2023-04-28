@@ -8,10 +8,16 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { omit, sortBy } from 'lodash';
-import moment, { Moment } from 'moment';
+import moment, { Moment } from 'moment-timezone';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import {
+  getTransactionEvents,
+  subtractDateDifference,
+  overwriteSynthEsClientPipeline,
+  deleteSummaryFieldTransform,
+} from './generate_data';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -70,6 +76,70 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ]);
     });
   });
+
+  registry.when(
+    'Time range metadata when generating summary data',
+    { config: 'basic', archives: [] },
+    () => {
+      describe('data loaded with and without summary field', () => {
+        const localStart = moment('2023-04-28T00:00:00.000Z');
+        const localEnd = moment('2023-04-28T06:00:00.000Z');
+        before(async () => {
+          const regularData = getTransactionEvents(localStart, localEnd);
+          await synthtraceEsClient.index([...regularData]);
+          const { previousStart, previousEnd } = subtractDateDifference(localStart, localEnd);
+          const previousDataWithoutSummaryField = getTransactionEvents(previousStart, previousEnd);
+          synthtraceEsClient.pipeline(
+            overwriteSynthEsClientPipeline({
+              synthtraceEsClient,
+              reset: false,
+              additionalTransform: deleteSummaryFieldTransform,
+            })
+          );
+          await synthtraceEsClient.index([...previousDataWithoutSummaryField]);
+        });
+        after(() => {
+          synthtraceEsClient.clean();
+          synthtraceEsClient.pipeline(
+            overwriteSynthEsClientPipeline({
+              synthtraceEsClient,
+              reset: true,
+            })
+          );
+        });
+        describe('Values for isSummaryFieldAvailable for transaction metrics', () => {
+          it('returns true when summary field is available both inside and outside the range', async () => {
+            const response = await getTimeRangeMedata({
+              start: moment(localStart).add(3, 'hours'),
+              end: moment(localEnd),
+            });
+
+            expect(
+              response.sources.filter(
+                (source) =>
+                  source.documentType === ApmDocumentType.TransactionMetric &&
+                  source.isSummaryFieldAvailable === true
+              ).length
+            ).to.eql(3);
+          });
+          it('returns true when summary field is available inside but not outside the range', async () => {
+            const response = await getTimeRangeMedata({
+              start: moment(localStart).subtract(30, 'minutes'),
+              end: moment(localEnd),
+            });
+
+            expect(
+              response.sources.filter(
+                (source) =>
+                  source.documentType === ApmDocumentType.TransactionMetric &&
+                  source.isSummaryFieldAvailable === false
+              ).length
+            ).to.eql(3);
+          });
+        });
+      });
+    }
+  );
 
   registry.when(
     'Time range metadata when generating data',
