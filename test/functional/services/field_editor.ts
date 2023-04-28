@@ -49,6 +49,7 @@ export class FieldEditorService extends FtrService {
   }
   public async save() {
     await this.testSubjects.click('fieldSaveButton');
+    await this.testSubjects.waitForDeleted('fieldEditor');
   }
 
   async setUrlFieldFormat(template: string) {
