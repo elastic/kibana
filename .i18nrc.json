@@ -108,6 +108,7 @@
     "visTypeVislib": "src/plugins/vis_types/vislib",
     "visTypeXy": "src/plugins/vis_types/xy",
     "visualizations": "src/plugins/visualizations",
+    "visualizationUiComponents": "src/plugins/visualization_ui_components",
     "unifiedSearch": "src/plugins/unified_search",
     "unifiedFieldList": "src/plugins/unified_field_list",
     "unifiedHistogram": "src/plugins/unified_histogram"

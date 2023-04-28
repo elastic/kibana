@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common } = getPageObjects(['common']);
 
   // Failing: See https://github.com/elastic/kibana/issues/155166
+  // Failing: See https://github.com/elastic/kibana/issues/155166
   describe.skip('Event "viewport_resize"', () => {
     beforeEach(async () => {
       // Navigating to `home` with the Welcome prompt because some runs were flaky
