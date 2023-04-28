@@ -322,6 +322,11 @@ export const useDiscoverHistogram = ({
   };
 };
 
+// Use pairwise to diff the previous and current state (starting with undefined to ensure
+// pairwise triggers after a single emission), and return an object containing only the
+// changed properties. By only including the changed properties, we avoid accidentally
+// overwriting other state properties that may have been updated between the time this
+// obersverable was triggered and the time the state changes are applied.
 const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistogramState>) => {
   return state$?.pipe(
     startWith(undefined),
