@@ -43,6 +43,12 @@ const previewStateDefault: PreviewState = {
   previewResponse: { fields: [], error: null },
   isFetchingDocument: false,
   fetchDocError: null,
+  customDocIdToLoad: null,
+  lastExecutePainlessRequestParams: {
+    type: null,
+    script: undefined,
+    documentId: undefined,
+  },
 };
 
 export class PreviewController {
@@ -132,6 +138,10 @@ export class PreviewController {
     this.updateState({ previewResponse });
   };
 
+  setCustomDocIdToLoad = (customDocIdToLoad: string | null) => {
+    this.updateState({ customDocIdToLoad });
+  };
+
   clearPreviewError = (errorCode: ScriptErrorCodes) => {
     const { previewResponse: prev } = this.internalState$.getValue();
     const error = prev.error === null || prev.error?.code === errorCode ? null : prev.error;
@@ -149,6 +159,18 @@ export class PreviewController {
 
   setFetchDocError = (fetchDocError: FetchDocError | null) => {
     this.updateState({ fetchDocError });
+  };
+
+  setLastExecutePainlessRequestParams = (
+    lastExecutePainlessRequestParams: Partial<PreviewState['lastExecutePainlessRequestParams']>
+  ) => {
+    const currentValue = this.internalState$.getValue().lastExecutePainlessRequestParams;
+    this.updateState({
+      lastExecutePainlessRequestParams: {
+        ...currentValue,
+        ...lastExecutePainlessRequestParams,
+      },
+    });
   };
 
   valueFormatter = ({
@@ -178,14 +200,13 @@ export class PreviewController {
     return defaultValueFormatter(value);
   };
 
-  /*
   fetchSampleDocuments = async (limit: number = 50) => {
     if (typeof limit !== 'number') {
       // We guard ourself from passing an <input /> event accidentally
       throw new Error('The "limit" option must be a number');
     }
 
-    lastExecutePainlessRequestParams.current.documentId = undefined;
+    this.setLastExecutePainlessRequestParams({ documentId: undefined });
     this.setIsFetchingDocument(true);
     this.setPreviewResponse({ fields: [], error: null });
 
@@ -204,7 +225,7 @@ export class PreviewController {
       .catch((err) => [null, err]);
 
     this.setIsFetchingDocument(false);
-    setCustomDocIdToLoad(null);
+    this.setCustomDocIdToLoad(null);
 
     const error: FetchDocError | null = Boolean(searchError)
       ? {
@@ -227,5 +248,4 @@ export class PreviewController {
       this.setDocuments(response ? response.rawResponse.hits.hits : []);
     }
   };
-  */
 }

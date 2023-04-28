@@ -75,6 +75,9 @@ const documentsSelector = (state: PreviewState) => {
 
 const isFetchingDocumentSelector = (state: PreviewState) => state.isFetchingDocument;
 const fetchDocErrorSelector = (state: PreviewState) => state.fetchDocError;
+const customDocIdToLoadSelector = (state: PreviewState) => state.customDocIdToLoad;
+const lastExecutePainlessRequestParamsSelector = (state: PreviewState) =>
+  state.lastExecutePainlessRequestParams;
 
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
   controller,
@@ -84,6 +87,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
   // We keep in cache the latest params sent to the _execute API so we don't make unecessary requests
   // when changing parameters that don't affect the preview result (e.g. changing the "name" field).
+  /*
   const lastExecutePainlessRequestParams = useRef<{
     type: Params['type'];
     script: string | undefined;
@@ -93,6 +97,11 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     script: undefined,
     documentId: undefined,
   });
+  */
+  const lastExecutePainlessRequestParams = useStateSelector(
+    controller.state$,
+    lastExecutePainlessRequestParamsSelector
+  );
 
   const {
     dataView,
@@ -129,7 +138,8 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
   /** Flag to indicate if we are loading a single document by providing its ID */
-  const [customDocIdToLoad, setCustomDocIdToLoad] = useState<string | null>(null);
+  // const [customDocIdToLoad, setCustomDocIdToLoad] = useState<string | null>(null);
+  const customDocIdToLoad = useStateSelector(controller.state$, customDocIdToLoadSelector);
 
   const { currentDocument, currentDocIndex, currentDocId, totalDocs, currentIdx } =
     useStateSelector(controller.state$, documentsSelector);
@@ -160,11 +170,11 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
   const hasSomeParamsChanged = useMemo(() => {
     return (
-      lastExecutePainlessRequestParams.current.type !== type ||
-      lastExecutePainlessRequestParams.current.script !== script?.source ||
-      lastExecutePainlessRequestParams.current.documentId !== currentDocId
+      lastExecutePainlessRequestParams.type !== type ||
+      lastExecutePainlessRequestParams.script !== script?.source ||
+      lastExecutePainlessRequestParams.documentId !== currentDocId
     );
-  }, [type, script, currentDocId]);
+  }, [type, script, currentDocId, lastExecutePainlessRequestParams]);
 
   const fetchSampleDocuments = useCallback(
     async (limit: number = 50) => {
@@ -173,7 +183,8 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         throw new Error('The "limit" option must be a number');
       }
 
-      lastExecutePainlessRequestParams.current.documentId = undefined;
+      // lastExecutePainlessRequestParams.current.documentId = undefined;
+      controller.setLastExecutePainlessRequestParams({ documentId: undefined });
       controller.setIsFetchingDocument(true);
       controller.setPreviewResponse({ fields: [], error: null });
 
@@ -192,7 +203,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         .catch((err) => [null, err]);
 
       controller.setIsFetchingDocument(false);
-      setCustomDocIdToLoad(null);
+      controller.setCustomDocIdToLoad(null);
 
       const error: FetchDocError | null = Boolean(searchError)
         ? {
@@ -224,7 +235,8 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         return;
       }
 
-      lastExecutePainlessRequestParams.current.documentId = undefined;
+      // lastExecutePainlessRequestParams.current.documentId = undefined;
+      controller.setLastExecutePainlessRequestParams({ documentId: undefined });
       controller.setIsFetchingDocument(true);
 
       const [response, searchError] = await search
@@ -355,11 +367,18 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       return;
     }
 
+    /*
     lastExecutePainlessRequestParams.current = {
       type,
       script: script?.source,
       documentId: currentDocId,
     };
+    */
+    controller.setLastExecutePainlessRequestParams({
+      type,
+      script: script?.source,
+      documentId: currentDocId,
+    });
 
     const currentApiCall = ++previewCount.current;
 
@@ -458,7 +477,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         update: updateParams,
       },
       documents: {
-        loadSingle: setCustomDocIdToLoad,
+        loadSingle: (id: string) => controller.setCustomDocIdToLoad(id),
         loadFromCluster: fetchSampleDocuments,
         fetchDocError,
       },
@@ -599,7 +618,8 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     if (script?.source === undefined) {
       // Whenever the source is not defined ("Set value" is toggled off or the
       // script is empty) we clear the error and update the params cache.
-      lastExecutePainlessRequestParams.current.script = undefined;
+      // lastExecutePainlessRequestParams.current.script = undefined;
+      controller.setLastExecutePainlessRequestParams({ script: undefined });
       controller.setPreviewError(null);
     }
   }, [script?.source, controller]);
@@ -633,7 +653,8 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
       // Make sure to update the lastExecutePainlessRequestParams cache so when the user updates
       // the script and fixes the syntax the "updatePreview()" will run
-      lastExecutePainlessRequestParams.current.script = script?.source;
+      // lastExecutePainlessRequestParams.current.script = script?.source;
+      controller.setLastExecutePainlessRequestParams({ script: script?.source });
     } else {
       // Clear possible previous syntax error
       controller.clearPreviewError('PAINLESS_SYNTAX_ERROR');
