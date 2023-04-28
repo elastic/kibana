@@ -260,6 +260,23 @@ describe('fieldStatsUtils', function () {
           "totalDocuments": 6460,
         }
       `);
+
+      expect(searchMock).toHaveBeenCalledWith({
+        aggs: {
+          sample: {
+            sampler: { shard_size: 5000 },
+            aggs: {
+              min_max_summary: {
+                filter: { exists: { field: 'bytes_counter' } },
+                aggs: {
+                  min: { min: { field: 'bytes_counter' } },
+                  max: { max: { field: 'bytes_counter' } },
+                },
+              },
+            },
+          },
+        },
+      });
     });
 
     it('should provide data for rendering top values and value distribution for a number field', async () => {
@@ -453,6 +470,29 @@ describe('fieldStatsUtils', function () {
           "totalDocuments": 2,
         }
       `);
+
+      expect(searchMock).toHaveBeenNthCalledWith(1, {
+        aggs: {
+          sample: {
+            sampler: { shard_size: 5000 },
+            aggs: {
+              min_value: { min: { field: 'bytes' } },
+              max_value: { max: { field: 'bytes' } },
+              sample_count: { value_count: { field: 'bytes' } },
+              top_values: { terms: { field: 'bytes', size: 10 } },
+            },
+          },
+        },
+      });
+
+      expect(searchMock).toHaveBeenNthCalledWith(2, {
+        aggs: {
+          sample: {
+            sampler: { shard_size: 5000 },
+            aggs: { histo: { histogram: { field: 'bytes', interval: 324 } } },
+          },
+        },
+      });
     });
 
     it('should provide data for string top values', async () => {
@@ -545,6 +585,18 @@ describe('fieldStatsUtils', function () {
           "totalDocuments": 75026,
         }
       `);
+
+      expect(searchMock).toHaveBeenCalledWith({
+        aggs: {
+          sample: {
+            sampler: { shard_size: 5000 },
+            aggs: {
+              sample_count: { value_count: { field: 'extension.keyword' } },
+              top_values: { terms: { field: 'extension.keyword', size: 10, shard_size: 25 } },
+            },
+          },
+        },
+      });
     });
 
     it('should provide examples for a non-aggregatable field', async () => {
@@ -608,6 +660,8 @@ describe('fieldStatsUtils', function () {
           "totalDocuments": 2,
         }
       `);
+
+      expect(searchMock).toHaveBeenCalledWith({ size: 100, fields: [{ field: '_id' }] });
     });
   });
 });
