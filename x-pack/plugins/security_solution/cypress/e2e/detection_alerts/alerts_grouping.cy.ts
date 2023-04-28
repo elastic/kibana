@@ -5,68 +5,106 @@
  * 2.0.
  */
 
-import { selectGroup } from '../../tasks/alerts_grouping';
+import { refreshPage } from '../../tasks/security_header';
+import {
+  getGroupLevel,
+  openGroup,
+  scrollGroupsIntoView,
+  selectGroup,
+} from '../../tasks/alerts_grouping';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { importRule } from '../../tasks/api_calls/rules';
 import {
   expectRowsPerPage,
-  expectTablePage,
+  expectTablePageActive,
   goToTablePage,
-  setRowsPerPageTo,
+  setWithinRowsPerPageTo,
 } from '../../tasks/table_pagination';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { GROUP_SELECTOR } from '../../screens/alerts';
-import { ALERT_TABLE_ACTIONS_HEADER } from '../../screens/timeline';
+import { GROUP_LEVEL_SELECTOR } from '../../screens/alerts';
 
-import { scrollAlertTableColumnIntoView } from '../../tasks/alerts';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
-import { removeKqlFilter } from '../../tasks/search_bar';
 
 import { ALERTS_URL } from '../../urls/navigation';
 describe('Alerts grouping', { testIsolation: false }, () => {
-  before(() => {
-    cleanKibana();
-    esArchiverLoad('auditbeat_bigger');
-    login();
-    importRule('grouping_rules.ndjson');
-    visit(ALERTS_URL);
-    waitForAlertsToPopulate();
-  });
-  after(() => {
-    esArchiverUnload('auditbeat_bigger');
-  });
-
+  // for (let i = 0; i < 100; i++) {
   describe('Filter', () => {
+    before(() => {
+      cleanKibana();
+      esArchiverLoad('auditbeat_bigger');
+      login();
+      importRule('grouping_rules.ndjson');
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
+    });
+    after(() => {
+      esArchiverUnload('auditbeat_bigger');
+    });
     afterEach(() => {
-      removeKqlFilter();
-      scrollAlertTableColumnIntoView(ALERT_TABLE_ACTIONS_HEADER);
+      refreshPage();
+      scrollGroupsIntoView();
     });
 
-    it.only('should reset pagination when selected group changes', () => {
+    it('should reset all pagination levels when selected group changes', () => {
       selectGroup('kibana.alert.rule.name');
-
-      expectRowsPerPage(25);
-      setRowsPerPageTo(10);
-      expectRowsPerPage(10);
-      goToTablePage(2);
-      expectTablePage(2);
+      getGroupLevel(0, () => {
+        expectRowsPerPage(25);
+      });
+      setWithinRowsPerPageTo(GROUP_LEVEL_SELECTOR(0), 10);
+      getGroupLevel(0, () => {
+        expectRowsPerPage(10);
+      });
       selectGroup('host.name');
-      expectTablePage(1);
-      cy.wait(100000);
+      getGroupLevel(0, () => {
+        expectTablePageActive(1);
+        goToTablePage(2);
+        expectTablePageActive(2);
+      });
+      openGroup('first');
+      getGroupLevel(1, () => {
+        expectRowsPerPage(25);
+      });
+      setWithinRowsPerPageTo(GROUP_LEVEL_SELECTOR(1), 10);
+      getGroupLevel(1, () => {
+        expectRowsPerPage(10);
+      });
+      getGroupLevel(1, () => {
+        expectTablePageActive(1);
+        goToTablePage(2);
+        expectTablePageActive(2);
+      });
+      selectGroup('user.name');
+      getGroupLevel(0, () => {
+        expectTablePageActive(1);
+      });
+      getGroupLevel(1, () => {
+        expectTablePageActive(1);
+      });
     });
 
-    it('should reset pagination when ', () => {
-      cy.get(GROUP_SELECTOR).click();
-      selectGroup('kibana.alert.rule.name');
-      expectRowsPerPage(25);
-      setRowsPerPageTo(10);
-      expectRowsPerPage(10);
-      goToTablePage(2);
-      expectTablePage(2);
-      selectGroup('host.name');
-      expectTablePage(1);
-      cy.wait(100000);
+    it('should reset inner pagination only when a new group opens', () => {
+      // set level 0 page to 2
+      getGroupLevel(0, () => {
+        goToTablePage(2);
+      });
+      // open level 1 group
+      openGroup('first');
+      // set level 1 page to 2
+      getGroupLevel(1, () => {
+        goToTablePage(2);
+      });
+      // open different level 1 group
+      openGroup('last');
+      // level 1 page should be 1
+      getGroupLevel(1, () => {
+        expectTablePageActive(1);
+      });
+      // level 0 page should be 2
+      getGroupLevel(0, () => {
+        expectTablePageActive(2);
+      });
     });
   });
+  // }
 });
