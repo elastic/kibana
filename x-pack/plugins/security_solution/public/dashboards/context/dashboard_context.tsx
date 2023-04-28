@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import type { Tag } from '@kbn/saved-objects-tagging-plugin/common';
-import { getSecurityTagIds } from '../../common/containers/dashboards/utils';
-import { useKibana } from '../../common/lib/kibana';
+import { useFetchSecurityTags } from '../containers/use_fetch_security_tags';
 
 export interface DashboardContextType {
   securityTags: Tag[] | null;
@@ -17,23 +16,14 @@ export interface DashboardContextType {
 const DashboardContext = React.createContext<DashboardContextType | null>({ securityTags: null });
 
 export const DashboardContextProvider: React.FC = ({ children }) => {
-  const { http } = useKibana().services;
-  const [securityTags, setSecurityTags] = useState<Tag[] | null>(null);
+  const { tags, isLoading } = useFetchSecurityTags();
 
-  useEffect(() => {
-    let ignore = false;
-    (async () => {
-      if (http) {
-        const tags = await getSecurityTagIds(http);
-        if (!ignore) {
-          setSecurityTags(tags);
-        }
-      }
-    })();
-    return () => {
-      ignore = true;
-    };
-  }, [http]);
+  const securityTags = useMemo(() => {
+    if (isLoading || !tags) {
+      return null;
+    }
+    return tags;
+  }, [tags, isLoading]);
 
   return <DashboardContext.Provider value={{ securityTags }}>{children}</DashboardContext.Provider>;
 };

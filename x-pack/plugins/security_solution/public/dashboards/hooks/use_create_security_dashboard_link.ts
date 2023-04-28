@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { useSecurityTags } from '../../../dashboards/context/dashboard_context';
-import { useKibana } from '../../lib/kibana';
+import { useSecurityTags } from '../context/dashboard_context';
+import { useKibana } from '../../common/lib/kibana';
 
 type UseCreateDashboard = () => { isLoading: boolean; url: string };
 

@@ -7,8 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { useKibana } from '../../lib/kibana';
-import { TestProviders } from '../../mock/test_providers';
+import { useKibana } from '../../common/lib/kibana';
+import { TestProviders } from '../../common/mock/test_providers';
 import { useCreateSecurityDashboardLink } from './use_create_security_dashboard_link';
 import { MOCK_TAG_ID } from './api/__mocks__';
 import { getSecurityTagIds as mockGetSecurityTagIds } from './utils';

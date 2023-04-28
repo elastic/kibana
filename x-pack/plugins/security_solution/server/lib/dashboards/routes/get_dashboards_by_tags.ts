@@ -20,7 +20,7 @@ const getDashboardsParamsSchema = schema.object({
   tagIds: schema.arrayOf(schema.string()),
 });
 
-export const getSecuritySolutionDashboardsRoute = (
+export const getDashboardsByTagsRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
   security: SetupPlugins['security']

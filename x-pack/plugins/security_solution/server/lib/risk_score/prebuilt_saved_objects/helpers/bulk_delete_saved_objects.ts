@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import * as savedObjectsToCreate from '../saved_object';
 import type { SavedObjectTemplate } from '../types';
-import { findRiskScoreTag, findSavedObjectsWithTagReference } from './find_or_create_tag';
+import { findRiskScoreTag, findSavedObjectsWithTagReference } from './create_risk_score_tag';
 import { RISK_SCORE_REPLACE_ID_MAPPINGS, getRiskScoreTagName } from './utils';
 
 const deleteSavedObject = async ({

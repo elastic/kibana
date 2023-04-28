@@ -10,16 +10,16 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { render } from '@testing-library/react';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EuiBasicTable } from '@elastic/eui';
-import { useKibana } from '../../lib/kibana';
-import { TestProviders } from '../../mock/test_providers';
+import { useKibana } from '../../common/lib/kibana';
+import { TestProviders } from '../../common/mock/test_providers';
 import {
   useSecurityDashboardsTableColumns,
   useSecurityDashboardsTableItems,
 } from './use_security_dashboards_table';
-import * as telemetry from '../../lib/telemetry';
-import { SecurityPageName } from '../../../../common/constants';
-import * as linkTo from '../../components/link_to';
-import type { DashboardTableItem } from './types';
+import * as telemetry from '../../common/lib/telemetry';
+import { SecurityPageName } from '../../../common/constants';
+import * as linkTo from '../../common/components/link_to';
+import type { DashboardTableItem } from '../types';
 
 jest.mock('../../lib/kibana');
 

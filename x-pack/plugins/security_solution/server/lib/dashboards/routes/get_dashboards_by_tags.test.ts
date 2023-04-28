@@ -14,9 +14,9 @@ import {
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
 import { mockGetDashboardsResult } from '../__mocks__';
-import { getSecuritySolutionDashboardsRoute } from './get_security_solution_dashboards';
+import { getDashboardsByTagsRoute } from './get_dashboards_by_tags';
 
-describe('getSecuritySolutionDashboardsRoute', () => {
+describe('getDashboardsByTagsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let securitySetup: SecurityPluginSetup;
   const { context } = requestContextMock.createTools();
@@ -43,7 +43,7 @@ describe('getSecuritySolutionDashboardsRoute', () => {
       authz: {},
     } as unknown as SecurityPluginSetup;
 
-    getSecuritySolutionDashboardsRoute(server.router, logger, securitySetup);
+    getDashboardsByTagsRoute(server.router, logger, securitySetup);
   });
 
   it('should return dashboards with Security Solution tags', async () => {

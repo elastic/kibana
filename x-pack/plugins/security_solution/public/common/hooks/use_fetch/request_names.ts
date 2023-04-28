@@ -8,6 +8,8 @@ import { APP_UI_ID } from '../../../../common/constants';
 
 export const REQUEST_NAMES = {
   SECURITY_DASHBOARDS: `${APP_UI_ID} fetch security dashboards`,
+  SECURITY_TAGS: `${APP_UI_ID} fetch security tags`,
+  CTI_TAGS: `${APP_UI_ID} fetch cti tags`,
   ANOMALIES_TABLE: `${APP_UI_ID} fetch anomalies table data`,
   GET_RISK_SCORE_DEPRECATED: `${APP_UI_ID} fetch is risk score deprecated`,
   ENABLE_RISK_SCORE: `${APP_UI_ID} fetch enable risk score`,

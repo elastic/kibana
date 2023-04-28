@@ -11,8 +11,8 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 
 import { useDispatch } from 'react-redux';
-import { InputsModelId } from '../../store/inputs/constants';
-import { inputsActions } from '../../store/inputs';
+import { InputsModelId } from '../../common/store/inputs/constants';
+import { inputsActions } from '../../common/store/inputs';
 
 const DashboardRendererComponent = ({
   canReadDashboard,
