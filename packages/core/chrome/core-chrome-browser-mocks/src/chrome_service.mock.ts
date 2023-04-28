@@ -63,6 +63,10 @@ const createStartContractMock = () => {
     getBodyClasses$: jest.fn(),
     getChromeStyle$: jest.fn(),
     setChromeStyle: jest.fn(),
+    project: {
+      setNavigation: jest.fn(),
+      setNavigationComponent: jest.fn(),
+    },
   };
   startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
