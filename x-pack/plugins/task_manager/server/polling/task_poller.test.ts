@@ -16,7 +16,7 @@ describe('TaskPoller', () => {
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
-    clock = sinon.useFakeTimers({ toFake: ['Date', 'setTimeout'] });
+    clock = sinon.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
   });
 
   afterEach(() => clock.restore());
@@ -257,6 +257,78 @@ describe('TaskPoller', () => {
     await new Promise((resolve) => setImmediate(resolve));
 
     expect(handler).toHaveBeenCalledWith(asOk(3));
+  });
+
+  test(`doesn't start polling until start is called`, async () => {
+    const pollInterval = 100;
+
+    const work = jest.fn(async () => true);
+    const taskPoller = createTaskPoller<void, boolean>({
+      initialPollInterval: pollInterval,
+      logger: loggingSystemMock.create().get(),
+      pollInterval$: of(pollInterval),
+      pollIntervalDelay$: of(0),
+      getCapacity: () => 1,
+      work,
+    });
+
+    expect(work).toHaveBeenCalledTimes(0);
+
+    clock.tick(pollInterval);
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(work).toHaveBeenCalledTimes(0);
+
+    clock.tick(pollInterval);
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(work).toHaveBeenCalledTimes(0);
+
+    // Start the poller here
+    taskPoller.start();
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(work).toHaveBeenCalledTimes(1);
+
+    clock.tick(pollInterval);
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(work).toHaveBeenCalledTimes(2);
+  });
+
+  test(`stops polling after stop is called`, async () => {
+    const pollInterval = 100;
+
+    const work = jest.fn(async () => true);
+    const taskPoller = createTaskPoller<void, boolean>({
+      initialPollInterval: pollInterval,
+      logger: loggingSystemMock.create().get(),
+      pollInterval$: of(pollInterval),
+      pollIntervalDelay$: of(0),
+      getCapacity: () => 1,
+      work,
+    });
+
+    taskPoller.start();
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(work).toHaveBeenCalledTimes(1);
+
+    clock.tick(pollInterval);
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(work).toHaveBeenCalledTimes(2);
+
+    clock.tick(pollInterval);
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(work).toHaveBeenCalledTimes(3);
+
+    // Stop the poller here
+    taskPoller.stop();
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(work).toHaveBeenCalledTimes(3);
+
+    clock.tick(pollInterval);
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(work).toHaveBeenCalledTimes(3);
+
+    clock.tick(pollInterval);
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(work).toHaveBeenCalledTimes(3);
   });
 });
 
