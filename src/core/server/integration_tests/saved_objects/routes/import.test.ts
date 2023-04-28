@@ -46,12 +46,14 @@ describe(`POST ${URL}`, () => {
     id: 'my-pattern',
     attributes: { title: 'my-pattern-*' },
     references: [],
+    managed: false,
   };
   const mockDashboard = {
     type: 'dashboard',
     id: 'my-dashboard',
     attributes: { title: 'Look at my dashboard' },
     references: [],
+    managed: false,
   };
 
   beforeEach(async () => {
@@ -145,6 +147,7 @@ describe(`POST ${URL}`, () => {
           type: 'index-pattern',
           id: 'my-pattern',
           meta: { title: 'my-pattern-*', icon: 'index-pattern-icon' },
+          managed: false,
         },
       ],
       warnings: [],
@@ -156,11 +159,49 @@ describe(`POST ${URL}`, () => {
     );
   });
 
-  it('imports an index pattern and dashboard, ignoring empty lines in the file', async () => {
+  it('returns the default for managed as part of the successResults', async () => {
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
+
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
+      .send(
+        [
+          '--EXAMPLE',
+          'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+          'Content-Type: application/ndjson',
+          '',
+          '{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}',
+          '--EXAMPLE--',
+        ].join('\r\n')
+      )
+      .expect(200);
+
+    expect(result.body).toEqual({
+      success: true,
+      successCount: 1,
+      successResults: [
+        {
+          type: 'index-pattern',
+          id: 'my-pattern',
+          meta: { title: 'my-pattern-*', icon: 'index-pattern-icon' },
+          managed: false,
+        },
+      ],
+      warnings: [],
+    });
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [expect.objectContaining({ typeMigrationVersion: '', managed: false })],
+      expect.any(Object) // options
+    );
+  });
+
+  it('imports an index pattern, dashboard and visualization, ignoring empty lines in the file', async () => {
     // NOTE: changes to this scenario should be reflected in the docs
 
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
-      saved_objects: [mockIndexPattern, mockDashboard],
+      saved_objects: [mockIndexPattern, { ...mockDashboard, managed: false }],
     });
 
     const result = await supertest(httpSetup.server.listener)
@@ -190,11 +231,13 @@ describe(`POST ${URL}`, () => {
           type: mockIndexPattern.type,
           id: mockIndexPattern.id,
           meta: { title: mockIndexPattern.attributes.title, icon: 'index-pattern-icon' },
+          managed: false,
         },
         {
           type: mockDashboard.type,
           id: mockDashboard.id,
           meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
+          managed: false,
         },
       ],
       warnings: [],
@@ -235,6 +278,7 @@ describe(`POST ${URL}`, () => {
           type: mockDashboard.type,
           id: mockDashboard.id,
           meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
+          managed: false,
         },
       ],
       errors: [
@@ -287,11 +331,13 @@ describe(`POST ${URL}`, () => {
           id: mockIndexPattern.id,
           meta: { title: mockIndexPattern.attributes.title, icon: 'index-pattern-icon' },
           overwrite: true,
+          managed: false,
         },
         {
           type: mockDashboard.type,
           id: mockDashboard.id,
           meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
+          managed: false,
         },
       ],
       warnings: [],
@@ -345,6 +391,7 @@ describe(`POST ${URL}`, () => {
           type: mockDashboard.type,
           id: mockDashboard.id,
           meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
+          managed: false,
         },
       ],
       warnings: [],
@@ -414,6 +461,7 @@ describe(`POST ${URL}`, () => {
           type: mockDashboard.type,
           id: mockDashboard.id,
           meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
+          managed: false,
         },
       ],
       warnings: [],
@@ -478,6 +526,7 @@ describe(`POST ${URL}`, () => {
           type: mockDashboard.type,
           id: mockDashboard.id,
           meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
+          managed: false,
         },
       ],
       warnings: [],
@@ -505,12 +554,14 @@ describe(`POST ${URL}`, () => {
         id: 'new-id-1',
         attributes: { title: 'Look at my visualization' },
         references: [],
+        managed: false,
       };
       const obj2 = {
         type: 'dashboard',
         id: 'new-id-2',
         attributes: { title: 'Look at my dashboard' },
         references: [],
+        managed: false,
       };
       savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [obj1, obj2] });
 
@@ -539,12 +590,14 @@ describe(`POST ${URL}`, () => {
             id: 'my-vis',
             meta: { title: obj1.attributes.title, icon: 'visualization-icon' },
             destinationId: obj1.id,
+            managed: false,
           },
           {
             type: obj2.type,
             id: 'my-dashboard',
             meta: { title: obj2.attributes.title, icon: 'dashboard-icon' },
             destinationId: obj2.id,
+            managed: false,
           },
         ],
         warnings: [],
@@ -556,11 +609,13 @@ describe(`POST ${URL}`, () => {
             type: 'visualization',
             id: 'new-id-1',
             references: [{ name: 'ref_0', type: 'index-pattern', id: 'my-pattern' }],
+            managed: false,
           }),
           expect.objectContaining({
             type: 'dashboard',
             id: 'new-id-2',
             references: [{ name: 'ref_0', type: 'visualization', id: 'new-id-1' }],
+            managed: false,
           }),
         ],
         expect.any(Object) // options
@@ -769,6 +824,7 @@ describe(`POST ${URL}`, () => {
         originId: 'my-vis',
         attributes: { title: 'Look at my visualization' },
         references: [],
+        managed: false,
       };
       const obj2 = {
         type: 'dashboard',
@@ -776,6 +832,7 @@ describe(`POST ${URL}`, () => {
         originId: 'my-dashboard',
         attributes: { title: 'Look at my dashboard' },
         references: [],
+        managed: false,
       };
       savedObjectsClient.bulkCreate.mockResolvedValueOnce({
         saved_objects: [
@@ -785,6 +842,7 @@ describe(`POST ${URL}`, () => {
             id: obj2.id,
             attributes: {},
             references: [],
+            managed: false,
             error: { error: 'some-error', message: 'Why not?', statusCode: 503 },
           },
         ],
@@ -830,6 +888,7 @@ describe(`POST ${URL}`, () => {
             id: obj1.originId,
             meta: { title: obj1.attributes.title, icon: 'visualization-icon' },
             destinationId: obj1.id,
+            managed: false,
           },
         ],
         errors: [
@@ -843,6 +902,7 @@ describe(`POST ${URL}`, () => {
               statusCode: 503,
               type: 'unknown',
             },
+            managed: false,
           },
         ],
         warnings: [],
@@ -855,12 +915,14 @@ describe(`POST ${URL}`, () => {
             id: 'new-id-1',
             originId: 'my-vis',
             references: [{ name: 'ref_0', type: 'index-pattern', id: 'my-pattern' }],
+            managed: false,
           }),
           expect.objectContaining({
             type: 'dashboard',
             id: 'new-id-2',
             originId: 'my-dashboard',
             references: [{ name: 'ref_0', type: 'visualization', id: 'new-id-1' }],
+            managed: false,
           }),
         ],
         expect.any(Object) // options
@@ -905,7 +967,9 @@ describe(`POST ${URL}`, () => {
         attributes: { title: 'Look at my visualization' },
         references: [],
       };
-      savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [obj1] });
+      savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [{ ...obj1, managed: false }],
+      });
 
       // Prepare mock results for the created legacy URL alias (for obj1 only).
       const legacyUrlAliasObj1 = {
@@ -956,6 +1020,7 @@ describe(`POST ${URL}`, () => {
             id: obj1.originId,
             meta: { title: obj1.attributes.title, icon: 'visualization-icon' },
             destinationId: obj1.id,
+            managed: false,
           },
         ],
         errors: [
@@ -969,6 +1034,7 @@ describe(`POST ${URL}`, () => {
               type: 'unknown',
             },
             meta: { title: 'Legacy URL alias (my-vis -> new-id-1)', icon: 'legacy-url-alias-icon' },
+            managed: false,
           },
         ],
         warnings: [],
@@ -981,6 +1047,7 @@ describe(`POST ${URL}`, () => {
             id: 'new-id-1',
             originId: 'my-vis',
             references: [{ name: 'ref_0', type: 'index-pattern', id: 'my-pattern' }],
+            managed: false,
           }),
         ],
         expect.any(Object) // options
