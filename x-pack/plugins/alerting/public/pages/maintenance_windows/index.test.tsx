@@ -10,6 +10,7 @@ import type { Capabilities } from '@kbn/core-capabilities-common';
 import { AppMockRenderer, createAppMockRenderer } from '../../lib/test_utils';
 import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
 import { MaintenanceWindowsPage } from '.';
+import { MAINTENANCE_WINDOW_FEATURE_ID } from '../../../common';
 
 jest.mock('../../hooks/use_find_maintenance_windows', () => ({
   useFindMaintenanceWindows: jest.fn(),
@@ -21,7 +22,7 @@ describe('Maintenance windows page', () => {
     license: { type: 'platinum' },
   });
   let capabilities: Capabilities = {
-    maintenanceWindow: {
+    [MAINTENANCE_WINDOW_FEATURE_ID]: {
       show: true,
       save: true,
     },
@@ -70,7 +71,7 @@ describe('Maintenance windows page', () => {
   test('show table in read only', () => {
     capabilities = {
       ...capabilities,
-      maintenanceWindow: {
+      [MAINTENANCE_WINDOW_FEATURE_ID]: {
         show: true,
         save: false,
       },

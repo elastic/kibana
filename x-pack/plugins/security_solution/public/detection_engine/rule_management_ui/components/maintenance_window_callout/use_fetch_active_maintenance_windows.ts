@@ -11,13 +11,14 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 import { fetchActiveMaintenanceWindows } from './api';
 
-export const useFetchActiveMaintenanceWindows = () => {
+export const useFetchActiveMaintenanceWindows = (enabled: boolean) => {
   const { addError } = useAppToasts();
 
   return useQuery(
     ['GET', INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH],
     ({ signal }) => fetchActiveMaintenanceWindows(signal),
     {
+      enabled,
       refetchInterval: 60000,
       onError: (error) => {
         addError(error, { title: i18n.FETCH_ERROR, toastMessage: i18n.FETCH_ERROR_DESCRIPTION });

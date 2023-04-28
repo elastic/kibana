@@ -8,8 +8,12 @@
 import React from 'react';
 import { render, waitFor, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MaintenanceWindowStatus } from '@kbn/alerting-plugin/common';
+import {
+  MaintenanceWindowStatus,
+  MAINTENANCE_WINDOW_FEATURE_ID,
+} from '@kbn/alerting-plugin/common';
 import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { MaintenanceWindowCallout } from './maintenance_window_callout';
@@ -21,6 +25,8 @@ jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('./api', () => ({
   fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
 }));
+
+jest.mock('../../../../common/lib/kibana');
 
 const RUNNING_MAINTENANCE_WINDOW_1: Partial<MaintenanceWindow> = {
   title: 'Maintenance window 1',
@@ -54,6 +60,18 @@ describe('MaintenanceWindowCallout', () => {
 
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            [MAINTENANCE_WINDOW_FEATURE_ID]: {
+              save: true,
+              show: true,
+            },
+          },
+        },
+      },
+    });
   });
 
   afterEach(() => {
@@ -132,5 +150,45 @@ describe('MaintenanceWindowCallout', () => {
         toastMessage: "Notification actions won't run while a maintenance window is running.",
       });
     });
+  });
+
+  it('should return null if window maintenance privilege is NONE', async () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            [MAINTENANCE_WINDOW_FEATURE_ID]: {
+              save: false,
+              show: false,
+            },
+          },
+        },
+      },
+    });
+    (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
+
+    const { container } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should work as expected if window maintenance privilege is READ ', async () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            [MAINTENANCE_WINDOW_FEATURE_ID]: {
+              save: false,
+              show: true,
+            },
+          },
+        },
+      },
+    });
+    (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
+
+    const { findByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
+
+    expect(await findByText('A maintenance window is currently running')).toBeInTheDocument();
   });
 });

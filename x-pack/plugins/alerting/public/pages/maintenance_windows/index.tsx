@@ -28,6 +28,7 @@ import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 import { ExperimentalBadge } from './components/page_header';
 import { useLicense } from '../../hooks/use_license';
 import { LicensePrompt } from './components/license_prompt';
+import { MAINTENANCE_WINDOW_FEATURE_ID } from '../../../common';
 
 export const MaintenanceWindowsPage = React.memo(() => {
   const {
@@ -48,8 +49,8 @@ export const MaintenanceWindowsPage = React.memo(() => {
   }, [navigateToCreateMaintenanceWindow]);
 
   const refreshData = useCallback(() => refetch(), [refetch]);
-  const showWindowMaintenance = capabilities.maintenanceWindow.show;
-  const writeWindowMaintenance = capabilities.maintenanceWindow.save;
+  const showWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].show;
+  const writeWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].save;
   const showEmptyPrompt =
     !isLoading &&
     maintenanceWindows.length === 0 &&
