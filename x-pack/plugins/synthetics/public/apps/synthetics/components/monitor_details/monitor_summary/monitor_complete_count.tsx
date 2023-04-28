@@ -35,6 +35,7 @@ export const MonitorCompleteCount = (props: MonitorCompleteCountProps) => {
       id="monitorCompleteCount"
       align="left"
       reportType={ReportTypes.SINGLE_METRIC}
+      skipLoadingWrapper={true}
       attributes={[
         {
           time: props,

@@ -38,6 +38,7 @@ export const MonitorCompleteSparklines = (props: Props) => {
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
       hideTicks={true}
+      skipLoadingWrapper={true}
       attributes={[
         {
           seriesType: 'area',
