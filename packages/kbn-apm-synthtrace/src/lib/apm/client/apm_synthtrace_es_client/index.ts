@@ -60,7 +60,8 @@ export class ApmSynthtraceEsClient {
 
   private readonly version: string;
 
-  private pipelineCallback: (base: Readable) => NodeJS.WritableStream = this.getDefaultPipeline();
+  private pipelineCallback: (base: Readable) => NodeJS.WritableStream | NodeJS.ReadableStream =
+    this.getDefaultPipeline();
 
   constructor(options: { client: Client; logger: Logger } & ApmSynthtraceEsClientOptions) {
     this.client = options.client;
@@ -154,7 +155,7 @@ export class ApmSynthtraceEsClient {
     };
   }
 
-  pipeline(cb: (base: Readable) => NodeJS.WritableStream) {
+  pipeline(cb: (base: Readable) => NodeJS.WritableStream | NodeJS.ReadableStream) {
     this.pipelineCallback = cb;
   }
 
