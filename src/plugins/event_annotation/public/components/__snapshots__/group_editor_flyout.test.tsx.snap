@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`group editor flyout renders controls 1`] = `
+Object {
+  "dataViewListItems": Array [
+    Object {
+      "id": "some-id",
+      "title": "My Data View",
+    },
+  ],
+  "group": Object {
+    "annotations": Array [],
+    "description": "",
+    "ignoreGlobalFilters": false,
+    "indexPatternId": "some-id",
+    "tags": Array [],
+    "title": "My group",
+  },
+  "savedObjectsTagging": Object {
+    "cache": Object {
+      "getState": [MockFunction],
+      "getState$": [MockFunction],
+    },
+    "client": Object {
+      "create": [MockFunction],
+      "delete": [MockFunction],
+      "get": [MockFunction],
+      "getAll": [MockFunction],
+      "update": [MockFunction],
+    },
+    "ui": Object {
+      "components": Object {
+        "SavedObjectSaveModalTagSelector": [MockFunction],
+        "TagList": [MockFunction],
+        "TagSelector": [MockFunction],
+      },
+      "convertNameToReference": [MockFunction],
+      "getSearchBarFilter": [MockFunction],
+      "getTableColumnDefinition": [MockFunction],
+      "getTag": [MockFunction],
+      "getTagIdFromName": [MockFunction],
+      "getTagIdsFromReferences": [MockFunction],
+      "getTagList": [MockFunction],
+      "hasTagDecoration": [MockFunction],
+      "parseSearchQuery": [MockFunction],
+      "updateTagsReferences": [MockFunction],
+    },
+  },
+  "update": [MockFunction],
+}
+`;

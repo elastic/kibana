@@ -9,7 +9,7 @@
 import React, { ChangeEvent, FormEvent } from 'react';
 import { EventAnnotationGroupConfig } from '../../common';
 import { shallow, ShallowWrapper } from 'enzyme';
-import { EventAnnotationGroupEditor } from './event_annotation_group_editor';
+import { GroupEditorControls } from './group_editor_controls';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 import { EuiSelectProps, EuiTextAreaProps, EuiTextProps } from '@elastic/eui';
 
@@ -30,12 +30,13 @@ describe('event annotation group editor', () => {
     indexPatternId: dataViewId,
     title: 'My group',
     ignoreGlobalFilters: false,
+    dataViewSpec: adHocDataViewSpec,
   };
 
   it('reports group updates', () => {
     const updateMock = jest.fn();
     const wrapper = shallow(
-      <EventAnnotationGroupEditor
+      <GroupEditorControls
         group={group}
         update={updateMock}
         savedObjectsTagging={mockTaggingApi}
@@ -49,7 +50,6 @@ describe('event annotation group editor', () => {
             title: 'Ad Hoc Data View',
           },
         ]}
-        adHocDataViewSpec={adHocDataViewSpec}
       />
     );
 
@@ -82,14 +82,18 @@ describe('event annotation group editor', () => {
         ) as ShallowWrapper<EuiSelectProps>
       ).prop('onChange')!({ target: { value: id } } as React.ChangeEvent<HTMLSelectElement>);
 
-    setDataViewId(adHocDataViewId);
     setDataViewId(dataViewId);
+    setDataViewId(adHocDataViewId);
 
     expect(updateMock.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           Object {
             "annotations": Array [],
+            "dataViewSpec": Object {
+              "id": "ad-hoc",
+              "title": "Ad Hoc Data View",
+            },
             "description": "",
             "ignoreGlobalFilters": false,
             "indexPatternId": "my-index-pattern",
@@ -100,6 +104,10 @@ describe('event annotation group editor', () => {
         Array [
           Object {
             "annotations": Array [],
+            "dataViewSpec": Object {
+              "id": "ad-hoc",
+              "title": "Ad Hoc Data View",
+            },
             "description": "im a new description!",
             "ignoreGlobalFilters": false,
             "indexPatternId": "my-index-pattern",
@@ -110,12 +118,27 @@ describe('event annotation group editor', () => {
         Array [
           Object {
             "annotations": Array [],
+            "dataViewSpec": Object {
+              "id": "ad-hoc",
+              "title": "Ad Hoc Data View",
+            },
             "description": "",
             "ignoreGlobalFilters": false,
             "indexPatternId": "my-index-pattern",
             "tags": Array [
               "im a new tag!",
             ],
+            "title": "My group",
+          },
+        ],
+        Array [
+          Object {
+            "annotations": Array [],
+            "dataViewSpec": undefined,
+            "description": "",
+            "ignoreGlobalFilters": false,
+            "indexPatternId": "my-index-pattern",
+            "tags": Array [],
             "title": "My group",
           },
         ],
@@ -129,17 +152,6 @@ describe('event annotation group editor', () => {
             "description": "",
             "ignoreGlobalFilters": false,
             "indexPatternId": "ad-hoc",
-            "tags": Array [],
-            "title": "My group",
-          },
-        ],
-        Array [
-          Object {
-            "annotations": Array [],
-            "dataViewSpec": undefined,
-            "description": "",
-            "ignoreGlobalFilters": false,
-            "indexPatternId": "my-index-pattern",
             "tags": Array [],
             "title": "My group",
           },

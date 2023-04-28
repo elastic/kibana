@@ -19,9 +19,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import { EventAnnotationGroupConfig, EVENT_ANNOTATION_GROUP_TYPE } from '../../common';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 
-import { EuiButton, EuiFlyout } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
-import { EventAnnotationGroupEditor } from './event_annotation_group_editor';
+import { GroupEditorFlyout } from './group_editor_flyout';
 
 describe('annotation list view', () => {
   const adHocDVId = 'ad-hoc';
@@ -166,7 +165,7 @@ describe('annotation list view', () => {
     });
 
     it('edits existing group', async () => {
-      expect(wrapper.find(EuiFlyout).exists()).toBeFalsy();
+      expect(wrapper.find(GroupEditorFlyout).exists()).toBeFalsy();
       const initialBouncerValue = wrapper.find(TableList).prop('refreshListBouncer');
 
       act(() => {
@@ -178,34 +177,13 @@ describe('annotation list view', () => {
 
       expect(mockEventAnnotationService.loadAnnotationGroup).toHaveBeenCalledWith('1234');
 
-      expect(wrapper.find(EuiFlyout).exists()).toBeTruthy();
+      expect(wrapper.find(GroupEditorFlyout).exists()).toBeTruthy();
 
       const updatedGroup = { ...group, tags: ['my-new-tag'] };
 
-      expect(wrapper.find(EventAnnotationGroupEditor).prop('adHocDataViewSpec')).toBe(
-        group.dataViewSpec
-      );
-      expect(wrapper.find(EventAnnotationGroupEditor).prop('dataViewListItems'))
-        .toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "id": "some-id",
-            "title": "Some data view",
-          },
-          Object {
-            "id": "ad-hoc",
-            "title": "Ad hoc data view",
-          },
-        ]
-      `);
+      wrapper.find(GroupEditorFlyout).prop('updateGroup')(updatedGroup);
 
-      wrapper.find(EventAnnotationGroupEditor).prop('update')(updatedGroup);
-
-      (
-        wrapper.find('[data-test-subj="saveAnnotationGroup"]') as ShallowWrapper<
-          Parameters<typeof EuiButton>[0]
-        >
-      ).prop('onClick')!({} as any);
+      wrapper.find(GroupEditorFlyout).prop('onSave')();
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -214,7 +192,7 @@ describe('annotation list view', () => {
         '1234'
       );
 
-      expect(wrapper.find(EuiFlyout).exists()).toBeFalsy();
+      expect(wrapper.find(GroupEditorFlyout).exists()).toBeFalsy();
       expect(wrapper.find(TableList).prop('refreshListBouncer')).not.toBe(initialBouncerValue); // (should refresh list)
     });
   });

@@ -20,23 +20,37 @@ import type { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/comm
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { EventAnnotationGroupConfig } from '../../common';
 
-export const EventAnnotationGroupEditor = ({
+export const GroupEditorControls = ({
   group,
   update,
   savedObjectsTagging,
-  dataViewListItems,
-  adHocDataViewSpec,
+  dataViewListItems: globalDataViewListItems,
 }: {
   group: EventAnnotationGroupConfig;
   update: (group: EventAnnotationGroupConfig) => void;
   savedObjectsTagging: SavedObjectsTaggingApi;
   dataViewListItems: DataViewListItem[];
-  adHocDataViewSpec: DataViewSpec | undefined;
 }) => {
   const { euiTheme } = useEuiTheme();
+
+  // save the spec for the life of the component since the user might change their mind after selecting another data view
+  const [adHocDataViewSpec] = useState<DataViewSpec | undefined>(group.dataViewSpec);
+
+  const dataViewListItems = useMemo(() => {
+    const items = [...globalDataViewListItems];
+    if (adHocDataViewSpec) {
+      const { id, name, title } = adHocDataViewSpec;
+      const adHocListItem: DataViewListItem = {
+        id: id!,
+        title: name ?? title!,
+      };
+      items.push(adHocListItem);
+    }
+    return items;
+  }, [adHocDataViewSpec, globalDataViewListItems]);
 
   return (
     <>
