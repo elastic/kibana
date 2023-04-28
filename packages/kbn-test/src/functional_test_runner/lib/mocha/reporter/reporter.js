@@ -44,12 +44,16 @@ export function MochaReporterProvider({ getService }) {
       runner.on('suite end', this.onSuiteEnd);
       runner.on('end', this.onEnd);
 
-      if (config.get('junit.enabled') && config.get('junit.reportName')) {
-        setupJUnitReportGeneration(runner, {
-          reportName: config.get('junit.reportName'),
-          metadata: config.get('junit.metadata'),
-        });
-      }
+      // if (config.get('junit.enabled') && config.get('junit.reportName')) {
+      //   setupJUnitReportGeneration(runner, {
+      //     reportName: config.get('junit.reportName'),
+      //     metadata: config.get('junit.metadata'),
+      //   });
+      // }
+      setupJUnitReportGeneration(runner, {
+        reportName: config.get('junit.reportName'),
+        metadata: config.get('junit.metadata'),
+      });
 
       if (config.get('mochaReporter.sendToCiStats')) {
         const reporter = CiStatsReporter.fromEnv(log);
