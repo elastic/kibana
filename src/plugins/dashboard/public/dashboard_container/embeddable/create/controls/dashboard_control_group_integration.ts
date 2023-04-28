@@ -106,23 +106,6 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
       })
   );
 
-  // dashboard may reset the control group input when discarding changes. Subscribe to these changes and update accordingly
-  this.subscriptions.add(
-    (this.getInput$() as Readonly<Observable<DashboardContainerInput>>)
-      .pipe(debounceTime(10), distinctUntilKeyChanged('controlGroupInput'))
-      .subscribe(() => {
-        if (!isControlGroupInputEqual()) {
-          if (!this.getInput().controlGroupInput) {
-            this.controlGroup!.updateInput(getDefaultControlGroupInput());
-            return;
-          }
-          this.controlGroup!.updateInput({
-            ...this.getInput().controlGroupInput,
-          });
-        }
-      })
-  );
-
   // when control group outputs filters, force a refresh!
   this.subscriptions.add(
     this.controlGroup
