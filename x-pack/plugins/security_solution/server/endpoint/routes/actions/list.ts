@@ -41,7 +41,7 @@ export function registerActionListRoutes(
       actionListHandler(endpointContext)
     )
   );
-  // This route is a temporary solution until we decide on how RBAC should look like for Actions in Alerts
+  // TODO: This route is a temporary solution until we decide on how RBAC should look like for Actions in Alerts
   router.get(
     {
       path: BASE_ENDPOINT_ACTION_ALERTS_ROUTE,

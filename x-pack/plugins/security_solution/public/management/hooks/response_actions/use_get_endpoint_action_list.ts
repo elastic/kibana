@@ -35,7 +35,7 @@ export const useGetEndpointActionList = (
     userIds = query.userIds.map((userId) => `*${userId}*`);
   }
 
-  // Temporary solution until we decide on how RBAC should look like for Actions in Alerts
+  // TODO: Temporary solution until we decide on how RBAC should look like for Actions in Alerts
   const path = query.alertId ? BASE_ENDPOINT_ACTION_ALERTS_ROUTE : BASE_ENDPOINT_ACTION_ROUTE;
   return useQuery<ActionListApiResponse, IHttpFetchError<ErrorType>>({
     queryKey: ['get-action-list', query],
