@@ -25,6 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'infraSavedViews',
   ]);
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   describe('Metrics Explorer', function () {
     this.tags('includeFirefox');
@@ -79,8 +80,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should display multple charts', async () => {
-        const charts = await pageObjects.infraMetricsExplorer.getCharts();
-        expect(charts.length).to.equal(6);
+        await retry.try(async () => {
+          const charts = await pageObjects.infraMetricsExplorer.getCharts();
+          expect(charts.length).to.equal(6);
+        });
       });
 
       it('should render as area chart by default', async () => {
