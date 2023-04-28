@@ -14,17 +14,28 @@ import { ApmPluginStartDeps } from '../../plugin';
 
 export function ApmErrorBoundary({ children }: { children?: React.ReactNode }) {
   const location = useLocation();
-  return <ErrorBoundary key={location.pathname}>{children}</ErrorBoundary>;
+  return <ErrorBoundary pathname={location.pathname}>{children}</ErrorBoundary>;
 }
 
 class ErrorBoundary extends React.Component<
-  { children?: React.ReactNode },
+  { children?: React.ReactNode; pathname: string },
   { error?: Error },
   {}
 > {
   public state: { error?: Error } = {
     error: undefined,
   };
+
+  componentDidUpdate(prevProps: { pathname: string }) {
+    console.log('componentDidUpdate', prevProps.pathname, this.state.error);
+    if (
+      this.props.pathname !== prevProps.pathname &&
+      this.state.error !== undefined
+    ) {
+      console.log('resetting error');
+      this.setState({ error: undefined });
+    }
+  }
 
   static getDerivedStateFromError(error: Error) {
     return { error };
@@ -47,6 +58,8 @@ function ErrorWithTemplate({ error }: { error: Error }) {
   const { services } = useKibana<ApmPluginStartDeps>();
   const { observabilityShared } = services;
 
+  console.log('rendering error');
+
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
   if (error instanceof NotFoundRouteException) {
@@ -66,7 +79,6 @@ function ErrorWithTemplate({ error }: { error: Error }) {
   );
 }
 
-function DummyComponent({ error }: { error: Error }) {
+function DummyComponent({ error }: { error: Error }): any {
   throw error;
-  return <div />;
 }

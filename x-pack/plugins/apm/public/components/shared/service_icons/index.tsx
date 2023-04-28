@@ -134,9 +134,10 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
   );
 
   const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;
+  // const isLoading = true;
 
   if (isLoading) {
-    return <EuiLoadingSpinner data-test-subj="loading" />;
+    return <EuiLoadingSpinner data-test-subj="loading-service-icons" />;
   }
 
   const popoverItems: PopoverItem[] = [
