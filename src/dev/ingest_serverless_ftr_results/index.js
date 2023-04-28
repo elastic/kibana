@@ -10,8 +10,8 @@ import { resolve } from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { pathExists } from '../code_coverage/ingest_coverage/team_assignment/enumeration_helpers';
 import { processJunitFiles } from './process_junit_files';
+import { REPO_ROOT } from '@kbn/repo-info';
 
-const ROOT = resolve(__dirname, '../../..');
 const flags = {
   string: ['path', 'verbose'],
   help: `
@@ -19,29 +19,28 @@ const flags = {
         `,
 };
 
+const resolveRoot = resolve.bind(null, REPO_ROOT);
+
 export function runServerlessFtrResultsIngestionCli() {
   run(
     ({ log }) => {
-      const resolveRoot = resolve.bind(null, ROOT);
-
       const junitPath = resolveRoot('target/junit');
+
       pathExists(junitPath)
-        .map(() => junitPath)
+        .map(patterns)
         .fold(
-          (err) => {
-            log.error(`\n### x: \n${JSON.stringify(err, null, 2)}`);
-          },
-          (x) => {
-            processJunitFiles(log)(x);
-          }
+          (err) => log.error(`\n### x: \n${JSON.stringify(err, null, 2)}`),
+          processJunitFiles(log)
         );
     },
     {
       description: `
-
-blah blah blah
+Ingests mocha generated junit xml files (failures).
       `,
       flags,
     }
   );
+}
+function patterns() {
+  return [resolveRoot('target/junit/**/*.xml')];
 }
