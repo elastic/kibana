@@ -1119,7 +1119,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     // For continuous transform, no need to assert progress bar exists
-    async startTransform({ expectProgressbarExists = true }) {
+    async startTransform({ expectProgressbarExists } = { expectProgressbarExists: true }) {
       await testSubjects.click('transformWizardStartButton');
       await retry.tryForTime(5000, async () => {
         await this.assertDiscoverCardExists();

@@ -118,10 +118,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discoverAdjustSuperDatePicker: true,
         expected: {
           continuousModeDateField: 'order_date',
-          fullTimeRange: {
-            start: 'Jun 12, 2019 @ 00:04:19.000',
-            end: 'Jul 12, 2019 @ 23:45:36.000',
-          },
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category": {'],
           pivotAdvancedEditorValue: {
             group_by: {
@@ -216,10 +212,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         numFailureRetries: '101',
         discoverAdjustSuperDatePicker: false,
         expected: {
-          fullTimeRange: {
-            start: 'Jun 12, 2019 @ 00:04:19.000',
-            end: 'Jul 12, 2019 @ 23:45:36.000',
-          },
           latestPreview: {
             column: 0,
             values: [],
@@ -478,17 +470,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('stops transform', async () => {
           await transform.testExecution.logTestStep('should show the actions popover');
           await transform.table.assertTransformRowActions(testData.transformId, true);
-          await transform.table.assertTransformRowActionEnabledState(
+          await transform.table.assertTransformRowActionEnabled(
             testData.transformId,
             'Reset',
             false
           );
-          await transform.table.assertTransformRowActionEnabledState(
+          await transform.table.assertTransformRowActionEnabled(
             testData.transformId,
             'Delete',
             false
           );
 
+          await transform.testExecution.logTestStep('should stop transform');
           await transform.table.stopTransform(testData.transformId);
         });
 
@@ -505,24 +498,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('resets and starts previously stopped transform', async () => {
           await transform.testExecution.logTestStep(
-            'navigates back to transform management list page'
+            'should navigate to transform management list page'
           );
           await transform.navigation.navigateTo();
           await transform.management.assertTransformListPageExists();
 
-          await transform.testExecution.logTestStep('should show the actions popover');
+          await transform.testExecution.logTestStep(
+            'should show the actions popover for continuous transform'
+          );
           await transform.table.assertTransformRowActions(testData.transformId, false);
-          await transform.table.assertTransformRowActionEnabledState(
+          await transform.table.assertTransformRowActionEnabled(
             testData.transformId,
             'Reset',
             true
           );
-          await transform.table.assertTransformRowActionEnabledState(
+          await transform.table.assertTransformRowActionEnabled(
             testData.transformId,
             'Start',
             true
           );
+
+          await transform.testExecution.logTestStep('should reset transform');
           await transform.table.resetTransform(testData.transformId);
+
+          await transform.testExecution.logTestStep('should start previously stopped transform');
           await transform.table.startTransform(testData.transformId);
         });
       });

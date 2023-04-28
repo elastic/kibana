@@ -354,36 +354,18 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await this.ensureTransformActionsMenuClosed();
     }
 
-    public async assertTransformRowActionEnabledState(
-      transformId: string,
-      action: 'Clone' | 'Delete' | 'Discover' | 'Edit' | 'Reset' | 'Start' | 'Stop',
-      expectedEnabledState: boolean
-    ) {
-      const actionDataTestSubj = 'transformAction' + action;
-      await this.ensureTransformActionsMenuOpen(transformId);
-
-      const isEnabled = await testSubjects.isEnabled(actionDataTestSubj);
-      expect(isEnabled).to.eql(
-        expectedEnabledState,
-        `Expected ${action} to be ${expectedEnabledState ? 'enabled' : 'disabled'} (got ${
-          isEnabled ? 'enabled' : 'disabled'
-        }`
-      );
-    }
-
     public async resetTransform(transformId: string) {
       await this.assertTransformRowFields(transformId, { status: 'stopped' });
       await retry.tryForTime(5 * 1000, async () => {
         await this.clickTransformRowAction(transformId, 'Reset');
-        await testSubjects.existOrFail('transformResetModal');
-        await testSubjects.clickWhenNotDisabled('confirmModalConfirmButton');
+        await this.confirmResetTransform();
         await this.assertTransformRowFields(transformId, { status: 'stopped' });
       });
     }
 
     public async stopTransform(transformId: string) {
       await this.assertTransformRowFields(transformId, { status: 'started' });
-      await this.assertTransformRowActionEnabledState(transformId, 'Stop', true);
+      await this.assertTransformRowActionEnabled(transformId, 'Stop', true);
       await retry.tryForTime(5 * 1000, async () => {
         await this.clickTransformRowAction(transformId, 'Stop');
         await this.assertTransformRowFields(transformId, { status: 'stopped' });
@@ -392,13 +374,11 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
     public async startTransform(transformId: string) {
       await this.assertTransformRowFields(transformId, { status: 'stopped' });
-      await this.assertTransformRowActionEnabledState(transformId, 'Start', true);
+      await this.assertTransformRowActionEnabled(transformId, 'Start', true);
 
       await retry.tryForTime(5 * 1000, async () => {
         await this.clickTransformRowAction(transformId, 'Start');
-        await testSubjects.existOrFail('transformStartModal');
-        await testSubjects.clickWhenNotDisabled('confirmModalConfirmButton');
-
+        await this.confirmStartTransform();
         await this.assertTransformRowFields(transformId, { status: 'started' });
       });
     }
