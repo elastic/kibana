@@ -1118,7 +1118,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       });
     },
 
-    // For continuous transform, no need to assert progress bar exists
+    // The progress bar has to exist for batch transform, not for continuous transforms.
     async startTransform({ expectProgressbarExists } = { expectProgressbarExists: true }) {
       await testSubjects.click('transformWizardStartButton');
       await retry.tryForTime(5000, async () => {

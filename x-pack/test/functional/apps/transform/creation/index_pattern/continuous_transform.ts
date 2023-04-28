@@ -7,7 +7,6 @@
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   GroupByEntry,
@@ -21,34 +20,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const canvasElement = getService('canvasElement');
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
-  const retry = getService('retry');
+  const sampleData = getService('sampleData');
   const security = getService('security');
-  const pageObjects = getPageObjects([
-    'common',
-    'header',
-    'home',
-    'discover',
-    'dashboard',
-    'timePicker',
-  ]);
+  const pageObjects = getPageObjects(['discover']);
 
   describe('creation_continuous_transform', function () {
     before(async () => {
       // installing the sample data with test user with super user role and then switching roles with limited privileges
       await security.testUser.setRoles(['superuser'], { skipBrowserRefresh: true });
       await esArchiver.emptyKibanaIndex();
-      await pageObjects.common.sleep(5000);
-
-      await pageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      // using sample data set for continuous data
-      await pageObjects.home.addSampleDataSet('ecommerce');
-      await retry.tryForTime(10000, async () => {
-        const isInstalled = await pageObjects.home.isSampleDataSetInstalled('ecommerce');
-        expect(isInstalled).to.be(true);
-      });
+      await sampleData.testResources.installKibanaSampleData('ecommerce');
       await transform.securityUI.loginAsTransformPowerUser();
     });
 

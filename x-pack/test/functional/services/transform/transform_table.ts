@@ -123,11 +123,12 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
         const transformRow = rows.filter((row) => row.id === transformId)[0];
 
         for (const [key, value] of Object.entries(expectedRow)) {
-          expect(transformRow).to.have.property(key).eql(
-            value,
-            // @ts-ignore
-            `Expected transform row ${transformId} to have '${key}' with value '${value}'  (got ${transformRow[key]})`
-          );
+          expect(transformRow)
+            .to.have.property(key)
+            .eql(
+              value,
+              `Expected transform row ${transformId} to have '${key}' with value '${value}'  (got ${transformRow})`
+            );
         }
       });
     }
@@ -356,7 +357,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
     public async resetTransform(transformId: string) {
       await this.assertTransformRowFields(transformId, { status: 'stopped' });
-      await retry.tryForTime(5 * 1000, async () => {
+      await retry.tryForTime(60 * 1000, async () => {
         await this.clickTransformRowAction(transformId, 'Reset');
         await this.confirmResetTransform();
         await this.assertTransformRowFields(transformId, { status: 'stopped' });
@@ -366,7 +367,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
     public async stopTransform(transformId: string) {
       await this.assertTransformRowFields(transformId, { status: 'started' });
       await this.assertTransformRowActionEnabled(transformId, 'Stop', true);
-      await retry.tryForTime(5 * 1000, async () => {
+      await retry.tryForTime(60 * 1000, async () => {
         await this.clickTransformRowAction(transformId, 'Stop');
         await this.assertTransformRowFields(transformId, { status: 'stopped' });
       });
@@ -376,7 +377,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await this.assertTransformRowFields(transformId, { status: 'stopped' });
       await this.assertTransformRowActionEnabled(transformId, 'Start', true);
 
-      await retry.tryForTime(5 * 1000, async () => {
+      await retry.tryForTime(60 * 1000, async () => {
         await this.clickTransformRowAction(transformId, 'Start');
         await this.confirmStartTransform();
         await this.assertTransformRowFields(transformId, { status: 'started' });

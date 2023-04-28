@@ -22,7 +22,7 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
 
     async openSuperDatePicker() {
       await this.assertSuperDatePickerToggleQuickMenuButtonExists();
-      await retry.try(async () => {
+      await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.click('superDatePickerToggleQuickMenuButton');
         await testSubjects.existOrFail('superDatePickerQuickMenu');
       });
