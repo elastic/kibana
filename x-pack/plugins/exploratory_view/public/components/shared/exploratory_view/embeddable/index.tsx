@@ -117,7 +117,12 @@ export function getExploratoryViewEmbeddable(
       return newProps;
     }, [loadCount, props, series.time]);
 
-    if (Object.keys(dataViews).length === 0 || loading || !lensHelper || lensLoading) {
+    if (
+      Object.keys(dataViews).length === 0 ||
+      (loading && !props.skipLoadingWrapper) ||
+      !lensHelper ||
+      lensLoading
+    ) {
       return (
         <LoadingWrapper customHeight={customHeight}>
           <EuiLoadingSpinner size="l" />
@@ -138,7 +143,7 @@ export function getExploratoryViewEmbeddable(
                 {...embedProps}
                 dataViewState={dataViews}
                 lens={lens}
-                lensFormulaHelper={lensHelper.formula}
+                lensFormulaHelper={lensHelper?.formula}
                 searchSessionId={services.data.search.session.getSessionId()}
                 onLoad={onLensLoaded}
               />

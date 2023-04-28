@@ -62,6 +62,7 @@ export interface ExploratoryEmbeddableProps {
   lineHeight?: number;
   dataTestSubj?: string;
   searchSessionId?: string;
+  skipLoadingWrapper?: boolean;
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
