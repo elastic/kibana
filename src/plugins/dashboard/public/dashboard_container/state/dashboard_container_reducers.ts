@@ -119,6 +119,9 @@ export const dashboardContainerReducers = {
   resetToLastSavedInput: (state: DashboardReduxState) => {
     state.explicitInput = {
       ...state.componentState.lastSavedInput,
+      ...(state.explicitInput.timeRestore
+        ? undefined
+        : { timeRange: state.explicitInput.timeRange }),
       viewMode: state.explicitInput.viewMode, // keep current view mode when resetting
     };
   },
