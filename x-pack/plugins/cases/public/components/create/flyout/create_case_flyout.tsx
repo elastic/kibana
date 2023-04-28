@@ -14,7 +14,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { noop } from 'lodash';
 import type { CasePostRequest } from '../../../../common/api';
 import * as i18n from '../translations';
-import type { Case } from '../../../../common/ui/types';
+import type { CaseUI } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
 import type { UseCreateAttachments } from '../../../containers/use_create_attachments';
 import type { CaseAttachmentsWithoutOwner } from '../../../types';
@@ -22,11 +22,11 @@ import { casesQueryClient } from '../../cases_context/query_client';
 
 export interface CreateCaseFlyoutProps {
   afterCaseCreated?: (
-    theCase: Case,
+    theCase: CaseUI,
     createAttachments: UseCreateAttachments['createAttachments']
   ) => Promise<void>;
   onClose?: () => void;
-  onSuccess?: (theCase: Case) => void;
+  onSuccess?: (theCase: CaseUI) => void;
   attachments?: CaseAttachmentsWithoutOwner;
   headerContent?: React.ReactNode;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;

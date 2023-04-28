@@ -35,7 +35,7 @@
       "expressionXY",
       "eventAnnotation",
       "unifiedSearch",
-      "unifiedFieldList"
+      "unifiedFieldList",
     ],
     "optionalPlugins": [
       "expressionLegacyMetricVis",
@@ -53,7 +53,8 @@
       "kibanaReact",
       "embeddable",
       "fieldFormats",
-      "charts"
+      "charts",
+      "visualizationUiComponents"
     ],
     "extraPublicDirs": [
       "common/constants"
