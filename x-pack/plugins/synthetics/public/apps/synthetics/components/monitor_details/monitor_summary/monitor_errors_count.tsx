@@ -38,6 +38,7 @@ export const MonitorErrorsCount = ({ monitorId, from, to, id }: MonitorErrorsCou
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}
+      skipLoadingWrapper={true}
       attributes={[
         {
           time,

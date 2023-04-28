@@ -39,6 +39,7 @@ export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}
+      skipLoadingWrapper={true}
       attributes={[
         {
           time: props,
