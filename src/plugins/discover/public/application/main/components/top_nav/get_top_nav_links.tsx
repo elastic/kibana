@@ -11,7 +11,6 @@ import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { relativeToAbsolute } from '@kbn/core-application-browser-internal';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
@@ -180,7 +179,12 @@ export const getTopNavLinks = ({
         refreshInterval,
       };
       const relativeUrl = locator.getRedirectUrl(params);
-      const shareableUrl = relativeToAbsolute(relativeUrl);
+
+      // This logic is duplicated from `relativeToAbsolute` (for bundle size reasons). Ultimately, this should be
+      // replaced when https://github.com/elastic/kibana/issues/153323 is implemented.
+      const link = document.createElement('a');
+      link.setAttribute('href', relativeUrl);
+      const shareableUrl = link.href;
 
       // Share -> Get links -> Saved object
       const shareableUrlForSavedObject = await locator.getUrl(
