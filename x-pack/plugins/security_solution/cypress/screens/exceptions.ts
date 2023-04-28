@@ -102,7 +102,7 @@ export const EXCEPTION_FLYOUT_VERSION_CONFLICT =
 
 export const EXCEPTION_FLYOUT_LIST_DELETED_ERROR = '[data-test-subj="errorCalloutContainer"]';
 
-// Exceptions all items view
+// Exceptions all items view in Rule pages
 export const NO_EXCEPTIONS_EXIST_PROMPT =
   '[data-test-subj="exceptionItemViewerEmptyPrompts-empty"]';
 
@@ -148,6 +148,22 @@ export const OS_SELECTION_SECTION = '[data-test-subj="osSelectionDropdown"]';
 
 export const OS_INPUT = '[data-test-subj="osSelectionDropdown"] [data-test-subj="comboBoxInput"]';
 
+// Exception Item comments
+export const EXCEPTION_COMMENTS_ACCORDION_BTN = '[data-test-subj="exceptionItemCommentsAccordion"]';
+
+export const EXCEPTION_COMMENT_TEXT_AREA = '[data-test-subj="newExceptionItemCommentTextArea"]';
+
+export const EXCEPTION_ITEM_VIEWER_CONTAINER_SHOW_COMMENTS_BTN =
+  '[data-test-subj="exceptionsViewerCommentAccordion"]';
+
+export const EXCEPTION_ITEM_COMMENTS_CONTAINER =
+  '[data-test-subj="exceptionsViewerCommentAccordion"] li';
+
+export const EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT =
+  '[data-test-subj="exceptionsViewerCommentAccordion"] li div.euiCommentEvent__body';
+
+export const EXCEPTION_ITEM_COMMENT_COPY_BTN = '[data-test-subj="clipboard"]';
+
 // Shared Exception List Management Page
 export const MANAGE_EXCEPTION_CREATE_BUTTON_MENU =
   '[data-test-subj="manageExceptionListCreateButton"]';
@@ -159,6 +175,7 @@ export const MANAGE_EXCEPTION_CREATE_LIST_BUTTON =
   '[data-test-subj="manageExceptionListCreateExceptionListButton"]';
 
 export const RULE_ACTION_LINK_RULE_SWITCH = '[data-test-subj="ruleActionLinkRuleSwitch"]';
+
 export const LINK_TO_SHARED_LIST_RADIO = '[data-test-subj="addToListsRadioOptionLabel"]';
 
 export const CREATE_SHARED_EXCEPTION_LIST_NAME_INPUT =
@@ -169,6 +186,32 @@ export const CREATE_SHARED_EXCEPTION_LIST_DESCRIPTION_INPUT =
 
 export const CREATE_SHARED_EXCEPTION_LIST_BTN =
   'button[data-test-subj="exception-lists-form-create-shared"]';
+
+// Exception List detail page
+
+export const EXCEPTIONS_LIST_MANAGEMENT_NAME =
+  '[data-test-subj="exceptionListManagementTitleText"]';
+
+export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_NAME_BTN =
+  '[data-test-subj="exceptionListManagementTitleEditIcon"]';
+
+export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT =
+  '[data-test-subj="editModalNameTextField"]';
+export const EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION =
+  '[data-test-subj="exceptionListManagementDescriptionText"]';
+
+export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT =
+  '[data-test-subj="editModalDescriptionTextField"]';
+
+export const EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN = '[data-test-subj="editModalSaveBtn"]';
+
+export const EXCEPTIONS_LIST_DETAILS_HEADER =
+  '[data-test-subj="exceptionListManagementPageHeader"]';
+
+export const EXCEPTION_LIST_DETAILS_CARD_ITEM_NAME = '[data-test-subj="exceptionItemCardHeader"]';
+
+export const EXCEPTION_LIST_DETAILS_LINK_RULES_BTN =
+  '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkRulesButton"]';
 
 // Import shared exception list
 export const IMPORT_SHARED_EXCEPTION_LISTS_BTN = '[data-test-subj="importSharedExceptionList"]';
@@ -192,44 +235,25 @@ export const LINKED_RULES_BADGE = '[data-test-subj="exceptionListCardLinkedRules
 
 export const MANAGE_RULES_SAVE = '[data-test-subj="manageListRulesSaveButton"]';
 
-// Exception list management
-export const EXCEPTIONS_LIST_MANAGEMENT_NAME =
-  '[data-test-subj="exceptionListManagementTitleText"]';
+export const LINK_RULES_FLYOUT_LINK_SWITCH = '[data-test-subj="ruleActionLinkRuleSwitch"]';
 
-export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_NAME_BTN =
-  '[data-test-subj="exceptionListManagementTitleEditIcon"]';
+export const EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU =
+  '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuEmptyButton"]';
 
-export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT =
-  '[data-test-subj="editModalNameTextField"]';
+export const EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM =
+  '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuMenuPanel"] div button';
 
-export const EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION =
-  '[data-test-subj="exceptionListManagementDescriptionText"]';
+export const EXCEPTION_LIST_DETAIL_MENU_ITEMS =
+  '[data-test-subj="exceptionListManagementRightSideMenuItemsMenuActionsButtonIcon"]';
 
-export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT =
-  '[data-test-subj="editModalDescriptionTextField"]';
+export const EXCEPTION_LIST_DETAIL_EXPORT_BTN =
+  '[data-test-subj="exceptionListManagementRightSideMenuItemsMenuActionsActionItem1"]';
 
-export const EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN = '[data-test-subj="editModalSaveBtn"]';
+export const EXCEPTION_LIST_DETAIL_DUPLICATE_BTN =
+  '[data-test-subj="exceptionListManagementRightSideMenuItemsMenuActionsActionItem3"]';
 
-export const EXCEPTIONS_LIST_DETAILS_HEADER =
-  '[data-test-subj="exceptionListManagementPageHeader"]';
-
-export const EXCEPTION_LIST_DETAILS_CARD_ITEM_NAME = '[data-test-subj="exceptionItemCardHeader"]';
-
-// Exception Item comments
-export const EXCEPTION_COMMENTS_ACCORDION_BTN = '[data-test-subj="exceptionItemCommentsAccordion"]';
-
-export const EXCEPTION_COMMENT_TEXT_AREA = '[data-test-subj="newExceptionItemCommentTextArea"]';
-
-export const EXCEPTION_ITEM_VIEWER_CONTAINER_SHOW_COMMENTS_BTN =
-  '[data-test-subj="exceptionsViewerCommentAccordion"]';
-
-export const EXCEPTION_ITEM_COMMENTS_CONTAINER =
-  '[data-test-subj="exceptionsViewerCommentAccordion"] li';
-
-export const EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT =
-  '[data-test-subj="exceptionsViewerCommentAccordion"] li div.euiCommentEvent__body';
-
-export const EXCEPTION_ITEM_COMMENT_COPY_BTN = '[data-test-subj="clipboard"]';
+export const EXCEPTION_LIST_DETAIL_DELETE_BTN =
+  '[data-test-subj="exceptionListManagementRightSideMenuItemsMenuActionsActionItem3"]';
 
 // Exception card in Shared List Detail Page
 export const EXCEPTION_ITEM_HEADER_ACTION_MENU =

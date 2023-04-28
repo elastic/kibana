@@ -44,7 +44,7 @@ import {
   waitForExceptionsTableToBeLoaded,
 } from '../../../tasks/exceptions_table';
 
-describe('Add/edit exception from exception management page', () => {
+describe('Add, edit and delete exception', () => {
   before(() => {
     esArchiverResetKibana();
     esArchiverLoad('exceptions');
