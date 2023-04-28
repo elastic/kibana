@@ -125,11 +125,9 @@ function maybeSetRecentConfig(file, projectType, isDevMode, configs, method) {
   }
 
   try {
-    if (projectType === true) {
-      if (!existsSync(path)) {
-        writeMode('es');
-      }
-    } else {
+    if (!existsSync(path)) {
+      writeMode(projectType === true ? 'es' : projectType);
+    } else if (typeof projectType === 'string') {
       const data = readFileSync(path, 'utf-8');
       const match = data.match(/serverless: (\w+)\n/);
       if (!match || match[1] !== projectType) {
@@ -139,10 +137,6 @@ function maybeSetRecentConfig(file, projectType, isDevMode, configs, method) {
 
     configs[method](path);
   } catch (err) {
-    if (err.code === 'ENOENT') {
-      return;
-    }
-
     throw err;
   }
 }

@@ -78,7 +78,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../../common/components/navigation/use_get_url_search');
+jest.mock('../../../../common/components/navigation/use_url_state_query_params');
 
 const defaultUseQueryAlertsReturn = {
   loading: true,
