@@ -21,10 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TooltipWrapper } from '@kbn/visualization-ui-components/public';
 import type { DatasourceLayerSettingsProps } from '../../types';
 import type { FormBasedPrivateState } from './types';
 import { isSamplingValueEnabled } from './utils';
-import { TooltipWrapper } from '../../shared_components';
 
 const samplingValues = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1];
 interface SamplingSliderProps {
