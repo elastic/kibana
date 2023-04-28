@@ -83,6 +83,7 @@
     "share": "src/plugins/share",
     "sharedUXPackages": "packages/shared-ux",
     "securitySolutionPackages": "x-pack/packages/security-solution",
+    "serverlessPackages": "packages/serverless",
     "coloring": "packages/kbn-coloring/src",
     "languageDocumentationPopover": "packages/kbn-language-documentation-popover/src",
     "statusPage": "src/legacy/core_plugins/status_page",
@@ -107,6 +108,7 @@
     "visTypeVislib": "src/plugins/vis_types/vislib",
     "visTypeXy": "src/plugins/vis_types/xy",
     "visualizations": "src/plugins/visualizations",
+    "visualizationUiComponents": "src/plugins/visualization_ui_components",
     "unifiedSearch": "src/plugins/unified_search",
     "unifiedFieldList": "src/plugins/unified_field_list",
     "unifiedHistogram": "src/plugins/unified_histogram"
