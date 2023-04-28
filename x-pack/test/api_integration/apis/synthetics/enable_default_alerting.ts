@@ -63,6 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
             notifyWhen: 'onActionGroupChange',
             consumer: 'uptime',
             alertTypeId: 'xpack.synthetics.alerts.monitorStatus',
+            apiKeyCreatedByUser: false,
             tags: ['SYNTHETICS_DEFAULT_ALERT'],
             name: 'Synthetics internal alert',
             enabled: true,

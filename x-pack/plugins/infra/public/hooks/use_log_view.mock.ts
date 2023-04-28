@@ -36,12 +36,18 @@ export const createUninitializedUseLogViewMock =
     load: jest.fn(),
     retry: jest.fn(),
     logView: undefined,
-    logViewId,
+    logViewReference: { type: 'log-view-reference', logViewId },
     logViewStatus: undefined,
     resolvedLogView: undefined,
     update: jest.fn(),
-    logViewStateService: interpret(createPureLogViewStateMachine({ logViewId })),
+    changeLogViewReference: jest.fn(),
+    revertToDefaultLogView: jest.fn(),
+    logViewStateService: interpret(
+      createPureLogViewStateMachine({ logViewReference: { type: 'log-view-reference', logViewId } })
+    ),
     logViewStateNotifications: createLogViewNotificationChannel(),
+    isPersistedLogView: false,
+    isInlineLogView: false,
   });
 
 export const createLoadingUseLogViewMock =

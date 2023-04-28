@@ -8,9 +8,12 @@
 
 import { Env } from '@kbn/config';
 import { getDocLinksMeta, getDocLinks } from '@kbn/doc-links';
+import { LogRecord } from '@kbn/logging';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import fs from 'fs/promises';
+import JSON5 from 'json5';
 
 export const getDocVersion = () => {
   const env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -33,3 +36,11 @@ export const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType =
   mappings: { properties: {} },
   ...parts,
 });
+
+export const parseLogFile = async (filePath: string): Promise<LogRecord[]> => {
+  const logFileContent = await fs.readFile(filePath, 'utf-8');
+  return logFileContent
+    .split('\n')
+    .filter(Boolean)
+    .map((str) => JSON5.parse(str)) as LogRecord[];
+};

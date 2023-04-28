@@ -27,6 +27,7 @@ import type {
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import {
   createPackagePolicyServiceMock,
@@ -170,6 +171,7 @@ export const createMockEndpointAppContextServiceStartContract =
       >(),
       exceptionListsClient: listMock.getExceptionListClient(),
       cases: casesMock,
+      cloud: cloudMock.createSetup(),
       featureUsageService: createFeatureUsageServiceMock(),
       experimentalFeatures: createMockConfig().experimentalFeatures,
       messageSigningService: createMessageSigningServiceMock(),

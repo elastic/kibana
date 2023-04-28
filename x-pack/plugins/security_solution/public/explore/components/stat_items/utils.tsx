@@ -14,7 +14,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
-  UserskKpiStrategyResponse,
+  UsersKpiStrategyResponse,
 } from '../../../../common/search_strategy';
 import type { ChartSeriesData, ChartData } from '../../../common/components/charts/common';
 
@@ -95,12 +95,12 @@ export const barchartConfigs = (config?: { onElementClick?: ElementClickListener
 
 export const addValueToFields = (
   fields: StatItem[],
-  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UserskKpiStrategyResponse
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UsersKpiStrategyResponse
 ): StatItem[] => fields.map((field) => ({ ...field, value: get(field.key, data) }));
 
 export const addValueToAreaChart = (
   fields: StatItem[],
-  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UserskKpiStrategyResponse
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UsersKpiStrategyResponse
 ): ChartSeriesData[] =>
   fields
     .filter((field) => get(`${field.key}Histogram`, data) != null)
@@ -112,7 +112,7 @@ export const addValueToAreaChart = (
 
 export const addValueToBarChart = (
   fields: StatItem[],
-  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UserskKpiStrategyResponse
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse | UsersKpiStrategyResponse
 ): ChartSeriesData[] => {
   if (fields.length === 0) return [];
   return fields.reduce((acc: ChartSeriesData[], field: StatItem, idx: number) => {

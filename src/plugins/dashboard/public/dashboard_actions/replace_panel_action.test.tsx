@@ -17,7 +17,7 @@ import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { ReplacePanelAction } from './replace_panel_action';
 import { pluginServices } from '../services/plugin_services';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../mocks';
+import { buildMockDashboard, getSampleDashboardPanel } from '../mocks';
 import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 
 const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
@@ -28,7 +28,7 @@ pluginServices.getServices().embeddable.getEmbeddableFactory = jest
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
 beforeEach(async () => {
-  const input = getSampleDashboardInput({
+  container = buildMockDashboard({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
         explicitInput: { firstName: 'Sam', id: '123' },
@@ -36,8 +36,6 @@ beforeEach(async () => {
       }),
     },
   });
-  container = new DashboardContainer(input);
-  await container.untilInitialized();
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -54,7 +52,7 @@ beforeEach(async () => {
   }
 });
 
-test('Executes the replace panel action', async () => {
+test('Executes the replace panel action', () => {
   let SavedObjectFinder: any;
   const action = new ReplacePanelAction(SavedObjectFinder);
   action.execute({ embeddable });
@@ -82,13 +80,13 @@ test('Execute throws an error when called with an embeddable not in a parent', a
   await expect(check()).rejects.toThrow(Error);
 });
 
-test('Returns title', async () => {
+test('Returns title', () => {
   let SavedObjectFinder: any;
   const action = new ReplacePanelAction(SavedObjectFinder);
   expect(action.getDisplayName({ embeddable })).toBeDefined();
 });
 
-test('Returns an icon', async () => {
+test('Returns an icon', () => {
   let SavedObjectFinder: any;
   const action = new ReplacePanelAction(SavedObjectFinder);
   expect(action.getIconType({ embeddable })).toBeDefined();

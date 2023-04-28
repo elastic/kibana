@@ -26,8 +26,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('When on the Endpoint Policy List Page', () => {
     before(async () => {
-      const endpointPackage = await policyTestResources.getEndpointPackage();
-      await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
       await browser.refresh();
     });
 

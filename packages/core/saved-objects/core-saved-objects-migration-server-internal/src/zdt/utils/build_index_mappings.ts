@@ -53,5 +53,8 @@ export const buildIndexMeta = ({ types }: BuildIndexMetaOpts): IndexMappingMeta 
   return {
     mappingVersions: modelVersions,
     docVersions: modelVersions,
+    migrationState: {
+      convertingDocuments: false,
+    },
   };
 };

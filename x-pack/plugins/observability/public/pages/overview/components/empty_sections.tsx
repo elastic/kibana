@@ -106,7 +106,7 @@ const getEmptySections = ({ http }: { http: HttpSetup }): ISection[] => {
       href: http.basePath.prepend('/app/home#/tutorial_directory/metrics'),
     },
     {
-      id: 'synthetics',
+      id: 'uptime',
       title: i18n.translate('xpack.observability.emptySection.apps.uptime.title', {
         defaultMessage: 'Uptime',
       }),

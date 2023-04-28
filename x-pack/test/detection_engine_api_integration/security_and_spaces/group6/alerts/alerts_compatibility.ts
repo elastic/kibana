@@ -368,6 +368,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.rule.threat': [],
           'kibana.alert.rule.to': 'now',
           'kibana.alert.rule.references': [],
+          'kibana.alert.rule.revision': 0,
           'kibana.alert.rule.version': 1,
           'kibana.alert.rule.exceptions_list': [],
           'kibana.alert.rule.immutable': false,
@@ -528,6 +529,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.rule.threat': [],
           'kibana.alert.rule.to': 'now',
           'kibana.alert.rule.references': [],
+          'kibana.alert.rule.revision': 0,
           'kibana.alert.rule.version': 1,
           'kibana.alert.rule.exceptions_list': [],
           'kibana.alert.rule.immutable': false,
@@ -556,9 +558,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
-        const rule: SavedQueryRuleCreateProps = getSavedQueryRuleForSignalTesting([
-          `.siem-signals-*`,
-        ]);
+        const rule: SavedQueryRuleCreateProps = {
+          ...getSavedQueryRuleForSignalTesting([`.siem-signals-*`]),
+          query: 'agent.name: "security-linux-1.example.dev"',
+        };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
@@ -569,9 +572,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
-        const rule: SavedQueryRuleCreateProps = getSavedQueryRuleForSignalTesting([
-          `.alerts-security.alerts-default`,
-        ]);
+        const rule: SavedQueryRuleCreateProps = {
+          ...getSavedQueryRuleForSignalTesting([`.alerts-security.alerts-default`]),
+          query: 'agent.name: "security-linux-1.example.dev"',
+        };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
@@ -597,7 +601,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
-        const rule: EqlRuleCreateProps = getEqlRuleForSignalTesting(['.siem-signals-*']);
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForSignalTesting(['.siem-signals-*']),
+          query: 'any where agent.name == "security-linux-1.example.dev"',
+          max_signals: 1000,
+        };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
@@ -608,9 +616,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should generate a signal-on-legacy-signal with AAD index pattern', async () => {
-        const rule: EqlRuleCreateProps = getEqlRuleForSignalTesting([
-          `.alerts-security.alerts-default`,
-        ]);
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForSignalTesting([`.alerts-security.alerts-default`]),
+          query: 'any where agent.name == "security-linux-1.example.dev"',
+          max_signals: 1000,
+        };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 1, [id]);

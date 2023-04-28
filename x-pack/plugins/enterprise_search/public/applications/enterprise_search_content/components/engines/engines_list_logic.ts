@@ -39,7 +39,7 @@ export type EnginesListActions = Pick<
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
   closeDeleteEngineModal(): void;
-  closeEngineCreate(): void;
+
   deleteEngine: DeleteEnginesApiLogicActions['makeRequest'];
   deleteError: DeleteEnginesApiLogicActions['apiError'];
   deleteSuccess: DeleteEnginesApiLogicActions['apiSuccess'];
@@ -51,12 +51,10 @@ export type EnginesListActions = Pick<
     engine: EnterpriseSearchEngine;
   };
   setIsFirstRequest(): void;
-  openEngineCreate(): void;
   setSearchQuery(searchQuery: string): { searchQuery: string };
 };
 
 interface EngineListValues {
-  createEngineFlyoutOpen: boolean;
   data: typeof FetchEnginesAPILogic.values.data;
   deleteModalEngine: EnterpriseSearchEngine | null;
   deleteModalEngineName: string;
@@ -74,6 +72,14 @@ interface EngineListValues {
 }
 
 export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListActions>>({
+  actions: {
+    closeDeleteEngineModal: true,
+    fetchEngines: true,
+    onPaginate: (args: EuiBasicTableOnChange) => ({ pageNumber: args.page.index }),
+    openDeleteEngineModal: (engine) => ({ engine }),
+    setIsFirstRequest: true,
+    setSearchQuery: (searchQuery: string) => ({ searchQuery }),
+  },
   connect: {
     actions: [
       FetchEnginesAPILogic,
@@ -88,25 +94,19 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
       ['status as deleteStatus'],
     ],
   },
-  actions: {
-    closeDeleteEngineModal: true,
-    closeEngineCreate: true,
-    fetchEngines: true,
-    onPaginate: (args: EuiBasicTableOnChange) => ({ pageNumber: args.page.index }),
-    openDeleteEngineModal: (engine) => ({ engine }),
-    openEngineCreate: true,
-    setSearchQuery: (searchQuery: string) => ({ searchQuery }),
-    setIsFirstRequest: true,
-  },
+  listeners: ({ actions, values }) => ({
+    deleteSuccess: () => {
+      actions.closeDeleteEngineModal();
+      actions.fetchEngines();
+    },
+    fetchEngines: async () => {
+      actions.makeRequest(values.parameters);
+    },
+  }),
+
   path: ['enterprise_search', 'content', 'engine_list_logic'],
+
   reducers: ({}) => ({
-    createEngineFlyoutOpen: [
-      false,
-      {
-        closeEngineCreate: () => false,
-        openEngineCreate: () => true,
-      },
-    ],
     deleteModalEngine: [
       null,
       {
@@ -158,6 +158,11 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
   }),
   selectors: ({ selectors }) => ({
     deleteModalEngineName: [() => [selectors.deleteModalEngine], (engine) => engine?.name ?? ''],
+    hasNoEngines: [
+      () => [selectors.data, selectors.results],
+      (data: EngineListValues['data'], results: EngineListValues['results']) =>
+        (data?.params?.from === 0 && results.length === 0 && !data?.params?.q) ?? false,
+    ],
 
     isDeleteLoading: [
       () => [selectors.deleteStatus],
@@ -168,22 +173,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
       (status: EngineListValues['status'], isFirstRequest: EngineListValues['isFirstRequest']) =>
         [Status.LOADING, Status.IDLE].includes(status) && isFirstRequest,
     ],
-    results: [() => [selectors.data], (data) => data?.results ?? []],
-
-    hasNoEngines: [
-      () => [selectors.data, selectors.results],
-      (data: EngineListValues['data'], results: EngineListValues['results']) =>
-        (data?.params?.from === 0 && results.length === 0 && !data?.params?.q) ?? false,
-    ],
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
-  }),
-  listeners: ({ actions, values }) => ({
-    deleteSuccess: () => {
-      actions.closeDeleteEngineModal();
-      actions.fetchEngines();
-    },
-    fetchEngines: async () => {
-      actions.makeRequest(values.parameters);
-    },
+    results: [() => [selectors.data], (data) => data?.results ?? []],
   }),
 });

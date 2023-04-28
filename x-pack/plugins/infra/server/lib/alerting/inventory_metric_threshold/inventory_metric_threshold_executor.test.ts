@@ -75,6 +75,7 @@ const mockOptions = {
     throttle: null,
     notifyWhen: null,
     producer: '',
+    revision: 0,
     ruleTypeId: '',
     ruleTypeName: '',
     muteAll: false,
@@ -97,6 +98,9 @@ const createMockStaticConfiguration = (sources: any) => ({
   },
   inventory: {
     compositeSize: 2000,
+  },
+  logs: {
+    app_target: 'logs-ui',
   },
   sources,
 });

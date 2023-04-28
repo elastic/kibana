@@ -21,7 +21,7 @@ export const TS_PROJECTS = TsProject.loadAll({
 
     'x-pack/plugins/synthetics/e2e/tsconfig.json',
     'x-pack/plugins/ux/e2e/tsconfig.json',
-    'x-pack/plugins/observability/e2e/tsconfig.json',
+    'x-pack/plugins/exploratory_view/e2e/tsconfig.json',
     'x-pack/plugins/threat_intelligence/cypress/tsconfig.json',
   ],
 });

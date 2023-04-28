@@ -16,6 +16,11 @@ import seedrandom from 'seedrandom';
 import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import useObservable from 'react-use/lib/useObservable';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../embeddables/grid_embeddable/constants';
+import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../kibana_context';
@@ -24,12 +29,12 @@ import type { MetricFieldsStats } from '../../common/components/stats_table/comp
 import { TimeBuckets } from '../../../../common/services/time_buckets';
 import type { FieldVisConfig } from '../../common/components/stats_table/types';
 import {
-  SUPPORTED_FIELD_TYPES,
   NON_AGGREGATABLE_FIELD_TYPES,
   OMIT_FIELDS,
+  SUPPORTED_FIELD_TYPES,
 } from '../../../../common/constants';
 import type { FieldRequestConfig, SupportedFieldType } from '../../../../common/types';
-import { kbnTypeToJobType } from '../../common/util/field_types_utils';
+import { kbnTypeToSupportedType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
 import type { DataVisualizerGridInput } from '../embeddables/grid_embeddable/grid_embeddable';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
@@ -37,6 +42,7 @@ import { useFieldStatsSearchStrategy } from './use_field_stats';
 import { useOverallStats } from './use_overall_stats';
 import type { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
 import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
+import { getSupportedAggs } from '../utils/get_supported_aggs';
 
 const defaults = getDefaultPageState();
 
@@ -56,7 +62,25 @@ export const useDataVisualizerGridData = (
   onUpdate?: (params: Dictionary<unknown>) => void
 ) => {
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, data, security } = services;
+  const { uiSettings, data, security, executionContext } = services;
+
+  const parentExecutionContext = useObservable(executionContext?.context$);
+
+  const embeddableExecutionContext: KibanaExecutionContext = useMemo(() => {
+    const child: KibanaExecutionContext = {
+      type: 'visualization',
+      name: DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE,
+      id: input.id,
+    };
+
+    return {
+      ...(parentExecutionContext ? parentExecutionContext : {}),
+      child,
+    };
+  }, [parentExecutionContext, input.id]);
+
+  useExecutionContext(executionContext, embeddableExecutionContext);
+
   const { samplerShardSize, visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
 
   const [lastRefresh, setLastRefresh] = useState(0);
@@ -196,7 +220,7 @@ export const useDataVisualizerGridData = (
 
       const aggInterval = buckets.getInterval();
 
-      const aggregatableFields: string[] = [];
+      const aggregatableFields: OverallStatsSearchStrategyParams['aggregatableFields'] = [];
       const nonAggregatableFields: string[] = [];
 
       const fields = currentDataView.fields;
@@ -211,7 +235,7 @@ export const useDataVisualizerGridData = (
             !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) &&
             !field.esTypes?.some((d) => d === ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE)
           ) {
-            aggregatableFields.push(field.name);
+            aggregatableFields.push({ name: field.name, supportedAggs: getSupportedAggs(field) });
           } else {
             nonAggregatableFields.push(field.name);
           }
@@ -234,6 +258,7 @@ export const useDataVisualizerGridData = (
         fieldsToFetch,
         browserSessionSeed,
         samplingOption: { ...samplingOption, seed: browserSessionSeed.toString() },
+        embeddableExecutionContext,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -250,6 +275,7 @@ export const useDataVisualizerGridData = (
       lastRefresh,
       fieldsToFetch,
       browserSessionSeed,
+      embeddableExecutionContext,
     ]
   );
 
@@ -264,10 +290,8 @@ export const useDataVisualizerGridData = (
     const existMetricFields = metricConfigs
       .map((config) => {
         return {
-          fieldName: config.fieldName,
-          type: config.type,
-          cardinality: config.stats?.cardinality ?? 0,
-          existsInDocs: config.existsInDocs,
+          ...config,
+          cardinality: config.stats?.cardinality,
         };
       })
       .filter((c) => c !== undefined) as FieldRequestConfig[];
@@ -277,10 +301,8 @@ export const useDataVisualizerGridData = (
     const existNonMetricFields: FieldRequestConfig[] = nonMetricConfigs
       .map((config) => {
         return {
-          fieldName: config.fieldName,
-          type: config.type,
-          cardinality: config.stats?.cardinality ?? 0,
-          existsInDocs: config.existsInDocs,
+          ...config,
+          cardinality: config.stats?.cardinality,
         };
       })
       .filter((c) => c !== undefined) as FieldRequestConfig[];
@@ -371,9 +393,11 @@ export const useDataVisualizerGridData = (
         ...fieldData,
         fieldFormat: currentDataView.getFormatterForField(field),
         type: SUPPORTED_FIELD_TYPES.NUMBER,
+        secondaryType: kbnTypeToSupportedType(field),
         loading: fieldData?.existsInDocs ?? true,
         aggregatable: true,
         deletable: field.runtimeField !== undefined,
+        supportedAggs: getSupportedAggs(field),
       };
       if (field.displayName !== metricConfig.fieldName) {
         metricConfig.displayName = field.displayName;
@@ -392,7 +416,7 @@ export const useDataVisualizerGridData = (
   const createNonMetricCards = useCallback(() => {
     const allNonMetricFields = dataViewFields.filter((f) => {
       return (
-        (f.type !== KBN_FIELD_TYPES.NUMBER || f.timeSeriesMetric === 'counter') &&
+        f.type !== KBN_FIELD_TYPES.NUMBER &&
         f.displayName !== undefined &&
         isDisplayField(f.displayName) === true
       );
@@ -447,6 +471,7 @@ export const useDataVisualizerGridData = (
       const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.spec.name);
       const nonMetricConfig: Partial<FieldVisConfig> = {
         ...(fieldData ? fieldData : {}),
+        secondaryType: kbnTypeToSupportedType(field),
         fieldFormat: currentDataView.getFormatterForField(field),
         aggregatable: field.aggregatable,
         loading: fieldData?.existsInDocs ?? true,
@@ -455,7 +480,7 @@ export const useDataVisualizerGridData = (
 
       // Map the field type from the Kibana index pattern to the field type
       // used in the data visualizer.
-      const dataVisualizerType = kbnTypeToJobType(field);
+      const dataVisualizerType = kbnTypeToSupportedType(field) as SupportedFieldType;
       if (dataVisualizerType !== undefined) {
         nonMetricConfig.type = dataVisualizerType;
       } else {
@@ -485,16 +510,12 @@ export const useDataVisualizerGridData = (
     () => {
       const fieldStats = strategyResponse.fieldStats;
       let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
-      if (visibleFieldTypes && visibleFieldTypes.length > 0) {
-        combinedConfigs = combinedConfigs.filter(
-          (config) => visibleFieldTypes.findIndex((field) => field === config.type) > -1
-        );
-      }
-      if (visibleFieldNames && visibleFieldNames.length > 0) {
-        combinedConfigs = combinedConfigs.filter(
-          (config) => visibleFieldNames.findIndex((field) => field === config.fieldName) > -1
-        );
-      }
+
+      combinedConfigs = filterFields(
+        combinedConfigs,
+        visibleFieldNames,
+        visibleFieldTypes
+      ).filteredFields;
 
       if (fieldStats) {
         combinedConfigs = combinedConfigs.map((c) => {

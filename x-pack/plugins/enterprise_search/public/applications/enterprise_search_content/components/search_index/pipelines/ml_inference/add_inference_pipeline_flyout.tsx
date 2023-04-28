@@ -127,6 +127,7 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
           </>
         )}
         <AddInferencePipelineHorizontalSteps />
+        <EuiSpacer size="m" />
         {step === AddInferencePipelineSteps.Configuration && <ConfigurePipeline />}
         {step === AddInferencePipelineSteps.Fields && <ConfigureFields />}
         {step === AddInferencePipelineSteps.Test && <TestPipeline />}
@@ -256,6 +257,15 @@ export const AddInferencePipelineFooter: React.FC<
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-cancel`}
+          onClick={onClose}
+        >
+          {CANCEL_BUTTON_LABEL}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem />
+      <EuiFlexItem grow={false}>
         {previousStep !== undefined ? (
           <EuiButtonEmpty
             flush="both"
@@ -265,15 +275,6 @@ export const AddInferencePipelineFooter: React.FC<
             {BACK_BUTTON_LABEL}
           </EuiButtonEmpty>
         ) : null}
-      </EuiFlexItem>
-      <EuiFlexItem />
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-cancel`}
-          onClick={onClose}
-        >
-          {CANCEL_BUTTON_LABEL}
-        </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {nextStep !== undefined ? (

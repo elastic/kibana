@@ -188,4 +188,82 @@ describe('createOrUpdateComponentTemplate', () => {
       },
     });
   });
+
+  it(`should retry getIndexTemplate and putIndexTemplate on transient ES errors`, async () => {
+    clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(
+      new EsErrors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 400,
+          body: {
+            error: {
+              root_cause: [
+                {
+                  type: 'illegal_argument_exception',
+                  reason:
+                    'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
+                },
+              ],
+              type: 'illegal_argument_exception',
+              reason:
+                'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
+              caused_by: {
+                type: 'illegal_argument_exception',
+                reason:
+                  'composable template [.alerts-security.alerts-default-index-template] template after composition with component templates [.alerts-ecs-mappings, .alerts-security.alerts-mappings, .alerts-technical-mappings] is invalid',
+                caused_by: {
+                  type: 'illegal_argument_exception',
+                  reason:
+                    'invalid composite mappings for [.alerts-security.alerts-default-index-template]',
+                  caused_by: {
+                    type: 'illegal_argument_exception',
+                    reason: 'Limit of total fields [1900] has been exceeded',
+                  },
+                },
+              },
+            },
+          },
+        })
+      )
+    );
+    const existingIndexTemplate = {
+      name: 'test-template',
+      index_template: {
+        index_patterns: ['test*'],
+        composed_of: ['test-mappings'],
+        template: {
+          settings: {
+            auto_expand_replicas: '0-1',
+            hidden: true,
+            'index.lifecycle': {
+              name: '.alerts-ilm-policy',
+              rollover_alias: `.alerts-empty-default`,
+            },
+            'index.mapping.total_fields.limit': 1800,
+          },
+          mappings: {
+            dynamic: false,
+          },
+        },
+      },
+    };
+    clusterClient.indices.getIndexTemplate
+      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+      .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+      .mockResolvedValueOnce({
+        index_templates: [existingIndexTemplate],
+      });
+    clusterClient.indices.putIndexTemplate
+      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+      .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+      .mockResolvedValue({ acknowledged: true });
+    await createOrUpdateComponentTemplate({
+      logger,
+      esClient: clusterClient,
+      template: ComponentTemplate,
+      totalFieldsLimit: 2500,
+    });
+
+    expect(clusterClient.indices.getIndexTemplate).toHaveBeenCalledTimes(3);
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
+  });
 });

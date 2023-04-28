@@ -11,21 +11,29 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
-import type {
-  SlackActionParams,
-  SlackSecrets,
-  WebhookParams,
-  PostMessageParams,
-} from '../../../common/slack/types';
+import { SlackActionParams, SlackSecrets } from '../types';
+import { PostMessageParams } from '../../../common/slack_api/types';
 
-export function getConnectorType(): ConnectorTypeModel<
-  unknown,
-  SlackSecrets,
-  WebhookParams | PostMessageParams
-> {
+export const subtype = [
+  {
+    id: '.slack',
+    name: i18n.translate('xpack.stackConnectors.components.slack.webhook', {
+      defaultMessage: 'Webhook',
+    }),
+  },
+  {
+    id: '.slack_api',
+    name: i18n.translate('xpack.stackConnectors.components.slack.webApi', {
+      defaultMessage: 'Web API',
+    }),
+  },
+];
+
+export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, SlackActionParams> {
   return {
-    id: SLACK_CONNECTOR_ID,
+    id: '.slack',
+    subtype,
+    modalWidth: 675,
     iconClass: 'logoSlack',
     selectMessage: i18n.translate('xpack.stackConnectors.components.slack.selectMessageText', {
       defaultMessage: 'Send a message to a Slack channel or user.',
@@ -39,39 +47,20 @@ export function getConnectorType(): ConnectorTypeModel<
       const translations = await import('./translations');
       const errors = {
         message: new Array<string>(),
-        'subActionParams.channels': new Array<string>(),
       };
       const validationResult = { errors };
-
-      if ('subAction' in actionParams) {
-        if (actionParams.subAction === 'postMessage') {
-          if (!actionParams.subActionParams.text) {
-            errors.message.push(translations.MESSAGE_REQUIRED);
-          }
-          if (!actionParams.subActionParams.channels?.length) {
-            errors['subActionParams.channels'].push(translations.CHANNEL_REQUIRED);
-          }
-        }
-      } else {
-        if (!actionParams.message) {
-          errors.message.push(translations.MESSAGE_REQUIRED);
-        }
+      if (!actionParams.message?.length) {
+        errors.message.push(translations.MESSAGE_REQUIRED);
       }
       return validationResult;
     },
     actionConnectorFields: lazy(() => import('./slack_connectors')),
     actionParamsFields: lazy(() => import('./slack_params')),
-    resetParamsOnConnectorChange: (
-      params: WebhookParams | PostMessageParams
-    ): WebhookParams | PostMessageParams | {} => {
+    convertParamsBetweenGroups: (
+      params: PostMessageParams | SlackActionParams
+    ): PostMessageParams | SlackActionParams | {} => {
       if ('message' in params) {
-        return {
-          subAction: 'postMessage',
-          subActionParams: {
-            channels: [],
-            text: params.message,
-          },
-        };
+        return params;
       } else if ('subAction' in params) {
         return {
           message: (params as PostMessageParams).subActionParams.text,

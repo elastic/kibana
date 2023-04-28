@@ -56,17 +56,17 @@ export default function alertTests({ getService }: FtrProviderContext) {
     ),
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/140867
-  // Failing: See https://github.com/elastic/kibana/issues/142704
-  // Failing: See https://github.com/elastic/kibana/issues/153801
-  // Failing: See https://github.com/elastic/kibana/issues/153800
-  describe.skip('alerts', () => {
+  describe('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
       await esTestIndexTool.destroy();
-      await esArchiver.load('x-pack/test/functional/es_archives/alerts_legacy');
+      // Not 100% sure why, seems the rules need to be loaded separately to avoid the task
+      // failing to load the rule during execution and deleting itself. Otherwise
+      // we have flakiness
+      await esArchiver.load('x-pack/test/functional/es_archives/alerts_legacy/rules');
+      await esArchiver.load('x-pack/test/functional/es_archives/alerts_legacy/tasks');
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
       await setupSpacesAndUsers(getService);
@@ -75,7 +75,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      await esArchiver.unload('x-pack/test/functional/es_archives/alerts_legacy');
+      await esArchiver.unload('x-pack/test/functional/es_archives/alerts_legacy/tasks');
+      await esArchiver.unload('x-pack/test/functional/es_archives/alerts_legacy/rules');
     });
 
     for (const scenario of UserAtSpaceScenarios) {

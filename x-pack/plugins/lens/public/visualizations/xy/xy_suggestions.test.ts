@@ -149,6 +149,25 @@ describe('xy_suggestions', () => {
     );
   });
 
+  test('marks incomplete as true when no metric is provided', () => {
+    expect(
+      (
+        [
+          {
+            isMultiRow: true,
+            columns: [strCol('foo')],
+            layerId: 'first',
+            changeType: 'unchanged',
+          },
+        ] as TableSuggestion[]
+      ).map((table) => {
+        const suggestions = getSuggestions({ table, keptLayerIds: [] });
+        expect(suggestions.every((suggestion) => suggestion.incomplete)).toEqual(true);
+        expect(suggestions).toHaveLength(10);
+      })
+    );
+  });
+
   test('rejects the configuration when metric isStaticValue', () => {
     (generateId as jest.Mock).mockReturnValueOnce('aaa');
     const suggestions = getSuggestions({

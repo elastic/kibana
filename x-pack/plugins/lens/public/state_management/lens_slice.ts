@@ -62,13 +62,21 @@ export const getPreloadedState = ({
 }: LensStoreDeps) => {
   const initialDatasourceId = getInitialDatasourceId(datasourceMap);
   const datasourceStates: LensAppState['datasourceStates'] = {};
+  // Initialize an empty datasourceStates for each datasource
+  if (initialDatasourceId) {
+    Object.keys(datasourceMap).forEach((datasourceId) => {
+      datasourceStates[datasourceId] = {
+        state: null,
+        isLoading: true,
+      };
+    });
+  }
   if (initialStateFromLocator) {
+    // if anything is passed via locator then populate the empty state
     if ('datasourceStates' in initialStateFromLocator) {
       Object.keys(datasourceMap).forEach((datasourceId) => {
-        datasourceStates[datasourceId] = {
-          state: initialStateFromLocator.datasourceStates[datasourceId],
-          isLoading: true,
-        };
+        datasourceStates[datasourceId].state =
+          initialStateFromLocator.datasourceStates[datasourceId];
       });
     }
     return {
@@ -81,14 +89,6 @@ export const getPreloadedState = ({
         initialDatasourceId,
       datasourceStates,
     };
-  }
-  if (initialDatasourceId) {
-    Object.keys(datasourceMap).forEach((datasourceId) => {
-      datasourceStates[datasourceId] = {
-        state: null,
-        isLoading: true,
-      };
-    });
   }
 
   const state = {

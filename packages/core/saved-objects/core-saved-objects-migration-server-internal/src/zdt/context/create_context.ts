@@ -21,12 +21,15 @@ export const createContext = ({
   types,
   docLinks,
   migrationConfig,
+  documentMigrator,
   elasticsearchClient,
   indexPrefix,
   typeRegistry,
   serializer,
 }: CreateContextOps): MigratorContext => {
   return {
+    migrationConfig,
+    documentMigrator,
     kibanaVersion,
     indexPrefix,
     types,
@@ -37,5 +40,6 @@ export const createContext = ({
     maxRetryAttempts: migrationConfig.retryAttempts,
     migrationDocLinks: docLinks.links.kibanaUpgradeSavedObjects,
     deletedTypes: REMOVED_TYPES,
+    discardCorruptObjects: Boolean(migrationConfig.discardCorruptObjects),
   };
 };

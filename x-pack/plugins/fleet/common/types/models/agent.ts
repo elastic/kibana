@@ -389,7 +389,10 @@ export interface FleetServerAgentAction {
   data?: {
     [k: string]: unknown;
   };
-
   total?: number;
+
+  /** Trace id */
+  traceparent?: string | null;
+
   [k: string]: unknown;
 }

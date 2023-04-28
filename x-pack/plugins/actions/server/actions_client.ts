@@ -106,11 +106,12 @@ interface Action extends ActionUpdate {
 
 export interface CreateOptions {
   action: Action;
+  options?: { id?: string };
 }
 
 interface ConstructorOptions {
   logger: Logger;
-  defaultKibanaIndex: string;
+  kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -134,7 +135,7 @@ export interface UpdateOptions {
 
 export class ActionsClient {
   private readonly logger: Logger;
-  private readonly defaultKibanaIndex: string;
+  private readonly kibanaIndices: string[];
   private readonly scopedClusterClient: IScopedClusterClient;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
@@ -153,7 +154,7 @@ export class ActionsClient {
   constructor({
     logger,
     actionTypeRegistry,
-    defaultKibanaIndex,
+    kibanaIndices,
     scopedClusterClient,
     unsecuredSavedObjectsClient,
     preconfiguredActions,
@@ -172,7 +173,7 @@ export class ActionsClient {
     this.actionTypeRegistry = actionTypeRegistry;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.scopedClusterClient = scopedClusterClient;
-    this.defaultKibanaIndex = defaultKibanaIndex;
+    this.kibanaIndices = kibanaIndices;
     this.preconfiguredActions = preconfiguredActions;
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
@@ -191,8 +192,20 @@ export class ActionsClient {
    */
   public async create({
     action: { actionTypeId, name, config, secrets },
+    options,
   }: CreateOptions): Promise<ActionResult> {
-    const id = SavedObjectsUtils.generateId();
+    const id = options?.id || SavedObjectsUtils.generateId();
+
+    if (this.preconfiguredActions.some((preconfiguredAction) => preconfiguredAction.id === id)) {
+      throw Boom.badRequest(
+        i18n.translate('xpack.actions.serverSideErrors.predefinedIdConnectorAlreadyExists', {
+          defaultMessage: 'This {id} already exist in preconfigured action.',
+          values: {
+            id,
+          },
+        })
+      );
+    }
 
     try {
       await this.authorization.ensureAuthorized('create', actionTypeId);
@@ -449,11 +462,7 @@ export class ActionsClient {
         isDeprecated: isConnectorDeprecated(preconfiguredAction),
       })),
     ].sort((a, b) => a.name.localeCompare(b.name));
-    return await injectExtraFindData(
-      this.defaultKibanaIndex,
-      this.scopedClusterClient,
-      mergedResult
-    );
+    return await injectExtraFindData(this.kibanaIndices, this.scopedClusterClient, mergedResult);
   }
 
   /**
@@ -888,7 +897,7 @@ function actionFromSavedObject(
 }
 
 async function injectExtraFindData(
-  defaultKibanaIndex: string,
+  kibanaIndices: string[],
   scopedClusterClient: IScopedClusterClient,
   actionResults: ActionResult[]
 ): Promise<FindActionResult[]> {
@@ -927,7 +936,7 @@ async function injectExtraFindData(
     };
   }
   const aggregationResult = await scopedClusterClient.asInternalUser.search({
-    index: defaultKibanaIndex,
+    index: kibanaIndices,
     body: {
       aggs,
       size: 0,

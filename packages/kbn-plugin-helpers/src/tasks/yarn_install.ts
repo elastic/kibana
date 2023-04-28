@@ -11,11 +11,11 @@ import Path from 'path';
 
 import execa from 'execa';
 
-import { BuildContext } from '../build_context';
+import { TaskContext } from '../task_context';
 
 const winVersion = (path: string) => (process.platform === 'win32' ? `${path}.cmd` : path);
 
-export async function yarnInstall({ log, buildDir, config }: BuildContext) {
+export async function yarnInstall({ log, buildDir, config }: TaskContext) {
   const pkgJson = Path.resolve(buildDir, 'package.json');
 
   if (config?.skipInstallDependencies || !Fs.existsSync(pkgJson)) {

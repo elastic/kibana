@@ -9,13 +9,19 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { searchProvider } from './search';
 
 type OrigMlClient = ElasticsearchClient['ml'];
+export interface UpdateTrainedModelDeploymentRequest {
+  model_id: string;
+  number_of_allocations: number;
+}
+export interface UpdateTrainedModelDeploymentResponse {
+  acknowledge: boolean;
+}
 
 export interface MlClient extends OrigMlClient {
   anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
-  updateTrainedModelDeployment: (payload: {
-    model_id: string;
-    number_of_allocations: number;
-  }) => Promise<{ acknowledge: boolean }>;
+  updateTrainedModelDeployment: (
+    payload: UpdateTrainedModelDeploymentRequest
+  ) => Promise<UpdateTrainedModelDeploymentResponse>;
 }
 
 export type MlClientParams =

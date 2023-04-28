@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiFormLabel, EuiPanel, EuiSelect, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+
 import { SLI_OPTIONS } from '../constants';
 import { ApmAvailabilityIndicatorTypeForm } from './apm_availability/apm_availability_indicator_type_form';
 import { ApmLatencyIndicatorTypeForm } from './apm_latency/apm_latency_indicator_type_form';
@@ -33,42 +34,36 @@ export function SloEditFormIndicatorSection() {
   };
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
-      <EuiTitle>
-        <h2>
-          {i18n.translate('xpack.observability.slo.sloEdit.definition.title', {
-            defaultMessage: 'Define SLI',
-          })}
-        </h2>
-      </EuiTitle>
-
-      <EuiSpacer size="xl" />
-
-      <EuiFormLabel>
-        {i18n.translate('xpack.observability.slo.sloEdit.definition.sliType', {
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="none"
+      style={{ maxWidth }}
+      data-test-subj="sloEditFormIndicatorSection"
+    >
+      <EuiFormRow
+        label={i18n.translate('xpack.observability.slo.sloEdit.definition.sliType', {
           defaultMessage: 'Choose the SLI type',
         })}
-      </EuiFormLabel>
-
-      <Controller
-        name="indicator.type"
-        control={control}
-        rules={{ required: true }}
-        render={({ field: { ref, ...field } }) => (
-          <EuiSelect
-            {...field}
-            required
-            data-test-subj="sloFormIndicatorTypeSelect"
-            options={SLI_OPTIONS}
-          />
-        )}
-      />
+      >
+        <Controller
+          name="indicator.type"
+          control={control}
+          rules={{ required: true }}
+          render={({ field: { ref, ...field } }) => (
+            <EuiSelect
+              {...field}
+              required
+              data-test-subj="sloFormIndicatorTypeSelect"
+              options={SLI_OPTIONS}
+            />
+          )}
+        />
+      </EuiFormRow>
 
       <EuiSpacer size="xxl" />
 
       {getIndicatorTypeForm()}
-
-      <EuiSpacer size="m" />
     </EuiPanel>
   );
 }

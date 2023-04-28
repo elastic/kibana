@@ -8,7 +8,15 @@
 import {
   DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB,
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB,
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB,
@@ -28,6 +36,10 @@ import {
   openInvestigationsTab,
   openSessionView,
   openVisualizeTab,
+  openEntities,
+  openThreatIntelligence,
+  openPrevalence,
+  openCorrelations,
 } from '../../../tasks/document_expandable_flyout';
 import { cleanKibana } from '../../../tasks/common';
 import { login, visit } from '../../../tasks/login';
@@ -65,7 +77,7 @@ describe.skip('Alert details expandable flyout left panel', { testIsolation: fal
     cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP).should('be.visible');
 
     openInsightsTab();
-    cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CONTENT).should('be.visible');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP).should('be.visible');
 
     openInvestigationsTab();
     cy.get(DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB_CONTENT).should('be.visible');
@@ -74,26 +86,65 @@ describe.skip('Alert details expandable flyout left panel', { testIsolation: fal
     cy.get(DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB_CONTENT).should('be.visible');
   });
 
-  it('should display a button group with 2 button in the visualize tab', () => {
-    openVisualizeTab();
-    cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON)
-      .should('be.visible')
-      .and('have.text', 'Session View');
-    cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON)
-      .should('be.visible')
-      .and('have.text', 'Analyzer Graph');
+  describe('visualiza tab', () => {
+    it('should display a button group with 2 button in the visualize tab', () => {
+      openVisualizeTab();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON)
+        .should('be.visible')
+        .and('have.text', 'Session View');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON)
+        .should('be.visible')
+        .and('have.text', 'Analyzer Graph');
+    });
+
+    it('should display content when switching buttons', () => {
+      openVisualizeTab();
+      openSessionView();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_CONTENT).should('be.visible');
+
+      openGraphAnalyzer();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT).should('be.visible');
+    });
   });
 
-  it('should display content when switching buttons', () => {
-    openVisualizeTab();
-    openSessionView();
-    cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_CONTENT)
-      .should('be.visible')
-      .and('have.text', 'Session view');
+  describe('insights tab', () => {
+    it('should display a button group with 4 button in the insights tab', () => {
+      openInsightsTab();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON)
+        .should('be.visible')
+        .and('have.text', 'Entities');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON)
+        .should('be.visible')
+        .and('have.text', 'Threat Intelligence');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON)
+        .should('be.visible')
+        .and('have.text', 'Prevalence');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON)
+        .should('be.visible')
+        .and('have.text', 'Correlations');
+    });
 
-    openGraphAnalyzer();
-    cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT)
-      .should('be.visible')
-      .and('have.text', 'Analyzer graph');
+    it('should display content when switching buttons', () => {
+      openInsightsTab();
+      openEntities();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_CONTENT)
+        .should('be.visible')
+        .and('have.text', 'Entities');
+
+      openThreatIntelligence();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_CONTENT)
+        .should('be.visible')
+        .and('have.text', 'Threat Intelligence');
+
+      openPrevalence();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_CONTENT)
+        .should('be.visible')
+        .and('have.text', 'Prevalence');
+
+      openCorrelations();
+      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_CONTENT)
+        .should('be.visible')
+        .and('have.text', 'Correlations');
+    });
   });
 });

@@ -6,18 +6,12 @@
  */
 
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
-import type { KibanaExecutionContext } from '@kbn/core/public';
-import {
-  getTilemap,
-  getEMSSettings,
-  getMapsEmsStart,
-  getExecutionContext,
-} from './kibana_services';
+import { getEMSSettings, getMapsEmsStart } from './kibana_services';
 import { getLicenseId } from './licensed_features';
-import { makeExecutionContext } from '../common/execution_context';
 
 export function getKibanaTileMap(): unknown {
-  return getTilemap();
+  const mapsEms = getMapsEmsStart();
+  return mapsEms.config.tilemap ? mapsEms.config.tilemap : {};
 }
 
 export async function getEmsFileLayers(): Promise<FileLayer[]> {
@@ -60,23 +54,4 @@ async function getEMSClient(): Promise<EMSClient> {
 
 export function isRetina(): boolean {
   return window.devicePixelRatio === 2;
-}
-
-export function makePublicExecutionContext(description: string): KibanaExecutionContext {
-  const topLevelContext = getExecutionContext().get();
-  const context = makeExecutionContext({
-    url: window.location.pathname,
-    description,
-  });
-
-  // Distinguish between running in maps app vs. embedded
-  return topLevelContext.name !== undefined && topLevelContext.name !== context.name
-    ? {
-        ...topLevelContext,
-        child: context,
-      }
-    : {
-        ...topLevelContext,
-        ...context,
-      };
 }

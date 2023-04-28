@@ -7,22 +7,23 @@
     "id": "synthetics",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "uptime"
-    ],
+    "configPath": ["xpack", "uptime"],
     "requiredPlugins": [
       "actions",
       "alerting",
       "cases",
+      "data",
+      "fleet",
       "embeddable",
       "discover",
       "dataViews",
       "encryptedSavedObjects",
+      "exploratoryView",
       "features",
       "inspector",
       "licensing",
       "observability",
+      "observabilityShared",
       "ruleRegistry",
       "security",
       "share",
@@ -30,17 +31,9 @@
       "triggersActionsUi",
       "usageCollection",
       "unifiedSearch",
-      "spaces",
       "bfetch"
     ],
-    "optionalPlugins": [
-      "cloud",
-      "data",
-      "fleet",
-      "home",
-      "ml",
-      "telemetry"
-    ],
+    "optionalPlugins": ["cloud", "data", "fleet", "home", "ml", "spaces", "telemetry"],
     "requiredBundles": [
       "data",
       "unifiedSearch",
@@ -49,6 +42,7 @@
       "kibanaUtils",
       "ml",
       "observability",
+      "spaces",
       "indexLifecycleManagement"
     ]
   }

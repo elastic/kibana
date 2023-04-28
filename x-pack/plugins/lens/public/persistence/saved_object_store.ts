@@ -12,7 +12,7 @@ import {
   ResolvedSimpleSavedObject,
 } from '@kbn/core/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { DOC_TYPE } from '../../common';
+import { DOC_TYPE } from '../../common/constants';
 import { LensSavedObjectAttributes } from '../async_services';
 
 export interface Document {

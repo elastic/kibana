@@ -8,7 +8,8 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { ERROR_MESSAGE, ERROR_TITLE } from './translations';
+import { DOCUMENT_ERROR_DETAILS, DOCUMENT_ERROR_TITLE } from './translations';
+import { ERROR_TITLE, ERROR_MESSAGE } from '../../shared/translations';
 import { TimelineTabs } from '../../../../common/types';
 import { EventFieldsBrowser } from '../../../common/components/event_details/event_fields_browser';
 import { useRightPanelContext } from '../context';
@@ -25,8 +26,8 @@ export const TableTab: FC = memo(() => {
       <EuiEmptyPrompt
         iconType="error"
         color="danger"
-        title={<h2>{ERROR_TITLE}</h2>}
-        body={<p>{ERROR_MESSAGE}</p>}
+        title={<h2>{ERROR_TITLE(DOCUMENT_ERROR_TITLE)}</h2>}
+        body={<p>{ERROR_MESSAGE(DOCUMENT_ERROR_DETAILS)}</p>}
         data-test-subj={TABLE_TAB_ERROR_TEST_ID}
       />
     );

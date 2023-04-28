@@ -8,15 +8,11 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import JSON5 from 'json5';
-import { LogRecord } from '@kbn/logging';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import {
-  getKibanaMigratorTestKit,
-  type KibanaMigratorTestKitParams,
-} from '../kibana_migrator_test_kit';
-import { delay } from '../test_utils';
-import { getFooType, getBarType, dummyModelVersion } from './base_types.fixtures';
+import '../jest_matchers';
+import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
+import { delay, parseLogFile } from '../test_utils';
+import { getBaseMigratorParams, getFooType, getBarType, dummyModelVersion } from './base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'mapping_version_conflict.test.log');
 
@@ -35,15 +31,7 @@ describe('ZDT upgrades - mapping model version conflict', () => {
     return await startES();
   };
 
-  const baseMigratorParams: KibanaMigratorTestKitParams = {
-    kibanaIndex: '.kibana',
-    kibanaVersion: '8.7.0',
-    settings: {
-      migrations: {
-        algorithm: 'zdt',
-      },
-    },
-  };
+  const baseMigratorParams = getBaseMigratorParams();
 
   beforeAll(async () => {
     await fs.unlink(logFilePath).catch(() => {});
@@ -115,25 +103,16 @@ describe('ZDT upgrades - mapping model version conflict', () => {
     const mappings = index.mappings ?? {};
     const mappingMeta = mappings._meta ?? {};
 
-    expect(aliases).toEqual(['.kibana', '.kibana_8.7.0']);
+    expect(aliases).toEqual(['.kibana', '.kibana_8.8.0']);
 
     expect(mappingMeta.mappingVersions).toEqual({
       foo: 2,
       bar: 2,
     });
 
-    const logFileContent = await fs.readFile(logFilePath, 'utf-8');
-    const records = logFileContent
-      .split('\n')
-      .filter(Boolean)
-      .map((str) => JSON5.parse(str)) as LogRecord[];
+    const records = await parseLogFile(logFilePath);
 
-    const expectLogsContains = (messagePrefix: string) => {
-      expect(records.find((entry) => entry.message.includes(messagePrefix))).toBeDefined();
-    };
-
-    //
-    expectLogsContains('Mappings model version check result: conflict');
-    expectLogsContains('INIT -> FATAL');
+    expect(records).toContainLogEntry('Mappings model version check result: conflict');
+    expect(records).toContainLogEntry('INIT -> FATAL');
   });
 });

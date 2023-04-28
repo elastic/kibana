@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { EuiTableActionsColumnType } from '@elastic/eui';
+
 import type { SignificantTerm, SignificantTermGroupItem } from '@kbn/ml-agg-utils';
 
 export type GroupTableItemGroup = Pick<
@@ -20,3 +22,7 @@ export interface GroupTableItem {
   groupItemsSortedByUniqueness: GroupTableItemGroup[];
   histogram: SignificantTerm['histogram'];
 }
+
+export type TableItemAction = EuiTableActionsColumnType<
+  SignificantTerm | GroupTableItem
+>['actions'][number];

@@ -642,7 +642,7 @@ describe('Response actions', () => {
         expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('execute');
         const parameters = actionDocs[1].body!.data.parameters as ResponseActionsExecuteParameters;
         expect(parameters.command).toEqual('ls -al');
-        expect(parameters.timeout).toEqual(14400000); // 4hrs
+        expect(parameters.timeout).toEqual(14400); // 4hrs in seconds
         expect(actionDocs[1].body!.data.command).toEqual('execute');
 
         expect(mockResponse.ok).toBeCalled();

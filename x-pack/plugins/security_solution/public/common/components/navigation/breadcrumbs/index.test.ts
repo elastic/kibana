@@ -412,6 +412,10 @@ describe('Navigation Breadcrumbs', () => {
           rulesBReadcrumb,
           {
             text: 'ALERT_RULE_NAME',
+            href: `securitySolutionUI/rules/id/${mockDetailName}`,
+          },
+          {
+            text: 'Deleted rule',
             href: '',
           },
         ]);
@@ -764,7 +768,11 @@ describe('Navigation Breadcrumbs', () => {
           rulesBReadcrumb,
           {
             text: mockRuleName,
-            href: ``,
+            href: `securitySolutionUI/rules/id/${mockDetailName}`,
+          },
+          {
+            text: 'Deleted rule',
+            href: '',
           },
         ]);
       });

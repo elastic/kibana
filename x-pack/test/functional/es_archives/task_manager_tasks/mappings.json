@@ -161,20 +161,23 @@
         },
         "task": {
           "properties": {
-            "attempts": {
-              "type": "integer"
-            },
-            "ownerId": {
+            "taskType": {
               "type": "keyword"
             },
-            "params": {
-              "type": "text"
-            },
-            "retryAt": {
+            "scheduledAt": {
               "type": "date"
             },
             "runAt": {
               "type": "date"
+            },
+            "startedAt": {
+              "type": "date"
+            },
+            "retryAt": {
+              "type": "date"
+            },
+            "enabled": {
+              "type": "boolean"
             },
             "schedule": {
               "properties": {
@@ -183,25 +186,28 @@
                 }
               }
             },
-            "scheduledAt": {
-              "type": "date"
-            },
-            "scope": {
-              "type": "keyword"
-            },
-            "startedAt": {
-              "type": "date"
-            },
-            "state": {
-              "type": "text"
+            "attempts": {
+              "type": "integer"
             },
             "status": {
               "type": "keyword"
             },
-            "taskType": {
-              "type": "keyword"
+            "traceparent": {
+              "type": "text"
+            },
+            "params": {
+              "type": "text"
+            },
+            "state": {
+              "type": "text"
             },
             "user": {
+              "type": "keyword"
+            },
+            "scope": {
+              "type": "keyword"
+            },
+            "ownerId": {
               "type": "keyword"
             }
           }

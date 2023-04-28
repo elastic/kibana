@@ -15,7 +15,9 @@ export interface TestData {
   requestBody: ApiExplainLogRateSpikes['body'];
   expected: {
     chunksLength: number;
+    chunksLengthGroupOnly: number;
     actionsLength: number;
+    actionsLengthGroupOnly: number;
     noIndexChunksLength: number;
     noIndexActionsLength: number;
     significantTermFilter: 'add_significant_terms';

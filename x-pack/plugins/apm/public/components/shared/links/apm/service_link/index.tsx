@@ -40,7 +40,6 @@ export function ServiceLink({
   agentName,
   query,
   serviceName,
-  serviceOverflowCount,
 }: ServiceLinkProps) {
   const { link } = useApmRouter();
 
@@ -70,9 +69,7 @@ export function ServiceLink({
             iconType="warning"
           >
             <EuiText style={{ width: `${unit * 28}px` }} size="s">
-              <ServiceMaxGroupsMessage
-                serviceOverflowCount={serviceOverflowCount}
-              />
+              <ServiceMaxGroupsMessage />
             </EuiText>
           </PopoverTooltip>
         </EuiFlexItem>

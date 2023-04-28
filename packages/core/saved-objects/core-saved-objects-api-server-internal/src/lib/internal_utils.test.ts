@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
@@ -17,6 +18,7 @@ import {
   normalizeNamespace,
   rawDocExistsInNamespace,
   rawDocExistsInNamespaces,
+  setManaged,
 } from './internal_utils';
 
 describe('#getBulkOperationError', () => {
@@ -98,6 +100,7 @@ describe('#getSavedObjectFromSource', () => {
   const originId = 'originId';
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const updated_at = 'updatedAt';
+  const managed = false;
 
   function createRawDoc(
     type: string,
@@ -114,6 +117,7 @@ describe('#getSavedObjectFromSource', () => {
         migrationVersion,
         coreMigrationVersion,
         typeMigrationVersion,
+        managed,
         originId,
         updated_at,
         ...namespaceAttrs,
@@ -130,6 +134,7 @@ describe('#getSavedObjectFromSource', () => {
       attributes,
       coreMigrationVersion,
       typeMigrationVersion,
+      managed,
       id,
       migrationVersion,
       namespaces: expect.anything(), // see specific test cases below
@@ -169,6 +174,49 @@ describe('#getSavedObjectFromSource', () => {
     const result2 = getSavedObjectFromSource(registry, type, id, doc2);
     expect(result1).toEqual(expect.objectContaining({ namespaces: ['default'] }));
     expect(result2).toEqual(expect.objectContaining({ namespaces: ['foo-ns'] }));
+  });
+
+  it('keeps original `migrationVersion` in compatibility mode', () => {
+    const type = NAMESPACE_AGNOSTIC_TYPE;
+    const doc = createRawDoc(type);
+    const result = getSavedObjectFromSource(registry, type, id, doc, {
+      migrationVersionCompatibility: 'compatible',
+    });
+    expect(result).toHaveProperty('migrationVersion', migrationVersion);
+  });
+
+  it('derives `migrationVersion` in compatibility mode', () => {
+    const type = NAMESPACE_AGNOSTIC_TYPE;
+    const doc = omit(createRawDoc(type), '_source.migrationVersion');
+
+    const result = getSavedObjectFromSource(registry, type, id, doc, {
+      migrationVersionCompatibility: 'compatible',
+    });
+    expect(result).toHaveProperty('migrationVersion', { [type]: typeMigrationVersion });
+  });
+
+  it('does not derive `migrationVersion` in compatibility mode if there is no type version', () => {
+    const type = NAMESPACE_AGNOSTIC_TYPE;
+    const doc = omit(
+      createRawDoc(type),
+      '_source.migrationVersion',
+      '_source.typeMigrationVersion'
+    );
+
+    const result = getSavedObjectFromSource(registry, type, id, doc, {
+      migrationVersionCompatibility: 'compatible',
+    });
+    expect(result).toHaveProperty('migrationVersion', undefined);
+  });
+
+  it('does not derive `migrationVersion` in raw mode', () => {
+    const type = NAMESPACE_AGNOSTIC_TYPE;
+    const doc = omit(createRawDoc(type), '_source.migrationVersion');
+
+    const result = getSavedObjectFromSource(registry, type, id, doc, {
+      migrationVersionCompatibility: 'raw',
+    });
+    expect(result).toHaveProperty('migrationVersion', undefined);
   });
 });
 
@@ -360,5 +408,28 @@ describe('#getCurrentTime', () => {
 
   it('returns the current time', () => {
     expect(getCurrentTime()).toEqual('2021-09-10T21:00:00.000Z');
+  });
+});
+
+describe('#setManaged', () => {
+  it('returns false if no arguments are provided', () => {
+    expect(setManaged({})).toEqual(false);
+  });
+
+  it('returns false if only one argument is provided as false', () => {
+    expect(setManaged({ optionsManaged: false })).toEqual(false);
+    expect(setManaged({ objectManaged: false })).toEqual(false);
+  });
+
+  it('returns true if only one argument is provided as true', () => {
+    expect(setManaged({ optionsManaged: true })).toEqual(true);
+    expect(setManaged({ objectManaged: true })).toEqual(true);
+  });
+
+  it('overrides objectManaged with optionsManaged', () => {
+    expect(setManaged({ optionsManaged: false, objectManaged: true })).toEqual(false);
+    expect(setManaged({ optionsManaged: true, objectManaged: false })).toEqual(true);
+    expect(setManaged({ optionsManaged: false, objectManaged: false })).toEqual(false);
+    expect(setManaged({ optionsManaged: true, objectManaged: true })).toEqual(true);
   });
 });

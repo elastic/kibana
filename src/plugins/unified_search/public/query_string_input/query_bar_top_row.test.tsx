@@ -13,7 +13,7 @@ import { mount, shallow } from 'enzyme';
 import { render } from '@testing-library/react';
 import { EMPTY } from 'rxjs';
 
-import QueryBarTopRow from './query_bar_top_row';
+import QueryBarTopRow, { SharingMetaFields } from './query_bar_top_row';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -307,5 +307,32 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
+  });
+});
+
+describe('SharingMetaFields', () => {
+  it('Should render the component with data-shared-timefilter-duration if time is set correctly', () => {
+    const from = '2023-04-07';
+    const to = '2023-04-08';
+    const component = <SharingMetaFields from={from} to={to} dateFormat="MMM D, YYYY" />;
+
+    expect(shallow(component)).toMatchInlineSnapshot(`
+      <div
+        data-shared-timefilter-duration="Apr 7, 2023 to Apr 8, 2023"
+        data-test-subj="dataSharedTimefilterDuration"
+      />
+    `);
+  });
+
+  it('Should render the component without data-shared-timefilter-duration if time is not set correctly', () => {
+    const component = (
+      <SharingMetaFields from="boom" to="now" dateFormat="MMM D, YYYY @ HH:mm:ss.SSS" />
+    );
+
+    expect(shallow(component)).toMatchInlineSnapshot(`
+      <div
+        data-test-subj="dataSharedTimefilterDuration"
+      />
+    `);
   });
 });

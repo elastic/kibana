@@ -15,7 +15,7 @@ import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { Document, checkForDuplicateTitle } from '../persistence';
 import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
-import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
+import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 import type { LensAppState } from '../state_management';
 import { getPersisted } from '../state_management/init_middleware/load_initial';
 import { VisualizeEditorContext } from '../types';
@@ -292,11 +292,17 @@ export const runSaveLensVisualization = async (
     }
   }
   try {
-    const newInput = (await attributeService.wrapAttributes(
+    let newInput = (await attributeService.wrapAttributes(
       docToSave,
       options.saveToLibrary,
       originalInput
     )) as LensEmbeddableInput;
+    if (saveProps.panelTimeRange) {
+      newInput = {
+        ...newInput,
+        timeRange: saveProps.panelTimeRange,
+      };
+    }
 
     if (saveProps.returnToOrigin && redirectToOrigin) {
       // disabling the validation on app leave because the document has been saved.

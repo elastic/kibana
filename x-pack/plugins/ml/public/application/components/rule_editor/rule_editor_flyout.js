@@ -11,8 +11,6 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButton,
@@ -30,6 +28,10 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { DetectorDescriptionList } from './components/detector_description_list';
 import { ActionsSection } from './actions_section';
@@ -54,7 +56,6 @@ import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
-import { extractErrorMessage } from '../../../../common/util/errors';
 
 class RuleEditorFlyoutUI extends Component {
   static propTypes = {

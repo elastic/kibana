@@ -16,7 +16,9 @@ export enum LICENSING_FEATURE {
   NATIVE_CONNECTOR = 'nativeConnector',
   CRAWLER = 'crawler',
   INFERENCE = 'inference',
+  PIPELINES = 'pipelines',
   SEARCH_APPLICATIONS = 'searchApplications',
+  ANALYTICS = 'analytics',
 }
 
 type ContentBlock = Record<LICENSING_FEATURE, string>;
@@ -44,11 +46,25 @@ export const LicensingCallout: React.FC<{ feature: LICENSING_FEATURE }> = ({ fea
           'Inference processors require a Platinum license or higher and are not available to Standard license self-managed deployments. You need to upgrade to use this feature.',
       }
     ),
+    [LICENSING_FEATURE.PIPELINES]: i18n.translate(
+      'xpack.enterpriseSearch.content.licensingCallout.pipelines.contentOne',
+      {
+        defaultMessage:
+          'Custom pipelines require a Platinum license or higher and are not available to Standard license self-managed deployments. You need to upgrade to use this feature.',
+      }
+    ),
     [LICENSING_FEATURE.SEARCH_APPLICATIONS]: i18n.translate(
       'xpack.enterpriseSearch.content.licensingCallout.searchApplications.contentOne',
       {
         defaultMessage:
           'Search Applications require a Platinum license or higher and are not available to Standard license self-managed deployments. You need to upgrade to use this feature.',
+      }
+    ),
+    [LICENSING_FEATURE.ANALYTICS]: i18n.translate(
+      'xpack.enterpriseSearch.content.licensingCallout.analytics.contentOne',
+      {
+        defaultMessage:
+          'Behavioral Analytics require a Platinum license or higher and are not available to Standard license self-managed deployments. You need to upgrade to use this feature.',
       }
     ),
   };
@@ -75,11 +91,25 @@ export const LicensingCallout: React.FC<{ feature: LICENSING_FEATURE }> = ({ fea
           "Did you know that inference processors are available with a Standard Elastic Cloud license? Elastic Cloud gives you the flexibility to run where you want. Deploy our managed service on Google Cloud, Microsoft Azure, or Amazon Web Services, and we'll handle the maintenance and upkeep for you.",
       }
     ),
+    [LICENSING_FEATURE.PIPELINES]: i18n.translate(
+      'xpack.enterpriseSearch.content.licensingCallout.pipelines.contentTwo',
+      {
+        defaultMessage:
+          "Did you know that custom pipelines are available with a Standard Elastic Cloud license? Elastic Cloud gives you the flexibility to run where you want. Deploy our managed service on Google Cloud, Microsoft Azure, or Amazon Web Services, and we'll handle the maintenance and upkeep for you.",
+      }
+    ),
     [LICENSING_FEATURE.SEARCH_APPLICATIONS]: i18n.translate(
       'xpack.enterpriseSearch.content.licensingCallout.searchApplications.contentTwo',
       {
         defaultMessage:
           "Did you know that Search Applications are available with a Standard Elastic Cloud license? Elastic Cloud gives you the flexibility to run where you want. Deploy our managed service on Google Cloud, Microsoft Azure, or Amazon Web Services and we'll handle the maintenance and upkeep for you.",
+      }
+    ),
+    [LICENSING_FEATURE.ANALYTICS]: i18n.translate(
+      'xpack.enterpriseSearch.content.licensingCallout.analytics.contentTwo',
+      {
+        defaultMessage:
+          "Did you know that Behavioral Analytics are available with a Standard Elastic Cloud license? Elastic Cloud gives you the flexibility to run where you want. Deploy our managed service on Google Cloud, Microsoft Azure, or Amazon Web Services and we'll handle the maintenance and upkeep for you.",
       }
     ),
   };

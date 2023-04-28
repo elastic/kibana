@@ -96,6 +96,7 @@ export const RulesContainer = () => {
           search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
           searchValue={rulesQuery.search}
           totalRulesCount={rulesPageData.all_rules.length}
+          pageSize={rulesPageData.rules_page.length}
           isSearching={status === 'loading'}
         />
         <EuiSpacer />

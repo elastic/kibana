@@ -19,11 +19,7 @@ import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
-import {
-  SEARCH_INDEX_PATH,
-  SEARCH_INDEX_SELECT_CONNECTOR_PATH,
-  SEARCH_INDEX_TAB_PATH,
-} from '../../routes';
+import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 
 import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
@@ -99,22 +95,10 @@ export const SearchIndex: React.FC = () => {
     }
   }, [isAppGuideActive, isWebsiteGuideActive, isDatabaseGuideActive, index?.count]);
 
-  useEffect(() => {
-    if (
-      isConnectorIndex(index) &&
-      index.name === indexName &&
-      index.connector.is_native &&
-      index.connector.service_type === null
-    ) {
-      KibanaLogic.values.navigateToUrl(
-        generateEncodedPath(SEARCH_INDEX_SELECT_CONNECTOR_PATH, { indexName })
-      );
-    }
-  }, [index]);
-
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
     {
       content: <SearchIndexOverview />,
+      'data-test-subj': 'entSearchContent-index-overview-tab',
       id: SearchIndexTabId.OVERVIEW,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.overviewTabLabel', {
         defaultMessage: 'Overview',
@@ -184,6 +168,7 @@ export const SearchIndex: React.FC = () => {
     },
     {
       content: <AutomaticCrawlScheduler />,
+      'data-test-subj': 'entSearchContent-index-crawler-scheduler-tab',
       id: SearchIndexTabId.SCHEDULING,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
         defaultMessage: 'Scheduling',

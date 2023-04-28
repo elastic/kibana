@@ -23,7 +23,6 @@ import {
   getApiTags as getCasesApiTags,
 } from '@kbn/cases-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
@@ -47,6 +46,7 @@ import { SLO_RULE_REGISTRATION_CONTEXT } from './common/constants';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { SLO_BURN_RATE_RULE_ID } from '../common/constants';
 import { registerSloUsageCollector } from './lib/collectors/register';
+import { sloRuleFieldMap } from './lib/rules/slo_burn_rate/field_map';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -134,8 +134,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                   ),
                   includeIn: 'all',
                   savedObject: {
-                    all: [],
-                    read: [],
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
                   },
                   cases: {
                     delete: [observabilityFeatureId],
@@ -223,11 +223,14 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       feature: sloFeatureId,
       registrationContext: SLO_RULE_REGISTRATION_CONTEXT,
       dataset: Dataset.alerts,
-      componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+      componentTemplateRefs: [],
       componentTemplates: [
         {
           name: 'mappings',
-          mappings: mappingFromFieldMap(legacyExperimentalFieldMap, 'strict'),
+          mappings: mappingFromFieldMap(
+            { ...legacyExperimentalFieldMap, ...sloRuleFieldMap },
+            'strict'
+          ),
         },
       ],
     });

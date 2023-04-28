@@ -46,7 +46,7 @@ jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
-jest.mock('../../../common/components/visualization_actions/lens_embeddable');
+jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
 const mockSetToggle = jest.fn();
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -252,7 +252,7 @@ describe('Stat Items Component', () => {
     });
 
     test('renders Lens Embeddables', () => {
-      expect(wrapper.find('[data-test-subj="lens-embeddable"]').length).toEqual(4);
+      expect(wrapper.find('[data-test-subj="visualization-embeddable"]').length).toEqual(4);
     });
   });
 });

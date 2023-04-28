@@ -14,6 +14,7 @@ export interface LogViewsStaticConfig {
 export const logViewOriginRT = rt.keyof({
   stored: null,
   internal: null,
+  inline: null,
   'infra-source-stored': null,
   'infra-source-internal': null,
   'infra-source-fallback': null,

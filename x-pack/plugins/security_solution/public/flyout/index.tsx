@@ -21,7 +21,6 @@ import { LeftPanelProvider } from './left/context';
 export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels'] = [
   {
     key: RightPanelKey,
-    width: 500,
     component: (props) => (
       <RightPanelProvider {...(props as RightPanelProps).params}>
         <RightPanel path={props.path as RightPanelProps['path']} />
@@ -30,7 +29,6 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
   },
   {
     key: LeftPanelKey,
-    width: 1000,
     component: (props) => (
       <LeftPanelProvider {...(props as LeftPanelProps).params}>
         <LeftPanel path={props.path as LeftPanelProps['path']} />

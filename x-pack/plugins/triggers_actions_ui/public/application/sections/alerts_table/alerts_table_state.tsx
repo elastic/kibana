@@ -16,6 +16,7 @@ import {
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
+import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
   BrowserFields,
@@ -45,22 +46,16 @@ import {
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 import { TypeRegistry } from '../../type_registry';
 import { bulkActionsReducer } from './bulk_actions/reducer';
-import { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
 import { useColumns } from './hooks/use_columns';
 import { InspectButtonContainer } from './toolbar/components/inspect';
 import { alertsTableQueryClient } from './query_client';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
+import { CasesService } from './types';
 
 const DefaultPagination = {
   pageSize: 10,
   pageIndex: 0,
 };
-
-interface CaseUi {
-  ui: {
-    getCasesContext: () => React.FC<any>;
-  };
-}
 
 export type AlertsTableStateProps = {
   alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
@@ -75,6 +70,10 @@ export type AlertsTableStateProps = {
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
   showAlertStatusWithFlapping?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
+  /**
+   * Allows to consumers of the table to decide to highlight a row based on the current alert.
+   */
+  shouldHighlightRow?: (alert: Alert) => boolean;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -85,7 +84,6 @@ export interface AlertsTableStorage {
 
 const EmptyConfiguration: AlertsTableConfigurationRegistry = {
   id: '',
-  casesFeatureId: '',
   columns: [],
   sort: [],
   getRenderCellValue: () => () => null,
@@ -102,18 +100,21 @@ const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<{
 
 const AlertsTableWithBulkActionsContext = React.memo(AlertsTableWithBulkActionsContextComponent);
 
-type AlertWithCaseIds = Alert & Required<Pick<Alert, 'kibana.alert.case_ids'>>;
+type AlertWithCaseIds = Alert & Required<Pick<Alert, typeof ALERT_CASE_IDS>>;
 
 const getCaseIdsFromAlerts = (alerts: Alerts): Set<string> =>
   new Set(
     alerts
-      .filter(
-        (alert): alert is AlertWithCaseIds =>
-          alert['kibana.alert.case_ids'] != null && alert['kibana.alert.case_ids'].length > 0
-      )
-      .map((alert) => alert['kibana.alert.case_ids'])
+      .filter((alert): alert is AlertWithCaseIds => {
+        const caseIds = alert[ALERT_CASE_IDS];
+        return caseIds != null && caseIds.length > 0;
+      })
+      .map((alert) => alert[ALERT_CASE_IDS])
       .flat()
   );
+
+const isCasesColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
+  columns.some(({ id }) => id === ALERT_CASE_IDS);
 
 const AlertsTableState = (props: AlertsTableStateProps) => {
   return (
@@ -141,8 +142,9 @@ const AlertsTableStateWithQueryProvider = ({
   onUpdate,
   showAlertStatusWithFlapping,
   toolbarVisibility,
+  shouldHighlightRow,
 }: AlertsTableStateProps) => {
-  const { cases: casesService } = useKibana<{ cases: CaseUi }>().services;
+  const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
 
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
@@ -243,7 +245,17 @@ const AlertsTableStateWithQueryProvider = ({
 
   const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
 
-  const { data: cases, isLoading: isLoadingCases } = useBulkGetCases(Array.from(caseIds.values()));
+  const casesPermissions = casesService?.helpers.canUseCases(
+    alertsTableConfiguration?.cases?.owner ?? []
+  );
+
+  const hasCaseReadPermissions = Boolean(casesPermissions?.read);
+  const fetchCases = isCasesColumnEnabled(columns) && hasCaseReadPermissions;
+
+  const { data: cases, isFetching: isLoadingCases } = useBulkGetCases(
+    Array.from(caseIds.values()),
+    fetchCases
+  );
 
   const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
     setPagination(_pagination);
@@ -308,10 +320,16 @@ const AlertsTableStateWithQueryProvider = ({
     updatedAt,
   ]);
 
+  const CasesContext = casesService?.ui.getCasesContext();
+  const isCasesContextAvailable = casesService && CasesContext;
+
   const tableProps: AlertsTableProps = useMemo(
     () => ({
       alertsTableConfiguration,
-      casesData: { cases: cases ?? new Map(), isLoading: isLoadingCases },
+      cases: {
+        data: cases ?? new Map(),
+        isLoading: isLoadingCases,
+      },
       columns,
       bulkActions: [],
       deletedEventIds: [],
@@ -340,6 +358,7 @@ const AlertsTableStateWithQueryProvider = ({
       controls: persistentControls,
       showInspectButton,
       toolbarVisibility,
+      shouldHighlightRow,
     }),
     [
       alertsTableConfiguration,
@@ -349,6 +368,7 @@ const AlertsTableStateWithQueryProvider = ({
       flyoutSize,
       pagination.pageSize,
       id,
+      leadingControlColumns,
       showExpandToDetails,
       showAlertStatusWithFlapping,
       useFetchAlertsData,
@@ -359,7 +379,6 @@ const AlertsTableStateWithQueryProvider = ({
       onResetColumns,
       onColumnsChange,
       onChangeVisibleColumns,
-      leadingControlColumns,
       query,
       rowHeightsOptions,
       renderCellValue,
@@ -367,11 +386,9 @@ const AlertsTableStateWithQueryProvider = ({
       persistentControls,
       showInspectButton,
       toolbarVisibility,
+      shouldHighlightRow,
     ]
   );
-
-  const CasesContext = casesService?.ui.getCasesContext();
-  const userCasesPermissions = useGetUserCasesPermissions(alertsTableConfiguration.casesFeatureId);
 
   return hasAlertsTableConfiguration ? (
     <>
@@ -387,11 +404,11 @@ const AlertsTableStateWithQueryProvider = ({
       {(isLoading || isBrowserFieldDataLoading) && (
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}
-      {alertsCount !== 0 && CasesContext && casesService && (
+      {alertsCount !== 0 && isCasesContextAvailable && (
         <CasesContext
-          owner={[alertsTableConfiguration.app_id ?? configurationId]}
-          permissions={userCasesPermissions}
-          features={{ alerts: { sync: false } }}
+          owner={alertsTableConfiguration.cases?.owner ?? []}
+          permissions={casesPermissions}
+          features={{ alerts: { sync: alertsTableConfiguration.cases?.syncAlerts ?? false } }}
         >
           <AlertsTableWithBulkActionsContext
             tableProps={tableProps}
@@ -399,7 +416,7 @@ const AlertsTableStateWithQueryProvider = ({
           />
         </CasesContext>
       )}
-      {alertsCount !== 0 && (!CasesContext || !casesService) && (
+      {alertsCount !== 0 && !isCasesContextAvailable && (
         <AlertsTableWithBulkActionsContext
           tableProps={tableProps}
           initialBulkActionsState={initialBulkActionsState}

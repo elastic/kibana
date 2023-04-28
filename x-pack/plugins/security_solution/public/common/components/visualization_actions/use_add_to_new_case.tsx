@@ -34,7 +34,7 @@ export const useAddToNewCase = ({ onClick, timeRange, lensAttributes }: UseAddTo
     ];
   }, [lensAttributes, timeRange]);
 
-  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout({
+  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout({
     toastContent: ADD_TO_CASE_SUCCESS,
   });
 
