@@ -5,10 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { allDoubleQuoteRE, nonAlphaNumRE } from './constants';
+import { allDoubleQuoteRE, commonQuotedDelimiters, nonAlphaNumRE } from './constants';
 import { cellHasFormulas } from './formula_checks';
 
 type RawValue = string | object | null | undefined;
+
+// string with the delimiter/separator already inside need to be wrapped in quotes
+// i.e. string with delimiter char in it like free text or some number formatting (1143 => 1,143)
+function shouldBeQuoted(value: string, delimiter: string) {
+  const trimmedSeparator = delimiter.trim();
+  return value.includes(trimmedSeparator) && commonQuotedDelimiters.has(trimmedSeparator);
+}
 
 /**
  * Create a function that will escape CSV values like "=", "@" and "+" with a
@@ -37,16 +44,11 @@ export function createEscapeValue({
         if (nonAlphaNumRE.test(formulasEscaped)) {
           return `"${formulasEscaped.replace(allDoubleQuoteRE, '""')}"`;
         }
-        // string with the separator already inside need to be wrapped in quotes
-        // i.e. string with csvSeparator char in it like free text or some number formatting (1143 => 1,143)
-        if (val.includes(separator)) {
-          return `"${val}"`;
-        }
       }
     }
     // raw multi-terms are stringified as T1,T2,T3 so check if the final value contains the
     // csv separator before returning (usually for raw values)
     const stringVal = val == null ? '' : val.toString();
-    return quoteValues && stringVal.includes(separator) ? `"${stringVal}"` : stringVal;
+    return quoteValues && shouldBeQuoted(stringVal, separator) ? `"${stringVal}"` : stringVal;
   };
 }

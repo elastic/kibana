@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { createEscapeValue } from './escape_value';
 
 describe('escapeValue', function () {
@@ -120,6 +120,46 @@ describe('escapeValue', function () {
         escapeFormulaValues: false,
       });
       expect(escapeValue('a;b')).to.be('a;b');
+    });
+
+    it.each([', ', ' , ', ' ,'])(
+      'should handle also delimiters that contains white spaces "%p"',
+      (separator) => {
+        const escapeValue = createEscapeValue({
+          separator,
+          quoteValues: true,
+          escapeFormulaValues: false,
+        });
+        const nonStringValue = {
+          toString() {
+            return `a${separator}b`;
+          },
+        };
+        expect(escapeValue(nonStringValue)).to.be(`"a${separator}b"`);
+      }
+    );
+
+    it('should handle also non-string values (array)', () => {
+      const escapeValue = createEscapeValue({
+        separator: ',',
+        quoteValues: true,
+        escapeFormulaValues: true,
+      });
+      expect(escapeValue(['a', 'b'])).to.be('"a,b"');
+    });
+
+    it('should not quote non-string values, even if escapable, when separator is not in the quoted delimiters list', () => {
+      const escapeValue = createEscapeValue({
+        separator: ':',
+        quoteValues: true,
+        escapeFormulaValues: true,
+      });
+      const nonStringValue = {
+        toString() {
+          return 'a:b';
+        },
+      };
+      expect(escapeValue(nonStringValue)).to.be('a:b');
     });
   });
 });
