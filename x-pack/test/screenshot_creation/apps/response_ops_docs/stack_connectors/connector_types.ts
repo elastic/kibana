@@ -26,32 +26,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const emailConnectorName = 'my-email-connector';
 
   describe('connector types', function () {
-    // let emailConnectorId: string;
-    // before(async () => {
-    //   ({ id: emailConnectorId } = await actions.api.createConnector({
-    //     name: emailConnectorName,
-    //     config: {
-    //       service: 'other',
-    //       from: 'bob@example.com',
-    //       host: 'some.non.existent.com',
-    //       port: 25,
-    //     },
-    //     secrets: {
-    //       user: 'bob',
-    //       password: 'supersecret',
-    //     },
-    //     connectorTypeId: '.email',
-    //   }));
-    // });
+    let emailConnectorId: string;
+    before(async () => {
+      ({ id: emailConnectorId } = await actions.api.createConnector({
+        name: emailConnectorName,
+        config: {
+          service: 'other',
+          from: 'bob@example.com',
+          host: 'some.non.existent.com',
+          port: 25,
+        },
+        secrets: {
+          user: 'bob',
+          password: 'supersecret',
+        },
+        connectorTypeId: '.email',
+      }));
+    });
 
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    // after(async () => {
-    //   await actions.api.deleteConnector(emailConnectorId);
-    // });
+    after(async () => {
+      await actions.api.deleteConnector(emailConnectorId);
+    });
 
     it('server log connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
