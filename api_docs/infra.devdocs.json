@@ -353,6 +353,20 @@
         },
         {
           "parentPluginId": "infra",
+          "id": "def-public.InfraClientStartExports.metricsExplorerViews",
+          "type": "Object",
+          "tags": [],
+          "label": "metricsExplorerViews",
+          "description": [],
+          "signature": [
+            "MetricsExplorerViewsServiceStart"
+          ],
+          "path": "x-pack/plugins/infra/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "infra",
           "id": "def-public.InfraClientStartExports.telemetry",
           "type": "Object",
           "tags": [],
