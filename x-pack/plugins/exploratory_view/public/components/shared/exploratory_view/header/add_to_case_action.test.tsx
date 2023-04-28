@@ -13,14 +13,9 @@ import * as useCaseHook from '../hooks/use_add_to_case';
 import * as datePicker from '../components/date_range_picker';
 import moment from 'moment';
 import { noCasesPermissions as mockUseGetCasesPermissions } from '@kbn/observability-shared-plugin/public';
-import * as obsHooks from '@kbn/observability-shared-plugin/public';
+import * as obsHooks from '@kbn/observability-shared-plugin/public/hooks/use_get_user_cases_permissions';
 
-jest.spyOn(obsHooks, 'useGetUserCasesPermissions').mockImplementation(
-  () =>
-    ({
-      useGetUserCasesPermissions: jest.fn(() => mockUseGetCasesPermissions()),
-    } as any)
-);
+jest.spyOn(obsHooks, 'useGetUserCasesPermissions').mockReturnValue(mockUseGetCasesPermissions());
 describe('AddToCaseAction', function () {
   beforeEach(() => {
     jest.spyOn(datePicker, 'parseRelativeDate').mockRestore();
@@ -77,7 +72,6 @@ describe('AddToCaseAction', function () {
           from: '',
           to: '',
         },
-        appId: 'securitySolutionUI',
         owner: 'security',
       })
     );
