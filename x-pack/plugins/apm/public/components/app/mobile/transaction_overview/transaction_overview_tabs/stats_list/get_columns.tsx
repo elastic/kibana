@@ -33,13 +33,11 @@ type MobileDetailedStatisticsByField =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/detailed_statistics'>;
 
 export function getColumns({
-  agentName,
   detailedStatisticsLoading,
   detailedStatistics,
   comparisonEnabled,
   offset,
 }: {
-  agentName?: string;
   detailedStatisticsLoading: boolean;
   detailedStatistics: MobileDetailedStatisticsByField;
   comparisonEnabled?: boolean;

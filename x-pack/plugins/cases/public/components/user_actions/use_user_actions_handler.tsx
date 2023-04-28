@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCaseViewParams } from '../../common/navigation';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import type { AddCommentRefObject } from '../add_comment';
@@ -28,7 +28,7 @@ export type UseUserActionsHandler = Pick<
   | 'handleSaveComment'
   | 'handleManageQuote'
   | 'handleDeleteComment'
-> & { handleUpdate: (updatedCase: Case) => void };
+> & { handleUpdate: (updatedCase: CaseUI) => void };
 
 const isAddCommentRef = (
   ref: AddCommentRefObject | UserActionMarkdownRefObject | null | undefined

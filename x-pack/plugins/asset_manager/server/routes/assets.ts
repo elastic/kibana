@@ -9,10 +9,14 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from '@kbn/core/server';
 import { differenceBy, intersectionBy } from 'lodash';
 import { debug } from '../../common/debug_log';
+import { AssetType, assetTypeRT, relationRT } from '../../common/types_api';
 import { ASSET_MANAGER_API_BASE } from '../constants';
 import { getAssets } from '../lib/get_assets';
+import { getAllRelatedAssets } from '../lib/get_all_related_assets';
 import { SetupRouteOptions } from './types';
 import { getEsClientFromContext } from './utils';
+import { AssetNotFoundError } from '../lib/errors';
+import { toArray } from '../lib/utils';
 
 const assetType = schema.oneOf([
   schema.literal('k8s.pod'),
@@ -23,8 +27,26 @@ const assetType = schema.oneOf([
 const getAssetsQueryOptions = schema.object({
   from: schema.maybe(schema.string()),
   to: schema.maybe(schema.string()),
-  type: schema.maybe(schema.oneOf([schema.arrayOf(assetType), assetType])),
+  type: schema.maybe(schema.oneOf([schema.arrayOf(assetTypeRT), assetTypeRT])),
   ean: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
+  size: schema.maybe(schema.number()),
+});
+
+const getAssetsDiffQueryOptions = schema.object({
+  aFrom: schema.string(),
+  aTo: schema.string(),
+  bFrom: schema.string(),
+  bTo: schema.string(),
+  type: schema.maybe(schema.oneOf([schema.arrayOf(assetType), assetType])),
+});
+
+const getRelatedAssetsQueryOptions = schema.object({
+  from: schema.string(), // ISO timestamp or ES datemath
+  to: schema.maybe(schema.string()), // ISO timestamp or ES datemath
+  ean: schema.string(),
+  relation: relationRT,
+  type: schema.maybe(schema.oneOf([assetTypeRT, schema.arrayOf(assetTypeRT)])),
+  maxDistance: schema.maybe(schema.number()),
   size: schema.maybe(schema.number()),
 });
 
@@ -58,14 +80,51 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
     }
   );
 
+  // GET assets/related
+  router.get<unknown, typeof getRelatedAssetsQueryOptions.type, unknown>(
+    {
+      path: `${ASSET_MANAGER_API_BASE}/assets/related`,
+      validate: {
+        query: getRelatedAssetsQueryOptions,
+      },
+    },
+    async (context, req, res) => {
+      // Add references into sample data and write integration tests
+
+      const { from, to, ean, relation } = req.query || {};
+      const esClient = await getEsClientFromContext(context);
+
+      // What if maxDistance is below 1?
+      const maxDistance = req.query.maxDistance ? Math.min(req.query.maxDistance, 5) : 1; // Validate maxDistance not larger than 5
+      const size = req.query.size ? Math.min(req.query.size, 100) : 10; // Do we need pagination and sorting? Yes.
+      const type = toArray<AssetType>(req.query.type);
+      // Validate from and to to be ISO string only. Or use io-ts to coerce.
+
+      try {
+        return res.ok({
+          body: {
+            results: await getAllRelatedAssets(esClient, {
+              ean,
+              from,
+              to,
+              type,
+              maxDistance,
+              size,
+              relation,
+            }),
+          },
+        });
+      } catch (error: any) {
+        debug('error looking up asset records', error);
+        if (error instanceof AssetNotFoundError) {
+          return res.customError({ statusCode: 404, body: error.message });
+        }
+        return res.customError({ statusCode: 500, body: error.message });
+      }
+    }
+  );
+
   // GET /assets/diff
-  const getAssetsDiffQueryOptions = schema.object({
-    aFrom: schema.string(),
-    aTo: schema.string(),
-    bFrom: schema.string(),
-    bTo: schema.string(),
-    type: schema.maybe(schema.oneOf([schema.arrayOf(assetType), assetType])),
-  });
   router.get<unknown, typeof getAssetsDiffQueryOptions.type, unknown>(
     {
       path: `${ASSET_MANAGER_API_BASE}/assets/diff`,
@@ -74,7 +133,8 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       },
     },
     async (context, req, res) => {
-      const { aFrom, aTo, bFrom, bTo, type } = req.query;
+      const { aFrom, aTo, bFrom, bTo } = req.query;
+      const type = toArray<AssetType>(req.query.type);
 
       if (new Date(aFrom) > new Date(aTo)) {
         return res.badRequest({

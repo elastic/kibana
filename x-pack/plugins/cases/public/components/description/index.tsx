@@ -23,7 +23,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import type { EditableMarkdownRefObject, EuiMarkdownEditorRef } from '../markdown_editor';
 import { EditableMarkdown, ScrollableMarkdown } from '../markdown_editor';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import type { OnUpdateFields } from '../case_view/types';
 import { schema } from './schema';
 
@@ -33,7 +33,7 @@ export interface DescriptionMarkdownRefObject extends EditableMarkdownRefObject 
   editor: EuiMarkdownEditorRef | null;
 }
 export interface DescriptionProps {
-  caseData: Case;
+  caseData: CaseUI;
   isLoadingDescription: boolean;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
 }
