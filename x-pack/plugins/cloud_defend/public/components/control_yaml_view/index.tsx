@@ -61,7 +61,11 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
     // validate responses
     responses.forEach((response) => {
       // for now we force 'alert' action if 'block' action added.
-      if (response.actions.includes('block') && !response.actions.includes('alert')) {
+      if (
+        response.actions &&
+        response.actions.includes('block') &&
+        !response.actions.includes('alert')
+      ) {
         errors.push(i18n.errorAlertActionRequired);
       }
     });
