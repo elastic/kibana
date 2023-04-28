@@ -51,9 +51,11 @@ export const ConnectorConfigurationForm = () => {
           depends_on: dependencies,
           key,
           display,
+          is_valid: isValid,
           label,
           sensitive,
           tooltip,
+          validation_errors: validationErrors,
         } = configEntry;
         const helpText = defaultValue
           ? i18n.translate(
@@ -93,6 +95,8 @@ export const ConnectorConfigurationForm = () => {
                   label={rowLabel}
                   key={key}
                   helpText={helpText}
+                  error={validationErrors}
+                  isInvalid={!isValid}
                   data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
                 >
                   <ConnectorConfigurationField configEntry={configEntry} />
@@ -108,6 +112,8 @@ export const ConnectorConfigurationForm = () => {
             label={rowLabel}
             key={key}
             helpText={helpText}
+            error={validationErrors}
+            isInvalid={!isValid}
             data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
           >
             <ConnectorConfigurationField configEntry={configEntry} />
