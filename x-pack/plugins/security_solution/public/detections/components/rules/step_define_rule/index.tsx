@@ -57,6 +57,7 @@ import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
 import { ThresholdInput } from '../threshold_input';
+import { SuppressionInfoIcon } from '../suppression_info_icon';
 import {
   Field,
   Form,
@@ -942,7 +943,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           <IntendedRuleTypeEuiFormRow
             $isVisible={isQueryRule(ruleType)}
             data-test-subj="alertSuppressionMissingFields"
-            label={i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL}
+            label={
+              <span>
+                {i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL} <SuppressionInfoIcon />
+              </span>
+            }
           >
             <UseMultiFields
               fields={{
