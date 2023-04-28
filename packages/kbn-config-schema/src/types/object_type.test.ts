@@ -177,7 +177,7 @@ describe('#validate', () => {
       baz: 'hello world',
     };
 
-    type.extendsDeep({}, { unknowns: 'allow' }).validate(value, undefined, undefined);
+    type.extendsDeep({ unknowns: 'allow' }).validate(value, undefined, undefined);
   });
 
   test(`allowUnknowns allows top-level unknown fields and overrides schema options`, () => {
@@ -193,7 +193,7 @@ describe('#validate', () => {
       baz: 'hello world',
     };
 
-    type.extendsDeep({}, { unknowns: 'allow' }).validate(value, undefined, undefined);
+    type.extendsDeep({ unknowns: 'allow' }).validate(value, undefined, undefined);
   });
 
   test(`allowUnknowns allows nested unknown fields`, () => {
@@ -209,7 +209,7 @@ describe('#validate', () => {
       },
     };
 
-    type.extendsDeep({}, { unknowns: 'allow' }).validate(value, undefined, undefined);
+    type.extendsDeep({ unknowns: 'allow' }).validate(value, undefined, undefined);
   });
 
   test(`allowUnknowns allows nested unknown fields and overrides schema options`, () => {
@@ -228,7 +228,7 @@ describe('#validate', () => {
       },
     };
 
-    type.extendsDeep({}, { unknowns: 'allow' }).validate(value, undefined, undefined);
+    type.extendsDeep({ unknowns: 'allow' }).validate(value, undefined, undefined);
   });
 
   // test(`allowUnknowns=false disallows top-level unknown fields`, () => {
@@ -299,7 +299,7 @@ describe('#validate', () => {
     };
 
     expect(() => {
-      type.extendsDeep({}, { unknowns: 'forbid' }).validate(value, undefined, undefined);
+      type.extendsDeep({ unknowns: 'forbid' }).validate(value, undefined, undefined);
     }).toThrowErrorMatchingInlineSnapshot(`"[bar.baz]: definition for this key is missing"`);
   });
 });
