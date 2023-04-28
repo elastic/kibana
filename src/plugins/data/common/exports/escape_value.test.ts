@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { createEscapeValue } from './escape_value';
 
 describe('escapeValue', function () {
