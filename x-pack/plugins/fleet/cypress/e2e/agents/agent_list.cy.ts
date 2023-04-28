@@ -223,7 +223,7 @@ describe('View agents list', () => {
 
       cy.get('button').contains('Unhealthy').click();
 
-      assertTableContainsNAgents(2);
+      assertTableContainsNAgents(1);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-2');
     });
 
@@ -298,7 +298,7 @@ describe('View agents list', () => {
       cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
 
       cy.get('button').contains('Agent policy 3').click();
-      assertTableContainsNAgents(16);
+      assertTableContainsNAgents(15);
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.CHECKBOX_SELECT_ALL).click();
       // Trigger a bulk upgrade
