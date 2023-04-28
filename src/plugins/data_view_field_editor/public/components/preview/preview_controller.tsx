@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { renderToString } from 'react-dom/server';
 import React from 'react';
-import { PreviewState } from './types';
+import { PreviewState, FetchDocError } from './types';
 import { BehaviorObservable } from '../../state_utils';
 import { EsDocument, ScriptErrorCodes, Params } from './types';
 import type { FieldFormatsStart } from '../../shared_imports';
@@ -42,6 +43,7 @@ const previewStateDefault: PreviewState = {
   scriptEditorValidation: { isValidating: false, isValid: true, message: null },
   previewResponse: { fields: [], error: null },
   isFetchingDocument: false,
+  fetchDocError: null,
 };
 
 export class PreviewController {
@@ -146,6 +148,10 @@ export class PreviewController {
     this.updateState({ isFetchingDocument });
   };
 
+  setFetchDocError = (fetchDocError: FetchDocError | null) => {
+    this.updateState({ fetchDocError });
+  };
+
   valueFormatter = ({
     value,
     format,
@@ -172,8 +178,8 @@ export class PreviewController {
 
     return defaultValueFormatter(value);
   };
-  /*
 
+  /*
   fetchSampleDocuments = async (limit: number = 50) => {
     if (typeof limit !== 'number') {
       // We guard ourself from passing an <input /> event accidentally
@@ -181,7 +187,7 @@ export class PreviewController {
     }
 
     lastExecutePainlessRequestParams.current.documentId = undefined;
-    setIsFetchingDocument(true);
+    this.setIsFetchingDocument(true);
     this.setPreviewResponse({ fields: [], error: null });
 
     const [response, searchError] = await this.search
@@ -198,7 +204,7 @@ export class PreviewController {
       .then((res) => [res, null])
       .catch((err) => [null, err]);
 
-    setIsFetchingDocument(false);
+    this.setIsFetchingDocument(false);
     setCustomDocIdToLoad(null);
 
     const error: FetchDocError | null = Boolean(searchError)
@@ -216,7 +222,7 @@ export class PreviewController {
         }
       : null;
 
-    setFetchDocError(error);
+    this.setFetchDocError(error);
 
     if (error === null) {
       this.setDocuments(response ? response.rawResponse.hits.hits : []);

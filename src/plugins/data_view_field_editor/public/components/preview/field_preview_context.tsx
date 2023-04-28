@@ -74,6 +74,7 @@ const documentsSelector = (state: PreviewState) => {
 };
 
 const isFetchingDocumentSelector = (state: PreviewState) => state.isFetchingDocument;
+const fetchDocErrorSelector = (state: PreviewState) => state.fetchDocError;
 
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
   controller,
@@ -109,7 +110,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   const [initialPreviewComplete, setInitialPreviewComplete] = useState(false);
 
   /** Possible error while fetching sample documents */
-  const [fetchDocError, setFetchDocError] = useState<FetchDocError | null>(null);
+  // const [fetchDocError, setFetchDocError] = useState<FetchDocError | null>(null);
   /** The parameters required for the Painless _execute API */
   const [params, setParams] = useState<Params>(defaultParams);
 
@@ -123,6 +124,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   const [isPanelVisible, setIsPanelVisible] = useState(true);
   /** Flag to indicate if we are loading document from cluster */
   // const [isFetchingDocument, setIsFetchingDocument] = useState(false);
+  const fetchDocError = useStateSelector(controller.state$, fetchDocErrorSelector);
   /** Flag to indicate if we are calling the _execute API */
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
@@ -207,7 +209,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
           }
         : null;
 
-      setFetchDocError(error);
+      controller.setFetchDocError(error);
 
       if (error === null) {
         controller.setDocuments(response ? response.rawResponse.hits.hits : []);
@@ -275,7 +277,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
           }
         : null;
 
-      setFetchDocError(error);
+      controller.setFetchDocError(error);
 
       if (error === null) {
         controller.setDocuments(loadedDocuments);

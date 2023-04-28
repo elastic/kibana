@@ -61,6 +61,7 @@ export interface PreviewState {
     error: PreviewError | null;
   };
   isFetchingDocument: boolean;
+  fetchDocError: FetchDocError | null;
 }
 
 export interface FetchDocError {
