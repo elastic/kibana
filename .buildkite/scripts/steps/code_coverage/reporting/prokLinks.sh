@@ -2,20 +2,9 @@
 
 set -euo pipefail
 
-echo "--- process HTML Links"
-
-xs=("$@")
-len=${#xs[@]}
-
-# TODO-TRE: Maybe use more exhaustive logic instead of just length.
-if [[ $len -eq 2 ]]; then
-  links="<a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/jest-combined/index.html">Latest Jest</a><a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/functional-combined/index.html">Latest FTR</a>"
-else
-  links="<a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/jest-combined/index.html">Latest Jest</a>"
-fi
-
-cat <<EOF >src/dev/code_coverage/www/index_partial_2.html
-        ${links}
+cat << EOF > src/dev/code_coverage/www/index_partial_2.html
+        <a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/jest-combined/index.html">Latest Jest</a>
+        <a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/functional-combined/index.html">Latest FTR</a>
       </nav>
     </div>
   </header>

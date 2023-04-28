@@ -21,6 +21,14 @@ const flags = {
 
 const resolveRoot = resolve.bind(null, REPO_ROOT);
 
+// What I'd love to get is a high level summary of the test run, something like this:
+// Total test cases: X
+// Passed: A
+// Skipped: B
+// Failed: C
+// Ideally even broken down by the high level test type (Jest, API integration, functional UI),
+// but that's just a nice-to-have.
+// Do you think you could get me these numbers?
 export function runServerlessFtrResultsIngestionCli() {
   run(
     ({ log }) => {

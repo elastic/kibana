@@ -8,11 +8,9 @@
 
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { getFailures } from '@kbn/failed-test-reporter-cli/failed_tests_reporter/get_failures';
-// import { getReportMessageIter } from '@kbn/failed-test-reporter-cli/failed_tests_reporter/report_metadata';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { readTestReport } from '@kbn/failed-test-reporter-cli/failed_tests_reporter/test_report';
 import globby from 'globby';
-// import {reportFailuresToEs} from "@kbn/failed-test-reporter-cli/failed_tests_reporter/report_failures_to_es";
 import { createFailError } from '@kbn/dev-cli-errors';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 
@@ -23,7 +21,6 @@ export const processJunitFiles = (log) => async (patterns) => {
   for (const reportPath of reportPaths) {
     const report = await readTestReport(reportPath);
     const failures = getFailures(report);
-    // console.log(`\n### failures: \n${JSON.stringify(failures, null, 2)}`);
     await reportFailuresToEs(log, failures);
   }
 };

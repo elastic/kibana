@@ -15,4 +15,4 @@ echo '--- Jest Integration code coverage'
 .buildkite/scripts/steps/code_coverage/jest_parallel.sh jest.integration.config.js
 
 # So the last step "knows" this config ran
-uploadRanFile "jest"
+uploadRanFile "jest_integration"

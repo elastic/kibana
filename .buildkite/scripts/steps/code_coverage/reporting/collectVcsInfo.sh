@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-echo "--- collect VCS Info"
-
 echo "### Prok'd Index File: ..."
 cat src/dev/code_coverage/www/index.html
 
