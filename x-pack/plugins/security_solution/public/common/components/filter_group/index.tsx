@@ -46,6 +46,8 @@ import { FilterGroupContext } from './filter_group_context';
 import { NUM_OF_CONTROLS } from './config';
 import { TEST_IDS } from './constants';
 import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
+import { convertToBuildEsQuery } from '../../lib/kuery';
+import { controlGroupFilterInputMock$ } from './mocks/control_group';
 
 const FilterWrapper = styled.div.attrs((props) => ({
   className: props.className,
@@ -150,13 +152,36 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   }, []);
 
   useEffect(() => {
+    const [_, kqlError] = convertToBuildEsQuery({
+      config: {},
+      queries: query ? [query] : [],
+      filters: filters ?? [],
+      indexPattern: { fields: [], title: '' },
+    });
+
+    if (!kqlError) {
+      /*
+       *
+       * Pass filters to control group only if there is no issue
+       * lucene or kqlQuery.
+       * This is because once once controlGroup goes into error. It does not recovers without either
+       * reloading the page or navigating away and coming back.
+       *
+       * */
+
+      controlGroup?.updateInput({
+        filters,
+        query,
+      });
+    }
+  }, [filters, query, controlGroup]);
+
+  useEffect(() => {
     controlGroup?.updateInput({
       timeRange,
-      filters,
-      query,
       chainingSystem,
     });
-  }, [timeRange, filters, query, chainingSystem, controlGroup]);
+  }, [timeRange, chainingSystem, controlGroup]);
 
   const handleInputUpdates = useCallback(
     (newInput: ControlGroupInput) => {
