@@ -17,8 +17,6 @@ import { schema } from './schema';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 
-jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
-
 describe('Description', () => {
   let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
