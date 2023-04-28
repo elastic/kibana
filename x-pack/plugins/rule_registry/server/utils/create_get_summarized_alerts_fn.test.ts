@@ -19,7 +19,8 @@ import {
   EVENT_ACTION,
   TIMESTAMP,
 } from '../../common/technical_rule_data_field_names';
-import { AlertDocument, createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
+import { createGetSummarizedAlertsFn } from './create_get_summarized_alerts_fn';
+import { Alert } from '@kbn/alerts-as-data-utils';
 
 describe('createGetSummarizedAlertsFn', () => {
   let ruleDataClientMock: RuleDataClientMock;
@@ -1803,7 +1804,7 @@ describe('createGetSummarizedAlertsFn', () => {
       ruleDataClient: ruleDataClientMock,
       useNamespace: true,
       isLifecycleAlert: false,
-      formatAlert: (alert: AlertDocument) => {
+      formatAlert: (alert: Alert) => {
         return {
           ...alert,
           [ALERT_ACTION_GROUP]: 'boopboopdedoo',

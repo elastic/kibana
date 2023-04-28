@@ -57,7 +57,7 @@ describe('getLicenseCheckForRuleType', () => {
   let license: Subject<ILicense>;
   let licenseState: ILicenseState;
   const mockNotifyUsage = jest.fn();
-  const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered'> = {
+  const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
     id: 'test',
     name: 'Test',
     actionGroups: [
@@ -195,7 +195,7 @@ describe('ensureLicenseForRuleType()', () => {
   let license: Subject<ILicense>;
   let licenseState: ILicenseState;
   const mockNotifyUsage = jest.fn();
-  const ruleType: RuleType<never, never, never, never, never, string, string> = {
+  const ruleType: RuleType<never, never, never, never, never, string, string, {}> = {
     id: 'test',
     name: 'Test',
     actionGroups: [

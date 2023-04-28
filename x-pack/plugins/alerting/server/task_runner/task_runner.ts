@@ -48,6 +48,7 @@ import {
   RawAlertInstance,
   RuleLastRunOutcomeOrderMap,
   MaintenanceWindow,
+  RuleAlertData,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -86,7 +87,8 @@ export class TaskRunner<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
 > {
   private context: TaskRunnerContext;
   private logger: Logger;
@@ -99,7 +101,8 @@ export class TaskRunner<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >;
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
@@ -129,7 +132,8 @@ export class TaskRunner<
       State,
       Context,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext,
