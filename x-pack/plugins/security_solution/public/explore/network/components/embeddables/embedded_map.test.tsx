@@ -17,6 +17,7 @@ import { createEmbeddable } from './create_embeddable';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { getLayerList } from './map_config';
 import { useIsFieldInIndexPattern } from '../../../containers/fields';
+import { buildTimeRangeFilter } from '../../../../detections/components/alerts_table/helpers';
 
 jest.mock('./create_embeddable');
 jest.mock('./map_config');
@@ -132,34 +133,7 @@ describe('EmbeddedMapComponent', () => {
     await waitFor(() => {
       expect(mockUpdateInput).toHaveBeenCalledTimes(2);
       expect(mockUpdateInput).toHaveBeenNthCalledWith(2, {
-        filters: [
-          {
-            meta: {
-              disabled: false,
-              negate: false,
-              alias: null,
-              key: '@timestamp',
-              field: '@timestamp',
-              params: {
-                gte: testProps.startDate,
-                lt: testProps.endDate,
-              },
-              value: JSON.stringify({
-                gte: testProps.startDate,
-                lt: testProps.endDate,
-              }),
-              type: 'range',
-            },
-            query: {
-              range: {
-                '@timestamp': {
-                  gte: testProps.startDate,
-                  lt: testProps.endDate,
-                },
-              },
-            },
-          },
-        ],
+        filters: buildTimeRangeFilter(testProps.startDate, testProps.endDate),
       });
     });
   });
