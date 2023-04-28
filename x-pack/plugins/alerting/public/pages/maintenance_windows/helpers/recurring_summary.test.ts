@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 
-import { Frequency } from '../constants';
+import { Frequency } from '@kbn/rrule';
 import { getPresets } from './get_presets';
 import { recurringSummary } from './recurring_summary';
 

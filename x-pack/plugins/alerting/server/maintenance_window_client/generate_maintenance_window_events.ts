@@ -7,10 +7,8 @@
 
 import _ from 'lodash';
 import moment from 'moment-timezone';
-import { RRule, Weekday } from 'rrule';
-import { parseByWeekday } from '../lib/rrule';
+import { RRule, Weekday } from '@kbn/rrule';
 import { RRuleParams, MaintenanceWindowSOAttributes, DateRange } from '../../common';
-import { utcToLocalUtc, localUtcToUtc } from '../lib/snooze';
 
 export interface GenerateMaintenanceWindowEventsParams {
   rRule: RRuleParams;
@@ -23,28 +21,27 @@ export const generateMaintenanceWindowEvents = ({
   expirationDate,
   duration,
 }: GenerateMaintenanceWindowEventsParams) => {
-  const { dtstart, until, wkst, byweekday, tzid, ...rest } = rRule;
+  const { dtstart, until, wkst, byweekday, ...rest } = rRule;
 
-  const startDate = utcToLocalUtc(new Date(dtstart), tzid);
-  const endDate = utcToLocalUtc(new Date(expirationDate), tzid);
+  const startDate = new Date(dtstart);
+  const endDate = new Date(expirationDate);
 
   const rRuleOptions = {
     ...rest,
     dtstart: startDate,
-    until: until ? utcToLocalUtc(new Date(until), tzid) : null,
-    wkst: wkst ? Weekday.fromStr(wkst) : null,
-    byweekday: byweekday ? parseByWeekday(byweekday) : null,
+    until: until ? new Date(until) : null,
+    wkst: wkst ? Weekday[wkst] : null,
+    byweekday: byweekday ?? null,
   };
 
   try {
     const recurrenceRule = new RRule(rRuleOptions);
-    const occurrenceDates = recurrenceRule.between(startDate, endDate, true);
+    const occurrenceDates = recurrenceRule.between(startDate, endDate);
 
     return occurrenceDates.map((date) => {
-      const utcDate = localUtcToUtc(date, tzid);
       return {
-        gte: utcDate.toISOString(),
-        lte: moment.utc(utcDate).add(duration, 'ms').toISOString(),
+        gte: date.toISOString(),
+        lte: moment(date).add(duration, 'ms').toISOString(),
       };
     });
   } catch (e) {
