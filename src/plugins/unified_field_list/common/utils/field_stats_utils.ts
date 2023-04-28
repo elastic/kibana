@@ -167,6 +167,7 @@ export async function getNumberSummary(
   aggSearchWithBody: SearchHandler,
   field: DataViewField
 ): Promise<FieldStatsResponse<string | number>> {
+  // similar to `getNumericFieldsStatsRequest` from Data Visualizer
   const searchWithAggs = {
     sample: {
       sampler: { shard_size: SHARD_SIZE },
@@ -193,12 +194,11 @@ export async function getNumberSummary(
   const minValue = summaryResult.aggregations!.sample.min_max_summary.min.value;
   const maxValue = summaryResult.aggregations!.sample.min_max_summary.max.value;
   const sampledDocuments = summaryResult.aggregations!.sample.doc_count;
-  const sampledValues = summaryResult.aggregations!.sample.min_max_summary.doc_count;
 
   return {
     totalDocuments: getHitsTotal(summaryResult),
     sampledDocuments,
-    sampledValues,
+    sampledValues: sampledDocuments,
     numberSummary: {
       minValue,
       maxValue,
