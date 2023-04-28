@@ -34739,7 +34739,6 @@
     "xpack.synthetics.monitorManagement.editMonitorCrumb": "编辑监测",
     "xpack.synthetics.monitorManagement.editMonitorError": "加载监测管理时出错",
     "xpack.synthetics.monitorManagement.editMonitorError.description": "无法加载监测管理设置。请联系支持人员。",
-    "xpack.synthetics.monitorManagement.emptyState.enablement": "启用监测管理以从全球托管测试地点运行轻量级、真正的浏览器监测。启用监测管理将生成 API 密钥，以便 Synthetics 服务回写 Elasticsearch 集群。",
     "xpack.synthetics.monitorManagement.emptyState.enablement.doc": "阅读文档",
     "xpack.synthetics.monitorManagement.emptyState.enablement.learnMore": "希望了解详情？",
     "xpack.synthetics.monitorManagement.emptyState.enablement.title": "启用",
