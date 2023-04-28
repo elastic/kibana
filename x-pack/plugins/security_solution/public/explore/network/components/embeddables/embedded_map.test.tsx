@@ -62,6 +62,7 @@ const packetbeatDataView = { id: '28995490-023d-11eb-bcb6-6ba0578012a9', title: 
 const mockSelector = {
   kibanaDataViews: [filebeatDataView, packetbeatDataView],
 };
+const mockUpdateInput = jest.fn();
 const embeddableValue = {
   destroyed: false,
   enhancements: { dynamicActions: {} },
@@ -88,7 +89,7 @@ const embeddableValue = {
   setEventHandlers: jest.fn(),
   setRenderTooltipContent: jest.fn(),
   type: 'map',
-  updateInput: jest.fn(),
+  updateInput: mockUpdateInput,
 };
 const testProps = {
   endDate: '2019-08-28T05:50:57.877Z',
@@ -119,6 +120,47 @@ describe('EmbeddedMapComponent', () => {
     );
     await waitFor(() => {
       expect(getByTestId('EmbeddedMapComponent')).toBeInTheDocument();
+    });
+  });
+
+  test('calls updateInput with time range filter', async () => {
+    render(
+      <TestProviders>
+        <EmbeddedMapComponent {...testProps} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(mockUpdateInput).toHaveBeenCalledTimes(2);
+      expect(mockUpdateInput).toHaveBeenNthCalledWith(2, {
+        filters: [
+          {
+            meta: {
+              disabled: false,
+              negate: false,
+              alias: null,
+              key: '@timestamp',
+              field: '@timestamp',
+              params: {
+                gte: testProps.startDate,
+                lt: testProps.endDate,
+              },
+              value: JSON.stringify({
+                gte: testProps.startDate,
+                lt: testProps.endDate,
+              }),
+              type: 'range',
+            },
+            query: {
+              range: {
+                '@timestamp': {
+                  gte: testProps.startDate,
+                  lt: testProps.endDate,
+                },
+              },
+            },
+          },
+        ],
+      });
     });
   });
 
