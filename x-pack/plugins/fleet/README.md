@@ -153,6 +153,19 @@ You can also run a specific test by passing the filepath as an argument, e.g.:
 yarn jest --config x-pack/plugins/fleet/jest.config.js x-pack/plugins/fleet/common/services/validate_package_policy.test.ts
 ```
 
+#### Jest integration tests
+
+We have a few Jest integration tests. These can be run with:
+```
+yarn test:jest_integration x-pack/plugins/fleet/jest.integration.config.js
+```
+
+You can also run a specific test by passing the filepath as an argument, e.g.:
+```
+yarn test:jest_integration x-pack/plugins/fleet/jest.integration.config.js x-pack/plugins/fleet/server/integration_tests/reset_preconfiguration.test.ts
+```
+
+
 #### API integration tests
 
 You need to have `docker` to run ingest manager api integration tests
