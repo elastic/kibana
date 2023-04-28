@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { BulkResponse, DeleteResponse } from '@elastic/elasticsearch/lib/api/types';
 
-import { keyBy } from 'lodash';
+import { keyBy, partition } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
 import { packageHasNoPolicyTemplates } from '../../common/services/policy_template';
@@ -37,6 +37,8 @@ import type {
 import { FleetError } from '../errors';
 import { SECRETS_INDEX } from '../constants';
 
+import { auditLoggingService } from './audit_logging';
+
 import { appContextService } from './app_context';
 
 interface SecretPath {
@@ -53,7 +55,6 @@ function getSecretsIndex() {
   return SECRETS_INDEX;
 }
 
-// TODO: QUESTION do we need audit logging in this service?
 export async function createSecrets(opts: {
   esClient: ElasticsearchClient;
   values: string[];
@@ -72,9 +73,22 @@ export async function createSecrets(opts: {
       body,
     });
 
-    const itemsWithErrors = res.items.filter(({ create }) => create?.error);
-    if (itemsWithErrors.length) {
-      throw new Error(JSON.stringify(itemsWithErrors));
+    const [errorItems, successItems] = partition(res.items, (a) => a.create?.error);
+
+    successItems.forEach((item) => {
+      auditLoggingService.writeCustomAuditLog({
+        message: `secret created: ${item.create!._id}`,
+        event: {
+          action: 'secret_create',
+          category: ['database'],
+          type: ['access'],
+          outcome: 'success',
+        },
+      });
+    });
+
+    if (errorItems.length) {
+      throw new Error(JSON.stringify(errorItems));
     }
 
     return res.items.map((item, i) => ({
@@ -98,6 +112,16 @@ export async function deleteSecret(opts: {
     res = await esClient.delete({
       index: getSecretsIndex(),
       id,
+    });
+
+    auditLoggingService.writeCustomAuditLog({
+      message: `secret deleted: ${id}`,
+      event: {
+        action: 'secret_delete',
+        category: ['database'],
+        type: ['access'],
+        outcome: 'success',
+      },
     });
   } catch (e) {
     const logger = appContextService.getLogger();
