@@ -67,7 +67,7 @@ describe('Isolate command', () => {
     beforeEach(() => {
       login();
     });
-    
+
     // FLAKY: https://github.com/elastic/security-team/issues/6518
     it.skip('should allow filtering endpoint by Isolated status', () => {
       cy.visit(APP_PATH + getEndpointListPath({ name: 'endpointList' }));
