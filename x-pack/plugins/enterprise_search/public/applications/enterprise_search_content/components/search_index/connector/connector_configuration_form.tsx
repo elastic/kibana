@@ -97,6 +97,7 @@ export const ConnectorConfigurationForm = () => {
                   helpText={helpText}
                   error={validationErrors}
                   isInvalid={!isValid}
+                  data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
                 >
                   <ConnectorConfigurationField configEntry={configEntry} />
                 </EuiFormRow>
@@ -113,6 +114,7 @@ export const ConnectorConfigurationForm = () => {
             helpText={helpText}
             error={validationErrors}
             isInvalid={!isValid}
+            data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
           >
             <ConnectorConfigurationField configEntry={configEntry} />
           </EuiFormRow>
@@ -122,6 +124,7 @@ export const ConnectorConfigurationForm = () => {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="entSearchContent-connector-configuration-saveConfiguration"
               data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
               type="submit"
               isLoading={status === Status.LOADING}

@@ -18,25 +18,29 @@ export const rotateKeyPairHandler: FleetRequestHandler<
   TypeOf<typeof RotateKeyPairSchema.query>,
   undefined
 > = async (_, __, response) => {
-  try {
-    const rotateKeyPairResponse = await appContextService
-      .getMessageSigningService()
-      ?.rotateKeyPair();
+  const logger = appContextService.getLogger();
+  const messageSigningService = appContextService.getMessageSigningService();
+  if (!messageSigningService) {
+    const errorMessage = 'Failed to rotate key pair. Message signing service is unavailable!';
+    logger.error(errorMessage);
+    return response.customError({
+      statusCode: 500,
+      body: {
+        message: errorMessage,
+      },
+    });
+  }
 
-    if (!rotateKeyPairResponse) {
-      return response.customError({
-        statusCode: 500,
-        body: {
-          message: 'Failed to rotate key pair!',
-        },
-      });
-    }
+  try {
+    await messageSigningService.rotateKeyPair();
+
     return response.ok({
       body: {
         message: 'Key pair rotated successfully.',
       },
     });
   } catch (error) {
+    logger.error(error.meta);
     return defaultFleetErrorHandler({ error, response });
   }
 };
