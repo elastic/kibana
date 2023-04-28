@@ -362,10 +362,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     try {
       const indexPattern = await this.getIndexPattern();
       const timeField = indexPattern.timeFieldName;
-      console.log({
-        timeField,
-        indexPattern,
-      });
       return !!timeField;
     } catch (error) {
       return false;
