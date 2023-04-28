@@ -49,6 +49,7 @@ import {
 import { InventoryViewsService } from './services/inventory_views';
 import { LogEntriesService } from './services/log_entries';
 import { LogViewsService } from './services/log_views';
+import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
 import { RulesService } from './services/rules';
 import {
   InfraConfig,
@@ -122,6 +123,7 @@ export class InfraServerPlugin
   private metricsRules: RulesService;
   private inventoryViews: InventoryViewsService;
   private logViews: LogViewsService;
+  private metricsExplorerViews: MetricsExplorerViewsService;
 
   constructor(context: PluginInitializerContext<InfraConfig>) {
     this.config = context.config.get();
@@ -140,6 +142,9 @@ export class InfraServerPlugin
 
     this.inventoryViews = new InventoryViewsService(this.logger.get('inventoryViews'));
     this.logViews = new LogViewsService(this.logger.get('logViews'));
+    this.metricsExplorerViews = new MetricsExplorerViewsService(
+      this.logger.get('metricsExplorerViews')
+    );
   }
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
@@ -155,12 +160,13 @@ export class InfraServerPlugin
     );
     const inventoryViews = this.inventoryViews.setup();
     const logViews = this.logViews.setup();
+    const metricsExplorerViews = this.metricsExplorerViews.setup();
 
     // register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
-    core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
     core.savedObjects.registerType(inventoryViewSavedObjectType);
     core.savedObjects.registerType(logViewSavedObjectType);
+    core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
 
     // TODO: separate these out individually and do away with "domains" as a temporary group
     // and make them available via the request context so we can do away with
@@ -237,6 +243,7 @@ export class InfraServerPlugin
       defineInternalSourceConfiguration: sources.defineInternalSourceConfiguration.bind(sources),
       inventoryViews,
       logViews,
+      metricsExplorerViews,
     } as InfraPluginSetup;
   }
 
@@ -258,9 +265,15 @@ export class InfraServerPlugin
       },
     });
 
+    const metricsExplorerViews = this.metricsExplorerViews.start({
+      infraSources: this.libs.sources,
+      savedObjects: core.savedObjects,
+    });
+
     return {
       inventoryViews,
       logViews,
+      metricsExplorerViews,
       getMetricIndices: makeGetMetricIndices(this.libs.sources),
     };
   }
