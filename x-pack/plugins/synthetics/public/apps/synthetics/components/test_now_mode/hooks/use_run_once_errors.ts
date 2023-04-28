@@ -102,15 +102,15 @@ export function useRunOnceErrors({
 }
 
 const RunErrorLabel = i18n.translate('xpack.synthetics.testRun.runErrorLabel', {
-  defaultMessage: 'Error running test',
+  defaultMessage: "Can't run the test now",
 });
 
 const getLocationTestErrorLabel = (locationName: string, reason: string) =>
   i18n.translate('xpack.synthetics.testRun.runErrorLocation.reason', {
-    defaultMessage: 'Failed to run monitor on location {locationName}. {reason}',
+    defaultMessage: 'Failed to run test on location {locationName}. {reason}',
     values: { locationName, reason },
   });
 
 const PushErrorService = i18n.translate('xpack.synthetics.testRun.pushError', {
-  defaultMessage: 'Failed to push the monitor to service.',
+  defaultMessage: 'This test cannot be executed at this time. Try again later.',
 });
