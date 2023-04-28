@@ -57,16 +57,18 @@ export const MaintenanceWindowsPage = React.memo(() => {
     writeWindowMaintenance;
   const hasLicense = isAtLeastPlatinum();
 
+  const readOnly = showWindowMaintenance && !writeWindowMaintenance;
+
   // if the user is read only then display the glasses badge in the global navigation header
   const setBadge = useCallback(() => {
-    if (showWindowMaintenance && !writeWindowMaintenance) {
+    if (readOnly) {
       chrome.setBadge({
         text: i18n.READ_ONLY_BADGE_TEXT,
         tooltip: i18n.READ_ONLY_BADGE_TOOLTIP,
         iconType: 'glasses',
       });
     }
-  }, [chrome, showWindowMaintenance, writeWindowMaintenance]);
+  }, [chrome, readOnly]);
 
   useEffect(() => {
     setBadge();
@@ -116,6 +118,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
         <>
           <EuiSpacer size="xl" />
           <MaintenanceWindowsList
+            readOnly={readOnly}
             refreshData={refreshData}
             loading={isLoading}
             items={maintenanceWindows}
