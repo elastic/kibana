@@ -206,7 +206,6 @@ export const actionCreateService = (
           signature: fleetActionDocSignature.signature,
         },
       };
-
       // write actions to .fleet-actions index
       try {
         fleetActionIndexResult = await esClient.index<EndpointAction>(

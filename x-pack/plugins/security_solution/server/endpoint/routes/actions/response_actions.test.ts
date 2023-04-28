@@ -180,6 +180,7 @@ describe('Response actions', () => {
             };
           }
         );
+        const metadataResponse = docGen.generateHostMetadata();
 
         const withIdxResp = idxResponse ? idxResponse : { statusCode: 201 };
         ctx.core.elasticsearch.client.asInternalUser.index.mockResponseImplementation(
@@ -187,7 +188,7 @@ describe('Response actions', () => {
         );
         ctx.core.elasticsearch.client.asInternalUser.search.mockResponseImplementation(() => {
           return {
-            body: legacyMetadataSearchResponseMock(searchResponse),
+            body: legacyMetadataSearchResponseMock(searchResponse ?? metadataResponse),
           };
         });
 
