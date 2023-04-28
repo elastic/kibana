@@ -27,6 +27,7 @@
     "@kbn/es-types",
     "@kbn/spaces-plugin",
     "@kbn/core-application-browser",
+    "@kbn/datemath",
   ],
   "exclude": ["target/**/*"]
 }
