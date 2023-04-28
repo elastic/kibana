@@ -103,7 +103,6 @@ export const UpsertViewModal = ({
           />
         </EuiButtonEmpty>
         <EuiButton
-          color="primary"
           disabled={trimmedName.length === 0}
           fill
           isLoading={isSaving}

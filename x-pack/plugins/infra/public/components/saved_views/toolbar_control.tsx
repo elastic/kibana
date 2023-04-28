@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NonEmptyString } from '@kbn/io-ts-utils';
-import { SavedViewManageViewsFlyout } from './manage_views_flyout';
+import { ManageViewsFlyout } from './manage_views_flyout';
 import { useBoolean } from '../../hooks/use_boolean';
 import { UpsertViewModal } from './upsert_modal';
 import { UseInventoryViewsResult } from '../../hooks/use_inventory_views';
@@ -186,7 +186,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
         />
       )}
       {isManageFlyoutOpen && (
-        <SavedViewManageViewsFlyout
+        <ManageViewsFlyout
           loading={isFetchingViews}
           views={views}
           onMakeDefaultView={onSetDefaultView}

@@ -30,8 +30,9 @@ import { UseInventoryViewsResult } from '../../hooks/use_inventory_views';
 import { UseMetricsExplorerViewsResult } from '../../hooks/use_metrics_explorer_views';
 
 type View = InventoryView | MetricsExplorerView;
+type UseViewResult = UseInventoryViewsResult | UseMetricsExplorerViewsResult;
 
-interface Props<UseViewResult extends UseInventoryViewsResult | UseMetricsExplorerViewsResult> {
+export interface ManageViewsFlyoutProps {
   views: UseViewResult['views'];
   loading: boolean;
   onClose(): void;
@@ -45,51 +46,18 @@ interface DeleteConfimationProps {
   onConfirm(): void;
 }
 
-const DeleteConfimation = ({ isDisabled, onConfirm }: DeleteConfimationProps) => {
-  const [isConfirmVisible, toggleVisibility] = useToggle(false);
-
-  return isConfirmVisible ? (
-    <EuiFlexGroup>
-      <EuiButtonEmpty onClick={toggleVisibility} data-test-subj="hideConfirm">
-        <FormattedMessage defaultMessage="cancel" id="xpack.infra.waffle.savedViews.cancel" />
-      </EuiButtonEmpty>
-      <EuiButton
-        disabled={isDisabled}
-        fill={true}
-        iconType="trash"
-        color="danger"
-        onClick={onConfirm}
-        data-test-subj="showConfirm"
-      >
-        <FormattedMessage
-          defaultMessage="Delete view?"
-          id="xpack.infra.openView.actionNames.deleteConfirmation"
-        />
-      </EuiButton>
-    </EuiFlexGroup>
-  ) : (
-    <EuiButtonIcon
-      data-test-subj="infraDeleteConfimationButton"
-      iconType="trash"
-      color="danger"
-      size="s"
-      onClick={toggleVisibility}
-    />
-  );
-};
-
 const searchConfig = {
   box: { incremental: true },
 };
 
-export function SavedViewManageViewsFlyout({
+export function ManageViewsFlyout({
   onClose,
   views = [],
   onSwitchView,
   onMakeDefaultView,
   onDeleteView,
   loading,
-}: Props<UseInventoryViewsResult | UseMetricsExplorerViewsResult>) {
+}: ManageViewsFlyoutProps) {
   // Add name as top level property to allow in memory search
   const namedViews = useMemo(() => views.map(addOwnName), [views]);
 
@@ -188,6 +156,39 @@ export function SavedViewManageViewsFlyout({
     </EuiPortal>
   );
 }
+
+const DeleteConfimation = ({ isDisabled, onConfirm }: DeleteConfimationProps) => {
+  const [isConfirmVisible, toggleVisibility] = useToggle(false);
+
+  return isConfirmVisible ? (
+    <EuiFlexGroup>
+      <EuiButtonEmpty onClick={toggleVisibility} data-test-subj="hideConfirm">
+        <FormattedMessage defaultMessage="cancel" id="xpack.infra.waffle.savedViews.cancel" />
+      </EuiButtonEmpty>
+      <EuiButton
+        disabled={isDisabled}
+        fill={true}
+        iconType="trash"
+        color="danger"
+        onClick={onConfirm}
+        data-test-subj="showConfirm"
+      >
+        <FormattedMessage
+          defaultMessage="Delete view?"
+          id="xpack.infra.openView.actionNames.deleteConfirmation"
+        />
+      </EuiButton>
+    </EuiFlexGroup>
+  ) : (
+    <EuiButtonIcon
+      data-test-subj="infraDeleteConfimationButton"
+      iconType="trash"
+      color="danger"
+      size="s"
+      onClick={toggleVisibility}
+    />
+  );
+};
 
 /**
  * Helpers
