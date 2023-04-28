@@ -12,10 +12,12 @@ const INDENT = ''.padStart(INDENT_LENGTH);
 export class LineWriter {
   private _indent: string = '';
   private _lines: string[] = [];
+  private _separator: string;
 
-  constructor() {
+  constructor(separator: string = '\n') {
     this._indent = '';
     this._lines = [];
+    this._separator = separator;
   }
 
   public addLine(line: string) {
@@ -41,8 +43,8 @@ export class LineWriter {
   }
 
   public getContent() {
-    return this._lines.join('\n');
+    return this._lines.join(this._separator);
   }
 }
 
-export const createLineWriter = () => new LineWriter();
+export const createLineWriter = (separator: string = '\n') => new LineWriter(separator);

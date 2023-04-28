@@ -65,6 +65,7 @@ export const schemaGeoPoint = rt.union([
   schemaGeoPointLocationString,
 ]);
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
+// prettier-ignore
 const AlertRequiredFlattened = rt.type({
   '@timestamp': schemaDate,
   'kibana.alert.instance.id': schemaString,
@@ -98,6 +99,7 @@ const AlertOptionalFlattened = rt.partial({
   'kibana.alert.workflow_status': schemaString,
   'kibana.version': schemaString,
 });
+// prettier-ignore
 const AlertRequired = rt.type({
   '@timestamp': schemaDate,
   kibana: rt.type({
@@ -152,8 +154,10 @@ const AlertOptional = rt.partial({
 
 // prettier-ignore
 export const AlertFlattenedSchema = rt.intersection([AlertRequiredFlattened, AlertOptionalFlattened]);
+// prettier-ignore
 export type AlertFlattened = rt.TypeOf<typeof AlertFlattenedSchema>;
 
 // prettier-ignore
 export const AlertSchema = rt.intersection([AlertRequired, AlertOptional]);
+// prettier-ignore
 export type Alert = rt.TypeOf<typeof AlertSchema>;

@@ -26,6 +26,16 @@ export default function checkAlertSchemasTest({ getService }: FtrProviderContext
       // Generate base alert schema
       createSchemaFromFieldMap(`schemas/generated/alert_schema.ts`, alertFieldMap, 'Alert');
 
+      // Generate legacy alert schema
+      createSchemaFromFieldMap(
+        `schemas/generated/legacy_alert_schema.ts`,
+        legacyAlertFieldMap,
+        'LegacyAlert'
+      );
+
+      // Generate ECS schema
+      createSchemaFromFieldMap(`schemas/generated/ecs_schema.ts`, ecsFieldMap, 'Ecs');
+
       const ruleTypes = await supertest
         .get('/api/alerting/rule_types')
         .expect(200)
@@ -38,27 +48,15 @@ export default function checkAlertSchemasTest({ getService }: FtrProviderContext
           const alertsDefinition = ruleType.alerts!;
           if (!processedContexts.includes(alertsDefinition.context)) {
             // Generate schema for this context
-            // All schemas have the alerts field map
-            let fieldMap = { ...alertFieldMap };
-
-            // Add the registered field map for this context
-            fieldMap = { ...fieldMap, ...alertsDefinition.mappings.fieldMap };
-
-            // If using ECS, include ECS field map
-            if (alertsDefinition.useEcs) {
-              fieldMap = { ...fieldMap, ...ecsFieldMap };
-            }
-
-            // If using legacy alerts, include legacy alert field map
-            if (alertsDefinition.useLegacyAlerts) {
-              fieldMap = { ...fieldMap, ...legacyAlertFieldMap };
-            }
             const name = contextToSchemaName(alertsDefinition.context);
 
             createSchemaFromFieldMap(
               `schemas/generated/${alertsDefinition.context.replaceAll('.', '_')}_schema.ts`,
-              fieldMap,
-              name
+              alertsDefinition.mappings.fieldMap,
+              name,
+              true,
+              alertsDefinition.useEcs ?? false,
+              alertsDefinition.useLegacyAlerts ?? false
             );
             processedContexts.push(alertsDefinition.context);
           }

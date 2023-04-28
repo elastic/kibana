@@ -18,14 +18,41 @@ const PLUGIN_DIR = path.resolve(path.join(__dirname, '..'));
 export const createSchemaFromFieldMap = (
   outputFile: string,
   fieldMap: FieldMap,
-  schemaPrefix: string
+  schemaPrefix: string,
+  useAlert: boolean = false,
+  useEcs: boolean = false,
+  useLegacyAlerts: boolean = false
 ) => {
   const lineWriters = {
+    IMPORTS: createLineWriter(),
     REQUIRED_FIELDS_FLATTENED: createLineWriter(),
     OPTIONAL_FIELDS_FLATTENED: createLineWriter(),
     REQUIRED_FIELDS_UNFLATTENED: createLineWriter(),
     OPTIONAL_FIELDS_UNFLATTENED: createLineWriter(),
+    INCLUDED_SCHEMAS_FLATTENED: createLineWriter(''),
+    INCLUDED_SCHEMAS_UNFLATTENED: createLineWriter(''),
   };
+
+  if (useAlert) {
+    lineWriters.IMPORTS.addLine(
+      `import { AlertFlattenedSchema, AlertSchema } from './alert_schema';`
+    );
+    lineWriters.INCLUDED_SCHEMAS_FLATTENED.addLine(`, AlertFlattenedSchema`);
+    lineWriters.INCLUDED_SCHEMAS_UNFLATTENED.addLine(`, AlertSchema`);
+  }
+
+  if (useEcs) {
+    lineWriters.IMPORTS.addLine(`import { EcsFlattenedSchema, EcsSchema } from './ecs_schema';`);
+    lineWriters.INCLUDED_SCHEMAS_FLATTENED.addLine(`, EcsFlattenedSchema`);
+    lineWriters.INCLUDED_SCHEMAS_UNFLATTENED.addLine(`, EcsSchema`);
+  }
+  if (useLegacyAlerts) {
+    lineWriters.IMPORTS.addLine(
+      `import { LegacyAlertFlattenedSchema, LegacyAlertSchema } from './legacy_alert_schema';`
+    );
+    lineWriters.INCLUDED_SCHEMAS_FLATTENED.addLine(`, LegacyAlertFlattenedSchema`);
+    lineWriters.INCLUDED_SCHEMAS_UNFLATTENED.addLine(`, LegacyAlertSchema`);
+  }
 
   generateSchemaFromFieldMap({ lineWriters, fieldMap });
 
@@ -246,7 +273,7 @@ const SchemaFileTemplate = `
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-
+%%IMPORTS%%
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(
   'IsoDateString',
@@ -301,17 +328,21 @@ export const schemaGeoPoint = rt.union([
   schemaGeoPointLocationString,
 ]);
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
+// prettier-ignore
 const %%schemaPrefix%%RequiredFlattened = %%REQUIRED_FIELDS_FLATTENED%%;
 const %%schemaPrefix%%OptionalFlattened = %%OPTIONAL_FIELDS_FLATTENED%%;
+// prettier-ignore
 const %%schemaPrefix%%Required = %%REQUIRED_FIELDS_UNFLATTENED%%;
 const %%schemaPrefix%%Optional = %%OPTIONAL_FIELDS_UNFLATTENED%%;
 
 // prettier-ignore
-export const %%schemaPrefix%%FlattenedSchema = rt.intersection([%%schemaPrefix%%RequiredFlattened, %%schemaPrefix%%OptionalFlattened]);
+export const %%schemaPrefix%%FlattenedSchema = rt.intersection([%%schemaPrefix%%RequiredFlattened, %%schemaPrefix%%OptionalFlattened%%INCLUDED_SCHEMAS_FLATTENED%%]);
+// prettier-ignore
 export type %%schemaPrefix%%Flattened = rt.TypeOf<typeof %%schemaPrefix%%FlattenedSchema>;
 
 // prettier-ignore
-export const %%schemaPrefix%%Schema = rt.intersection([%%schemaPrefix%%Required, %%schemaPrefix%%Optional]);
+export const %%schemaPrefix%%Schema = rt.intersection([%%schemaPrefix%%Required, %%schemaPrefix%%Optional%%INCLUDED_SCHEMAS_UNFLATTENED%%]);
+// prettier-ignore
 export type %%schemaPrefix%% = rt.TypeOf<typeof %%schemaPrefix%%Schema>;
 
 `.trim();
