@@ -3230,7 +3230,9 @@ const ObservabilityLogsAlertOptional = rt.partial({
 
 // prettier-ignore
 export const ObservabilityLogsAlertFlattenedSchema = rt.intersection([ObservabilityLogsAlertRequiredFlattened, ObservabilityLogsAlertOptionalFlattened]);
-export type ObservabilityLogsAlertFlattened = rt.TypeOf<typeof ObservabilityLogsAlertFlattenedSchema>;
+export type ObservabilityLogsAlertFlattened = rt.TypeOf<
+  typeof ObservabilityLogsAlertFlattenedSchema
+>;
 
 // prettier-ignore
 export const ObservabilityLogsAlertSchema = rt.intersection([ObservabilityLogsAlertRequired, ObservabilityLogsAlertOptional]);

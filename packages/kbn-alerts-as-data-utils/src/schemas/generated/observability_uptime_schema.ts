@@ -286,7 +286,9 @@ const ObservabilityUptimeAlertOptional = rt.partial({
 
 // prettier-ignore
 export const ObservabilityUptimeAlertFlattenedSchema = rt.intersection([ObservabilityUptimeAlertRequiredFlattened, ObservabilityUptimeAlertOptionalFlattened]);
-export type ObservabilityUptimeAlertFlattened = rt.TypeOf<typeof ObservabilityUptimeAlertFlattenedSchema>;
+export type ObservabilityUptimeAlertFlattened = rt.TypeOf<
+  typeof ObservabilityUptimeAlertFlattenedSchema
+>;
 
 // prettier-ignore
 export const ObservabilityUptimeAlertSchema = rt.intersection([ObservabilityUptimeAlertRequired, ObservabilityUptimeAlertOptional]);

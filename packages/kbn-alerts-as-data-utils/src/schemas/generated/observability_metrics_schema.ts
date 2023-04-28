@@ -3230,7 +3230,9 @@ const ObservabilityMetricsAlertOptional = rt.partial({
 
 // prettier-ignore
 export const ObservabilityMetricsAlertFlattenedSchema = rt.intersection([ObservabilityMetricsAlertRequiredFlattened, ObservabilityMetricsAlertOptionalFlattened]);
-export type ObservabilityMetricsAlertFlattened = rt.TypeOf<typeof ObservabilityMetricsAlertFlattenedSchema>;
+export type ObservabilityMetricsAlertFlattened = rt.TypeOf<
+  typeof ObservabilityMetricsAlertFlattenedSchema
+>;
 
 // prettier-ignore
 export const ObservabilityMetricsAlertSchema = rt.intersection([ObservabilityMetricsAlertRequired, ObservabilityMetricsAlertOptional]);
