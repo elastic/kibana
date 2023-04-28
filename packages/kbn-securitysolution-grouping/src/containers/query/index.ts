@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { AlertsGroupingAggregation } from '@kbn/security-solution-plugin/public/detections/components/alerts_table/grouping_settings/types';
 import { getEmptyValue, getFieldTypeMissingValues } from './helpers';
 import { GroupingAggregation } from '../..';
 import type { GroupingQueryArgs, GroupingQuery } from './types';
@@ -45,7 +44,7 @@ export const getGroupingQuery = ({
   runtimeMappings,
   selectedGroupEsTypes,
   size = DEFAULT_GROUP_BY_FIELD_SIZE,
-  sort = [{ unitsCount: { order: 'desc' } }],
+  sort,
   statsAggregations,
   to,
 }: GroupingQueryArgs): GroupingQuery => ({
@@ -123,8 +122,8 @@ export const getGroupingQuery = ({
  * @param buckets buckets returned from the grouping query
  */
 export const parseGroupingQuery = <T>(
-  aggs?: GroupingAggregation<AlertsGroupingAggregation>
-): GroupingAggregation<AlertsGroupingAggregation> | {} => {
+  aggs?: GroupingAggregation<T>
+): GroupingAggregation<T> | {} => {
   if (!aggs) {
     return {};
   }
@@ -154,9 +153,9 @@ export const parseGroupingQuery = <T>(
     groupByFields: { buckets: groupByFields },
     groupsCount: {
       value:
-        aggs.unitsCount?.value !== aggs.unitsCountWithoutNull?.value
+        (aggs.unitsCount?.value !== aggs.unitsCountWithoutNull?.value
           ? (aggs.groupsCount?.value ?? 0) + 1
-          : aggs.groupsCount?.value,
+          : aggs.groupsCount?.value) ?? 0,
     },
   };
 };
