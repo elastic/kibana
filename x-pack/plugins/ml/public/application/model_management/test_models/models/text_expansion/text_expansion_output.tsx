@@ -14,10 +14,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { TextExpansionInference, FormattedTextExpansionResponse } from '.';
 
 export const getTextExpansionOutputComponent = (inferrer: TextExpansionInference) => (
-  <TextClassificationOutput inferrer={inferrer} />
+  <TextExpansionOutput inferrer={inferrer} />
 );
 
-export const TextClassificationOutput: FC<{
+export const TextExpansionOutput: FC<{
   inferrer: TextExpansionInference;
 }> = ({ inferrer }) => {
   const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
@@ -29,7 +29,7 @@ export const TextClassificationOutput: FC<{
     <>
       {result.map(({ response, inputText }) => (
         <>
-          <PredictionProbabilityList response={response} inputText={inputText} />
+          <TokenList response={response} inputText={inputText} />
           <EuiHorizontalRule />
         </>
       ))}
@@ -37,7 +37,7 @@ export const TextClassificationOutput: FC<{
   );
 };
 
-export const PredictionProbabilityList: FC<{
+export const TokenList: FC<{
   response: FormattedTextExpansionResponse;
   inputText?: string;
 }> = ({ response, inputText }) => {

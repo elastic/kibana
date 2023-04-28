@@ -26,7 +26,7 @@ export type TextExpansionResponse = InferResponse<
 >;
 
 export class TextExpansionInference extends InferenceBase<TextExpansionResponse> {
-  protected inferenceType = SUPPORTED_PYTORCH_TASKS.NER;
+  protected inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
   protected inferenceTypeLabel = i18n.translate(
     'xpack.ml.trainedModels.testModelsFlyout.textExpansion.label',
     { defaultMessage: 'Text expansion' }
