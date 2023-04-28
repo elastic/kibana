@@ -209,6 +209,5 @@ export const editExceptionLisDetails = ({
 };
 
 export const clickOnLinkRulesByRuleRowOrderInListDetail = (ruleSwitch: number = 0) => {
-  // cy.get(LINK_RULES_FLYOUT_LINK_SWITCH).first().click();
   cy.get(RULE_ACTION_LINK_RULE_SWITCH).eq(ruleSwitch).find('button').click();
 };
