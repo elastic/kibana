@@ -148,7 +148,7 @@ export class Plugin implements InfraClientPluginClass {
       new LogStreamEmbeddableFactoryDefinition(core.getStartServices)
     );
 
-    if (this.appTarget !== DISCOVER_APP_TARGET) {
+    if (this.appTarget === DISCOVER_APP_TARGET) {
       core.application.register({
         id: 'logs-to-discover',
         title: '',
@@ -165,7 +165,7 @@ export class Plugin implements InfraClientPluginClass {
       });
     }
 
-    if (this.appTarget !== LOGS_APP_TARGET) {
+    if (this.appTarget === LOGS_APP_TARGET) {
       core.application.register({
         id: 'logs',
         title: i18n.translate('xpack.infra.logs.pluginTitle', {
