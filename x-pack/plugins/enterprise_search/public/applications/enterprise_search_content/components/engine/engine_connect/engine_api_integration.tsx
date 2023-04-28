@@ -19,7 +19,7 @@ import { EngineApiLogic } from './engine_api_logic';
 
 import { elasticsearchUrl } from './search_application_api';
 
-const SearchUISnippet = (esUrl: string, engineName: string, apiKey: string) => `6
+const SearchUISnippet = (esUrl: string, engineName: string, apiKey: string) => `
 import EnginesAPIConnector from "@elastic/search-ui-engines-connector";
 
 const connector = new EnginesAPIConnector({
@@ -74,7 +74,7 @@ export const EngineApiIntegrationStage: React.FC = () => {
         <p>
           {i18n.translate('xpack.enterpriseSearch.content.engine.api.step3.intro', {
             defaultMessage:
-              'Learn how to integrate with your search application with the language clients maintained by Elastic to help build your search experience.',
+              'Use the following code snippets to connect to your search application.',
           })}
         </p>
       </EuiText>

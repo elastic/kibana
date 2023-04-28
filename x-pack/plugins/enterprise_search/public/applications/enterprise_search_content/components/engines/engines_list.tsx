@@ -97,7 +97,7 @@ export const CreateEngineButton: React.FC<CreateEngineButtonProps> = ({ disabled
           <EuiText size="s">
             <FormattedMessage
               id="xpack.enterpriseSearch.content.searchApplications.createEngineTechnicalPreviewPopover.body"
-              defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+              defaultMessage="This functionality may be changed or removed completely in a future release."
             />
           </EuiText>
         </EuiFlexGroup>
@@ -170,7 +170,7 @@ export const EnginesList: React.FC<ListProps> = ({ createEngineFlyoutOpen }) => 
           description: (
             <FormattedMessage
               id="xpack.enterpriseSearch.content.searchApplications.description"
-              defaultMessage="Search Applications help make your Elasticsearch data searchable for end users, with out-of-the-box relevance, analytics and personalization tools. To learn more, {documentationUrl}."
+              defaultMessage="Search Applications help make your Elasticsearch data easily searchable for end users. Create, build, and manage all your search applications here. To learn more, {documentationUrl}."
               values={{
                 documentationUrl: (
                   <EuiLink
