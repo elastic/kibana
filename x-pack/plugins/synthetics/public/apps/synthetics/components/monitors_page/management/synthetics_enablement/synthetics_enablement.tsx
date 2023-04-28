@@ -16,8 +16,13 @@ export const EnablementEmptyState = () => {
 
   return !isEnabled && !loading ? (
     <EuiEmptyPrompt
-      title={<h2>{labels.SYNTHETICS_APP_DISABLED_LABEL}</h2>}
-      body={<p>{labels.MONITOR_MANAGEMENT_DISABLED_MESSAGE}</p>}
+      title={<h2>{labels.SYNTHETICS_APP_ENABLEMENT_TITLE}</h2>}
+      body={
+        <>
+          <p>{labels.MONITOR_MANAGEMENT_DISABLED_MESSAGE}</p>
+          <p>{labels.MONITOR_MANAGEMENT_CONTACT_ADMINISTRATOR}</p>
+        </>
+      }
       footer={
         <>
           <EuiTitle size="xxs">

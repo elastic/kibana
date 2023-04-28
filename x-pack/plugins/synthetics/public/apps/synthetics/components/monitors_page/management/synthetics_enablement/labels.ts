@@ -7,18 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SYNTHETICS_APP_DISABLED_LABEL = i18n.translate(
-  'xpack.synthetics.emptyState.enablement.disabled.title',
+export const SYNTHETICS_APP_ENABLEMENT_TITLE = i18n.translate(
+  'xpack.synthetics.emptyState.enablement.title',
   {
-    defaultMessage: 'Synthetics App is disabled',
-  }
-);
-
-export const MONITOR_MANAGEMENT_ENABLEMENT_MESSAGE = i18n.translate(
-  'xpack.synthetics.monitorManagement.emptyState.enablement',
-  {
-    defaultMessage:
-      'Enable Synthetics App to run lightweight and real-browser monitors from hosted testing locations around the world. Enabling Synthetics App will generate an API key to allow the Synthetics Service to write back to your Elasticsearch cluster.',
+    defaultMessage: 'Monitor the status of your services and applications with Synthetics',
   }
 );
 
@@ -26,7 +18,14 @@ export const MONITOR_MANAGEMENT_DISABLED_MESSAGE = i18n.translate(
   'xpack.synthetics.emptyState.enablement.disabledDescription',
   {
     defaultMessage:
-      'Synthetics App is currently disabled. Synthetics App allows you to run lightweight and real-browser monitors from hosted testing locations around the world. Synthetics App will be enabled when an admin visits the Synthetics app.',
+      'Run automated checks based on real-browser simulations and lightweight endpoint pings to measure the experience of your users from any location worldwide.',
+  }
+);
+
+export const MONITOR_MANAGEMENT_CONTACT_ADMINISTRATOR = i18n.translate(
+  'xpack.synthetics.emptyState.enablement.contactAdministrator',
+  {
+    defaultMessage: 'Only administrators can enable this feature.',
   }
 );
 
