@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: any) {
 
   // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/155924
   // Failing: See https://github.com/elastic/kibana/issues/155928
+  // Failing: See https://github.com/elastic/kibana/issues/155928
   describe.skip('Ingest Pipelines Accessibility', async () => {
     before(async () => {
       await putSamplePipeline(esClient);
