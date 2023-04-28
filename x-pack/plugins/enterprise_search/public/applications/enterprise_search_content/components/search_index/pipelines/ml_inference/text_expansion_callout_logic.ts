@@ -95,7 +95,7 @@ export const TextExpansionCalloutLogic = kea<
   },
   events: ({ actions, values }) => ({
     afterMount: () => {
-      actions.fetchTextExpansionModel(undefined);
+      actions.fetchTextExpansionModel({});
     },
     beforeUnmount: () => {
       if (values.textExpansionModelPollTimeoutId !== null) {
@@ -109,12 +109,12 @@ export const TextExpansionCalloutLogic = kea<
         clearTimeout(values.textExpansionModelPollTimeoutId);
       }
       const timeoutId = setTimeout(() => {
-        actions.fetchTextExpansionModel(undefined);
+        actions.fetchTextExpansionModel({});
       }, duration);
       actions.setTextExpansionModelPollingId(timeoutId);
     },
     createTextExpansionModelSuccess: () => {
-      actions.fetchTextExpansionModel(undefined);
+      actions.fetchTextExpansionModel({});
       actions.startPollingTextExpansionModel();
     },
     fetchTextExpansionModelError: () => {
@@ -147,7 +147,7 @@ export const TextExpansionCalloutLogic = kea<
       actions.createTextExpansionModelPollingTimeout(FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION);
     },
     startTextExpansionModelSuccess: () => {
-      actions.fetchTextExpansionModel(undefined);
+      actions.fetchTextExpansionModel({});
     },
     stopPollingTextExpansionModel: () => {
       if (values.textExpansionModelPollTimeoutId !== null) {

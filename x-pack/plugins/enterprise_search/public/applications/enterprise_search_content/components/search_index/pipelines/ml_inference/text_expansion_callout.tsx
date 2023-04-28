@@ -14,13 +14,12 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiPanel,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
@@ -66,7 +65,7 @@ export const DeployModel = ({
   const { createTextExpansionModel } = useActions(TextExpansionCalloutLogic);
 
   return (
-    <EuiPanel color="success">
+    <EuiCallOut color="success">
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
@@ -79,16 +78,14 @@ export const DeployModel = ({
               </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow>
-              <EuiTitle size="xs">
-                <h4>
-                  <EuiText color="text">
-                    <FormattedMessage
-                      id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.title"
-                      defaultMessage="Improve your results with ELSER"
-                    />
-                  </EuiText>
-                </h4>
-              </EuiTitle>
+              <EuiText color="success" size="xs">
+                <h3>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.title',
+                    { defaultMessage: 'Improve your results with ELSER' }
+                  )}
+                </h3>
+              </EuiText>
             </EuiFlexItem>
             {isDismissable && (
               <EuiFlexItem grow={false}>
@@ -100,7 +97,7 @@ export const DeployModel = ({
         <EuiFlexItem>
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
-              <EuiText>
+              <EuiText size="s">
                 <FormattedHTMLMessage
                   id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.body"
                   defaultMessage="ELSER (Elastic Learned Sparse EncodeR) is our <strong>new trained machine learning model</strong> designed to efficiently use context in natural language queries. This model delivers better results than BM25 without further training on your data."
@@ -115,7 +112,7 @@ export const DeployModel = ({
                     color="success"
                     disabled={isCreateButtonDisabled}
                     iconType="launch"
-                    onClick={() => createTextExpansionModel(undefined)}
+                    onClick={() => createTextExpansionModel({})}
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.deployButton.label',
@@ -138,7 +135,7 @@ export const DeployModel = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </EuiCallOut>
   );
 };
 
@@ -146,22 +143,22 @@ export const ModelDeploymentInProgress = ({
   dismiss,
   isDismissable,
 }: Pick<TextExpansionCallOutState, 'dismiss' | 'isDismissable'>) => (
-  <EuiPanel color="success">
+  <EuiCallOut color="success">
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="clock" />
+            <EuiIcon color="success" type="clock" />
           </EuiFlexItem>
           <EuiFlexItem grow>
-            <EuiTitle size="xs">
-              <h4>
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployingTitle"
-                  defaultMessage="Your ELSER model is deploying."
-                />
-              </h4>
-            </EuiTitle>
+            <EuiText color="success" size="xs">
+              <h3>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployingTitle',
+                  { defaultMessage: 'Your ELSER model is deploying.' }
+                )}
+              </h3>
+            </EuiText>
           </EuiFlexItem>
           {isDismissable && (
             <EuiFlexItem grow={false}>
@@ -171,15 +168,20 @@ export const ModelDeploymentInProgress = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployingBody"
-            defaultMessage="You can continue creating your pipeline with other uploaded models in the meantime."
-          />
+        <EuiText size="s">
+          <p>
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployingBody',
+              {
+                defaultMessage:
+                  'You can continue creating your pipeline with other uploaded models in the meantime.',
+              }
+            )}
+          </p>
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
-  </EuiPanel>
+  </EuiCallOut>
 );
 
 export const ModelDeployed = ({
@@ -190,22 +192,22 @@ export const ModelDeployed = ({
   const { startTextExpansionModel } = useActions(TextExpansionCalloutLogic);
 
   return (
-    <EuiPanel color="success">
+    <EuiCallOut color="success">
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow>
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="checkInCircleFilled" />
+              <EuiIcon color="success" type="checkInCircleFilled" />
             </EuiFlexItem>
             <EuiFlexItem grow>
-              <EuiTitle size="xs">
-                <h4>
-                  <FormattedMessage
-                    id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedTitle"
-                    defaultMessage="Your ELSER model has deployed but not started."
-                  />
-                </h4>
-              </EuiTitle>
+              <EuiText color="success" size="xs">
+                <h3>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedTitle',
+                    { defaultMessage: 'Your ELSER model has deployed but not started.' }
+                  )}
+                </h3>
+              </EuiText>
             </EuiFlexItem>
             {isDismissable && (
               <EuiFlexItem grow={false}>
@@ -215,25 +217,26 @@ export const ModelDeployed = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <EuiText>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedBody"
-              defaultMessage="You may start the model in a single-threaded configuration for testing, or tune the performance for a production environment."
-            />
+          <EuiText size="s">
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedBody',
+                {
+                  defaultMessage:
+                    'You may start the model in a single-threaded configuration for testing, or tune the performance for a production environment.',
+                }
+              )}
+            </p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow>
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
             <EuiFlexItem>
               <EuiButton
-                aria-label={i18n.translate(
-                  'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startModelButton',
-                  { defaultMessage: 'Start ELSER model' }
-                )}
                 color="success"
                 disabled={isStartButtonDisabled}
                 iconType="playFilled"
-                onClick={() => startTextExpansionModel(undefined)}
+                onClick={() => startTextExpansionModel({})}
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.startModelButton.label',
@@ -245,10 +248,6 @@ export const ModelDeployed = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButtonEmpty
-                aria-label={i18n.translate(
-                  'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.fineTuneModelButton',
-                  { defaultMessage: 'Fine-tune ELSER model' }
-                )}
                 iconSide="left"
                 iconType="wrench"
                 onClick={() =>
@@ -266,7 +265,7 @@ export const ModelDeployed = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </EuiCallOut>
   );
 };
 
@@ -274,22 +273,22 @@ export const ModelStarted = ({
   dismiss,
   isDismissable,
 }: Pick<TextExpansionCallOutState, 'dismiss' | 'isDismissable'>) => (
-  <EuiPanel color="success">
+  <EuiCallOut color="success">
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" />
+            <EuiIcon type="checkInCircleFilled" color="success" />
           </EuiFlexItem>
           <EuiFlexItem grow>
-            <EuiTitle size="xs">
-              <h4>
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitle"
-                  defaultMessage="Your ELSER model has started."
-                />
-              </h4>
-            </EuiTitle>
+            <EuiText color="success" size="xs">
+              <h3>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitle',
+                  { defaultMessage: 'Your ELSER model has started.' }
+                )}
+              </h3>
+            </EuiText>
           </EuiFlexItem>
           {isDismissable && (
             <EuiFlexItem grow={false}>
@@ -299,15 +298,17 @@ export const ModelStarted = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedBody"
-            defaultMessage="Enjoy the power of ELSER in your custom Inference pipeline."
-          />
+        <EuiText size="s">
+          <p>
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedBody',
+              { defaultMessage: 'Enjoy the power of ELSER in your custom Inference pipeline.' }
+            )}
+          </p>
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
-  </EuiPanel>
+  </EuiCallOut>
 );
 
 export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props) => {
@@ -322,9 +323,9 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
 
   if (!show) return null;
 
-  if (!!isModelDownloadInProgress) {
+  if (isModelDownloadInProgress) {
     return <ModelDeploymentInProgress dismiss={dismiss} isDismissable={isDismissable} />;
-  } else if (!!isModelDownloaded) {
+  } else if (isModelDownloaded) {
     return (
       <ModelDeployed
         dismiss={dismiss}
@@ -332,7 +333,7 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
         isStartButtonDisabled={isStartButtonDisabled}
       />
     );
-  } else if (!!isModelStarted) {
+  } else if (isModelStarted) {
     return <ModelStarted dismiss={dismiss} isDismissable={isDismissable} />;
   }
 
