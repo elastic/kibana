@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
+/* eslint-disable @elastic/eui/href-or-on-click */
+
+import React, { PropsWithChildren, MouseEvent } from 'react';
 import {
   EuiTitle,
   EuiLink,
@@ -28,7 +30,7 @@ import { useWizard } from '.';
 import { useKibanaNavigation } from '../../../../hooks/use_kibana_navigation';
 
 export function SelectLogs() {
-  const navigateToKibanaUrl = useKibanaNavigation();
+  const { navigateToKibanaUrl, navigateToAppUrl } = useKibanaNavigation();
   const { goToStep, getState, setState } = useWizard();
 
   function onBack() {
@@ -125,7 +127,14 @@ export function SelectLogs() {
           <EuiSpacer size="m" />
         </LogsTypeSection>
         <EuiSpacer size="m" />
-        <EuiLink href="#/navigation/link" external>
+        <EuiLink
+          href="#"
+          target="_blank"
+          onClick={(event: MouseEvent) => {
+            event.preventDefault();
+            navigateToAppUrl('/integrations/browse/observability');
+          }}
+        >
           Explore other integrations
         </EuiLink>
         <EuiHorizontalRule margin="l" />
