@@ -6,7 +6,7 @@
  */
 
 import { CommonFields, ConfigKey, SourceType } from '../../runtime_types/monitor_management';
-import { arrayToJsonFormatter, FormatterFn } from '../formatting_utils';
+import { arrayToJsonFormatter, stringToJsonFormatter, FormatterFn } from '../formatting_utils';
 
 export type Formatter = null | FormatterFn;
 
@@ -14,7 +14,7 @@ export type CommonFormatMap = Record<keyof CommonFields | ConfigKey.NAME, Format
 
 export const commonFormatters: CommonFormatMap = {
   [ConfigKey.APM_SERVICE_NAME]: null,
-  [ConfigKey.NAME]: null,
+  [ConfigKey.NAME]: stringToJsonFormatter,
   [ConfigKey.LOCATIONS]: null,
   [ConfigKey.MONITOR_TYPE]: null,
   [ConfigKey.ENABLED]: null,
