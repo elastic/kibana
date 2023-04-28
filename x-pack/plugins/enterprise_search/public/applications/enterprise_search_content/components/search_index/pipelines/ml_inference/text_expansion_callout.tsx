@@ -232,10 +232,15 @@ export const ModelDeployed = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSpacer size="s" />
-        </EuiFlexItem>        
+        </EuiFlexItem>
         <EuiFlexItem grow>
-          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-            <EuiFlexItem>
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="s"
+            alignItems="center"
+            justifyContent="flexStart"
+          >
+            <EuiFlexItem grow={false}>
               <EuiButton
                 color="success"
                 disabled={isStartButtonDisabled}
@@ -250,7 +255,7 @@ export const ModelDeployed = ({
                 )}
               </EuiButton>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 iconSide="left"
                 iconType="wrench"
@@ -265,7 +270,6 @@ export const ModelDeployed = ({
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow />
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
