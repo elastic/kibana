@@ -11,7 +11,7 @@ import React from 'react';
 import { useWizard } from '.';
 
 export function HorizontalSteps() {
-  const { getPath } = useWizard();
+  const { getPath, goToStep } = useWizard();
   const [currentStep, ...previousSteps] = getPath().reverse();
 
   function getStatus(stepKey: ReturnType<typeof getPath>[0]) {
@@ -22,6 +22,10 @@ export function HorizontalSteps() {
       return 'complete';
     }
     return 'incomplete';
+  }
+
+  function isDisabled(stepKey: ReturnType<typeof getPath>[0]) {
+    return getStatus(stepKey) === 'incomplete';
   }
 
   return (
@@ -35,7 +39,9 @@ export function HorizontalSteps() {
             }
           ),
           status: getStatus('selectLogs'),
-          onClick: () => {},
+          onClick: () => {
+            goToStep('selectLogs');
+          },
         },
         {
           title: i18n.translate(
@@ -45,7 +51,10 @@ export function HorizontalSteps() {
             }
           ),
           status: getStatus('configureLogs'),
-          onClick: () => {},
+          disabled: isDisabled('configureLogs'),
+          onClick: () => {
+            goToStep('configureLogs');
+          },
         },
         {
           title: i18n.translate(
@@ -55,7 +64,10 @@ export function HorizontalSteps() {
             }
           ),
           status: getStatus('installElasticAgent'),
-          onClick: () => {},
+          disabled: isDisabled('installElasticAgent'),
+          onClick: () => {
+            goToStep('installElasticAgent');
+          },
         },
         {
           title: i18n.translate(
@@ -65,7 +77,10 @@ export function HorizontalSteps() {
             }
           ),
           status: getStatus('collectLogs'),
-          onClick: () => {},
+          disabled: isDisabled('collectLogs'),
+          onClick: () => {
+            goToStep('collectLogs');
+          },
         },
       ]}
     />
