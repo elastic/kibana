@@ -32,9 +32,9 @@ export const AlertDetailsRedirect = () => {
 
   // Default to the existing global timerange if we don't get this query param for whatever reason
   const fromTime = timestamp ?? globalTimerange.from;
-  // Add 1 millisecond to the alert timestamp as the alert table is non-inclusive of the end time
-  // So we have to extend slightly beyond the range of the timestamp of the given alert
-  const toTime = moment(timestamp ?? globalTimerange.to).add('1', 'millisecond');
+  // Add 5 minutes to the alert timestamp as the alert table is non-inclusive of the end time
+  // This also provides padding time if the user clears the `_id` filter after redirect to see other alerts
+  const toTime = moment(timestamp ?? globalTimerange.to).add('5', 'minutes');
 
   const timerange = encode({
     global: {

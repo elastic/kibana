@@ -44,18 +44,21 @@ describe(`POST ${URL}`, () => {
     id: 'my-dashboard',
     attributes: { title: 'Look at my dashboard' },
     references: [],
+    managed: false,
   };
   const mockVisualization = {
     type: 'visualization',
     id: 'my-vis',
     attributes: { title: 'Look at my visualization' },
     references: [{ name: 'ref_0', type: 'index-pattern', id: 'existing' }],
+    managed: false,
   };
   const mockIndexPattern = {
     type: 'index-pattern',
     id: 'existing',
     attributes: {},
     references: [],
+    managed: false,
   };
 
   beforeEach(async () => {
@@ -155,12 +158,13 @@ describe(`POST ${URL}`, () => {
       type,
       id,
       attributes: { title },
+      managed,
     } = mockDashboard;
     const meta = { title, icon: 'dashboard-icon' };
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
-      successResults: [{ type, id, meta }],
+      successResults: [{ type, id, meta, managed }],
       warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
@@ -193,17 +197,17 @@ describe(`POST ${URL}`, () => {
       )
       .expect(200);
 
-    const { type, id, attributes } = mockDashboard;
+    const { type, id, attributes, managed } = mockDashboard;
     const meta = { title: attributes.title, icon: 'dashboard-icon' };
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
-      successResults: [{ type, id, meta }],
+      successResults: [{ type, id, meta, managed }],
       warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [{ type, id, attributes, typeMigrationVersion: '' }],
+      [{ type, id, attributes, typeMigrationVersion: '', managed }],
       expect.objectContaining({ overwrite: undefined })
     );
   });
@@ -232,17 +236,17 @@ describe(`POST ${URL}`, () => {
       )
       .expect(200);
 
-    const { type, id, attributes } = mockDashboard;
+    const { type, id, attributes, managed } = mockDashboard;
     const meta = { title: attributes.title, icon: 'dashboard-icon' };
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
-      successResults: [{ type, id, meta, overwrite: true }],
+      successResults: [{ type, id, meta, overwrite: true, managed }],
       warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [{ type, id, attributes, typeMigrationVersion: '' }],
+      [{ type, id, attributes, typeMigrationVersion: '', managed }],
       expect.objectContaining({ overwrite: true })
     );
   });
@@ -271,7 +275,7 @@ describe(`POST ${URL}`, () => {
       )
       .expect(200);
 
-    const { type, id, attributes, references } = mockVisualization;
+    const { type, id, attributes, references, managed } = mockVisualization;
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
@@ -280,13 +284,14 @@ describe(`POST ${URL}`, () => {
           type: 'visualization',
           id: 'my-vis',
           meta: { title: 'Look at my visualization', icon: 'visualization-icon' },
+          managed,
         },
       ],
       warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [{ type, id, attributes, references, typeMigrationVersion: '' }],
+      [{ type, id, attributes, references, typeMigrationVersion: '', managed }],
       expect.objectContaining({ overwrite: undefined })
     );
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
@@ -319,7 +324,7 @@ describe(`POST ${URL}`, () => {
       )
       .expect(200);
 
-    const { type, id, attributes } = mockVisualization;
+    const { type, id, attributes, managed } = mockVisualization;
     const references = [{ name: 'ref_0', type: 'index-pattern', id: 'missing' }];
     expect(result.body).toEqual({
       success: true,
@@ -329,13 +334,14 @@ describe(`POST ${URL}`, () => {
           type: 'visualization',
           id: 'my-vis',
           meta: { title: 'Look at my visualization', icon: 'visualization-icon' },
+          managed,
         },
       ],
       warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [{ type, id, attributes, references, typeMigrationVersion: '' }],
+      [{ type, id, attributes, references, typeMigrationVersion: '', managed }],
       expect.objectContaining({ overwrite: undefined })
     );
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
@@ -351,12 +357,14 @@ describe(`POST ${URL}`, () => {
         id: 'new-id-1',
         attributes: { title: 'Look at my visualization' },
         references: [],
+        managed: false,
       };
       const obj2 = {
         type: 'dashboard',
         id: 'new-id-2',
         attributes: { title: 'Look at my dashboard' },
         references: [],
+        managed: false,
       };
       savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [obj1, obj2] });
 
@@ -389,12 +397,14 @@ describe(`POST ${URL}`, () => {
             id: 'my-vis',
             meta: { title: obj1.attributes.title, icon: 'visualization-icon' },
             destinationId: obj1.id,
+            managed: obj1.managed,
           },
           {
             type: obj2.type,
             id: 'my-dashboard',
             meta: { title: obj2.attributes.title, icon: 'dashboard-icon' },
             destinationId: obj2.id,
+            managed: obj2.managed,
           },
         ],
         warnings: [],
@@ -406,11 +416,13 @@ describe(`POST ${URL}`, () => {
             type: 'visualization',
             id: 'new-id-1',
             references: [{ name: 'ref_0', type: 'index-pattern', id: 'existing' }],
+            managed: false,
           }),
           expect.objectContaining({
             type: 'dashboard',
             id: 'new-id-2',
             references: [{ name: 'ref_0', type: 'visualization', id: 'new-id-1' }],
+            managed: false,
           }),
         ],
         expect.any(Object) // options
@@ -429,6 +441,7 @@ describe(`POST ${URL}`, () => {
         id: 'my-vis',
         attributes: { title: 'Look at my visualization' },
         references: [],
+        managed: false,
       };
       const obj2 = {
         type: 'dashboard',
@@ -436,6 +449,7 @@ describe(`POST ${URL}`, () => {
         originId: 'my-dashboard',
         attributes: { title: 'Look at my dashboard' },
         references: [],
+        managed: false,
       };
       savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [obj1, obj2] });
 
@@ -451,6 +465,7 @@ describe(`POST ${URL}`, () => {
           targetId: obj2.id,
           purpose: 'savedObjectImport',
         },
+        managed: false,
       };
       savedObjectsClient.bulkCreate.mockResolvedValueOnce({
         saved_objects: [legacyUrlAliasObj2],
@@ -484,12 +499,14 @@ describe(`POST ${URL}`, () => {
             type: obj1.type,
             id: 'my-vis',
             meta: { title: obj1.attributes.title, icon: 'visualization-icon' },
+            managed: obj1.managed,
           },
           {
             type: obj2.type,
             id: 'my-dashboard',
             meta: { title: obj2.attributes.title, icon: 'dashboard-icon' },
             destinationId: obj2.id,
+            managed: obj2.managed,
           },
         ],
         warnings: [],
@@ -502,12 +519,14 @@ describe(`POST ${URL}`, () => {
             type: 'visualization',
             id: 'my-vis',
             references: [{ name: 'ref_0', type: 'index-pattern', id: 'existing' }],
+            managed: false,
           }),
           expect.objectContaining({
             type: 'dashboard',
             id: 'new-id-2',
             originId: 'my-dashboard',
             references: [{ name: 'ref_0', type: 'visualization', id: 'my-vis' }],
+            managed: false,
           }),
         ],
         expect.any(Object) // options
