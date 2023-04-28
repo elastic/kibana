@@ -40,9 +40,17 @@ export interface MobileMainStatisticsResponse {
     name: string | number;
     latency: number | null;
     throughput: number;
-    crashRate?: number;
+    crashRate: number;
   }>;
 }
+
+type MergedQueriesResponse = Array<{
+  name: string | number;
+  latency: number | null;
+  throughput: number;
+  sessions: number;
+  crashes?: number;
+}>;
 
 export async function getMobileMainStatisticsByField({
   kuery,
@@ -55,7 +63,7 @@ export async function getMobileMainStatisticsByField({
 }: Props) {
   async function getMobileTransactionEventStatistics() {
     const response = await apmEventClient.search(
-      `get_mobile_main_statistics_by_field`,
+      `get_mobile_transaction_events_main_statistics_by_field`,
       {
         apm: {
           sources: [
@@ -90,6 +98,11 @@ export async function getMobileMainStatisticsByField({
                     field: TRANSACTION_DURATION,
                   },
                 },
+                sessions: {
+                  cardinality: {
+                    field: SESSION_ID,
+                  },
+                },
               },
             },
           },
@@ -110,66 +123,59 @@ export async function getMobileMainStatisticsByField({
             end,
             value: bucket.doc_count,
           }),
+          sessions: bucket.sessions.value,
         };
       }) ?? []
     );
   }
 
   async function getMobileErrorEventStatistics() {
-    const response = await apmEventClient.search(
-      `get_mobile_transaction_events_main_statistics_by_field`,
-      {
-        apm: {
-          sources: [
-            {
-              documentType: ApmDocumentType.ErrorEvent,
-              rollupInterval: RollupInterval.None,
-            },
-          ],
-        },
-        body: {
-          track_total_hits: false,
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                ...termQuery(SERVICE_NAME, serviceName),
-                ...rangeQuery(start, end),
-                ...environmentQuery(environment),
-                ...kqlQuery(kuery),
-              ],
-            },
+    const response = await apmEventClient.search(`get_mobile_crashes`, {
+      apm: {
+        sources: [
+          {
+            documentType: ApmDocumentType.ErrorEvent,
+            rollupInterval: RollupInterval.None,
           },
-          aggs: {
-            main_statistics: {
-              terms: {
-                field,
-                size: 1000,
-              },
-              aggs: {
-                sessions: {
-                  cardinality: {
-                    field: SESSION_ID,
-                  },
-                },
-                crashes: {
-                  filter: {
-                    term: {
-                      [ERROR_TYPE]: 'crash',
-                    },
+        ],
+      },
+      body: {
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+            ],
+          },
+        },
+        aggs: {
+          main_statistics: {
+            terms: {
+              field,
+              size: 1000,
+            },
+            aggs: {
+              crashes: {
+                filter: {
+                  term: {
+                    [ERROR_TYPE]: 'crash',
                   },
                 },
               },
             },
           },
         },
-      }
-    );
+      },
+    });
     return (
       response.aggregations?.main_statistics.buckets.map((bucket) => {
         return {
           name: bucket.key,
-          crashRate: bucket.crashes.doc_count / bucket.sessions.value ?? 0,
+          crashes: bucket.crashes.doc_count ?? 0,
         };
       }) ?? []
     );
@@ -180,7 +186,19 @@ export async function getMobileMainStatisticsByField({
     getMobileErrorEventStatistics(),
   ]);
 
-  const mainStatistics = merge(transactioEventStatistics, errorEventStatistics);
+  const mainStatisticsMerged: MergedQueriesResponse = merge(
+    transactioEventStatistics,
+    errorEventStatistics
+  );
+
+  const mainStatistics = mainStatisticsMerged.map((item) => {
+    return {
+      name: item.name,
+      latency: item.latency,
+      throughput: item.throughput,
+      crashRate: item.crashes ? item.crashes / item.sessions : 0,
+    };
+  });
 
   return { mainStatistics };
 }
