@@ -30,7 +30,7 @@ export default function checkAlertSchemasTest({ getService }: FtrProviderContext
   // node scripts/functional_tests_server.js --config x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group4/config.ts
   // node scripts/functional_test_runner --config=x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group4/config.ts --grep "check alert schemas"
   //
-  // and check in the changed schema files in packages/kbn-alerts-as-data-utils/src/schemas/generated/
+  // and commit the changed schema files in packages/kbn-alerts-as-data-utils/src/schemas/generated/
 
   describe('check alert schemas', () => {
     it('should successfully generate alert schemas', async () => {

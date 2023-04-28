@@ -61,7 +61,7 @@ import { RulesClientFactory } from './rules_client_factory';
 import { RulesSettingsClientFactory } from './rules_settings_client_factory';
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
-import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID, RuleAlertData } from './types';
+import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID } from './types';
 import { defineRoutes } from './routes';
 import {
   AlertInstanceContext,
@@ -119,8 +119,7 @@ export interface PluginSetupContract {
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = never,
-    RecoveryActionGroupId extends string = never,
-    AlertData extends RuleAlertData = never
+    RecoveryActionGroupId extends string = never
   >(
     ruleType: RuleType<
       Params,
@@ -129,8 +128,7 @@ export interface PluginSetupContract {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId,
-      AlertData
+      RecoveryActionGroupId
     >
   ): void;
 
@@ -353,8 +351,7 @@ export class AlertingPlugin {
         InstanceState extends AlertInstanceState = never,
         InstanceContext extends AlertInstanceContext = never,
         ActionGroupIds extends string = never,
-        RecoveryActionGroupId extends string = never,
-        AlertData extends RuleAlertData = never
+        RecoveryActionGroupId extends string = never
       >(
         ruleType: RuleType<
           Params,
@@ -363,8 +360,7 @@ export class AlertingPlugin {
           InstanceState,
           InstanceContext,
           ActionGroupIds,
-          RecoveryActionGroupId,
-          AlertData
+          RecoveryActionGroupId
         >
       ) => {
         if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {

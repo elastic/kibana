@@ -52,8 +52,7 @@ const ruleType: NormalizedRuleType<
   AlertInstanceState,
   AlertInstanceContext,
   'default' | 'other-group',
-  'recovered',
-  {}
+  'recovered'
 > = {
   id: 'test',
   name: 'Test',

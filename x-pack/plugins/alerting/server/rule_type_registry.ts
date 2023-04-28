@@ -28,7 +28,6 @@ import {
   ActionGroup,
   validateDurationSchema,
   parseDuration,
-  RuleAlertData,
 } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
@@ -93,8 +92,7 @@ export type NormalizedRuleType<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  RecoveryActionGroupId extends string
 > = {
   actionGroups: Array<ActionGroup<ActionGroupIds | RecoveryActionGroupId>>;
 } & Omit<
@@ -105,8 +103,7 @@ export type NormalizedRuleType<
     InstanceState,
     InstanceContext,
     ActionGroupIds,
-    RecoveryActionGroupId,
-    AlertData
+    RecoveryActionGroupId
   >,
   'recoveryActionGroup' | 'actionGroups'
 > &
@@ -119,8 +116,7 @@ export type NormalizedRuleType<
         InstanceState,
         InstanceContext,
         ActionGroupIds,
-        RecoveryActionGroupId,
-        AlertData
+        RecoveryActionGroupId
       >
     >,
     'recoveryActionGroup'
@@ -133,8 +129,7 @@ export type UntypedNormalizedRuleType = NormalizedRuleType<
   AlertInstanceState,
   AlertInstanceContext,
   string,
-  string,
-  RuleAlertData
+  string
 >;
 
 export class RuleTypeRegistry {
@@ -183,8 +178,7 @@ export class RuleTypeRegistry {
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string,
-    AlertData extends RuleAlertData
+    RecoveryActionGroupId extends string
   >(
     ruleType: RuleType<
       Params,
@@ -193,8 +187,7 @@ export class RuleTypeRegistry {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId,
-      AlertData
+      RecoveryActionGroupId
     >
   ) {
     if (this.has(ruleType.id)) {
@@ -265,8 +258,7 @@ export class RuleTypeRegistry {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId,
-      AlertData
+      RecoveryActionGroupId
     >(ruleType);
 
     this.ruleTypes.set(
@@ -286,8 +278,7 @@ export class RuleTypeRegistry {
             InstanceState,
             InstanceContext,
             ActionGroupIds,
-            RecoveryActionGroupId | RecoveredActionGroupId,
-            AlertData
+            RecoveryActionGroupId | RecoveredActionGroupId
           >(normalizedRuleType, context, this.inMemoryMetrics),
       },
     });
@@ -312,8 +303,7 @@ export class RuleTypeRegistry {
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = string,
-    RecoveryActionGroupId extends string = string,
-    AlertData extends RuleAlertData = RuleAlertData
+    RecoveryActionGroupId extends string = string
   >(
     id: string
   ): NormalizedRuleType<
@@ -323,8 +313,7 @@ export class RuleTypeRegistry {
     InstanceState,
     InstanceContext,
     ActionGroupIds,
-    RecoveryActionGroupId,
-    AlertData
+    RecoveryActionGroupId
   > {
     if (!this.has(id)) {
       throw Boom.badRequest(
@@ -348,8 +337,7 @@ export class RuleTypeRegistry {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId,
-      AlertData
+      RecoveryActionGroupId
     >;
   }
 
@@ -418,8 +406,7 @@ function augmentActionGroupsWithReserved<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  RecoveryActionGroupId extends string
 >(
   ruleType: RuleType<
     Params,
@@ -428,8 +415,7 @@ function augmentActionGroupsWithReserved<
     InstanceState,
     InstanceContext,
     ActionGroupIds,
-    RecoveryActionGroupId,
-    AlertData
+    RecoveryActionGroupId
   >
 ): NormalizedRuleType<
   Params,
@@ -438,8 +424,7 @@ function augmentActionGroupsWithReserved<
   InstanceState,
   InstanceContext,
   ActionGroupIds,
-  RecoveredActionGroupId | RecoveryActionGroupId,
-  AlertData
+  RecoveredActionGroupId | RecoveryActionGroupId
 > {
   const reservedActionGroups = getBuiltinActionGroups(ruleType.recoveryActionGroup);
   const { id, actionGroups, recoveryActionGroup } = ruleType;

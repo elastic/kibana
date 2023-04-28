@@ -54,7 +54,6 @@ import {
   SanitizedRule,
   AlertsFilter,
   AlertsFilterTimeframe,
-  RuleAlertData,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -87,8 +86,7 @@ export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 export interface RuleExecutorServices<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = never,
-  AlertData extends RuleAlertData = RuleAlertData
+  ActionGroupIds extends string = never
 > {
   searchSourceClient: ISearchStartSearchSource;
   savedObjectsClient: SavedObjectsClientContract;
@@ -108,15 +106,14 @@ export interface RuleExecutorOptions<
   State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never,
-  AlertData extends RuleAlertData = never
+  ActionGroupIds extends string = never
 > {
   executionId: string;
   logger: Logger;
   params: Params;
   previousStartedAt: Date | null;
   rule: SanitizedRuleConfig;
-  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds, AlertData>;
+  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds>;
   spaceId: string;
   startedAt: Date;
   state: State;
@@ -135,17 +132,9 @@ export type ExecutorType<
   State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never,
-  AlertData extends RuleAlertData = never
+  ActionGroupIds extends string = never
 > = (
-  options: RuleExecutorOptions<
-    Params,
-    State,
-    InstanceState,
-    InstanceContext,
-    ActionGroupIds,
-    AlertData
-  >
+  options: RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>
 ) => Promise<{ state: State }>;
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
@@ -245,8 +234,7 @@ export interface RuleType<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
-  RecoveryActionGroupId extends string = never,
-  AlertData extends RuleAlertData = never
+  RecoveryActionGroupId extends string = never
 > {
   id: string;
   name: string;
@@ -265,8 +253,7 @@ export interface RuleType<
      * Ensure that the reserved ActionGroups (such as `Recovered`) are not
      * available for scheduling in the Executor
      */
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>,
-    AlertData
+    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
   >;
   producer: string;
   actionVariables?: {

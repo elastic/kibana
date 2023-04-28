@@ -21,7 +21,6 @@ import {
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-  RuleAlertData,
 } from '../types';
 import { RuleTypeDisabledError } from './errors/rule_type_disabled';
 
@@ -180,8 +179,7 @@ export class LicenseState {
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string,
-    AlertData extends RuleAlertData
+    RecoveryActionGroupId extends string
   >(
     ruleType: RuleType<
       Params,
@@ -190,8 +188,7 @@ export class LicenseState {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId,
-      AlertData
+      RecoveryActionGroupId
     >
   ) {
     this.notifyUsage(ruleType.name, ruleType.minimumLicenseRequired);

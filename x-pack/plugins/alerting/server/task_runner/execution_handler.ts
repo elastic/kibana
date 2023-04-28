@@ -36,7 +36,6 @@ import {
   RuleTypeParams,
   RuleTypeState,
   SanitizedRule,
-  RuleAlertData,
 } from '../../common';
 import {
   generateActionHash,
@@ -66,8 +65,7 @@ export class ExecutionHandler<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  RecoveryActionGroupId extends string
 > {
   private logger: Logger;
   private alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
@@ -79,8 +77,7 @@ export class ExecutionHandler<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId,
-    AlertData
+    RecoveryActionGroupId
   >;
   private taskRunnerContext: TaskRunnerContext;
   private taskInstance: RuleTaskInstance;
@@ -118,8 +115,7 @@ export class ExecutionHandler<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId,
-    AlertData
+    RecoveryActionGroupId
   >) {
     this.logger = logger;
     this.alertingEventLogger = alertingEventLogger;
