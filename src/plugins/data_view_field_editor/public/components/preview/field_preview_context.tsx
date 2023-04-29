@@ -174,7 +174,8 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       lastExecutePainlessRequestParams.script !== script?.source ||
       lastExecutePainlessRequestParams.documentId !== currentDocId
     );
-  }, [type, script, currentDocId, lastExecutePainlessRequestParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type, script, currentDocId]);
 
   const loadDocument = useCallback(
     async (id: string) => {
