@@ -73,9 +73,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   controller,
   children,
 }) => {
-  // moving this over to the controller created problems
-  const previewCount = useRef(0);
-
   const {
     dataView,
     services: {
@@ -152,7 +149,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       documentId: currentDocId,
     });
 
-    const currentApiCall = ++previewCount.current;
+    const currentApiCall = controller.incrementPreviewCount(); // ++previewCount.current;
 
     const previewScript = (parentName && dataView.getRuntimeField(parentName)?.script) || script!;
 
@@ -163,7 +160,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       script: previewScript,
     });
 
-    if (currentApiCall !== previewCount.current) {
+    if (currentApiCall !== controller.getPreviewCount()) {
       // Discard this response as there is another one inflight
       // or we have called reset() and no longer need the response.
       return;
@@ -232,13 +229,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     fieldName$,
   ]);
 
-  const reset = useCallback(() => {
-    // By resetting the previewCount we will discard previous inflight
-    // API call response coming in after calling reset() was called
-    previewCount.current = 0;
-    controller.reset();
-  }, [controller]);
-
   const ctx = useMemo<Context>(
     () => ({
       controller,
@@ -260,7 +250,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       validation: {
         setScriptEditorValidation,
       },
-      reset,
     }),
     [
       controller,
@@ -272,7 +261,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       updateParams,
       totalDocs,
       isPanelVisible,
-      reset,
     ]
   );
 

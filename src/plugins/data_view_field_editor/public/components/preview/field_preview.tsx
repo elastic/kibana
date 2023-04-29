@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiResizeObserver, EuiFieldSearch, EuiCallOut } from '@elastic/eui';
 
@@ -33,7 +33,6 @@ export const FieldPreview = () => {
       value: { name, script, format },
     },
     isLoadingPreview,
-    reset,
     isPreviewAvailable,
     controller,
   } = useFieldPreviewContext();
@@ -74,12 +73,6 @@ export const FieldPreview = () => {
       </ul>
     );
   };
-
-  useEffect(() => {
-    // When unmounting the preview pannel we make sure to reset
-    // the state of the preview panel.
-    return reset;
-  }, [reset]);
 
   return (
     <div

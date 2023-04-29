@@ -134,7 +134,6 @@ export interface Context {
     isFirstDoc: boolean;
     isLastDoc: boolean;
   };
-  reset: () => void;
   validation: {
     setScriptEditorValidation: React.Dispatch<
       React.SetStateAction<{ isValid: boolean; isValidating: boolean; message: string | null }>

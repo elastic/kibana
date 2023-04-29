@@ -68,14 +68,14 @@ export class PreviewController {
   }
 
   // dependencies
-  // @ts-ignore
   private dataView: DataView;
-  // @ts-ignore
   private search: ISearchStart;
   private fieldFormats: FieldFormatsStart;
 
   private internalState$: BehaviorSubject<PreviewState>;
   state$: BehaviorObservable<PreviewState>;
+
+  private previewCount = 0;
 
   private updateState = (newState: Partial<PreviewState>) => {
     this.internalState$.next({ ...this.state$.getValue(), ...newState });
@@ -362,6 +362,7 @@ export class PreviewController {
   };
 
   reset = () => {
+    this.previewCount = 0;
     this.updateState({
       documents: [],
       previewResponse: { fields: [], error: null },
@@ -381,6 +382,10 @@ export class PreviewController {
       this.lastExecutePainlessRequestParams.documentId !== currentDocId
     );
   };
+
+  getPreviewCount = () => this.previewCount;
+
+  incrementPreviewCount = () => ++this.previewCount;
 
   allParamsDefined = (
     type: Params['type'],
