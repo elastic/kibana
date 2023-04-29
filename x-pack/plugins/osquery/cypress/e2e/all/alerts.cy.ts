@@ -123,6 +123,7 @@ describe('Alert Event Details', () => {
       cy.visit('/app/security/rules');
       cy.contains(ruleName).click();
       cy.getBySel('editRuleSettingsLink').click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
       cy.contains('Response actions are run on each rule execution');
       cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
@@ -161,6 +162,7 @@ describe('Alert Event Details', () => {
       closeToastIfVisible();
 
       cy.getBySel('editRuleSettingsLink').click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
         cy.contains('select * from uptime1');
@@ -205,6 +207,7 @@ describe('Alert Event Details', () => {
       closeToastIfVisible();
 
       cy.getBySel('editRuleSettingsLink').click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
         cy.contains(packName);
@@ -269,6 +272,7 @@ describe('Alert Event Details', () => {
       cy.visit('/app/security/rules');
       cy.contains(ruleName).click();
       cy.getBySel('editRuleSettingsLink').click();
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
 
       cy.contains(investigationGuideNote);
