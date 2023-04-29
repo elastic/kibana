@@ -68,8 +68,6 @@ const documentsSelector = (state: PreviewState) => {
 const isFetchingDocumentSelector = (state: PreviewState) => state.isFetchingDocument;
 const fetchDocErrorSelector = (state: PreviewState) => state.fetchDocError;
 const customDocIdToLoadSelector = (state: PreviewState) => state.customDocIdToLoad;
-const lastExecutePainlessRequestParamsSelector = (state: PreviewState) =>
-  state.lastExecutePainlessRequestParams;
 const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
 
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
@@ -78,24 +76,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 }) => {
   // moving this over to the controller created problems
   const previewCount = useRef(0);
-
-  // We keep in cache the latest params sent to the _execute API so we don't make unecessary requests
-  // when changing parameters that don't affect the preview result (e.g. changing the "name" field).
-  /*
-  const lastExecutePainlessRequestParams = useRef<{
-    type: Params['type'];
-    script: string | undefined;
-    documentId: string | undefined;
-  }>({
-    type: null,
-    script: undefined,
-    documentId: undefined,
-  });
-  */
-  const lastExecutePainlessRequestParams = useStateSelector(
-    controller.state$,
-    lastExecutePainlessRequestParamsSelector
-  );
 
   const {
     dataView,
@@ -162,17 +142,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     }
     return true;
   }, [currentDocIndex, script?.source, type]);
-
-  /*
-  const hasSomeParamsChanged = useMemo(() => {
-    return (
-      lastExecutePainlessRequestParams.type !== type ||
-      lastExecutePainlessRequestParams.script !== script?.source ||
-      lastExecutePainlessRequestParams.documentId !== currentDocId
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type, script, currentDocId]);
-  */
 
   const updateSingleFieldPreview = useCallback(
     (fieldName: string, values: unknown[]) => {
@@ -241,13 +210,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       return;
     }
 
-    /*
-    lastExecutePainlessRequestParams.current = {
-      type,
-      script: script?.source,
-      documentId: currentDocId,
-    };
-    */
     controller.setLastExecutePainlessRequestParams({
       type,
       script: script?.source,
