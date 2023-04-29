@@ -51,6 +51,7 @@ const previewStateDefault: PreviewState = {
   // when changing parameters that don't affect the preview result (e.g. changing the "name" field).
 
   isLoadingPreview: false,
+  initialPreviewComplete: false,
 };
 
 export class PreviewController {
@@ -175,6 +176,10 @@ export class PreviewController {
 
   setIsLoadingPreview = (isLoadingPreview: boolean) => {
     this.updateState({ isLoadingPreview });
+  };
+
+  setInitialPreviewComplete = (initialPreviewComplete: boolean) => {
+    this.updateState({ initialPreviewComplete });
   };
 
   setLastExecutePainlessRequestParams = (

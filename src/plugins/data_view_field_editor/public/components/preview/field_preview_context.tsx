@@ -78,7 +78,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
   const {
     dataView,
-    fieldTypeToProcess,
     services: {
       notifications,
       api: { getFieldPreview },
@@ -87,8 +86,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   } = useFieldEditorContext();
 
   const fieldPreview$ = useRef(new BehaviorSubject<FieldPreview[] | undefined>(undefined));
-
-  const [initialPreviewComplete, setInitialPreviewComplete] = useState(false);
 
   /** Possible error while fetching sample documents */
   // const [fetchDocError, setFetchDocError] = useState<FetchDocError | null>(null);
@@ -216,7 +213,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       }
     }
 
-    setInitialPreviewComplete(true);
+    controller.setInitialPreviewComplete(true);
     controller.setIsLoadingPreview(false);
   }, [
     name,
@@ -248,7 +245,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       fieldPreview$: fieldPreview$.current,
       isPreviewAvailable,
       isLoadingPreview,
-      initialPreviewComplete,
       params: {
         value: params,
         update: updateParams,
@@ -277,7 +273,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       totalDocs,
       isPanelVisible,
       reset,
-      initialPreviewComplete,
     ]
   );
 
@@ -301,13 +296,13 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       controller.fetchSampleDocuments();
     }
     // its unclear if fieldTypeToProcess is needed here
-  }, [isPanelVisible, fieldTypeToProcess, controller]);
+  }, [isPanelVisible, controller]);
 
   /**
    * Each time the current document changes we update the parameters
    * that will be sent in the _execute HTTP request.
    */
-  // TODO TRY THIS ONE NEXT
+  // This game me problems
   useEffect(() => {
     updateParams({
       document: currentDocument,

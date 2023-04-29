@@ -64,6 +64,7 @@ export interface PreviewState {
   fetchDocError: FetchDocError | null;
   customDocIdToLoad: string | null;
   isLoadingPreview: boolean;
+  initialPreviewComplete: boolean;
 }
 
 export interface FetchDocError {
@@ -119,7 +120,6 @@ export interface Context {
   controller: PreviewController;
   fieldPreview$: BehaviorSubject<FieldPreview[] | undefined>;
   fieldTypeInfo?: FieldTypeInfo[];
-  initialPreviewComplete: boolean;
   params: {
     value: Params;
     update: (updated: Partial<Params>) => void;
