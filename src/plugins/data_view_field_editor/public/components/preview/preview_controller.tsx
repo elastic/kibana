@@ -45,11 +45,9 @@ const previewStateDefault: PreviewState = {
   isFetchingDocument: false,
   fetchDocError: null,
   customDocIdToLoad: null,
-  lastExecutePainlessRequestParams: {
-    type: null,
-    script: undefined,
-    documentId: undefined,
-  },
+  // We keep in cache the latest params sent to the _execute API so we don't make unecessary requests
+  // when changing parameters that don't affect the preview result (e.g. changing the "name" field).
+
   isLoadingPreview: false,
 };
 
@@ -78,6 +76,16 @@ export class PreviewController {
 
   private updateState = (newState: Partial<PreviewState>) => {
     this.internalState$.next({ ...this.state$.getValue(), ...newState });
+  };
+
+  private lastExecutePainlessRequestParams: {
+    type: Params['type'];
+    script: string | undefined;
+    documentId: string | undefined;
+  } = {
+    type: null,
+    script: undefined,
+    documentId: undefined,
   };
 
   togglePinnedField = (fieldName: string) => {
@@ -170,13 +178,10 @@ export class PreviewController {
   setLastExecutePainlessRequestParams = (
     lastExecutePainlessRequestParams: Partial<PreviewState['lastExecutePainlessRequestParams']>
   ) => {
-    const currentValue = this.internalState$.getValue().lastExecutePainlessRequestParams;
-    this.updateState({
-      lastExecutePainlessRequestParams: {
-        ...currentValue,
-        ...lastExecutePainlessRequestParams,
-      },
-    });
+    this.lastExecutePainlessRequestParams = {
+      ...this.lastExecutePainlessRequestParams,
+      ...lastExecutePainlessRequestParams,
+    };
   };
 
   valueFormatter = ({
@@ -323,5 +328,27 @@ export class PreviewController {
       // and we won't fetch the preview
       this.setIsLoadingPreview(false);
     }
+  };
+
+  reset = () => {
+    this.updateState({
+      documents: [],
+      previewResponse: { fields: [], error: null },
+      isLoadingPreview: false,
+      isFetchingDocument: false,
+    });
+  };
+
+  hasSomeParamsChanged = (
+    type: Params['type'],
+    script: string | undefined,
+    currentDocId: string | undefined
+  ) => {
+    // const { lastExecutePainlessRequestParams } = this.internalState$.getValue();
+    return (
+      this.lastExecutePainlessRequestParams.type !== type ||
+      this.lastExecutePainlessRequestParams.script !== script ||
+      this.lastExecutePainlessRequestParams.documentId !== currentDocId
+    );
   };
 }

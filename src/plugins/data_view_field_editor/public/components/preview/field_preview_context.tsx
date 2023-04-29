@@ -76,6 +76,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   controller,
   children,
 }) => {
+  // moving this over to the controller created problems
   const previewCount = useRef(0);
 
   // We keep in cache the latest params sent to the _execute API so we don't make unecessary requests
@@ -122,6 +123,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   }>({ isValidating: false, isValid: true, message: null });
 
   /** Flag to show/hide the preview panel */
+  // moving this to controller caused problems
   const [isPanelVisible, setIsPanelVisible] = useState(true);
   /** Flag to indicate if we are loading document from cluster */
   // const [isFetchingDocument, setIsFetchingDocument] = useState(false);
@@ -161,6 +163,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     return true;
   }, [currentDocIndex, script?.source, type]);
 
+  /*
   const hasSomeParamsChanged = useMemo(() => {
     return (
       lastExecutePainlessRequestParams.type !== type ||
@@ -169,6 +172,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, script, currentDocId]);
+  */
 
   const updateSingleFieldPreview = useCallback(
     (fieldName: string, values: unknown[]) => {
@@ -229,7 +233,9 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
     if (
       !parentName &&
-      (!allParamsDefined || !hasSomeParamsChanged || scriptEditorValidation.isValid === false)
+      (!allParamsDefined ||
+        !controller.hasSomeParamsChanged(type, script?.source, currentDocId) ||
+        scriptEditorValidation.isValid === false)
     ) {
       controller.setIsLoadingPreview(false);
       return;
@@ -315,7 +321,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     notifications.toasts,
     allParamsDefined,
     scriptEditorValidation,
-    hasSomeParamsChanged,
     updateSingleFieldPreview,
     updateCompositeFieldPreview,
     currentDocIndex,
@@ -326,11 +331,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     // By resetting the previewCount we will discard previous inflight
     // API call response coming in after calling reset() was called
     previewCount.current = 0;
-
-    controller.setDocuments([]);
-    controller.setPreviewResponse({ fields: [], error: null });
-    controller.setIsLoadingPreview(false);
-    controller.setIsFetchingDocument(false);
+    controller.reset();
   }, [controller]);
 
   const ctx = useMemo<Context>(
@@ -384,23 +385,23 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
    * one of the _execute API param changes
    */
   useEffect(() => {
-    if (allParamsDefined && hasSomeParamsChanged) {
+    if (allParamsDefined && controller.hasSomeParamsChanged(type, script?.source, currentDocId)) {
       controller.setIsLoadingPreview(true);
     }
-  }, [allParamsDefined, hasSomeParamsChanged, script?.source, type, currentDocId, controller]);
+  }, [allParamsDefined, script?.source, type, currentDocId, controller]);
 
   /**
    * In order to immediately display the "Updating..." state indicator and not have to wait
    * the 500ms of the debounce, we set the isFetchingDocument state in this effect whenever
    * "customDocIdToLoad" changes
    */
+  // moving this over to the controller caused problems
   useEffect(() => {
     controller.setCustomId(customDocIdToLoad || undefined);
     if (customDocIdToLoad !== null && Boolean(customDocIdToLoad.trim())) {
       controller.setIsFetchingDocument(true);
     }
   }, [customDocIdToLoad, controller]);
-
   /**
    * Whenever we show the preview panel we will update the documents from the cluster
    */

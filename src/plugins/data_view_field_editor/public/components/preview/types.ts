@@ -63,11 +63,6 @@ export interface PreviewState {
   isFetchingDocument: boolean;
   fetchDocError: FetchDocError | null;
   customDocIdToLoad: string | null;
-  lastExecutePainlessRequestParams: {
-    type: Params['type'];
-    script: string | undefined;
-    documentId: string | undefined;
-  };
   isLoadingPreview: boolean;
 }
 
