@@ -15,8 +15,9 @@ import { renderToString } from 'react-dom/server';
 import React from 'react';
 import { PreviewState, FetchDocError } from './types';
 import { BehaviorObservable } from '../../state_utils';
-import { EsDocument, ScriptErrorCodes, Params } from './types';
+import { EsDocument, ScriptErrorCodes, Params, FieldPreview } from './types';
 import type { FieldFormatsStart } from '../../shared_imports';
+import { valueTypeToSelectedType } from './field_preview_context';
 
 export const defaultValueFormatter = (value: unknown) => {
   const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
@@ -176,7 +177,7 @@ export class PreviewController {
   };
 
   setLastExecutePainlessRequestParams = (
-    lastExecutePainlessRequestParams: Partial<PreviewState['lastExecutePainlessRequestParams']>
+    lastExecutePainlessRequestParams: Partial<typeof this.lastExecutePainlessRequestParams>
   ) => {
     this.lastExecutePainlessRequestParams = {
       ...this.lastExecutePainlessRequestParams,
@@ -344,11 +345,80 @@ export class PreviewController {
     script: string | undefined,
     currentDocId: string | undefined
   ) => {
-    // const { lastExecutePainlessRequestParams } = this.internalState$.getValue();
     return (
       this.lastExecutePainlessRequestParams.type !== type ||
       this.lastExecutePainlessRequestParams.script !== script ||
       this.lastExecutePainlessRequestParams.documentId !== currentDocId
     );
+  };
+
+  allParamsDefined = (
+    type: Params['type'],
+    script: string | undefined,
+    currentDocIndex: string
+  ) => {
+    if (!currentDocIndex || !script || !type) {
+      return false;
+    }
+    return true;
+  };
+
+  updateSingleFieldPreview = (
+    fieldName: string,
+    values: unknown[],
+    type: Params['type'],
+    format: Params['format']
+  ) => {
+    const [value] = values;
+    const formattedValue = this.valueFormatter({ value, type, format });
+
+    this.setPreviewResponse({
+      fields: [{ key: fieldName, value, formattedValue }],
+      error: null,
+    });
+  };
+
+  updateCompositeFieldPreview = (
+    compositeValues: Record<string, unknown[]>,
+    parentName: string | null,
+    name: string,
+    fieldName$Value: string,
+    type: Params['type'],
+    format: Params['format'],
+    onNext: (fields: FieldPreview[]) => void
+  ) => {
+    const updatedFieldsInScript: string[] = [];
+    // if we're displaying a composite subfield, filter results
+    const filterSubfield = parentName ? (field: FieldPreview) => field.key === name : () => true;
+
+    const fields = Object.entries(compositeValues)
+      .map<FieldPreview>(([key, values]) => {
+        // The Painless _execute API returns the composite field values under a map.
+        // Each of the key is prefixed with "composite_field." (e.g. "composite_field.field1: ['value']")
+        const { 1: fieldName } = key.split('composite_field.');
+        updatedFieldsInScript.push(fieldName);
+
+        const [value] = values;
+        const formattedValue = this.valueFormatter({ value, type, format });
+
+        return {
+          key: parentName
+            ? `${parentName ?? ''}.${fieldName}`
+            : `${fieldName$Value ?? ''}.${fieldName}`,
+          value,
+          formattedValue,
+          type: valueTypeToSelectedType(value),
+        };
+      })
+      .filter(filterSubfield)
+      // ...and sort alphabetically
+      .sort((a, b) => a.key.localeCompare(b.key));
+
+    // fieldPreview$.current.next(fields);
+    onNext(fields);
+    this.setPreviewResponse({
+      fields,
+      error: null,
+    });
   };
 }

@@ -136,64 +136,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     setParams((prev) => ({ ...prev, ...updated }));
   }, []);
 
-  const allParamsDefined = useMemo(() => {
-    if (!currentDocIndex || !script?.source || !type) {
-      return false;
-    }
-    return true;
-  }, [currentDocIndex, script?.source, type]);
-
-  const updateSingleFieldPreview = useCallback(
-    (fieldName: string, values: unknown[]) => {
-      const [value] = values;
-      const formattedValue = controller.valueFormatter({ value, type, format });
-
-      controller.setPreviewResponse({
-        fields: [{ key: fieldName, value, formattedValue }],
-        error: null,
-      });
-    },
-    [controller, type, format]
-  );
-
-  const updateCompositeFieldPreview = useCallback(
-    (compositeValues: Record<string, unknown[]>) => {
-      const updatedFieldsInScript: string[] = [];
-      // if we're displaying a composite subfield, filter results
-      const filterSubfield = parentName ? (field: FieldPreview) => field.key === name : () => true;
-
-      const fields = Object.entries(compositeValues)
-        .map<FieldPreview>(([key, values]) => {
-          // The Painless _execute API returns the composite field values under a map.
-          // Each of the key is prefixed with "composite_field." (e.g. "composite_field.field1: ['value']")
-          const { 1: fieldName } = key.split('composite_field.');
-          updatedFieldsInScript.push(fieldName);
-
-          const [value] = values;
-          const formattedValue = controller.valueFormatter({ value, type, format });
-
-          return {
-            key: parentName
-              ? `${parentName ?? ''}.${fieldName}`
-              : `${fieldName$.getValue() ?? ''}.${fieldName}`,
-            value,
-            formattedValue,
-            type: valueTypeToSelectedType(value),
-          };
-        })
-        .filter(filterSubfield)
-        // ...and sort alphabetically
-        .sort((a, b) => a.key.localeCompare(b.key));
-
-      fieldPreview$.current.next(fields);
-      controller.setPreviewResponse({
-        fields,
-        error: null,
-      });
-    },
-    [parentName, name, fieldPreview$, fieldName$, controller, type, format]
-  );
-
   const updatePreview = useCallback(async () => {
     // don't prevent rendering if we're working with a composite subfield (has parentName)
     if (!parentName && scriptEditorValidation.isValidating) {
@@ -202,7 +144,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
     if (
       !parentName &&
-      (!allParamsDefined ||
+      (!controller.allParamsDefined(type, script?.source, currentDocIndex) ||
         !controller.hasSomeParamsChanged(type, script?.source, currentDocId) ||
         scriptEditorValidation.isValid === false)
     ) {
@@ -262,9 +204,17 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         });
       } else {
         if (!Array.isArray(values)) {
-          updateCompositeFieldPreview(values);
+          controller.updateCompositeFieldPreview(
+            values,
+            parentName,
+            name!,
+            fieldName$.getValue(),
+            type,
+            format,
+            (value: FieldPreview[] | undefined) => fieldPreview$.current.next(value)
+          );
         } else {
-          updateSingleFieldPreview(name!, values);
+          controller.updateSingleFieldPreview(name!, values, type, format);
         }
       }
     }
@@ -281,12 +231,11 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     currentDocId,
     getFieldPreview,
     notifications.toasts,
-    allParamsDefined,
     scriptEditorValidation,
-    updateSingleFieldPreview,
-    updateCompositeFieldPreview,
     currentDocIndex,
     controller,
+    format,
+    fieldName$,
   ]);
 
   const reset = useCallback(() => {
@@ -347,10 +296,13 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
    * one of the _execute API param changes
    */
   useEffect(() => {
-    if (allParamsDefined && controller.hasSomeParamsChanged(type, script?.source, currentDocId)) {
+    if (
+      controller.allParamsDefined(type, script?.source, currentDocIndex) &&
+      controller.hasSomeParamsChanged(type, script?.source, currentDocId)
+    ) {
       controller.setIsLoadingPreview(true);
     }
-  }, [allParamsDefined, script?.source, type, currentDocId, controller]);
+  }, [script?.source, type, currentDocId, controller, currentDocIndex]);
 
   /**
    * In order to immediately display the "Updating..." state indicator and not have to wait
