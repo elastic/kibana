@@ -182,6 +182,13 @@ export class PreviewController {
     this.updateState({ initialPreviewComplete });
   };
 
+  getIsFirstDoc = () => this.internalState$.getValue().currentIdx === 0;
+
+  getIsLastDoc = () => {
+    const { currentIdx, documents } = this.internalState$.getValue();
+    return currentIdx >= documents.length - 1;
+  };
+
   setLastExecutePainlessRequestParams = (
     lastExecutePainlessRequestParams: Partial<typeof this.lastExecutePainlessRequestParams>
   ) => {

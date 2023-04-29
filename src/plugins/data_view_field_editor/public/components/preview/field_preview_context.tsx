@@ -61,13 +61,11 @@ const documentsSelector = (state: PreviewState) => {
     totalDocs: state.documents.length,
     currentDocIndex: currentDocument?._index,
     currentDocId: currentDocument?._id,
-    currentIdx: state.currentIdx,
   };
 };
 
 const isFetchingDocumentSelector = (state: PreviewState) => state.isFetchingDocument;
 const customDocIdToLoadSelector = (state: PreviewState) => state.customDocIdToLoad;
-const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
 
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
   controller,
@@ -99,16 +97,14 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   // moving this to controller caused problems
   const [isPanelVisible, setIsPanelVisible] = useState(true);
 
-  /** Flag to indicate if we are calling the _execute API */
-  // const [isLoadingPreview, setIsLoadingPreview] = useState(false);
-  const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
-
   /** Flag to indicate if we are loading a single document by providing its ID */
   // const [customDocIdToLoad, setCustomDocIdToLoad] = useState<string | null>(null);
   const customDocIdToLoad = useStateSelector(controller.state$, customDocIdToLoadSelector);
 
-  const { currentDocument, currentDocIndex, currentDocId, totalDocs, currentIdx } =
-    useStateSelector(controller.state$, documentsSelector);
+  const { currentDocument, currentDocIndex, currentDocId, totalDocs } = useStateSelector(
+    controller.state$,
+    documentsSelector
+  );
 
   let isPreviewAvailable = true;
 
@@ -234,34 +230,20 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       controller,
       fieldPreview$: fieldPreview$.current,
       isPreviewAvailable,
-      isLoadingPreview,
       params: {
         value: params,
         update: updateParams,
-      },
-      navigation: {
-        isFirstDoc: currentIdx === 0,
-        isLastDoc: currentIdx >= totalDocs - 1,
       },
       panel: {
         isVisible: isPanelVisible,
         setIsVisible: setIsPanelVisible,
       },
       validation: {
+        // todo do this next
         setScriptEditorValidation,
       },
     }),
-    [
-      controller,
-      currentIdx,
-      fieldPreview$,
-      params,
-      isPreviewAvailable,
-      isLoadingPreview,
-      updateParams,
-      totalDocs,
-      isPanelVisible,
-    ]
+    [controller, fieldPreview$, params, isPreviewAvailable, updateParams, isPanelVisible]
   );
 
   /**
@@ -283,7 +265,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     if (isPanelVisible) {
       controller.fetchSampleDocuments();
     }
-    // its unclear if fieldTypeToProcess is needed here
   }, [isPanelVisible, controller]);
 
   /**

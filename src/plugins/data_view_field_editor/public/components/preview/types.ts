@@ -63,6 +63,7 @@ export interface PreviewState {
   isFetchingDocument: boolean;
   fetchDocError: FetchDocError | null;
   customDocIdToLoad: string | null;
+  /** Flag to indicate if we are calling the _execute API */
   isLoadingPreview: boolean;
   initialPreviewComplete: boolean;
 }
@@ -125,14 +126,9 @@ export interface Context {
     update: (updated: Partial<Params>) => void;
   };
   isPreviewAvailable: boolean;
-  isLoadingPreview: boolean;
   panel: {
     isVisible: boolean;
     setIsVisible: (isVisible: boolean) => void;
-  };
-  navigation: {
-    isFirstDoc: boolean;
-    isLastDoc: boolean;
   };
   validation: {
     setScriptEditorValidation: React.Dispatch<
