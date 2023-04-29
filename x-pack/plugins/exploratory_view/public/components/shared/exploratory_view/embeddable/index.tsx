@@ -117,12 +117,7 @@ export function getExploratoryViewEmbeddable(
       return newProps;
     }, [loadCount, props, series.time]);
 
-    if (
-      Object.keys(dataViews).length === 0 ||
-      (loading && !props.skipLoadingWrapper) ||
-      !lensHelper ||
-      lensLoading
-    ) {
+    if (Object.keys(dataViews).length === 0 || loading || !lensHelper || lensLoading) {
       return (
         <LoadingWrapper customHeight={customHeight}>
           <EuiLoadingSpinner size="l" />

@@ -44,7 +44,6 @@ export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
       hideTicks={true}
-      skipLoadingWrapper={true}
       attributes={[
         {
           seriesType: 'area',

@@ -74,7 +74,6 @@ export const StepDurationPanel = ({
         reportType={ReportTypes.KPI}
         legendPosition={legendPosition}
         legendIsVisible={doBreakdown}
-        skipLoadingWrapper={true}
         attributes={[
           {
             time,

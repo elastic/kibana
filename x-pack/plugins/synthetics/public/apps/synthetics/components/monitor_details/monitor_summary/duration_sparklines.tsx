@@ -43,7 +43,6 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
         axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
         legendIsVisible={false}
         hideTicks={true}
-        skipLoadingWrapper={true}
         attributes={[
           {
             seriesType: 'area',

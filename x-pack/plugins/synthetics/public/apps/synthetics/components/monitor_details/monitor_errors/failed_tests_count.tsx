@@ -29,7 +29,6 @@ export const FailedTestsCount = ({ from, to, id }: { to: string; from: string; i
     <ExploratoryViewEmbeddable
       id={id}
       reportType="single-metric"
-      skipLoadingWrapper={true}
       attributes={[
         {
           time: { from, to },

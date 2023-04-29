@@ -35,7 +35,6 @@ export const MonitorTotalRunsCount = (props: MonitorTotalRunsCountProps) => {
       id="monitorTotalRunsCount"
       align="left"
       reportType={ReportTypes.SINGLE_METRIC}
-      skipLoadingWrapper={true}
       attributes={[
         {
           time: props,

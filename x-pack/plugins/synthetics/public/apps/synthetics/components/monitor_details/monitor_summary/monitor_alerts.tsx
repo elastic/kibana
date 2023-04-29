@@ -60,7 +60,6 @@ export const MonitorAlerts = ({
                   withActions={false}
                   customHeight={'27px'}
                   reportType="single-metric"
-                  skipLoadingWrapper={true}
                   attributes={[
                     {
                       dataType: 'alerts',

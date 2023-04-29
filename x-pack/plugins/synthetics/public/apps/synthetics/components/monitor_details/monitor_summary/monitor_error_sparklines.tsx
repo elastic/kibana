@@ -40,7 +40,6 @@ export const MonitorErrorSparklines = ({ from, to, monitorId, id }: Props) => {
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
       hideTicks={true}
-      skipLoadingWrapper={true}
       attributes={[
         {
           time,
