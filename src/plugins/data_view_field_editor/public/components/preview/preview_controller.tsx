@@ -50,6 +50,7 @@ const previewStateDefault: PreviewState = {
     script: undefined,
     documentId: undefined,
   },
+  isLoadingPreview: false,
 };
 
 export class PreviewController {
@@ -162,6 +163,10 @@ export class PreviewController {
     this.updateState({ fetchDocError });
   };
 
+  setIsLoadingPreview = (isLoadingPreview: boolean) => {
+    this.updateState({ isLoadingPreview });
+  };
+
   setLastExecutePainlessRequestParams = (
     lastExecutePainlessRequestParams: Partial<PreviewState['lastExecutePainlessRequestParams']>
   ) => {
@@ -247,6 +252,76 @@ export class PreviewController {
 
     if (error === null) {
       this.setDocuments(response ? response.rawResponse.hits.hits : []);
+    }
+  };
+
+  loadDocument = async (id: string) => {
+    if (!Boolean(id.trim())) {
+      return;
+    }
+
+    // lastExecutePainlessRequestParams.current.documentId = undefined;
+    this.setLastExecutePainlessRequestParams({ documentId: undefined });
+    this.setIsFetchingDocument(true);
+
+    const [response, searchError] = await this.search
+      .search({
+        params: {
+          index: this.dataView.getIndexPattern(),
+          body: {
+            size: 1,
+            fields: ['*'],
+            query: {
+              ids: {
+                values: [id],
+              },
+            },
+          },
+        },
+      })
+      .toPromise()
+      .then((res) => [res, null])
+      .catch((err) => [null, err]);
+
+    this.setIsFetchingDocument(false);
+
+    const isDocumentFound = response?.rawResponse.hits.total > 0;
+    const loadedDocuments: EsDocument[] = isDocumentFound ? response.rawResponse.hits.hits : [];
+    const error: FetchDocError | null = Boolean(searchError)
+      ? {
+          code: 'ERR_FETCHING_DOC',
+          error: {
+            message: searchError.toString(),
+            reason: i18n.translate(
+              'indexPatternFieldEditor.fieldPreview.error.errorLoadingDocumentDescription',
+              {
+                defaultMessage: 'Error loading document.',
+              }
+            ),
+          },
+        }
+      : isDocumentFound === false
+      ? {
+          code: 'DOC_NOT_FOUND',
+          error: {
+            message: i18n.translate(
+              'indexPatternFieldEditor.fieldPreview.error.documentNotFoundDescription',
+              {
+                defaultMessage: 'Document ID not found',
+              }
+            ),
+          },
+        }
+      : null;
+
+    this.setFetchDocError(error);
+
+    if (error === null) {
+      this.setDocuments(loadedDocuments);
+    } else {
+      // Make sure we disable the "Updating..." indicator as we have an error
+      // and we won't fetch the preview
+      this.setIsLoadingPreview(false);
     }
   };
 }

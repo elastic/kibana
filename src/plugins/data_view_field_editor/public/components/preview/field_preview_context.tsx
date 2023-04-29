@@ -26,15 +26,7 @@ import { useStateSelector } from '../../state_utils';
 
 import { parseEsError } from '../../lib/runtime_field_validation';
 import { useFieldEditorContext } from '../field_editor_context';
-import type {
-  PainlessExecuteContext,
-  Context,
-  Params,
-  EsDocument,
-  FetchDocError,
-  FieldPreview,
-  PreviewState,
-} from './types';
+import type { PainlessExecuteContext, Context, Params, FieldPreview, PreviewState } from './types';
 import type { PreviewController } from './preview_controller';
 
 const fieldPreviewContext = createContext<Context | undefined>(undefined);
@@ -78,6 +70,7 @@ const fetchDocErrorSelector = (state: PreviewState) => state.fetchDocError;
 const customDocIdToLoadSelector = (state: PreviewState) => state.customDocIdToLoad;
 const lastExecutePainlessRequestParamsSelector = (state: PreviewState) =>
   state.lastExecutePainlessRequestParams;
+const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
 
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
   controller,
@@ -107,7 +100,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     dataView,
     fieldTypeToProcess,
     services: {
-      search,
       notifications,
       api: { getFieldPreview },
     },
@@ -135,7 +127,8 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   // const [isFetchingDocument, setIsFetchingDocument] = useState(false);
   const fetchDocError = useStateSelector(controller.state$, fetchDocErrorSelector);
   /** Flag to indicate if we are calling the _execute API */
-  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  // const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
 
   /** Flag to indicate if we are loading a single document by providing its ID */
   // const [customDocIdToLoad, setCustomDocIdToLoad] = useState<string | null>(null);
@@ -176,79 +169,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, script, currentDocId]);
-
-  const loadDocument = useCallback(
-    async (id: string) => {
-      if (!Boolean(id.trim())) {
-        return;
-      }
-
-      // lastExecutePainlessRequestParams.current.documentId = undefined;
-      controller.setLastExecutePainlessRequestParams({ documentId: undefined });
-      controller.setIsFetchingDocument(true);
-
-      const [response, searchError] = await search
-        .search({
-          params: {
-            index: dataView.getIndexPattern(),
-            body: {
-              size: 1,
-              fields: ['*'],
-              query: {
-                ids: {
-                  values: [id],
-                },
-              },
-            },
-          },
-        })
-        .toPromise()
-        .then((res) => [res, null])
-        .catch((err) => [null, err]);
-
-      controller.setIsFetchingDocument(false);
-
-      const isDocumentFound = response?.rawResponse.hits.total > 0;
-      const loadedDocuments: EsDocument[] = isDocumentFound ? response.rawResponse.hits.hits : [];
-      const error: FetchDocError | null = Boolean(searchError)
-        ? {
-            code: 'ERR_FETCHING_DOC',
-            error: {
-              message: searchError.toString(),
-              reason: i18n.translate(
-                'indexPatternFieldEditor.fieldPreview.error.errorLoadingDocumentDescription',
-                {
-                  defaultMessage: 'Error loading document.',
-                }
-              ),
-            },
-          }
-        : isDocumentFound === false
-        ? {
-            code: 'DOC_NOT_FOUND',
-            error: {
-              message: i18n.translate(
-                'indexPatternFieldEditor.fieldPreview.error.documentNotFoundDescription',
-                {
-                  defaultMessage: 'Document ID not found',
-                }
-              ),
-            },
-          }
-        : null;
-
-      controller.setFetchDocError(error);
-
-      if (error === null) {
-        controller.setDocuments(loadedDocuments);
-      } else {
-        // Make sure we disable the "Updating..." indicator as we have an error
-        // and we won't fetch the preview
-        setIsLoadingPreview(false);
-      }
-    },
-    [dataView, search, controller]
-  );
 
   const updateSingleFieldPreview = useCallback(
     (fieldName: string, values: unknown[]) => {
@@ -311,7 +231,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       !parentName &&
       (!allParamsDefined || !hasSomeParamsChanged || scriptEditorValidation.isValid === false)
     ) {
-      setIsLoadingPreview(false);
+      controller.setIsLoadingPreview(false);
       return;
     }
 
@@ -354,7 +274,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       });
       notifications.toasts.addError(serverError, { title });
 
-      setIsLoadingPreview(false);
+      controller.setIsLoadingPreview(false);
       return;
     }
 
@@ -382,7 +302,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     }
 
     setInitialPreviewComplete(true);
-    setIsLoadingPreview(false);
+    controller.setIsLoadingPreview(false);
   }, [
     name,
     type,
@@ -409,7 +329,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
     controller.setDocuments([]);
     controller.setPreviewResponse({ fields: [], error: null });
-    setIsLoadingPreview(false);
+    controller.setIsLoadingPreview(false);
     controller.setIsFetchingDocument(false);
   }, [controller]);
 
@@ -465,9 +385,9 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
    */
   useEffect(() => {
     if (allParamsDefined && hasSomeParamsChanged) {
-      setIsLoadingPreview(true);
+      controller.setIsLoadingPreview(true);
     }
-  }, [allParamsDefined, hasSomeParamsChanged, script?.source, type, currentDocId]);
+  }, [allParamsDefined, hasSomeParamsChanged, script?.source, type, currentDocId, controller]);
 
   /**
    * In order to immediately display the "Updating..." state indicator and not have to wait
@@ -580,7 +500,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
     if (scriptEditorValidation.isValid === false) {
       // Make sure to remove the "Updating..." spinner
-      setIsLoadingPreview(false);
+      controller.setIsLoadingPreview(false);
 
       // Set preview response error so it is displayed in the flyout footer
       const error =
@@ -623,7 +543,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         return;
       }
 
-      loadDocument(customDocIdToLoad);
+      controller.loadDocument(customDocIdToLoad);
     },
     500,
     [customDocIdToLoad]

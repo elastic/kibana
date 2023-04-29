@@ -68,6 +68,7 @@ export interface PreviewState {
     script: string | undefined;
     documentId: string | undefined;
   };
+  isLoadingPreview: boolean;
 }
 
 export interface FetchDocError {
