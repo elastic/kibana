@@ -66,7 +66,6 @@ const documentsSelector = (state: PreviewState) => {
 };
 
 const isFetchingDocumentSelector = (state: PreviewState) => state.isFetchingDocument;
-const fetchDocErrorSelector = (state: PreviewState) => state.fetchDocError;
 const customDocIdToLoadSelector = (state: PreviewState) => state.customDocIdToLoad;
 const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
 
@@ -105,9 +104,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   /** Flag to show/hide the preview panel */
   // moving this to controller caused problems
   const [isPanelVisible, setIsPanelVisible] = useState(true);
-  /** Flag to indicate if we are loading document from cluster */
-  // const [isFetchingDocument, setIsFetchingDocument] = useState(false);
-  const fetchDocError = useStateSelector(controller.state$, fetchDocErrorSelector);
+
   /** Flag to indicate if we are calling the _execute API */
   // const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
@@ -256,11 +253,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         value: params,
         update: updateParams,
       },
-      documents: {
-        loadSingle: (id: string) => controller.setCustomDocIdToLoad(id),
-        loadFromCluster: () => controller.fetchSampleDocuments(),
-        fetchDocError,
-      },
       navigation: {
         isFirstDoc: currentIdx === 0,
         isLastDoc: currentIdx >= totalDocs - 1,
@@ -278,7 +270,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       controller,
       currentIdx,
       fieldPreview$,
-      fetchDocError,
       params,
       isPreviewAvailable,
       isLoadingPreview,
@@ -289,20 +280,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       initialPreviewComplete,
     ]
   );
-
-  /**
-   * In order to immediately display the "Updating..." state indicator and not have to wait
-   * the 500ms of the debounce, we set the isLoadingPreview state in this effect whenever
-   * one of the _execute API param changes
-   */
-  useEffect(() => {
-    if (
-      controller.allParamsDefined(type, script?.source, currentDocIndex) &&
-      controller.hasSomeParamsChanged(type, script?.source, currentDocId)
-    ) {
-      controller.setIsLoadingPreview(true);
-    }
-  }, [script?.source, type, currentDocId, controller, currentDocIndex]);
 
   /**
    * In order to immediately display the "Updating..." state indicator and not have to wait
@@ -323,12 +300,14 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     if (isPanelVisible) {
       controller.fetchSampleDocuments();
     }
+    // its unclear if fieldTypeToProcess is needed here
   }, [isPanelVisible, fieldTypeToProcess, controller]);
 
   /**
    * Each time the current document changes we update the parameters
    * that will be sent in the _execute HTTP request.
    */
+  // TODO TRY THIS ONE NEXT
   useEffect(() => {
     updateParams({
       document: currentDocument,

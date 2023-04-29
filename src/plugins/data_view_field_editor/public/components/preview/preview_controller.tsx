@@ -43,6 +43,7 @@ const previewStateDefault: PreviewState = {
   /** Keep track if the script painless syntax is being validated and if it is valid  */
   scriptEditorValidation: { isValidating: false, isValid: true, message: null },
   previewResponse: { fields: [], error: null },
+  /** Flag to indicate if we are loading document from cluster */
   isFetchingDocument: false,
   fetchDocError: null,
   customDocIdToLoad: null,
@@ -179,10 +180,34 @@ export class PreviewController {
   setLastExecutePainlessRequestParams = (
     lastExecutePainlessRequestParams: Partial<typeof this.lastExecutePainlessRequestParams>
   ) => {
-    this.lastExecutePainlessRequestParams = {
+    const state = this.internalState$.getValue();
+    const currentDocument = state.documents[state.currentIdx];
+    const updated = {
       ...this.lastExecutePainlessRequestParams,
       ...lastExecutePainlessRequestParams,
     };
+
+    if (
+      this.allParamsDefined(
+        updated.type,
+        updated.script,
+        // todo get current doc index
+        currentDocument?._index
+      ) &&
+      this.hasSomeParamsChanged(
+        lastExecutePainlessRequestParams.type!,
+        lastExecutePainlessRequestParams.script,
+        lastExecutePainlessRequestParams.documentId
+      )
+    ) {
+      /**
+       * In order to immediately display the "Updating..." state indicator and not have to wait
+       * the 500ms of the debounce, we set the isLoadingPreview state in this effect whenever
+       * one of the _execute API param changes
+       */
+      this.setIsLoadingPreview(true);
+    }
+    this.lastExecutePainlessRequestParams = updated;
   };
 
   valueFormatter = ({

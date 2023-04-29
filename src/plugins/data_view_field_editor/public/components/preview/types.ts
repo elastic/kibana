@@ -126,11 +126,6 @@ export interface Context {
   };
   isPreviewAvailable: boolean;
   isLoadingPreview: boolean;
-  documents: {
-    loadSingle: (id: string) => void;
-    loadFromCluster: () => Promise<void>;
-    fetchDocError: FetchDocError | null;
-  };
   panel: {
     isVisible: boolean;
     setIsVisible: (isVisible: boolean) => void;
