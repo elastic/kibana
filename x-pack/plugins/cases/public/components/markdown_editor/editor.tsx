@@ -11,8 +11,12 @@ import type { PluggableList } from 'unified';
 import type { EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
 import { EuiMarkdownEditor } from '@elastic/eui';
 import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
+import { useFilesContext } from '@kbn/shared-ux-file-context';
+import type { Owner } from '../../../common/constants/types';
 import { usePlugins } from './use_plugins';
 import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
+import { createFileHandler } from './file_handler';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface MarkdownEditorProps {
   ariaLabel: string;
@@ -36,6 +40,8 @@ export interface MarkdownEditorRef {
 
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
   ({ ariaLabel, dataTestSubj, editorId, height, onChange, value, disabledUiPlugins }, ref) => {
+    const { client: filesClient } = useFilesContext();
+    const { owner } = useCasesContext();
     const astRef = useRef<EuiMarkdownAstNode | undefined>(undefined);
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
     const onParse: EuiMarkdownEditorProps['onParse'] = useCallback((err, { messages, ast }) => {
@@ -45,6 +51,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
 
     const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins(disabledUiPlugins);
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
+    const dropHandlers = [createFileHandler(filesClient, owner[0] as Owner)];
 
     useLensButtonToggle({
       astRef,
@@ -81,6 +88,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
         errors={markdownErrorMessages}
         data-test-subj={dataTestSubj}
         height={height}
+        dropHandlers={dropHandlers}
       />
     );
   }
