@@ -10966,22 +10966,6 @@
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
           },
@@ -11088,18 +11072,6 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
           },
           {
             "plugin": "synthetics",
@@ -26152,7 +26124,7 @@
           "\nCreate a function that will escape CSV values like \"=\", \"@\" and \"+\" with a\n\"'\". This will also place CSV values in \"\" if contain non-alphanumeric chars.\n\nFor example:\n\nGiven: =1+1\nReturns: \"'=1+1\"\n\nSee OWASP: https://www.owasp.org/index.php/CSV_Injection."
         ],
         "signature": [
-          "(quoteValues: boolean, escapeFormulas: boolean) => (val: RawValue) => string"
+          "({\n  separator,\n  quoteValues,\n  escapeFormulaValues,\n}: { separator: string; quoteValues: boolean; escapeFormulaValues: boolean; }) => (val: RawValue) => string"
         ],
         "path": "src/plugins/data/common/exports/escape_value.ts",
         "deprecated": false,
@@ -26161,32 +26133,48 @@
           {
             "parentPluginId": "data",
             "id": "def-common.createEscapeValue.$1",
-            "type": "boolean",
+            "type": "Object",
             "tags": [],
-            "label": "quoteValues",
+            "label": "{\n  separator,\n  quoteValues,\n  escapeFormulaValues,\n}",
             "description": [],
-            "signature": [
-              "boolean"
-            ],
             "path": "src/plugins/data/common/exports/escape_value.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.createEscapeValue.$2",
-            "type": "boolean",
-            "tags": [],
-            "label": "escapeFormulas",
-            "description": [],
-            "signature": [
-              "boolean"
-            ],
-            "path": "src/plugins/data/common/exports/escape_value.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.createEscapeValue.$1.separator",
+                "type": "string",
+                "tags": [],
+                "label": "separator",
+                "description": [],
+                "path": "src/plugins/data/common/exports/escape_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.createEscapeValue.$1.quoteValues",
+                "type": "boolean",
+                "tags": [],
+                "label": "quoteValues",
+                "description": [],
+                "path": "src/plugins/data/common/exports/escape_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.createEscapeValue.$1.escapeFormulaValues",
+                "type": "boolean",
+                "tags": [],
+                "label": "escapeFormulaValues",
+                "description": [],
+                "path": "src/plugins/data/common/exports/escape_value.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -28735,22 +28723,6 @@
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
           },
@@ -28857,18 +28829,6 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
           },
           {
             "plugin": "synthetics",
