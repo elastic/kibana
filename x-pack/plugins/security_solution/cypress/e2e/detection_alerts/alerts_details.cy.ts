@@ -24,7 +24,6 @@ import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { getUnmappedRule } from '../../objects/rule';
 import { ALERTS_URL } from '../../urls/navigation';
 import { tablePageSelector } from '../../screens/table_pagination';
-import { ALERTS_COUNT } from '../../screens/alerts';
 
 describe('Alert details flyout', () => {
   describe('With unmapped fields', { testIsolation: false }, () => {
@@ -94,41 +93,37 @@ describe('Alert details flyout', () => {
       cleanKibana();
       esArchiverLoad('query_alert');
       login();
+    });
+
+    beforeEach(() => {
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
     });
 
     it('should store the flyout state in the url when it is opened', () => {
-      expandFirstAlert();
       cy.get(OVERVIEW_RULE).should('be.visible');
       cy.url().should('include', 'eventFlyout=');
     });
 
     it('should remove the flyout state from the url when it is closed', () => {
-      expandFirstAlert();
       cy.get(OVERVIEW_RULE).should('be.visible');
       closeAlertFlyout();
       cy.url().should('not.include', 'eventFlyout=');
     });
 
     it('should open the alert flyout when the page is refreshed', () => {
-      expandFirstAlert();
       cy.get(OVERVIEW_RULE).should('be.visible');
       cy.reload();
       cy.get(OVERVIEW_RULE).should('be.visible');
-      cy.get(OVERVIEW_RULE).then((field) => {
-        expect(field).to.contain('Endpoint Security');
-      });
+      cy.get(OVERVIEW_RULE).should('contain', 'Endpoint Security');
     });
 
     it('should show the copy link button for the flyout', () => {
-      expandFirstAlert();
       cy.get(COPY_ALERT_FLYOUT_LINK).should('be.visible');
     });
 
     it('should open the flyout given the custom url', () => {
-      expandFirstAlert();
       openTable();
       filterBy('_id');
       cy.get('[data-test-subj="event-field-_id"]')
@@ -136,13 +131,14 @@ describe('Alert details flyout', () => {
         .then((alertId) => {
           cy.visit(`http://localhost:5620/app/security/alerts/redirect/${alertId}`);
           cy.get('[data-test-subj="unifiedQueryInput"]').should('have.text', `_id: ${alertId}`);
-          cy.get(ALERTS_COUNT).should('have.text', '1 alert');
           cy.get(OVERVIEW_RULE).should('be.visible');
+          openTable();
+          filterBy('_id');
+          cy.get('[data-test-subj="event-field-_id"]').should('have.text', alertId);
         });
     });
 
     it('should have the `kibana.alert.url` field set', () => {
-      expandFirstAlert();
       openTable();
       filterBy('kibana.alert.url');
       cy.get('[data-test-subj="formatted-field-kibana.alert.url"]').should(
