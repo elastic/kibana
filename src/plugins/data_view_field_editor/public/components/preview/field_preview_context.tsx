@@ -66,6 +66,7 @@ const documentsSelector = (state: PreviewState) => {
 
 const isFetchingDocumentSelector = (state: PreviewState) => state.isFetchingDocument;
 const customDocIdToLoadSelector = (state: PreviewState) => state.customDocIdToLoad;
+const scriptEditorValidationSelector = (state: PreviewState) => state.scriptEditorValidation;
 
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
   controller,
@@ -87,12 +88,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   /** The parameters required for the Painless _execute API */
   const [params, setParams] = useState<Params>(defaultParams);
 
-  const [scriptEditorValidation, setScriptEditorValidation] = useState<{
-    isValidating: boolean;
-    isValid: boolean;
-    message: string | null;
-  }>({ isValidating: false, isValid: true, message: null });
-
   /** Flag to show/hide the preview panel */
   // moving this to controller caused problems
   const [isPanelVisible, setIsPanelVisible] = useState(true);
@@ -100,6 +95,10 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   /** Flag to indicate if we are loading a single document by providing its ID */
   // const [customDocIdToLoad, setCustomDocIdToLoad] = useState<string | null>(null);
   const customDocIdToLoad = useStateSelector(controller.state$, customDocIdToLoadSelector);
+  const scriptEditorValidation = useStateSelector(
+    controller.state$,
+    scriptEditorValidationSelector
+  );
 
   const { currentDocument, currentDocIndex, currentDocId, totalDocs } = useStateSelector(
     controller.state$,
@@ -237,10 +236,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       panel: {
         isVisible: isPanelVisible,
         setIsVisible: setIsPanelVisible,
-      },
-      validation: {
-        // todo do this next
-        setScriptEditorValidation,
       },
     }),
     [controller, fieldPreview$, params, isPreviewAvailable, updateParams, isPanelVisible]

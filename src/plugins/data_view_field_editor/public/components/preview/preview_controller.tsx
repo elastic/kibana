@@ -131,11 +131,9 @@ export class PreviewController {
     }
   };
 
-  /* disabled while investigating issues with painless script editor
   setScriptEditorValidation = (scriptEditorValidation: PreviewState['scriptEditorValidation']) => {
     this.updateState({ scriptEditorValidation });
   };
-  */
 
   setCustomId = (customId?: string) => {
     this.updateState({ customId });

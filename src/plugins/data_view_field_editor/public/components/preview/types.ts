@@ -130,11 +130,6 @@ export interface Context {
     isVisible: boolean;
     setIsVisible: (isVisible: boolean) => void;
   };
-  validation: {
-    setScriptEditorValidation: React.Dispatch<
-      React.SetStateAction<{ isValid: boolean; isValidating: boolean; message: string | null }>
-    >;
-  };
 }
 
 export type PainlessExecuteContext =
