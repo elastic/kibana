@@ -18,11 +18,11 @@ import {
   EuiButton,
   htmlIdGenerator,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { EventAnnotationGroupConfig } from '../../common';
+import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
 import { GroupEditorControls } from './group_editor_controls';
 
 export const GroupEditorFlyout = ({
@@ -42,6 +42,8 @@ export const GroupEditorFlyout = ({
 }) => {
   const flyoutHeadingId = useMemo(() => htmlIdGenerator()(), []);
 
+  const [selectedAnnotation, setSelectedAnnotation] = useState<EventAnnotationConfig>();
+
   return (
     <EuiFlyout onClose={onClose} size={'s'}>
       <EuiFlyoutHeader hasBorder aria-labelledby={flyoutHeadingId}>
@@ -59,6 +61,8 @@ export const GroupEditorFlyout = ({
         <GroupEditorControls
           group={group}
           update={updateGroup}
+          selectedAnnotation={selectedAnnotation}
+          setSelectedAnnotation={setSelectedAnnotation}
           savedObjectsTagging={savedObjectsTagging}
           dataViewListItems={dataViewListItems}
         />

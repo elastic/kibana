@@ -7,10 +7,12 @@
  */
 
 import {
+  EuiButton,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiSelect,
+  EuiSpacer,
   EuiText,
   EuiTextArea,
   useEuiTheme,
@@ -21,16 +23,21 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import React, { useMemo, useState } from 'react';
-import { EventAnnotationGroupConfig } from '../../common';
+import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
+import { AnnotationsPanel } from './annotations_config_panel';
 
 export const GroupEditorControls = ({
   group,
   update,
+  setSelectedAnnotation,
+  selectedAnnotation,
   savedObjectsTagging,
   dataViewListItems: globalDataViewListItems,
 }: {
   group: EventAnnotationGroupConfig;
   update: (group: EventAnnotationGroupConfig) => void;
+  selectedAnnotation: EventAnnotationConfig | undefined;
+  setSelectedAnnotation: (annotation: EventAnnotationConfig) => void;
   savedObjectsTagging: SavedObjectsTaggingApi;
   dataViewListItems: DataViewListItem[];
 }) => {
@@ -52,7 +59,7 @@ export const GroupEditorControls = ({
     return items;
   }, [adHocDataViewSpec, globalDataViewListItems]);
 
-  return (
+  return !selectedAnnotation ? (
     <>
       <EuiText
         size="s"
@@ -129,7 +136,24 @@ export const GroupEditorControls = ({
             }
           />
         </EuiFormRow>
+        <EuiFormRow label="Annotations">
+          <div>
+            {group.annotations.map((annotation) => (
+              <>
+                <EuiButton fullWidth onClick={() => setSelectedAnnotation(annotation)}>
+                  {annotation.label}
+                </EuiButton>
+                <EuiSpacer size="s" />
+              </>
+            ))}
+          </div>
+        </EuiFormRow>
       </EuiForm>
     </>
+  ) : (
+    <AnnotationsPanel
+      annotation={selectedAnnotation}
+      onAnnotationChange={(changes) => setSelectedAnnotation({ ...selectedAnnotation, ...changes })}
+    />
   );
 };

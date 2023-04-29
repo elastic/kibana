@@ -26,7 +26,9 @@
     "@kbn/presentation-util-plugin",
     "@kbn/content-management-table-list",
     "@kbn/visualizations-plugin",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/visualization-ui-components",
+    "@kbn/chart-icons"
   ],
   "exclude": [
     "target/**/*",

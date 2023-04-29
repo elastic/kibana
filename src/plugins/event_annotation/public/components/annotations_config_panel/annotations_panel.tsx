@@ -1,108 +1,64 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './index.scss';
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
-import type { PaletteRegistry } from '@kbn/coloring';
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import {
-  defaultAnnotationColor,
-  defaultAnnotationRangeColor,
-  isQueryAnnotationConfig,
-  isRangeAnnotationConfig,
-} from '@kbn/event-annotation-plugin/public';
-import {
-  EventAnnotationConfig,
-  PointInTimeEventAnnotationConfig,
-  QueryPointEventAnnotationConfig,
-} from '@kbn/event-annotation-plugin/common';
-import moment from 'moment';
-import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
+import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiButtonGroup } from '@elastic/eui';
 import {
   IconSelectSetting,
-  FieldOption,
-  FieldOptionValue,
-  FieldPicker,
-  NameInput,
-  useDebouncedValue,
   DimensionEditorSection,
+  NameInput,
   ColorPicker,
   LineStyleSettings,
 } from '@kbn/visualization-ui-components/public';
-import { FormatFactory } from '../../../../../common/types';
-import { defaultAnnotationLabel, defaultRangeAnnotationLabel } from '../../annotations/helpers';
-import { TextDecorationSetting } from '../shared/marker_decoration_settings';
-import { updateLayer } from '..';
+import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
+import { AvailableAnnotationIcon, EventAnnotationConfig } from '../../../common';
+// import { isHorizontalChart } from '../../state_helpers';
+import {
+  defaultAnnotationColor,
+  defaultAnnotationLabel,
+  defaultAnnotationRangeColor,
+} from './helpers';
 import { annotationsIconSet } from './icon_set';
-import type { VisualizationDimensionEditorProps } from '../../../../types';
-import type { State, XYState, XYAnnotationLayerConfig } from '../../types';
-import { ConfigPanelManualAnnotation } from './manual_annotation_panel';
-import { ConfigPanelQueryAnnotation } from './query_annotation_panel';
-import { TooltipSection } from './tooltip_annotation_panel';
-import { sanitizeProperties, toLineAnnotationColor } from './helpers';
-import { idPrefix } from '../dimension_editor';
+import { sanitizeProperties } from './helpers';
 
-export const AnnotationsPanel = (
-  props: VisualizationDimensionEditorProps<State> & {
-    datatableUtilities: DatatableUtilitiesService;
-    formatFactory: FormatFactory;
-    paletteService: PaletteRegistry;
-  }
-) => {
-  const { state, setState, layerId, accessor, frame } = props;
-  const { hasFieldData } = useExistingFieldsReader();
-
-  const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
-    value: state,
-    onChange: setState,
-  });
-
-  const index = localState.layers.findIndex((l) => l.layerId === layerId);
-  const localLayer = localState.layers.find(
-    (l) => l.layerId === layerId
-  ) as XYAnnotationLayerConfig;
-
-  const currentAnnotation = localLayer.annotations?.find((c) => c.id === accessor);
+export const AnnotationsPanel = ({
+  annotation: currentAnnotation,
+  onAnnotationChange,
+}: {
+  annotation: EventAnnotationConfig;
+  onAnnotationChange: (annotation: EventAnnotationConfig) => void;
+  // dataView: DataView;
+  // datatableUtilities: DatatableUtilitiesService;
+  // formatFactory: FormatFactory;
+  // paletteService: PaletteRegistry;
+}) => {
+  // const { hasFieldData } = useExistingFieldsReader();
 
   const isQueryBased = isQueryAnnotationConfig(currentAnnotation);
   const isRange = isRangeAnnotationConfig(currentAnnotation);
+
   const [queryInputShouldOpen, setQueryInputShouldOpen] = React.useState(false);
   useEffect(() => {
     setQueryInputShouldOpen(!isQueryBased);
   }, [isQueryBased]);
 
-  const setAnnotations = useCallback(
-    <T extends EventAnnotationConfig>(annotation: Partial<T> | undefined) => {
-      if (annotation == null) {
-        return;
-      }
-      const newConfigs = [...(localLayer.annotations || [])];
-      const existingIndex = newConfigs.findIndex((c) => c.id === accessor);
-      if (existingIndex !== -1) {
-        const existingConfig = newConfigs[existingIndex];
-        newConfigs[existingIndex] = sanitizeProperties({
-          ...existingConfig,
-          ...annotation,
-        });
-      } else {
-        throw new Error(
-          'should never happen because annotation is created before config panel is opened'
-        );
-      }
-      setLocalState(updateLayer(localState, { ...localLayer, annotations: newConfigs }, index));
-    },
-    [accessor, index, localState, localLayer, setLocalState]
+  const update = useCallback(
+    <T extends EventAnnotationConfig>(newAnnotation: Partial<T> | undefined) =>
+      newAnnotation &&
+      onAnnotationChange(sanitizeProperties({ ...currentAnnotation, ...newAnnotation })),
+    [currentAnnotation, onAnnotationChange]
   );
 
   return (
     <>
-      <DimensionEditorSection
+      {/* <DimensionEditorSection
         title={i18n.translate('xpack.lens.xyChart.placement', {
           defaultMessage: 'Placement',
         })}
@@ -147,8 +103,6 @@ export const AnnotationsPanel = (
                 return;
               }
               if (typeFromId === 'query') {
-                const currentIndexPattern =
-                  frame.dataViews.indexPatterns[localLayer.indexPatternId];
                 // If coming from a range type, it requires some additional resets
                 const additionalRangeResets = isRangeAnnotationConfig(currentAnnotation)
                   ? {
@@ -159,12 +113,12 @@ export const AnnotationsPanel = (
                       color: toLineAnnotationColor(currentAnnotation.color),
                     }
                   : {};
-                return setAnnotations({
+                return update({
                   type: typeFromId,
                   timeField:
-                    (currentIndexPattern.timeFieldName ||
+                    (dataView.timeFieldName ||
                       // fallback to the first avaiable date field in the dataView
-                      currentIndexPattern.fields.find(({ type: fieldType }) => fieldType === 'date')
+                      dataView.fields.find(({ type: fieldType }) => fieldType === 'date')
                         ?.displayName) ??
                     '',
                   key: { type: 'point_in_time' },
@@ -172,7 +126,7 @@ export const AnnotationsPanel = (
                 });
               }
               // From query to manual annotation
-              return setAnnotations<PointInTimeEventAnnotationConfig>({
+              return update<PointInTimeEventAnnotationConfig>({
                 type: typeFromId,
                 key: { type: 'point_in_time', timestamp: moment().toISOString() },
               });
@@ -198,7 +152,7 @@ export const AnnotationsPanel = (
             state={state}
           />
         )}
-      </DimensionEditorSection>
+      </DimensionEditorSection> */}
       <DimensionEditorSection
         title={i18n.translate('xpack.lens.xyChart.appearance', {
           defaultMessage: 'Appearance',
@@ -208,18 +162,18 @@ export const AnnotationsPanel = (
           value={currentAnnotation?.label || defaultAnnotationLabel}
           defaultValue={defaultAnnotationLabel}
           onChange={(value) => {
-            setAnnotations({ label: value });
+            update({ label: value });
           }}
         />
         {!isRange && (
           <>
-            <IconSelectSetting
-              setIcon={(icon) => setAnnotations({ icon })}
+            <IconSelectSetting<AvailableAnnotationIcon>
+              currentIcon={currentAnnotation.icon}
+              setIcon={(icon) => update({ icon })}
               defaultIcon="triangle"
-              currentIcon={currentAnnotation?.icon}
               customIconSet={annotationsIconSet}
             />
-            <TextDecorationSetting
+            {/* <TextDecorationSetting
               setConfig={setAnnotations}
               currentConfig={{
                 axisMode: 'bottom',
@@ -231,9 +185,7 @@ export const AnnotationsPanel = (
                 if (textDecorationSelected !== 'field') {
                   return null;
                 }
-                const currentIndexPattern =
-                  frame.dataViews.indexPatterns[localLayer.indexPatternId];
-                const options = currentIndexPattern.fields
+                const options = dataView.fields
                   .filter(({ displayName, type }) => displayName && type !== 'document')
                   .map(
                     (field) =>
@@ -244,7 +196,7 @@ export const AnnotationsPanel = (
                           field: field.name,
                           dataType: field.type,
                         },
-                        exists: hasFieldData(currentIndexPattern.id, field.name),
+                        exists: hasFieldData(dataView.id!, field.name),
                         compatible: true,
                         'data-test-subj': `lnsXY-annotation-fieldOption-${field.name}`,
                       } as FieldOption<FieldOptionValue>)
@@ -253,7 +205,7 @@ export const AnnotationsPanel = (
                   .textField;
 
                 const fieldIsValid = selectedField
-                  ? Boolean(currentIndexPattern.getFieldByName(selectedField))
+                  ? Boolean(dataView.getFieldByName(selectedField))
                   : true;
                 return (
                   <>
@@ -282,11 +234,14 @@ export const AnnotationsPanel = (
                   </>
                 );
               }}
-            </TextDecorationSetting>
+            </TextDecorationSetting> */}
             <LineStyleSettings
-              idPrefix={idPrefix}
-              setConfig={setAnnotations}
-              currentConfig={currentAnnotation}
+              idPrefix=""
+              setConfig={update}
+              currentConfig={{
+                lineStyle: currentAnnotation.lineStyle,
+                lineWidth: currentAnnotation.lineWidth,
+              }}
             />
           </>
         )}
@@ -325,7 +280,7 @@ export const AnnotationsPanel = (
                 Boolean(currentAnnotation?.outside) ? 'outside' : 'inside'
               }`}
               onChange={(id) => {
-                setAnnotations({
+                update({
                   outside: id === `lens_xyChart_fillStyle_outside`,
                 });
               }}
@@ -335,11 +290,10 @@ export const AnnotationsPanel = (
         )}
 
         <ColorPicker
-          {...props}
-          overwriteColor={currentAnnotation?.color}
+          overwriteColor={currentAnnotation.color}
           defaultColor={isRange ? defaultAnnotationRangeColor : defaultAnnotationColor}
           showAlpha={isRange}
-          setConfig={setAnnotations}
+          setConfig={update}
           disableHelpTooltip
           label={i18n.translate('xpack.lens.xyChart.lineColor.label', {
             defaultMessage: 'Color',
@@ -350,11 +304,10 @@ export const AnnotationsPanel = (
             defaultMessage: 'Hide annotation',
           })}
           data-test-subj="lns-annotations-hide-annotation"
-          value={Boolean(currentAnnotation?.isHidden)}
-          onChange={(ev) => setAnnotations({ isHidden: ev.target.checked })}
+          value={Boolean(currentAnnotation.isHidden)}
+          onChange={(ev) => update({ isHidden: ev.target.checked })}
         />
-      </DimensionEditorSection>
-      {isQueryBased && currentAnnotation && (
+        {/* {isQueryBased && currentAnnotation && (
         <DimensionEditorSection
           title={i18n.translate('xpack.lens.xyChart.tooltip', {
             defaultMessage: 'Tooltip',
@@ -374,8 +327,8 @@ export const AnnotationsPanel = (
               indexPattern={frame.dataViews.indexPatterns[localLayer.indexPatternId]}
             />
           </EuiFormRow>
-        </DimensionEditorSection>
-      )}
+          */}
+      </DimensionEditorSection>
     </>
   );
 };

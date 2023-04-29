@@ -21,7 +21,8 @@
     "requiredBundles": [
       "savedObjectsFinder",
       "dataViews",
-      "kibanaReact"
+      "kibanaReact",
+      "visualizationUiComponents",
     ],
     "extraPublicDirs": [
       "common"

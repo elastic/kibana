@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState } from 'react';
@@ -14,23 +15,21 @@ import {
   EuiFlexItem,
   EuiFormRow,
 } from '@elastic/eui';
-import { LineStyle } from '@kbn/expression-xy-plugin/common';
-
-import { idPrefix } from '../dimension_editor';
+import { LineStyle } from '../../common/types';
 
 interface LineStyleConfig {
-  lineStyle?: Exclude<LineStyle, 'dot-dashed'>;
+  lineStyle?: LineStyle;
   lineWidth?: number;
 }
 
 export const LineStyleSettings = ({
   currentConfig,
   setConfig,
-  isHorizontal,
+  idPrefix,
 }: {
   currentConfig?: LineStyleConfig;
   setConfig: (config: LineStyleConfig) => void;
-  isHorizontal: boolean;
+  idPrefix: string;
 }) => {
   return (
     <>

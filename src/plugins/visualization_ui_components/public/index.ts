@@ -31,6 +31,7 @@ export {
   isQueryValid,
   DimensionEditorSection,
   DimensionButton,
+  LineStyleSettings,
 } from './components';
 
 export type {

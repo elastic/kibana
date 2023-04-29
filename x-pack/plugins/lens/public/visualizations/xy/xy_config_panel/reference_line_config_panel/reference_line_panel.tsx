@@ -14,6 +14,7 @@ import {
   useDebouncedValue,
   IconSelectSetting,
   ColorPicker,
+  LineStyleSettings,
 } from '@kbn/visualization-ui-components/public';
 import type { VisualizationDimensionEditorProps } from '../../../../types';
 import { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
@@ -26,7 +27,6 @@ import {
   MarkerDecorationPosition,
   TextDecorationSetting,
 } from '../shared/marker_decoration_settings';
-import { LineStyleSettings } from '../shared/line_style_settings';
 import { referenceLineIconsSet } from './icon_set';
 import { defaultReferenceLineColor } from '../../color_assignment';
 
@@ -88,11 +88,7 @@ export const ReferenceLinePanel = (
         setConfig={setConfig}
         currentConfig={localConfig}
       />
-      <LineStyleSettings
-        isHorizontal={isHorizontal}
-        setConfig={setConfig}
-        currentConfig={localConfig}
-      />
+      <LineStyleSettings idPrefix={idPrefix} setConfig={setConfig} currentConfig={localConfig} />
       <FillSetting isHorizontal={isHorizontal} setConfig={setConfig} currentConfig={localConfig} />
       <ColorPicker
         {...props}

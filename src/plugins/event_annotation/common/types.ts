@@ -10,6 +10,7 @@ import type { UserContentCommonSchema } from '@kbn/content-management-table-list
 import { DataViewSpec, KibanaQueryOutput } from '@kbn/data-plugin/common';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { $Values } from '@kbn/utility-types';
+import { LineStyle } from '@kbn/visualization-ui-components/common/types';
 import { AvailableAnnotationIcons } from './constants';
 import {
   ManualEventAnnotationOutput,
@@ -21,7 +22,6 @@ import {
   QueryPointEventAnnotationOutput,
 } from './query_point_event_annotation/types';
 
-export type LineStyle = 'solid' | 'dashed' | 'dotted';
 export type Fill = 'inside' | 'outside' | 'none';
 export type ManualAnnotationType = 'manual';
 export type QueryAnnotationType = 'query';
