@@ -233,13 +233,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
    * the 500ms of the debounce, we set the isFetchingDocument state in this effect whenever
    * "customDocIdToLoad" changes
    */
-  // moving this over to the controller caused problems
-  useEffect(() => {
-    controller.setCustomId(customDocIdToLoad || undefined);
-    if (customDocIdToLoad !== null && Boolean(customDocIdToLoad.trim())) {
-      controller.setIsFetchingDocument(true);
-    }
-  }, [customDocIdToLoad, controller]);
+
   /**
    * Whenever we show the preview panel we will update the documents from the cluster
    */

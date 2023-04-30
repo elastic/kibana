@@ -154,8 +154,11 @@ export class PreviewController {
   setCustomDocIdToLoad = (customDocIdToLoad: string | null) => {
     this.updateState({
       customDocIdToLoad,
+      customId: customDocIdToLoad || undefined,
       isPreviewAvailable: this.getIsPreviewAvailable({ customDocIdToLoad }),
     });
+    // load document if id is present
+    this.setIsFetchingDocument(!!customDocIdToLoad);
   };
 
   // If no documents could be fetched from the cluster (and we are not trying to load
