@@ -13,6 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { renderToString } from 'react-dom/server';
 import React from 'react';
+import debounce from 'lodash/debounce';
 import { PreviewState, FetchDocError } from './types';
 import { BehaviorObservable } from '../../state_utils';
 import { EsDocument, ScriptErrorCodes, Params, FieldPreview } from './types';
@@ -46,7 +47,8 @@ const previewStateDefault: PreviewState = {
   /** Flag to indicate if we are loading document from cluster */
   isFetchingDocument: false,
   fetchDocError: null,
-  customDocIdToLoad: null,
+  /** Flag to indicate if we are loading a single document by providing its ID */
+  customDocIdToLoad: null, // not used externally
   // We keep in cache the latest params sent to the _execute API so we don't make unecessary requests
   // when changing parameters that don't affect the preview result (e.g. changing the "name" field).
 
@@ -163,6 +165,9 @@ export class PreviewController {
     });
     // load document if id is present
     this.setIsFetchingDocument(!!customDocIdToLoad);
+    if (customDocIdToLoad) {
+      debounce(() => this.loadDocument(customDocIdToLoad), 500, { leading: true })();
+    }
   };
 
   setIsPanelVisible = (isPanelVisible: boolean) => {

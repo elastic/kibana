@@ -64,7 +64,6 @@ const documentsSelector = (state: PreviewState) => {
   };
 };
 
-const customDocIdToLoadSelector = (state: PreviewState) => state.customDocIdToLoad;
 const scriptEditorValidationSelector = (state: PreviewState) => state.scriptEditorValidation;
 
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
@@ -88,8 +87,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   const [params, setParams] = useState<Params>(defaultParams);
 
   /** Flag to indicate if we are loading a single document by providing its ID */
-  // const [customDocIdToLoad, setCustomDocIdToLoad] = useState<string | null>(null);
-  const customDocIdToLoad = useStateSelector(controller.state$, customDocIdToLoadSelector);
   const scriptEditorValidation = useStateSelector(
     controller.state$,
     scriptEditorValidationSelector
@@ -350,21 +347,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
    * we call it to update the preview response with the field(s) value or possible error.
    */
   useDebounce(updatePreview, 500, [updatePreview]);
-
-  /**
-   * Whenever the doc ID to load changes we load the document (after a 500ms debounce)
-   */
-  useDebounce(
-    () => {
-      if (customDocIdToLoad === null) {
-        return;
-      }
-
-      controller.loadDocument(customDocIdToLoad);
-    },
-    500,
-    [customDocIdToLoad]
-  );
 
   return <fieldPreviewContext.Provider value={ctx}>{children}</fieldPreviewContext.Provider>;
 };
