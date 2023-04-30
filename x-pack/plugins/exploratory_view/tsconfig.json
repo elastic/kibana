@@ -55,8 +55,6 @@
     "@kbn/charts-plugin",
     "@kbn/shared-ux-router",
     "@kbn/core-application-browser",
-    "@kbn/observability-plugin",
-    "@kbn/core-ui-settings-browser-mocks",
     "@kbn/observability-shared-plugin"
   ],
   "exclude": ["target/**/*"]
