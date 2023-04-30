@@ -62,7 +62,7 @@ describe('timeline flyout button', () => {
   });
 
   it('the `(+)` button popover menu owns focus', () => {
-    cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
+    cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click();
     cy.get(`${CREATE_NEW_TIMELINE}`)
       .pipe(($el) => $el.trigger('focus'))
       .should('have.focus');

@@ -7,7 +7,7 @@
 
 import { getEndpointListPath } from '../../../common/routing';
 import {
-  checkEndpointListForOnlyIsolatedHosts,
+  checkEndpointIsIsolated,
   checkFlyoutEndpointIsolation,
   filterOutIsolatedHosts,
   interceptActionRequests,
@@ -32,6 +32,8 @@ describe('Isolate command', () => {
   describe('from Manage', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let isolatedEndpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
+    let isolatedEndpointHostnames: [string, string];
+    let endpointHostnames: [string, string];
 
     before(() => {
       indexEndpointHosts({
@@ -40,6 +42,10 @@ describe('Isolate command', () => {
         isolation: false,
       }).then((indexEndpoints) => {
         endpointData = indexEndpoints;
+        endpointHostnames = [
+          endpointData.data.hosts[0].host.name,
+          endpointData.data.hosts[1].host.name,
+        ];
       });
 
       indexEndpointHosts({
@@ -48,6 +54,10 @@ describe('Isolate command', () => {
         isolation: true,
       }).then((indexEndpoints) => {
         isolatedEndpointData = indexEndpoints;
+        isolatedEndpointHostnames = [
+          isolatedEndpointData.data.hosts[0].host.name,
+          isolatedEndpointData.data.hosts[1].host.name,
+        ];
       });
     });
 
@@ -71,7 +81,10 @@ describe('Isolate command', () => {
       cy.visit(APP_PATH + getEndpointListPath({ name: 'endpointList' }));
       closeAllToasts();
       filterOutIsolatedHosts();
-      checkEndpointListForOnlyIsolatedHosts();
+      isolatedEndpointHostnames.forEach(checkEndpointIsIsolated);
+      endpointHostnames.forEach((hostname) => {
+        cy.contains(hostname).should('not.exist');
+      });
     });
   });
 
@@ -122,8 +135,18 @@ describe('Isolate command', () => {
       cy.visit(APP_ALERTS_PATH);
       closeAllToasts();
 
-      cy.getByTestSubj('globalLoadingIndicator').should('exist');
-      cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
+      cy.getByTestSubj('alertsTable').within(() => {
+        cy.getByTestSubj('expand-event')
+          .first()
+          .within(() => {
+            cy.get(`[data-is-loading="true"]`).should('exist');
+          });
+        cy.getByTestSubj('expand-event')
+          .first()
+          .within(() => {
+            cy.get(`[data-is-loading="true"]`).should('not.exist');
+          });
+      });
 
       openAlertDetails();
 
@@ -163,7 +186,7 @@ describe('Isolate command', () => {
       cy.getByTestSubj('euiFlyoutCloseButton').click();
       openAlertDetails();
       cy.getByTestSubj('event-field-agent.status').within(() => {
-        cy.get('[title="Isolated"]', { timeout: 1200000 }).should('not.exist');
+        cy.get('[title="Isolated"]').should('not.exist');
       });
     });
   });
