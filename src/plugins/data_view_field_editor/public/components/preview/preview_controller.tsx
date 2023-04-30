@@ -139,10 +139,6 @@ export class PreviewController {
     this.updateState({ scriptEditorValidation });
   };
 
-  setCustomId = (customId?: string) => {
-    this.updateState({ customId });
-  };
-
   setPreviewError = (error: PreviewState['previewResponse']['error']) => {
     this.updateState({
       previewResponse: { ...this.internalState$.getValue().previewResponse, error },
