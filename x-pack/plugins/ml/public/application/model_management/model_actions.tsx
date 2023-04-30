@@ -227,6 +227,7 @@ export function useModelActions({
 
           const deploymentParams = await getUserInputModelDeploymentParams(item, {
             deploymentId: deploymentToUpdate,
+            modelId: item.model_id,
             numOfAllocations: item.stats!.deployment_stats.find(
               (v) => v.deployment_id === deploymentToUpdate
             )!.number_of_allocations,
@@ -236,9 +237,13 @@ export function useModelActions({
 
           try {
             onLoading(true);
-            await trainedModelsApiService.updateModelDeployment(deploymentParams.deploymentId!, {
-              number_of_allocations: deploymentParams.numOfAllocations,
-            });
+            await trainedModelsApiService.updateModelDeployment(
+              deploymentParams.modelId!,
+              deploymentParams.deploymentId!,
+              {
+                number_of_allocations: deploymentParams.numOfAllocations,
+              }
+            );
             displaySuccessToast(
               i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccess', {
                 defaultMessage: 'Deployment for "{modelId}" has been updated successfully.',
@@ -294,7 +299,7 @@ export function useModelActions({
 
           try {
             onLoading(true);
-            await trainedModelsApiService.stopModelAllocation(deploymentIds, {
+            await trainedModelsApiService.stopModelAllocation(item.model_id, deploymentIds, {
               force: requireForceStop,
             });
             displaySuccessToast(
