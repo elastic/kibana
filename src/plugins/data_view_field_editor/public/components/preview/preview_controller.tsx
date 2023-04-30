@@ -46,6 +46,7 @@ const previewStateDefault: PreviewState = {
   previewResponse: { fields: [], error: null },
   /** Flag to indicate if we are loading document from cluster */
   isFetchingDocument: false,
+  /** Possible error while fetching sample documents */
   fetchDocError: null,
   /** Flag to indicate if we are loading a single document by providing its ID */
   customDocIdToLoad: null, // not used externally

@@ -54,17 +54,15 @@ export const valueTypeToSelectedType = (value: unknown): RuntimePrimitiveTypes =
   return 'keyword';
 };
 
+const scriptEditorValidationSelector = (state: PreviewState) => state.scriptEditorValidation;
 const documentsSelector = (state: PreviewState) => {
   const currentDocument = state.documents[state.currentIdx];
   return {
     currentDocument,
-    totalDocs: state.documents.length,
     currentDocIndex: currentDocument?._index,
     currentDocId: currentDocument?._id,
   };
 };
-
-const scriptEditorValidationSelector = (state: PreviewState) => state.scriptEditorValidation;
 
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
   controller,
@@ -81,12 +79,9 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
   const fieldPreview$ = useRef(new BehaviorSubject<FieldPreview[] | undefined>(undefined));
 
-  /** Possible error while fetching sample documents */
-  // const [fetchDocError, setFetchDocError] = useState<FetchDocError | null>(null);
   /** The parameters required for the Painless _execute API */
   const [params, setParams] = useState<Params>(defaultParams);
 
-  /** Flag to indicate if we are loading a single document by providing its ID */
   const scriptEditorValidation = useStateSelector(
     controller.state$,
     scriptEditorValidationSelector
@@ -125,7 +120,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       documentId: currentDocId,
     });
 
-    const currentApiCall = controller.incrementPreviewCount(); // ++previewCount.current;
+    const currentApiCall = controller.incrementPreviewCount();
 
     const previewScript = (parentName && dataView.getRuntimeField(parentName)?.script) || script!;
 
