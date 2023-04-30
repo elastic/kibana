@@ -127,10 +127,6 @@ export interface Context {
     value: Params;
     update: (updated: Partial<Params>) => void;
   };
-  panel: {
-    isVisible: boolean;
-    setIsVisible: (isVisible: boolean) => void;
-  };
 }
 
 export type PainlessExecuteContext =

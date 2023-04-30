@@ -53,6 +53,7 @@ const previewStateDefault: PreviewState = {
   isLoadingPreview: false,
   initialPreviewComplete: false,
   isPreviewAvailable: true,
+  /** Flag to show/hide the preview panel */
   isPanelVisible: true,
 };
 
@@ -166,6 +167,9 @@ export class PreviewController {
 
   setIsPanelVisible = (isPanelVisible: boolean) => {
     this.updateState({ isPanelVisible });
+    /**
+     * Whenever we show the preview panel we will update the documents from the cluster
+     */
     if (isPanelVisible) {
       this.fetchSampleDocuments();
     }
