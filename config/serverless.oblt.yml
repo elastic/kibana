@@ -1,1 +1,2 @@
+uiSettings.overrides.defaultRoute: /app/observability/overview
 xpack.infra.logs.app_target: discover

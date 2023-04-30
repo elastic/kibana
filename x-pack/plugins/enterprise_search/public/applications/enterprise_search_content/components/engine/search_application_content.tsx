@@ -30,6 +30,7 @@ import { EngineIndices } from './engine_indices';
 import { EngineIndicesLogic } from './engine_indices_logic';
 import { EngineSchema } from './engine_schema';
 import { EngineViewLogic } from './engine_view_logic';
+import './search_application_layout.scss';
 
 const pageTitle = i18n.translate(
   'xpack.enterpriseSearch.content.searchApplications.content.pageTitle',
@@ -78,6 +79,8 @@ export const SearchApplicationContent = () => {
         pageViewTelemetry={EngineViewTabs.CONTENT}
         isLoading={isLoadingEngine}
         pageHeader={{
+          bottomBorder: false,
+          className: 'searchApplicationHeaderBackgroundColor',
           pageTitle,
           rightSideItems: [],
         }}
@@ -103,6 +106,7 @@ export const SearchApplicationContent = () => {
       pageViewTelemetry={EngineViewTabs.CONTENT}
       isLoading={isLoadingEngine}
       pageHeader={{
+        bottomBorder: false,
         breadcrumbs: [
           {
             color: 'primary',
@@ -119,6 +123,7 @@ export const SearchApplicationContent = () => {
             ),
           },
         ],
+        className: 'searchApplicationHeaderBackgroundColor',
         pageTitle,
         rightSideItems: [
           <EuiButton
