@@ -117,10 +117,6 @@ export class PreviewController {
     });
   };
 
-  setCurrentIdx = (currentIdx: number) => {
-    this.updateState({ currentIdx });
-  };
-
   goToNextDocument = () => {
     const currentState = this.state$.getValue();
     if (currentState.currentIdx >= currentState.documents.length - 1) {
