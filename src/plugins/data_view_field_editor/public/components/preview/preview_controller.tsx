@@ -108,7 +108,7 @@ export class PreviewController {
     this.updateState({ pinnedFields });
   };
 
-  setDocuments = (documents: EsDocument[]) => {
+  private setDocuments = (documents: EsDocument[]) => {
     this.updateState({
       documents,
       currentIdx: 0,
@@ -162,16 +162,6 @@ export class PreviewController {
     }
   };
 
-  setIsPanelVisible = (isPanelVisible: boolean) => {
-    this.updateState({ isPanelVisible });
-    /**
-     * Whenever we show the preview panel we will update the documents from the cluster
-     */
-    if (isPanelVisible) {
-      this.fetchSampleDocuments();
-    }
-  };
-
   // If no documents could be fetched from the cluster (and we are not trying to load
   // a custom doc ID) then we disable preview as the script field validation expect the result
   // of the preview to before resolving. If there are no documents we can't have a preview
@@ -210,14 +200,14 @@ export class PreviewController {
     });
   };
 
-  setIsFetchingDocument = (isFetchingDocument: boolean) => {
+  private setIsFetchingDocument = (isFetchingDocument: boolean) => {
     this.updateState({
       isFetchingDocument,
       isPreviewAvailable: this.getIsPreviewAvailable({ isFetchingDocument }),
     });
   };
 
-  setFetchDocError = (fetchDocError: FetchDocError | null) => {
+  private setFetchDocError = (fetchDocError: FetchDocError | null) => {
     this.updateState({ fetchDocError });
   };
 
