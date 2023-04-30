@@ -8,7 +8,7 @@ import { ELSER_MODEL_ID } from '../../../../../../common/ml_inference_pipeline';
 import { Actions, createApiLogic } from '../../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../../shared/http';
 
-export interface FetchTextExpansionModelArgs {}
+export type FetchTextExpansionModelArgs = undefined;
 
 export interface FetchTextExpansionModelResponse {
   deploymentState: string;

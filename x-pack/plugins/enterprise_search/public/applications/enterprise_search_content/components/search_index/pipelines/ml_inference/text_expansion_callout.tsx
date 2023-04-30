@@ -107,13 +107,18 @@ export const DeployModel = ({
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                <EuiFlexItem>
+              <EuiFlexGroup
+                direction="row"
+                gutterSize="m"
+                alignItems="center"
+                justifyContent="flexStart"
+              >
+                <EuiFlexItem grow={false}>
                   <EuiButton
                     color="success"
                     disabled={isCreateButtonDisabled}
                     iconType="launch"
-                    onClick={() => createTextExpansionModel({})}
+                    onClick={() => createTextExpansionModel(undefined)}
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.deployButton.label',
@@ -123,7 +128,7 @@ export const DeployModel = ({
                     )}
                   </EuiButton>
                 </EuiFlexItem>
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiLink target="_blank" href={docLinks.elser}>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.learnMoreLink"
@@ -245,7 +250,7 @@ export const ModelDeployed = ({
                 color="success"
                 disabled={isStartButtonDisabled}
                 iconType="playFilled"
-                onClick={() => startTextExpansionModel({})}
+                onClick={() => startTextExpansionModel(undefined)}
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.startModelButton.label',
