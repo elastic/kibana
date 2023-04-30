@@ -361,7 +361,7 @@
             "section": "def-public.FieldPopoverFooterProps",
             "text": "FieldPopoverFooterProps"
           },
-          ">) => JSX.Element | null"
+          ">) => JSX.Element"
         ],
         "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_footer.tsx",
         "deprecated": false,

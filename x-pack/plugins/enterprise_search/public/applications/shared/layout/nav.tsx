@@ -30,7 +30,8 @@ import { KibanaLogic } from '../kibana';
 import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
-  const { productAccess, productFeatures } = useValues(KibanaLogic);
+  const { isSidebarEnabled, productAccess, productFeatures } = useValues(KibanaLogic);
+  if (!isSidebarEnabled) return undefined;
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
@@ -174,6 +175,7 @@ export const useEnterpriseSearchNav = () => {
 
 export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?: boolean) => {
   const navItems = useEnterpriseSearchNav();
+  if (!navItems) return undefined;
   if (!engineName) return navItems;
   const applicationsItem = navItems.find((item) => item.id === 'applications');
   if (!applicationsItem || !applicationsItem.items) return navItems;
@@ -196,7 +198,7 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
             {
               id: 'enterpriseSearchEnginePreview',
               name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
-                defaultMessage: 'Preview',
+                defaultMessage: 'Search Preview',
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
@@ -255,6 +257,9 @@ export const useEnterpriseSearchAnalyticsNav = (
   }
 ) => {
   const navItems = useEnterpriseSearchNav();
+
+  if (!navItems) return undefined;
+
   const applicationsNav = navItems.find((item) => item.id === 'applications');
   const analyticsNav = applicationsNav?.items?.find((item) => item.id === 'analyticsCollections');
 
