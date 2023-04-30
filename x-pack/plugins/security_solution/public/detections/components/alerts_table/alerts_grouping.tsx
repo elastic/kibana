@@ -132,10 +132,6 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     setPageIndex((curr) => curr.map(() => DEFAULT_PAGE_INDEX));
   }, []);
 
-  useEffect(() => {
-    resetAllPagination();
-  }, [resetAllPagination, selectedGroups]);
-
   const setPageVar = useCallback(
     (newNumber: number, groupingLevel: number, pageType: 'index' | 'size') => {
       if (pageType === 'index') {
@@ -158,23 +154,31 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [setStoragePageSize]
   );
 
-  const nonGroupingFilters = useRef({
+  const paginationResetTriggers = useRef({
     defaultFilters: props.defaultFilters,
     globalFilters: props.globalFilters,
     globalQuery: props.globalQuery,
+    selectedGroups,
   });
 
   useEffect(() => {
-    const nonGrouping = {
+    const triggers = {
       defaultFilters: props.defaultFilters,
       globalFilters: props.globalFilters,
       globalQuery: props.globalQuery,
+      selectedGroups,
     };
-    if (!isEqual(nonGroupingFilters.current, nonGrouping)) {
+    if (!isEqual(paginationResetTriggers.current, triggers)) {
       resetAllPagination();
-      nonGroupingFilters.current = nonGrouping;
+      paginationResetTriggers.current = triggers;
     }
-  }, [props.defaultFilters, props.globalFilters, props.globalQuery, resetAllPagination]);
+  }, [
+    props.defaultFilters,
+    props.globalFilters,
+    props.globalQuery,
+    resetAllPagination,
+    selectedGroups,
+  ]);
 
   const getLevel = useCallback(
     (level: number, selectedGroup: string, parentGroupingFilter?: string) => {
@@ -184,6 +188,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           return getLevel(
             level + 1,
             selectedGroups[level + 1],
+            // stringify because if the filter is passed as an object, it will cause unnecessary re-rendering
             JSON.stringify([
               ...groupingFilters,
               ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),

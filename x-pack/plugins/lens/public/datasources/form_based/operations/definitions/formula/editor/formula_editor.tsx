@@ -908,18 +908,24 @@ export function FormulaEditor({
                         </EuiButtonEmpty>
                       }
                     >
-                      {warnings.map(({ message, severity }, index) => (
-                        <div key={index} className="lnsFormula__warningText">
-                          <EuiText
-                            size="s"
-                            color={
-                              severity === monaco.MarkerSeverity.Warning ? 'warning' : 'danger'
-                            }
-                          >
-                            {message}
-                          </EuiText>
-                        </div>
-                      ))}
+                      <div
+                        css={css`
+                          max-width: 400px;
+                        `}
+                      >
+                        {warnings.map(({ message, severity }, index) => (
+                          <div key={index} className="lnsFormula__warningText">
+                            <EuiText
+                              size="s"
+                              color={
+                                severity === monaco.MarkerSeverity.Warning ? 'warning' : 'danger'
+                              }
+                            >
+                              {message}
+                            </EuiText>
+                          </div>
+                        ))}
+                      </div>
                     </EuiPopover>
                   </EuiFlexItem>
                 ) : null}
