@@ -123,6 +123,7 @@ describe('Alert Event Details', () => {
       cy.visit('/app/security/rules');
       cy.contains(ruleName).click();
       cy.getBySel('editRuleSettingsLink').click();
+      cy.getBySel('globalLoadingIndicator').should('exist');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
       cy.contains('Response actions are run on each rule execution');
@@ -162,6 +163,7 @@ describe('Alert Event Details', () => {
       closeToastIfVisible();
 
       cy.getBySel('editRuleSettingsLink').click();
+      cy.getBySel('globalLoadingIndicator').should('exist');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
@@ -207,6 +209,7 @@ describe('Alert Event Details', () => {
       closeToastIfVisible();
 
       cy.getBySel('editRuleSettingsLink').click();
+      cy.getBySel('globalLoadingIndicator').should('exist');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
@@ -272,6 +275,7 @@ describe('Alert Event Details', () => {
       cy.visit('/app/security/rules');
       cy.contains(ruleName).click();
       cy.getBySel('editRuleSettingsLink').click();
+      cy.getBySel('globalLoadingIndicator').should('exist');
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
 

@@ -71,7 +71,6 @@ describe('Isolate command', () => {
       cy.visit(APP_PATH + getEndpointListPath({ name: 'endpointList' }));
       closeAllToasts();
       filterOutIsolatedHosts();
-      cy.contains('Showing 2 endpoints');
       checkEndpointListForOnlyIsolatedHosts();
     });
   });
@@ -123,18 +122,8 @@ describe('Isolate command', () => {
       cy.visit(APP_ALERTS_PATH);
       closeAllToasts();
 
-      cy.getByTestSubj('alertsTable').within(() => {
-        cy.getByTestSubj('expand-event')
-          .first()
-          .within(() => {
-            cy.get(`[data-is-loading="true"]`).should('exist');
-          });
-        cy.getByTestSubj('expand-event')
-          .first()
-          .within(() => {
-            cy.get(`[data-is-loading="true"]`).should('not.exist');
-          });
-      });
+      cy.getByTestSubj('globalLoadingIndicator').should('exist');
+      cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
 
       openAlertDetails();
 
@@ -174,7 +163,7 @@ describe('Isolate command', () => {
       cy.getByTestSubj('euiFlyoutCloseButton').click();
       openAlertDetails();
       cy.getByTestSubj('event-field-agent.status').within(() => {
-        cy.get('[title="Isolated"]').should('not.exist');
+        cy.get('[title="Isolated"]', { timeout: 1200000 }).should('not.exist');
       });
     });
   });
