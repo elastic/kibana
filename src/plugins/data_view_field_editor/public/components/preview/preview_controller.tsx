@@ -53,6 +53,7 @@ const previewStateDefault: PreviewState = {
   isLoadingPreview: false,
   initialPreviewComplete: false,
   isPreviewAvailable: true,
+  isPanelVisible: true,
 };
 
 export class PreviewController {
@@ -66,6 +67,8 @@ export class PreviewController {
     });
 
     this.state$ = this.internalState$ as BehaviorObservable<PreviewState>;
+
+    this.fetchSampleDocuments();
   }
 
   // dependencies
@@ -159,6 +162,13 @@ export class PreviewController {
     });
     // load document if id is present
     this.setIsFetchingDocument(!!customDocIdToLoad);
+  };
+
+  setIsPanelVisible = (isPanelVisible: boolean) => {
+    this.updateState({ isPanelVisible });
+    if (isPanelVisible) {
+      this.fetchSampleDocuments();
+    }
   };
 
   // If no documents could be fetched from the cluster (and we are not trying to load

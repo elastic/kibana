@@ -66,6 +66,7 @@ const documentsSelector = (state: PreviewState) => {
 
 const customDocIdToLoadSelector = (state: PreviewState) => state.customDocIdToLoad;
 const scriptEditorValidationSelector = (state: PreviewState) => state.scriptEditorValidation;
+const isPanelVisibleSelector = (state: PreviewState) => state.isPanelVisible;
 
 export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
   controller,
@@ -89,7 +90,8 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
   /** Flag to show/hide the preview panel */
   // moving this to controller caused problems
-  const [isPanelVisible, setIsPanelVisible] = useState(true);
+  const isPanelVisible = useStateSelector(controller.state$, isPanelVisibleSelector);
+  // const [isPanelVisible, setIsPanelVisible] = useState(true);
 
   /** Flag to indicate if we are loading a single document by providing its ID */
   // const [customDocIdToLoad, setCustomDocIdToLoad] = useState<string | null>(null);
@@ -222,7 +224,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       },
       panel: {
         isVisible: isPanelVisible,
-        setIsVisible: setIsPanelVisible,
+        setIsVisible: (isVisible: boolean) => controller.setIsPanelVisible(isVisible),
       },
     }),
     [controller, fieldPreview$, params, updateParams, isPanelVisible]
@@ -237,11 +239,13 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   /**
    * Whenever we show the preview panel we will update the documents from the cluster
    */
+  /*
   useEffect(() => {
     if (isPanelVisible) {
       controller.fetchSampleDocuments();
     }
   }, [isPanelVisible, controller]);
+  */
 
   /**
    * Each time the current document changes we update the parameters

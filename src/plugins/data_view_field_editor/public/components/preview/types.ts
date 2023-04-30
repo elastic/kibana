@@ -67,6 +67,7 @@ export interface PreviewState {
   isLoadingPreview: boolean;
   initialPreviewComplete: boolean;
   isPreviewAvailable: boolean;
+  isPanelVisible: boolean;
 }
 
 export interface FetchDocError {
