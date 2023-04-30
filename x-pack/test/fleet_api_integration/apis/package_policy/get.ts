@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
@@ -337,7 +338,7 @@ export default function (providerContext: FtrProviderContext) {
         // Delete the agent policy directly from ES to orphan the package policy
         const esClient = getService('es');
         await esClient.delete({
-          index: '.kibana',
+          index: INGEST_SAVED_OBJECT_INDEX,
           id: `ingest-agent-policies:${agentPolicyId}`,
           refresh: 'wait_for',
         });

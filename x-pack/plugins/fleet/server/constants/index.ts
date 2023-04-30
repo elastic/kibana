@@ -35,6 +35,8 @@ export {
   PRECONFIGURATION_API_ROUTES,
   DOWNLOAD_SOURCE_API_ROOT,
   DOWNLOAD_SOURCE_API_ROUTES,
+  // Saved Object indices
+  INGEST_SAVED_OBJECT_INDEX,
   // Saved object types
   SO_SEARCH_LIMIT,
   AGENTS_PREFIX,
@@ -72,6 +74,8 @@ export {
   FLEET_PROXY_SAVED_OBJECT_TYPE,
   // Authz
   ENDPOINT_PRIVILEGES,
+  // Message signing service
+  MESSAGE_SIGNING_SERVICE_API_ROUTES,
 } from '../../common/constants';
 
 export {

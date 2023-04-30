@@ -66,6 +66,7 @@
     "@kbn/shared-ux-router",
     "@kbn/dom-drag-drop",
     "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/visualization-ui-components",
   ],
   "exclude": [
     "target/**/*",

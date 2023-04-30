@@ -38,7 +38,7 @@ export const getHostRiskScoreColumns = ({
       if (hostName != null && hostName.length > 0) {
         return (
           <SecurityCellActions
-            mode={CellActionsMode.HOVER}
+            mode={CellActionsMode.HOVER_DOWN}
             visibleCellActions={5}
             showActionTooltips
             triggerId={SecurityCellActionsTrigger.DEFAULT}

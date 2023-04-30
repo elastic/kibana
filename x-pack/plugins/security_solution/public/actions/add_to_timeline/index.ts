@@ -6,4 +6,5 @@
  */
 
 export { createAddToTimelineCellActionFactory } from './cell_action/add_to_timeline';
+export { createAddToNewTimelineCellActionFactory } from './cell_action/add_to_new_timeline';
 export { createAddToTimelineLensAction } from './lens/add_to_timeline';

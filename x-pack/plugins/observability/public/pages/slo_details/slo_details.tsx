@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useIsMutating } from '@tanstack/react-query';
 import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -26,6 +27,7 @@ import { paths } from '../../config/paths';
 import type { SloDetailsPathParams } from './types';
 import type { ObservabilityAppServices } from '../../application/types';
 import { AutoRefreshButton } from '../slos/components/auto_refresh_button';
+import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 
 export function SloDetailsPage() {
   const {
@@ -43,6 +45,8 @@ export function SloDetailsPage() {
 
   const { isLoading, slo } = useFetchSloDetails({ sloId, shouldRefetch: isAutoRefreshing });
 
+  const isCloningOrDeleting = Boolean(useIsMutating());
+
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
   const isSloNotFound = !isLoading && slo === undefined;
@@ -54,6 +58,8 @@ export function SloDetailsPage() {
     navigateToUrl(basePath.prepend(paths.observability.slos));
   }
 
+  const isPerformingAction = isLoading || isCloningOrDeleting;
+
   const handleToggleAutoRefresh = () => {
     setIsAutoRefreshing(!isAutoRefreshing);
   };
@@ -61,14 +67,15 @@ export function SloDetailsPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <HeaderTitle isLoading={isLoading} slo={slo} />,
+        pageTitle: <HeaderTitle isLoading={isPerformingAction} slo={slo} />,
         rightSideItems: [
-          <HeaderControl isLoading={isLoading} slo={slo} />,
+          <HeaderControl isLoading={isPerformingAction} slo={slo} />,
           <AutoRefreshButton
-            disabled={isLoading}
+            disabled={isPerformingAction}
             isAutoRefreshing={isAutoRefreshing}
             onClick={handleToggleAutoRefresh}
           />,
+          <FeedbackButton disabled={isPerformingAction} />,
         ],
         bottomBorder: false,
       }}

@@ -117,6 +117,12 @@ export const createStartServicesMock = (
     unifiedSearch,
     data: {
       ...data,
+      dataViews: {
+        create: jest.fn(),
+        getIdsWithTitle: jest.fn(),
+        get: jest.fn(),
+        getIndexPattern: jest.fn(),
+      },
       query: {
         ...data.query,
         savedQueries: {
