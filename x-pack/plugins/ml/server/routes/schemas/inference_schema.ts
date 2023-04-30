@@ -72,9 +72,3 @@ export const stopDeploymentSchema = schema.object({
   /** force close */
   force: schema.maybe(schema.boolean()),
 });
-
-// export const stopDeploymentSchema = schema.object({
-//   modelId: schema.string(),
-//   /** force close */
-//   force: schema.maybe(schema.boolean()),
-// });
