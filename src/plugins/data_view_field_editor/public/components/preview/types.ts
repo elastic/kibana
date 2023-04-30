@@ -66,6 +66,7 @@ export interface PreviewState {
   /** Flag to indicate if we are calling the _execute API */
   isLoadingPreview: boolean;
   initialPreviewComplete: boolean;
+  isPreviewAvailable: boolean;
 }
 
 export interface FetchDocError {
@@ -125,7 +126,6 @@ export interface Context {
     value: Params;
     update: (updated: Partial<Params>) => void;
   };
-  isPreviewAvailable: boolean;
   panel: {
     isVisible: boolean;
     setIsVisible: (isVisible: boolean) => void;

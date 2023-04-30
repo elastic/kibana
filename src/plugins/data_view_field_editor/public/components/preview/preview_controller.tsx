@@ -52,6 +52,7 @@ const previewStateDefault: PreviewState = {
 
   isLoadingPreview: false,
   initialPreviewComplete: false,
+  isPreviewAvailable: true,
 };
 
 export class PreviewController {
@@ -106,6 +107,7 @@ export class PreviewController {
       documents,
       currentIdx: 0,
       isLoadingDocuments: false,
+      isPreviewAvailable: this.getIsPreviewAvailable({ documents }),
     });
   };
 
@@ -150,7 +152,37 @@ export class PreviewController {
   };
 
   setCustomDocIdToLoad = (customDocIdToLoad: string | null) => {
-    this.updateState({ customDocIdToLoad });
+    this.updateState({
+      customDocIdToLoad,
+      isPreviewAvailable: this.getIsPreviewAvailable({ customDocIdToLoad }),
+    });
+  };
+
+  // If no documents could be fetched from the cluster (and we are not trying to load
+  // a custom doc ID) then we disable preview as the script field validation expect the result
+  // of the preview to before resolving. If there are no documents we can't have a preview
+  // (the _execute API expects one) and thus the validation should not expect a value.
+
+  private getIsPreviewAvailable = (update: {
+    isFetchingDocument?: boolean;
+    customDocIdToLoad?: string | null;
+    documents?: EsDocument[];
+  }) => {
+    const {
+      isFetchingDocument: existingIsFetchingDocument,
+      customDocIdToLoad: existingCustomDocIdToLoad,
+      documents: existingDocuments,
+    } = this.internalState$.getValue();
+
+    const existing = { existingIsFetchingDocument, existingCustomDocIdToLoad, existingDocuments };
+
+    const merged = { ...existing, ...update };
+
+    if (!merged.isFetchingDocument && !merged.customDocIdToLoad && merged.documents?.length === 0) {
+      return false;
+    } else {
+      return true;
+    }
   };
 
   clearPreviewError = (errorCode: ScriptErrorCodes) => {
@@ -165,7 +197,10 @@ export class PreviewController {
   };
 
   setIsFetchingDocument = (isFetchingDocument: boolean) => {
-    this.updateState({ isFetchingDocument });
+    this.updateState({
+      isFetchingDocument,
+      isPreviewAvailable: this.getIsPreviewAvailable({ isFetchingDocument }),
+    });
   };
 
   setFetchDocError = (fetchDocError: FetchDocError | null) => {

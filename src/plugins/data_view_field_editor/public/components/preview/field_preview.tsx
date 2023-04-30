@@ -24,6 +24,7 @@ import './field_preview.scss';
 const previewResponseSelector = (state: PreviewState) => state.previewResponse;
 const fetchDocErrorSelector = (state: PreviewState) => state.fetchDocError;
 const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
+const isPreviewAvailableSelector = (state: PreviewState) => state.isPreviewAvailable;
 
 export const FieldPreview = () => {
   const [fieldListHeight, setFieldListHeight] = useState(-1);
@@ -33,12 +34,12 @@ export const FieldPreview = () => {
     params: {
       value: { name, script, format },
     },
-    isPreviewAvailable,
     controller,
   } = useFieldPreviewContext();
   const { fields, error } = useStateSelector(controller.state$, previewResponseSelector);
   const fetchDocError = useStateSelector(controller.state$, fetchDocErrorSelector);
   const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
+  const isPreviewAvailable = useStateSelector(controller.state$, isPreviewAvailableSelector);
 
   // To show the preview we at least need a name to be defined, the script or the format
   // and an first response from the _execute API

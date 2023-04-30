@@ -64,7 +64,6 @@ const documentsSelector = (state: PreviewState) => {
   };
 };
 
-const isFetchingDocumentSelector = (state: PreviewState) => state.isFetchingDocument;
 const customDocIdToLoadSelector = (state: PreviewState) => state.customDocIdToLoad;
 const scriptEditorValidationSelector = (state: PreviewState) => state.scriptEditorValidation;
 
@@ -100,21 +99,10 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     scriptEditorValidationSelector
   );
 
-  const { currentDocument, currentDocIndex, currentDocId, totalDocs } = useStateSelector(
+  const { currentDocument, currentDocIndex, currentDocId } = useStateSelector(
     controller.state$,
     documentsSelector
   );
-
-  let isPreviewAvailable = true;
-
-  // If no documents could be fetched from the cluster (and we are not trying to load
-  // a custom doc ID) then we disable preview as the script field validation expect the result
-  // of the preview to before resolving. If there are no documents we can't have a preview
-  // (the _execute API expects one) and thus the validation should not expect a value.
-  const isFetchingDocument = useStateSelector(controller.state$, isFetchingDocumentSelector);
-  if (!isFetchingDocument && !customDocIdToLoad && totalDocs === 0) {
-    isPreviewAvailable = false;
-  }
 
   const { name, document, script, format, type, parentName } = params;
 
@@ -228,7 +216,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     () => ({
       controller,
       fieldPreview$: fieldPreview$.current,
-      isPreviewAvailable,
       params: {
         value: params,
         update: updateParams,
@@ -238,7 +225,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         setIsVisible: setIsPanelVisible,
       },
     }),
-    [controller, fieldPreview$, params, isPreviewAvailable, updateParams, isPanelVisible]
+    [controller, fieldPreview$, params, updateParams, isPanelVisible]
   );
 
   /**
