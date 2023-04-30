@@ -39,13 +39,14 @@ export function fetchStreaming({
   if (!isCompressionDisabled) {
     url = appendQueryParam(url, 'compress', 'true');
   }
-
   // Begin the request
   xhr.open(method, url);
   xhr.withCredentials = true;
 
   // Set the HTTP headers
-  Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+  Object.entries({ ...headers, 'x-elastic-internal-origin': 'Kibana' }).forEach(([k, v]) =>
+    xhr.setRequestHeader(k, v)
+  );
 
   const stream = fromStreamingXhr(xhr, signal);
 

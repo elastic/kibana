@@ -8,3 +8,5 @@
 
 /** @internal */
 export const ELASTIC_HTTP_VERSION_HEADER = 'elastic-api-version' as const;
+
+export const INTERNAL_ACCESS_REQUEST = 'x-elastic-internal-origin' as const;

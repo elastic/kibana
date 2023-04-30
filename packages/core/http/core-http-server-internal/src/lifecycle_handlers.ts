@@ -9,13 +9,13 @@
 import { Env } from '@kbn/config';
 import type { OnPostAuthHandler, OnPreResponseHandler } from '@kbn/core-http-server';
 import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { INTERNAL_ACCESS_REQUEST } from '@kbn/core-http-common/src/constants';
 import { HttpConfig } from './http_config';
 import { LifecycleRegistrar } from './http_server';
 
 const VERSION_HEADER = 'kbn-version';
 const XSRF_HEADER = 'kbn-xsrf';
 const KIBANA_NAME_HEADER = 'kbn-name';
-const INTERNAL_ACCESS_ONLY_HEADER = 'x-elastic-internal-origin';
 
 export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler => {
   const { allowlist, disableProtection } = config.xsrf;
@@ -44,11 +44,11 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
 export const createRestrictInternalRoutesPostAuthHandler = (
   config: HttpConfig
 ): OnPostAuthHandler => {
-  const isProductRequestEnforced = config.enforceProductRequest;
+  const isProductRequestEnforced = config.enforceInternalRequest;
 
   return (request, response, toolkit) => {
     const isInternalRoute = request.route.options.access === 'internal';
-    const hasInternalKibanaRequestHeader = INTERNAL_ACCESS_ONLY_HEADER in request.headers;
+    const hasInternalKibanaRequestHeader = INTERNAL_ACCESS_REQUEST in request.headers;
     if (isProductRequestEnforced && isInternalRoute && !hasInternalKibanaRequestHeader) {
       // throw 400
       return response.badRequest({
