@@ -160,8 +160,12 @@ export const expandFirstAlertActions = () => {
 };
 
 export const expandFirstAlert = () => {
-  cy.get(EXPAND_ALERT_BTN).first().click();
-  cy.get(ALERT_FLYOUT).should('be.visible');
+  cy.root()
+    .pipe(($el) => {
+      $el.find(EXPAND_ALERT_BTN).trigger('click');
+      return $el.find(ALERT_FLYOUT);
+    })
+    .should('be.visible');
 };
 
 export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();

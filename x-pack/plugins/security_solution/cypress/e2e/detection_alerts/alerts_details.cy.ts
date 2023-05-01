@@ -93,9 +93,6 @@ describe('Alert details flyout', () => {
       cleanKibana();
       esArchiverLoad('query_alert');
       login();
-    });
-
-    beforeEach(() => {
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
     });
