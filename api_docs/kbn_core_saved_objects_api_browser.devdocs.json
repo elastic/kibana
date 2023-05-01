@@ -2197,10 +2197,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/hooks/use_dashboard_button_href.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/overview/containers/overview_cti_links/index.tsx"
               },
               {

@@ -5020,6 +5020,10 @@
 "@kbn/server-route-repository@link:packages/kbn-server-route-repository":
   version "0.0.0"
   uid ""
+  
+"@kbn/serverless-observability@link:x-pack/plugins/serverless_observability":
+  version "0.0.0"
+  uid ""
 
 "@kbn/serverless-project-switcher@link:packages/serverless/project_switcher":
   version "0.0.0"
@@ -5030,6 +5034,10 @@
   uid ""
 
 "@kbn/serverless-types@link:packages/serverless/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-search@link:x-pack/plugins/serverless_search":
   version "0.0.0"
   uid ""
 
@@ -5094,6 +5102,10 @@
   uid ""
 
 "@kbn/shared-ux-card-no-data@link:packages/shared-ux/card/no_data/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-chrome-navigation@link:packages/shared-ux/chrome/navigation":
   version "0.0.0"
   uid ""
 
@@ -5598,6 +5610,10 @@
   uid ""
 
 "@kbn/vis-type-xy-plugin@link:src/plugins/vis_types/xy":
+  version "0.0.0"
+  uid ""
+
+"@kbn/visualization-ui-components@link:src/plugins/visualization_ui_components":
   version "0.0.0"
   uid ""
 
