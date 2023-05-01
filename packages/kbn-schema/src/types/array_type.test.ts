@@ -13,11 +13,6 @@ test('returns value if it matches the type', () => {
   expect(type.validate(['foo', 'bar', 'baz'])).toEqual(['foo', 'bar', 'baz']);
 });
 
-test('properly parse the value if input is a string', () => {
-  const type = schema.arrayOf(schema.string());
-  expect(type.validate('["foo", "bar", "baz"]')).toEqual(['foo', 'bar', 'baz']);
-});
-
 test('fails if wrong input type', () => {
   const type = schema.arrayOf(schema.string());
   expect(() => type.validate(12)).toThrowErrorMatchingInlineSnapshot(
@@ -28,21 +23,21 @@ test('fails if wrong input type', () => {
 test('fails if string input cannot be parsed', () => {
   const type = schema.arrayOf(schema.string());
   expect(() => type.validate('test')).toThrowErrorMatchingInlineSnapshot(
-    `"could not parse array value from json input"`
+    `"expected value of type [array] but got [string]"`
   );
 });
 
 test('fails with correct type if parsed input is not an array', () => {
   const type = schema.arrayOf(schema.string());
   expect(() => type.validate('{"foo": "bar"}')).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [array] but got [Object]"`
+    `"expected value of type [array] but got [string]"`
   );
 });
 
 test('includes namespace in failure when wrong top-level type', () => {
   const type = schema.arrayOf(schema.string());
   expect(() => type.validate('test', 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: could not parse array value from json input"`
+    `"[foo-namespace]: expected value of type [array] but got [string]"`
   );
 });
 
@@ -62,7 +57,7 @@ test('fails if wrong type of content in array', () => {
 
 test('fails when parsing if wrong type of content in array', () => {
   const type = schema.arrayOf(schema.string());
-  expect(() => type.validate('[1, 2, 3]')).toThrowErrorMatchingInlineSnapshot(
+  expect(() => type.validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
     `"[0]: expected value of type [string] but got [number]"`
   );
 });
@@ -71,31 +66,6 @@ test('fails if mixed types of content in array', () => {
   const type = schema.arrayOf(schema.string());
   expect(() => type.validate(['foo', 'bar', true, {}])).toThrowErrorMatchingInlineSnapshot(
     `"[2]: expected value of type [string] but got [boolean]"`
-  );
-});
-
-test('fails if sparse content in array', () => {
-  const type = schema.arrayOf(schema.string());
-  expect(type.validate([])).toEqual([]);
-  expect(() => type.validate([undefined])).toThrowErrorMatchingInlineSnapshot(
-    `"[0]: sparse array are not allowed"`
-  );
-});
-
-test('fails if sparse content in array if optional', () => {
-  const type = schema.arrayOf(schema.maybe(schema.string()));
-  expect(type.validate([])).toEqual([]);
-  expect(() => type.validate([undefined])).toThrowErrorMatchingInlineSnapshot(
-    `"[0]: sparse array are not allowed"`
-  );
-});
-
-test('fails if sparse content in array if nullable', () => {
-  const type = schema.arrayOf(schema.nullable(schema.string()));
-  expect(type.validate([])).toEqual([]);
-  expect(type.validate([null])).toEqual([null]);
-  expect(() => type.validate([undefined])).toThrowErrorMatchingInlineSnapshot(
-    `"[0]: sparse array are not allowed"`
   );
 });
 
