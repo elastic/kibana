@@ -57,7 +57,6 @@ export function registerReportingUsageCollector(
     );
   };
   const collectionIsReady = reporting.pluginStartsUp.bind(reporting);
-
   const collector = getReportingUsageCollector(
     usageCollection,
     getLicense,
