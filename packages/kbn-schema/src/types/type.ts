@@ -34,6 +34,7 @@ export function convertValidationToRefinement<T = unknown>(
 
     if (typeof validationResultMessage === 'string') {
       ctx.addIssue({
+        path: ctx.path,
         code: z.ZodIssueCode.custom,
         message: validationResultMessage,
       });
@@ -78,8 +79,7 @@ export abstract class Type<V> {
     const result = this.internalSchema.safeParse(value);
 
     if (!result.success) {
-      const { error } = result;
-      throw new ValidationError(error.errors[0] as any, namespace);
+      throw new ValidationError(result.error.errors[0] as any, namespace);
     }
 
     return result.data;
