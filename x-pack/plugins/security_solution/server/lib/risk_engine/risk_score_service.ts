@@ -13,7 +13,7 @@ export interface RiskScoreService {
   getScores: (params: GetScoresParams) => Promise<GetScoresResponse>;
 }
 
-export const buildRiskScoreService = ({
+export const riskScoreService = ({
   esClient,
   logger,
 }: {

@@ -13,7 +13,7 @@ import { RISK_SCORES_URL } from '../../../../common/constants';
 import { riskScoresRequestSchema } from '../../../../common/risk_engine/risk_scoring/risk_scores_request_schema';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { buildRiskScoreService } from '../risk_score_service';
+import { riskScoreService } from '../risk_score_service';
 import { getRiskInputsIndex } from '../helpers';
 
 export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
@@ -30,7 +30,7 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const soClient = (await context.core).savedObjects.client;
       const siemClient = (await context.securitySolution).getAppClient();
-      const riskScoreService = buildRiskScoreService({
+      const riskScore = riskScoreService({
         esClient,
         logger,
       });
@@ -56,7 +56,7 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
           siemClient.getAlertsIndex();
 
         const range = userRange ?? { start: 'now-15d', end: 'now' };
-        const result = await riskScoreService.getScores({
+        const result = await riskScore.getScores({
           debug,
           enrichInputs,
           index,

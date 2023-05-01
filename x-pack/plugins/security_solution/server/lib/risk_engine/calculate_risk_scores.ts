@@ -20,12 +20,11 @@ import {
 } from './category_weights';
 import type {
   CalculateRiskScoreAggregations,
-  FullRiskScore,
   GetScoresParams,
   GetScoresResponse,
   IdentifierType,
+  RiskScore,
   RiskScoreBucket,
-  SimpleRiskScore,
 } from './types';
 
 const getFieldForIdentifierAgg = (identifierType: IdentifierType): string =>
@@ -41,7 +40,7 @@ const bucketToResponse = ({
   enrichInputs?: boolean;
   now: string;
   identifierField: string;
-}): SimpleRiskScore | FullRiskScore => ({
+}): RiskScore => ({
   '@timestamp': now,
   identifierField,
   identifierValue: bucket.key[identifierField],

@@ -33,7 +33,7 @@ export interface GetScoresResponse {
     request: unknown;
     response: unknown;
   };
-  scores: SimpleRiskScore[] | FullRiskScore[];
+  scores: RiskScore[];
 }
 
 export interface SimpleRiskInput {
@@ -44,7 +44,7 @@ export interface SimpleRiskInput {
 
 export type RiskInput = Ecs;
 
-export interface BaseRiskScore {
+export interface RiskScore {
   '@timestamp': string;
   identifierField: string;
   identifierValue: string;
@@ -54,14 +54,7 @@ export interface BaseRiskScore {
   alertsScore: number;
   otherScore: number;
   notes: string[];
-}
-
-export interface SimpleRiskScore extends BaseRiskScore {
-  riskiestInputs: SimpleRiskInput[];
-}
-
-export interface FullRiskScore extends BaseRiskScore {
-  riskiestInputs: RiskInput[];
+  riskiestInputs: SimpleRiskInput[] | RiskInput[];
 }
 
 export interface CalculateRiskScoreAggregations {
