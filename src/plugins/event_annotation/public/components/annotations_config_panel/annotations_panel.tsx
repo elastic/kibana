@@ -36,6 +36,7 @@ import {
 } from './helpers';
 import { annotationsIconSet } from './icon_set';
 import { sanitizeProperties } from './helpers';
+import { TooltipSection } from './tooltip_annotation_panel';
 
 export const AnnotationsPanel = ({
   annotation: currentAnnotation,
@@ -318,7 +319,8 @@ export const AnnotationsPanel = ({
           value={Boolean(currentAnnotation.isHidden)}
           onChange={(ev) => update({ isHidden: ev.target.checked })}
         />
-        {/* {isQueryBased && currentAnnotation && (
+      </DimensionEditorSection>
+      {isQueryBased && currentAnnotation && (
         <DimensionEditorSection
           title={i18n.translate('xpack.lens.xyChart.tooltip', {
             defaultMessage: 'Tooltip',
@@ -334,12 +336,12 @@ export const AnnotationsPanel = ({
           >
             <TooltipSection
               currentConfig={currentAnnotation}
-              setConfig={setAnnotations}
-              indexPattern={frame.dataViews.indexPatterns[localLayer.indexPatternId]}
+              setConfig={update}
+              dataView={dataView}
             />
           </EuiFormRow>
-          */}
-      </DimensionEditorSection>
+        </DimensionEditorSection>
+      )}
     </>
   );
 };
