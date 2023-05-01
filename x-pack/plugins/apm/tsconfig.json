@@ -84,6 +84,7 @@
     "@kbn/logging-mocks",
     "@kbn/chart-icons",
     "@kbn/observability-shared-plugin",
+    "@kbn/shared-ux-prompt-not-found",
   ],
   "exclude": [
     "target/**/*",
