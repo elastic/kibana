@@ -193,8 +193,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     skip: isNoneGroup([selectedGroup]),
   });
 
-  const buckets = useMemo(
-    () => parseGroupingQuery(alertsGroupsData?.aggregations?.groupByFields?.buckets ?? []),
+  const aggs = useMemo(
+    () => parseGroupingQuery(alertsGroupsData?.aggregations),
     [alertsGroupsData]
   );
 
@@ -248,10 +248,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         activePage: pageIndex,
         data: {
           ...alertsGroupsData?.aggregations,
-          groupByFields: {
-            ...alertsGroupsData?.aggregations?.groupByFields,
-            buckets,
-          },
+          ...aggs,
         },
         groupingLevel,
         inspectButton: inspect,
@@ -268,7 +265,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       getGrouping,
       pageIndex,
       alertsGroupsData,
-      buckets,
+      aggs,
       groupingLevel,
       inspect,
       loading,
