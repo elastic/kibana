@@ -9,7 +9,7 @@
 import React, { useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 
-import { EuiCodeBlock, EuiFlexGroup, EuiForm, EuiFormRow, EuiLoadingContent } from '@elastic/eui';
+import { EuiCodeBlock, EuiFlexGroup, EuiForm, EuiFormRow, EuiSkeletonText } from '@elastic/eui';
 import { FilterableEmbeddable, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { css } from '@emotion/react';
@@ -44,6 +44,7 @@ export function FiltersNotificationPopoverContents({ context }: FiltersNotificat
     Promise.all([
       (embeddable as IEmbeddable & FilterableEmbeddable).getFilters(),
       (embeddable as IEmbeddable & FilterableEmbeddable).getQuery(),
+      new Promise<void>((res) => setTimeout(() => res(), 1000)),
     ]).then(([embeddableFilters, embeddableQuery]) => {
       setFilters(embeddableFilters);
       if (embeddableQuery) {
@@ -55,21 +56,22 @@ export function FiltersNotificationPopoverContents({ context }: FiltersNotificat
           setQueryString(embeddableQuery[language as keyof AggregateQuery]);
         }
       }
+      console.log('set loading');
       setIsLoading(false);
     });
   });
 
   return (
-    <>
+    <EuiForm
+      component="div"
+      css={css`
+        min-width: 300px;
+      `}
+    >
       {isLoading ? (
-        <EuiLoadingContent lines={3} />
+        <EuiSkeletonText lines={3} />
       ) : (
-        <EuiForm
-          component="div"
-          css={css`
-            min-width: 300px;
-          `}
-        >
+        <>
           {queryString !== '' && (
             <EuiFormRow
               label={dashboardFilterNotificationActionStrings.getQueryTitle()}
@@ -93,8 +95,8 @@ export function FiltersNotificationPopoverContents({ context }: FiltersNotificat
               </EuiFlexGroup>
             </EuiFormRow>
           )}
-        </EuiForm>
+        </>
       )}
-    </>
+    </EuiForm>
   );
 }
