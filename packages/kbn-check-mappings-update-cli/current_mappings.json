@@ -513,20 +513,8 @@
         "type": "keyword"
       },
       "hash": {
-        "properties": {
-          "md5": {
-            "type": "text"
-          },
-          "sha1": {
-            "type": "text"
-          },
-          "sha256": {
-            "type": "text"
-          },
-          "sha512": {
-            "type": "text"
-          }
-        }
+        "dynamic": false,
+        "properties": {}
       }
     }
   },

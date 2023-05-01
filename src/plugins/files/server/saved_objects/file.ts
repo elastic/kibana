@@ -7,7 +7,6 @@
  */
 
 import { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
-import { MappingProperty as EsMappingProperty } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { FileMetadata } from '../../common';
 import { BaseFileMetadata, FILE_SO_TYPE } from '../../common';
 
@@ -22,13 +21,6 @@ export type SupportedFileHashAlgorithm = keyof Pick<
 >;
 
 export type FileHashObj = Partial<Record<SupportedFileHashAlgorithm, string>>;
-
-const hashProperties: Record<SupportedFileHashAlgorithm, EsMappingProperty> = {
-  md5: { type: 'text' },
-  sha1: { type: 'text' },
-  sha256: { type: 'text' },
-  sha512: { type: 'text' },
-};
 
 const properties: Properties = {
   created: {
@@ -62,7 +54,8 @@ const properties: Properties = {
     type: 'keyword',
   },
   hash: {
-    properties: hashProperties,
+    dynamic: false,
+    properties: {},
   },
 };
 
