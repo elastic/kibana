@@ -22,7 +22,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
 
   beforeAll(async () => {
     const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
+      adjustTimeout: (t: number) => jest.setTimeout(10000),
     });
 
     esServer = await startES();
@@ -40,6 +40,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
     if (esServer) {
       await esServer.stop();
     }
+    await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
   // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
