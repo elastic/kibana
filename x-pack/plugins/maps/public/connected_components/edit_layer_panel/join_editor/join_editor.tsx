@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
-import { EuiTitle, EuiTextAlign, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingContent, EuiTextAlign, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Join } from './resources/join';
 import { JoinDocumentationPopover } from './resources/join_documentation_popover';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
-import { SOURCE_TYPES } from '../../../../common/constants';
+import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { AddJoinButton } from './add_join_button';
 
 export interface JoinField {
@@ -31,6 +31,57 @@ export interface Props {
 }
 
 export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDisplayName }: Props) {
+  const [supportsSpatialJoin, setSupportsSpatialJoin] = useState(false);
+  const [spatialJoinDisableReason, setSpatialJoinDisableReason] = useState<ReactNode>('');
+
+  useEffect(() => {
+    let ignore = false;
+    const  source = layer.getSource();
+    setSpatialJoinDisableReason(<EuiLoadingContent lines={1} />);
+
+    if (!source.isESSource()) {
+      setSpatialJoinDisableReason(i18n.translate('xpack.maps.layerPanel.joinEditor.spatialJoin.disabled.esSourceOnly', {
+        defaultMessage: 'Spatial joins are not supported for {sourceType}.',
+        values: { sourceType: source.getType()}
+      }));
+      setSupportsSpatialJoin(false);
+      return;
+    }
+
+    if (source.isMvt()) {
+      setSpatialJoinDisableReason(i18n.translate('xpack.maps.layerPanel.joinEditor.spatialJoin.disabled.geoJsonOnly', {
+        defaultMessage: 'Spatial joins are not supported with vector tiles.',
+      }));
+      setSupportsSpatialJoin(false);
+      return;
+    }
+
+    // TODO remove isPointsOnly check once non-point spatial joins have been implemented
+    source.getSupportedShapeTypes()
+      .then((supportedShapes) => {
+        if (!ignore) {
+          const isPointsOnly = supportedShapes.length === 1 && supportedShapes[0] === VECTOR_SHAPE_TYPE.POINT;
+          if (!isPointsOnly) {
+            setSpatialJoinDisableReason(i18n.translate('xpack.maps.layerPanel.joinEditor.spatialJoin.disabled.pointsOnly', {
+              defaultMessage: 'Spatial joins are not supported with geo_shape geometry.',
+            }));
+            setSupportsSpatialJoin(isPointsOnly);
+            return;
+          }
+
+          setSpatialJoinDisableReason('');
+          setSupportsSpatialJoin(true);
+        }
+      })
+      .catch((error) => {
+        // keep spatial joins disabled when unable to verify if they are supported
+      });
+    
+    return () => {
+      ignore = true;
+    };
+  }, [layer, setSupportsSpatialJoin, setSpatialJoinDisableReason]);
+
   const renderJoins = () => {
     return joins.map((joinDescriptor: JoinDescriptor, index: number) => {
       const handleOnChange = (updatedDescriptor: JoinDescriptor) => {
@@ -79,10 +130,8 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
         {renderJoins()}
         <EuiTextAlign textAlign="center">
           <AddJoinButton
-            disabledReason={i18n.translate('xpack.maps.layerPanel.joinEditor.spatialJoin.addButtonDisabledReason', {
-              defaultMessage: 'geojson',
-            })}
-            isDisabled={layer.getSource().isMvt()}
+            disabledReason={spatialJoinDisableReason}
+            isDisabled={!supportsSpatialJoin}
             label={i18n.translate('xpack.maps.layerPanel.joinEditor.spatialJoin.addButtonLabel', {
               defaultMessage: 'Add spatial join',
             })}
@@ -97,7 +146,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
           />
           <AddJoinButton
             disabledReason={i18n.translate('xpack.maps.layerPanel.joinEditor.termJoin.mvtSingleJoinMsg', {
-              defaultMessage: `Vector tiles support one term join. To add multiple joins, select 'Limit results' in 'Scaling'.`,
+              defaultMessage: 'Vector tiles can only support a single join.',
             })}
             isDisabled={layer.getSource().isMvt() && joins.length >= 1}
             label={i18n.translate('xpack.maps.layerPanel.joinEditor.termJoin.addButtonLabel', {
