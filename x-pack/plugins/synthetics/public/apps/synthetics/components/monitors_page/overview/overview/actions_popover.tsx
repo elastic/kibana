@@ -235,7 +235,12 @@ export function ActionsPopover({
       },
     },
     {
-      name: monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel,
+      name: (
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+          {monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel}
+        </NoPermissionsTooltip>
+      ),
+      disabled: !canEditSynthetics,
       icon: alertLoading ? (
         <EuiLoadingSpinner size="s" />
       ) : monitor.isStatusAlertEnabled ? (

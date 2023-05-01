@@ -10,7 +10,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { ActionTypes, UserActionWithResponse } from '../../../common/api';
 import type {
-  Case,
+  CaseUI,
   CaseConnectors,
   CaseUserActions,
   CommentUI,
@@ -31,7 +31,7 @@ export interface UserActionTreeProps {
   caseConnectors: CaseConnectors;
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
-  data: Case;
+  data: CaseUI;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   actionsNavigation?: ActionsNavigation;
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
@@ -48,7 +48,7 @@ export type SupportedUserActionTypes = keyof Omit<typeof ActionTypes, Unsupporte
 
 export interface UserActionBuilderArgs {
   appId?: string;
-  caseData: Case;
+  caseData: CaseUI;
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;

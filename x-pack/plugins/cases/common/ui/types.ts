@@ -20,7 +20,7 @@ import type {
   CaseUserActionResponse,
   SingleCaseMetricsResponse,
   Comment,
-  CaseResponse,
+  Case as CaseSnakeCase,
   UserActionFindResponse,
   FindTypeField as UserActionFindTypeField,
   CommentResponseAlertsType,
@@ -92,8 +92,8 @@ export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>,
   userActions: CaseUserActions[];
 };
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
-export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: CommentUI[] };
-export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
+export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & { comments: CommentUI[] };
+export type CasesUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: CaseUI[] };
 export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
@@ -101,7 +101,7 @@ export type CaseConnectors = SnakeToCamelCase<GetCaseConnectorsResponse>;
 export type CaseUsers = GetCaseUsersResponse;
 
 export interface ResolvedCase {
-  case: Case;
+  case: CaseUI;
   outcome: ResolvedSimpleSavedObject['outcome'];
   aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
   aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
@@ -191,7 +191,7 @@ export type UpdateKey = keyof Pick<
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  caseData: Case;
+  caseData: CaseUI;
   onSuccess?: () => void;
   onError?: () => void;
 }

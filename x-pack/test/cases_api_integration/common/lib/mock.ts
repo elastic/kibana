@@ -7,7 +7,7 @@
 
 import {
   CasePostRequest,
-  CaseResponse,
+  Case,
   CasesFindResponse,
   Comment,
   ConnectorTypes,
@@ -161,7 +161,7 @@ export const persistableStateAttachment: CommentRequestPersistableStateType = {
 export const postCaseResp = (
   id?: string | null,
   req: CasePostRequest = postCaseReq
-): Partial<CaseResponse> => ({
+): Partial<Case> => ({
   ...req,
   ...(id != null ? { id } : {}),
   comments: [],
