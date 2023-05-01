@@ -52,6 +52,9 @@ const UPCOMING_MAINTENANCE_WINDOW: Partial<MaintenanceWindow> = {
   ],
 };
 
+const useKibanaMock = useKibana as jest.Mock;
+const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as jest.Mock;
+
 describe('MaintenanceWindowCallout', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
@@ -60,7 +63,7 @@ describe('MaintenanceWindowCallout', () => {
 
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
-    (useKibana as jest.Mock).mockReturnValue({
+    useKibanaMock.mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -80,7 +83,7 @@ describe('MaintenanceWindowCallout', () => {
   });
 
   it('should be visible if currently there is at least one "running" maintenance window', async () => {
-    (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
 
     const { findByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
@@ -88,7 +91,7 @@ describe('MaintenanceWindowCallout', () => {
   });
 
   it('should be visible if currently there are multiple "running" maintenance windows', async () => {
-    (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
       RUNNING_MAINTENANCE_WINDOW_1,
       RUNNING_MAINTENANCE_WINDOW_2,
     ]);
@@ -99,7 +102,7 @@ describe('MaintenanceWindowCallout', () => {
   });
 
   it('should NOT be visible if currently there are no active (running or upcoming) maintenance windows', async () => {
-    (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([]);
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
 
     const { container } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
@@ -107,7 +110,7 @@ describe('MaintenanceWindowCallout', () => {
   });
 
   it('should NOT be visible if currently there are no "running" maintenance windows', async () => {
-    (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([UPCOMING_MAINTENANCE_WINDOW]);
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([UPCOMING_MAINTENANCE_WINDOW]);
 
     const { container } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
@@ -139,7 +142,7 @@ describe('MaintenanceWindowCallout', () => {
     };
 
     const mockError = new Error('Network error');
-    (fetchActiveMaintenanceWindows as jest.Mock).mockRejectedValue(mockError);
+    fetchActiveMaintenanceWindowsMock.mockRejectedValue(mockError);
 
     render(<MaintenanceWindowCallout />, { wrapper: createReactQueryWrapper() });
 
@@ -153,7 +156,7 @@ describe('MaintenanceWindowCallout', () => {
   });
 
   it('should return null if window maintenance privilege is NONE', async () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    useKibanaMock.mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -165,7 +168,7 @@ describe('MaintenanceWindowCallout', () => {
         },
       },
     });
-    (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
 
     const { container } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
@@ -173,7 +176,7 @@ describe('MaintenanceWindowCallout', () => {
   });
 
   it('should work as expected if window maintenance privilege is READ ', async () => {
-    (useKibana as jest.Mock).mockReturnValue({
+    useKibanaMock.mockReturnValue({
       services: {
         application: {
           capabilities: {
@@ -185,7 +188,7 @@ describe('MaintenanceWindowCallout', () => {
         },
       },
     });
-    (fetchActiveMaintenanceWindows as jest.Mock).mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
 
     const { findByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 

@@ -23,7 +23,7 @@ export function MaintenanceWindowCallout(): JSX.Element | null {
   const isMaintenanceWindowDisabled =
     !capabilities[MAINTENANCE_WINDOW_FEATURE_ID].show &&
     !capabilities[MAINTENANCE_WINDOW_FEATURE_ID].save;
-  const { data } = useFetchActiveMaintenanceWindows(!isMaintenanceWindowDisabled);
+  const { data } = useFetchActiveMaintenanceWindows({ enabled: !isMaintenanceWindowDisabled });
 
   if (isMaintenanceWindowDisabled) {
     return null;

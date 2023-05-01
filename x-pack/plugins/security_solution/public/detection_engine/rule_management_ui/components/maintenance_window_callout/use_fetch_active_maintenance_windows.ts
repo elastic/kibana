@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH } from '@kbn/alerting-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 import { fetchActiveMaintenanceWindows } from './api';
 
-export const useFetchActiveMaintenanceWindows = (enabled: boolean) => {
+export const useFetchActiveMaintenanceWindows = ({ enabled }: Pick<UseQueryOptions, 'enabled'>) => {
   const { addError } = useAppToasts();
 
   return useQuery(
