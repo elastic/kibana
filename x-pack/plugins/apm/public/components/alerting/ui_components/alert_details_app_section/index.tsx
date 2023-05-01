@@ -35,6 +35,8 @@ import {
   TRANSACTION_TYPE,
 } from './types';
 
+const toMicrosecond = (value?: number) => (value ? value * 1000 : value);
+
 export function AlertDetailsAppSection({
   rule,
   alert,
@@ -64,7 +66,7 @@ export function AlertDetailsAppSection({
         ),
         value: formatAlertEvaluationValue(
           alert?.fields[ALERT_RULE_TYPE_ID],
-          alert?.fields[ALERT_EVALUATION_THRESHOLD]
+          toMicrosecond(alert?.fields[ALERT_EVALUATION_THRESHOLD])
         ),
       },
       {

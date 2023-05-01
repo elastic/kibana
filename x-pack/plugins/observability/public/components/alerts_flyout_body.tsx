@@ -42,6 +42,14 @@ interface FlyoutProps {
   id?: string;
 }
 
+// For APM Latency threshold rule, threshold is in ms but the duration formatter works with microseconds
+const normalizeUnit = (ruleTypeId: string, value?: number) => {
+  if (ruleTypeId === 'apm.transaction_duration' && value) {
+    return value * 1000;
+  }
+  return value;
+};
+
 export function AlertsFlyoutBody({ alert, id: pageId }: FlyoutProps) {
   const {
     http: {
@@ -89,7 +97,7 @@ export function AlertsFlyoutBody({ alert, id: pageId }: FlyoutProps) {
       title: translations.alertsFlyout.expectedValueLabel,
       description: formatAlertEvaluationValue(
         alert.fields[ALERT_RULE_TYPE_ID],
-        alert.fields[ALERT_EVALUATION_THRESHOLD]
+        normalizeUnit(alert.fields[ALERT_RULE_TYPE_ID], alert.fields[ALERT_EVALUATION_THRESHOLD])
       ),
     },
     {
