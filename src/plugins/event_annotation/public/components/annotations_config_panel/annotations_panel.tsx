@@ -59,11 +59,8 @@ export const AnnotationsPanel = ({
   getDefaultRangeEnd: (rangeStart: string) => string;
   calendarClassName?: string;
   queryInputServices: QueryInputServices;
-  // datatableUtilities: DatatableUtilitiesService;
-  // formatFactory: FormatFactory;
-  // paletteService: PaletteRegistry;
 }) => {
-  // const { hasFieldData } = useExistingFieldsReader();
+  const { hasFieldData } = useExistingFieldsReader();
 
   const isQueryBased = isQueryAnnotationConfig(currentAnnotation);
   const isRange = isRangeAnnotationConfig(currentAnnotation);
@@ -79,8 +76,6 @@ export const AnnotationsPanel = ({
       onAnnotationChange(sanitizeProperties({ ...currentAnnotation, ...newAnnotation })),
     [currentAnnotation, onAnnotationChange]
   );
-
-  const { hasFieldData } = useExistingFieldsReader();
 
   return (
     <>
