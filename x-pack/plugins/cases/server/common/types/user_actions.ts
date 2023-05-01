@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UserActionAttributesWithInjectedId } from '../../../common/api';
 import type { User } from './user';
 
 interface UserActionCommonPersistedAttributes {
@@ -18,3 +19,5 @@ export interface UserActionPersistedAttributes extends UserActionCommonPersisted
   type: string;
   payload: Record<string, unknown>;
 }
+
+export type UserActionTransformedAttributes = UserActionAttributesWithInjectedId;

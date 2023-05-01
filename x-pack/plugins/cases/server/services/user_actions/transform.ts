@@ -17,7 +17,6 @@ import {
 import type {
   CaseUserActionAttributes,
   CaseUserActionDeprecatedResponse,
-  UserAction,
 } from '../../../common/api';
 import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
@@ -33,12 +32,15 @@ import { isCommentRequestTypeExternalReferenceSO } from '../type_guards';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
 import { findReferenceId } from '../../common/references';
-import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
+import type {
+  UserActionPersistedAttributes,
+  UserActionTransformedAttributes,
+} from '../../common/types/user_actions';
 
 export function transformFindResponseToExternalModel(
   userActions: SavedObjectsFindResponse<UserActionPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): SavedObjectsFindResponse<UserAction> {
+): SavedObjectsFindResponse<UserActionTransformedAttributes> {
   return {
     ...userActions,
     saved_objects: userActions.saved_objects.map((so) => ({
@@ -51,7 +53,7 @@ export function transformFindResponseToExternalModel(
 export function transformToExternalModel(
   userAction: SavedObject<UserActionPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): SavedObject<UserAction> {
+): SavedObject<UserActionTransformedAttributes> {
   const { references } = userAction;
 
   const commentId =
@@ -64,7 +66,7 @@ export function transformToExternalModel(
       ...userAction.attributes,
       comment_id: commentId,
       payload,
-    } as UserAction,
+    } as UserActionTransformedAttributes,
   };
 }
 

@@ -6,14 +6,7 @@
  */
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import type {
-  ActionLicense,
-  CasesUI,
-  CaseUI,
-  CasesStatus,
-  CaseUserActions,
-  Comment,
-} from './types';
+import type { ActionLicense, CasesUI, CaseUI, CasesStatus, UserActionUI, Comment } from './types';
 
 import type {
   ResolvedCase,
@@ -33,8 +26,8 @@ import type {
   CasesFindResponse,
   Cases,
   CasesStatusResponse,
-  CaseUserActionResponse,
-  CaseUserActionsResponse,
+  UserAction,
+  UserActions,
   CommentResponse,
   ActionCategory,
   UserActionTypes,
@@ -620,7 +613,7 @@ export const getUserAction = (
   type: UserActionTypes,
   action: ActionCategory,
   overrides?: Record<string, unknown>
-): CaseUserActions => {
+): UserActionUI => {
   const commonProperties = {
     ...basicAction,
     id: `${type}-${action}`,
@@ -745,7 +738,7 @@ export const getUserAction = (
       return {
         ...commonProperties,
         ...overrides,
-      } as CaseUserActions;
+      } as UserActionUI;
   }
 };
 
@@ -753,19 +746,19 @@ export const getUserActionSnake = (
   type: UserActionTypes,
   action: ActionCategory,
   overrides?: Record<string, unknown>
-): CaseUserActionResponse => {
+): UserAction => {
   return {
     ...covertToSnakeCase(getUserAction(type, action, overrides)),
-  } as unknown as CaseUserActionResponse;
+  } as unknown as UserAction;
 };
 
-export const caseUserActionsSnake: CaseUserActionsResponse = [
+export const caseUserActionsSnake: UserActions = [
   getUserActionSnake('description', Actions.create),
   getUserActionSnake('comment', Actions.create),
   getUserActionSnake('description', Actions.update),
 ];
 
-export const caseUserActionsWithRegisteredAttachmentsSnake: CaseUserActionsResponse = [
+export const caseUserActionsWithRegisteredAttachmentsSnake: UserActions = [
   getUserActionSnake('description', Actions.create),
   {
     created_at: basicCreatedAt,
@@ -865,13 +858,13 @@ export const getHostIsolationUserAction = (
   ...overrides,
 });
 
-export const caseUserActions: CaseUserActions[] = [
+export const caseUserActions: UserActionUI[] = [
   getUserAction('description', Actions.create),
   getUserAction('comment', Actions.create),
   getUserAction('description', Actions.update),
 ];
 
-export const caseUserActionsWithRegisteredAttachments: CaseUserActions[] = [
+export const caseUserActionsWithRegisteredAttachments: UserActionUI[] = [
   getUserAction('description', Actions.create),
   {
     createdAt: basicCreatedAt,

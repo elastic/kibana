@@ -9,7 +9,7 @@ import type { SavedObject, SavedObjectsFindResponse, SavedObjectsRawDoc } from '
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
-import type { CaseUserActionDeprecatedResponse, UserAction } from '../../../common/api';
+import type { CaseUserActionDeprecatedResponse } from '../../../common/api';
 import { ActionTypes } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
@@ -35,7 +35,10 @@ import { defaultSortField } from '../../common/utils';
 import { UserActionPersister } from './operations/create';
 import { UserActionFinder } from './operations/find';
 import { transformToExternalModel, legacyTransformFindResponseToExternalModel } from './transform';
-import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
+import type {
+  UserActionPersistedAttributes,
+  UserActionTransformedAttributes,
+} from '../../common/types/user_actions';
 
 export class CaseUserActionService {
   private readonly _creator: UserActionPersister;
@@ -219,7 +222,7 @@ export class CaseUserActionService {
 
   public async getMostRecentUserAction(
     caseId: string
-  ): Promise<SavedObject<UserAction> | undefined> {
+  ): Promise<SavedObject<UserActionTransformedAttributes> | undefined> {
     try {
       this.context.log.debug(
         `Attempting to retrieve the most recent user action for case id: ${caseId}`
@@ -324,7 +327,7 @@ export class CaseUserActionService {
         rawFieldsDoc = createCase.mostRecent.hits.hits[0];
       }
 
-      let fieldsDoc: SavedObject<UserAction> | undefined;
+      let fieldsDoc: SavedObject<UserActionTransformedAttributes> | undefined;
       if (rawFieldsDoc != null) {
         const doc =
           this.context.savedObjectsSerializer.rawToSavedObject<UserActionPersistedAttributes>(
@@ -365,7 +368,9 @@ export class CaseUserActionService {
     }
   }
 
-  private getTopHitsDoc(topHits: TopHits): SavedObject<UserAction> | undefined {
+  private getTopHitsDoc(
+    topHits: TopHits
+  ): SavedObject<UserActionTransformedAttributes> | undefined {
     if (topHits.hits.hits.length > 0) {
       const rawPushDoc = topHits.hits.hits[0];
 

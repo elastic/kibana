@@ -25,7 +25,6 @@ import type {
   CaseSeverity,
   CaseStatuses,
   CaseUserActionAttributesWithoutConnectorId,
-  UserAction,
   CommentRequest,
   CommentUserAction,
   ConnectorUserAction,
@@ -36,7 +35,10 @@ import type {
   UserActionTypes,
 } from '../../../common/api';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
+import type {
+  UserActionPersistedAttributes,
+  UserActionTransformedAttributes,
+} from '../../common/types/user_actions';
 import type { IndexRefresh } from '../types';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
@@ -155,17 +157,17 @@ export interface ServiceContext {
 }
 
 export interface PushTimeFrameInfo {
-  mostRecent: SavedObject<UserAction>;
-  oldest: SavedObject<UserAction>;
+  mostRecent: SavedObject<UserActionTransformedAttributes>;
+  oldest: SavedObject<UserActionTransformedAttributes>;
 }
 
 export interface CaseConnectorActivity {
   connectorId: string;
-  fields: SavedObject<UserAction>;
+  fields: SavedObject<UserActionTransformedAttributes>;
   push?: PushTimeFrameInfo;
 }
 
-export type CaseConnectorFields = Map<string, SavedObject<UserAction>>;
+export type CaseConnectorFields = Map<string, SavedObject<UserActionTransformedAttributes>>;
 
 export interface PushInfo {
   date: Date;
