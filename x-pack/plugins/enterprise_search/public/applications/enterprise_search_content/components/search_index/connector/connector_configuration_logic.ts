@@ -73,7 +73,7 @@ export interface ConfigEntry {
   type: FieldType;
   ui_restrictions: string[];
   validation_errors: string[];
-  validations: string[];
+  validations?: string[];
   value: string | number | boolean | null;
 }
 
@@ -346,7 +346,7 @@ export const ConnectorConfigurationLogic = kea<
             tooltip,
             type,
             ui_restrictions,
-            validations,
+            validations: validations ?? [],
             value: ensureCorrectTyping(type, value),
           },
         }),
