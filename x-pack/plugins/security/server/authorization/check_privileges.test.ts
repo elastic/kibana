@@ -17,7 +17,6 @@ const application = 'kibana-our_application';
 
 const mockActions = {
   login: 'mock-action:login',
-  version: 'mock-action:version',
 };
 
 const savedObjectTypes = ['foo-type', 'bar-type'];
@@ -82,13 +81,12 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
             resources: [`space:${options.spaceId}`],
             privileges: options.kibanaPrivileges
               ? uniq([
-                  mockActions.version,
                   mockActions.login,
                   ...(Array.isArray(options.kibanaPrivileges)
                     ? options.kibanaPrivileges
                     : [options.kibanaPrivileges]),
                 ])
-              : [mockActions.version, mockActions.login],
+              : [mockActions.login],
           },
         ],
       },
@@ -111,7 +109,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
           [application]: {
             'space:space_1': {
               [mockActions.login]: true,
-              [mockActions.version]: true,
             },
           },
         },
@@ -149,7 +146,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
           [application]: {
             'space:space_1': {
               [mockActions.login]: false,
-              [mockActions.version]: true,
             },
           },
         },
@@ -187,15 +183,30 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
           [application]: {
             'space:space_1': {
               [mockActions.login]: true,
-              [mockActions.version]: false,
             },
           },
         },
       },
     });
-    expect(result).toMatchInlineSnapshot(
-      `[Error: Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.]`
-    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": false,
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
+          },
+          "kibana": Array [
+            Object {
+              "authorized": true,
+              "privilege": "mock-action:login",
+              "resource": "space_1",
+            },
+          ],
+        },
+        "username": "foo-username",
+      }
+    `);
   });
 
   test(`successful when checking for two actions and the user has both`, async () => {
@@ -212,7 +223,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
           [application]: {
             'space:space_1': {
               [mockActions.login]: true,
-              [mockActions.version]: true,
               [`saved_object:${savedObjectTypes[0]}/get`]: true,
               [`saved_object:${savedObjectTypes[1]}/get`]: true,
             },
@@ -260,7 +270,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
           [application]: {
             'space:space_1': {
               [mockActions.login]: true,
-              [mockActions.version]: true,
               [`saved_object:${savedObjectTypes[0]}/get`]: false,
               [`saved_object:${savedObjectTypes[1]}/get`]: true,
             },
@@ -306,7 +315,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
@@ -330,7 +338,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
             },
           },
@@ -361,7 +368,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: true,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
@@ -427,7 +433,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: false,
               },
@@ -493,7 +498,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: true,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
@@ -559,7 +563,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: false,
               },
@@ -623,7 +626,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
             },
           },
@@ -675,7 +677,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
             },
           },
@@ -739,7 +740,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
             },
           },
@@ -816,7 +816,6 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
             },
           },
@@ -884,9 +883,7 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
       index: {},
       application: {
         [application]: {
-          'space:space_1': {
-            [mockActions.version]: true,
-          },
+          'space:space_1': {},
         },
       },
     });
@@ -906,7 +903,7 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
           {
             application,
             resources: [`space:space_1`],
-            privileges: [mockActions.version],
+            privileges: [],
           },
         ],
       },
@@ -964,13 +961,12 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
             resources: options.spaceIds.map((spaceId) => `space:${spaceId}`),
             privileges: options.kibanaPrivileges
               ? uniq([
-                  mockActions.version,
                   mockActions.login,
                   ...(Array.isArray(options.kibanaPrivileges)
                     ? options.kibanaPrivileges
                     : [options.kibanaPrivileges]),
                 ])
-              : [mockActions.version, mockActions.login],
+              : [mockActions.login],
           },
         ],
       },
@@ -993,11 +989,9 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
           [application]: {
             'space:space_1': {
               [mockActions.login]: true,
-              [mockActions.version]: true,
             },
             'space:space_2': {
               [mockActions.login]: true,
-              [mockActions.version]: true,
             },
           },
         },
@@ -1040,11 +1034,9 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
           [application]: {
             'space:space_1': {
               [mockActions.login]: true,
-              [mockActions.version]: true,
             },
             'space:space_2': {
               [mockActions.login]: false,
-              [mockActions.version]: true,
             },
           },
         },
@@ -1087,19 +1079,38 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
           [application]: {
             'space:space_1': {
               [mockActions.login]: true,
-              [mockActions.version]: false,
             },
             'space:space_2': {
               [mockActions.login]: true,
-              [mockActions.version]: false,
             },
           },
         },
       },
     });
-    expect(result).toMatchInlineSnapshot(
-      `[Error: Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.]`
-    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": false,
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
+          },
+          "kibana": Array [
+            Object {
+              "authorized": true,
+              "privilege": "mock-action:login",
+              "resource": "space_1",
+            },
+            Object {
+              "authorized": true,
+              "privilege": "mock-action:login",
+              "resource": "space_2",
+            },
+          ],
+        },
+        "username": "foo-username",
+      }
+    `);
   });
 
   test(`throws error when Elasticsearch returns malformed response`, async () => {
@@ -1145,13 +1156,11 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
           [application]: {
             'space:space_1': {
               [mockActions.login]: true,
-              [mockActions.version]: true,
               [`saved_object:${savedObjectTypes[0]}/get`]: true,
               [`saved_object:${savedObjectTypes[1]}/get`]: true,
             },
             'space:space_2': {
               [mockActions.login]: true,
-              [mockActions.version]: true,
               [`saved_object:${savedObjectTypes[0]}/get`]: true,
               [`saved_object:${savedObjectTypes[1]}/get`]: true,
             },
@@ -1209,13 +1218,11 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
           [application]: {
             'space:space_1': {
               [mockActions.login]: true,
-              [mockActions.version]: true,
               [`saved_object:${savedObjectTypes[0]}/get`]: true,
               [`saved_object:${savedObjectTypes[1]}/get`]: false,
             },
             'space:space_2': {
               [mockActions.login]: true,
-              [mockActions.version]: true,
               [`saved_object:${savedObjectTypes[0]}/get`]: false,
               [`saved_object:${savedObjectTypes[1]}/get`]: false,
             },
@@ -1273,13 +1280,11 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
           [application]: {
             'space:space_1': {
               [mockActions.login]: true,
-              [mockActions.version]: true,
               [`saved_object:${savedObjectTypes[0]}/get`]: true,
               [`saved_object:${savedObjectTypes[1]}/get`]: true,
             },
             'space:space_2': {
               [mockActions.login]: true,
-              [mockActions.version]: true,
               [`saved_object:${savedObjectTypes[0]}/get`]: false,
               [`saved_object:${savedObjectTypes[1]}/get`]: false,
             },
@@ -1337,13 +1342,11 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
           [application]: {
             'space:space_1': {
               [mockActions.login]: true,
-              [mockActions.version]: true,
               [`saved_object:${savedObjectTypes[0]}/get`]: true,
               [`saved_object:${savedObjectTypes[1]}/get`]: true,
             },
             'space:space_2': {
               [mockActions.login]: true,
-              [mockActions.version]: true,
               [`saved_object:${savedObjectTypes[0]}/get`]: true,
               [`saved_object:${savedObjectTypes[1]}/get`]: false,
             },
@@ -1399,13 +1402,11 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
               'space:space_2': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
               },
             },
@@ -1428,11 +1429,9 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
               'space:space_2': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
               },
             },
@@ -1455,17 +1454,14 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
               },
               'space:space_2': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
               },
               'space:space_3': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
               },
             },
@@ -1488,7 +1484,6 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
               },
             },
@@ -1520,13 +1515,11 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: true,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
               'space:space_2': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: true,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
@@ -1602,13 +1595,11 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: false,
               },
               'space:space_2': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: false,
               },
@@ -1684,13 +1675,11 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: true,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
               'space:space_2': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: true,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
@@ -1766,13 +1755,11 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: false,
               },
               'space:space_2': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: false,
               },
@@ -1846,11 +1833,9 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
               'space:space_2': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
             },
           },
@@ -1902,11 +1887,9 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
               'space:space_2': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
             },
           },
@@ -1970,11 +1953,9 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
               'space:space_2': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
             },
           },
@@ -2051,11 +2032,9 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
             [application]: {
               'space:space_1': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
               'space:space_2': {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
             },
           },
@@ -2123,9 +2102,7 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
       index: {},
       application: {
         [application]: {
-          'space:space_1': {
-            [mockActions.version]: true,
-          },
+          'space:space_1': {},
         },
       },
     });
@@ -2145,7 +2122,7 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
           {
             application,
             resources: [`space:space_1`],
-            privileges: [mockActions.version],
+            privileges: [],
           },
         ],
       },
@@ -2202,13 +2179,12 @@ describe('#checkPrivilegesWithRequest.globally', () => {
             resources: [GLOBAL_RESOURCE],
             privileges: options.kibanaPrivileges
               ? uniq([
-                  mockActions.version,
                   mockActions.login,
                   ...(Array.isArray(options.kibanaPrivileges)
                     ? options.kibanaPrivileges
                     : [options.kibanaPrivileges]),
                 ])
-              : [mockActions.version, mockActions.login],
+              : [mockActions.login],
           },
         ],
       },
@@ -2230,7 +2206,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
           [application]: {
             [GLOBAL_RESOURCE]: {
               [mockActions.login]: true,
-              [mockActions.version]: true,
             },
           },
         },
@@ -2267,7 +2242,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
           [application]: {
             [GLOBAL_RESOURCE]: {
               [mockActions.login]: false,
-              [mockActions.version]: true,
             },
           },
         },
@@ -2304,15 +2278,30 @@ describe('#checkPrivilegesWithRequest.globally', () => {
           [application]: {
             [GLOBAL_RESOURCE]: {
               [mockActions.login]: true,
-              [mockActions.version]: false,
             },
           },
         },
       },
     });
-    expect(result).toMatchInlineSnapshot(
-      `[Error: Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.]`
-    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "hasAllRequested": false,
+        "privileges": Object {
+          "elasticsearch": Object {
+            "cluster": Array [],
+            "index": Object {},
+          },
+          "kibana": Array [
+            Object {
+              "authorized": true,
+              "privilege": "mock-action:login",
+              "resource": undefined,
+            },
+          ],
+        },
+        "username": "foo-username",
+      }
+    `);
   });
 
   test(`throws error when Elasticsearch returns malformed response`, async () => {
@@ -2352,7 +2341,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
           [application]: {
             [GLOBAL_RESOURCE]: {
               [mockActions.login]: true,
-              [mockActions.version]: true,
               [`saved_object:${savedObjectTypes[0]}/get`]: true,
               [`saved_object:${savedObjectTypes[1]}/get`]: true,
             },
@@ -2399,7 +2387,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
           [application]: {
             [GLOBAL_RESOURCE]: {
               [mockActions.login]: true,
-              [mockActions.version]: true,
               [`saved_object:${savedObjectTypes[0]}/get`]: false,
               [`saved_object:${savedObjectTypes[1]}/get`]: true,
             },
@@ -2444,7 +2431,7 @@ describe('#checkPrivilegesWithRequest.globally', () => {
             [application]: {
               [GLOBAL_RESOURCE]: {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
+                // [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
@@ -2467,7 +2454,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
             [application]: {
               [GLOBAL_RESOURCE]: {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
             },
           },
@@ -2497,7 +2483,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
             [application]: {
               [GLOBAL_RESOURCE]: {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: true,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
@@ -2562,7 +2547,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
             [application]: {
               [GLOBAL_RESOURCE]: {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: false,
               },
@@ -2627,7 +2611,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
             [application]: {
               [GLOBAL_RESOURCE]: {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: true,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
@@ -2692,7 +2675,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
             [application]: {
               [GLOBAL_RESOURCE]: {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: false,
               },
@@ -2755,7 +2737,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
             [application]: {
               [GLOBAL_RESOURCE]: {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
             },
           },
@@ -2806,7 +2787,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
             [application]: {
               [GLOBAL_RESOURCE]: {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
             },
           },
@@ -2869,7 +2849,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
             [application]: {
               [GLOBAL_RESOURCE]: {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
             },
           },
@@ -2945,7 +2924,6 @@ describe('#checkPrivilegesWithRequest.globally', () => {
             [application]: {
               [GLOBAL_RESOURCE]: {
                 [mockActions.login]: true,
-                [mockActions.version]: true,
               },
             },
           },
@@ -3013,9 +2991,7 @@ describe('#checkPrivilegesWithRequest.globally', () => {
       index: {},
       application: {
         [application]: {
-          [GLOBAL_RESOURCE]: {
-            [mockActions.version]: true,
-          },
+          [GLOBAL_RESOURCE]: {},
         },
       },
     });
@@ -3035,7 +3011,7 @@ describe('#checkPrivilegesWithRequest.globally', () => {
           {
             application,
             resources: [GLOBAL_RESOURCE],
-            privileges: [mockActions.version],
+            privileges: [],
           },
         ],
       },
@@ -3084,8 +3060,8 @@ describe('#checkUserProfilesPrivileges.atSpace', () => {
               application,
               resources: [`space:${options.spaceId}`],
               privileges: options.kibanaPrivileges
-                ? uniq([mockActions.version, mockActions.login, ...options.kibanaPrivileges])
-                : [mockActions.version, mockActions.login],
+                ? uniq([mockActions.login, ...options.kibanaPrivileges])
+                : [mockActions.login],
             },
           ],
         },
