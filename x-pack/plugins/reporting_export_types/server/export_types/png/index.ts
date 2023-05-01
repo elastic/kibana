@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { JobParamsPNGDeprecated } from '@kbn/reporting-export-types/common';
-import { TaskPayloadPNG } from '@kbn/reporting-export-types/common/png';
 import {
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -20,6 +18,8 @@ import type {
   ExportTypeDefinition,
   RunTaskFn,
 } from '@kbn/reporting-plugin/server/types';
+import { JobParamsPNGDeprecated } from '../../../common';
+import { TaskPayloadPNG } from '../../../common/png';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { JobParamsCsvFromSavedObject } from '@kbn/reporting-export-types/common';
-import { TaskPayloadCsvFromSavedObject } from '@kbn/reporting-export-types/common/csv_v2';
 import {
   CSV_REPORT_TYPE_V2 as CSV_JOB_TYPE,
   LICENSE_TYPE_BASIC,
@@ -17,6 +15,8 @@ import {
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-plugin/common/constants';
 import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '@kbn/reporting-plugin/server/types';
+import { JobParamsCsvFromSavedObject } from '../../../common';
+import { TaskPayloadCsvFromSavedObject } from '../../../common/csv_v2';
 
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
