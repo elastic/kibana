@@ -28,6 +28,7 @@ export const formatSyntheticsPolicy = (
   config: Partial<
     MonitorFields & {
       location_name: string;
+      location_id: string;
       'monitor.project.name': string;
       'monitor.project.id': string;
     }
