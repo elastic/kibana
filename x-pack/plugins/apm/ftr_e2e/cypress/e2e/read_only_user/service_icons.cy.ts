@@ -23,18 +23,7 @@ const serviceOverview = url.format({
   },
 });
 
-const errorsOverviewPage = url.format({
-  pathname: '/app/apm/services/opbeans-java/errors',
-  query: {
-    comparisonEnabled: 'true',
-    environment: 'ENVIRONMENT_ALL',
-    rangeFrom: start,
-    rangeTo: end,
-    offset: '1d',
-  },
-});
-
-describe('Service icon page', () => {
+describe('When navigating between pages', () => {
   before(() => {
     synthtrace.index(
       opbeans({
@@ -45,42 +34,39 @@ describe('Service icon page', () => {
   });
 
   after(() => {
-    // synthtrace.clean();
+    synthtrace.clean();
   });
 
   beforeEach(() => {
     cy.loginAsViewerUser();
   });
 
-  describe('navigations', () => {
-    // it('navigates to service overview and service icons are loaded', () => {
-    //   cy.visitKibana(serviceOverview);
+  it('should only load certain resources once', () => {
+    cy.intercept('**/internal/apm/has_data').as('hasDataRequest');
+    cy.intercept('**/apm/fleet/has_apm_policies').as('apmPoliciesRequest');
 
-    //   cy.getByTestSubj('loading-service-icons').should(
-    //     'have.text',
-    //     'Loading service icons...'
-    //   );
+    // Overview page
+    cy.visitKibana(serviceOverview);
+    cy.getByTestSubj('apmMainTemplateHeaderServiceName').should(
+      'have.text',
+      'opbeans-java'
+    );
+    cy.get('.euiTab-isSelected').should('have.text', 'Overview');
 
-    //   cy.getByTestSubj('loading-service-icons').should('exist');
+    // it should load service icons once
+    cy.get('@hasDataRequest.all').should('have.length', 1);
+    cy.get('@apmPoliciesRequest.all').should('have.length', 1);
 
-    //   cy.getByTestSubj('loading-service-icons').should('not.exist');
-    // });
+    // Navigate to errors page
+    cy.contains('.euiTab', 'Errors').click();
+    cy.get('.euiTab-isSelected').should('have.text', 'Errors');
 
-    it('navigates to service overview and service icons are only loaded once', () => {
-      // Overview page
-      cy.visitKibana(serviceOverview);
-      cy.getByTestSubj('apmMainTemplateHeaderServiceName').should(
-        'have.text',
-        'opbeans-java'
-      );
-      cy.get('.euiTab-isSelected').should('have.text', 'Overview');
-      cy.getByTestSubj('loading-service-icons').should('exist');
-      cy.getByTestSubj('loading-service-icons').should('not.exist');
+    // page have loaded correctly
+    cy.get('.euiLoadingChart').should('not.exist');
+    cy.get('[data-test-subj="errorDistribution"]').should('exist');
 
-      // Navigate to errors page
-      cy.contains('.euiTab', 'Errors').click();
-      cy.get('.euiTab-isSelected').should('have.text', 'Errors');
-      cy.getByTestSubj('loading-service-icons').should('not.exist');
-    });
+    // it should not load service icons again
+    cy.get('@hasDataRequest.all').should('have.length', 1);
+    cy.get('@apmPoliciesRequest.all').should('have.length', 1);
   });
 });
