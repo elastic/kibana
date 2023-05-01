@@ -8,7 +8,10 @@
 import type { SavedObject } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
-import type { AttachmentPersistedAttributes } from '../../../common/types/attachments';
+import type {
+  AttachmentPersistedAttributes,
+  AttachmentTransformedAttributes,
+} from '../../../common/types/attachments';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -16,11 +19,7 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
 import { buildFilter, combineFilters } from '../../../client/utils';
-import type {
-  AttachmentTotals,
-  AttributesTypeAlerts,
-  CommentAttributes as AttachmentAttributes,
-} from '../../../../common/api';
+import type { AttachmentTotals, AttributesTypeAlerts } from '../../../../common/api';
 import { CommentType } from '../../../../common/api';
 import type {
   AlertIdsAggsResult,
@@ -42,7 +41,7 @@ export class AttachmentGetter {
 
   public async bulkGet(
     attachmentIds: string[]
-  ): Promise<BulkOptionalAttributes<AttachmentAttributes>> {
+  ): Promise<BulkOptionalAttributes<AttachmentTransformedAttributes>> {
     try {
       this.context.log.debug(
         `Attempting to retrieve attachments with ids: ${attachmentIds.join()}`
@@ -192,7 +191,7 @@ export class AttachmentGetter {
 
   public async get({
     attachmentId,
-  }: GetAttachmentArgs): Promise<SavedObject<AttachmentAttributes>> {
+  }: GetAttachmentArgs): Promise<SavedObject<AttachmentTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to GET attachment ${attachmentId}`);
       const res = await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
@@ -302,7 +301,7 @@ export class AttachmentGetter {
   }: {
     caseId: string;
     fileIds: string[];
-  }): Promise<Array<SavedObject<AttachmentAttributes>>> {
+  }): Promise<Array<SavedObject<AttachmentTransformedAttributes>>> {
     try {
       this.context.log.debug('Attempting to find file attachments');
 
@@ -331,7 +330,7 @@ export class AttachmentGetter {
           }
         );
 
-      const foundAttachments: Array<SavedObject<AttachmentAttributes>> = [];
+      const foundAttachments: Array<SavedObject<AttachmentTransformedAttributes>> = [];
 
       for await (const attachmentSavedObjects of finder.find()) {
         foundAttachments.push(

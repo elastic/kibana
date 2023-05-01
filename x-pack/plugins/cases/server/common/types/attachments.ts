@@ -6,6 +6,7 @@
  */
 
 import type { JsonValue } from '@kbn/utility-types';
+import type { CommentAttributes } from '../../../common/api';
 import type { User } from './user';
 
 interface AttachmentCommonPersistedAttributes {
@@ -46,3 +47,5 @@ export interface AttachmentRequestAttributes {
 
 export type AttachmentPersistedAttributes = AttachmentRequestAttributes &
   AttachmentCommonPersistedAttributes;
+
+export type AttachmentTransformedAttributes = CommentAttributes;
