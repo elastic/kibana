@@ -42,7 +42,7 @@ export const registerActionFileUploadRoute = (
         body: {
           accepts: ['multipart/form-data'],
           output: 'stream',
-          maxBytes: endpointContext.service.getServerConfig().maxUploadResponseActionFileBytes,
+          maxBytes: endpointContext.serverConfig.maxUploadResponseActionFileBytes,
         },
       },
     },
@@ -58,7 +58,7 @@ export const getActionFileUploadHandler = (
   endpointContext: EndpointAppContext
 ): RequestHandler<never, never, UploadActionRequestBody, SecuritySolutionRequestHandlerContext> => {
   const logger = endpointContext.logFactory.get('uploadAction');
-  const maxFileBytes = endpointContext.service.getServerConfig().maxUploadResponseActionFileBytes;
+  const maxFileBytes = endpointContext.serverConfig.maxUploadResponseActionFileBytes;
 
   return async (context, req, res) => {
     const user = endpointContext.service.security?.authc.getCurrentUser(req);

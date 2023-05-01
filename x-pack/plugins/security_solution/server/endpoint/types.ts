@@ -7,6 +7,7 @@
 
 import type { LoggerFactory } from '@kbn/core/server';
 
+import type { DeepReadonly } from 'utility-types';
 import type { ConfigType } from '../config';
 import type { EndpointAppContextService } from './endpoint_app_context_services';
 import type { HostMetadata } from '../../common/endpoint/types';
@@ -19,12 +20,12 @@ export interface EndpointAppContext {
   logFactory: LoggerFactory;
 
   /**
-   * Returns the Security Solution Plugin config.
-   *
-   * **NOTE:**  If needing access to the config in a non-async way, call
-   *            `EndpointAppContext.service.getServerConfig()` instead.
+   * @deprecated use `EndpointAppContext.serverConfig` property intead
    */
   config(): Promise<ConfigType>;
+
+  serverConfig: DeepReadonly<ConfigType>;
+
   experimentalFeatures: ExperimentalFeatures;
 
   /**

@@ -244,12 +244,4 @@ export class EndpointAppContextService {
 
     return this.startDependencies.actionCreateService;
   }
-
-  public getServerConfig(): ConfigType {
-    if (!this.startDependencies?.config) {
-      throw new EndpointAppContentServicesNotStartedError();
-    }
-
-    return this.startDependencies.config;
-  }
 }

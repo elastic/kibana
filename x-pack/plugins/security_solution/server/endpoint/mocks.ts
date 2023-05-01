@@ -69,9 +69,12 @@ import { createFeatureUsageServiceMock } from './services/feature_usage/mocks';
 export const createMockEndpointAppContext = (
   mockManifestManager?: ManifestManager
 ): EndpointAppContext => {
+  const config = createMockConfig();
+
   return {
     logFactory: loggingSystemMock.create(),
-    config: () => Promise.resolve(createMockConfig()),
+    config: () => Promise.resolve(config),
+    serverConfig: config,
     service: createMockEndpointAppContextService(mockManifestManager),
     experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
   };
