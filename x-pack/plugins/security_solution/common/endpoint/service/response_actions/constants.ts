@@ -37,6 +37,7 @@ export const ENDPOINT_CAPABILITIES = [
   'running_processes',
   'get_file',
   'execute',
+  'upload',
 ] as const;
 
 export type EndpointCapabilities = typeof ENDPOINT_CAPABILITIES[number];
