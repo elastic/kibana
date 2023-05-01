@@ -126,16 +126,6 @@ export class Join extends Component<Props, State> {
     });
   };
 
-  _onRightSizeChange = (size: number) => {
-    this.props.onChange({
-      leftField: this.props.join.leftField,
-      right: {
-        ...this.props.join.right,
-        size,
-      } as ESTermSourceDescriptor,
-    });
-  };
-
   _onMetricsChange = (metrics: AggDescriptor[]) => {
     this.props.onChange({
       leftField: this.props.join.leftField,
@@ -250,7 +240,6 @@ export class Join extends Component<Props, State> {
               rightValue={right.term}
               rightFields={rightFields}
               onRightFieldChange={this._onRightFieldChange}
-              onRightSizeChange={this._onRightSizeChange}
             />
           </EuiFlexItem>
 

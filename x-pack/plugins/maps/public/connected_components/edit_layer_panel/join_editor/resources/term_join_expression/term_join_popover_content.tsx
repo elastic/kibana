@@ -49,7 +49,6 @@ interface Props {
   rightValue: string;
   rightFields: DataViewField[];
   onRightFieldChange: (term?: string) => void;
-  onRightSizeChange: (size: number) => void;
 }
 
 export function TermJoinPopoverContent(props: Props) {
@@ -172,7 +171,7 @@ export function TermJoinPopoverContent(props: Props) {
   }
 
   function renderRightFieldSizeInput() {
-    if (props.rightValue || !props.leftValue) {
+    if (!props.leftValue) {
       return null;
     }
 
@@ -183,7 +182,12 @@ export function TermJoinPopoverContent(props: Props) {
         }
         min={1}
         max={DEFAULT_MAX_BUCKETS_LIMIT}
-        onChange={props.onRightSizeChange}
+        onChange={(size: number) => {
+          props.onSourceDescriptorChange({
+            ...props.sourceDescriptor,
+            size,
+          });
+        }}
         label={i18n.translate('xpack.maps.layerPanel.joinExpression.rightSizeLabel', {
           defaultMessage: 'Right size',
         })}

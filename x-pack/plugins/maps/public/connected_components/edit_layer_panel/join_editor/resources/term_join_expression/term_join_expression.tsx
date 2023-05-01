@@ -39,7 +39,6 @@ interface Props {
   rightValue: string;
   rightFields: DataViewField[];
   onRightFieldChange: (term?: string) => void;
-  onRightSizeChange: (size: number) => void;
 }
 
 interface State {
@@ -119,7 +118,6 @@ export class TermJoinExpression extends Component<Props, State> {
           rightValue={this.props.rightValue}
           rightFields={this.props.rightFields}
           onRightFieldChange={this.props.onRightFieldChange}
-          onRightSizeChange={this.props.onRightSizeChange}
         />
       </EuiPopover>
     );
