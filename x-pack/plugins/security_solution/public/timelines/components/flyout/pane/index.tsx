@@ -7,7 +7,7 @@
 
 import React, { useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
 
 import { StatefulTimeline } from '../../timeline';
 import type { TimelineId } from '../../../../../common/types/timeline';
@@ -24,6 +24,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   timelineId,
   visible = true,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const ref = useRef<HTMLDivElement>(null);
 
   const timeline = useMemo(
@@ -50,10 +51,10 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
             min-width: 150px;
             height: calc(100% - 96px);
             top: 96px;
-            background: white;
+            background: ${useEuiBackgroundColor('plain')};
             position: fixed;
             width: 100%;
-            z-index: ${euiThemeVars.euiZFlyout};
+            z-index: ${euiTheme.levels.flyout};
             display: ${visible ? 'block' : 'none'};
           `}
         >
