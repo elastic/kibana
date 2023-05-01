@@ -177,9 +177,7 @@ export function registerResponseActionRoutes(
     );
   }
 
-  if (endpointContext.experimentalFeatures.responseActionUploadEnabled) {
-    registerActionFileUploadRoute(router, endpointContext);
-  }
+  registerActionFileUploadRoute(router, endpointContext);
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(

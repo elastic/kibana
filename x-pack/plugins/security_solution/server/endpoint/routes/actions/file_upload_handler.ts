@@ -26,6 +26,10 @@ export const registerActionFileUploadRoute = (
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) => {
+  if (!endpointContext.experimentalFeatures.responseActionUploadEnabled) {
+    return;
+  }
+
   const logger = endpointContext.logFactory.get('uploadAction');
 
   router.post(
