@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { createFile, deleteFile } from '../../services';
 import type { UploadActionParams } from '../../../../common/endpoint/types';
 import { UPLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import {
@@ -53,13 +54,15 @@ export const getActionFileUploadHandler = (
   endpointContext: EndpointAppContext
 ): RequestHandler<never, never, UploadActionRequestBody, SecuritySolutionRequestHandlerContext> => {
   const logger = endpointContext.logFactory.get('uploadAction');
+  const maxFileBytes = endpointContext.service.getServerConfig().maxUploadResponseActionFileBytes;
 
   return async (context, req, res) => {
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const fileStream = req.body.file as HapiReadableStream;
     const { file: _, parameters: userParams, ...actionPayload } = req.body;
     const uploadParameters: UploadActionParams = {
-      ...actionPayload,
+      ...userParams,
       file: {
         file_id: '',
         file_name: '',
@@ -68,16 +71,22 @@ export const getActionFileUploadHandler = (
       },
     };
 
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
+    try {
+      const createdFile = await createFile({
+        esClient,
+        logger,
+        fileStream,
+        agents: actionPayload.endpoint_ids,
+        maxFileBytes,
+      });
+
+      uploadParameters.file.file_id = createdFile.file.id;
+      uploadParameters.file.file_name = createdFile.file.name;
+      uploadParameters.file.sha256 = createdFile.file.hash?.sha256;
+      uploadParameters.file.size = createdFile.file.size;
+    } catch (err) {
+      return errorHandler(logger, res, err);
+    }
 
     try {
       const casesClient = await endpointContext.service.getCasesClient(req);
@@ -100,7 +109,14 @@ export const getActionFileUploadHandler = (
         },
       });
     } catch (err) {
-      // FIXME:PT delete file if one was created
+      if (uploadParameters.file.file_id) {
+        // Try to delete the created file since creating the action threw an error
+        try {
+          await deleteFile(esClient, logger, uploadParameters.file.file_id);
+        } catch (e) {
+          logger.error(`Attempt to clean up created file failed; ${e.message}`, e);
+        }
+      }
 
       return errorHandler(logger, res, err);
     }
