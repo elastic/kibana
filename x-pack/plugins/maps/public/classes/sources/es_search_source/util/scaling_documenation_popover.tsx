@@ -72,7 +72,7 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.clustersUseCase"
-                  defaultMessage="Use this option to display large data sets. Does not support term joins."
+                  defaultMessage="Use this option to display large data sets. Does not support joins."
                 />
               </p>
             </dd>
@@ -101,13 +101,19 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
                   <li>
                     <FormattedMessage
                       id="xpack.maps.scalingDocs.limitUseCase.multipleJoins"
+                      defaultMessage="Spatial joins"
+                    />
+                  </li>
+                  <li>
+                    <FormattedMessage
+                      id="xpack.maps.scalingDocs.limitUseCase.multipleJoins"
                       defaultMessage="Multiple term joins"
                     />
                   </li>
                   <li>
                     <FormattedMessage
                       id="xpack.maps.scalingDocs.limitUseCase.joinFieldsWithLayoutStyles"
-                      defaultMessage="Data driven styling from term join metrics with 'Label', 'Label size', icon 'Symbol size', and 'Symbol orientation' style properties"
+                      defaultMessage="Data driven styling from join metrics with 'Label', 'Label size', icon 'Symbol size', and 'Symbol orientation' style properties"
                     />
                   </li>
                   <li>

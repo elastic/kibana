@@ -190,6 +190,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         scalingType={this._descriptor.scalingType}
         filterByMapBounds={this.isFilterByMapBounds()}
         numberOfJoins={sourceEditorArgs.numberOfJoins}
+        hasSpatialJoins={sourceEditorArgs.hasSpatialJoins}
       />
     );
   }
