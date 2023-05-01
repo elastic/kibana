@@ -11,7 +11,7 @@ import { RouteProps } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { createSearchSessionMock } from '../__mocks__/search_session';
 import { discoverServiceMock as mockDiscoverServices } from '../__mocks__/services';
-import { discoverRouter } from './discover_router';
+import { DiscoverRouter } from './discover_router';
 import { DiscoverMainRoute } from './main';
 import { SingleDocRoute } from './doc';
 import { ContextAppRoute } from './context';
@@ -24,7 +24,7 @@ describe('Discover router', () => {
   };
   beforeAll(() => {
     const { history } = createSearchSessionMock();
-    const component = shallow(discoverRouter(mockDiscoverServices, history, props.isDev));
+    const component = shallow(DiscoverRouter(mockDiscoverServices, history, props.isDev));
     component.find(Route).forEach((route) => {
       const routeProps = route.props() as RouteProps;
       const path = routeProps.path;
