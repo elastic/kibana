@@ -12,7 +12,6 @@ import { useActions, useValues } from 'kea';
 import {
   EuiAccordion,
   EuiFieldText,
-  EuiFieldNumber,
   EuiFieldPassword,
   EuiRadioGroup,
   EuiSelect,
@@ -30,7 +29,6 @@ import {
   ConnectorConfigurationLogic,
   ConfigEntry,
   ensureStringType,
-  ensureNumberType,
   ensureBooleanType,
 } from './connector_configuration_logic';
 
@@ -44,7 +42,17 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const { setLocalConfigEntry } = useActions(ConnectorConfigurationLogic);
 
-  const { key, display, label, options, required, sensitive, tooltip, value } = configEntry;
+  const {
+    key,
+    display,
+    is_valid: isValid,
+    label,
+    options,
+    required,
+    sensitive,
+    tooltip,
+    value,
+  } = configEntry;
 
   switch (display) {
     case DisplayType.DROPDOWN:
@@ -72,10 +80,11 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
 
     case DisplayType.NUMERIC:
       return (
-        <EuiFieldNumber
+        <EuiFieldText
           disabled={status === Status.LOADING}
           required={required}
-          value={ensureNumberType(value)}
+          value={ensureStringType(value)}
+          isInvalid={!isValid}
           onChange={(event) => {
             setLocalConfigEntry({ ...configEntry, value: event.target.value });
           }}
