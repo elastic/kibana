@@ -32,8 +32,6 @@ export { StreamType } from './stream_type';
 export type { StringOptions } from './string_type';
 export { StringType } from './string_type';
 export { UnionType } from './union_type';
-export type { URIOptions } from './uri_type';
-export { URIType } from './uri_type';
 export { NeverType } from './never_type';
 export type { IpOptions } from './ip_type';
 export { IpType } from './ip_type';

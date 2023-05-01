@@ -42,8 +42,6 @@ import {
   TypeOf,
   TypeOptions,
   UnionType,
-  URIOptions,
-  URIType,
   StreamType,
 } from './src/types';
 
@@ -193,7 +191,6 @@ export const schema = {
   recordOf,
   stream,
   string,
-  uri,
 };
 
 export type Schema = typeof schema;
