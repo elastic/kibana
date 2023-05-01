@@ -44,6 +44,7 @@ export interface ConnectorConfigProperties {
   tooltip: string;
   type: FieldType;
   ui_restrictions: string[];
+  validations: string[];
   value: string | number | boolean | null;
 }
 
