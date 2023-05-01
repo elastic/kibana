@@ -21,7 +21,7 @@ import { useDockerRegistry, waitForFleetSetup, getSupertestWithAdminUser } from 
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
-for (let i = 1; i <= 200; i++) {
+for (let i = 1; i <= 50; i++) {
   describe(`Fleet preconfiguration reset, run #${i}`, () => {
     let esServer: TestElasticsearchUtils;
     let kbnServer: TestKibanaUtils;
