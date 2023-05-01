@@ -24,13 +24,13 @@ import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { setIndexPatterns } from '@kbn/unified-search-plugin/public/services';
-import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { rumFieldFormats } from './configurations/rum/field_formats';
 import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import * as useAppDataViewHook from './hooks/use_app_data_view';
