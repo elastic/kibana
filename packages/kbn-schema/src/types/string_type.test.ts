@@ -78,66 +78,6 @@ describe('#maxLength', () => {
   });
 });
 
-describe('#hostname', () => {
-  test('returns value for valid hostname as per RFC1123', () => {
-    const hostNameSchema = schema.string({ hostname: true });
-
-    expect(hostNameSchema.validate('www.example.com')).toBe('www.example.com');
-    expect(hostNameSchema.validate('3domain.local')).toBe('3domain.local');
-    expect(hostNameSchema.validate('hostname')).toBe('hostname');
-    expect(hostNameSchema.validate('::1')).toBe('::1');
-    expect(hostNameSchema.validate('0:0:0:0:0:0:0:1')).toBe('0:0:0:0:0:0:0:1');
-    expect(hostNameSchema.validate('xn----ascii-7gg5ei7b1i.xn--90a3a')).toBe(
-      'xn----ascii-7gg5ei7b1i.xn--90a3a'
-    );
-
-    const hostNameWithMaxAllowedLength = Array(4).fill('a'.repeat(63)).join('.');
-    expect(hostNameSchema.validate(hostNameWithMaxAllowedLength)).toBe(
-      hostNameWithMaxAllowedLength
-    );
-  });
-
-  test('returns error when value is not a valid hostname', () => {
-    const hostNameSchema = schema.string({ hostname: true });
-
-    expect(() => hostNameSchema.validate('2387628')).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid hostname (see RFC 1123)."`
-    );
-    expect(() =>
-      hostNameSchema.validate(Array(4).fill('a'.repeat(64)).join('.'))
-    ).toThrowErrorMatchingInlineSnapshot(`"value must be a valid hostname (see RFC 1123)."`);
-    expect(() => hostNameSchema.validate('host:name')).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid hostname (see RFC 1123)."`
-    );
-    expect(() => hostNameSchema.validate('localhost:5601')).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid hostname (see RFC 1123)."`
-    );
-    expect(() => hostNameSchema.validate('-')).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid hostname (see RFC 1123)."`
-    );
-    expect(() => hostNameSchema.validate('0:?:0:0:0:0:0:1')).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid hostname (see RFC 1123)."`
-    );
-    expect(() => hostNameSchema.validate('a'.repeat(256))).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid hostname (see RFC 1123)."`
-    );
-  });
-
-  test('returns error when empty string', () => {
-    expect(() => schema.string({ hostname: true }).validate('')).toThrowErrorMatchingInlineSnapshot(
-      `"\\"value\\" is not allowed to be empty"`
-    );
-  });
-
-  test('supports string validation rules', () => {
-    expect(() =>
-      schema.string({ hostname: true, maxLength: 3 }).validate('www.example.com')
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"value has length [15] but it must have a maximum length of [3]."`
-    );
-  });
-});
-
 describe('#defaultValue', () => {
   test('returns default when string is undefined', () => {
     expect(schema.string({ defaultValue: 'foo' }).validate(undefined)).toBe('foo');

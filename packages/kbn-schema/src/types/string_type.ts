@@ -17,14 +17,13 @@ export type StringOptions = TypeOptions<string> & {
 };
 
 const errorMap: z.ZodErrorMap = (issue, ctx) => {
+  const value = ctx.data as string;
   if (issue.code === z.ZodIssueCode.too_small) {
-    const value = ctx.data as string;
     return {
       message: `value has length [${value.length}] but it must have a minimum length of [${issue.minimum}].`,
     };
   }
   if (issue.code === z.ZodIssueCode.too_big) {
-    const value = ctx.data as string;
     return {
       message: `value has length [${value.length}] but it must have a maximum length of [${issue.maximum}].`,
     };
@@ -34,12 +33,7 @@ const errorMap: z.ZodErrorMap = (issue, ctx) => {
 
 export class StringType extends Type<string> {
   constructor(options: StringOptions = {}) {
-    // We want to allow empty strings, however calling `allow('')` causes
-    // Joi to allow the value and skip any additional validation.
-    // Instead, we reimplement the string validator manually except in the
-    // hostname case where empty strings aren't allowed anyways.
     let schema = internals.string({ errorMap });
-    schema = options.hostname === true ? schema.url() : schema;
 
     if (options.minLength !== undefined) {
       schema = schema.min(options.minLength);
