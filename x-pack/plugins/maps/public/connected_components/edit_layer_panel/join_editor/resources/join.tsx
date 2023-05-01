@@ -248,7 +248,6 @@ export class Join extends Component<Props, State> {
               onSourceDescriptorChange={this._onRightSourceDescriptorChange}
               rightSourceName={rightSourceName}
               rightValue={right.term}
-              rightSize={right.size}
               rightFields={rightFields}
               onRightFieldChange={this._onRightFieldChange}
               onRightSizeChange={this._onRightSizeChange}

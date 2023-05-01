@@ -47,7 +47,6 @@ interface Props {
 
   // Right field props
   rightValue: string;
-  rightSize?: number;
   rightFields: DataViewField[];
   onRightFieldChange: (term?: string) => void;
   onRightSizeChange: (size: number) => void;
@@ -180,7 +179,7 @@ export function TermJoinPopoverContent(props: Props) {
     return (
       <ValidatedNumberInput
         initialValue={
-          props.rightSize !== undefined ? props.rightSize : DEFAULT_MAX_BUCKETS_LIMIT
+          props.sourceDescriptor.size !== undefined ? props.sourceDescriptor.size : DEFAULT_MAX_BUCKETS_LIMIT
         }
         min={1}
         max={DEFAULT_MAX_BUCKETS_LIMIT}
