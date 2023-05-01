@@ -6,13 +6,14 @@
  */
 
 import { Chart, Datum, Flame, FlameLayerValue, PartialTheme, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../../common/flamegraph';
 import { getFlamegraphModel } from '../../utils/get_flamegraph_model';
-import { FlamegraphInformationWindow } from '../flame_graphs_view/flamegraph_information_window';
 import { FlameGraphLegend } from '../flame_graphs_view/flame_graph_legend';
+import { FrameInformationWindow } from '../frame_information_window';
+import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { FlameGraphTooltip } from './flamegraph_tooltip';
 
 interface Props {
@@ -70,7 +71,7 @@ export function FlameGraph({
 
   const [highlightedVmIndex, setHighlightedVmIndex] = useState<number | undefined>(undefined);
 
-  const selected: undefined | React.ComponentProps<typeof FlamegraphInformationWindow>['frame'] =
+  const selected: undefined | React.ComponentProps<typeof FrameInformationWindow>['frame'] =
     primaryFlamegraph && highlightedVmIndex !== undefined
       ? {
           fileID: primaryFlamegraph.FileID[highlightedVmIndex],
@@ -169,15 +170,12 @@ export function FlameGraph({
         </EuiFlexItem>
       </EuiFlexGroup>
       {showInformationWindow && (
-        <EuiFlyout onClose={toggleShowInformationWindow} size="s">
-          <EuiFlyoutBody>
-            <FlamegraphInformationWindow
-              frame={selected}
-              totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
-              totalSamples={totalSamples}
-            />
-          </EuiFlyoutBody>
-        </EuiFlyout>
+        <FrameInformationTooltip
+          onClose={toggleShowInformationWindow}
+          frame={selected}
+          totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
+          totalSamples={totalSamples}
+        />
       )}
     </>
   );

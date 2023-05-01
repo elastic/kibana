@@ -50,8 +50,8 @@ export class AiopsPlugin
 
     // Register server side APIs
     if (AIOPS_ENABLED) {
-      core.getStartServices().then(([_, depsStart]) => {
-        defineExplainLogRateSpikesRoute(router, aiopsLicense, this.logger);
+      core.getStartServices().then(([coreStart, depsStart]) => {
+        defineExplainLogRateSpikesRoute(router, aiopsLicense, this.logger, coreStart);
       });
     }
 

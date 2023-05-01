@@ -273,6 +273,8 @@ jest.mock('./app_context', () => ({
   },
 }));
 
+jest.mock('./audit_logging');
+
 const spyAgentPolicyServiceUpdate = jest.spyOn(agentPolicy.agentPolicyService, 'update');
 const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
   agentPolicy.agentPolicyService,

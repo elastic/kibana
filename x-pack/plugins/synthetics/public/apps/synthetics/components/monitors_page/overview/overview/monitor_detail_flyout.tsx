@@ -98,8 +98,9 @@ function DetailFlyoutDurationChart({
 >) {
   const theme = useTheme();
 
-  const { observability } = useKibana<ClientPluginsStart>().services;
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
   return (
     <EuiPageSection bottomBorder="extended">
       <EuiTitle size="xs">
@@ -331,7 +332,7 @@ export function MonitorDetailFlyout(props: Props) {
               configId={configId}
               monitor={{
                 ...monitorSavedObject.attributes,
-                id: monitorSavedObject.id,
+                id,
                 updated_at: monitorSavedObject.updated_at!,
                 created_at: monitorSavedObject.created_at!,
               }}

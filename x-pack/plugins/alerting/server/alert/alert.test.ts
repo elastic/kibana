@@ -8,6 +8,7 @@
 import sinon from 'sinon';
 import { Alert } from './alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
+import { alertWithAnyUUID } from '../test_utils';
 
 let clock: sinon.SinonFakeTimers;
 
@@ -231,6 +232,23 @@ describe('getState()', () => {
   });
 });
 
+describe('getUUID()', () => {
+  test('returns a UUID for a new alert', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    const uuid = alert.getUuid();
+    expect(uuid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+  });
+
+  test('returns same uuid from previous run of alert', () => {
+    const uuid = 'previous-uuid';
+    const meta = { uuid };
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta,
+    });
+    expect(alert.getUuid()).toEqual(uuid);
+  });
+});
+
 describe('scheduleActions()', () => {
   test('makes hasScheduledActions() return true', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
@@ -320,6 +338,7 @@ describe('updateLastScheduledActions()', () => {
     expect(alert.toJSON()).toEqual({
       state: {},
       meta: {
+        uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
           group: 'default',
@@ -338,6 +357,7 @@ describe('updateLastScheduledActions()', () => {
       state: {},
       meta: {
         flappingHistory: [],
+        uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
           group: 'default',
@@ -367,6 +387,7 @@ describe('updateLastScheduledActions()', () => {
       state: {},
       meta: {
         flappingHistory: [],
+        uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
           group: 'default',
@@ -468,9 +489,22 @@ describe('toJSON', () => {
         },
       }
     );
-    expect(JSON.stringify(alertInstance)).toEqual(
-      '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"},"flappingHistory":[false,true],"flapping":false,"pendingRecoveredCount":2}}'
-    );
+
+    expect(alertInstance).toMatchObject({
+      state: {
+        foo: true,
+      },
+      meta: {
+        lastScheduledActions: {
+          date: expect.any(Date),
+          group: 'default',
+        },
+        uuid: expect.any(String),
+        flappingHistory: [false, true],
+        flapping: false,
+        pendingRecoveredCount: 2,
+      },
+    });
   });
 });
 
@@ -514,6 +548,7 @@ describe('toRaw', () => {
       meta: {
         flappingHistory: [false, true, true],
         flapping: false,
+        uuid: expect.any(String),
       },
     });
   });
@@ -529,12 +564,13 @@ describe('setFlappingHistory', () => {
     );
     alertInstance.setFlappingHistory([false]);
     expect(alertInstance.getFlappingHistory()).toEqual([false]);
-    expect(alertInstance.toRaw()).toMatchInlineSnapshot(`
+    expect(alertWithAnyUUID(alertInstance.toRaw())).toMatchInlineSnapshot(`
       Object {
         "meta": Object {
           "flappingHistory": Array [
             false,
           ],
+          "uuid": Any<String>,
         },
         "state": Object {},
       }
@@ -561,11 +597,12 @@ describe('setFlapping', () => {
     );
     alertInstance.setFlapping(false);
     expect(alertInstance.getFlapping()).toEqual(false);
-    expect(alertInstance.toRaw()).toMatchInlineSnapshot(`
+    expect(alertWithAnyUUID(alertInstance.toRaw())).toMatchInlineSnapshot(`
       Object {
         "meta": Object {
           "flapping": false,
           "flappingHistory": Array [],
+          "uuid": Any<String>,
         },
         "state": Object {},
       }
@@ -624,7 +661,7 @@ describe('resetPendingRecoveredCount', () => {
 
 describe('isFilteredOut', () => {
   const summarizedAlerts = {
-    all: { count: 1, data: [{ kibana: { alert: { instance: { id: 1 } } } }] },
+    all: { count: 1, data: [{ kibana: { alert: { uuid: '1' } } }] },
     new: { count: 0, data: [] },
     ongoing: { count: 0, data: [] },
     recovered: { count: 0, data: [] },
@@ -632,19 +669,25 @@ describe('isFilteredOut', () => {
 
   test('returns false if summarizedAlerts is null', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      meta: { pendingRecoveredCount: 3 },
+      meta: { pendingRecoveredCount: 3, uuid: '1' },
     });
     expect(alert.isFilteredOut(null)).toBe(false);
   });
-  test('returns false if the alert is in summarizedAlerts', () => {
+  test('returns false if the alert with same ID is in summarizedAlerts', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
-      meta: { pendingRecoveredCount: 3 },
+      meta: { pendingRecoveredCount: 3, uuid: 'no' },
     });
-    expect(alert.isFilteredOut(null)).toBe(false);
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(false);
   });
-  test('returns true if the alert is not in summarizedAlerts', () => {
+  test('returns false if the alert with same UUID is in summarizedAlerts', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2', {
-      meta: { pendingRecoveredCount: 3 },
+      meta: { pendingRecoveredCount: 3, uuid: '1' },
+    });
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(false);
+  });
+  test('returns true if the alert with same UUID or ID is not in summarizedAlerts', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2', {
+      meta: { pendingRecoveredCount: 3, uuid: '3' },
     });
     expect(alert.isFilteredOut(summarizedAlerts)).toBe(true);
   });

@@ -19,27 +19,7 @@ export default {
 // TODO ideally we would want to have some data here, but we need to spent some time getting all the foundation items for storybook
 //  (ReduxStoreProvider, CellActionsProvider...) similarly to how it was done for the TestProvidersComponent
 //  see ticket https://github.com/elastic/security-team/issues/6223
-export const Expanded: Story<void> = () => {
-  const flyoutContextValue = {
-    openRightPanel: () => window.alert('openRightPanel called'),
-  } as unknown as ExpandableFlyoutContext;
-  const panelContextValue = {
-    eventId: 'eventId',
-    indexName: 'indexName',
-    dataFormattedForFieldBrowser: [],
-    browserFields: {},
-  } as unknown as RightPanelContext;
-
-  return (
-    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-      <RightPanelContext.Provider value={panelContextValue}>
-        <HighlightedFields expanded={true} />
-      </RightPanelContext.Provider>
-    </ExpandableFlyoutContext.Provider>
-  );
-};
-
-export const Collapsed: Story<void> = () => {
+export const Default: Story<void> = () => {
   const flyoutContextValue = {
     openRightPanel: () => window.alert('openRightPanel called'),
   } as unknown as ExpandableFlyoutContext;

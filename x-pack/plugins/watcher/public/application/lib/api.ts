@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup, SavedObjectsClientContract } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 
 import { Settings } from '../models/settings';
 import { Watch } from '../models/watch';
@@ -26,14 +26,6 @@ export const setHttpClient = (anHttpClient: HttpSetup) => {
 export const getHttpClient = () => {
   return httpClient;
 };
-
-let savedObjectsClient: SavedObjectsClientContract;
-
-export const setSavedObjectsClient = (aSavedObjectsClient: SavedObjectsClientContract) => {
-  savedObjectsClient = aSavedObjectsClient;
-};
-
-export const getSavedObjectsClient = () => savedObjectsClient;
 
 const basePath = ROUTES.API_ROOT;
 

@@ -19,9 +19,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { keyBy, orderBy } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { TopNFunctions, TopNFunctionSortField } from '../../../common/functions';
 import { getCalleeFunction, StackFrameMetadata } from '../../../common/profiling';
+import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates';
+import { asCost } from '../../utils/formatters/as_cost';
+import { asWeight } from '../../utils/formatters/as_weight';
+import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
+import { CPULabelWithHint } from '../shared/cpu_label_with_hint';
 import { StackFrameSummary } from '../stack_frame_summary';
 import { GetLabel } from './get_label';
 
@@ -31,6 +36,7 @@ interface Row {
   samples: number;
   exclusiveCPU: number;
   inclusiveCPU: number;
+  impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
   diff?: {
     rank: number;
     samples: number;
@@ -125,13 +131,7 @@ function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU?: number }) {
   );
 }
 
-export const TopNFunctionsTable = ({
-  sortDirection,
-  sortField,
-  onSortChange,
-  topNFunctions,
-  comparisonTopNFunctions,
-}: {
+interface Props {
   sortDirection: 'asc' | 'desc';
   sortField: TopNFunctionSortField;
   onSortChange: (options: {
@@ -140,7 +140,21 @@ export const TopNFunctionsTable = ({
   }) => void;
   topNFunctions?: TopNFunctions;
   comparisonTopNFunctions?: TopNFunctions;
-}) => {
+  totalSeconds: number;
+  isDifferentialView: boolean;
+}
+
+export function TopNFunctionsTable({
+  sortDirection,
+  sortField,
+  onSortChange,
+  topNFunctions,
+  comparisonTopNFunctions,
+  totalSeconds,
+  isDifferentialView,
+}: Props) {
+  const [selectedRow, setSelectedRow] = useState<Row | undefined>();
+
   const totalCount: number = useMemo(() => {
     if (!topNFunctions || !topNFunctions.TotalCount) {
       return 0;
@@ -163,6 +177,17 @@ export const TopNFunctionsTable = ({
 
       const inclusiveCPU = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
       const exclusiveCPU = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
+      const totalSamples = topN.CountExclusive;
+
+      const impactEstimates =
+        totalSeconds > 0
+          ? calculateImpactEstimates({
+              countExclusive: exclusiveCPU,
+              countInclusive: inclusiveCPU,
+              totalSamples,
+              totalSeconds,
+            })
+          : undefined;
 
       const diff =
         comparisonTopNFunctions && comparisonRow
@@ -184,10 +209,11 @@ export const TopNFunctionsTable = ({
         samples: topN.CountExclusive,
         exclusiveCPU,
         inclusiveCPU,
+        impactEstimates,
         diff,
       };
     });
-  }, [topNFunctions, comparisonTopNFunctions]);
+  }, [topNFunctions, comparisonTopNFunctions, totalSeconds]);
 
   const theme = useEuiTheme();
 
@@ -197,46 +223,40 @@ export const TopNFunctionsTable = ({
       name: i18n.translate('xpack.profiling.functionsView.rankColumnLabel', {
         defaultMessage: 'Rank',
       }),
-      align: 'right',
       render: (_, { rank }) => {
         return <EuiText style={{ whiteSpace: 'nowrap', fontSize: 'inherit' }}>{rank}</EuiText>;
       },
+      align: 'right',
     },
     {
       field: TopNFunctionSortField.Frame,
       name: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
         defaultMessage: 'Function',
       }),
-      width: '100%',
       render: (_, { frame }) => <StackFrameSummary frame={frame} />,
+      width: '50%',
     },
     {
       field: TopNFunctionSortField.Samples,
       name: i18n.translate('xpack.profiling.functionsView.samplesColumnLabel', {
         defaultMessage: 'Samples (estd.)',
       }),
-      align: 'right',
       render: (_, { samples, diff }) => {
         return (
           <SampleStat samples={samples} diffSamples={diff?.samples} totalSamples={totalCount} />
         );
       },
+      align: 'right',
     },
     {
       field: TopNFunctionSortField.ExclusiveCPU,
       name: (
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>
-            {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel1Exclusive', {
-              defaultMessage: 'CPU excl.',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel2Exclusive', {
-              defaultMessage: 'subfunctions',
-            })}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <CPULabelWithHint
+          type="self"
+          labelSize="xs"
+          labelStyle={{ fontWeight: 600 }}
+          iconSize="s"
+        />
       ),
       render: (_, { exclusiveCPU, diff }) => {
         return <CPUStat cpu={exclusiveCPU} diffCPU={diff?.exclusiveCPU} />;
@@ -246,18 +266,12 @@ export const TopNFunctionsTable = ({
     {
       field: TopNFunctionSortField.InclusiveCPU,
       name: (
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>
-            {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel1Inclusive', {
-              defaultMessage: 'CPU incl.',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {i18n.translate('xpack.profiling.functionsView.cpuColumnLabel2Inclusive', {
-              defaultMessage: 'subfunctions',
-            })}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <CPULabelWithHint
+          type="total"
+          labelSize="xs"
+          labelStyle={{ fontWeight: 600 }}
+          iconSize="s"
+        />
       ),
       render: (_, { inclusiveCPU, diff }) => {
         return <CPUStat cpu={inclusiveCPU} diffCPU={diff?.inclusiveCPU} />;
@@ -302,6 +316,49 @@ export const TopNFunctionsTable = ({
       },
     });
   }
+  if (!isDifferentialView) {
+    columns.push(
+      {
+        field: 'annualized_co2',
+        name: i18n.translate('xpack.profiling.functionsView.annualizedCo2', {
+          defaultMessage: 'Annualized CO2',
+        }),
+        render: (_, { impactEstimates }) => {
+          if (impactEstimates?.annualizedCo2) {
+            return <div>{asWeight(impactEstimates.annualizedCo2)}</div>;
+          }
+        },
+        align: 'right',
+      },
+      {
+        field: 'annualized_dollar_cost',
+        name: i18n.translate('xpack.profiling.functionsView.annualizedDollarCost', {
+          defaultMessage: `Annualized dollar cost`,
+        }),
+        render: (_, { impactEstimates }) => {
+          if (impactEstimates?.annualizedDollarCost) {
+            return <div>{asCost(impactEstimates.annualizedDollarCost)}</div>;
+          }
+        },
+        align: 'right',
+      },
+      {
+        name: 'Actions',
+        actions: [
+          {
+            name: 'show_more_information',
+            description: i18n.translate('xpack.profiling.functionsView.showMoreButton', {
+              defaultMessage: `Show more information`,
+            }),
+            icon: 'inspect',
+            color: 'primary',
+            type: 'icon',
+            onClick: setSelectedRow,
+          },
+        ],
+      }
+    );
+  }
 
   const sortedRows = orderBy(
     rows,
@@ -339,6 +396,26 @@ export const TopNFunctionsTable = ({
           },
         }}
       />
+      {selectedRow && (
+        <FrameInformationTooltip
+          onClose={() => {
+            setSelectedRow(undefined);
+          }}
+          frame={{
+            addressOrLine: selectedRow.frame.AddressOrLine,
+            countExclusive: selectedRow.exclusiveCPU,
+            countInclusive: selectedRow.inclusiveCPU,
+            exeFileName: selectedRow.frame.ExeFileName,
+            fileID: selectedRow.frame.FileID,
+            frameType: selectedRow.frame.FrameType,
+            functionName: selectedRow.frame.FunctionName,
+            sourceFileName: selectedRow.frame.SourceFilename,
+            sourceLine: selectedRow.frame.SourceLine,
+          }}
+          totalSeconds={totalSeconds ?? 0}
+          totalSamples={selectedRow.samples}
+        />
+      )}
     </>
   );
-};
+}

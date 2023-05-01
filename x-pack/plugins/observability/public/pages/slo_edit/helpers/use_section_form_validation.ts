@@ -27,8 +27,12 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
             'indicator.params.filter',
             'indicator.params.good',
             'indicator.params.total',
+            'indicator.params.timestampField',
           ] as const
-        ).every((field) => !getFieldState(field).invalid) && !!getValues('indicator.params.index');
+        ).every((field) => !getFieldState(field).invalid) &&
+        (['indicator.params.index', 'indicator.params.timestampField'] as const).every(
+          (field) => !!getValues(field)
+        );
       break;
     case 'sli.apm.transactionDuration':
       isIndicatorSectionValid =

@@ -32,8 +32,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
       <input
         data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
         data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
         }}
       />
     ),
@@ -127,10 +127,8 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     },
 
     addDocumentsJson(jsonString: string) {
-      find('documentsEditor').simulate('change', {
-        jsonString,
-      });
-      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+      find('documentsEditor').getDOMNode().setAttribute('data-currentvalue', jsonString);
+      find('documentsEditor').simulate('change');
     },
 
     clickDocumentsDropdown() {

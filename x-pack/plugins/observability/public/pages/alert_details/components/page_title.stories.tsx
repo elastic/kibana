@@ -8,6 +8,7 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { EuiPageTemplate } from '@elastic/eui';
+import { ALERT_RULE_CATEGORY } from '@kbn/rule-data-utils';
 
 import { PageTitle as Component, PageTitleProps } from './page_title';
 import { alert } from '../mock/alert';
@@ -34,5 +35,21 @@ const defaultProps = {
 
 export const PageTitle = Template.bind({});
 PageTitle.args = defaultProps;
+
+export const PageTitleForAnomaly = Template.bind({});
+PageTitleForAnomaly.args = {
+  ...{
+    alert: {
+      ...defaultProps.alert,
+      fields: {
+        ...defaultProps.alert.fields,
+        [ALERT_RULE_CATEGORY]: 'Anomaly',
+      },
+    },
+  },
+};
+
 export const PageTitleUsedWithinPageTemplate = TemplateWithPageTemplate.bind({});
-PageTitleUsedWithinPageTemplate.args = defaultProps;
+PageTitleUsedWithinPageTemplate.args = {
+  ...defaultProps,
+};

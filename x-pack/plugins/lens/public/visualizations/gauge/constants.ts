@@ -6,7 +6,7 @@
  */
 
 import type { GaugeState as GaugeStateOriginal } from '@kbn/expression-gauge-plugin/common';
-import { LayerType } from '../../../common/types';
+import type { LayerType } from '../../../common/types';
 
 export const LENS_GAUGE_ID = 'lnsGauge';
 

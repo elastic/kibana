@@ -291,10 +291,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       },
       heatmap: {
         grid: {
-          cellHeight: {
-            min: CELL_HEIGHT,
-            max: CELL_HEIGHT,
-          },
           stroke: {
             width: BORDER_WIDTH,
             color: euiTheme.euiBorderColor,

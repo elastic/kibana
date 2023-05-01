@@ -47,7 +47,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      await es.indices.delete({ index: alertAsDataIndex });
+      await es.deleteByQuery({ index: alertAsDataIndex, query: { match_all: {} } });
     });
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -1244,8 +1244,7 @@ instanceStateValue: true
             throttle: null,
             summary: true,
             alertsFilter: {
-              timeframe: null,
-              query: { kql: 'kibana.alert.rule.name:abc' },
+              query: { kql: 'kibana.alert.rule.name:abc', filters: [] },
             },
           });
 
@@ -1307,8 +1306,7 @@ instanceStateValue: true
             throttle: null,
             summary: true,
             alertsFilter: {
-              timeframe: null,
-              query: { kql: 'kibana.alert.instance.id:1' },
+              query: { kql: 'kibana.alert.instance.id:1', filters: [] },
             },
           });
 
@@ -1361,14 +1359,12 @@ instanceStateValue: true
 
         it('should filter alerts by hours', async () => {
           const now = new Date();
-          now.setMinutes(now.getMinutes() + 10);
-          const hour = padStart(now.getUTCHours().toString(), 2);
-          const minutesStart = padStart(now.getUTCMinutes().toString(), 2, '0');
-          now.setMinutes(now.getMinutes() + 1);
-          const minutesEnd = padStart(now.getUTCMinutes().toString(), 2, '0');
+          now.setHours(now.getHours() + 1);
+          const hour = padStart(now.getUTCHours().toString(), 2, '0');
+          const minutes = padStart(now.getUTCMinutes().toString(), 2, '0');
 
-          const start = `${hour}:${minutesStart}`;
-          const end = `${hour}:${minutesEnd}`;
+          const start = `${hour}:${minutes}`;
+          const end = `${hour}:${minutes}`;
 
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringSummaryAction({
@@ -1385,7 +1381,6 @@ instanceStateValue: true
                 timezone: 'UTC',
                 hours: { start, end },
               },
-              query: null,
             },
           });
 

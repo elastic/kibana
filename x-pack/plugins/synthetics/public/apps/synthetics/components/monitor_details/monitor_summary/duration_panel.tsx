@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ReportTypes } from '@kbn/observability-plugin/public';
+import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
@@ -22,7 +22,7 @@ interface DurationPanelProps {
 export const DurationPanel = (props: DurationPanelProps) => {
   const {
     services: {
-      observability: { ExploratoryViewEmbeddable },
+      exploratoryView: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
   const selectedLocation = useSelectedLocation();
@@ -42,7 +42,7 @@ export const DurationPanel = (props: DurationPanelProps) => {
       attributes={[
         {
           time: props,
-          name: AVG_DURATION_LABEL,
+          name: MEDIAN_DURATION_LABEL,
           dataType: 'synthetics',
           selectedMetricField: 'monitor_duration',
           reportDefinitions: {
@@ -55,9 +55,9 @@ export const DurationPanel = (props: DurationPanelProps) => {
   );
 };
 
-export const AVG_DURATION_LABEL = i18n.translate(
-  'xpack.synthetics.monitorDetails.summary.avgDuration',
+export const MEDIAN_DURATION_LABEL = i18n.translate(
+  'xpack.synthetics.monitorDetails.summary.medianDuration',
   {
-    defaultMessage: 'Avg. duration',
+    defaultMessage: 'Median duration',
   }
 );

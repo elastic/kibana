@@ -18,6 +18,7 @@ import {
   rewriteRootLevelAttribute,
 } from './validation_utils';
 import { aggregationSchemas } from './aggs_types';
+import { getRootFields } from '../included_fields';
 
 const aggregationKeys = ['aggs', 'aggregations'];
 
@@ -226,6 +227,10 @@ const isAttributeValue = (fieldName: string, fieldValue: unknown): boolean => {
   return attributeFields.includes(fieldName) && typeof fieldValue === 'string';
 };
 
+const isRootField = (fieldName: string): boolean => {
+  return getRootFields().includes(fieldName);
+};
+
 const validateAndRewriteAttributePath = (
   attributePath: string,
   { allowedTypes, indexMapping, currentPath }: ValidationContext
@@ -235,6 +240,9 @@ const validateAndRewriteAttributePath = (
   }
   if (isObjectTypeAttribute(attributePath, indexMapping, allowedTypes)) {
     return rewriteObjectTypeAttribute(attributePath);
+  }
+  if (isRootField(attributePath)) {
+    return attributePath;
   }
   throw new Error(`[${currentPath.join('.')}] Invalid attribute path: ${attributePath}`);
 };

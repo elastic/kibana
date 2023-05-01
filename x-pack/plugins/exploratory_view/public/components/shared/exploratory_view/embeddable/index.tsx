@@ -11,11 +11,11 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { useFetcher } from '@kbn/observability-plugin/public';
 import styled from 'styled-components';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useAppDataView } from './use_app_data_view';
 import type { ExploratoryViewPublicPluginsStart } from '../../../..';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
@@ -175,6 +175,6 @@ function EmptyState({ height }: { height?: string }) {
   );
 }
 
-const NO_DATA_LABEL = i18n.translate('xpack.exploratoryView.overview.exploratoryView.noData', {
+const NO_DATA_LABEL = i18n.translate('xpack.exploratoryView.noData', {
   defaultMessage: 'No data',
 });

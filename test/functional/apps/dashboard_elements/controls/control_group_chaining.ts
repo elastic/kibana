@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       /* start by adding some incomplete data so that we can test `exists` query */
       await common.navigateToApp('console');
-      await console.collapseHelp();
+      await console.closeHelpIfExists();
       await console.clearTextArea();
       await addDocument(
         'animals-cats-2018-01-01',
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await common.navigateToApp('console');
-      await console.collapseHelp();
+      await console.closeHelpIfExists();
       await console.clearTextArea();
       for (const { index, id } of newDocuments) {
         await console.enterRequest(`\nDELETE /${index}/_doc/${id}`);

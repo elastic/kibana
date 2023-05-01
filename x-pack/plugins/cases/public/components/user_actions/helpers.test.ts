@@ -62,7 +62,7 @@ describe('helpers', () => {
       ['title', true],
       ['status', true],
       ['settings', true],
-      ['create_case', false],
+      ['create_case', true],
       ['delete_case', false],
     ];
 

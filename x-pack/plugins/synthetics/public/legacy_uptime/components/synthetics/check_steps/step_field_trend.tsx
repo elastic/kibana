@@ -37,11 +37,10 @@ export function StepFieldTrend({
   field: string;
   step: JourneyStep;
 }) {
-  const { observability } = useUptimeStartPlugins();
+  const { exploratoryView } = useUptimeStartPlugins();
+  const ExploratoryViewEmbeddable = exploratoryView?.ExploratoryViewEmbeddable;
 
   const indexSettings = useSelector(selectDynamicSettings);
-
-  const EmbeddableExpView = observability!.ExploratoryViewEmbeddable;
 
   const basePath = useKibana().services.http?.basePath?.get();
 
@@ -68,9 +67,9 @@ export function StepFieldTrend({
     basePath
   );
 
-  return (
+  return ExploratoryViewEmbeddable ? (
     <Wrapper>
-      <EmbeddableExpView
+      <ExploratoryViewEmbeddable
         title={title}
         appendTitle={
           <EuiButton
@@ -97,7 +96,7 @@ export function StepFieldTrend({
         withActions={false}
       />
     </Wrapper>
-  );
+  ) : null;
 }
 
 export const EXPLORE_LABEL = i18n.translate('xpack.synthetics.synthetics.markers.explore', {

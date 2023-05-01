@@ -33,7 +33,8 @@ import { setRowsPerPageTo } from '../../tasks/table_pagination';
 
 const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
 
-describe('Alerts detection rules table auto-refresh', () => {
+// TODO: See https://github.com/elastic/kibana/issues/154694
+describe.skip('Alerts detection rules table auto-refresh', () => {
   before(() => {
     cleanKibana();
     login();

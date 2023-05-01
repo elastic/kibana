@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import type { MapAttributes } from '../content_management';
 
 export function removeBoundsFromSavedObject({
   attributes,
 }: {
-  attributes: MapSavedObjectAttributes;
-}): MapSavedObjectAttributes {
+  attributes: MapAttributes;
+}): MapAttributes {
   const newAttributes = { ...attributes };
   // @ts-expect-error
   // This removes an unused parameter from pre 7.8=< saved objects

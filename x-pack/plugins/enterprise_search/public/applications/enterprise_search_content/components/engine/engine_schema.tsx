@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -13,29 +13,40 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiFilterButton,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiPanel,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiSwitch,
   EuiText,
 } from '@elastic/eui';
+
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { FieldIcon } from '@kbn/react-field';
+
 import { SchemaField } from '../../../../../common/types/engines';
+
 import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
-import { EngineViewTabs, SEARCH_INDEX_TAB_PATH } from '../../routes';
-import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
+import { SEARCH_INDEX_TAB_PATH } from '../../routes';
 
 import { EngineIndicesLogic } from './engine_indices_logic';
 
 import { EngineViewLogic } from './engine_view_logic';
-import { FieldIcon } from './field_icon';
 
 const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaField }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
@@ -143,11 +154,51 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
 
 export const EngineSchema: React.FC = () => {
   const { engineName } = useValues(EngineIndicesLogic);
+  const [onlyShowConflicts, setOnlyShowConflicts] = useState<boolean>(false);
   const { isLoadingEngineSchema, schemaFields } = useValues(EngineViewLogic);
   const { fetchEngineSchema } = useActions(EngineViewLogic);
+
+  const [isFilterByPopoverOpen, setIsFilterByPopoverOpen] = useState<boolean>(false);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
+  // get all the elasticsearch Field Types
+  const esFieldTypes = Object.values(ES_FIELD_TYPES).map((fieldDataTypeName) => ({
+    checked: undefined,
+    label: fieldDataTypeName.toString(),
+  }));
+  const [selectedEsFieldTypes, setSelectedEsFieldTypes] = useState(esFieldTypes);
+
+  const toggleOnlyShowConflicts = useCallback(() => {
+    setOnlyShowConflicts(!onlyShowConflicts);
+    setItemIdToExpandedRowMap({});
+  }, [onlyShowConflicts]);
+
+  // update filteredDataTypes as filter by field types are selected
+  const filteredDataTypes = useMemo(() => {
+    const selectedDataTypes = selectedEsFieldTypes
+      .filter((option) => option.checked === 'on')
+      .map((option) => option.label);
+    return selectedDataTypes;
+  }, [selectedEsFieldTypes]);
+
+  // return schema fields may be with conflicts
+  const schemaFieldsMaybeWithConflicts = useMemo(() => {
+    if (onlyShowConflicts) return schemaFields.filter((field) => field.type === 'conflict');
+    return schemaFields;
+  }, [onlyShowConflicts, schemaFields]);
+
+  const filteredSchemaFields = useMemo(() => {
+    if (filteredDataTypes.length > 0)
+      return schemaFieldsMaybeWithConflicts.filter((field) =>
+        field.indices.some((i) => filteredDataTypes.includes(i.type))
+      );
+    return schemaFieldsMaybeWithConflicts;
+  }, [onlyShowConflicts, schemaFields, filteredDataTypes]);
+
+  const totalConflictsHiddenByTypeFilters = onlyShowConflicts
+    ? schemaFieldsMaybeWithConflicts.length - filteredSchemaFields.length
+    : 0;
 
   useEffect(() => {
     fetchEngineSchema({ engineName });
@@ -275,29 +326,132 @@ export const EngineSchema: React.FC = () => {
       width: '10%',
     },
   ];
+  const filterButton = (
+    <EuiFilterButton
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={() => setIsFilterByPopoverOpen(!isFilterByPopoverOpen)}
+      numFilters={selectedEsFieldTypes.length}
+      hasActiveFilters={filteredDataTypes.length > 0}
+      numActiveFilters={filteredDataTypes.length}
+      isSelected={isFilterByPopoverOpen}
+    >
+      {i18n.translate('xpack.enterpriseSearch.content.engine.schema.filters', {
+        defaultMessage: 'Field types',
+      })}
+    </EuiFilterButton>
+  );
 
   return (
-    <EnterpriseSearchEnginesPageTemplate
-      pageChrome={[engineName]}
-      pageViewTelemetry={EngineViewTabs.SCHEMA}
-      isLoading={isLoadingEngineSchema}
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.content.engine.schema.pageTitle', {
-          defaultMessage: 'Schema',
-        }),
-      }}
-      engineName={engineName}
-    >
-      <>
+    <>
+      <EuiFlexGroup direction="column" gutterSize="l">
+        <EuiFlexGroup>
+          <EuiSwitch
+            label={i18n.translate(
+              'xpack.enterpriseSearch.content.engine.schema.onlyShowConflicts',
+              {
+                defaultMessage: 'Only show conflicts',
+              }
+            )}
+            checked={onlyShowConflicts}
+            onChange={toggleOnlyShowConflicts}
+          />
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.enterpriseSearch.content.engine.schema.filters.label', {
+                defaultMessage: 'Filter By',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                button={filterButton}
+                isOpen={isFilterByPopoverOpen}
+                closePopover={() => setIsFilterByPopoverOpen(false)}
+                panelPaddingSize="none"
+                anchorPosition="downCenter"
+              >
+                <EuiSelectable
+                  searchable
+                  searchProps={{
+                    placeholder: i18n.translate(
+                      'xpack.enterpriseSearch.content.engine.schema.filters.searchPlaceholder',
+                      {
+                        defaultMessage: 'Filter list ',
+                      }
+                    ),
+                  }}
+                  options={selectedEsFieldTypes}
+                  onChange={(options) => setSelectedEsFieldTypes(options)}
+                >
+                  {(list, search) => (
+                    <div style={{ width: 300 }}>
+                      <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+                      {list}
+                    </div>
+                  )}
+                </EuiSelectable>
+                <EuiPopoverFooter>
+                  <EuiFlexGroup justifyContent="spaceAround">
+                    <EuiButtonEmpty
+                      color="danger"
+                      iconType="eraser"
+                      size="s"
+                      onClick={() => setSelectedEsFieldTypes(esFieldTypes)}
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.engine.schema.filters.clearAll',
+                        {
+                          defaultMessage: 'Clear all ',
+                        }
+                      )}
+                    </EuiButtonEmpty>
+                  </EuiFlexGroup>
+                </EuiPopoverFooter>
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexGroup>
+
         <EuiBasicTable
-          items={schemaFields}
+          items={filteredSchemaFields}
           columns={columns}
           loading={isLoadingEngineSchema}
           itemId="name"
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isExpandable
         />
-      </>
-    </EnterpriseSearchEnginesPageTemplate>
+        {totalConflictsHiddenByTypeFilters > 0 && (
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.engine.schema.filters.conflict.callout.title"
+                defaultMessage="There are {totalConflictsHiddenByTypeFilters, number} more {totalConflictsHiddenByTypeFilters, plural, one {conflict} other {conflicts}}   not displayed here"
+                values={{ totalConflictsHiddenByTypeFilters }}
+              />
+            }
+            color="danger"
+            iconType="iInCircle"
+          >
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.engine.schema.filters.conflict.callout.subTitle',
+                {
+                  defaultMessage:
+                    'In order to see all field conflicts you must clear your field filters',
+                }
+              )}
+            </p>
+            <EuiButton fill color="danger" onClick={() => setSelectedEsFieldTypes(esFieldTypes)}>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.engine.schema.filters.conflict.callout.clearFilters',
+                {
+                  defaultMessage: 'Clear filters ',
+                }
+              )}
+            </EuiButton>
+          </EuiCallOut>
+        )}
+      </EuiFlexGroup>
+    </>
   );
 };

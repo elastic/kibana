@@ -9,7 +9,6 @@ import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import type {
   CaseConnectors,
-  Cases,
   CaseUpdateRequest,
   FetchCasesProps,
   ResolvedCase,
@@ -17,15 +16,14 @@ import type {
   CaseUserActionTypeWithAll,
   CaseUserActionsStats,
   CaseUsers,
+  CasesUI,
 } from '../../common/ui/types';
 import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
 import type {
   BulkCreateCommentRequest,
   CasePatchRequest,
   CasePostRequest,
-  CaseResponse,
   CaseResolveResponse,
-  CasesResponse,
   UserActionFindResponse,
   CommentRequest,
   User,
@@ -33,10 +31,13 @@ import type {
   CasesFindResponse,
   GetCaseConnectorsResponse,
   CaseUserActionStatsResponse,
+  Case,
+  Cases,
 } from '../../common/api';
 import {
   CommentType,
   getCaseCommentsUrl,
+  getCasesDeleteFileAttachmentsUrl,
   getCaseDetailsUrl,
   getCaseDetailsMetricsUrl,
   getCasePushUrl,
@@ -51,7 +52,6 @@ import {
   CASE_TAGS_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
-  MAX_DOCS_PER_PAGE,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -69,7 +69,7 @@ import {
 
 import type {
   ActionLicense,
-  Case,
+  CaseUI,
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
   CaseUserActions,
@@ -91,8 +91,8 @@ export const getCase = async (
   caseId: string,
   includeComments: boolean = true,
   signal: AbortSignal
-): Promise<Case> => {
-  const response = await KibanaServices.get().http.fetch<CaseResponse>(getCaseDetailsUrl(caseId), {
+): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(getCaseDetailsUrl(caseId), {
     method: 'GET',
     query: {
       includeComments,
@@ -161,13 +161,16 @@ export const findCaseUserActions = async (
   params: {
     type: CaseUserActionTypeWithAll;
     sortOrder: 'asc' | 'desc';
+    page: number;
+    perPage: number;
   },
   signal: AbortSignal
 ): Promise<FindCaseUserActions> => {
   const query = {
     types: params.type !== 'all' ? [params.type] : [],
-    sortOrder: params.sortOrder ?? 'asc',
-    perPage: MAX_DOCS_PER_PAGE,
+    sortOrder: params.sortOrder,
+    page: params.page,
+    perPage: params.perPage,
   };
 
   const response = await KibanaServices.get().http.fetch<UserActionFindResponse>(
@@ -220,7 +223,7 @@ export const getCases = async ({
     sortOrder: 'desc',
   },
   signal,
-}: FetchCasesProps): Promise<Cases> => {
+}: FetchCasesProps): Promise<CasesUI> => {
   const query = {
     ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
     ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
@@ -242,8 +245,8 @@ export const getCases = async ({
   return convertAllCasesToCamel(decodeCasesFindResponse(response));
 };
 
-export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<Case> => {
-  const response = await KibanaServices.get().http.fetch<CaseResponse>(CASES_URL, {
+export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(CASES_URL, {
     method: 'POST',
     body: JSON.stringify(newCase),
     signal,
@@ -259,8 +262,8 @@ export const patchCase = async (
   >,
   version: string,
   signal: AbortSignal
-): Promise<Case[]> => {
-  const response = await KibanaServices.get().http.fetch<CasesResponse>(CASES_URL, {
+): Promise<CaseUI[]> => {
+  const response = await KibanaServices.get().http.fetch<Cases>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases: [{ ...updatedCase, id: caseId, version }] }),
     signal,
@@ -271,12 +274,12 @@ export const patchCase = async (
 export const updateCases = async (
   cases: CaseUpdateRequest[],
   signal: AbortSignal
-): Promise<Case[]> => {
+): Promise<CaseUI[]> => {
   if (cases.length === 0) {
     return [];
   }
 
-  const response = await KibanaServices.get().http.fetch<CasesResponse>(CASES_URL, {
+  const response = await KibanaServices.get().http.fetch<Cases>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases }),
     signal,
@@ -289,15 +292,12 @@ export const postComment = async (
   newComment: CommentRequest,
   caseId: string,
   signal: AbortSignal
-): Promise<Case> => {
-  const response = await KibanaServices.get().http.fetch<CaseResponse>(
-    `${CASES_URL}/${caseId}/comments`,
-    {
-      method: 'POST',
-      body: JSON.stringify(newComment),
-      signal,
-    }
-  );
+): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(`${CASES_URL}/${caseId}/comments`, {
+    method: 'POST',
+    body: JSON.stringify(newComment),
+    signal,
+  });
   return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
@@ -315,8 +315,8 @@ export const patchComment = async ({
   version: string;
   signal: AbortSignal;
   owner: string;
-}): Promise<Case> => {
-  const response = await KibanaServices.get().http.fetch<CaseResponse>(getCaseCommentsUrl(caseId), {
+}): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(getCaseCommentsUrl(caseId), {
     method: 'PATCH',
     body: JSON.stringify({
       comment: commentUpdate,
@@ -339,7 +339,7 @@ export const deleteComment = async ({
   commentId: string;
   signal: AbortSignal;
 }): Promise<void> => {
-  await KibanaServices.get().http.fetch<CaseResponse>(getCaseCommentDeleteUrl(caseId, commentId), {
+  await KibanaServices.get().http.fetch<Case>(getCaseCommentDeleteUrl(caseId, commentId), {
     method: 'DELETE',
     signal,
   });
@@ -358,8 +358,8 @@ export const pushCase = async (
   caseId: string,
   connectorId: string,
   signal: AbortSignal
-): Promise<Case> => {
-  const response = await KibanaServices.get().http.fetch<CaseResponse>(
+): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(
     getCasePushUrl(caseId, connectorId),
     {
       method: 'POST',
@@ -387,8 +387,8 @@ export const createAttachments = async (
   attachments: BulkCreateCommentRequest,
   caseId: string,
   signal: AbortSignal
-): Promise<Case> => {
-  const response = await KibanaServices.get().http.fetch<CaseResponse>(
+): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(
     INTERNAL_BULK_CREATE_ATTACHMENTS_URL.replace('{case_id}', caseId),
     {
       method: 'POST',
@@ -397,6 +397,22 @@ export const createAttachments = async (
     }
   );
   return convertCaseToCamelCase(decodeCaseResponse(response));
+};
+
+export const deleteFileAttachments = async ({
+  caseId,
+  fileIds,
+  signal,
+}: {
+  caseId: string;
+  fileIds: string[];
+  signal: AbortSignal;
+}): Promise<void> => {
+  await KibanaServices.get().http.fetch(getCasesDeleteFileAttachmentsUrl(caseId), {
+    method: 'POST',
+    body: JSON.stringify({ ids: fileIds }),
+    signal,
+  });
 };
 
 export const getFeatureIds = async (

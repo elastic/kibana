@@ -94,9 +94,7 @@ To open an existing index for drawing:
 
 . Select the data view that points to your index. A <<data-views, data view>> can point to one or more indices. For feature editing, the data view must point to a single index.
 
-. Click *Add layer*.
-
-. Click *Save & close*.
+. Click *Add and close*.
 
 . In the legend, click the layer name and select *Edit features*.
 

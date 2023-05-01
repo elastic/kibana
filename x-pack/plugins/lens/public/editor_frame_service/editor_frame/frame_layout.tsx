@@ -53,7 +53,7 @@ export function FrameLayout(props: FrameLayoutProps) {
             aria-labelledby="lns_ChartTitle"
           >
             <section
-              className={classNames('lnsFrameLayout__sidebar lnsFrameLayout__sidebar--left', {})}
+              className={'lnsFrameLayout__sidebar lnsFrameLayout__sidebar--left hide-for-sharing'}
               aria-labelledby="dataPanelId"
             >
               <EuiScreenReaderOnly>
@@ -79,12 +79,18 @@ export function FrameLayout(props: FrameLayoutProps) {
                 </h2>
               </EuiScreenReaderOnly>
               {props.workspacePanel}
-              <div className="lnsFrameLayout__suggestionPanel">{props.suggestionsPanel}</div>
+              <div className="lnsFrameLayout__suggestionPanel hide-for-sharing">
+                {props.suggestionsPanel}
+              </div>
             </section>
             <section
-              className={classNames('lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right', {
-                'lnsFrameLayout__sidebar-isFullscreen': isFullscreen,
-              })}
+              className={classNames(
+                'lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right',
+                'hide-for-sharing',
+                {
+                  'lnsFrameLayout__sidebar-isFullscreen': isFullscreen,
+                }
+              )}
               aria-labelledby="configPanel"
             >
               <EuiScreenReaderOnly>

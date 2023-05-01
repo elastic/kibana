@@ -19,6 +19,7 @@ import type {
   EntriesArray,
   ExceptionListItemType,
   ExceptionListItemTypeOrUndefined,
+  ExceptionListSchema,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
   ExpireTimeOrUndefined,
@@ -295,10 +296,12 @@ export interface CreateEndpointListItemOptions {
  * {@link ExceptionListClient.duplicateExceptionListAndItems}
  */
 export interface DuplicateExceptionListOptions {
-  /** The single list id to do the search against */
-  listId: ListId;
+  /** The list to be duplicated */
+  list: ExceptionListSchema;
   /** saved object namespace (single | agnostic) */
   namespaceType: NamespaceType;
+  /** determines whether exception items with an expired TTL are included in duplication */
+  includeExpiredExceptions: boolean;
 }
 
 /**

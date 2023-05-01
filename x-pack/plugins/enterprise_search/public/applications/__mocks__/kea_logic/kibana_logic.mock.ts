@@ -24,17 +24,18 @@ export const mockKibanaValues = {
     ),
   } as unknown as ApplicationStart,
   capabilities: {} as Capabilities,
-  config: { host: 'http://localhost:3002' },
   charts: chartPluginMock.createStartContract(),
   cloud: {
     ...cloudMock.createSetup(),
-    isCloudEnabled: false,
     deployment_url: 'https://cloud.elastic.co/deployments/some-id',
+    isCloudEnabled: false,
   },
+  config: { host: 'http://localhost:3002' },
   data: dataPluginMock.createStartContract(),
   guidedOnboarding: {},
   history: mockHistory,
   isCloud: false,
+  isSidebarEnabled: true,
   lens: {
     EmbeddableComponent: jest.fn(),
     stateHelperApi: jest.fn().mockResolvedValue({
@@ -44,20 +45,18 @@ export const mockKibanaValues = {
   navigateToUrl: jest.fn(),
   productAccess: {
     hasAppSearchAccess: true,
-    hasSearchEnginesAccess: false,
     hasWorkplaceSearchAccess: true,
   },
   productFeatures: {
     hasNativeConnectors: true,
-    hasSearchApplications: false,
     hasWebCrawler: true,
   },
-  uiSettings: uiSettingsServiceMock.createStartContract(),
+  renderHeaderActions: jest.fn(),
   security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),
   setChromeIsVisible: jest.fn(),
   setDocTitle: jest.fn(),
-  renderHeaderActions: jest.fn(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 jest.mock('../../shared/kibana', () => ({

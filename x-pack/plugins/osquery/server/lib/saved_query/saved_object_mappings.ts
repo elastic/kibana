@@ -7,6 +7,7 @@
 
 import { produce } from 'immer';
 import type { SavedObjectsType } from '@kbn/core/server';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
   savedQuerySavedObjectType,
   packSavedObjectType,
@@ -55,6 +56,7 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const savedQueryType: SavedObjectsType = {
   name: savedQuerySavedObjectType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: savedQuerySavedObjectMappings,
@@ -140,6 +142,7 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const packType: SavedObjectsType = {
   name: packSavedObjectType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: packSavedObjectMappings,
@@ -213,6 +216,7 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const packAssetType: SavedObjectsType = {
   name: packAssetSavedObjectType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   management: {
     importableAndExportable: true,

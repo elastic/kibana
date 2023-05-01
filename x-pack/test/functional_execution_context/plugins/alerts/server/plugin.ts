@@ -82,6 +82,9 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         await coreStart.elasticsearch.client.asInternalUser.ping();
         return { state: {} };
       },
+      validate: {
+        params: { validate: (params) => params },
+      },
     });
 
     const router = core.http.createRouter();

@@ -18,7 +18,6 @@ const isPageNameWithEmptyView = (currentName: string) => {
     SecurityPageName.timelines,
     SecurityPageName.overview,
     SecurityPageName.users,
-    SecurityPageName.kubernetes,
   ];
   return pageNamesWithEmptyView.includes(currentName);
 };

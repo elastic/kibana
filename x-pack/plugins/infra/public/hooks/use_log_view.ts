@@ -11,32 +11,33 @@ import { useCallback, useState } from 'react';
 import { waitFor } from 'xstate/lib/waitFor';
 import { LogViewAttributes, LogViewReference } from '../../common/log_views';
 import {
+  InitializeFromUrl,
+  UpdateContextInUrl,
+  ListenForUrlChanges,
+} from '../observability_logs/log_view_state/src/url_state_storage_service';
+import {
   createLogViewNotificationChannel,
   createLogViewStateMachine,
   DEFAULT_LOG_VIEW,
 } from '../observability_logs/log_view_state';
 import type { ILogViewsClient } from '../services/log_views';
 import { isDevMode } from '../utils/dev_mode';
-import { useKbnUrlStateStorageFromRouterContext } from '../utils/kbn_url_state_context';
-import { useKibanaContextForPlugin } from './use_kibana';
 
 export const useLogView = ({
   initialLogViewReference,
   logViews,
   useDevTools = isDevMode(),
+  initializeFromUrl,
+  updateContextInUrl,
+  listenForUrlChanges,
 }: {
   initialLogViewReference?: LogViewReference;
   logViews: ILogViewsClient;
   useDevTools?: boolean;
+  initializeFromUrl?: InitializeFromUrl;
+  updateContextInUrl?: UpdateContextInUrl;
+  listenForUrlChanges?: ListenForUrlChanges;
 }) => {
-  const {
-    services: {
-      notifications: { toasts: toastsService },
-    },
-  } = useKibanaContextForPlugin();
-
-  const urlStateStorage = useKbnUrlStateStorageFromRouterContext();
-
   const [logViewStateNotifications] = useState(() => createLogViewNotificationChannel());
 
   const logViewStateService = useInterpret(
@@ -47,8 +48,9 @@ export const useLogView = ({
         },
         logViews,
         notificationChannel: logViewStateNotifications,
-        toastsService,
-        urlStateStorage,
+        initializeFromUrl,
+        updateContextInUrl,
+        listenForUrlChanges,
       }),
     {
       devTools: useDevTools,

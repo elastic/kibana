@@ -228,6 +228,13 @@ const updateIndexSafe = async (
   index: string,
   mappings: MappingTypeMapping
 ) => {
+  // for now, remove from object so as not to update stream or data stream properties of the index until type and name
+  // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
+  // to skip updating and assume the value in the index mapping is correct
+  if (mappings && mappings.properties) {
+    delete mappings.properties.stream;
+    delete mappings.properties.data_stream;
+  }
   try {
     await esClient.indices.putMapping({
       index,

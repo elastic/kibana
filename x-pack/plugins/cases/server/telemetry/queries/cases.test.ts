@@ -7,12 +7,12 @@
 
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { ESCaseStatus } from '../../services/cases/types';
+import { CasePersistedStatus } from '../../common/types/case';
 import type {
   AttachmentAggregationResult,
   AttachmentFrameworkAggsResult,
   CaseAggregationResult,
-  FileAttachmentAggregationResult,
+  FileAttachmentAggregationResults,
 } from '../types';
 import { getCasesTelemetryData } from './cases';
 
@@ -99,7 +99,7 @@ describe('getCasesTelemetryData', () => {
         status: {
           buckets: [
             {
-              key: ESCaseStatus.OPEN,
+              key: CasePersistedStatus.OPEN,
               doc_count: 2,
             },
           ],
@@ -187,17 +187,65 @@ describe('getCasesTelemetryData', () => {
         ...attachmentFramework,
       };
 
-      const filesRes: FileAttachmentAggregationResult = {
+      const filesRes: FileAttachmentAggregationResults = {
         securitySolution: {
-          averageSize: 500,
+          averageSize: { value: 500 },
+          topMimeTypes: {
+            buckets: [
+              {
+                doc_count: 5,
+                key: 'image/png',
+              },
+              {
+                doc_count: 1,
+                key: 'application/json',
+              },
+            ],
+          },
         },
         observability: {
-          averageSize: 500,
+          averageSize: { value: 500 },
+          topMimeTypes: {
+            buckets: [
+              {
+                doc_count: 5,
+                key: 'image/png',
+              },
+              {
+                doc_count: 1,
+                key: 'application/json',
+              },
+            ],
+          },
         },
         cases: {
-          averageSize: 500,
+          averageSize: { value: 500 },
+          topMimeTypes: {
+            buckets: [
+              {
+                doc_count: 5,
+                key: 'image/png',
+              },
+              {
+                doc_count: 1,
+                key: 'application/json',
+              },
+            ],
+          },
         },
-        averageSize: 500,
+        averageSize: { value: 500 },
+        topMimeTypes: {
+          buckets: [
+            {
+              doc_count: 5,
+              key: 'image/png',
+            },
+            {
+              doc_count: 1,
+              key: 'application/json',
+            },
+          ],
+        },
       };
 
       mockFind(caseAggsResult);
@@ -259,6 +307,16 @@ describe('getCasesTelemetryData', () => {
               average,
               maxOnACase: 10,
               total,
+              topMimeTypes: [
+                {
+                  count: 5,
+                  name: 'image/png',
+                },
+                {
+                  count: 1,
+                  name: 'application/json',
+                },
+              ],
             },
           },
         };
@@ -644,6 +702,7 @@ describe('getCasesTelemetryData', () => {
                   },
                   "terms": Object {
                     "field": "cases-comments.attributes.externalReferenceAttachmentTypeId",
+                    "size": 10,
                   },
                 },
                 "persistableReferenceTypes": Object {
@@ -677,6 +736,7 @@ describe('getCasesTelemetryData', () => {
                   },
                   "terms": Object {
                     "field": "cases-comments.attributes.persistableStateAttachmentTypeId",
+                    "size": 10,
                   },
                 },
               },
@@ -717,6 +777,7 @@ describe('getCasesTelemetryData', () => {
               },
               "terms": Object {
                 "field": "cases-comments.attributes.externalReferenceAttachmentTypeId",
+                "size": 10,
               },
             },
             "observability": Object {
@@ -752,6 +813,7 @@ describe('getCasesTelemetryData', () => {
                   },
                   "terms": Object {
                     "field": "cases-comments.attributes.externalReferenceAttachmentTypeId",
+                    "size": 10,
                   },
                 },
                 "persistableReferenceTypes": Object {
@@ -785,6 +847,7 @@ describe('getCasesTelemetryData', () => {
                   },
                   "terms": Object {
                     "field": "cases-comments.attributes.persistableStateAttachmentTypeId",
+                    "size": 10,
                   },
                 },
               },
@@ -830,6 +893,7 @@ describe('getCasesTelemetryData', () => {
               },
               "terms": Object {
                 "field": "cases-comments.attributes.persistableStateAttachmentTypeId",
+                "size": 10,
               },
             },
             "securitySolution": Object {
@@ -865,6 +929,7 @@ describe('getCasesTelemetryData', () => {
                   },
                   "terms": Object {
                     "field": "cases-comments.attributes.externalReferenceAttachmentTypeId",
+                    "size": 10,
                   },
                 },
                 "persistableReferenceTypes": Object {
@@ -898,6 +963,7 @@ describe('getCasesTelemetryData', () => {
                   },
                   "terms": Object {
                     "field": "cases-comments.attributes.persistableStateAttachmentTypeId",
+                    "size": 10,
                   },
                 },
               },
@@ -1031,6 +1097,12 @@ describe('getCasesTelemetryData', () => {
                     "field": "file.attributes.size",
                   },
                 },
+                "topMimeTypes": Object {
+                  "terms": Object {
+                    "field": "file.attributes.mime_type",
+                    "size": 20,
+                  },
+                },
               },
               "filter": Object {
                 "term": Object {
@@ -1043,6 +1115,12 @@ describe('getCasesTelemetryData', () => {
                 "averageSize": Object {
                   "avg": Object {
                     "field": "file.attributes.size",
+                  },
+                },
+                "topMimeTypes": Object {
+                  "terms": Object {
+                    "field": "file.attributes.mime_type",
+                    "size": 20,
                   },
                 },
               },
@@ -1059,11 +1137,23 @@ describe('getCasesTelemetryData', () => {
                     "field": "file.attributes.size",
                   },
                 },
+                "topMimeTypes": Object {
+                  "terms": Object {
+                    "field": "file.attributes.mime_type",
+                    "size": 20,
+                  },
+                },
               },
               "filter": Object {
                 "term": Object {
                   "file.attributes.Meta.owner": "securitySolution",
                 },
+              },
+            },
+            "topMimeTypes": Object {
+              "terms": Object {
+                "field": "file.attributes.mime_type",
+                "size": 20,
               },
             },
           },
@@ -1072,7 +1162,7 @@ describe('getCasesTelemetryData', () => {
               Object {
                 "isQuoted": false,
                 "type": "literal",
-                "value": "file.attributes.Meta.caseId",
+                "value": "file.attributes.Meta.caseIds",
               },
               Object {
                 "type": "wildcard",

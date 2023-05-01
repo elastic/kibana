@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldCapsResponse, HealthStatus } from '@elastic/elasticsearch/lib/api/types';
+import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 
 export interface EnterpriseSearchEnginesResponse {
   count: number;
@@ -32,7 +32,6 @@ export interface EnterpriseSearchEngineIndex {
 }
 
 export interface EnterpriseSearchEngineFieldCapabilities {
-  field_capabilities: FieldCapsResponse;
   fields: SchemaField[];
   name: string;
   updated_at_millis: number;
@@ -47,7 +46,10 @@ export interface SchemaFieldIndex {
 }
 
 export interface SchemaField {
+  aggregatable: boolean;
   indices: SchemaFieldIndex[];
+  metadata_field?: boolean;
   name: string;
+  searchable: boolean;
   type: string;
 }

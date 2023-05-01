@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { GetPackagePoliciesResponse } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import type {
   ExceptionListItemSchema,
@@ -79,14 +80,11 @@ export const createPerPolicyArtifact = (name: string, body: object, policyId?: '
   });
 };
 
-export const yieldFirstPolicyID = () => {
-  return cy
-    .request({
-      method: 'GET',
-      url: `${PACKAGE_POLICY_API_ROOT}?page=1&perPage=1&kuery=ingest-package-policies.package.name: endpoint`,
-    })
-    .then(({ body }) => {
-      expect(body.items.length).to.be.least(1);
-      return body.items[0].id;
-    });
-};
+export const yieldFirstPolicyID = (): Cypress.Chainable<string> =>
+  request<GetPackagePoliciesResponse>({
+    method: 'GET',
+    url: `${PACKAGE_POLICY_API_ROOT}?page=1&perPage=1&kuery=ingest-package-policies.package.name: endpoint`,
+  }).then(({ body }) => {
+    expect(body.items.length).to.be.least(1);
+    return body.items[0].id;
+  });

@@ -5,29 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
-import type { VFC } from 'react';
-import React, { useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { HIGHLIGHTED_FIELDS_TEST_ID } from './test_ids';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 import { AlertSummaryView } from '../../../common/components/event_details/alert_summary_view';
 import { HIGHLIGHTED_FIELDS_TITLE } from './translations';
-import { HeaderSection } from '../../../common/components/header_section';
 import { useRightPanelContext } from '../context';
 import { RightPanelKey, RightPanelTableTabPath } from '..';
 
-export interface HighlightedFieldsProps {
-  /**
-   * Boolean to allow the component to be expanded or collapsed on first render
-   */
-  expanded?: boolean;
-}
-
-export const HighlightedFields: VFC<HighlightedFieldsProps> = ({ expanded = false }) => {
-  const [isPanelExpanded, setIsPanelExpanded] = useState(expanded);
-
+export const HighlightedFields: FC = () => {
   const { openRightPanel } = useExpandableFlyoutContext();
-  const { eventId, indexName, dataFormattedForFieldBrowser, browserFields } =
+  const { eventId, indexName, dataFormattedForFieldBrowser, browserFields, scopeId } =
     useRightPanelContext();
 
   const goToTableTab = useCallback(() => {
@@ -37,37 +27,36 @@ export const HighlightedFields: VFC<HighlightedFieldsProps> = ({ expanded = fals
       params: {
         id: eventId,
         indexName,
+        scopeId,
       },
     });
-  }, [eventId, indexName, openRightPanel]);
+  }, [eventId, indexName, openRightPanel, scopeId]);
 
   if (!dataFormattedForFieldBrowser || !browserFields || !eventId) {
-    return <></>;
+    return null;
   }
 
   return (
-    <EuiFlexGroup gutterSize="none" direction="column" data-test-subj={HIGHLIGHTED_FIELDS_TEST_ID}>
-      <HeaderSection
-        alignHeader="center"
-        hideSubtitle
-        outerDirection="row"
-        title={HIGHLIGHTED_FIELDS_TITLE}
-        titleSize="xs"
-        toggleQuery={setIsPanelExpanded}
-        toggleStatus={isPanelExpanded}
-      />
-      {isPanelExpanded && (
-        <AlertSummaryView
-          data={dataFormattedForFieldBrowser}
-          eventId={eventId}
-          browserFields={browserFields}
-          isDraggable={false}
-          scopeId={'global'}
-          title={HIGHLIGHTED_FIELDS_TITLE}
-          isReadOnly={false} // TODO: set properly
-          goToTable={goToTableTab}
-        />
-      )}
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_TITLE_TEST_ID}>
+        <EuiTitle size="xxs">
+          <h5>{HIGHLIGHTED_FIELDS_TITLE}</h5>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem data-test-subj={HIGHLIGHTED_FIELDS_DETAILS_TEST_ID}>
+        <EuiPanel hasBorder hasShadow={false}>
+          <AlertSummaryView // TODO consider using x-pack/plugins/security_solution/public/common/components/event_details/summary_view.tsx instead if the link to the table have to be removed
+            data={dataFormattedForFieldBrowser}
+            eventId={eventId}
+            browserFields={browserFields}
+            isDraggable={false}
+            scopeId={'global'}
+            title={''}
+            isReadOnly={false} // TODO: set properly
+            goToTable={goToTableTab}
+          />
+        </EuiPanel>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

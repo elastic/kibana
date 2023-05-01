@@ -15,7 +15,7 @@ import {
   createSessionStorageStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { ExploratoryView } from './exploratory_view';
 import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
@@ -39,12 +39,12 @@ export function ExploratoryViewPage({
   useSessionStorage = false,
 }: ExploratoryViewPageProps) {
   const {
-    services: { uiSettings, notifications, observability },
+    services: { uiSettings, notifications, observabilityShared },
   } = useKibana<ExploratoryViewPublicPluginsStart>();
 
   const history = useHistory();
 
-  const ObservabilityPageTemplate = observability.navigation.PageTemplate;
+  const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
   useTrackPageview({ app: 'observability-overview', path: 'exploratory-view' });
   useTrackPageview({
@@ -56,7 +56,7 @@ export function ExploratoryViewPage({
   useBreadcrumbs(
     [
       {
-        text: i18n.translate('xpack.exploratoryView.overview.exploratoryView', {
+        text: i18n.translate('xpack.exploratoryView.overview', {
           defaultMessage: 'Explore data',
         }),
       },
