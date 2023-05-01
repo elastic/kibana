@@ -106,8 +106,8 @@ describe('ZDT upgrades - mapping model version conflict', () => {
     expect(aliases).toEqual(['.kibana', '.kibana_8.8.0']);
 
     expect(mappingMeta.mappingVersions).toEqual({
-      foo: 2,
-      bar: 2,
+      foo: '10.2.0',
+      bar: '10.2.0',
     });
 
     const records = await parseLogFile(logFilePath);

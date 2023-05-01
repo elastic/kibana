@@ -81,12 +81,12 @@ describe('ZDT upgrades - running on a fresh cluster', () => {
 
     expect(mappingMeta).toEqual({
       docVersions: {
-        foo: 2,
-        bar: 1,
+        foo: '10.2.0',
+        bar: '10.1.0',
       },
       mappingVersions: {
-        foo: 2,
-        bar: 1,
+        foo: '10.2.0',
+        bar: '10.1.0',
       },
       migrationState: expect.objectContaining({
         convertingDocuments: false,

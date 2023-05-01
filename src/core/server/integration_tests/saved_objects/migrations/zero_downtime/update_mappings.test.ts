@@ -111,8 +111,8 @@ describe('ZDT upgrades - basic mapping update', () => {
     );
 
     expect(mappingMeta.mappingVersions).toEqual({
-      foo: 3,
-      bar: 2,
+      foo: '10.3.0',
+      bar: '10.2.0',
     });
 
     const records = await parseLogFile(logFilePath);

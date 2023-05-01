@@ -179,8 +179,8 @@ describe('ZDT upgrades - basic document migration', () => {
     );
 
     expect(mappingMeta.docVersions).toEqual({
-      sample_a: 2,
-      sample_b: 3,
+      sample_a: '10.2.0',
+      sample_b: '10.3.0',
     });
 
     const { saved_objects: sampleADocs } = await savedObjectsRepository.find({ type: 'sample_a' });
