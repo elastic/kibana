@@ -12,6 +12,8 @@ export type ApmApplicationMetricFields = Partial<{
   'system.process.memory.size': number;
   'system.memory.actual.free': number;
   'system.memory.total': number;
+  'system.process.cgroup.memory.mem.limit.bytes': number;
+  'system.process.cgroup.memory.mem.usage.bytes': number;
   'system.cpu.total.norm.pct': number;
   'system.process.memory.rss.bytes': number;
   'system.process.cpu.total.norm.pct': number;
@@ -22,6 +24,7 @@ export type ApmApplicationMetricFields = Partial<{
   'faas.timeout': number;
   'faas.coldstart_duration': number;
   'faas.duration': number;
+  'application.launch.time': number;
 }>;
 
 export type ApmUserAgentFields = Partial<{
@@ -88,6 +91,7 @@ export type ApmFields = Fields<{
     'error.grouping_key': string;
     'error.grouping_name': string;
     'error.id': string;
+    'error.type': string;
     'event.ingested': number;
     'event.name': string;
     'event.outcome': string;

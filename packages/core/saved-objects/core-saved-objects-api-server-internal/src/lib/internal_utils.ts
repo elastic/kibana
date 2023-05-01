@@ -144,6 +144,7 @@ export function getSavedObjectFromSource<T>(
     created_at: createdAt,
     coreMigrationVersion,
     typeMigrationVersion,
+    managed,
     migrationVersion = migrationVersionCompatibility === 'compatible' && typeMigrationVersion
       ? { [type]: typeMigrationVersion }
       : undefined,
@@ -169,6 +170,7 @@ export function getSavedObjectFromSource<T>(
     version: encodeHitVersion(doc),
     attributes: doc._source[type],
     references: doc._source.references || [],
+    managed,
   };
 }
 
@@ -271,4 +273,25 @@ export function normalizeNamespace(namespace?: string) {
  */
 export function getCurrentTime() {
   return new Date(Date.now()).toISOString();
+}
+
+/**
+ * Returns the managed boolean to apply to a document as it's managed value.
+ * For use by applications to modify behavior for managed saved objects.
+ * The behavior is as follows:
+ * If `optionsManaged` is set, it will override any existing `managed` value in all the documents being created
+ * If `optionsManaged` is not provided, then the documents are created with whatever may be assigned to their `managed` property
+ * or default to `false`.
+ *
+ * @internal
+ */
+
+export function setManaged({
+  optionsManaged,
+  objectManaged,
+}: {
+  optionsManaged?: boolean;
+  objectManaged?: boolean;
+}): boolean {
+  return optionsManaged ?? objectManaged ?? false;
 }

@@ -17,44 +17,6 @@ get:
           schema:
             type: object
             properties:
-              alerting_framework_heath:
-                type: object
-                description: This property has a typo. Use `alerting_framework_health` instead.
-                deprecated: true
-                properties:
-                  _deprecated:
-                    type: string
-                    example: "This state property has a typo, use \"alerting_framework_health\" instead."
-                  decryption_health:
-                    type: object
-                    properties:
-                      status:
-                        type: string
-                        example: ok
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: "2023-01-13T01:28:00.280Z"
-                  execution_health:
-                    type: object
-                    properties:
-                      status:
-                        type: string
-                        example: ok
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: "2023-01-13T01:28:00.280Z"
-                  read_health:
-                    type: object
-                    properties:
-                      status:
-                        type: string
-                        example: ok
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: "2023-01-13T01:28:00.280Z"
               alerting_framework_health:
                 type: object
                 description: >

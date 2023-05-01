@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+
+import { useLocation } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldText,
@@ -26,6 +26,8 @@ import {
   EuiTitle,
   EuiComboBoxOptionOption,
   EuiCallOut,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -33,14 +35,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../common/types/api';
 import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
-import { isNotNullish } from '../../../../../common/utils/is_not_nullish';
 
-import { CANCEL_BUTTON_LABEL } from '../../../shared/constants';
+import { CANCEL_BUTTON_LABEL, ESINDEX_QUERY_PARAMETER } from '../../../shared/constants';
 import { docLinks } from '../../../shared/doc_links';
 import { getErrorsFromHttpResponse } from '../../../shared/flash_messages/handle_api_errors';
 
-import { indexToOption, IndicesSelectComboBox } from './components/indices_select_combobox';
+import { parseQueryParams } from '../../../shared/query_params';
 
+import { indexToOption, IndicesSelectComboBox } from './components/indices_select_combobox';
 import { CreateEngineLogic } from './create_engine_logic';
 
 export interface CreateEngineFlyoutProps {
@@ -60,11 +62,18 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
     selectedIndices,
   } = useValues(CreateEngineLogic);
 
+  const { search } = useLocation() as unknown as Location;
+  const { ...params } = parseQueryParams(search);
+  const indexName = params[ESINDEX_QUERY_PARAMETER];
+
   const onIndicesChange = (
     selectedOptions: Array<EuiComboBoxOptionOption<ElasticsearchIndexWithIngestion>>
   ) => {
-    setSelectedIndices(selectedOptions.map((option) => option.value).filter(isNotNullish));
+    setSelectedIndices(selectedOptions.map((option) => option.label));
   };
+  useEffect(() => {
+    if (indexName && typeof indexName === 'string') setSelectedIndices([indexName]);
+  }, []);
 
   return (
     <EuiFlyout onClose={onClose} size="m">
@@ -72,7 +81,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
         <EuiTitle size="m">
           <h3>
             {i18n.translate('xpack.enterpriseSearch.content.engines.createEngine.headerTitle', {
-              defaultMessage: 'Create an engine',
+              defaultMessage: 'Create a Search Application',
             })}
           </h3>
         </EuiTitle>
@@ -81,7 +90,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.content.engines.createEngine.headerSubTitle"
-              defaultMessage="An engine allows your users to query data in your indices. Explore our {enginesDocsLink} to learn more!"
+              defaultMessage="Explore our {enginesDocsLink} to learn more!"
               values={{
                 enginesDocsLink: (
                   <EuiLink
@@ -92,7 +101,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.engines.createEngine.header.docsLink',
-                      { defaultMessage: 'Engines documentation' }
+                      { defaultMessage: 'Search Application documentation' }
                     )}
                   </EuiLink>
                 ),
@@ -107,7 +116,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
               color="danger"
               title={i18n.translate(
                 'xpack.enterpriseSearch.content.engines.createEngine.header.createError.title',
-                { defaultMessage: 'Error creating engine' }
+                { defaultMessage: 'Error creating search application' }
               )}
             >
               {getErrorsFromHttpResponse(createEngineError).map((errMessage, i) => (
@@ -118,44 +127,56 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
         )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiSteps
-          steps={[
-            {
-              children: (
-                <IndicesSelectComboBox
-                  fullWidth
-                  isDisabled={formDisabled}
-                  onChange={onIndicesChange}
-                  selectedOptions={selectedIndices.map(indexToOption)}
-                />
-              ),
-              status: indicesStatus,
-              title: i18n.translate(
-                'xpack.enterpriseSearch.content.engines.createEngine.selectIndices.title',
-                { defaultMessage: 'Select indices' }
-              ),
-            },
-            {
-              children: (
-                <EuiFieldText
-                  fullWidth
-                  disabled={formDisabled}
-                  placeholder={i18n.translate(
-                    'xpack.enterpriseSearch.content.engines.createEngine.nameEngine.placeholder',
-                    { defaultMessage: 'Engine name' }
-                  )}
-                  value={engineName}
-                  onChange={(e) => setEngineName(e.target.value)}
-                />
-              ),
-              status: engineNameStatus,
-              title: i18n.translate(
-                'xpack.enterpriseSearch.content.engines.createEngine.nameEngine.title',
-                { defaultMessage: 'Name your engine' }
-              ),
-            },
-          ]}
-        />
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow>
+            <EuiCallOut title="Technical Preview feature" color="warning" iconType="beaker">
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.engines.createEngine.technicalPreviewCallOut.title"
+                defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+              />
+            </EuiCallOut>
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <EuiSteps
+              steps={[
+                {
+                  children: (
+                    <IndicesSelectComboBox
+                      fullWidth
+                      isDisabled={formDisabled}
+                      onChange={onIndicesChange}
+                      selectedOptions={selectedIndices.map((index: string) => indexToOption(index))}
+                    />
+                  ),
+                  status: indicesStatus,
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.content.engines.createEngine.selectIndices.title',
+                    { defaultMessage: 'Select indices' }
+                  ),
+                },
+                {
+                  children: (
+                    <EuiFieldText
+                      fullWidth
+                      disabled={formDisabled}
+                      placeholder={i18n.translate(
+                        'xpack.enterpriseSearch.content.engines.createEngine.nameEngine.placeholder',
+                        { defaultMessage: 'Search application name' }
+                      )}
+                      value={engineName}
+                      onChange={(e) => setEngineName(e.target.value)}
+                    />
+                  ),
+                  status: engineNameStatus,
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.content.engines.createEngine.nameEngine.title',
+                    { defaultMessage: 'Name your search application' }
+                  ),
+                },
+              ]}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup>
@@ -171,7 +192,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
           <EuiFlexItem />
           <EuiFlexItem grow={false}>
             <EuiButton
-              disabled={createDisabled || formDisabled}
+              isDisabled={createDisabled || formDisabled}
               data-telemetry-id="entSearchContent-engines-createEngine-submit"
               fill
               iconType="plusInCircle"
@@ -180,7 +201,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
               }}
             >
               {i18n.translate('xpack.enterpriseSearch.content.engines.createEngine.submit', {
-                defaultMessage: 'Create this engine',
+                defaultMessage: 'Create',
               })}
             </EuiButton>
           </EuiFlexItem>

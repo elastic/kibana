@@ -1,23 +1,17 @@
 {
-  "description": "Security: Authentication - looks for an unusual user name in the authentication logs. An unusual user name is one way of detecting credentialed access by means of a new or dormant user account. A user account that is normally inactive, because the user has left the organization, which becomes active, may be due to credentialed access using a compromised account password. Threat actors will sometimes also create new users as a means of persisting in a compromised web application.",
-  "groups": [
-    "security",
-    "authentication"
-  ],
+  "description": "Security: Authentication - Looks for an unusual user name in the authentication logs. An unusual user name is one way of detecting credentialed access by means of a new or dormant user account. A user account that is normally inactive, because the user has left the organization, which becomes active, may be due to credentialed access using a compromised account password. Threat actors will sometimes also create new users as a means of persisting in a compromised web application.",
+  "groups": ["security", "authentication"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare user",
+        "detector_description": "Detects rare user authentication.",
         "function": "rare",
         "by_field_name": "user.name",
         "detector_index": 0
       }
     ],
-    "influencers": [
-      "source.ip",
-      "user.name"
-    ]
+    "influencers": ["source.ip", "user.name", "host.name"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -28,6 +22,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-auth",
-    "security_app_display_name": "Rare User Logon"
+    "security_app_display_name": "Rare User Logon",
+    "managed": true,
+    "job_revision": 4
   }
 }

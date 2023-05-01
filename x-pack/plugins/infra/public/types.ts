@@ -37,19 +37,24 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
   UseNodeMetricsTableOptions,
 } from './components/infrastructure_node_metrics_tables/shared';
+import { InventoryViewsServiceStart } from './services/inventory_views';
 import { LogViewsServiceStart } from './services/log_views';
+import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
 import { ITelemetryClient } from './services/telemetry';
 
 // Our own setup and start contract values
 export type InfraClientSetupExports = void;
 
 export interface InfraClientStartExports {
+  inventoryViews: InventoryViewsServiceStart;
   logViews: LogViewsServiceStart;
+  metricsExplorerViews: MetricsExplorerViewsServiceStart;
   telemetry: ITelemetryClient;
   ContainerMetricsTable: (
     props: UseNodeMetricsTableOptions & Partial<SourceProviderProps>
@@ -79,6 +84,7 @@ export interface InfraClientStartDeps {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  discover: DiscoverStart;
   embeddable?: EmbeddableStart;
   lens: LensPublicStart;
   ml: MlPluginStart;

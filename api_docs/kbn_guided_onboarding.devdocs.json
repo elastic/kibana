@@ -271,6 +271,27 @@
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/guided-onboarding",
+            "id": "def-common.GuideState.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/guided-onboarding",
+                "scope": "common",
+                "docId": "kibKbnGuidedOnboardingPluginApi",
+                "section": "def-common.GuideParams",
+                "text": "GuideParams"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -294,7 +315,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"rules\" | \"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\""
+              "\"rules\" | \"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\" | \"step4\""
             ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
@@ -336,7 +357,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"rules\" | \"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\""
+              "\"rules\" | \"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\" | \"step4\""
             ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
@@ -560,6 +581,21 @@
       },
       {
         "parentPluginId": "@kbn/guided-onboarding",
+        "id": "def-common.GuideParams",
+        "type": "Type",
+        "tags": [],
+        "label": "GuideParams",
+        "description": [],
+        "signature": [
+          "{ [x: string]: string; }"
+        ],
+        "path": "packages/kbn-guided-onboarding/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/guided-onboarding",
         "id": "def-common.GuideStatus",
         "type": "Type",
         "tags": [],
@@ -583,7 +619,7 @@
         "label": "GuideStepIds",
         "description": [],
         "signature": [
-          "\"rules\" | \"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\""
+          "\"rules\" | \"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\" | \"step4\""
         ],
         "path": "packages/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
@@ -757,7 +793,7 @@
             "label": "steps",
             "description": [],
             "signature": [
-              "({ id: \"step1\"; title: string; descriptionList: string[]; location: { appID: string; path: string; }; integration: string; } | { id: \"step2\"; title: string; descriptionList: (string | { descriptionText: string; linkText: string; linkUrl: string; isLinkExternal: true; })[]; location: { appID: string; path: string; }; manualCompletion: { title: string; description: string; readyToCompleteOnNavigation: true; }; } | { id: \"step3\"; title: string; description: string; manualCompletion: { title: string; description: string; }; location: { appID: string; path: string; }; })[]"
+              "({ id: \"step1\"; title: string; descriptionList: string[]; location: { appID: string; path: string; }; integration: string; } | { id: \"step2\"; title: string; descriptionList: (string | { descriptionText: string; linkText: string; linkUrl: string; isLinkExternal: true; })[]; location: { appID: string; path: string; }; manualCompletion: { title: string; description: string; readyToCompleteOnNavigation: true; }; } | { id: \"step3\"; title: string; description: string; manualCompletion: { title: string; description: string; }; location: { appID: string; path: string; }; } | { id: \"step4\"; title: string; description: string; location: { appID: string; path: string; }; })[]"
             ],
             "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
             "deprecated": false,

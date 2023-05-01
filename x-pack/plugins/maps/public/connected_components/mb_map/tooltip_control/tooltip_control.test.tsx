@@ -70,6 +70,9 @@ const mockLayer = {
       },
     } as unknown as IVectorSource;
   },
+  getMasks: () => {
+    return [];
+  },
 } as unknown as IVectorLayer;
 
 const mockMbMapHandlers: { [key: string]: (event?: MapMouseEvent) => void } = {};

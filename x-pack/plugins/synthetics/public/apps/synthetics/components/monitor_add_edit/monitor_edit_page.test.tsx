@@ -12,6 +12,10 @@ import { MonitorEditPage } from './monitor_edit_page';
 import { ConfigKey } from '../../../../../common/runtime_types';
 
 import * as observabilityPublic from '@kbn/observability-plugin/public';
+import {
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '../../../../../common/constants/monitor_defaults';
 
 mockGlobals();
 
@@ -45,6 +49,7 @@ describe('MonitorEditPage', () => {
           [ConfigKey.MONITOR_SOURCE_TYPE]: 'ui',
           [ConfigKey.FORM_MONITOR_TYPE]: 'multistep',
           [ConfigKey.LOCATIONS]: [],
+          [ConfigKey.THROTTLING_CONFIG]: PROFILES_MAP[PROFILE_VALUES_ENUM.DEFAULT],
         },
       },
       refetch: () => null,
