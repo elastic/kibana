@@ -8,10 +8,12 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Readable } from 'stream';
 import type { FileClient } from '@kbn/files-plugin/server';
-import { createEsFileClient } from '@kbn/files-plugin/server';
+import { createEsFileClient, createFileHashTransform } from '@kbn/files-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { v4 as uuidV4 } from 'uuid';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
+import assert from 'assert';
 import type { HapiReadableStream } from '../../../types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { FileUploadMetadata, UploadedFileInfo } from '../../../../common/endpoint/types';
@@ -197,7 +199,10 @@ interface UploadFileInternalStorageMeta {
 }
 
 interface CreateFileResponse {
-  file: Record<string, unknown>; // FIXME:PT type this
+  file: Pick<
+    Required<FileJSON<UploadFileInternalStorageMeta>>,
+    'id' | 'created' | 'updated' | 'name' | 'mimeType' | 'extension' | 'meta' | 'status'
+  > & { size: number; hash: { sha256: string } };
 }
 
 export const createFile = async ({
@@ -227,9 +232,37 @@ export const createFile = async ({
     },
   });
 
-  await uploadedFile.uploadContent(fileStream, undefined, {});
+  await uploadedFile.uploadContent(fileStream, undefined, {
+    transforms: [createFileHashTransform()],
+  });
+
+  const { name, created, meta, id, mimeType, size, status, extension, hash, updated } =
+    uploadedFile.toJSON();
+
+  assert(hash && hash.sha256, 'File hash was not generated~');
 
   return {
-    file: uploadedFile.toJSON(),
+    file: {
+      name,
+      created,
+      updated,
+      meta,
+      id,
+      mimeType,
+      status,
+      extension,
+      size: size ?? 0,
+      hash: { sha256: hash.sha256 },
+    },
   };
+};
+
+export const deleteFile = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  fileId: string
+): Promise<void> => {
+  const fileClient = getFileClient(esClient, logger);
+
+  await fileClient.delete({ id: fileId, hasContent: true });
 };
