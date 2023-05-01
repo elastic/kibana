@@ -19,7 +19,7 @@ function prefixPath(
 }
 
 export class ValidationError extends SchemaError {
-  private static extractMessage(error: z.ZodError, namespace?: string, level?: number) {
+  private static extractMessage(error: z.ZodError, namespace?: string) {
     let message: string = '';
     if (error.issues.length > 1) {
       error.issues.forEach((issue) => {
