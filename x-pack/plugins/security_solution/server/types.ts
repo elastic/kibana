@@ -60,5 +60,6 @@ export type SecuritySolutionPluginRouter = IRouter<SecuritySolutionRequestHandle
 export interface HapiReadableStream extends Readable {
   hapi: {
     filename: string;
+    headers: Record<string, string>;
   };
 }

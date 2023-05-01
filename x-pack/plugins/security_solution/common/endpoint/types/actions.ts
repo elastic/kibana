@@ -12,6 +12,7 @@ import type {
   NoParametersRequestSchema,
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
+  UploadActionRequestBody,
 } from '../schema/actions';
 import type {
   ResponseActionStatus,
@@ -475,3 +476,18 @@ export type UploadedFileInfo = Pick<
 export interface ActionFileInfoApiResponse {
   data: UploadedFileInfo;
 }
+
+/**
+ * The parameters that are sent to the Endpoint.
+ *
+ * NOTE: Most of the parameters below are NOT accepted via the API. They are inserted into
+ * the action's parameters via the API route handler
+ */
+export type UploadActionParams = UploadActionRequestBody['parameters'] & {
+  file: {
+    sha256: string;
+    size: number;
+    file_name: string;
+    file_id: string;
+  };
+};

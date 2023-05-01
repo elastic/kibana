@@ -11,6 +11,8 @@ import type { FileClient } from '@kbn/files-plugin/server';
 import { createEsFileClient } from '@kbn/files-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { v4 as uuidV4 } from 'uuid';
+import type { HapiReadableStream } from '../../../types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { FileUploadMetadata, UploadedFileInfo } from '../../../../common/endpoint/types';
 import { NotFoundError } from '../../errors';
@@ -20,13 +22,18 @@ import {
 } from '../../../../common/endpoint/constants';
 import { EndpointError } from '../../../../common/endpoint/errors';
 
-const getFileClient = (esClient: ElasticsearchClient, logger: Logger): FileClient => {
+const getFileClient = (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  maxSizeBytes?: number
+): FileClient => {
   return createEsFileClient({
     metadataIndex: FILE_STORAGE_METADATA_INDEX,
     blobStorageIndex: FILE_STORAGE_DATA_INDEX,
     elasticsearchClient: esClient,
     logger,
     indexIsAlias: true,
+    maxSizeBytes,
   });
 };
 
@@ -182,4 +189,47 @@ export const validateActionFileId = async (
   if (fileInfo.actionId !== actionId) {
     throw new CustomHttpRequestError(`Invalid file id [${fileId}] for action [${actionId}]`, 400);
   }
+};
+
+interface UploadFileInternalStorageMeta {
+  target_agents: string[];
+  action_id: string;
+}
+
+interface CreateFileResponse {
+  file: Record<string, unknown>; // FIXME:PT type this
+}
+
+export const createFile = async ({
+  esClient,
+  logger,
+  fileStream,
+  maxFileBytes,
+  agents,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  fileStream: HapiReadableStream;
+  maxFileBytes: number;
+  agents: string[];
+}): Promise<CreateFileResponse> => {
+  const fileClient = getFileClient(esClient, logger, maxFileBytes);
+
+  const uploadedFile = await fileClient.create<UploadFileInternalStorageMeta>({
+    id: uuidV4(),
+    metadata: {
+      name: fileStream.hapi.filename ?? 'unknown_file_name',
+      mime: fileStream.hapi.headers['content-type'] ?? 'application/octet-stream',
+      meta: {
+        target_agents: agents,
+        action_id: '', // Populated later once we have the action is created
+      },
+    },
+  });
+
+  await uploadedFile.uploadContent(fileStream, undefined, {});
+
+  return {
+    file: uploadedFile.toJSON(),
+  };
 };

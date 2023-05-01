@@ -245,9 +245,10 @@ export const UploadActionRequestSchema = {
     ...BaseActionRequestSchema,
 
     parameters: schema.object({
-      file: schema.stream(),
       overwrite: schema.maybe(schema.boolean()),
     }),
+
+    file: schema.stream(),
   }),
 };
 

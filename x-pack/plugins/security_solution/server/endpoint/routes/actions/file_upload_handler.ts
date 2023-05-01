@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { UploadActionParams } from '../../../../common/endpoint/types';
 import { UPLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import {
   type UploadActionRequestBody,
@@ -15,8 +16,10 @@ import { withEndpointAuthz } from '../with_endpoint_authz';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
+  HapiReadableStream,
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
+import { errorHandler } from '../error_handler';
 
 export const registerActionFileUploadRoute = (
   router: SecuritySolutionPluginRouter,
@@ -49,9 +52,57 @@ export const registerActionFileUploadRoute = (
 export const getActionFileUploadHandler = (
   endpointContext: EndpointAppContext
 ): RequestHandler<never, never, UploadActionRequestBody, SecuritySolutionRequestHandlerContext> => {
-  // responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
+  const logger = endpointContext.logFactory.get('uploadAction');
 
   return async (context, req, res) => {
-    return res.noContent();
+    const user = endpointContext.service.security?.authc.getCurrentUser(req);
+    const fileStream = req.body.file as HapiReadableStream;
+    const { file: _, parameters: userParams, ...actionPayload } = req.body;
+    const uploadParameters: UploadActionParams = {
+      ...actionPayload,
+      file: {
+        file_id: '',
+        file_name: '',
+        sha256: '',
+        size: 0,
+      },
+    };
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    try {
+      const casesClient = await endpointContext.service.getCasesClient(req);
+      const { action: actionId, ...data } = await endpointContext.service
+        .getActionCreateService()
+        .createAction(
+          {
+            ...actionPayload,
+            parameters: uploadParameters,
+            command: 'upload',
+            user,
+          },
+          casesClient
+        );
+
+      return res.ok({
+        body: {
+          action: actionId,
+          data,
+        },
+      });
+    } catch (err) {
+      // FIXME:PT delete file if one was created
+
+      return errorHandler(logger, res, err);
+    }
   };
 };
