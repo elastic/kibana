@@ -23,29 +23,38 @@ import {
 import type { FieldOptionValue } from '@kbn/visualization-ui-components/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
+import moment from 'moment';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 import {
   AvailableAnnotationIcon,
   EventAnnotationConfig,
+  PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
 } from '../../../common';
 import {
   defaultAnnotationColor,
   defaultAnnotationLabel,
   defaultAnnotationRangeColor,
+  defaultRangeAnnotationLabel,
+  toLineAnnotationColor,
 } from './helpers';
 import { annotationsIconSet } from './icon_set';
 import { sanitizeProperties } from './helpers';
 import { TooltipSection } from './tooltip_annotation_panel';
+import { ConfigPanelManualAnnotation } from './manual_annotation_panel';
 
 export const AnnotationsPanel = ({
   annotation: currentAnnotation,
   onAnnotationChange,
   dataView,
+  getDefaultRangeEnd,
+  calendarClassName,
 }: {
   annotation: EventAnnotationConfig;
   onAnnotationChange: (annotation: EventAnnotationConfig) => void;
   dataView: DataView;
+  getDefaultRangeEnd: (rangeStart: string) => string;
+  calendarClassName?: string;
   // datatableUtilities: DatatableUtilitiesService;
   // formatFactory: FormatFactory;
   // paletteService: PaletteRegistry;
@@ -71,7 +80,7 @@ export const AnnotationsPanel = ({
 
   return (
     <>
-      {/* <DimensionEditorSection
+      <DimensionEditorSection
         title={i18n.translate('xpack.lens.xyChart.placement', {
           defaultMessage: 'Placement',
         })}
@@ -148,24 +157,24 @@ export const AnnotationsPanel = ({
           />
         </EuiFormRow>
         {isQueryBased ? (
-          <ConfigPanelQueryAnnotation
-            annotation={currentAnnotation}
-            onChange={setAnnotations}
-            frame={frame}
-            state={state}
-            layer={localLayer}
-            queryInputShouldOpen={queryInputShouldOpen}
-          />
+          // <ConfigPanelQueryAnnotation
+          //   annotation={currentAnnotation}
+          //   onChange={setAnnotations}
+          //   frame={frame}
+          //   state={state}
+          //   layer={localLayer}
+          //   queryInputShouldOpen={queryInputShouldOpen}
+          // />
+          <div />
         ) : (
           <ConfigPanelManualAnnotation
             annotation={currentAnnotation}
-            onChange={setAnnotations}
-            datatableUtilities={props.datatableUtilities}
-            frame={frame}
-            state={state}
+            onChange={update}
+            getDefaultRangeEnd={getDefaultRangeEnd}
+            calendarClassName={calendarClassName}
           />
         )}
-      </DimensionEditorSection> */}
+      </DimensionEditorSection>
       <DimensionEditorSection
         title={i18n.translate('xpack.lens.xyChart.appearance', {
           defaultMessage: 'Appearance',

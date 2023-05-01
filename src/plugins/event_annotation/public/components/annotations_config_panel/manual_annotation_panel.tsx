@@ -11,15 +11,22 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { isRangeAnnotationConfig } from '../..';
-import { ConfigPanelRangeDatePicker } from './range_annotation_panel';
+import {
+  ConfigPanelApplyAsRangeSwitch,
+  ConfigPanelRangeDatePicker,
+} from './range_annotation_panel';
 import type { ManualEventAnnotationType } from './types';
 
 export const ConfigPanelManualAnnotation = ({
   annotation,
   onChange,
+  getDefaultRangeEnd,
+  calendarClassName,
 }: {
   annotation?: ManualEventAnnotationType | undefined;
   onChange: <T extends ManualEventAnnotationType>(annotation: Partial<T> | undefined) => void;
+  getDefaultRangeEnd: (rangeStart: string) => string;
+  calendarClassName: string | undefined;
 }) => {
   const isRange = isRangeAnnotationConfig(annotation);
   return (
@@ -28,6 +35,7 @@ export const ConfigPanelManualAnnotation = ({
         <>
           <ConfigPanelRangeDatePicker
             dataTestSubj="lns-xyAnnotation-fromTime"
+            calendarClassName={calendarClassName}
             prependLabel={i18n.translate('xpack.lens.xyChart.annotationDate.from', {
               defaultMessage: 'From',
             })}
@@ -61,6 +69,7 @@ export const ConfigPanelManualAnnotation = ({
           />
           <ConfigPanelRangeDatePicker
             dataTestSubj="lns-xyAnnotation-toTime"
+            calendarClassName={calendarClassName}
             prependLabel={i18n.translate('xpack.lens.xyChart.annotationDate.to', {
               defaultMessage: 'To',
             })}
@@ -93,6 +102,7 @@ export const ConfigPanelManualAnnotation = ({
       ) : (
         <ConfigPanelRangeDatePicker
           dataTestSubj="lns-xyAnnotation-time"
+          calendarClassName={calendarClassName}
           label={i18n.translate('xpack.lens.xyChart.annotationDate', {
             defaultMessage: 'Annotation date',
           })}
@@ -109,13 +119,11 @@ export const ConfigPanelManualAnnotation = ({
           }}
         />
       )}
-      {/* <ConfigPanelApplyAsRangeSwitch
+      <ConfigPanelApplyAsRangeSwitch
         annotation={annotation}
         onChange={onChange}
-        datatableUtilities={datatableUtilities}
-        frame={frame}
-        state={state}
-      /> */}
+        getDefaultRangeEnd={getDefaultRangeEnd}
+      />
     </>
   );
 };

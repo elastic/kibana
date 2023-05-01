@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
@@ -20,19 +19,18 @@ import {
 import moment from 'moment';
 import { isRangeAnnotationConfig } from '../..';
 import type { PointInTimeEventAnnotationConfig, RangeEventAnnotationConfig } from '../../../common';
-// import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../../utils';
 import { defaultRangeAnnotationLabel, defaultAnnotationLabel } from './helpers';
 import { toLineAnnotationColor, toRangeAnnotationColor } from './helpers';
 import type { ManualEventAnnotationType } from './types';
 
 export const ConfigPanelApplyAsRangeSwitch = ({
   annotation,
-  datatableUtilities,
   onChange,
+  getDefaultRangeEnd,
 }: {
   annotation?: ManualEventAnnotationType;
-  datatableUtilities: DatatableUtilitiesService;
   onChange: <T extends ManualEventAnnotationType>(annotations: Partial<T> | undefined) => void;
+  getDefaultRangeEnd: (rangeStart: string) => string;
 }) => {
   const isRange = isRangeAnnotationConfig(annotation);
   return (
@@ -65,19 +63,12 @@ export const ConfigPanelApplyAsRangeSwitch = ({
             };
             onChange(newPointAnnotation);
           } else if (annotation) {
-            const fromTimestamp = moment(annotation?.key.timestamp);
             const newRangeAnnotation: RangeEventAnnotationConfig = {
               type: 'manual',
               key: {
                 type: 'range',
                 timestamp: annotation.key.timestamp,
-                endTimestamp: '',
-                // endTimestamp: getEndTimestamp(
-                //   datatableUtilities,
-                //   fromTimestamp.toISOString(),
-                //   frame,
-                //   dataLayers
-                // ),
+                endTimestamp: getDefaultRangeEnd(annotation.key.timestamp),
               },
               id: annotation.id,
               label:
@@ -101,12 +92,14 @@ export const ConfigPanelRangeDatePicker = ({
   label,
   prependLabel,
   onChange,
+  calendarClassName,
   dataTestSubj = 'lnsXY_annotation_date_picker',
 }: {
   value: moment.Moment;
   prependLabel?: string;
   label?: string;
   onChange: (val: moment.Moment | null) => void;
+  calendarClassName: string | undefined;
   dataTestSubj?: string;
 }) => {
   return (
@@ -120,7 +113,7 @@ export const ConfigPanelRangeDatePicker = ({
           }
         >
           <EuiDatePicker
-            // calendarClassName={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+            calendarClassName={calendarClassName}
             fullWidth
             showTimeSelect
             selected={value}
@@ -131,7 +124,7 @@ export const ConfigPanelRangeDatePicker = ({
         </EuiFormControlLayout>
       ) : (
         <EuiDatePicker
-          // calendarClassName={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+          calendarClassName={calendarClassName}
           fullWidth
           showTimeSelect
           selected={value}

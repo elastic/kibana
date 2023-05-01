@@ -19,6 +19,7 @@
       "savedObjectsTagging",
     ],
     "requiredBundles": [
+      "data",
       "savedObjectsFinder",
       "dataViews",
       "kibanaReact",

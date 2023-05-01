@@ -163,6 +163,7 @@ export const GroupEditorControls = ({
       annotation={selectedAnnotation}
       onAnnotationChange={(changes) => setSelectedAnnotation({ ...selectedAnnotation, ...changes })}
       dataView={currentDataView}
+      getDefaultRangeEnd={(rangeStart) => rangeStart}
     />
   );
 };
