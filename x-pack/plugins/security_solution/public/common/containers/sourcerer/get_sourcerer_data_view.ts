@@ -15,18 +15,13 @@ export const getSourcererDataView = async (
 ) => {
   const dataViewData = await dataViewsService.get(dataViewId, true, refreshFields);
   const defaultPatternsList = ensurePatternFormat(dataViewData.getIndexPattern().split(','));
-  const patternList = defaultPatternsList.reduce((res: string[], pattern) => {
-    if (dataViewData.matchedIndices.find((q) => q.includes(pattern.replaceAll('*', '')))) {
-      res.push(pattern);
-    }
-    return res;
-  }, []);
+  const patternList = defaultPatternsList;
 
   return {
     id: dataViewData.id ?? '',
     title: dataViewData.getIndexPattern(),
     indexFields: dataViewData.fields,
-    fields: dataViewData.fields,
+    fields: { ...dataViewData.fields, ...dataViewData.getAllRuntimeFields() },
     patternList,
     dataView: dataViewData,
   };
