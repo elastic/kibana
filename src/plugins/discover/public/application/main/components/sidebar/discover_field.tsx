@@ -19,15 +19,12 @@ import {
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
-  FieldPopoverVisualize,
+  FieldPopoverFooter,
 } from '@kbn/unified-field-list-plugin/public';
 import { DragDrop } from '@kbn/dom-drag-drop';
 import { DiscoverFieldStats } from './discover_field_stats';
-import { DiscoverFieldDetails } from './deprecated_stats/discover_field_details';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { PLUGIN_ID, SHOW_LEGACY_FIELD_TOP_VALUES } from '../../../../../common';
+import { PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
-import { type DataDocuments$ } from '../../services/discover_data_state_container';
 
 interface GetCommonFieldItemButtonPropsParams {
   field: DataViewField;
@@ -112,10 +109,6 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
 
 export interface DiscoverFieldProps {
   /**
-   * hits fetched from ES, displayed in the doc table
-   */
-  documents$: DataDocuments$;
-  /**
    * Determines whether add/remove button is displayed not only when focused
    */
   alwaysShowActionButton?: boolean;
@@ -170,10 +163,6 @@ export interface DiscoverFieldProps {
   onDeleteField?: (fieldName: string) => void;
 
   /**
-   * Optionally show or hide field stats in the popover
-   */
-  showFieldStats?: boolean;
-  /**
    * Columns
    */
   contextualFields: string[];
@@ -195,7 +184,6 @@ export interface DiscoverFieldProps {
 }
 
 function DiscoverFieldComponent({
-  documents$,
   alwaysShowActionButton = false,
   field,
   highlight,
@@ -209,12 +197,10 @@ function DiscoverFieldComponent({
   multiFields,
   onEditField,
   onDeleteField,
-  showFieldStats,
   contextualFields,
   groupIndex,
   itemIndex,
 }: DiscoverFieldProps) {
-  const services = useDiscoverServices();
   const [infoIsOpen, setOpen] = useState(false);
   const isDocumentRecord = !!onAddFilter;
 
@@ -272,33 +258,18 @@ function DiscoverFieldComponent({
   );
 
   const renderPopover = () => {
-    const showLegacyFieldStats = services.uiSettings.get(SHOW_LEGACY_FIELD_TOP_VALUES);
-
     return (
       <>
-        {showLegacyFieldStats ? ( // TODO: Deprecate and remove after ~v8.7
-          <>
-            {showFieldStats && (
-              <DiscoverFieldDetails
-                documents$={documents$}
-                dataView={dataView}
-                field={field}
-                onAddFilter={onAddFilter}
-              />
-            )}
-          </>
-        ) : (
-          <DiscoverFieldStats
-            field={field}
-            multiFields={multiFields}
-            dataView={dataView}
-            onAddFilter={addFilterAndClosePopover}
-          />
-        )}
+        <DiscoverFieldStats
+          field={field}
+          multiFields={multiFields}
+          dataView={dataView}
+          onAddFilter={addFilterAndClosePopover}
+        />
 
         {multiFields && (
           <>
-            {(showFieldStats || !showLegacyFieldStats) && <EuiSpacer size="m" />}
+            <EuiSpacer size="m" />
             <MultiFields
               multiFields={multiFields}
               alwaysShowActionButton={alwaysShowActionButton}
@@ -307,7 +278,7 @@ function DiscoverFieldComponent({
           </>
         )}
 
-        <FieldPopoverVisualize
+        <FieldPopoverFooter
           field={field}
           dataView={dataView}
           multiFields={rawMultiFields}
@@ -315,6 +286,7 @@ function DiscoverFieldComponent({
           contextualFields={contextualFields}
           originatingApp={PLUGIN_ID}
           uiActions={getUiActions()}
+          closePopover={() => closePopover()}
         />
       </>
     );

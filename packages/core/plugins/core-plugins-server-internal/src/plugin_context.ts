@@ -260,6 +260,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       register: deps.uiSettings.register,
       registerGlobal: deps.uiSettings.registerGlobal,
     },
+    userSettings: {
+      setUserProfileSettings: deps.userSettings.setUserProfileSettings,
+    },
     getStartServices: () => plugin.startDependencies,
     deprecations: deps.deprecations.getRegistry(plugin.name),
     coreUsageData: {
