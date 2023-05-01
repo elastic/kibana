@@ -108,7 +108,7 @@ export class ReportingCore {
 
     this.getContract = () => ({
       usesUiCapabilities: () => syncConfig.roles.enabled === false,
-      registerExportType: this.exportTypesRegistry.register,
+      registerExportType: (id) => this.exportTypesRegistry.register(id),
     });
 
     this.executing = new Set();
