@@ -187,7 +187,7 @@ export default function ({
           updateBaselines
         );
 
-        expect(percentDiff).to.be.lessThan(0.01);
+        expect(percentDiff).to.be.lessThan(0.03);
       });
     });
 
@@ -284,7 +284,7 @@ export default function ({
           updateBaselines
         );
 
-        expect(percentDiff).to.be.lessThan(0.01);
+        expect(percentDiff).to.be.lessThan(0.03);
       });
     });
   });

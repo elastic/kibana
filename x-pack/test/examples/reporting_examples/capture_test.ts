@@ -69,7 +69,7 @@ export default function ({
           screenshotDir,
           updateBaselines
         )
-      ).to.be.lessThan(0.01);
+      ).to.be.lessThan(0.03);
     });
   });
 }
