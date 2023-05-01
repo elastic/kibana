@@ -43,18 +43,18 @@ describe('When navigating between pages', () => {
 
   it('should only load certain resources once', () => {
     cy.intercept('**/internal/apm/has_data').as('hasDataRequest');
+    cy.intercept('**/internal/apm/services/opbeans-java/metadata/icons**').as(
+      'serviceIconsRequest'
+    );
     cy.intercept('**/apm/fleet/has_apm_policies').as('apmPoliciesRequest');
 
     // Overview page
     cy.visitKibana(serviceOverview);
-    cy.getByTestSubj('apmMainTemplateHeaderServiceName').should(
-      'have.text',
-      'opbeans-java'
-    );
     cy.get('.euiTab-isSelected').should('have.text', 'Overview');
 
-    // it should load service icons once
+    // it should load resources once
     cy.get('@hasDataRequest.all').should('have.length', 1);
+    cy.get('@serviceIconsRequest.all').should('have.length', 1);
     cy.get('@apmPoliciesRequest.all').should('have.length', 1);
 
     // Navigate to errors page
@@ -65,8 +65,9 @@ describe('When navigating between pages', () => {
     cy.get('.euiLoadingChart').should('not.exist');
     cy.get('[data-test-subj="errorDistribution"]').should('exist');
 
-    // it should not load service icons again
+    // it should not load resources again
     cy.get('@hasDataRequest.all').should('have.length', 1);
+    cy.get('@serviceIconsRequest.all').should('have.length', 1);
     cy.get('@apmPoliciesRequest.all').should('have.length', 1);
   });
 });
