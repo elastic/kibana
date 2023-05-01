@@ -20,7 +20,7 @@ const isDismissed = () => localStorage.getItem(TEXT_EXPANSION_CALL_OUT_DISMISSED
 export const useTextExpansionCallOutData = ({
   isDismissable = false,
 }: TextExpansionCallOutProps): TextExpansionCallOutState => {
-  const { isCreateButtonDisabled } = useValues(TextExpansionCalloutLogic);
+  const { isCreateButtonDisabled, isStartButtonDisabled } = useValues(TextExpansionCalloutLogic);
 
   const [show, setShow] = useState<boolean>(() => {
     if (!isDismissable) return true;
@@ -50,6 +50,7 @@ export const useTextExpansionCallOutData = ({
     dismiss,
     isCreateButtonDisabled,
     isDismissable,
+    isStartButtonDisabled,
     show,
   };
 };
