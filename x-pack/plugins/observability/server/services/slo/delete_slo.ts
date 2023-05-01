@@ -45,8 +45,12 @@ export class DeleteSLO {
   }
 
   private async deleteAssociatedRules(sloId: string): Promise<void> {
-    await this.rulesClient.bulkDeleteRules({
-      filter: `alert.attributes.params.sloId:${sloId}`,
-    });
+    try {
+      await this.rulesClient.bulkDeleteRules({
+        filter: `alert.attributes.params.sloId:${sloId}`,
+      });
+    } catch (err) {
+      // no-op: bulkDeleteRules throws if no rules are found.
+    }
   }
 }
