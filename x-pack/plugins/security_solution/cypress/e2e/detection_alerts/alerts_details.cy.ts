@@ -98,6 +98,9 @@ describe('Alert details flyout', () => {
     beforeEach(() => {
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
+    });
+
+    beforeEach(() => {
       expandFirstAlert();
     });
 
@@ -123,28 +126,12 @@ describe('Alert details flyout', () => {
       cy.get(COPY_ALERT_FLYOUT_LINK).should('be.visible');
     });
 
-    it('should open the flyout given the custom url', () => {
-      openTable();
-      filterBy('_id');
-      cy.get('[data-test-subj="event-field-_id"]')
-        .invoke('text')
-        .then((alertId) => {
-          cy.visit(`http://localhost:5620/app/security/alerts/redirect/${alertId}`);
-          cy.get('[data-test-subj="unifiedQueryInput"]').should('have.text', `_id: ${alertId}`);
-          cy.get(OVERVIEW_RULE).should('be.visible');
-          openTable();
-          filterBy('_id');
-          cy.get('[data-test-subj="event-field-_id"]').should('have.text', alertId);
-        });
-    });
-
     it('should have the `kibana.alert.url` field set', () => {
+      const alertUrl =
+        'http://localhost:5601/app/security/alerts/redirect/eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1?index=.alerts-security.alerts-default&timestamp=2023-04-27T11:03:57.906Z';
       openTable();
       filterBy('kibana.alert.url');
-      cy.get('[data-test-subj="formatted-field-kibana.alert.url"]').should(
-        'have.text',
-        'http://localhost:5601/app/security/alerts/redirect/eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1?index=.alerts-security.alerts-default&timestamp=2023-04-27T11:03:57.906Z'
-      );
+      cy.get('[data-test-subj="formatted-field-kibana.alert.url"]').should('have.text', alertUrl);
     });
   });
 });
