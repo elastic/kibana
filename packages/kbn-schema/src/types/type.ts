@@ -79,7 +79,7 @@ export abstract class Type<V> {
     const result = this.internalSchema.safeParse(value);
 
     if (!result.success) {
-      throw new ValidationError(result.error.errors[0] as any, namespace);
+      throw new ValidationError(result.error, namespace);
     }
 
     return result.data;

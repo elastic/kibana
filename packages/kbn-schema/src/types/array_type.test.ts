@@ -50,23 +50,28 @@ test('includes namespace in failure when wrong item type', () => {
 
 test('fails if wrong type of content in array', () => {
   const type = schema.arrayOf(schema.string());
-  expect(() => type.validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
-    `"[0]: expected value of type [string] but got [number]"`
-  );
+  expect(() => type.validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(`
+    " - [0]: expected value of type [string] but got [number]
+     - [1]: expected value of type [string] but got [number]
+     - [2]: expected value of type [string] but got [number]"
+  `);
 });
 
 test('fails when parsing if wrong type of content in array', () => {
   const type = schema.arrayOf(schema.string());
-  expect(() => type.validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
-    `"[0]: expected value of type [string] but got [number]"`
-  );
+  expect(() => type.validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(`
+    " - [0]: expected value of type [string] but got [number]
+     - [1]: expected value of type [string] but got [number]
+     - [2]: expected value of type [string] but got [number]"
+  `);
 });
 
 test('fails if mixed types of content in array', () => {
   const type = schema.arrayOf(schema.string());
-  expect(() => type.validate(['foo', 'bar', true, {}])).toThrowErrorMatchingInlineSnapshot(
-    `"[2]: expected value of type [string] but got [boolean]"`
-  );
+  expect(() => type.validate(['foo', 'bar', true, {}])).toThrowErrorMatchingInlineSnapshot(`
+    " - [2]: expected value of type [string] but got [boolean]
+     - [3]: expected value of type [string] but got [Object]"
+  `);
 });
 
 test('fails for null values if optional', () => {
