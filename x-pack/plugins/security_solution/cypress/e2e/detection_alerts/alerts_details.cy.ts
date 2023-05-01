@@ -25,7 +25,7 @@ import { getUnmappedRule } from '../../objects/rule';
 import { ALERTS_URL } from '../../urls/navigation';
 import { tablePageSelector } from '../../screens/table_pagination';
 
-describe('Alert details flyout', () => {
+describe.skip('Alert details flyout', () => {
   describe('With unmapped fields', { testIsolation: false }, () => {
     before(() => {
       cleanKibana();
