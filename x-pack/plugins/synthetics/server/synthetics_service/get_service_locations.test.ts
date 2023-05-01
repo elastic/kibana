@@ -50,6 +50,7 @@ describe('getServiceLocations', function () {
             manifestUrl: 'http://local.dev',
             showExperimentalLocations: false,
           },
+          enabled: true,
         },
         // @ts-ignore
         logger: {
@@ -101,6 +102,7 @@ describe('getServiceLocations', function () {
             manifestUrl: 'http://local.dev',
             showExperimentalLocations: false,
           },
+          enabled: true,
         },
         // @ts-ignore
         logger: {
@@ -138,6 +140,7 @@ describe('getServiceLocations', function () {
             manifestUrl: 'http://local.dev',
             showExperimentalLocations: true,
           },
+          enabled: true,
         },
         // @ts-ignore
         logger: {
