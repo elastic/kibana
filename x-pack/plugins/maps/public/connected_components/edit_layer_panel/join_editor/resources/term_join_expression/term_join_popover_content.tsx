@@ -21,6 +21,10 @@ import { DataViewField } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDataViewSelectPlaceholder } from '../../../../../../common/i18n_getters';
 import { DEFAULT_MAX_BUCKETS_LIMIT } from '../../../../../../common/constants';
+import {
+  ESTermSourceDescriptor,
+  JoinSourceDescriptor,
+} from '../../../../../../common/descriptor_types';
 import { SingleFieldSelect } from '../../../../../components/single_field_select';
 import { ValidatedNumberInput } from '../../../../../components/validated_number_input';
 
@@ -38,8 +42,8 @@ interface Props {
   onLeftFieldChange: (leftField: string) => void;
 
   // Right source props
-  rightSourceIndexPatternId: string;
-  onRightSourceChange: (indexPatternId: string) => void;
+  sourceDescriptor: Partial<ESTermSourceDescriptor>;
+  onSourceDescriptorChange: (sourceDescriptor: Partial<JoinSourceDescriptor>) => void;
 
   // Right field props
   rightValue: string;
@@ -50,12 +54,16 @@ interface Props {
 }
 
 export function TermJoinPopoverContent(props: Props) {
-  function onRightSourceChange(indexPatternId?: string) {
+  function onRightDataViewChange(indexPatternId?: string) {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
 
-    props.onRightSourceChange(indexPatternId);
+    const { term, ...rest } = props.sourceDescriptor;
+    props.onSourceDescriptorChange({
+      ...rest,
+      indexPatternId,
+    });
   };
 
   function onLeftFieldChange(selectedFields: Array<EuiComboBoxOptionOption<JoinField>>) {
@@ -131,8 +139,8 @@ export function TermJoinPopoverContent(props: Props) {
       >
         <IndexPatternSelect
           placeholder={getDataViewSelectPlaceholder()}
-          indexPatternId={props.rightSourceIndexPatternId}
-          onChange={onRightSourceChange}
+          indexPatternId={props.sourceDescriptor.indexPatternId}
+          onChange={onRightDataViewChange}
           isClearable={false}
         />
       </EuiFormRow>

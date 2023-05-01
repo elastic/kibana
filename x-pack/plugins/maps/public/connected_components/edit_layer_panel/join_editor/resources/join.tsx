@@ -20,6 +20,7 @@ import {
   AggDescriptor,
   ESTermSourceDescriptor,
   JoinDescriptor,
+  JoinSourceDescriptor,
 } from '../../../../../common/descriptor_types';
 import { ILayer } from '../../../../classes/layers/layer';
 
@@ -95,22 +96,25 @@ export class Join extends Component<Props, State> {
     });
   };
 
-  _onRightSourceChange = (indexPatternId: string) => {
-    this.setState({
-      rightFields: [],
-      loadError: undefined,
-    });
-    this._loadRightFields(indexPatternId);
-    const { term, ...restOfRight } = this.props.join.right as ESTermSourceDescriptor;
+  _onRightSourceDescriptorChange = (sourceDescriptor: Partial<JoinSourceDescriptor>) => {
+    if (this.state.indexPattern?.id !== sourceDescriptor.indexPatternId) {
+      this.setState({
+        indexPattern: undefined,
+        rightFields: [],
+        loadError: undefined,
+      });
+      if (sourceDescriptor.indexPatternId) {
+        this._loadRightFields(sourceDescriptor.indexPatternId);
+      }
+    }
+
     this.props.onChange({
       leftField: this.props.join.leftField,
       right: {
-        ...restOfRight,
-        indexPatternId,
-        type: SOURCE_TYPES.ES_TERM_SOURCE,
-      } as ESTermSourceDescriptor,
+        ...sourceDescriptor,
+      },
     });
-  };
+  }
 
   _onRightFieldChange = (term?: string) => {
     this.props.onChange({
@@ -175,7 +179,7 @@ export class Join extends Component<Props, State> {
   render() {
     const { join, onRemove, leftFields, leftSourceName } = this.props;
     const { rightFields, indexPattern } = this.state;
-    const right = _.get(join, 'right', {}) as ESTermSourceDescriptor;
+    const right = join?.right ?? {} as Partial<JoinSourceDescriptor>;
     const rightSourceName = indexPattern ? indexPattern.getName() : right.indexPatternId;
     const isJoinConfigComplete = join.leftField && right.indexPatternId && right.term;
 
@@ -240,9 +244,9 @@ export class Join extends Component<Props, State> {
               leftValue={join.leftField}
               leftFields={leftFields}
               onLeftFieldChange={this._onLeftFieldChange}
-              rightSourceIndexPatternId={right.indexPatternId}
+              sourceDescriptor={right as ESTermSourceDescriptor}
+              onSourceDescriptorChange={this._onRightSourceDescriptorChange}
               rightSourceName={rightSourceName}
-              onRightSourceChange={this._onRightSourceChange}
               rightValue={right.term}
               rightSize={right.size}
               rightFields={rightFields}

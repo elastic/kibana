@@ -13,6 +13,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
+import {
+  ESTermSourceDescriptor,
+  JoinSourceDescriptor,
+} from '../../../../../../common/descriptor_types';
 import type { JoinField } from '../../join_editor';
 import { TermJoinPopoverContent } from './term_join_popover_content';
 
@@ -26,9 +30,10 @@ interface Props {
   onLeftFieldChange: (leftField: string) => void;
 
   // Right source props
-  rightSourceIndexPatternId: string;
+  sourceDescriptor: Partial<ESTermSourceDescriptor>;
+  onSourceDescriptorChange: (sourceDescriptor: Partial<JoinSourceDescriptor>) => void;
+
   rightSourceName: string;
-  onRightSourceChange: (indexPatternId: string) => void;
 
   // Right field props
   rightValue: string;
@@ -109,8 +114,8 @@ export class TermJoinExpression extends Component<Props, State> {
           leftValue={this.props.leftValue}
           leftFields={this.props.leftFields}
           onLeftFieldChange={this.props.onLeftFieldChange}
-          rightSourceIndexPatternId={this.props.rightSourceIndexPatternId}
-          onRightSourceChange={this.props.onRightSourceChange}
+          sourceDescriptor={this.props.sourceDescriptor}
+          onSourceDescriptorChange={this.props.onSourceDescriptorChange}
           rightValue={this.props.rightValue}
           rightSize={this.props.rightSize}
           rightFields={this.props.rightFields}
