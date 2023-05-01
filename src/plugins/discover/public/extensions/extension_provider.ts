@@ -10,9 +10,9 @@ import { createContext, useContext, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isFunction } from 'lodash';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import type { RegisterExtensions } from '../plugin';
 import { createExtensionRegistry, DiscoverExtensionId, DiscoverExtensionRegistry } from '.';
 import type { DiscoverStateContainer } from '../application/main/services/discover_state';
+import type { RegisterExtensions } from './types';
 
 const extensionContext = createContext<DiscoverExtensionRegistry>(createExtensionRegistry());
 

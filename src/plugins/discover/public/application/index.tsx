@@ -11,16 +11,16 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { DiscoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
-import type { RegisterExtensions } from '../plugin';
+import type { DiscoverProfileRegistry } from '../extensions/profile_registry';
 
 export interface RenderAppProps {
   element: HTMLElement;
   services: DiscoverServices;
-  registerExtensionsMap: Map<string, RegisterExtensions[]>;
+  profileRegistry: DiscoverProfileRegistry;
   isDev: boolean;
 }
 
-export const renderApp = ({ element, services, registerExtensionsMap, isDev }: RenderAppProps) => {
+export const renderApp = ({ element, services, profileRegistry, isDev }: RenderAppProps) => {
   const { history: getHistory, capabilities, chrome, data, core } = services;
 
   const history = getHistory();
@@ -39,7 +39,7 @@ export const renderApp = ({ element, services, registerExtensionsMap, isDev }: R
     wrapWithTheme(
       <DiscoverRouter
         services={services}
-        registerExtensionsMap={registerExtensionsMap}
+        profileRegistry={profileRegistry}
         history={history}
         isDev={isDev}
       />,
