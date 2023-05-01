@@ -78,7 +78,7 @@ describe('getFileType', () => {
       expect(actions[0]).toStrictEqual({
         type: AttachmentActionType.CUSTOM,
         isPrimary: false,
-        label: 'Download File',
+        label: 'Download file',
         render: expect.any(Function),
       });
 
