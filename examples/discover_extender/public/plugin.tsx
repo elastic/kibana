@@ -29,6 +29,39 @@ export class DiscoverExtenderPlugin implements Plugin {
   start(core: CoreStart, plugins: DiscoverExtenderStartPlugins) {
     const { discover } = plugins;
 
+    discover.registerExtensions('default', ({ extensions, stateContainer }) => {
+      extensions.set({
+        id: 'top_nav',
+        defaultMenu: {
+          options: { order: 100 },
+          new: { order: 200 },
+          open: { order: 300 },
+          share: { order: 400 },
+          alerts: { order: 500 },
+          inspect: { order: 600 },
+          save: { order: 800 },
+        },
+        getMenuItems: () => [
+          {
+            data: {
+              id: 'logsExplorer',
+              label: 'Logs explorer',
+              iconType: 'logsApp',
+              run: () => {
+                // stateContainer.appState.update({ profile: 'extender' });
+              },
+            },
+            order: 700,
+          },
+        ],
+      });
+
+      return () => {
+        // eslint-disable-next-line no-console
+        console.log('Cleaning up Document explorer extensions');
+      };
+    });
+
     let isOptionsOpen = false;
     const optionsContainer = document.createElement('div');
     const closeOptionsPopover = () => {
@@ -37,7 +70,7 @@ export class DiscoverExtenderPlugin implements Plugin {
       isOptionsOpen = false;
     };
 
-    discover.registerExtensions(async ({ extensions, stateContainer }) => {
+    discover.registerExtensions('extender', async ({ extensions, stateContainer }) => {
       extensions.set({
         id: 'top_nav',
         defaultMenu: {
@@ -113,16 +146,7 @@ export class DiscoverExtenderPlugin implements Plugin {
               label: 'Document explorer',
               iconType: 'discoverApp',
               run: () => {
-                extensions.disable('top_nav');
-                extensions.disable('search_bar');
-                extensions.disable('field_popover');
-                extensions.disable('data_grid');
-                setTimeout(() => {
-                  extensions.enable('top_nav');
-                  extensions.enable('search_bar');
-                  extensions.enable('field_popover');
-                  extensions.enable('data_grid');
-                }, 5000);
+                // stateContainer.appState.update({ profile: 'default' });
               },
             },
             order: 300,
@@ -217,7 +241,7 @@ export class DiscoverExtenderPlugin implements Plugin {
 
       return () => {
         // eslint-disable-next-line no-console
-        console.log('Cleaning up Discover extensions');
+        console.log('Cleaning up Logs explorer extensions');
       };
     });
   }

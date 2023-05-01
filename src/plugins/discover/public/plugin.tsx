@@ -166,7 +166,7 @@ export interface DiscoverStart {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly registerExtensions: (register: RegisterExtensions) => void;
+  readonly registerExtensions: (profile: string, register: RegisterExtensions) => void;
 }
 
 /**
@@ -221,7 +221,7 @@ export class DiscoverPlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
-  private registerExtensions: RegisterExtensions[] = [];
+  private registerExtensionsMap = new Map<string, RegisterExtensions[]>();
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
@@ -346,7 +346,7 @@ export class DiscoverPlugin
         const unmount = renderApp({
           element: params.element,
           services,
-          registerExtensions: this.registerExtensions,
+          registerExtensionsMap: this.registerExtensionsMap,
           isDev,
         });
         return () => {
@@ -409,8 +409,10 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      registerExtensions: (register: RegisterExtensions) => {
-        this.registerExtensions.push(register);
+      registerExtensions: (profile: string, register: RegisterExtensions) => {
+        const registerExtensions = this.registerExtensionsMap.get(profile) || [];
+        registerExtensions.push(register);
+        this.registerExtensionsMap.set(profile, registerExtensions);
       },
     };
   }
