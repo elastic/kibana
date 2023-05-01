@@ -160,6 +160,7 @@ describe('Fetch', () => {
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'content-type': 'application/json',
         'kbn-version': 'VERSION',
+        'x-elastic-internal-origin': 'Kibana',
         myheader: 'foo',
       });
     });
@@ -168,7 +169,11 @@ describe('Fetch', () => {
       fetchMock.get('*', {});
       await expect(
         fetchInstance.fetch('/my/path', {
-          headers: { myHeader: 'foo', 'kbn-version': 'CUSTOM!' },
+          headers: {
+            myHeader: 'foo',
+            'kbn-version': 'CUSTOM!',
+            'x-elastic-internal-origin': 'Kibana',
+          },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-version]"`
@@ -310,6 +315,7 @@ describe('Fetch', () => {
         headers: {
           'content-type': 'application/json',
           'kbn-version': 'VERSION',
+          'x-elastic-internal-origin': 'Kibana',
         },
       });
     });

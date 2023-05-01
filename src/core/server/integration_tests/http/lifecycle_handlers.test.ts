@@ -25,6 +25,7 @@ const nameHeader = 'kbn-name';
 const allowlistedTestPath = '/xsrf/test/route/whitelisted';
 const xsrfDisabledTestPath = '/xsrf/test/route/disabled';
 const kibanaName = 'my-kibana-name';
+const internalProductHeader = 'x-elastic-internal-origin';
 const setupDeps = {
   context: contextServiceMock.createSetupContract(),
   executionContext: executionContextServiceMock.createInternalSetupContract(),

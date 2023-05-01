@@ -18,8 +18,7 @@ export interface IHttpConfig {
   cors: ICorsConfig;
   ssl: ISslConfig;
   shutdownTimeout: Duration;
-  // do not allow external requests for internal APIs
-  enforceInternalRequest: boolean;
+  restrictInternalApis: boolean;
 }
 
 export interface ICorsConfig {

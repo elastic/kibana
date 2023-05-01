@@ -347,7 +347,11 @@ describe('throwIfAnyTypeNotVisibleByAPI', () => {
 
 describe('logWarnOnExternalRequest', () => {
   let logger: MockedLogger;
-  const firstPartyRequestHeaders = { 'kbn-version': 'a', referer: 'b' };
+  const firstPartyRequestHeaders = {
+    'kbn-version': 'a',
+    referer: 'b',
+    'x-elastic-internal-origin': 'foo',
+  };
   const kibRequest = httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders });
   const extRequest = httpServerMock.createKibanaRequest();
 

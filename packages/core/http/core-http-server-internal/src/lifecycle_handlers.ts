@@ -39,17 +39,19 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
     return toolkit.next();
   };
 };
-// TODO: implement check to ensure the required header is present on requests to internal routes. See https://github.com/elastic/kibana/issues/151940
-// validates the incomming request has the required header if route options access === internal
+
 export const createRestrictInternalRoutesPostAuthHandler = (
   config: HttpConfig
 ): OnPostAuthHandler => {
-  const isProductRequestEnforced = config.enforceInternalRequest;
+  const isRestrictionEnabled = config.restrictInternalApis;
 
   return (request, response, toolkit) => {
     const isInternalRoute = request.route.options.access === 'internal';
+
+    // only check if the header is present, not it's content.
     const hasInternalKibanaRequestHeader = INTERNAL_ACCESS_REQUEST in request.headers;
-    if (isProductRequestEnforced && isInternalRoute && !hasInternalKibanaRequestHeader) {
+
+    if (isRestrictionEnabled && isInternalRoute && !hasInternalKibanaRequestHeader) {
       // throw 400
       return response.badRequest({
         body: `uri [${request.url}] with method [${request.route.method}] exists but is not available with the current configuration`,

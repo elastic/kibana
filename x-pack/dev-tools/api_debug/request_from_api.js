@@ -9,6 +9,7 @@ import fetch from 'node-fetch';
 import { resolve } from 'path';
 import abab from 'abab';
 import pkg from '../../package.json';
+import { INTERNAL_ACCESS_REQUEST } from '@kbn/core-http-common/src/constants';
 
 function getRequestParams(argv) {
   // use `--host=https://somedomain.com:5601` or else http://localhost:5601 is defaulted
@@ -32,6 +33,7 @@ function getRequestHeaders(auth) {
     'kbn-version': pkg.version,
     'Content-Type': 'application/json',
     Authorization: auth,
+    [INTERNAL_ACCESS_REQUEST]: 'kibana',
   };
 }
 
