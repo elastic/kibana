@@ -4890,6 +4890,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/schema@link:packages/kbn-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/screenshot-mode-example-plugin@link:examples/screenshot_mode_example":
   version "0.0.0"
   uid ""
@@ -5021,7 +5025,7 @@
 "@kbn/server-route-repository@link:packages/kbn-server-route-repository":
   version "0.0.0"
   uid ""
-  
+
 "@kbn/serverless-observability@link:x-pack/plugins/serverless_observability":
   version "0.0.0"
   uid ""
@@ -5030,15 +5034,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/serverless-search@link:x-pack/plugins/serverless_search":
+  version "0.0.0"
+  uid ""
+
 "@kbn/serverless-storybook-config@link:packages/serverless/storybook/config":
   version "0.0.0"
   uid ""
 
 "@kbn/serverless-types@link:packages/serverless/types":
-  version "0.0.0"
-  uid ""
-
-"@kbn/serverless-search@link:x-pack/plugins/serverless_search":
   version "0.0.0"
   uid ""
 
