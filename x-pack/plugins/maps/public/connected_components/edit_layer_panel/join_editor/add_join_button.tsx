@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
 export interface Props {
-  disabledReason: string;
+  disabledReason: ReactNode;
   isDisabled: boolean;
   label: string;
   onClick: () => void;

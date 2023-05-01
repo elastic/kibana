@@ -164,7 +164,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     return false;
   }
 
-  showJoinEditor() {
+  supportsJoins() {
     return false;
   }
 

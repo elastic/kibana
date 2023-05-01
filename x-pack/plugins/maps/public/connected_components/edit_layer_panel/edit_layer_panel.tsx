@@ -112,7 +112,7 @@ export class EditLayerPanel extends Component<Props, State> {
     }
 
     const vectorLayer = this.props.selectedLayer as IVectorLayer;
-    if (!vectorLayer.showJoinEditor() || vectorLayer.getLeftJoinFields === undefined) {
+    if (!vectorLayer.getSource().supportsJoins() || vectorLayer.getLeftJoinFields === undefined) {
       return;
     }
 
@@ -184,7 +184,7 @@ export class EditLayerPanel extends Component<Props, State> {
       return;
     }
     const vectorLayer = this.props.selectedLayer as IVectorLayer;
-    if (!vectorLayer.showJoinEditor()) {
+    if (!vectorLayer.getSource().supportsJoins()) {
       return null;
     }
 

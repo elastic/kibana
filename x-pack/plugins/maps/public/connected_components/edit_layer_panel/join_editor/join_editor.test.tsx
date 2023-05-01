@@ -17,11 +17,7 @@ class MockLayer {
   constructor(disableReason: string | null) {
     this._disableReason = disableReason;
   }
-
-  getJoinsDisabledReason() {
-    return this._disableReason;
-  }
-
+  
   getSource() {
     return {
       isMvt: () => {

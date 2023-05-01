@@ -205,7 +205,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     }
   }
 
-  showJoinEditor(): boolean {
+  supportsJoins(): boolean {
     return false;
   }
 

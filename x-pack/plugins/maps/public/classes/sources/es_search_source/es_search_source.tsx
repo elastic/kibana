@@ -801,16 +801,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     };
   }
 
-  getJoinsDisabledReason(): string | null {
-    let reason;
-    if (this._descriptor.scalingType === SCALING_TYPES.CLUSTERS) {
-      reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReason', {
-        defaultMessage: 'Joins are not supported when scaling by clusters',
-      });
-    } else {
-      reason = null;
-    }
-    return reason;
+  supportsJoins(): boolean {
+    // can only join with features, not aggregated clusters
+    return this._descriptor.scalingType !== SCALING_TYPES.CLUSTERS
   }
 
   async _getEditableIndex(): Promise<string> {

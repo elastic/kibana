@@ -106,8 +106,7 @@ export interface IVectorSource extends ISource {
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField | null;
   getLeftJoinFields(): Promise<IField[]>;
-  showJoinEditor(): boolean;
-  getJoinsDisabledReason(): string | null;
+  supportsJoins(): boolean;
 
   /*
    * Vector layer avoids unnecessarily re-fetching source data.
@@ -189,10 +188,6 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [];
   }
 
-  getJoinsDisabledReason(): string | null {
-    return null;
-  }
-
   async getGeoJsonWithMeta(
     layerName: string,
     requestMeta: VectorSourceRequestMeta,
@@ -227,7 +222,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return false;
   }
 
-  showJoinEditor() {
+  supportsJoins() {
     return true;
   }
 

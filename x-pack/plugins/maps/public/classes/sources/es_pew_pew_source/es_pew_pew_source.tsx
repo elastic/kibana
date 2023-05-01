@@ -88,7 +88,7 @@ export class ESPewPewSource extends AbstractESAggSource {
     return true;
   }
 
-  showJoinEditor() {
+  supportsJoins() {
     return false;
   }
 

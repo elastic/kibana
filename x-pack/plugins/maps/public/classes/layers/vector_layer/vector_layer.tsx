@@ -92,7 +92,6 @@ export interface IVectorLayer extends ILayer {
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getJoins(): InnerJoin[];
-  getJoinsDisabledReason(): string | null;
   getValidJoins(): InnerJoin[];
   getSource(): IVectorSource;
   getFeatureId(feature: Feature): string | number | undefined;
@@ -102,7 +101,6 @@ export interface IVectorLayer extends ILayer {
     executionContext: KibanaExecutionContext
   ): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
-  showJoinEditor(): boolean;
   canShowTooltip(): boolean;
   areTooltipsDisabled(): boolean;
   supportsFeatureEditing(): boolean;
@@ -252,10 +250,6 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     return this._joins.slice();
   }
 
-  getJoinsDisabledReason() {
-    return this.getSource().getJoinsDisabledReason();
-  }
-
   getValidJoins() {
     return this.getJoins().filter((join) => {
       return join.hasCompleteConfig();
@@ -270,10 +264,6 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
   hasJoins() {
     return this.getValidJoins().length > 0;
-  }
-
-  showJoinEditor(): boolean {
-    return this.getSource().showJoinEditor();
   }
 
   isLayerLoading() {
