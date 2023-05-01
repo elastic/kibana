@@ -572,7 +572,7 @@ export const UPCOMING = i18n.translate('xpack.alerting.maintenanceWindows.upcomi
 export const UPGRADE_TO_PLATINUM = i18n.translate(
   'xpack.alerting.maintenanceWindows.licenseCallout.updgradeToPlatinumTitle',
   {
-    defaultMessage: 'Maintenance Windows are a subscription feature.',
+    defaultMessage: 'Maintenance windows are a subscription feature',
   }
 );
 
