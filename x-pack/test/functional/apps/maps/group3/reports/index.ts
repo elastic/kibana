@@ -12,6 +12,7 @@ const REPORTS_FOLDER = __dirname;
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
+  const browser = getService('browser');
   const config = getService('config');
   const log = getService('log');
   const reporting = getService('reporting');
@@ -49,11 +50,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     };
 
+    before(async () => {
+      await browser.setWindowSize(1600, 1000);
+    });
+
     after(async () => {
       await reporting.deleteAllReports();
     });
 
     it('PNG file matches the baseline image, using sample geo data', async function () {
+      log.info(`window size:` + JSON.stringify(await browser.getWindowSize()));
+
       await reporting.initEcommerce();
 
       await PageObjects.common.navigateToApp('dashboard');

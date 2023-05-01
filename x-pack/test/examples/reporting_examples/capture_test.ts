@@ -16,6 +16,7 @@ export default function ({
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
   const PageObjects = getPageObjects(['common', 'reporting']);
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const png = getService('png');
   const config = getService('config');
@@ -34,6 +35,10 @@ export default function ({
   // "baseline" image file to reflect current renderings. The source and destination file paths can be found in
   // the INFO logs for this test run.
   describe('Captures', () => {
+    before(async () => {
+      await browser.setWindowSize(1600, 1000);
+    });
+
     it('PNG file matches the baseline image', async () => {
       await PageObjects.common.navigateToApp(appId);
 
