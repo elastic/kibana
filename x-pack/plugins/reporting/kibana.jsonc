@@ -26,16 +26,16 @@
       "screenshotMode",
       "share",
       "features",
-      "reportingExportTypes",
+      "reportingExportTypes"
     ],
     "optionalPlugins": [
       "security",
       "spaces",
-      "usageCollection"
+      "usageCollection",
     ],
     "requiredBundles": [
       "kibanaReact",
-      "discover"
+      "discover",
     ]
   }
 }

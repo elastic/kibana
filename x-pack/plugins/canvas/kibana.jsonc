@@ -31,11 +31,11 @@
       "uiActions",
       "share",
       "savedObjectsManagement",
-      "savedObjectsFinder"
+      "savedObjectsFinder",
+      "reporting"
     ],
     "optionalPlugins": [
       "home",
-      "reporting",
       "spaces",
       "usageCollection",
       "savedObjects",
@@ -47,7 +47,7 @@
       "lens",
       "maps",
       "visualizations",
-      "fieldFormats"
+      "fieldFormats",
     ],
   }
 }

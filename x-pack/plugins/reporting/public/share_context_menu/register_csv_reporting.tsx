@@ -13,6 +13,7 @@ import { CSV_JOB_TYPE } from '../../common/constants';
 import { checkLicense } from '../lib/license_check';
 import { ExportPanelShareOpts } from '.';
 import { ReportingPanelContent } from './reporting_panel_content_lazy';
+import { ExportTypesRegistry } from '../export_types_registry';
 
 export const reportingCsvShareProvider = ({
   apiClient,
@@ -52,10 +53,10 @@ export const reportingCsvShareProvider = ({
     const licenseToolTipContent = licenseCheck.message;
     const licenseHasCsvReporting = licenseCheck.showLinks;
     const licenseDisabled = !licenseCheck.enableLinks;
+    const exportTypesRegistry = new ExportTypesRegistry();
 
-    // TODO: add abstractions in ExportTypeRegistry to use here?
     let capabilityHasCsvReporting = false;
-    if (usesUiCapabilities) {
+    if (usesUiCapabilities && exportTypesRegistry.setup.register) {
       capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
     } else {
       capabilityHasCsvReporting = true; // deprecated
