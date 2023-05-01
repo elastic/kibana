@@ -10,7 +10,7 @@ import { Readable } from 'stream';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
-import type { HapiReadableStream } from '../../rule_management/logic/import/hapi_readable_stream';
+import type { HapiReadableStream } from '../../../../types';
 
 /**
  * Given a string, builds a hapi stream as our
