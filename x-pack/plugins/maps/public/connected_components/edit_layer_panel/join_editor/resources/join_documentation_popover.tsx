@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { EuiButtonIcon, EuiLink, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDocLinks } from '../../../../kibana_services';
@@ -14,101 +14,88 @@ interface State {
   isPopoverOpen: boolean;
 }
 
-export class JoinDocumentationPopover extends Component<{}, State> {
-  state: State = {
-    isPopoverOpen: false,
-  };
-
-  _togglePopover = () => {
-    this.setState((prevState) => ({
-      isPopoverOpen: !prevState.isPopoverOpen,
-    }));
-  };
-
-  _closePopover = () => {
-    this.setState({
-      isPopoverOpen: false,
-    });
-  };
-
-  _renderContent() {
-    return (
+export function JoinDocumentationPopover() {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  
+  return (
+    <EuiPopover
+      id="joinHelpPopover"
+      anchorPosition="leftCenter"
+      button={
+        <EuiButtonIcon
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+          }}
+          iconType="documentation"
+          aria-label="Join documentation"
+        />
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => {
+        setIsPopoverOpen(false);
+      }}
+      repositionOnScroll
+      ownFocus
+    >
+      <EuiPopoverTitle>
+        <FormattedMessage
+          id="xpack.maps.layerPanel.joinEditor.title"
+          defaultMessage="Joins"
+        />
+      </EuiPopoverTitle>
       <div>
-        <EuiText style={{ maxWidth: '36em' }}>
+        <EuiText size="s" style={{ maxWidth: '36em' }}>
           <p>
             <FormattedMessage
               id="xpack.maps.joinDocs.intro"
-              defaultMessage="Term joins augment layers with properties for data driven styling. Term joins work as follows:"
+              defaultMessage="Joins add metrics that are used for data driven styling and tooltip content."
             />
-          </p>
-          <ul>
-            <li>
-              <FormattedMessage
-                id="xpack.maps.joinDocs.sharedKey"
-                defaultMessage="A shared key combines vector features, the left source, with the results of an Elasticsearch aggregation, the right source."
-              />
-            </li>
-            <li>
-              <FormattedMessage
-                id="xpack.maps.joinDocs.termsAggregation"
-                defaultMessage="The terms aggregation creates a bucket for each unique shared key."
-              />
-            </li>
-            <li>
-              <FormattedMessage
-                id="xpack.maps.joinDocs.metrics"
-                defaultMessage="Metrics are calculated for all documents in a bucket."
-              />
-            </li>
-            <li>
-              <FormattedMessage
-                id="xpack.maps.joinDocs.join"
-                defaultMessage="The join adds metrics for each terms aggregation bucket with the corresponding shared key."
-              />
-            </li>
-          </ul>
-          <p>
-            <FormattedMessage
+            {' '}
+            <i><FormattedMessage
               id="xpack.maps.joinDocs.noMatches"
-              defaultMessage="Features that do have have a corresponding terms aggregation bucket are not visible on the map."
-            />
+              defaultMessage="Features that do have a matches are not visible on the map."
+            /></i>
           </p>
-          <EuiLink href={getDocLinks().links.maps.termJoinsExample} target="_blank" external={true}>
-            <FormattedMessage
-              id="xpack.maps.joinDocs.linkLabel"
-              defaultMessage="Term join example"
-            />
-          </EuiLink>
+          <dl>
+            <dt>
+              <FormattedMessage
+                id="xpack.maps.joinDocs.termJoinTitle"
+                defaultMessage="Term join"
+              />
+            </dt>
+            <dd>
+              <p>
+                <FormattedMessage
+                  id="xpack.maps.joinDocs.termsJoinIntro"
+                  defaultMessage="A term join uses a shared key to combine vector features with metrics from an Elasticsearch terms aggregation."
+                />
+              </p>
+              <EuiLink href={getDocLinks().links.maps.termJoinsExample} target="_blank" external={true}>
+                <FormattedMessage
+                  id="xpack.maps.joinDocs.linkLabel"
+                  defaultMessage="Term join example"
+                />
+              </EuiLink>
+            </dd>
+
+            <dt>
+              <FormattedMessage
+                id="xpack.maps.joinDocs.spatialJoinTitle"
+                defaultMessage="Spatial join"
+              />
+            </dt>
+            <dd>
+              <p>
+                <FormattedMessage
+                  id="xpack.maps.joinDocs.spatialJoinIntro"
+                  defaultMessage="A spatial join uses a geospatial relationship to combine vector features with metrics from an Elasticsearch geo query filters aggregation."
+                />
+              </p>
+            </dd>
+          </dl>
+          
         </EuiText>
       </div>
-    );
-  }
-
-  render() {
-    return (
-      <EuiPopover
-        id="joinHelpPopover"
-        anchorPosition="leftCenter"
-        button={
-          <EuiButtonIcon
-            onClick={this._togglePopover}
-            iconType="documentation"
-            aria-label="Join documentation"
-          />
-        }
-        isOpen={this.state.isPopoverOpen}
-        closePopover={this._closePopover}
-        repositionOnScroll
-        ownFocus
-      >
-        <EuiPopoverTitle>
-          <FormattedMessage
-            id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
-            defaultMessage="Term joins"
-          />
-        </EuiPopoverTitle>
-        {this._renderContent()}
-      </EuiPopover>
-    );
-  }
+    </EuiPopover>
+  );
 }
