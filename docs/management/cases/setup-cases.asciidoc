@@ -35,6 +35,11 @@ least once, which creates a user profile.
 | Give access to view and delete cases | `Read` for the *Cases* feature under
 *Management* with the deletion sub-feature enabled.
 
+| Give access to add alerts to cases
+a|
+* `All` for the *Cases* feature under *Management*.
+* `Read` for an *{observability}* or *Security* feature that has alerts
+
 | Revoke all access to cases | `None` for the *Cases* feature under *Management*.
 
 |=== 
