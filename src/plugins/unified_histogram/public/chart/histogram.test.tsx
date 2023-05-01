@@ -66,7 +66,7 @@ function mountComponent() {
       to: '2020-05-14T11:20:13.590',
     }),
     refetch$,
-    lensAttributes: getMockLensAttributes(),
+    lensAttributesContext: getMockLensAttributes(),
     onTotalHitsChange: jest.fn(),
     onChartLoad: jest.fn(),
   };
@@ -91,7 +91,7 @@ describe('Histogram', () => {
     const originalProps = getLensProps({
       searchSessionId: props.request.searchSessionId,
       getTimeRange: props.getTimeRange,
-      attributes: getMockLensAttributes(),
+      attributes: getMockLensAttributes().attributes,
       onLoad: lensProps.onLoad,
     });
     expect(lensProps).toEqual(originalProps);

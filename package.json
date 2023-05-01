@@ -575,6 +575,7 @@
     "@kbn/server-http-tools": "link:packages/kbn-server-http-tools",
     "@kbn/server-route-repository": "link:packages/kbn-server-route-repository",
     "@kbn/serverless": "link:x-pack/plugins/serverless",
+    "@kbn/serverless-observability": "link:x-pack/plugins/serverless_observability",
     "@kbn/serverless-project-switcher": "link:packages/serverless/project_switcher",
     "@kbn/serverless-search": "link:x-pack/plugins/serverless_search",
     "@kbn/serverless-types": "link:packages/serverless/types",
