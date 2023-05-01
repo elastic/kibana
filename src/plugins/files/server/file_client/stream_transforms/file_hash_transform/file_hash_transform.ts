@@ -12,6 +12,7 @@ import { SupportedFileHashAlgorithm } from '../../../saved_objects/file';
 class FileHashTransform extends Transform {
   private readonly hash: Hash;
   private isFinished = false;
+  private hashValue: string | undefined = undefined;
 
   constructor(private readonly algorithm: SupportedFileHashAlgorithm = 'sha256') {
     super();
@@ -39,9 +40,13 @@ class FileHashTransform extends Transform {
       throw new Error('File hash generation not yet complete');
     }
 
+    if (!this.hashValue) {
+      this.hashValue = this.hash.digest('hex');
+    }
+
     return {
       algorithm: this.algorithm,
-      value: this.hash.digest('hex'),
+      value: this.hashValue,
     };
   }
 }

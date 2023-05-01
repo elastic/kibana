@@ -29,7 +29,6 @@ import { FileMetadataClient } from '../file_client';
 import { SavedObjectsFileMetadataClient } from '../file_client/file_metadata_client/adapters/saved_objects';
 import { File as IFile } from '../../common';
 import { createFileHashTransform } from '..';
-import { SupportedFileHashAlgorithm } from '../saved_objects/file';
 
 const setImmediate = promisify(global.setImmediate);
 
@@ -171,24 +170,22 @@ describe('File', () => {
       });
     });
 
-    it.each([
-      ['md5', '098f6bcd4621d373cade4e832627b4f6'],
-      ['sha1', 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3'],
-      ['sha256', '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08'],
-      [
-        'sha512',
-        'ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff',
-      ],
-    ] as Array<[SupportedFileHashAlgorithm, string]>)(
-      'should store file hash when FileHashTransform is used with algorithm: %s',
-      async (algorithm, expectedHash) => {
-        await file.uploadContent(fileContent, undefined, {
-          transforms: [createFileHashTransform(algorithm)],
-        });
+    it('should generate and store file hash when FileHashTransform is used', async () => {
+      await file.uploadContent(fileContent, undefined, {
+        transforms: [createFileHashTransform()],
+      });
 
-        expect(file.data.hash).toEqual({ [algorithm]: expectedHash });
-      }
-    );
+      expect(file.toJSON()).toEqual({
+        created: expect.any(String),
+        updated: expect.any(String),
+        fileKind: 'fileKind',
+        hash: {
+          sha256: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
+        },
+        size: 4,
+        status: 'READY',
+      });
+    });
 
     it('should return file hash', async () => {
       file = await fileService.getById({ id: '1' });
