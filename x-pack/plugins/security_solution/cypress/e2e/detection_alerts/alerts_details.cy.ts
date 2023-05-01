@@ -116,9 +116,7 @@ describe('Alert details flyout', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
       cy.reload();
       cy.get(OVERVIEW_RULE).should('be.visible');
-      cy.get(OVERVIEW_RULE).then((field) => {
-        expect(field).to.contain('Endpoint Security');
-      });
+      cy.get(OVERVIEW_RULE).should('contain', 'Endpoint Security');
     });
 
     it('should show the copy link button for the flyout', () => {
