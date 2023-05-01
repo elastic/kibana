@@ -13,8 +13,8 @@ import { uiCapabilitiesRegex } from '@kbn/features-plugin/server';
 export class UIActions {
   private readonly prefix: string;
 
-  constructor(versionNumber: string) {
-    this.prefix = `ui:${versionNumber}:`;
+  constructor(/* versionNumber: string */) {
+    this.prefix = `ui:`; // ${versionNumber}:`;
   }
 
   public get(featureId: keyof UICapabilities, ...uiCapabilityParts: string[]) {

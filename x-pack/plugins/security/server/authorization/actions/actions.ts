@@ -26,21 +26,21 @@ export class Actions {
   public readonly alerting: AlertingActions;
   public readonly space: SpaceActions;
   public readonly ui: UIActions;
-  public readonly version: string;
+  // public readonly version: string;
 
-  constructor(private readonly versionNumber: string) {
-    if (versionNumber === '') {
-      throw new Error(`version can't be an empty string`);
-    }
+  constructor(/* private readonly versionNumber: string */) {
+    // if (versionNumber === '') {
+    //   throw new Error(`version can't be an empty string`);
+    // }
 
-    this.api = new ApiActions(this.versionNumber);
-    this.app = new AppActions(this.versionNumber);
-    this.cases = new CasesActions(this.versionNumber);
+    this.api = new ApiActions(/* this.versionNumber */);
+    this.app = new AppActions(/* this.versionNumber */);
+    this.cases = new CasesActions(/* this.versionNumber */);
     this.login = 'login:';
-    this.savedObject = new SavedObjectActions(this.versionNumber);
-    this.alerting = new AlertingActions(this.versionNumber);
-    this.space = new SpaceActions(this.versionNumber);
-    this.ui = new UIActions(this.versionNumber);
-    this.version = `version:${this.versionNumber}`;
+    this.savedObject = new SavedObjectActions(/* this.versionNumber */);
+    this.alerting = new AlertingActions(/* this.versionNumber */);
+    this.space = new SpaceActions(/* this.versionNumber */);
+    this.ui = new UIActions(/* this.versionNumber */);
+    // this.version = `version:${this.versionNumber}`;
   }
 }

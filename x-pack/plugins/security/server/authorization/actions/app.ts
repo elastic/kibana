@@ -10,8 +10,8 @@ import { isString } from 'lodash';
 export class AppActions {
   private readonly prefix: string;
 
-  constructor(versionNumber: string) {
-    this.prefix = `app:${versionNumber}:`;
+  constructor(/* versionNumber: string*/) {
+    this.prefix = `app:`; // ${versionNumber}:`;
   }
 
   public get(appId: string) {

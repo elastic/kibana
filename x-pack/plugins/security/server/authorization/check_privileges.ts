@@ -27,7 +27,6 @@ import { validateEsPrivilegeResponse } from './validate_es_response';
 
 interface CheckPrivilegesActions {
   login: string;
-  version: string;
 }
 
 export function checkPrivilegesFactory(
@@ -35,13 +34,13 @@ export function checkPrivilegesFactory(
   getClusterClient: () => Promise<IClusterClient>,
   applicationName: string
 ) {
-  const hasIncompatibleVersion = (
-    applicationPrivilegesResponse: HasPrivilegesResponseApplication
-  ) => {
-    return Object.values(applicationPrivilegesResponse).some(
-      (resource) => !resource[actions.version] && resource[actions.login]
-    );
-  };
+  // const hasIncompatibleVersion = (
+  //   applicationPrivilegesResponse: HasPrivilegesResponseApplication
+  // ) => {
+  //   return Object.values(applicationPrivilegesResponse).some(
+  //     (resource) => !resource[actions.version] && resource[actions.login]
+  //   );
+  // };
 
   const createApplicationPrivilegesCheck = (
     resources: string[],
@@ -56,7 +55,7 @@ export function checkPrivilegesFactory(
       application: applicationName,
       resources,
       privileges: uniq([
-        actions.version,
+        // actions.version,
         ...(requireLoginAction ? [actions.login] : []),
         ...normalizedKibanaPrivileges,
       ]),
@@ -163,11 +162,11 @@ export function checkPrivilegesFactory(
         };
       }, {});
 
-      if (hasIncompatibleVersion(applicationPrivilegesResponse)) {
-        throw new Error(
-          'Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.'
-        );
-      }
+      // if (hasIncompatibleVersion(applicationPrivilegesResponse)) {
+      //   throw new Error(
+      //     'Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.'
+      //   );
+      // }
 
       // we need to filter out the non requested privileges from the response
       const resourcePrivileges = transform(applicationPrivilegesResponse, (result, value, key) => {

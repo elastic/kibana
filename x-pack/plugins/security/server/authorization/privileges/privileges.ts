@@ -66,7 +66,7 @@ export function privilegesFactory(
         })) {
           featurePrivileges[feature.id][featurePrivilege.privilegeId] = [
             actions.login,
-            actions.version,
+            // actions.version,
             ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
           ];
         }
@@ -77,7 +77,7 @@ export function privilegesFactory(
         })) {
           featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
             actions.login,
-            actions.version,
+            // actions.version,
             ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
           ];
         }
@@ -92,7 +92,7 @@ export function privilegesFactory(
           )) {
             featurePrivileges[feature.id][subFeaturePrivilege.id] = [
               actions.login,
-              actions.version,
+              // actions.version,
               ...uniq(featurePrivilegeBuilder.getActions(subFeaturePrivilege, feature)),
             ];
           }
@@ -107,7 +107,7 @@ export function privilegesFactory(
         global: {
           all: [
             actions.login,
-            actions.version,
+            // actions.version,
             actions.api.get('decryptedTelemetry'),
             actions.api.get('features'),
             actions.api.get('taskManager'),
@@ -122,21 +122,21 @@ export function privilegesFactory(
           ],
           read: [
             actions.login,
-            actions.version,
+            // actions.version,
             actions.api.get('decryptedTelemetry'),
             actions.ui.get('globalSettings', 'show'),
             ...readActions,
           ],
         },
         space: {
-          all: [actions.login, actions.version, ...allActions],
-          read: [actions.login, actions.version, ...readActions],
+          all: [actions.login, /* actions.version,*/ ...allActions],
+          read: [actions.login, /* actions.version,*/ ...readActions],
         },
         reserved: features.reduce((acc: Record<string, string[]>, feature: KibanaFeature) => {
           if (feature.reserved) {
             feature.reserved.privileges.forEach((reservedPrivilege) => {
               acc[reservedPrivilege.id] = [
-                actions.version,
+                // actions.version,
                 ...uniq(featurePrivilegeBuilder.getActions(reservedPrivilege.privilege, feature)),
               ];
             });
