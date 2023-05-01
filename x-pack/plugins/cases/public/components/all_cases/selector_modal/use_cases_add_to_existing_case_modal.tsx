@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { CaseStatuses, StatusAll } from '../../../../common';
 import type { AllCasesSelectorModalProps } from '.';
 import { useCasesToast } from '../../../common/use_cases_toast';
-import type { Case } from '../../../containers/types';
+import type { CaseUI } from '../../../containers/types';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
@@ -27,13 +27,13 @@ export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRo
     title?: string;
     content?: string;
   };
-  onSuccess?: (theCase: Case) => void;
+  onSuccess?: (theCase: CaseUI) => void;
 };
 
 export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProps = {}) => {
   const createNewCaseFlyout = useCasesAddToNewCaseFlyout({
     onClose: props.onClose,
-    onSuccess: (theCase?: Case) => {
+    onSuccess: (theCase?: CaseUI) => {
       if (props.onSuccess && theCase) {
         return props.onSuccess(theCase);
       }
@@ -60,8 +60,8 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
 
   const handleOnRowClick = useCallback(
     async (
-      theCase: Case | undefined,
-      getAttachments?: ({ theCase }: { theCase?: Case }) => CaseAttachmentsWithoutOwner
+      theCase: CaseUI | undefined,
+      getAttachments?: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner
     ) => {
       const attachments = getAttachments?.({ theCase }) ?? [];
       // when the case is undefined in the modal
@@ -121,14 +121,14 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
     ({
       getAttachments,
     }: {
-      getAttachments?: ({ theCase }: { theCase?: Case }) => CaseAttachmentsWithoutOwner;
+      getAttachments?: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner;
     } = {}) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: {
           ...props,
           hiddenStatuses: [CaseStatuses.closed, StatusAll],
-          onRowClick: (theCase?: Case) => {
+          onRowClick: (theCase?: CaseUI) => {
             handleOnRowClick(theCase, getAttachments);
           },
           onClose: () => {

@@ -8,14 +8,14 @@
 import React, { memo } from 'react';
 import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import * as i18n from '../../common/translations';
 import { CreateCase } from '../create';
 
 export interface CreateCaseModalProps {
   isModalOpen: boolean;
   onCloseCaseModal: () => void;
-  onSuccess: (theCase: Case) => Promise<void>;
+  onSuccess: (theCase: CaseUI) => Promise<void>;
 }
 
 const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
