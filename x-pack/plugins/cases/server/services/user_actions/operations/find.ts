@@ -8,12 +8,10 @@
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
 import type {
-  CaseUserActionAttributesWithoutConnectorId,
-  UserActionFindRequest,
   ActionTypeValues,
   FindTypeField,
   UserAction,
@@ -25,14 +23,10 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
 
-import type { ServiceContext } from '../types';
+import type { FindOptions, ServiceContext } from '../types';
 import { transformFindResponseToExternalModel, transformToExternalModel } from '../transform';
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../../../client/utils';
-
-interface FindOptions extends UserActionFindRequest {
-  caseId: string;
-  filter?: KueryNode;
-}
+import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
 
 export class UserActionFinder {
   constructor(private readonly context: ServiceContext) {}
@@ -51,17 +45,15 @@ export class UserActionFinder {
       const finalFilter = combineFilters([filter, UserActionFinder.buildFilter(types)]);
 
       const userActions =
-        await this.context.unsecuredSavedObjectsClient.find<CaseUserActionAttributesWithoutConnectorId>(
-          {
-            type: CASE_USER_ACTION_SAVED_OBJECT,
-            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-            page: page ?? DEFAULT_PAGE,
-            perPage: perPage ?? DEFAULT_PER_PAGE,
-            sortField: 'created_at',
-            sortOrder: sortOrder ?? 'asc',
-            filter: finalFilter,
-          }
-        );
+        await this.context.unsecuredSavedObjectsClient.find<UserActionPersistedAttributes>({
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+          page: page ?? DEFAULT_PAGE,
+          perPage: perPage ?? DEFAULT_PER_PAGE,
+          sortField: 'created_at',
+          sortOrder: sortOrder ?? 'asc',
+          filter: finalFilter,
+        });
 
       return transformFindResponseToExternalModel(
         userActions,
@@ -197,7 +189,7 @@ export class UserActionFinder {
       const combinedFilters = combineFilters([updateActionFilter, statusChangeFilter, filter]);
 
       const finder =
-        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<CaseUserActionAttributesWithoutConnectorId>(
+        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<UserActionPersistedAttributes>(
           {
             type: CASE_USER_ACTION_SAVED_OBJECT,
             hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
