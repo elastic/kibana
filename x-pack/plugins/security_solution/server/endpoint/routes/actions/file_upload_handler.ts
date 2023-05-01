@@ -34,7 +34,7 @@ export const registerActionFileUploadRoute = (
         body: {
           accepts: ['multipart/form-data'],
           output: 'stream',
-          maxBytes: 26214400, // FIXME:PT use config value using endpointContext.config()
+          maxBytes: endpointContext.service.getServerConfig().maxUploadResponseActionFileBytes,
         },
       },
     },

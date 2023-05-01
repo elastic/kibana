@@ -17,6 +17,13 @@ import type { ExperimentalFeatures } from '../../common/experimental_features';
  */
 export interface EndpointAppContext {
   logFactory: LoggerFactory;
+
+  /**
+   * Returns the Security Solution Plugin config.
+   *
+   * **NOTE:**  If needing access to the config in a non-async way, call
+   *            `EndpointAppContext.service.getServerConfig()` instead.
+   */
   config(): Promise<ConfigType>;
   experimentalFeatures: ExperimentalFeatures;
 
