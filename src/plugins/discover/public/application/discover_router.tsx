@@ -8,7 +8,7 @@
 
 import { Redirect, Router, Switch, useParams } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -20,19 +20,17 @@ import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 import type { RegisterExtensions } from '../plugin';
 
-export interface DiscoverRouterProps {
-  services: DiscoverServices;
+interface DiscoverRoutesProps {
+  prefix?: string;
   registerExtensions: RegisterExtensions[];
-  history: History;
   isDev: boolean;
 }
 
-type DiscoverRoutesProps = Pick<DiscoverRouterProps, 'registerExtensions' | 'isDev'> & {
-  prefix?: string;
-};
-
 const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProps) => {
-  const prefixPath = (path: string) => (prefix ? `/${prefix}/${path}` : `/${path}`);
+  const prefixPath = useCallback(
+    (path: string) => (prefix ? `${prefix}/${path}` : `/${path}`),
+    [prefix]
+  );
 
   return (
     <Switch>
@@ -64,29 +62,59 @@ const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProps) => {
   );
 };
 
-const CustomDiscoverRoutes = (props: DiscoverRoutesProps) => {
-  const { profile } = useParams<{ profile: string }>();
+interface CustomDiscoverRoutesProps {
+  registerExtensionsMap: Map<string, RegisterExtensions[]>;
+  isDev: boolean;
+}
 
-  if (profile === 'test') {
-    return <DiscoverRoutes prefix={profile} {...props} />;
+const CustomDiscoverRoutes = ({ registerExtensionsMap, ...props }: CustomDiscoverRoutesProps) => {
+  const { profile } = useParams<{ profile: string }>();
+  const registerExtensions = useMemo(
+    () => registerExtensionsMap.get(profile),
+    [profile, registerExtensionsMap]
+  );
+
+  if (registerExtensions) {
+    return (
+      <DiscoverRoutes prefix={`/p/${profile}`} registerExtensions={registerExtensions} {...props} />
+    );
   }
 
   return <NotFoundRoute />;
 };
 
-export const DiscoverRouter = ({ services, history, ...routeProps }: DiscoverRouterProps) => (
-  <KibanaContextProvider services={services}>
-    <EuiErrorBoundary>
-      <Router history={history} data-test-subj="discover-react-router">
-        <Switch>
-          <Route path="/:profile">
-            <CustomDiscoverRoutes {...routeProps} />
-          </Route>
-          <Route path="/">
-            <DiscoverRoutes {...routeProps} />
-          </Route>
-        </Switch>
-      </Router>
-    </EuiErrorBoundary>
-  </KibanaContextProvider>
-);
+export interface DiscoverRouterProps {
+  services: DiscoverServices;
+  registerExtensionsMap: Map<string, RegisterExtensions[]>;
+  history: History;
+  isDev: boolean;
+}
+
+export const DiscoverRouter = ({
+  services,
+  history,
+  registerExtensionsMap,
+  ...routeProps
+}: DiscoverRouterProps) => {
+  const registerDefaultExtensions = useMemo(
+    () => registerExtensionsMap.get('default') ?? [],
+    [registerExtensionsMap]
+  );
+
+  return (
+    <KibanaContextProvider services={services}>
+      <EuiErrorBoundary>
+        <Router history={history} data-test-subj="discover-react-router">
+          <Switch>
+            <Route path="/p/:profile">
+              <CustomDiscoverRoutes registerExtensionsMap={registerExtensionsMap} {...routeProps} />
+            </Route>
+            <Route path="/">
+              <DiscoverRoutes registerExtensions={registerDefaultExtensions} {...routeProps} />
+            </Route>
+          </Switch>
+        </Router>
+      </EuiErrorBoundary>
+    </KibanaContextProvider>
+  );
+};

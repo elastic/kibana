@@ -16,11 +16,11 @@ import type { RegisterExtensions } from '../plugin';
 export interface RenderAppProps {
   element: HTMLElement;
   services: DiscoverServices;
-  registerExtensions: RegisterExtensions[];
+  registerExtensionsMap: Map<string, RegisterExtensions[]>;
   isDev: boolean;
 }
 
-export const renderApp = ({ element, services, registerExtensions, isDev }: RenderAppProps) => {
+export const renderApp = ({ element, services, registerExtensionsMap, isDev }: RenderAppProps) => {
   const { history: getHistory, capabilities, chrome, data, core } = services;
 
   const history = getHistory();
@@ -39,7 +39,7 @@ export const renderApp = ({ element, services, registerExtensions, isDev }: Rend
     wrapWithTheme(
       <DiscoverRouter
         services={services}
-        registerExtensions={registerExtensions}
+        registerExtensionsMap={registerExtensionsMap}
         history={history}
         isDev={isDev}
       />,
