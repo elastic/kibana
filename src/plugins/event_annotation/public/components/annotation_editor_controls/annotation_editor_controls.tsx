@@ -45,7 +45,7 @@ import { TooltipSection } from './tooltip_annotation_panel';
 import { ConfigPanelManualAnnotation } from './manual_annotation_panel';
 import { ConfigPanelQueryAnnotation } from './query_annotation_panel';
 
-export const AnnotationsPanel = ({
+export const AnnotationEditorControls = ({
   annotation: currentAnnotation,
   onAnnotationChange,
   dataView,

@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { AnnotationsPanel } from './annotations_panel';
+export { AnnotationEditorControls } from './annotation_editor_controls';

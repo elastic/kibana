@@ -25,7 +25,7 @@ import { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-os
 import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
-import { AnnotationsPanel } from './annotations_config_panel';
+import { AnnotationEditorControls } from './annotation_editor_controls';
 
 export const GroupEditorControls = ({
   group,
@@ -162,7 +162,7 @@ export const GroupEditorControls = ({
       </EuiForm>
     </>
   ) : (
-    <AnnotationsPanel
+    <AnnotationEditorControls
       annotation={selectedAnnotation}
       onAnnotationChange={(changes) => setSelectedAnnotation({ ...selectedAnnotation, ...changes })}
       dataView={currentDataView}
