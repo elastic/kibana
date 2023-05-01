@@ -32,10 +32,13 @@ import { LicensePrompt } from './components/license_prompt';
 export const MaintenanceWindowsPage = React.memo(() => {
   const { docLinks } = useKibana().services;
   const { isAtLeastPlatinum } = useLicense();
+  const hasLicense = isAtLeastPlatinum();
 
   const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
 
-  const { isLoading, maintenanceWindows, refetch } = useFindMaintenanceWindows();
+  const { isLoading, maintenanceWindows, refetch } = useFindMaintenanceWindows({
+    enabled: hasLicense,
+  });
 
   useBreadcrumbs(AlertingDeepLinkId.maintenanceWindows);
 
@@ -46,7 +49,6 @@ export const MaintenanceWindowsPage = React.memo(() => {
   const refreshData = useCallback(() => refetch(), [refetch]);
 
   const showEmptyPrompt = !isLoading && maintenanceWindows.length === 0;
-  const hasLicense = isAtLeastPlatinum();
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;

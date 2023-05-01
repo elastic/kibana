@@ -43,7 +43,6 @@ export const LicensePrompt = React.memo(() => {
                 >
                   {i18n.UPGRADE_SUBSCRIPTION}
                 </EuiButtonEmpty>
-                ,
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -57,7 +56,6 @@ export const LicensePrompt = React.memo(() => {
                 >
                   {i18n.START_TRIAL}
                 </EuiButton>
-                ,
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
