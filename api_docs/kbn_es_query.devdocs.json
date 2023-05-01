@@ -5328,7 +5328,7 @@
             "label": "function",
             "description": [],
             "signature": [
-              "\"nested\" | \"is\" | \"and\" | \"or\" | \"not\" | \"range\" | \"exists\""
+              "\"nested\" | \"is\" | \"exists\" | \"range\" | \"and\" | \"or\" | \"not\""
             ],
             "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
             "deprecated": false,
@@ -6425,8 +6425,8 @@
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
                 "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.FunctionTypeBuildNode",
-                "text": "FunctionTypeBuildNode"
+                "section": "def-common.KueryNode",
+                "text": "KueryNode"
               }
             ],
             "path": "packages/kbn-es-query/src/kuery/node_types/node_builder.ts",
@@ -6594,8 +6594,8 @@
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
                 "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.FunctionTypeBuildNode",
-                "text": "FunctionTypeBuildNode"
+                "section": "def-common.KueryNode",
+                "text": "KueryNode"
               }
             ],
             "path": "packages/kbn-es-query/src/kuery/node_types/node_builder.ts",

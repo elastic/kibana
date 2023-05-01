@@ -33,27 +33,26 @@ type RequiredFieldsOnly<T> = {
 };
 interface KibanaLogicProps {
   application: ApplicationStart;
-  config: ClientConfigType;
-  productAccess: ProductAccess;
-  productFeatures: ProductFeatures;
-  // Kibana core
   capabilities: Capabilities;
+  charts: ChartsPluginStart;
+  cloud?: CloudSetup;
+  config: ClientConfigType;
   data: DataPublicPluginStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
   history: ScopedHistory;
+  isSidebarEnabled: boolean;
   lens: LensPublicStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
+  productAccess: ProductAccess;
+  productFeatures: ProductFeatures;
+  renderHeaderActions(HeaderActions: FC): void;
+  security: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
-  renderHeaderActions(HeaderActions: FC): void;
-  // Required plugins
-  charts: ChartsPluginStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
-  security: SecurityPluginStart;
   uiSettings: IUiSettingsClient;
-  // Optional plugins
-  cloud?: CloudSetup;
 }
+
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
   cloud: Partial<CloudSetup>;
   data: DataPublicPluginStart;
@@ -73,6 +72,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     data: [props.data, {}],
     guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],
+    isSidebarEnabled: [props.isSidebarEnabled, {}],
     lens: [props.lens, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {
