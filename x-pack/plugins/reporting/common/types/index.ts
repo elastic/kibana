@@ -144,10 +144,6 @@ export interface JobSummarySet {
   failed: JobSummary[];
 }
 
-// JobAppParamsPDF,
-//   JobParamsPDFV2,
-//   JobParamsPNGV2,
-
 interface BaseParamsPDFV2 {
   layout: LayoutParams;
 
