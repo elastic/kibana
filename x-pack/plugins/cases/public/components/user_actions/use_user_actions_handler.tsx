@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCaseViewParams } from '../../common/navigation';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import type { AddCommentRefObject } from '../add_comment';
@@ -28,13 +28,20 @@ export type UseUserActionsHandler = Pick<
   | 'handleSaveComment'
   | 'handleManageQuote'
   | 'handleDeleteComment'
-> & { handleUpdate: (updatedCase: Case) => void };
+> & { handleUpdate: (updatedCase: CaseUI) => void };
 
 const isAddCommentRef = (
   ref: AddCommentRefObject | UserActionMarkdownRefObject | null | undefined
 ): ref is AddCommentRefObject => {
   const commentRef = ref as AddCommentRefObject;
   return commentRef?.addQuote != null;
+};
+
+const isSetCommentRef = (
+  ref: AddCommentRefObject | UserActionMarkdownRefObject | null | undefined
+): ref is AddCommentRefObject => {
+  const commentRef = ref as UserActionMarkdownRefObject;
+  return commentRef?.setComment != null;
 };
 
 export const useUserActionsHandler = (): UseUserActionsHandler => {
@@ -122,7 +129,7 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
   );
 
   useEffect(() => {
-    if (draftComment?.commentId) {
+    if (draftComment?.commentId && draftComment?.commentId !== 'description') {
       setManageMarkdownEditIds((prevManageMarkdownEditIds) => {
         if (
           NEW_COMMENT_ID !== draftComment?.commentId &&
@@ -135,7 +142,7 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
 
       const ref = commentRefs?.current?.[draftComment.commentId];
 
-      if (isAddCommentRef(ref) && ref.editor?.textarea) {
+      if (isSetCommentRef(ref) && ref.editor?.textarea) {
         ref.setComment(draftComment.comment);
         if (hasIncomingLensState) {
           openLensModal({ editorRef: ref.editor });
