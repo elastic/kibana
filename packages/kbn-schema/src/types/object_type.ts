@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { AnySchema } from 'joi';
-import typeDetect from 'type-detect';
+import z from 'zod';
 import { internals } from '../internals';
 import { Type, TypeOptions } from './type';
 import { ValidationError } from '../errors';
@@ -40,25 +39,6 @@ export type ObjectResultType<P extends Props> = Readonly<
   }
 >;
 
-type DefinedProperties<Base extends NullableProps> = Pick<
-  Base,
-  {
-    [Key in keyof Base]: undefined extends Base[Key] ? never : null extends Base[Key] ? never : Key;
-  }[keyof Base]
->;
-
-type ExtendedProps<P extends Props, NP extends NullableProps> = Omit<P, keyof NP> & {
-  [K in keyof DefinedProperties<NP>]: NP[K];
-};
-
-type ExtendedObjectType<P extends Props, NP extends NullableProps> = ObjectType<
-  ExtendedProps<P, NP>
->;
-
-type ExtendedObjectTypeOptions<P extends Props, NP extends NullableProps> = ObjectTypeOptions<
-  ExtendedProps<P, NP>
->;
-
 interface UnknownOptions {
   /**
    * Options for dealing with unknown keys:
@@ -72,137 +52,46 @@ interface UnknownOptions {
 export type ObjectTypeOptions<P extends Props = any> = TypeOptions<ObjectResultType<P>> &
   UnknownOptions;
 
+const errorMap: z.ZodErrorMap = (issue, ctx) => {
+  if (issue.code === z.ZodIssueCode.unrecognized_keys) {
+    if (issue.keys.length === 1) {
+      return {
+        message: `definition for [${issue.keys[0]}] key is missing`,
+      };
+    }
+    return { message: `definition for these keys is missing: [${issue.keys.join(', ')}]` };
+  }
+  return { message: ctx.defaultError };
+};
+
 export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
-  private props: P;
-  private options: ObjectTypeOptions<P>;
-  private propSchemas: Record<string, AnySchema>;
+  private propSchemas: Record<string, z.ZodTypeAny>;
 
   constructor(props: P, options: ObjectTypeOptions<P> = {}) {
-    const schemaKeys = {} as Record<string, AnySchema>;
+    const schemaKeys = {} as Record<string, z.ZodTypeAny>;
     const { unknowns = 'forbid', ...typeOptions } = options;
     for (const [key, value] of Object.entries(props)) {
       schemaKeys[key] = value.getSchema();
     }
-    const schema = internals
-      .object()
-      .keys(schemaKeys)
-      .default()
-      .optional()
-      .unknown(unknowns === 'allow')
-      .options({ stripUnknown: { objects: unknowns === 'ignore' } });
+    let schema = internals.object(schemaKeys, { errorMap }).strict();
+    if (unknowns === 'allow') {
+      schema = schema.passthrough() as unknown as z.ZodObject<any, 'strict'>;
+    } else if (unknowns === 'ignore') {
+      schema = schema.strip() as unknown as z.ZodObject<any, 'strict'>;
+    }
 
     super(schema, typeOptions);
-    this.props = props;
     this.propSchemas = schemaKeys;
-    this.options = options;
-  }
-
-  /**
-   * Return a new `ObjectType` instance extended with given `newProps` properties.
-   * Original properties can be deleted from the copy by passing a `null` or `undefined` value for the key.
-   *
-   * @example
-   * How to add a new key to an object schema
-   * ```ts
-   * const origin = schema.object({
-   *   initial: schema.string(),
-   * });
-   *
-   * const extended = origin.extends({
-   *   added: schema.number(),
-   * });
-   * ```
-   *
-   * How to remove an existing key from an object schema
-   * ```ts
-   * const origin = schema.object({
-   *   initial: schema.string(),
-   *   toRemove: schema.number(),
-   * });
-   *
-   * const extended = origin.extends({
-   *   toRemove: undefined,
-   * });
-   * ```
-   *
-   * How to override the schema's options
-   * ```ts
-   * const origin = schema.object({
-   *   initial: schema.string(),
-   * }, { defaultValue: { initial: 'foo' }});
-   *
-   * const extended = origin.extends({
-   *   added: schema.number(),
-   * }, { defaultValue: { initial: 'foo', added: 'bar' }});
-   *
-   * @remarks
-   * `extends` only support extending first-level properties. It's currently not possible to perform deep/nested extensions.
-   *
-   * ```ts
-   * const origin = schema.object({
-   *   foo: schema.string(),
-   *   nested: schema.object({
-   *     a: schema.string(),
-   *     b: schema.string(),
-   *   }),
-   * });
-   *
-   * const extended = origin.extends({
-   *   nested: schema.object({
-   *     c: schema.string(),
-   *   }),
-   * });
-   *
-   * // TypeOf<typeof extended> is `{ foo: string; nested: { c: string } }`
-   * ```
-   */
-  public extends<NP extends NullableProps>(
-    newProps: NP,
-    newOptions?: ExtendedObjectTypeOptions<P, NP>
-  ): ExtendedObjectType<P, NP> {
-    const extendedProps = Object.entries({
-      ...this.props,
-      ...newProps,
-    }).reduce((memo, [key, value]) => {
-      if (value !== null && value !== undefined) {
-        return {
-          ...memo,
-          [key]: value,
-        };
-      }
-      return memo;
-    }, {} as ExtendedProps<P, NP>);
-
-    const extendedOptions = {
-      ...this.options,
-      ...newOptions,
-    } as ExtendedObjectTypeOptions<P, NP>;
-
-    return new ObjectType(extendedProps, extendedOptions);
-  }
-
-  protected handleError(type: string, { reason, value }: Record<string, any>) {
-    switch (type) {
-      case 'any.required':
-      case 'object.base':
-        return `expected a plain object value, but found [${typeDetect(value)}] instead.`;
-      case 'object.parse':
-        return `could not parse object value from json input`;
-      case 'object.unknown':
-        return `definition for this key is missing`;
-      case 'object.child':
-        return reason[0];
-    }
   }
 
   validateKey(key: string, value: any) {
     if (!this.propSchemas[key]) {
       throw new Error(`${key} is not a valid part of this schema`);
     }
-    const { value: validatedValue, error } = this.propSchemas[key].validate(value);
-    if (error) {
-      throw new ValidationError(error as any, key);
+    const result = this.propSchemas[key].safeParse(value);
+    if (!result.success) {
+      throw new ValidationError(result.error.errors[0] as any, key);
     }
-    return validatedValue;
+    return result.data;
   }
 }
