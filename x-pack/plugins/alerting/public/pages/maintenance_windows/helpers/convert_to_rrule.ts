@@ -39,7 +39,7 @@ export const convertToRRule = (
     form = { ...recurringForm, ...presets[recurringForm.frequency] };
   }
 
-  const frequency = form.customFrequency ? form.customFrequency : (form.frequency as Frequency);
+  const frequency = form.customFrequency ?? (form.frequency as Frequency);
   rRule.freq = frequency;
 
   rRule.interval = form.interval;

@@ -30,9 +30,8 @@ export const recurringSummary = (
       schedule = { ...recurringSchedule, ...presets[recurringSchedule.frequency] };
     }
 
-    const frequency = schedule.customFrequency
-      ? schedule.customFrequency
-      : (schedule.frequency as MaintenanceWindowFrequency);
+    const frequency =
+      schedule.customFrequency ?? (schedule.frequency as MaintenanceWindowFrequency);
     const interval = schedule.interval || 1;
     const frequencySummary = i18n.CREATE_FORM_FREQUENCY_SUMMARY(interval)[frequency];
 
