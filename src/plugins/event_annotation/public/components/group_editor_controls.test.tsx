@@ -14,6 +14,7 @@ import { GroupEditorControls } from './group_editor_controls';
 import { EuiSelectProps, EuiTextAreaProps, EuiTextProps } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { act } from 'react-dom/test-utils';
+import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
 
 describe('event annotation group editor', () => {
   const dataViewId = 'my-index-pattern';
@@ -61,6 +62,7 @@ describe('event annotation group editor', () => {
             toSpec: () => spec,
           } as unknown as DataView)
         }
+        queryInputServices={{} as QueryInputServices}
       />
     );
 

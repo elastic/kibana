@@ -13,7 +13,9 @@
       "data",
       "presentationUtil",
       "visualizations",
-      "dataViews"
+      "dataViews",
+      "unifiedSearch",
+      "kibanaUtils"
     ],
     "optionalPlugins": [
       "savedObjectsTagging",

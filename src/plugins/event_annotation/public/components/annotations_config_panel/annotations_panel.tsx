@@ -19,6 +19,7 @@ import {
   TextDecorationSetting,
   FieldPicker,
   FieldOption,
+  type QueryInputServices,
 } from '@kbn/visualization-ui-components/public';
 import type { FieldOptionValue } from '@kbn/visualization-ui-components/public';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -42,6 +43,7 @@ import { annotationsIconSet } from './icon_set';
 import { sanitizeProperties } from './helpers';
 import { TooltipSection } from './tooltip_annotation_panel';
 import { ConfigPanelManualAnnotation } from './manual_annotation_panel';
+import { ConfigPanelQueryAnnotation } from './query_annotation_panel';
 
 export const AnnotationsPanel = ({
   annotation: currentAnnotation,
@@ -49,12 +51,14 @@ export const AnnotationsPanel = ({
   dataView,
   getDefaultRangeEnd,
   calendarClassName,
+  queryInputServices,
 }: {
   annotation: EventAnnotationConfig;
   onAnnotationChange: (annotation: EventAnnotationConfig) => void;
   dataView: DataView;
   getDefaultRangeEnd: (rangeStart: string) => string;
   calendarClassName?: string;
+  queryInputServices: QueryInputServices;
   // datatableUtilities: DatatableUtilitiesService;
   // formatFactory: FormatFactory;
   // paletteService: PaletteRegistry;
@@ -157,15 +161,13 @@ export const AnnotationsPanel = ({
           />
         </EuiFormRow>
         {isQueryBased ? (
-          // <ConfigPanelQueryAnnotation
-          //   annotation={currentAnnotation}
-          //   onChange={setAnnotations}
-          //   frame={frame}
-          //   state={state}
-          //   layer={localLayer}
-          //   queryInputShouldOpen={queryInputShouldOpen}
-          // />
-          <div />
+          <ConfigPanelQueryAnnotation
+            annotation={currentAnnotation}
+            onChange={update}
+            dataView={dataView}
+            queryInputShouldOpen={queryInputShouldOpen}
+            queryInputServices={queryInputServices}
+          />
         ) : (
           <ConfigPanelManualAnnotation
             annotation={currentAnnotation}

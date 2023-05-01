@@ -16,6 +16,7 @@ import {
   FieldOptionValue,
   FieldPicker,
   FilterQueryInput,
+  type QueryInputServices,
 } from '@kbn/visualization-ui-components/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryPointEventAnnotationConfig } from '../../../common';
@@ -30,11 +31,13 @@ export const ConfigPanelQueryAnnotation = ({
   dataView,
   onChange,
   queryInputShouldOpen,
+  queryInputServices,
 }: {
   annotation?: QueryPointEventAnnotationConfig;
   onChange: (annotations: Partial<QueryPointEventAnnotationConfig> | undefined) => void;
   dataView: DataView;
   queryInputShouldOpen?: boolean;
+  queryInputServices: QueryInputServices;
 }) => {
   const { hasFieldData } = useExistingFieldsReader();
   // list only date fields
@@ -78,7 +81,7 @@ export const ConfigPanelQueryAnnotation = ({
           }}
           dataView={dataView}
           appName="TODO"
-          queryInputServices={{}}
+          queryInputServices={queryInputServices}
         />
       </EuiFormRow>
 

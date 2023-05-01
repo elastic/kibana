@@ -37,3 +37,5 @@ export type { AccessorConfig } from './dimension_buttons';
 export type { FieldOptionValue, FieldOption, DataType } from './field_picker';
 
 export type { IconSet } from './icon_select';
+
+export type { QueryInputServices } from './query_input';

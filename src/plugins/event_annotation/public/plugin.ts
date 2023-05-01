@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { type Plugin, type CoreSetup, type CoreStart } from '@kbn/core/public';
+import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/types';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EventAnnotationService } from './event_annotation_service';
 import {
   manualPointEventAnnotation,
@@ -23,13 +25,13 @@ import {
 } from '../common';
 import { getFetchEventAnnotations } from './fetch_event_annotations';
 import { EventAnnotationListingPageServices, getTableList } from './get_table_list';
-
 export interface EventAnnotationStartDependencies {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   data: DataPublicPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 interface SetupDependencies {
@@ -78,6 +80,16 @@ export class EventAnnotationPlugin
           PresentationUtilContextProvider: pluginsStart.presentationUtil.ContextProvider,
           dataViews,
           createDataView: pluginsStart.dataViews.create.bind(pluginsStart.dataViews),
+          queryInputServices: {
+            http: coreStart.http,
+            docLinks: coreStart.docLinks,
+            notifications: coreStart.notifications,
+            uiSettings: coreStart.uiSettings,
+            dataViews: pluginsStart.dataViews,
+            unifiedSearch: pluginsStart.unifiedSearch,
+            data: pluginsStart.data,
+            storage: new Storage(localStorage),
+          },
         };
 
         // TODO wire parent props

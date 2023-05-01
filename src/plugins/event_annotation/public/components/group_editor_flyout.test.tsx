@@ -14,6 +14,7 @@ import React from 'react';
 import { GroupEditorControls } from './group_editor_controls';
 import { GroupEditorFlyout } from './group_editor_flyout';
 import { DataView } from '@kbn/data-views-plugin/common';
+import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
 
 const simulateButtonClick = (component: ShallowWrapper, selector: string) => {
   (component.find(selector) as ShallowWrapper<Parameters<typeof EuiButton>[0]>).prop('onClick')!(
@@ -56,6 +57,7 @@ describe('group editor flyout', () => {
         ]}
         savedObjectsTagging={mockTaggingApi}
         createDataView={jest.fn()}
+        queryInputServices={{} as QueryInputServices}
       />
     );
   });

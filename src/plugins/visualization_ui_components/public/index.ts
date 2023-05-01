@@ -41,6 +41,7 @@ export type {
   FieldOption,
   IconSet,
   AccessorConfig,
+  QueryInputServices,
 } from './components';
 
 export function plugin() {

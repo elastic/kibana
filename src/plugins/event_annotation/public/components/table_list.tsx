@@ -13,6 +13,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
 import { EventAnnotationGroupConfig } from '../../common';
 import type { EventAnnotationServiceType } from '../event_annotation_service/types';
 import { EventAnnotationGroupContent } from '../../common/types';
@@ -29,6 +30,7 @@ export const EventAnnotationGroupTableList = ({
   parentProps,
   dataViews,
   createDataView,
+  queryInputServices,
 }: {
   uiSettings: IUiSettingsClient;
   eventAnnotationService: EventAnnotationServiceType;
@@ -37,6 +39,7 @@ export const EventAnnotationGroupTableList = ({
   parentProps: TableListTabParentProps;
   dataViews: DataView[];
   createDataView: (spec: DataViewSpec) => Promise<DataView>;
+  queryInputServices: QueryInputServices;
 }) => {
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -91,6 +94,7 @@ export const EventAnnotationGroupTableList = ({
       savedObjectsTagging={savedObjectsTagging}
       dataViews={dataViews}
       createDataView={createDataView}
+      queryInputServices={queryInputServices}
     />
   ) : undefined;
 

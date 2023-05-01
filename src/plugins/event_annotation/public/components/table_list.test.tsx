@@ -22,6 +22,7 @@ import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/moc
 import { act } from 'react-dom/test-utils';
 import { GroupEditorFlyout } from './group_editor_flyout';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { QueryInputServices } from '@kbn/visualization-ui-components/public';
 
 describe('annotation list view', () => {
   const adHocDVId = 'ad-hoc';
@@ -79,6 +80,7 @@ describe('annotation list view', () => {
           } as DataView,
         ]}
         createDataView={() => Promise.resolve({} as DataView)}
+        queryInputServices={{} as QueryInputServices}
       />
     );
   });

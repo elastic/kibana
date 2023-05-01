@@ -16,6 +16,7 @@ import {
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { QueryInputServices } from '@kbn/visualization-ui-components/public';
 import { EventAnnotationGroupTableList } from './components/table_list';
 import { EventAnnotationServiceType } from './event_annotation_service/types';
 
@@ -26,6 +27,7 @@ export interface EventAnnotationListingPageServices {
   PresentationUtilContextProvider: FC;
   dataViews: DataView[];
   createDataView: (spec: DataViewSpec) => Promise<DataView>;
+  queryInputServices: QueryInputServices;
 }
 
 export const getTableList = (
@@ -49,6 +51,7 @@ export const getTableList = (
         parentProps={parentProps}
         dataViews={services.dataViews}
         createDataView={services.createDataView}
+        queryInputServices={services.queryInputServices}
       />
     </TableListViewKibanaProvider>
   );

@@ -22,6 +22,7 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
 import { AnnotationsPanel } from './annotations_config_panel';
@@ -34,6 +35,7 @@ export const GroupEditorControls = ({
   TagSelector,
   dataViews: globalDataViews,
   createDataView,
+  queryInputServices,
 }: {
   group: EventAnnotationGroupConfig;
   update: (group: EventAnnotationGroupConfig) => void;
@@ -42,6 +44,7 @@ export const GroupEditorControls = ({
   TagSelector: SavedObjectsTaggingApiUiComponent['SavedObjectSaveModalTagSelector'];
   dataViews: DataView[];
   createDataView: (spec: DataViewSpec) => Promise<DataView>;
+  queryInputServices: QueryInputServices;
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -164,6 +167,7 @@ export const GroupEditorControls = ({
       onAnnotationChange={(changes) => setSelectedAnnotation({ ...selectedAnnotation, ...changes })}
       dataView={currentDataView}
       getDefaultRangeEnd={(rangeStart) => rangeStart}
+      queryInputServices={queryInputServices}
     />
   );
 };
