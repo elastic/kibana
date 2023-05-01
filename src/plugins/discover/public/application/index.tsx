@@ -5,9 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
-import { discoverRouter } from './discover_router';
+import { DiscoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
 import type { RegisterExtensions } from '../plugin';
 
@@ -35,7 +37,12 @@ export const renderApp = ({ element, services, registerExtensions, isDev }: Rend
   }
   const unmount = toMountPoint(
     wrapWithTheme(
-      discoverRouter({ services, registerExtensions, history, isDev }),
+      <DiscoverRouter
+        services={services}
+        registerExtensions={registerExtensions}
+        history={history}
+        isDev={isDev}
+      />,
       core.theme.theme$
     )
   )(element);

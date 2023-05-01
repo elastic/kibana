@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Redirect, Router, Switch } from 'react-router-dom';
+import { Redirect, Router, Switch, useParams } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { History } from 'history';
@@ -27,38 +27,64 @@ export interface DiscoverRouterProps {
   isDev: boolean;
 }
 
-export const discoverRouter = ({
-  services,
-  registerExtensions,
-  history,
-  isDev,
-}: DiscoverRouterProps) => (
+type DiscoverRoutesProps = Pick<DiscoverRouterProps, 'registerExtensions' | 'isDev'> & {
+  prefix?: string;
+};
+
+const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProps) => {
+  const prefixPath = (path: string) => (prefix ? `/${prefix}/${path}` : `/${path}`);
+
+  return (
+    <Switch>
+      <Route path={prefixPath('context/:dataViewId/:id')}>
+        <ContextAppRoute />
+      </Route>
+      <Route
+        path={prefixPath('doc/:dataView/:index/:type')}
+        render={(props) => (
+          <Redirect
+            to={prefixPath(`doc/${props.match.params.dataView}/${props.match.params.index}`)}
+          />
+        )}
+      />
+      <Route path={prefixPath('doc/:dataViewId/:index')}>
+        <SingleDocRoute />
+      </Route>
+      <Route path={prefixPath('viewAlert/:id')}>
+        <ViewAlertRoute />
+      </Route>
+      <Route path={prefixPath('view/:id')}>
+        <DiscoverMainRoute {...mainRouteProps} />
+      </Route>
+      <Route path={prefixPath('')} exact>
+        <DiscoverMainRoute {...mainRouteProps} />
+      </Route>
+      <NotFoundRoute />
+    </Switch>
+  );
+};
+
+const CustomDiscoverRoutes = (props: DiscoverRoutesProps) => {
+  const { profile } = useParams<{ profile: string }>();
+
+  if (profile === 'test') {
+    return <DiscoverRoutes prefix={profile} {...props} />;
+  }
+
+  return <NotFoundRoute />;
+};
+
+export const DiscoverRouter = ({ services, history, ...routeProps }: DiscoverRouterProps) => (
   <KibanaContextProvider services={services}>
     <EuiErrorBoundary>
       <Router history={history} data-test-subj="discover-react-router">
         <Switch>
-          <Route path="/context/:dataViewId/:id">
-            <ContextAppRoute />
+          <Route path="/:profile">
+            <CustomDiscoverRoutes {...routeProps} />
           </Route>
-          <Route
-            path="/doc/:dataView/:index/:type"
-            render={(props) => (
-              <Redirect to={`/doc/${props.match.params.dataView}/${props.match.params.index}`} />
-            )}
-          />
-          <Route path="/doc/:dataViewId/:index">
-            <SingleDocRoute />
+          <Route path="/">
+            <DiscoverRoutes {...routeProps} />
           </Route>
-          <Route path="/viewAlert/:id">
-            <ViewAlertRoute />
-          </Route>
-          <Route path="/view/:id">
-            <DiscoverMainRoute registerExtensions={registerExtensions} isDev={isDev} />
-          </Route>
-          <Route path="/" exact>
-            <DiscoverMainRoute registerExtensions={registerExtensions} isDev={isDev} />
-          </Route>
-          <NotFoundRoute />
         </Switch>
       </Router>
     </EuiErrorBoundary>
