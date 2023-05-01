@@ -48,7 +48,7 @@ import {
 export type { AnyType, TypeOf, Props, SchemaStructureEntry, NullableProps };
 export { ObjectType, Type };
 export { ByteSizeValue } from './src/byte_size_value';
-export { SchemaTypeError, ValidationError } from './src/errors';
+export { ValidationError } from './src/errors';
 export { isKbnSchema } from './src/typeguards';
 
 function any(options?: TypeOptions<any>) {
