@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-
+import { v4 as uuidv4 } from 'uuid';
+import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiTextAlign, EuiCallOut } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Join } from './resources/join';
 import { JoinDocumentationPopover } from './resources/join_documentation_popover';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
 import { SOURCE_TYPES } from '../../../../common/constants';
-import { AddTermJoinButton } from './add_term_join_button';
+import { AddJoinButton } from './add_join_button';
 
 export interface JoinField {
   label: string;
@@ -58,7 +58,13 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
     onChange(layer, [
       ...joins,
       {
-        ...joinDescriptor
+        ...joinDescriptor,
+        right: {
+          id: uuidv4(),
+          applyGlobalQuery: true,
+          applyGlobalTime: true,
+          ...(joinDescriptor?.right ?? {})
+        }
       },
     ]);
   };
@@ -72,10 +78,38 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
       <>
         {renderJoins()}
         <EuiTextAlign textAlign="center">
-          <AddTermJoinButton
-            addJoin={addJoin}
-            isLayerSourceMvt={layer.getSource().isMvt()}
-            numJoins={joins.length}
+          <AddJoinButton
+            disabledReason={i18n.translate('xpack.maps.layerPanel.joinEditor.spatialJoin.addButtonDisabledReason', {
+              defaultMessage: 'geojson',
+            })}
+            isDisabled={layer.getSource().isMvt()}
+            label={i18n.translate('xpack.maps.layerPanel.joinEditor.spatialJoin.addButtonLabel', {
+              defaultMessage: 'Add spatial join',
+            })}
+            onClick={() => {
+              addJoin({
+                leftField: '_id',
+                right: {
+                  type: SOURCE_TYPES.ES_DISTANCE_SOURCE,
+                }
+              })
+            }}
+          />
+          <AddJoinButton
+            disabledReason={i18n.translate('xpack.maps.layerPanel.joinEditor.termJoin.mvtSingleJoinMsg', {
+              defaultMessage: `Vector tiles support one term join. To add multiple joins, select 'Limit results' in 'Scaling'.`,
+            })}
+            isDisabled={layer.getSource().isMvt() && joins.length >= 1}
+            label={i18n.translate('xpack.maps.layerPanel.joinEditor.termJoin.addButtonLabel', {
+              defaultMessage: 'Add term join',
+            })}
+            onClick={() => {
+              addJoin({
+                right: {
+                  type: SOURCE_TYPES.ES_TERM_SOURCE,
+                }
+              })
+            }}
           />
         </EuiTextAlign>
       </>
