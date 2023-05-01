@@ -14,8 +14,3 @@ export const SEARCH_QUERY_LANGUAGE = {
 } as const;
 
 export type SearchQueryLanguage = typeof SEARCH_QUERY_LANGUAGE[keyof typeof SEARCH_QUERY_LANGUAGE];
-
-export interface ErrorMessage {
-  query: string;
-  message: string;
-}

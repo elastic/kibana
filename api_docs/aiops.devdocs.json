@@ -217,6 +217,26 @@
           },
           {
             "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-execution-context-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+                "section": "def-common.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
             "id": "def-public.AiopsAppDependencies.charts",
             "type": "CompoundType",
             "tags": [],
@@ -444,6 +464,46 @@
                 "section": "def-public.LensPublicStart",
                 "text": "LensPublicStart"
               }
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.fieldStats",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldStats",
+            "description": [],
+            "signature": [
+              "{ useFieldStatsTrigger: () => { renderOption: ((option: ",
+              "EuiComboBoxOptionOption",
+              "<string>, searchValue: string, OPTION_CONTENT_CLASSNAME: string) => React.ReactNode) | undefined; closeFlyout: () => void; }; FieldStatsFlyoutProvider: React.FC<{ dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "; fieldStatsServices: ",
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.FieldStatsServices",
+                "text": "FieldStatsServices"
+              },
+              "; timeRangeMs?: ",
+              {
+                "pluginId": "@kbn/ml-date-picker",
+                "scope": "common",
+                "docId": "kibKbnMlDatePickerPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined; dslQuery?: object | undefined; }>; } | undefined"
             ],
             "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,

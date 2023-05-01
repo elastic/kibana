@@ -17,14 +17,14 @@ import {
 import styled from 'styled-components';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import type { Case, CaseStatusWithAllStatus } from '../../../../common/ui/types';
+import type { CaseUI, CaseStatusWithAllStatus } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
 import { casesQueryClient } from '../../cases_context/query_client';
 
 export interface AllCasesSelectorModalProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
-  onRowClick?: (theCase?: Case) => void;
+  onRowClick?: (theCase?: CaseUI) => void;
   onClose?: () => void;
 }
 
@@ -46,7 +46,7 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
     }, [onClose]);
 
     const onClick = useCallback(
-      (theCase?: Case) => {
+      (theCase?: CaseUI) => {
         closeModal();
         if (onRowClick) {
           onRowClick(theCase);

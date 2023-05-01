@@ -218,13 +218,33 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
     async createTransform(
       transformId: string,
       transformConfig: PutTransformsRequestSchema,
-      deferValidation?: boolean
+      options: {
+        deferValidation?: boolean;
+        headers?: object;
+      } = {}
     ) {
-      log.debug(`Creating transform with id '${transformId}'...`);
-      const { body, status } = await esSupertest
-        .put(`/_transform/${transformId}${deferValidation ? '?defer_validation=true' : ''}`)
-        .send(transformConfig);
-      this.assertResponseStatusCode(200, status, body);
+      const { deferValidation, headers } = options;
+
+      if (headers) {
+        log.debug(
+          `Creating transform with id '${transformId}' with headers ${JSON.stringify(
+            headers
+          )} and defer_validation:${deferValidation}...`
+        );
+        const { body, status } = await esSupertest
+          .put(`/_transform/${transformId}${deferValidation ? '?defer_validation=true' : ''}`)
+          .set(headers)
+          .send(transformConfig);
+        this.assertResponseStatusCode(200, status, body);
+      } else {
+        log.debug(
+          `Creating transform with id '${transformId}' and defer_validation:${deferValidation}...`
+        );
+        const { body, status } = await esSupertest
+          .put(`/_transform/${transformId}${deferValidation ? '?defer_validation=true' : ''}`)
+          .send(transformConfig);
+        this.assertResponseStatusCode(200, status, body);
+      }
 
       await this.waitForTransformToExist(
         transformId,
@@ -264,8 +284,12 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, body);
     },
 
-    async createAndRunTransform(transformId: string, transformConfig: PutTransformsRequestSchema) {
-      await this.createTransform(transformId, transformConfig);
+    async createAndRunTransform(
+      transformId: string,
+      transformConfig: PutTransformsRequestSchema,
+      options: { headers?: object } = {}
+    ) {
+      await this.createTransform(transformId, transformConfig, { headers: options.headers });
       await this.startTransform(transformId);
       if (transformConfig.sync === undefined) {
         // batch mode

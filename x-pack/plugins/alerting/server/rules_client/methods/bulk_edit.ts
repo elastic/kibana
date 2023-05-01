@@ -7,7 +7,7 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { cloneDeep, omit } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import {
@@ -503,11 +503,11 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
     }
 
     // validate rule params
-    const validatedAlertTypeParams = validateRuleTypeParams(ruleParams, ruleType.validate?.params);
+    const validatedAlertTypeParams = validateRuleTypeParams(ruleParams, ruleType.validate.params);
     const validatedMutatedAlertTypeParams = validateMutatedRuleTypeParams(
       validatedAlertTypeParams,
       rule.attributes.params,
-      ruleType.validate?.params
+      ruleType.validate.params
     );
 
     const {
@@ -636,19 +636,6 @@ async function getUpdatedAttributesFromOperations(
         if (isAttributeModified) {
           ruleActions = modifiedAttributes;
           isAttributesUpdateSkipped = false;
-        }
-
-        // TODO https://github.com/elastic/kibana/issues/148414
-        // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
-        const firstFrequency = updatedOperation.value.find(
-          (action) => action?.frequency
-        )?.frequency;
-        if (rule.attributes.consumer === AlertConsumers.SIEM && firstFrequency) {
-          ruleActions.actions = ruleActions.actions.map((action) => omit(action, 'frequency'));
-          if (!attributes.notifyWhen) {
-            attributes.notifyWhen = firstFrequency.notifyWhen;
-            attributes.throttle = firstFrequency.throttle;
-          }
         }
 
         break;

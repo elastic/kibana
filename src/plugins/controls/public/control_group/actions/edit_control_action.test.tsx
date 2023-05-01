@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-import {
-  lazyLoadReduxEmbeddablePackage,
-  ReduxEmbeddablePackage,
-} from '@kbn/presentation-util-plugin/public';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { ControlOutput } from '../../types';
@@ -21,15 +17,10 @@ import { TimeSliderEmbeddableFactory } from '../../time_slider';
 import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from '../../options_list';
 import { ControlGroupContainer } from '../embeddable/control_group_container';
 import { OptionsListEmbeddable } from '../../options_list/embeddable/options_list_embeddable';
-
-let reduxEmbeddablePackage: ReduxEmbeddablePackage;
+import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
 
 const controlGroupInput = { chainingSystem: 'NONE', panels: {} } as ControlGroupInput;
 const deleteControlAction = new DeleteControlAction();
-
-beforeAll(async () => {
-  reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
-});
 
 test('Action is incompatible with Error Embeddables', async () => {
   const editControlAction = new EditControlAction(deleteControlAction);
@@ -44,7 +35,7 @@ test('Action is incompatible with embeddables that are not editable', async () =
   pluginServices.getServices().embeddable.getEmbeddableFactory = mockGetFactory;
 
   const editControlAction = new EditControlAction(deleteControlAction);
-  const emptyContainer = new ControlGroupContainer(reduxEmbeddablePackage, controlGroupInput);
+  const emptyContainer = new ControlGroupContainer(mockedReduxEmbeddablePackage, controlGroupInput);
   await emptyContainer.untilInitialized();
   await emptyContainer.addTimeSliderControl();
 
@@ -62,7 +53,7 @@ test('Action is compatible with embeddables that are editable', async () => {
   pluginServices.getServices().embeddable.getEmbeddableFactory = mockGetFactory;
 
   const editControlAction = new EditControlAction(deleteControlAction);
-  const emptyContainer = new ControlGroupContainer(reduxEmbeddablePackage, controlGroupInput);
+  const emptyContainer = new ControlGroupContainer(mockedReduxEmbeddablePackage, controlGroupInput);
   await emptyContainer.untilInitialized();
   await emptyContainer.addOptionsListControl({
     dataViewId: 'test-data-view',
@@ -82,7 +73,7 @@ test('Action is compatible with embeddables that are editable', async () => {
 test('Execute throws an error when called with an embeddable not in a parent', async () => {
   const editControlAction = new EditControlAction(deleteControlAction);
   const optionsListEmbeddable = new OptionsListEmbeddable(
-    reduxEmbeddablePackage,
+    mockedReduxEmbeddablePackage,
     {} as OptionsListEmbeddableInput,
     {} as ControlOutput
   );
@@ -95,7 +86,7 @@ test('Execute should open a flyout', async () => {
   const spyOn = jest.fn().mockResolvedValue(undefined);
   pluginServices.getServices().overlays.openFlyout = spyOn;
 
-  const emptyContainer = new ControlGroupContainer(reduxEmbeddablePackage, controlGroupInput);
+  const emptyContainer = new ControlGroupContainer(mockedReduxEmbeddablePackage, controlGroupInput);
   await emptyContainer.untilInitialized();
   await emptyContainer.addOptionsListControl({
     dataViewId: 'test-data-view',

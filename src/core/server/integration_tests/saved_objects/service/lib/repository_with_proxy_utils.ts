@@ -7,7 +7,6 @@
  */
 import Hapi from '@hapi/hapi';
 import { IncomingMessage } from 'http';
-import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 
 // proxy setup
 const defaultProxyOptions = (hostname: string, port: string) => ({
@@ -52,10 +51,13 @@ const proxyOnResponseHandler = async (res: IncomingMessage, h: Hapi.ResponseTool
     .code(404);
 };
 
-const kbnIndex = `.kibana_${pkg.version}`;
-
 // GET /.kibana_8.0.0/_doc/{type*} route (repository.get calls)
-export const declareGetRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
+export const declareGetRoute = (
+  hapiServer: Hapi.Server,
+  hostname: string,
+  port: string,
+  kbnIndex: string
+) =>
   hapiServer.route({
     method: 'GET',
     path: `/${kbnIndex}/_doc/{type*}`,
@@ -70,7 +72,12 @@ export const declareGetRoute = (hapiServer: Hapi.Server, hostname: string, port:
     },
   });
 // DELETE /.kibana_8.0.0/_doc/{type*} route (repository.delete calls)
-export const declareDeleteRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
+export const declareDeleteRoute = (
+  hapiServer: Hapi.Server,
+  hostname: string,
+  port: string,
+  kbnIndex: string
+) =>
   hapiServer.route({
     method: 'DELETE',
     path: `/${kbnIndex}/_doc/{_id*}`,
@@ -133,7 +140,12 @@ export const declarePostMgetRoute = (hapiServer: Hapi.Server, hostname: string, 
     },
   });
 // GET _search route
-export const declareGetSearchRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
+export const declareGetSearchRoute = (
+  hapiServer: Hapi.Server,
+  hostname: string,
+  port: string,
+  kbnIndex: string
+) =>
   hapiServer.route({
     method: 'GET',
     path: `/${kbnIndex}/_search`,
@@ -149,7 +161,12 @@ export const declareGetSearchRoute = (hapiServer: Hapi.Server, hostname: string,
     },
   });
 // POST _search route (`find` calls)
-export const declarePostSearchRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
+export const declarePostSearchRoute = (
+  hapiServer: Hapi.Server,
+  hostname: string,
+  port: string,
+  kbnIndex: string
+) =>
   hapiServer.route({
     method: 'POST',
     path: `/${kbnIndex}/_search`,
@@ -168,7 +185,12 @@ export const declarePostSearchRoute = (hapiServer: Hapi.Server, hostname: string
     },
   });
 // POST _update
-export const declarePostUpdateRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
+export const declarePostUpdateRoute = (
+  hapiServer: Hapi.Server,
+  hostname: string,
+  port: string,
+  kbnIndex: string
+) =>
   hapiServer.route({
     method: 'POST',
     path: `/${kbnIndex}/_update/{_id*}`,
@@ -187,7 +209,12 @@ export const declarePostUpdateRoute = (hapiServer: Hapi.Server, hostname: string
     },
   });
 // POST _pit
-export const declarePostPitRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
+export const declarePostPitRoute = (
+  hapiServer: Hapi.Server,
+  hostname: string,
+  port: string,
+  kbnIndex: string
+) =>
   hapiServer.route({
     method: 'POST',
     path: `/${kbnIndex}/_pit`,
@@ -209,7 +236,8 @@ export const declarePostPitRoute = (hapiServer: Hapi.Server, hostname: string, p
 export const declarePostUpdateByQueryRoute = (
   hapiServer: Hapi.Server,
   hostname: string,
-  port: string
+  port: string,
+  kbnIndex: string
 ) =>
   hapiServer.route({
     method: 'POST',
@@ -244,3 +272,22 @@ export const declarePassthroughRoute = (hapiServer: Hapi.Server, hostname: strin
       },
     },
   });
+
+export function allCombinationsPermutations<T>(collection: T[]): T[][] {
+  const recur = (subcollection: T[], size: number): T[][] => {
+    if (size <= 0) {
+      return [[]];
+    }
+    const permutations: T[][] = [];
+    subcollection.forEach((value, index, array) => {
+      array = array.slice();
+      array.splice(index, 1);
+      recur(array, size - 1).forEach((permutation) => {
+        permutation.unshift(value);
+        permutations.push(permutation);
+      });
+    });
+    return permutations;
+  };
+  return collection.map((_, n) => recur(collection, n + 1)).flat();
+}

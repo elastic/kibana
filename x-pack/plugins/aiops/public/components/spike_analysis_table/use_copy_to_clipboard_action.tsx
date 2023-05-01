@@ -7,13 +7,21 @@
 
 import React from 'react';
 
-import { EuiCopy, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiCopy, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { isSignificantTerm, type SignificantTerm } from '@kbn/ml-agg-utils';
 
+import { TableActionButton } from './table_action_button';
 import { getTableItemAsKQL } from './get_table_item_as_kql';
 import type { GroupTableItem, TableItemAction } from './types';
+
+const copyToClipboardButtonLabel = i18n.translate(
+  'xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardButtonLabel',
+  {
+    defaultMessage: 'Copy to clipboard',
+  }
+);
 
 const copyToClipboardSignificantTermMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.linksMenu.copyToClipboardSignificantTermMessage',
@@ -37,7 +45,15 @@ export const useCopyToClipboardAction = (): TableItemAction => ({
     return (
       <EuiToolTip content={message}>
         <EuiCopy textToCopy={getTableItemAsKQL(tableItem)}>
-          {(copy) => <EuiButtonIcon iconType="copyClipboard" onClick={copy} aria-label={message} />}
+          {(copy) => (
+            <TableActionButton
+              dataTestSubjPostfix="CopyToClipboard"
+              iconType="copyClipboard"
+              isDisabled={false}
+              label={copyToClipboardButtonLabel}
+              onClick={copy}
+            />
+          )}
         </EuiCopy>
       </EuiToolTip>
     );

@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  getSyntheticsEnablement,
-  enableSynthetics,
-  disableSynthetics,
-  selectSyntheticsEnablement,
-} from '../state';
+import { getSyntheticsEnablement, selectSyntheticsEnablement } from '../state';
 
 export function useEnablement() {
   const dispatch = useDispatch();
@@ -20,10 +15,10 @@ export function useEnablement() {
   const { loading, error, enablement } = useSelector(selectSyntheticsEnablement);
 
   useEffect(() => {
-    if (!enablement && !loading) {
+    if (!enablement && !loading && !error) {
       dispatch(getSyntheticsEnablement());
     }
-  }, [dispatch, enablement, loading]);
+  }, [dispatch, enablement, error, loading]);
 
   return {
     enablement: {
@@ -35,7 +30,5 @@ export function useEnablement() {
     invalidApiKeyError: enablement ? !Boolean(enablement?.isValidApiKey) : false,
     error,
     loading,
-    enableSynthetics: useCallback(() => dispatch(enableSynthetics()), [dispatch]),
-    disableSynthetics: useCallback(() => dispatch(disableSynthetics()), [dispatch]),
   };
 }

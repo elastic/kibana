@@ -26,9 +26,9 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DashboardContainerByValueInput } from '../../../../common';
+import { DashboardContainerInput } from '../../../../common';
 import { pluginServices } from '../../../services/plugin_services';
-import { useDashboardContainerContext } from '../../dashboard_container_context';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
 interface DashboardSettingsProps {
   onClose: () => void;
@@ -42,23 +42,18 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
     dashboardSavedObject: { checkForDuplicateDashboardTitle },
   } = pluginServices.getServices();
 
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { setStateFromSettingsFlyout },
-    embeddableInstance: dashboardContainer,
-  } = useDashboardContainerContext();
+  const dashboard = useDashboardContainer();
 
   const [dashboardSettingsState, setDashboardSettingsState] = useState({
-    ...dashboardContainer.getInputAsValueType(),
+    ...dashboard.getInput(),
   });
 
   const [isTitleDuplicate, setIsTitleDuplicate] = useState(false);
   const [isTitleDuplicateConfirmed, setIsTitleDuplicateConfirmed] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
 
-  const lastSavedId = select((state) => state.componentState.lastSavedId);
-  const lastSavedTitle = select((state) => state.explicitInput.title);
+  const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
+  const lastSavedTitle = dashboard.select((state) => state.explicitInput.title);
 
   const isMounted = useMountedState();
 
@@ -83,24 +78,19 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
     setIsApplying(false);
 
     if (validTitle) {
-      dispatch(setStateFromSettingsFlyout({ lastSavedId, ...dashboardSettingsState }));
+      dashboard.dispatch.setStateFromSettingsFlyout({ lastSavedId, ...dashboardSettingsState });
       onClose();
     }
   };
 
-  const updateDashboardSetting = useCallback(
-    (newSettings: Partial<DashboardContainerByValueInput>) => {
-      setDashboardSettingsState((prevDashboardSettingsState) => {
-        return {
-          ...prevDashboardSettingsState,
-          ...newSettings,
-        };
-      });
-    },
-    []
-  );
-
-  const dispatch = useEmbeddableDispatch();
+  const updateDashboardSetting = useCallback((newSettings: Partial<DashboardContainerInput>) => {
+    setDashboardSettingsState((prevDashboardSettingsState) => {
+      return {
+        ...prevDashboardSettingsState,
+        ...newSettings,
+      };
+    });
+  }, []);
 
   const renderDuplicateTitleCallout = () => {
     if (!isTitleDuplicate) {
