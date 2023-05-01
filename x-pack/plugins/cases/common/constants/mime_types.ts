@@ -85,6 +85,7 @@ export const imageMimeTypes = [
   'image/vnd.zbrush.pcx',
   'image/webp',
   'image/wmf',
+  'image/gif',
 ];
 
 export const textMimeTypes = ['text/plain', 'text/csv', 'text/json', 'application/json'];

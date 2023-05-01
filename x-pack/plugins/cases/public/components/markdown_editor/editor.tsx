@@ -6,7 +6,15 @@
  */
 
 import type { ElementRef } from 'react';
-import React, { memo, forwardRef, useCallback, useRef, useState, useImperativeHandle } from 'react';
+import React, {
+  memo,
+  forwardRef,
+  useCallback,
+  useRef,
+  useState,
+  useImperativeHandle,
+  useMemo,
+} from 'react';
 import type { PluggableList } from 'unified';
 import type { EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
 import { EuiMarkdownEditor } from '@elastic/eui';
@@ -51,7 +59,19 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
 
     const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins(disabledUiPlugins);
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
-    const dropHandlers = [createFileHandler(filesClient, owner[0] as Owner)];
+
+    const fileOwner = owner[0];
+    const domain = `${window.location.protocol}//${window.location.host}`;
+
+    const dropHandlers = useMemo(() => {
+      return [
+        createFileHandler({
+          filesClient,
+          owner: fileOwner as Owner,
+          domain,
+        }),
+      ];
+    }, [fileOwner, filesClient, domain]);
 
     useLensButtonToggle({
       astRef,
