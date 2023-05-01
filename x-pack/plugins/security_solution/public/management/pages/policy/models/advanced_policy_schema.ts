@@ -1098,8 +1098,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.process',
       {
-        defaultMessage:
-          'Collect callstacks during process events?  Default: true',
+        defaultMessage: 'Collect callstacks during process events?  Default: true',
       }
     ),
   },
@@ -1109,8 +1108,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.image_load',
       {
-        defaultMessage:
-          'Collect callstacks during image/library load events?  Default: true',
+        defaultMessage: 'Collect callstacks during image/library load events?  Default: true',
       }
     ),
   },
@@ -1120,8 +1118,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.file',
       {
-        defaultMessage:
-          'Collect callstacks during file events?  Default: true',
+        defaultMessage: 'Collect callstacks during file events?  Default: true',
       }
     ),
   },
@@ -1131,8 +1128,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.registry',
       {
-        defaultMessage:
-          'Collect callstacks during registry events?  Default: true',
+        defaultMessage: 'Collect callstacks during registry events?  Default: true',
       }
     ),
   },
