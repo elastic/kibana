@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField, DataView, Query } from '@kbn/data-plugin/common';
 import { indexPatterns } from '@kbn/data-plugin/public';
@@ -160,11 +160,41 @@ export class Join extends Component<Props, State> {
     const { join, onRemove, leftFields, leftSourceName } = this.props;
     const { rightFields, indexPattern } = this.state;
     const right = join?.right ?? {} as Partial<JoinSourceDescriptor>;
-    const isJoinConfigComplete = join.leftField && right.indexPatternId && right.term;
+    
+    let isJoinConfigComplete = false;
+    let joinExpression;
+    if (right.type === SOURCE_TYPES.ES_TERM_SOURCE) {
+      isJoinConfigComplete = join.leftField && right.indexPatternId && right.term;
+      joinExpression = (
+        <TermJoinExpression
+          leftSourceName={leftSourceName}
+          leftValue={join.leftField}
+          leftFields={leftFields}
+          onLeftFieldChange={this._onLeftFieldChange}
+          sourceDescriptor={right as ESTermSourceDescriptor}
+          onSourceDescriptorChange={this._onRightSourceDescriptorChange}
+          rightFields={rightFields}
+        />
+      )
+    } else {
+      joinExpression = (
+        <EuiText size="small">
+          <p>
+            <EuiTextColor color="warning">
+              {i18n.translate('xpack.maps.layerPanel.join.joinExpression.unknownType', {
+                defaultMessage: 'Unknown join {type}.',
+                values: { type: right.type },
+              })}
+            </EuiTextColor>
+          </p>
+        </EuiText>
+      );
+    }
 
     let metricsExpression;
     let globalFilterCheckbox;
     let globalTimeCheckbox;
+    
     if (isJoinConfigComplete) {
       metricsExpression = (
         <EuiFlexItem grow={false}>
@@ -218,15 +248,7 @@ export class Join extends Component<Props, State> {
       <div className="mapJoinItem">
         <EuiFlexGroup className="mapJoinItem__inner" responsive={false} wrap={true} gutterSize="s">
           <EuiFlexItem grow={false}>
-            <TermJoinExpression
-              leftSourceName={leftSourceName}
-              leftValue={join.leftField}
-              leftFields={leftFields}
-              onLeftFieldChange={this._onLeftFieldChange}
-              sourceDescriptor={right as ESTermSourceDescriptor}
-              onSourceDescriptorChange={this._onRightSourceDescriptorChange}
-              rightFields={rightFields}
-            />
+            {joinExpression}
           </EuiFlexItem>
 
           {metricsExpression}
