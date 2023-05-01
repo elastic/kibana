@@ -28,11 +28,12 @@ interface Props {
 export function SpatialJoinExpression(props: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const expressionValue = props.sourceDescriptor.geoField !== undefined
+  const { geoField } = props.sourceDescriptor;
+  const expressionValue = geoField !== undefined
     ? i18n.translate('xpack.maps.layerPanel.spatialJoinExpression.value', {
         defaultMessage:
-          'features within {distance} km',
-        values: { distance: props.sourceDescriptor.distance },
+          'features from {geoField}',
+        values: { geoField },
       })
     : i18n.translate('xpack.maps.layerPanel.spatialJoinExpression.placeholder', {
         defaultMessage: '-- configure spatial join --',
