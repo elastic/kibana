@@ -43,6 +43,7 @@ import { AddInferencePipelineFlyout } from './ml_inference/add_inference_pipelin
 import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
 import { PipelinesJSONConfigurations } from './pipelines_json_configurations';
 import { PipelinesLogic } from './pipelines_logic';
+import { TextExpansionErrors } from './ml_inference/text_expansion_errors';
 
 export const SearchIndexPipelines: React.FC = () => {
   const {

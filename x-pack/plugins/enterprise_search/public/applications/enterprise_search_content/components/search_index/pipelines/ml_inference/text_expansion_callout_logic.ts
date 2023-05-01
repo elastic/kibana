@@ -74,7 +74,11 @@ export const TextExpansionCalloutLogic = kea<
   connect: {
     actions: [
       CreateTextExpansionModelApiLogic,
-      ['makeRequest as createTextExpansionModel', 'apiSuccess as createTextExpansionModelSuccess'],
+      [
+        'makeRequest as createTextExpansionModel',
+        'apiSuccess as createTextExpansionModelSuccess',
+        'apiError as createTextExpansionModelError',
+      ],
       FetchTextExpansionModelApiLogic,
       [
         'makeRequest as fetchTextExpansionModel',
@@ -82,7 +86,11 @@ export const TextExpansionCalloutLogic = kea<
         'apiError as fetchTextExpansionModelError',
       ],
       StartTextExpansionModelApiLogic,
-      ['makeRequest as startTextExpansionModel', 'apiSuccess as startTextExpansionModelSuccess'],
+      [
+        'makeRequest as startTextExpansionModel',
+        'apiSuccess as startTextExpansionModelSuccess',
+        'apiError as startTextExpansionModelError',
+      ],
     ],
     values: [
       CreateTextExpansionModelApiLogic,
@@ -169,7 +177,7 @@ export const TextExpansionCalloutLogic = kea<
   selectors: ({ selectors }) => ({
     isCreateButtonDisabled: [
       () => [selectors.createTextExpansionModelStatus],
-      (status: Status) => status !== Status.IDLE,
+      (status: Status) => status !== Status.IDLE && status !== Status.ERROR,
     ],
     isModelDownloadInProgress: [
       () => [selectors.textExpansionModel],
@@ -195,7 +203,7 @@ export const TextExpansionCalloutLogic = kea<
     ],
     isStartButtonDisabled: [
       () => [selectors.startTextExpansionModelStatus],
-      (status: Status) => status !== Status.IDLE,
+      (status: Status) => status !== Status.IDLE && status !== Status.ERROR,
     ],
   }),
 });

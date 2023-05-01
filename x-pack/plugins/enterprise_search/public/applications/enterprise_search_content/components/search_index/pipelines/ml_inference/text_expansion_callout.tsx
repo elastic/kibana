@@ -30,6 +30,10 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 
 import { useTextExpansionCallOutData } from './text_expansion_callout_data';
 import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
+import { CreateTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
+import { FetchTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
+import { StartTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
+import { TextExpansionErrors } from './text_expansion_errors';
 
 export interface TextExpansionCallOutState {
   dismiss: () => void;
@@ -333,6 +337,13 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
     isModelStarted,
     isStartButtonDisabled,
   } = useValues(TextExpansionCalloutLogic);
+  const { error: createError } = useValues(CreateTextExpansionModelApiLogic);
+  const { error: fetchError } = useValues(FetchTextExpansionModelApiLogic);
+  const { error: startError } = useValues(StartTextExpansionModelApiLogic);
+
+  if (createError !== undefined || fetchError !== undefined || startError !== undefined) {
+    return <TextExpansionErrors createError={createError} fetchError={fetchError} startError={startError} />
+  }
 
   if (!show) return null;
 
