@@ -25,7 +25,6 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../common/constants';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
   transformAlertToRuleAction,
@@ -49,6 +48,7 @@ import {
   GroupByOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/rule_schema';
 import { stepActionsDefaultValue } from '../../../../detections/components/rules/step_rule_actions';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
@@ -448,6 +448,9 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
                   ruleFields.groupByRadioSelection === GroupByOptions.PerTimePeriod
                     ? ruleFields.groupByDuration
                     : undefined,
+                missing_fields_strategy:
+                  ruleFields.suppressionMissingFields ||
+                  DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
               },
             }
           : {}),
@@ -563,19 +566,12 @@ export const formatAboutStepData = (
 };
 
 export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
-  const {
-    actions = [],
-    responseActions,
-    enabled,
-    kibanaSiemAppUrl,
-    throttle = NOTIFICATION_THROTTLE_NO_ACTIONS,
-  } = actionsStepData;
+  const { actions = [], responseActions, enabled, kibanaSiemAppUrl } = actionsStepData;
 
   return {
     actions: actions.map(transformAlertToRuleAction),
     response_actions: responseActions?.map(transformAlertToRuleResponseAction),
     enabled,
-    throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
     meta: {
       kibana_siem_app_url: kibanaSiemAppUrl,
     },

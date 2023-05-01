@@ -250,6 +250,22 @@ export interface FileKindBrowser extends FileKindBase {
    * @default 4MiB
    */
   maxSizeBytes?: number;
+  /**
+   * Allowed actions that can be done in the File Management UI. If not provided, all actions are allowed
+   *
+   */
+  managementUiActions?: {
+    /** Allow files to be listed in management UI */
+    list?: {
+      enabled: boolean;
+    };
+    /** Allow files to be deleted in management UI */
+    delete?: {
+      enabled: boolean;
+      /** If delete is not enabled in management UI, specify the reason (will appear in a tooltip). */
+      reason?: string;
+    };
+  };
 }
 
 /**

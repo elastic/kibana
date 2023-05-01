@@ -84,9 +84,9 @@ export default function ({ getService }: FtrProviderContext) {
               success: true,
               successCount: 3,
               successResults: [
-                { ...indexPattern, overwrite: true },
-                { ...visualization, overwrite: true },
-                { ...dashboard, overwrite: true },
+                { ...indexPattern, overwrite: true, managed: false },
+                { ...visualization, overwrite: true, managed: false },
+                { ...dashboard, overwrite: true, managed: false },
               ],
               warnings: [],
             });
@@ -112,7 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               success: true,
               successCount: 1,
-              successResults: [{ ...visualization, overwrite: true }],
+              successResults: [{ ...visualization, overwrite: true, managed: false }],
               warnings: [],
             });
           });
@@ -163,6 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
                   type: 'visualization',
                   id: '1',
                   meta: { title: 'My favorite vis', icon: 'visualizeApp' },
+                  managed: false,
                 },
               ],
               warnings: [],

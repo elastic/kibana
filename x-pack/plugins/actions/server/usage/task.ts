@@ -24,18 +24,10 @@ export function initializeActionsTelemetry(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  kibanaIndex: string,
   preconfiguredActions: PreConfiguredAction[],
   eventLogIndex: string
 ) {
-  registerActionsTelemetryTask(
-    logger,
-    taskManager,
-    core,
-    kibanaIndex,
-    preconfiguredActions,
-    eventLogIndex
-  );
+  registerActionsTelemetryTask(logger, taskManager, core, preconfiguredActions, eventLogIndex);
 }
 
 export function scheduleActionsTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
@@ -46,7 +38,6 @@ function registerActionsTelemetryTask(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  kibanaIndex: string,
   preconfiguredActions: PreConfiguredAction[],
   eventLogIndex: string
 ) {
@@ -54,13 +45,7 @@ function registerActionsTelemetryTask(
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(
-        logger,
-        core,
-        kibanaIndex,
-        preconfiguredActions,
-        eventLogIndex
-      ),
+      createTaskRunner: telemetryTaskRunner(logger, core, preconfiguredActions, eventLogIndex),
     },
   });
 }
@@ -82,7 +67,6 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 export function telemetryTaskRunner(
   logger: Logger,
   core: CoreSetup,
-  kibanaIndex: string,
   preconfiguredActions: PreConfiguredAction[],
   eventLogIndex: string
 ) {
@@ -96,12 +80,17 @@ export function telemetryTaskRunner(
           },
         ]) => client.asInternalUser
       );
+    const getActionIndex = () =>
+      core
+        .getStartServices()
+        .then(([coreStart]) => coreStart.savedObjects.getIndexForType('action'));
     return {
       async run() {
+        const actionIndex = await getActionIndex();
         const esClient = await getEsClient();
         return Promise.all([
-          getTotalCount(esClient, kibanaIndex, logger, preconfiguredActions),
-          getInUseTotalCount(esClient, kibanaIndex, logger, undefined, preconfiguredActions),
+          getTotalCount(esClient, actionIndex, logger, preconfiguredActions),
+          getInUseTotalCount(esClient, actionIndex, logger, undefined, preconfiguredActions),
           getExecutionsPerDayCount(esClient, eventLogIndex, logger),
         ]).then(([totalAggegations, totalInUse, totalExecutionsPerDay]) => {
           const hasErrors =

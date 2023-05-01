@@ -137,15 +137,21 @@ export const sendEndpointActionResponse = async (
       message: 'Endpoint encountered an error and was unable to apply action to host',
     };
 
-    if (endpointResponse.EndpointActions.data.command === 'get-file') {
+    if (
+      endpointResponse.EndpointActions.data.command === 'get-file' &&
+      endpointResponse.EndpointActions.data.output
+    ) {
       (
-        endpointResponse.EndpointActions.data.output?.content as ResponseActionGetFileOutputContent
+        endpointResponse.EndpointActions.data.output.content as ResponseActionGetFileOutputContent
       ).code = endpointActionGenerator.randomGetFileFailureCode();
     }
 
-    if (endpointResponse.EndpointActions.data.command === 'execute') {
+    if (
+      endpointResponse.EndpointActions.data.command === 'execute' &&
+      endpointResponse.EndpointActions.data.output
+    ) {
       (
-        endpointResponse.EndpointActions.data.output?.content as ResponseActionExecuteOutputContent
+        endpointResponse.EndpointActions.data.output.content as ResponseActionExecuteOutputContent
       ).stderr = 'execute command timed out';
     }
   }

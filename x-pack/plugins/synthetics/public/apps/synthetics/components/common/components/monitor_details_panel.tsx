@@ -65,6 +65,8 @@ export const MonitorDetailsPanel = ({
     return <EuiLoadingContent lines={8} />;
   }
 
+  const url = latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS];
+
   return (
     <PanelWithTitle
       paddingSize="m"
@@ -95,13 +97,15 @@ export const MonitorDetailsPanel = ({
           )}
           <TitleLabel>{URL_LABEL}</TitleLabel>
           <DescriptionLabel style={{ wordBreak: 'break-all' }}>
-            <EuiLink
-              data-test-subj="syntheticsMonitorDetailsPanelLink"
-              href={latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS]}
-              external
-            >
-              {latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS]}
-            </EuiLink>
+            {url ? (
+              <EuiLink data-test-subj="syntheticsMonitorDetailsPanelLink" href={url} external>
+                {url}
+              </EuiLink>
+            ) : (
+              <EuiText color="subdued" size="s">
+                {UN_AVAILABLE_LABEL}
+              </EuiText>
+            )}
           </DescriptionLabel>
           <TitleLabel>{LAST_RUN_LABEL}</TitleLabel>
           <DescriptionLabel>
@@ -259,4 +263,8 @@ const PROJECT_ID_LABEL = i18n.translate('xpack.synthetics.monitorList.projectIdH
 
 const MONITOR_ID_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.monitorIdItemText', {
   defaultMessage: 'Monitor ID',
+});
+
+const UN_AVAILABLE_LABEL = i18n.translate('xpack.synthetics.monitorList.unAvailable', {
+  defaultMessage: '(unavailable)',
 });

@@ -146,6 +146,7 @@ describe('useAddToRulesTable', () => {
     const { options } = filters[0];
     expect(options).toEqual([
       {
+        field: 'tags',
         name: 'some fake tag 1',
         value: 'some fake tag 1',
       },

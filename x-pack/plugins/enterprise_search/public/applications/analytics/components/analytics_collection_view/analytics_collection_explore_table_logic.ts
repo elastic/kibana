@@ -8,6 +8,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import {
+  DataView,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   isCompleteResponse,
@@ -16,7 +17,11 @@ import {
 
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
-import { AnalyticsCollectionDataViewLogic } from './analytics_collection_data_view_logic';
+import {
+  AnalyticsCollectionDataViewLogic,
+  AnalyticsCollectionDataViewLogicActions,
+  AnalyticsCollectionDataViewLogicValues,
+} from './analytics_collection_data_view_logic';
 
 import {
   getBaseSearchTemplate,
@@ -29,13 +34,18 @@ import {
   ExploreTableItem,
   ExploreTables,
   SearchTermsTable,
-  TopClickedTable,
-  TopReferrersTable,
+  ClickedTable,
+  ReferrersTable,
   WorsePerformersTable,
+  LocationsTable,
 } from './analytics_collection_explore_table_types';
-import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
+import {
+  AnalyticsCollectionToolbarLogic,
+  AnalyticsCollectionToolbarLogicValues,
+} from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
 const BASE_PAGE_SIZE = 10;
+const SEARCH_COOLDOWN = 200;
 
 export interface Sorting<T extends ExploreTableItem = ExploreTableItem> {
   direction: 'asc' | 'desc';
@@ -44,43 +54,50 @@ export interface Sorting<T extends ExploreTableItem = ExploreTableItem> {
 
 interface TableParams<T extends ExploreTableItem = ExploreTableItem> {
   parseResponse(response: IKibanaSearchResponse): { items: T[]; totalCount: number };
-  requestParams(props: {
-    pageIndex: number;
-    pageSize: number;
-    search: string;
-    sorting: Sorting<T> | null;
-    timeRange: TimeRange;
-  }): IKibanaSearchRequest;
+  requestParams(
+    dataView: DataView,
+    props: {
+      pageIndex: number;
+      pageSize: number;
+      search: string;
+      sorting: Sorting<T> | null;
+      timeRange: TimeRange;
+    }
+  ): IKibanaSearchRequest;
 }
 
 const tablesParams: {
+  [ExploreTables.Clicked]: TableParams<ClickedTable>;
+  [ExploreTables.Locations]: TableParams<LocationsTable>;
+  [ExploreTables.Referrers]: TableParams<ReferrersTable>;
   [ExploreTables.SearchTerms]: TableParams<SearchTermsTable>;
-  [ExploreTables.TopClicked]: TableParams<TopClickedTable>;
-  [ExploreTables.TopReferrers]: TableParams<TopReferrersTable>;
   [ExploreTables.WorsePerformers]: TableParams<WorsePerformersTable>;
 } = {
   [ExploreTables.SearchTerms]: {
     parseResponse: (
       response: IKibanaSearchResponse<{
-        aggregations: {
+        aggregations?: {
           searches: { buckets: Array<{ doc_count: number; key: string }> };
           totalCount: { value: number };
         };
       }>
     ) => ({
-      items: response.rawResponse.aggregations.searches.buckets.map((bucket) => ({
-        [ExploreTableColumns.count]: bucket.doc_count,
-        [ExploreTableColumns.searchTerms]: bucket.key,
-      })),
-      totalCount: response.rawResponse.aggregations.totalCount.value,
+      items:
+        response.rawResponse.aggregations?.searches.buckets.map((bucket) => ({
+          [ExploreTableColumns.count]: bucket.doc_count,
+          [ExploreTableColumns.searchTerms]: bucket.key,
+        })) || [],
+      totalCount: response.rawResponse.aggregations?.totalCount.value || 0,
     }),
     requestParams: (
+      dataView,
       { timeRange, sorting, pageIndex, pageSize, search },
       aggregationFieldName = 'search.query'
     ) =>
       getBaseSearchTemplate(
+        dataView,
         aggregationFieldName,
-        { search, timeRange },
+        { eventType: 'search', search, timeRange },
         {
           searches: {
             terms: {
@@ -102,7 +119,7 @@ const tablesParams: {
   [ExploreTables.WorsePerformers]: {
     parseResponse: (
       response: IKibanaSearchResponse<{
-        aggregations: {
+        aggregations?: {
           formula: {
             searches: { buckets: Array<{ doc_count: number; key: string }> };
             totalCount: { value: number };
@@ -110,19 +127,22 @@ const tablesParams: {
         };
       }>
     ) => ({
-      items: response.rawResponse.aggregations.formula.searches.buckets.map((bucket) => ({
-        [ExploreTableColumns.count]: bucket.doc_count,
-        [ExploreTableColumns.query]: bucket.key,
-      })),
-      totalCount: response.rawResponse.aggregations.formula.totalCount.value,
+      items:
+        response.rawResponse.aggregations?.formula.searches.buckets.map((bucket) => ({
+          [ExploreTableColumns.count]: bucket.doc_count,
+          [ExploreTableColumns.query]: bucket.key,
+        })) || [],
+      totalCount: response.rawResponse.aggregations?.formula.totalCount.value || 0,
     }),
     requestParams: (
+      dataView,
       { timeRange, sorting, pageIndex, pageSize, search },
       aggregationFieldName = 'search.query'
     ) =>
       getBaseSearchTemplate(
+        dataView,
         aggregationFieldName,
-        { search, timeRange },
+        { eventType: 'search', search, timeRange },
         {
           formula: {
             aggs: {
@@ -146,7 +166,7 @@ const tablesParams: {
         }
       ),
   },
-  [ExploreTables.TopClicked]: {
+  [ExploreTables.Clicked]: {
     parseResponse: (
       response: IKibanaSearchResponse<{
         aggregations: {
@@ -157,19 +177,22 @@ const tablesParams: {
         };
       }>
     ) => ({
-      items: response.rawResponse.aggregations.formula.searches.buckets.map((bucket) => ({
-        [ExploreTableColumns.count]: bucket.doc_count,
-        [ExploreTableColumns.page]: bucket.key,
-      })),
-      totalCount: response.rawResponse.aggregations.formula.totalCount.value,
+      items:
+        response.rawResponse.aggregations?.formula.searches.buckets.map((bucket) => ({
+          [ExploreTableColumns.count]: bucket.doc_count,
+          [ExploreTableColumns.page]: bucket.key,
+        })) || [],
+      totalCount: response.rawResponse.aggregations?.formula.totalCount.value || 0,
     }),
     requestParams: (
+      dataView,
       { timeRange, sorting, pageIndex, pageSize, search },
       aggregationFieldName = 'search.results.items.page.url'
     ) =>
       getBaseSearchTemplate(
+        dataView,
         aggregationFieldName,
-        { search, timeRange },
+        { eventType: 'search_click', search, timeRange },
         {
           formula: {
             aggs: {
@@ -193,10 +216,10 @@ const tablesParams: {
         }
       ),
   },
-  [ExploreTables.TopReferrers]: {
+  [ExploreTables.Referrers]: {
     parseResponse: (
       response: IKibanaSearchResponse<{
-        aggregations: {
+        aggregations?: {
           formula: {
             searches: { buckets: Array<{ doc_count: number; key: string }> };
             totalCount: { value: number };
@@ -204,19 +227,22 @@ const tablesParams: {
         };
       }>
     ) => ({
-      items: response.rawResponse.aggregations.formula.searches.buckets.map((bucket) => ({
-        [ExploreTableColumns.sessions]: bucket.doc_count,
-        [ExploreTableColumns.page]: bucket.key,
-      })),
-      totalCount: response.rawResponse.aggregations.formula.totalCount.value,
+      items:
+        response.rawResponse.aggregations?.formula.searches.buckets.map((bucket) => ({
+          [ExploreTableColumns.sessions]: bucket.doc_count,
+          [ExploreTableColumns.page]: bucket.key,
+        })) || [],
+      totalCount: response.rawResponse.aggregations?.formula.totalCount.value || 0,
     }),
     requestParams: (
+      dataView,
       { timeRange, sorting, pageIndex, pageSize, search },
       aggregationFieldName = 'page.referrer'
     ) =>
       getBaseSearchTemplate(
+        dataView,
         aggregationFieldName,
-        { search, timeRange },
+        { eventType: 'page_view', search, timeRange },
         {
           formula: {
             aggs: {
@@ -240,16 +266,73 @@ const tablesParams: {
         }
       ),
   },
+  [ExploreTables.Locations]: {
+    parseResponse: (
+      response: IKibanaSearchResponse<{
+        aggregations?: {
+          formula: {
+            searches: { buckets: Array<{ doc_count: number; key: string }> };
+            totalCount: { value: number };
+          };
+        };
+      }>
+    ) => ({
+      items:
+        response.rawResponse.aggregations?.formula.searches.buckets.map((bucket) => ({
+          [ExploreTableColumns.sessions]: bucket.doc_count,
+          [ExploreTableColumns.location]: bucket.key[0],
+          countryISOCode: bucket.key[1],
+        })) || [],
+      totalCount: response.rawResponse.aggregations?.formula.totalCount.value || 0,
+    }),
+    requestParams: (
+      dataView,
+      { timeRange, sorting, pageIndex, pageSize, search },
+      aggregationFieldName = 'session.location.country_name'
+    ) =>
+      getBaseSearchTemplate(
+        dataView,
+        aggregationFieldName,
+        { eventType: 'page_view', search, timeRange },
+        {
+          formula: {
+            aggs: {
+              ...getTotalCountRequestParams(aggregationFieldName),
+              searches: {
+                multi_terms: {
+                  ...getPaginationRequestSizeParams(pageIndex, pageSize),
+                  order: sorting
+                    ? {
+                        [sorting?.field === ExploreTableColumns.sessions ? '_count' : '_key']:
+                          sorting?.direction,
+                      }
+                    : undefined,
+                  terms: [
+                    { field: aggregationFieldName },
+                    { field: 'session.location.country_iso_code' },
+                  ],
+                },
+                ...getPaginationRequestParams(pageIndex, pageSize),
+              },
+            },
+            filter: { term: { 'event.action': 'page_view' } },
+          },
+        }
+      ),
+  },
 };
 
 export interface AnalyticsCollectionExploreTableLogicValues {
+  dataView: AnalyticsCollectionDataViewLogicValues['dataView'];
   isLoading: boolean;
   items: ExploreTableItem[];
   pageIndex: number;
   pageSize: number;
   search: string;
+  searchSessionId: AnalyticsCollectionToolbarLogicValues['searchSessionId'];
   selectedTable: ExploreTables | null;
   sorting: Sorting | null;
+  timeRange: AnalyticsCollectionToolbarLogicValues['timeRange'];
   totalItemsCount: number;
 }
 
@@ -259,6 +342,7 @@ export interface AnalyticsCollectionExploreTableLogicActions {
     sort?: Sorting;
   };
   reset(): void;
+  setDataView: AnalyticsCollectionDataViewLogicActions['setDataView'];
   setItems(items: ExploreTableItem[]): { items: ExploreTableItem[] };
   setSearch(search: string): { search: string };
   setSelectedTable(
@@ -282,18 +366,39 @@ export const AnalyticsCollectionExploreTableLogic = kea<
     setSelectedTable: (id, sorting) => ({ id, sorting }),
     setTotalItemsCount: (count) => ({ count }),
   },
+  connect: {
+    actions: [
+      AnalyticsCollectionToolbarLogic,
+      ['setTimeRange', 'setSearchSessionId'],
+      AnalyticsCollectionDataViewLogic,
+      ['setDataView'],
+    ],
+    values: [
+      AnalyticsCollectionDataViewLogic,
+      ['dataView'],
+      AnalyticsCollectionToolbarLogic,
+      ['timeRange', 'searchSessionId'],
+    ],
+  },
   listeners: ({ actions, values }) => {
     const fetchItems = () => {
-      if (values.selectedTable === null || !(values.selectedTable in tablesParams)) {
+      if (
+        values.selectedTable === null ||
+        !(values.selectedTable in tablesParams) ||
+        !values.dataView
+      ) {
+        actions.setItems([]);
+        actions.setTotalItemsCount(0);
+
         return;
       }
 
       const { requestParams, parseResponse } = tablesParams[values.selectedTable] as TableParams;
-      const timeRange = AnalyticsCollectionToolbarLogic.values.timeRange;
+      const timeRange = values.timeRange;
 
       const search$ = KibanaLogic.values.data.search
         .search(
-          requestParams({
+          requestParams(values.dataView, {
             pageIndex: values.pageIndex,
             pageSize: values.pageSize,
             search: values.search,
@@ -301,8 +406,8 @@ export const AnalyticsCollectionExploreTableLogic = kea<
             timeRange,
           }),
           {
-            indexPattern: AnalyticsCollectionDataViewLogic.values.dataView || undefined,
-            sessionId: AnalyticsCollectionToolbarLogic.values.searchSessionId,
+            indexPattern: values.dataView,
+            sessionId: values.searchSessionId,
           }
         )
         .subscribe({
@@ -323,13 +428,17 @@ export const AnalyticsCollectionExploreTableLogic = kea<
 
     return {
       onTableChange: fetchItems,
-      setSearch: fetchItems,
+      setDataView: fetchItems,
+      setSearch: async (_, breakpoint) => {
+        await breakpoint(SEARCH_COOLDOWN);
+        fetchItems();
+      },
+      setSearchSessionId: fetchItems,
       setSelectedTable: fetchItems,
-      [AnalyticsCollectionToolbarLogic.actionTypes.setTimeRange]: fetchItems,
-      [AnalyticsCollectionToolbarLogic.actionTypes.setSearchSessionId]: fetchItems,
+      setTimeRange: fetchItems,
     };
   },
-  path: ['enterprise_search', 'analytics', 'collections', 'explore', 'table'],
+  path: ['enterprise_search', 'analytics', 'collection', 'explore', 'table'],
   reducers: () => ({
     isLoading: [
       false,
@@ -337,10 +446,10 @@ export const AnalyticsCollectionExploreTableLogic = kea<
         onTableChange: () => true,
         setItems: () => false,
         setSearch: () => true,
+        setSearchSessionId: () => true,
         setSelectedTable: () => true,
         setTableState: () => true,
-        [AnalyticsCollectionToolbarLogic.actionTypes.setTimeRange]: () => true,
-        [AnalyticsCollectionToolbarLogic.actionTypes.setSearchSessionId]: () => true,
+        setTimeRange: () => true,
       },
     ],
     items: [[], { setItems: (_, { items }) => items }],
