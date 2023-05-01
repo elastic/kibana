@@ -160,7 +160,6 @@ export class Join extends Component<Props, State> {
     const { join, onRemove, leftFields, leftSourceName } = this.props;
     const { rightFields, indexPattern } = this.state;
     const right = join?.right ?? {} as Partial<JoinSourceDescriptor>;
-    const rightSourceName = indexPattern ? indexPattern.getName() : right.indexPatternId;
     const isJoinConfigComplete = join.leftField && right.indexPatternId && right.term;
 
     let metricsExpression;
@@ -226,7 +225,6 @@ export class Join extends Component<Props, State> {
               onLeftFieldChange={this._onLeftFieldChange}
               sourceDescriptor={right as ESTermSourceDescriptor}
               onSourceDescriptorChange={this._onRightSourceDescriptorChange}
-              rightSourceName={rightSourceName}
               rightFields={rightFields}
             />
           </EuiFlexItem>

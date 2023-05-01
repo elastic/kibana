@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import {
   EuiPopover,
   EuiExpression,
@@ -32,90 +32,64 @@ interface Props {
   // Right source props
   sourceDescriptor: Partial<ESTermSourceDescriptor>;
   onSourceDescriptorChange: (sourceDescriptor: Partial<JoinSourceDescriptor>) => void;
-
-  rightSourceName: string;
-
-  // Right field props
   rightFields: DataViewField[];
 }
 
-interface State {
-  isPopoverOpen: boolean;
-}
+export function TermJoinExpression(props: Props) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-export class TermJoinExpression extends Component<Props, State> {
-  state: State = {
-    isPopoverOpen: false,
-  };
-
-  _togglePopover = () => {
-    this.setState((prevState) => ({
-      isPopoverOpen: !prevState.isPopoverOpen,
-    }));
-  };
-
-  _closePopover = () => {
-    this.setState({
-      isPopoverOpen: false,
-    });
-  };
-
-  _getExpressionValue() {
-    const { size, term } = this.props.sourceDescriptor;
-    const { leftSourceName, leftValue, rightSourceName } = this.props;
-    if (leftSourceName && leftValue && rightSourceName && term) {
-      return i18n.translate('xpack.maps.layerPanel.joinExpression.value', {
+  const { size, term } = props.sourceDescriptor;
+  const expressionValue = term !== undefined
+    ? i18n.translate('xpack.maps.layerPanel.termJoinExpression.value', {
         defaultMessage:
-          '{leftSourceName}:{leftValue} with {sizeFragment} {rightSourceName}:{term}',
+          '{topTerms} terms from {term}',
         values: {
-          leftSourceName,
-          leftValue,
-          sizeFragment:
+          topTerms:
             size !== undefined
-              ? i18n.translate('xpack.maps.layerPanel.joinExpression.sizeFragment', {
-                  defaultMessage: 'top {size} terms from',
+              ? i18n.translate('xpack.maps.layerPanel.termJoinExpression.topTerms', {
+                  defaultMessage: 'top {size}',
                   values: { size },
                 })
               : '',
-          rightSourceName,
           term,
         },
+      })
+    : i18n.translate('xpack.maps.layerPanel.joinExpression.selectPlaceholder', {
+        defaultMessage: '-- select --',
       });
-    }
 
-    return i18n.translate('xpack.maps.layerPanel.joinExpression.selectPlaceholder', {
-      defaultMessage: '-- select --',
-    });
-  }
-
-  render() {
-    return (
-      <EuiPopover
-        id="joinPopover"
-        isOpen={this.state.isPopoverOpen}
-        closePopover={this._closePopover}
-        ownFocus
-        initialFocus="body" /* avoid initialFocus on Combobox */
-        anchorPosition="leftCenter"
-        button={
-          <EuiExpression
-            onClick={this._togglePopover}
-            description="Join"
-            uppercase={false}
-            value={this._getExpressionValue()}
-          />
-        }
-      >
-        <TermJoinPopoverContent 
-          leftSourceName={this.props.leftSourceName}
-          leftValue={this.props.leftValue}
-          leftFields={this.props.leftFields}
-          onLeftFieldChange={this.props.onLeftFieldChange}
-          sourceDescriptor={this.props.sourceDescriptor}
-          onSourceDescriptorChange={this.props.onSourceDescriptorChange}
-          rightFields={this.props.rightFields}
+  return (
+    <EuiPopover
+      id="joinPopover"
+      isOpen={isPopoverOpen}
+      closePopover={() => {
+        setIsPopoverOpen(false);
+      }}
+      ownFocus
+      initialFocus="body" /* avoid initialFocus on Combobox */
+      anchorPosition="leftCenter"
+      button={
+        <EuiExpression
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+          }}
+          description={i18n.translate('xpack.maps.layerPanel.joinExpression.description', {
+            defaultMessage: 'Join with',
+          })}
+          uppercase={false}
+          value={expressionValue}
         />
-      </EuiPopover>
-    );
-  }
+      }
+    >
+      <TermJoinPopoverContent 
+        leftSourceName={props.leftSourceName}
+        leftValue={props.leftValue}
+        leftFields={props.leftFields}
+        onLeftFieldChange={props.onLeftFieldChange}
+        sourceDescriptor={props.sourceDescriptor}
+        onSourceDescriptorChange={props.onSourceDescriptorChange}
+        rightFields={props.rightFields}
+      />
+    </EuiPopover>
+  );
 }
