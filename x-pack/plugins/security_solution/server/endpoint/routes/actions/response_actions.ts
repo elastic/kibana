@@ -38,6 +38,7 @@ import type {
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
+import { registerActionFileUploadRoute } from './file_upload_handler';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -174,6 +175,10 @@ export function registerResponseActionRoutes(
         responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
       )
     );
+  }
+
+  if (endpointContext.experimentalFeatures.responseActionUploadEnabled) {
+    registerActionFileUploadRoute(router, endpointContext);
   }
 }
 
