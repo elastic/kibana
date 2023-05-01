@@ -9,17 +9,26 @@
 import './index.scss';
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiButtonGroup } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import {
   IconSelectSetting,
   DimensionEditorSection,
   NameInput,
   ColorPicker,
   LineStyleSettings,
+  TextDecorationSetting,
+  FieldPicker,
+  FieldOption,
 } from '@kbn/visualization-ui-components/public';
+import type { FieldOptionValue } from '@kbn/visualization-ui-components/public';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
-import { AvailableAnnotationIcon, EventAnnotationConfig } from '../../../common';
-// import { isHorizontalChart } from '../../state_helpers';
+import {
+  AvailableAnnotationIcon,
+  EventAnnotationConfig,
+  QueryPointEventAnnotationConfig,
+} from '../../../common';
 import {
   defaultAnnotationColor,
   defaultAnnotationLabel,
@@ -31,10 +40,11 @@ import { sanitizeProperties } from './helpers';
 export const AnnotationsPanel = ({
   annotation: currentAnnotation,
   onAnnotationChange,
+  dataView,
 }: {
   annotation: EventAnnotationConfig;
   onAnnotationChange: (annotation: EventAnnotationConfig) => void;
-  // dataView: DataView;
+  dataView: DataView;
   // datatableUtilities: DatatableUtilitiesService;
   // formatFactory: FormatFactory;
   // paletteService: PaletteRegistry;
@@ -55,6 +65,8 @@ export const AnnotationsPanel = ({
       onAnnotationChange(sanitizeProperties({ ...currentAnnotation, ...newAnnotation })),
     [currentAnnotation, onAnnotationChange]
   );
+
+  const { hasFieldData } = useExistingFieldsReader();
 
   return (
     <>
@@ -173,12 +185,10 @@ export const AnnotationsPanel = ({
               defaultIcon="triangle"
               customIconSet={annotationsIconSet}
             />
-            {/* <TextDecorationSetting
-              setConfig={setAnnotations}
-              currentConfig={{
-                axisMode: 'bottom',
-                ...currentAnnotation,
-              }}
+            <TextDecorationSetting
+              idPrefix="TODO"
+              setConfig={update}
+              currentConfig={currentAnnotation}
               isQueryBased={isQueryBased}
             >
               {(textDecorationSelected) => {
@@ -207,6 +217,7 @@ export const AnnotationsPanel = ({
                 const fieldIsValid = selectedField
                   ? Boolean(dataView.getFieldByName(selectedField))
                   : true;
+
                 return (
                   <>
                     <EuiSpacer size="xs" />
@@ -224,7 +235,7 @@ export const AnnotationsPanel = ({
                       options={options}
                       onChoose={function (choice: FieldOptionValue | undefined): void {
                         if (choice) {
-                          setAnnotations({ textField: choice.field, textVisibility: true });
+                          update({ textField: choice.field, textVisibility: true });
                         }
                       }}
                       fieldIsInvalid={!fieldIsValid}
@@ -234,7 +245,7 @@ export const AnnotationsPanel = ({
                   </>
                 );
               }}
-            </TextDecorationSetting> */}
+            </TextDecorationSetting>
             <LineStyleSettings
               idPrefix=""
               setConfig={update}

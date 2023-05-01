@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { EventAnnotationGroupConfig } from '../../common';
 import type { EventAnnotationServiceType } from '../event_annotation_service/types';
 import { EventAnnotationGroupContent } from '../../common/types';
@@ -27,14 +27,16 @@ export const EventAnnotationGroupTableList = ({
   visualizeCapabilities,
   savedObjectsTagging,
   parentProps,
-  dataViewListItems,
+  dataViews,
+  createDataView,
 }: {
   uiSettings: IUiSettingsClient;
   eventAnnotationService: EventAnnotationServiceType;
   visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
   savedObjectsTagging: SavedObjectsTaggingApi;
   parentProps: TableListTabParentProps;
-  dataViewListItems: DataViewListItem[];
+  dataViews: DataView[];
+  createDataView: (spec: DataViewSpec) => Promise<DataView>;
 }) => {
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
@@ -87,7 +89,8 @@ export const EventAnnotationGroupTableList = ({
         })
       }
       savedObjectsTagging={savedObjectsTagging}
-      dataViewListItems={dataViewListItems}
+      dataViews={dataViews}
+      createDataView={createDataView}
     />
   ) : undefined;
 

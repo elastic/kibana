@@ -68,14 +68,16 @@ export class EventAnnotationPlugin
           pluginsStart.savedObjectsManagement
         ).getService();
 
-        const dataViewListItems = await pluginsStart.dataViews.getIdsWithTitle();
+        const ids = await pluginsStart.dataViews.getIds();
+        const dataViews = await Promise.all(ids.map((id) => pluginsStart.dataViews.get(id)));
 
         const services: EventAnnotationListingPageServices = {
           core: coreStart,
           savedObjectsTagging: pluginsStart.savedObjectsTagging,
           eventAnnotationService,
           PresentationUtilContextProvider: pluginsStart.presentationUtil.ContextProvider,
-          dataViewListItems,
+          dataViews,
+          createDataView: pluginsStart.dataViews.create.bind(pluginsStart.dataViews),
         };
 
         // TODO wire parent props

@@ -13,6 +13,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { GroupEditorControls } from './group_editor_controls';
 import { GroupEditorFlyout } from './group_editor_flyout';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 const simulateButtonClick = (component: ShallowWrapper, selector: string) => {
   (component.find(selector) as ShallowWrapper<Parameters<typeof EuiButton>[0]>).prop('onClick')!(
@@ -47,13 +48,14 @@ describe('group editor flyout', () => {
         onSave={onSave}
         onClose={onClose}
         updateGroup={updateGroup}
-        dataViewListItems={[
+        dataViews={[
           {
             id: 'some-id',
             title: 'My Data View',
-          },
+          } as DataView,
         ]}
         savedObjectsTagging={mockTaggingApi}
+        createDataView={jest.fn()}
       />
     );
   });

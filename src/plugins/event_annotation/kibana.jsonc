@@ -23,6 +23,7 @@
       "dataViews",
       "kibanaReact",
       "visualizationUiComponents",
+      "unifiedFieldList"
     ],
     "extraPublicDirs": [
       "common"

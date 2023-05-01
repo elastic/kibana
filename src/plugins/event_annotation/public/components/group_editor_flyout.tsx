@@ -21,7 +21,7 @@ import {
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
 import { GroupEditorControls } from './group_editor_controls';
 
@@ -31,14 +31,16 @@ export const GroupEditorFlyout = ({
   onClose,
   onSave,
   savedObjectsTagging,
-  dataViewListItems,
+  dataViews,
+  createDataView,
 }: {
   group: EventAnnotationGroupConfig;
   updateGroup: (newGroup: EventAnnotationGroupConfig) => void;
   onClose: () => void;
   onSave: () => void;
   savedObjectsTagging: SavedObjectsTaggingApi;
-  dataViewListItems: DataViewListItem[];
+  dataViews: DataView[];
+  createDataView: (spec: DataViewSpec) => Promise<DataView>;
 }) => {
   const flyoutHeadingId = useMemo(() => htmlIdGenerator()(), []);
 
@@ -63,8 +65,9 @@ export const GroupEditorFlyout = ({
           update={updateGroup}
           selectedAnnotation={selectedAnnotation}
           setSelectedAnnotation={setSelectedAnnotation}
-          savedObjectsTagging={savedObjectsTagging}
-          dataViewListItems={dataViewListItems}
+          TagSelector={savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector}
+          dataViews={dataViews}
+          createDataView={createDataView}
         />
       </EuiFlyoutBody>
 

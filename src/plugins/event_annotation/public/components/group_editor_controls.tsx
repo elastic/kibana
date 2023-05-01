@@ -18,11 +18,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import React, { useMemo, useState } from 'react';
+import { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import React, { useEffect, useMemo, useState } from 'react';
 import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
 import { AnnotationsPanel } from './annotations_config_panel';
 
@@ -31,33 +31,41 @@ export const GroupEditorControls = ({
   update,
   setSelectedAnnotation,
   selectedAnnotation,
-  savedObjectsTagging,
-  dataViewListItems: globalDataViewListItems,
+  TagSelector,
+  dataViews: globalDataViews,
+  createDataView,
 }: {
   group: EventAnnotationGroupConfig;
   update: (group: EventAnnotationGroupConfig) => void;
   selectedAnnotation: EventAnnotationConfig | undefined;
   setSelectedAnnotation: (annotation: EventAnnotationConfig) => void;
-  savedObjectsTagging: SavedObjectsTaggingApi;
-  dataViewListItems: DataViewListItem[];
+  TagSelector: SavedObjectsTaggingApiUiComponent['SavedObjectSaveModalTagSelector'];
+  dataViews: DataView[];
+  createDataView: (spec: DataViewSpec) => Promise<DataView>;
 }) => {
   const { euiTheme } = useEuiTheme();
 
   // save the spec for the life of the component since the user might change their mind after selecting another data view
-  const [adHocDataViewSpec] = useState<DataViewSpec | undefined>(group.dataViewSpec);
+  const [adHocDataView, setAdHocDataView] = useState<DataView>();
 
-  const dataViewListItems = useMemo(() => {
-    const items = [...globalDataViewListItems];
-    if (adHocDataViewSpec) {
-      const { id, name, title } = adHocDataViewSpec;
-      const adHocListItem: DataViewListItem = {
-        id: id!,
-        title: name ?? title!,
-      };
-      items.push(adHocListItem);
+  useEffect(() => {
+    if (group.dataViewSpec) {
+      createDataView(group.dataViewSpec).then(setAdHocDataView);
+    }
+  }, [createDataView, group.dataViewSpec]);
+
+  const dataViews = useMemo(() => {
+    const items = [...globalDataViews];
+    if (adHocDataView) {
+      items.push(adHocDataView);
     }
     return items;
-  }, [adHocDataViewSpec, globalDataViewListItems]);
+  }, [adHocDataView, globalDataViews]);
+
+  const currentDataView = useMemo(
+    () => dataViews.find((dataView) => dataView.id === group.indexPatternId) || dataViews[0],
+    [dataViews, group.indexPatternId]
+  );
 
   return !selectedAnnotation ? (
     <>
@@ -105,7 +113,7 @@ export const GroupEditorControls = ({
           />
         </EuiFormRow>
         <EuiFormRow>
-          <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+          <TagSelector
             initialSelection={group.tags}
             onTagsSelected={(tags: string[]) =>
               update({
@@ -122,7 +130,7 @@ export const GroupEditorControls = ({
         >
           <EuiSelect
             data-test-subj="annotationDataViewSelection"
-            options={dataViewListItems.map(({ id: value, title, name }) => ({
+            options={dataViews.map(({ id: value, title, name }) => ({
               value,
               text: name ?? title,
             }))}
@@ -131,7 +139,7 @@ export const GroupEditorControls = ({
               update({
                 ...group,
                 indexPatternId: value,
-                dataViewSpec: value === adHocDataViewSpec?.id ? adHocDataViewSpec : undefined,
+                dataViewSpec: value === adHocDataView?.id ? adHocDataView.toSpec(false) : undefined,
               })
             }
           />
@@ -154,6 +162,7 @@ export const GroupEditorControls = ({
     <AnnotationsPanel
       annotation={selectedAnnotation}
       onAnnotationChange={(changes) => setSelectedAnnotation({ ...selectedAnnotation, ...changes })}
+      dataView={currentDataView}
     />
   );
 };

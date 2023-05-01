@@ -2,7 +2,8 @@
 
 exports[`group editor flyout renders controls 1`] = `
 Object {
-  "dataViewListItems": Array [
+  "createDataView": [MockFunction],
+  "dataViews": Array [
     Object {
       "id": "some-id",
       "title": "My Data View",
@@ -46,6 +47,8 @@ Object {
       "updateTagsReferences": [MockFunction],
     },
   },
+  "selectedAnnotation": undefined,
+  "setSelectedAnnotation": [Function],
   "update": [MockFunction],
 }
 `;

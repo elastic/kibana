@@ -32,6 +32,7 @@ export {
   DimensionEditorSection,
   DimensionButton,
   LineStyleSettings,
+  TextDecorationSetting,
 } from './components';
 
 export type {

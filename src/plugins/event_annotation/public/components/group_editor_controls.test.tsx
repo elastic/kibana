@@ -8,14 +8,14 @@
 
 import React, { ChangeEvent, FormEvent } from 'react';
 import { EventAnnotationGroupConfig } from '../../common';
-import { shallow, ShallowWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { GroupEditorControls } from './group_editor_controls';
-import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 import { EuiSelectProps, EuiTextAreaProps, EuiTextProps } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { act } from 'react-dom/test-utils';
 
 describe('event annotation group editor', () => {
-  const mockTaggingApi = taggingApiMock.create();
-
   const dataViewId = 'my-index-pattern';
   const adHocDataViewId = 'ad-hoc';
   const adHocDataViewSpec = {
@@ -33,29 +33,49 @@ describe('event annotation group editor', () => {
     dataViewSpec: adHocDataViewSpec,
   };
 
-  it('reports group updates', () => {
-    const updateMock = jest.fn();
-    const wrapper = shallow(
+  let wrapper: ReactWrapper;
+  const updateMock = jest.fn();
+
+  const TagSelector = (_props: { onTagsSelected: (tags: string[]) => void }) => <div />;
+
+  beforeEach(async () => {
+    wrapper = mountWithIntl(
       <GroupEditorControls
         group={group}
         update={updateMock}
-        savedObjectsTagging={mockTaggingApi}
-        dataViewListItems={[
-          {
-            id: dataViewId,
-            title: 'My Data View',
-          },
-          {
-            id: adHocDataViewId,
-            title: 'Ad Hoc Data View',
-          },
-        ]}
+        TagSelector={TagSelector}
+        dataViews={
+          [
+            {
+              id: dataViewId,
+              title: 'My Data View',
+            },
+          ] as DataView[]
+        }
+        selectedAnnotation={undefined}
+        setSelectedAnnotation={jest.fn()}
+        createDataView={(spec) =>
+          Promise.resolve({
+            id: spec.id,
+            title: spec.title,
+            toSpec: () => spec,
+          } as unknown as DataView)
+        }
       />
     );
 
-    (wrapper.find("[data-test-subj='annotationGroupTitle']") as ShallowWrapper<EuiTextProps>).prop(
-      'onChange'
-    )!({
+    await act(async () => {
+      await new Promise((resolve) => setImmediate(resolve));
+      wrapper.update();
+    });
+  });
+
+  it('reports group updates', () => {
+    (
+      wrapper.find(
+        "EuiFieldText[data-test-subj='annotationGroupTitle']"
+      ) as ReactWrapper<EuiTextProps>
+    ).prop('onChange')!({
       target: {
         value: 'im a new title!',
       } as Partial<EventTarget> as EventTarget,
@@ -63,23 +83,23 @@ describe('event annotation group editor', () => {
 
     (
       wrapper.find(
-        "[data-test-subj='annotationGroupDescription']"
-      ) as ShallowWrapper<EuiTextAreaProps>
+        "EuiTextArea[data-test-subj='annotationGroupDescription']"
+      ) as ReactWrapper<EuiTextAreaProps>
     ).prop('onChange')!({
       target: {
         value: 'im a new description!',
       },
     } as ChangeEvent<HTMLTextAreaElement>);
 
-    wrapper
-      .find(mockTaggingApi.ui.components.SavedObjectSaveModalTagSelector)
-      .prop('onTagsSelected')(['im a new tag!']);
+    act(() => {
+      wrapper.find(TagSelector).prop('onTagsSelected')(['im a new tag!']);
+    });
 
     const setDataViewId = (id: string) =>
       (
         wrapper.find(
-          "[data-test-subj='annotationDataViewSelection']"
-        ) as ShallowWrapper<EuiSelectProps>
+          "EuiSelect[data-test-subj='annotationDataViewSelection']"
+        ) as ReactWrapper<EuiSelectProps>
       ).prop('onChange')!({ target: { value: id } } as React.ChangeEvent<HTMLSelectElement>);
 
     setDataViewId(dataViewId);

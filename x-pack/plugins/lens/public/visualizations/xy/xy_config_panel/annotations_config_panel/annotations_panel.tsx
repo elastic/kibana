@@ -34,10 +34,10 @@ import {
   DimensionEditorSection,
   ColorPicker,
   LineStyleSettings,
+  TextDecorationSetting,
 } from '@kbn/visualization-ui-components/public';
 import { FormatFactory } from '../../../../../common/types';
 import { defaultAnnotationLabel, defaultRangeAnnotationLabel } from '../../annotations/helpers';
-import { TextDecorationSetting } from '../shared/marker_decoration_settings';
 import { updateLayer } from '..';
 import { annotationsIconSet } from './icon_set';
 import type { VisualizationDimensionEditorProps } from '../../../../types';
@@ -220,9 +220,9 @@ export const AnnotationsPanel = (
               customIconSet={annotationsIconSet}
             />
             <TextDecorationSetting
+              idPrefix={idPrefix}
               setConfig={setAnnotations}
               currentConfig={{
-                axisMode: 'bottom',
                 ...currentAnnotation,
               }}
               isQueryBased={isQueryBased}

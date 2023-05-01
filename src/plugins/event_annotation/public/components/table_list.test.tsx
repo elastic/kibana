@@ -21,6 +21,7 @@ import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/moc
 
 import { act } from 'react-dom/test-utils';
 import { GroupEditorFlyout } from './group_editor_flyout';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 describe('annotation list view', () => {
   const adHocDVId = 'ad-hoc';
@@ -71,12 +72,13 @@ describe('annotation list view', () => {
         parentProps={{
           onFetchSuccess: () => {},
         }}
-        dataViewListItems={[
+        dataViews={[
           {
             id: 'some-id',
             title: 'Some data view',
-          },
+          } as DataView,
         ]}
+        createDataView={() => Promise.resolve({} as DataView)}
       />
     );
   });
