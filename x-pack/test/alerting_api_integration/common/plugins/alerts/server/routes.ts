@@ -453,7 +453,7 @@ export function defineRoutes(
 
   router.get(
     {
-      path: '/api/event_log/{type}/{id}/_find',
+      path: '/_test/event_log/{type}/{id}/_find',
       validate: {
         params: schema.object({
           type: schema.string(),

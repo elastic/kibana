@@ -213,7 +213,7 @@ export const isEventLogServiceLoggingEntriesRoute = (
 export const getEventLogRoute = (router: IRouter, core: CoreSetup<EventLogFixtureStartDeps>) => {
   router.get(
     {
-      path: '/api/event_log/{type}/{id}/_find',
+      path: '/_test/event_log/{type}/{id}/_find',
       validate: {
         params: schema.object({
           type: schema.string(),
@@ -251,7 +251,7 @@ export const getEventLogByIdsRoute = (
 ) => {
   router.post(
     {
-      path: '/api/event_log/{type}/_find',
+      path: '/_test/event_log/{type}/_find',
       validate: {
         params: schema.object({
           type: schema.string(),
