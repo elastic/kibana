@@ -27,11 +27,7 @@ export const createRawKibanaPrivileges = (
     hasAtLeast: (licenseType: LicenseType) => licenseType === 'basic',
   };
 
-  return privilegesFactory(
-    new Actions('unit_test_version'),
-    featuresService,
-    licensingService
-  ).get();
+  return privilegesFactory(new Actions(), featuresService, licensingService).get();
 };
 
 export const createKibanaPrivileges = (
