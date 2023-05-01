@@ -82,8 +82,7 @@ test('use shorter error messages when defining only one type', () => {
 test('includes namespace in failure', () => {
   const type = schema.oneOf([schema.object({ age: schema.number() }), schema.string()]);
 
-  expect(() => type.validate({ age: 'foo' }, {}, 'foo-namespace'))
-    .toThrowErrorMatchingInlineSnapshot(`
+  expect(() => type.validate({ age: 'foo' }, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(`
     "[foo-namespace]: types that failed validation:
     - [foo-namespace.0.age]: expected value of type [number] but got [string]
     - [foo-namespace.1]: expected value of type [string] but got [Object]"
@@ -93,9 +92,7 @@ test('includes namespace in failure', () => {
 test('includes namespace in failure in shorthand mode', () => {
   const type = schema.oneOf([schema.object({ age: schema.number() })]);
 
-  expect(() =>
-    type.validate({ age: 'foo' }, {}, 'foo-namespace')
-  ).toThrowErrorMatchingInlineSnapshot(
+  expect(() => type.validate({ age: 'foo' }, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
     `"[foo-namespace.age]: expected value of type [number] but got [string]"`
   );
 });

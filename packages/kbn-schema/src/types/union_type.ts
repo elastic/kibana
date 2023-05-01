@@ -7,14 +7,33 @@
  */
 
 import typeDetect from 'type-detect';
+import z from 'zod';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
 import { Type, TypeOptions } from './type';
 
+const errorMap: z.ZodErrorMap = (issue, ctx) => {
+  if (issue.code === z.ZodIssueCode.invalid_union) {
+    return {
+      message: `types that failed validation:
+${issue.unionErrors
+  .map((e, idx) => {
+    return `- [${issue.path.join('.')}.${idx}]: ${e.errors[0].message}`;
+  })
+  .join('\n')}`,
+    };
+  }
+  return { message: ctx.defaultError };
+};
+
 export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
   constructor(types: RTS, options?: TypeOptions<T>) {
-    const schema = internals.alternatives(types.map((type) => type.getSchema())).match('any');
-
+    const ts = types.map((type) => type.getSchema()) as [
+      z.ZodTypeAny,
+      z.ZodTypeAny,
+      ...z.ZodTypeAny[]
+    ];
+    const schema = internals.union(ts, { errorMap });
     super(schema, options);
   }
 
