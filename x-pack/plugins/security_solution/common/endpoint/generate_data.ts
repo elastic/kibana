@@ -561,6 +561,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         },
       },
       dll: this.getAlertsDefaultDll(),
+      user: {
+        domain: this.randomString(10),
+        name: this.randomString(10),
+      },
     };
   }
 
@@ -663,6 +667,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         },
       },
       dll: this.getAlertsDefaultDll(),
+      user: {
+        domain: this.randomString(10),
+        name: this.randomString(10),
+      },
     };
 
     // shellcode_thread memory alert have an additional process field
@@ -865,6 +873,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         },
       },
       dll: this.getAlertsDefaultDll(),
+      user: {
+        domain: this.randomString(10),
+        name: this.randomString(10),
+      },
     };
     return newAlert;
   }
@@ -951,6 +963,9 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       ...detailRecordForEventType,
       event: {
         category: options.eventCategory ? options.eventCategory : ['process'],
+        outcome: options.eventCategory?.includes('authentication')
+          ? this.randomChoice(['success', 'failure'])
+          : '',
         kind: 'event',
         type: options.eventType ? options.eventType : ['start'],
         id: this.seededUUIDv4(),
