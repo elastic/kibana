@@ -46,9 +46,7 @@ interface Props {
   onSourceDescriptorChange: (sourceDescriptor: Partial<JoinSourceDescriptor>) => void;
 
   // Right field props
-  rightValue: string;
   rightFields: DataViewField[];
-  onRightFieldChange: (term?: string) => void;
 }
 
 export function TermJoinPopoverContent(props: Props) {
@@ -76,7 +74,10 @@ export function TermJoinPopoverContent(props: Props) {
       return;
     }
 
-    props.onRightFieldChange(term);
+    props.onSourceDescriptorChange({
+      ...props.sourceDescriptor,
+      term,
+    });
   };
 
   function renderLeftFieldSelect() {
@@ -161,7 +162,7 @@ export function TermJoinPopoverContent(props: Props) {
       >
         <SingleFieldSelect
           placeholder={getSelectFieldPlaceholder()}
-          value={props.rightValue}
+          value={props.sourceDescriptor.term}
           onChange={onRightFieldChange}
           fields={getTermsFields(props.rightFields)}
           isClearable={false}

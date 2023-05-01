@@ -116,16 +116,6 @@ export class Join extends Component<Props, State> {
     });
   }
 
-  _onRightFieldChange = (term?: string) => {
-    this.props.onChange({
-      leftField: this.props.join.leftField,
-      right: {
-        ...this.props.join.right,
-        term,
-      } as ESTermSourceDescriptor,
-    });
-  };
-
   _onMetricsChange = (metrics: AggDescriptor[]) => {
     this.props.onChange({
       leftField: this.props.join.leftField,
@@ -237,9 +227,7 @@ export class Join extends Component<Props, State> {
               sourceDescriptor={right as ESTermSourceDescriptor}
               onSourceDescriptorChange={this._onRightSourceDescriptorChange}
               rightSourceName={rightSourceName}
-              rightValue={right.term}
               rightFields={rightFields}
-              onRightFieldChange={this._onRightFieldChange}
             />
           </EuiFlexItem>
 

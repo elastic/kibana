@@ -36,9 +36,7 @@ interface Props {
   rightSourceName: string;
 
   // Right field props
-  rightValue: string;
   rightFields: DataViewField[];
-  onRightFieldChange: (term?: string) => void;
 }
 
 interface State {
@@ -63,12 +61,12 @@ export class TermJoinExpression extends Component<Props, State> {
   };
 
   _getExpressionValue() {
-    const { size } = this.props.sourceDescriptor;
-    const { leftSourceName, leftValue, rightSourceName, rightValue } = this.props;
-    if (leftSourceName && leftValue && rightSourceName && rightValue) {
+    const { size, term } = this.props.sourceDescriptor;
+    const { leftSourceName, leftValue, rightSourceName } = this.props;
+    if (leftSourceName && leftValue && rightSourceName && term) {
       return i18n.translate('xpack.maps.layerPanel.joinExpression.value', {
         defaultMessage:
-          '{leftSourceName}:{leftValue} with {sizeFragment} {rightSourceName}:{rightValue}',
+          '{leftSourceName}:{leftValue} with {sizeFragment} {rightSourceName}:{term}',
         values: {
           leftSourceName,
           leftValue,
@@ -80,7 +78,7 @@ export class TermJoinExpression extends Component<Props, State> {
                 })
               : '',
           rightSourceName,
-          rightValue,
+          term,
         },
       });
     }
@@ -115,9 +113,7 @@ export class TermJoinExpression extends Component<Props, State> {
           onLeftFieldChange={this.props.onLeftFieldChange}
           sourceDescriptor={this.props.sourceDescriptor}
           onSourceDescriptorChange={this.props.onSourceDescriptorChange}
-          rightValue={this.props.rightValue}
           rightFields={this.props.rightFields}
-          onRightFieldChange={this.props.onRightFieldChange}
         />
       </EuiPopover>
     );
