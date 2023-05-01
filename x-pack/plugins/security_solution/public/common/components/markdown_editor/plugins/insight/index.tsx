@@ -14,6 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiSpacer,
+  EuiCallOut,
   EuiBetaBadge,
   EuiCodeBlock,
   EuiModalHeader,
@@ -53,6 +54,7 @@ import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/consta
 import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
 import { filtersToInsightProviders } from './provider';
+import { useLicense } from '../../../../hooks/use_license';
 import * as i18n from './translations';
 
 interface InsightComponentProps {
@@ -208,8 +210,24 @@ const InsightComponent = ({
     }
   }, [oldestTimestamp, relativeTimerange]);
 
+  const isPlatinum = useLicense().isAtLeast('platinum');
+
   if (isQueryLoading) {
     return <EuiLoadingSpinner size="l" />;
+  } else if (isPlatinum === false) {
+    return (
+      <>
+        <EuiButton
+          isDisabled={true}
+          iconSide={'left'}
+          iconType={'timeline'}
+          data-test-subj="insight-investigate-in-timeline-button-license"
+        >
+          {`${label}`}
+        </EuiButton>
+        <div>{description}</div>
+      </>
+    );
   } else {
     return (
       <>
@@ -361,6 +379,8 @@ const InsightEditorComponent = ({
       },
     ];
   }, [indexPattern]);
+  const isPlatinum = useLicense().isAtLeast('platinum');
+
   return (
     <>
       <EuiModalHeader
@@ -389,7 +409,12 @@ const InsightEditorComponent = ({
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
-
+      {isPlatinum === false && (
+        <EuiCallOut
+          title="To add suggested queries to an investigation guide, please upgrade to platinum"
+          iconType="timeline"
+        />
+      )}
       <EuiModalBody>
         <FormProvider {...formMethods}>
           <EuiForm fullWidth>
