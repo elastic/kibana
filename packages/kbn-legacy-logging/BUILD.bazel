@@ -50,8 +50,8 @@ TYPES_DEPS = [
   "@npm//@types/hapi__hapi",
   "@npm//@types/jest",
   "@npm//@types/lodash",
-  "@npm//@types/moment-timezone",
   "@npm//@types/node",
+  "@npm//moment-timezone",
 ]
 
 jsts_transpiler(
