@@ -204,8 +204,8 @@ export function TermJoinPopoverContent(props: Props) {
     <div style={{ width: 300 }}>
       <EuiPopoverTitle>
         <FormattedMessage
-          id="xpack.maps.layerPanel.joinExpression.joinPopoverTitle"
-          defaultMessage="Join"
+          id="xpack.maps.layerPanel.joinExpression.termJoin.popoverTitle"
+          defaultMessage="Configure term join"
         />
       </EuiPopoverTitle>
       <EuiFormHelpText className="mapJoinExpressionHelpText">

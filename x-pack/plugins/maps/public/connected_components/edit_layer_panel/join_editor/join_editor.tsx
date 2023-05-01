@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import React from 'react';
 
-import { EuiTitle, EuiSpacer, EuiTextAlign, EuiCallOut } from '@elastic/eui';
+import { EuiTitle, EuiTextAlign, EuiCallOut } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Join } from './resources/join';
@@ -16,7 +15,7 @@ import { JoinDocumentationPopover } from './resources/join_documentation_popover
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
 import { SOURCE_TYPES } from '../../../../common/constants';
-import { AddJoinButton } from './add_join_button';
+import { AddTermJoinButton } from './add_term_join_button';
 
 export interface JoinField {
   label: string;
@@ -42,39 +41,25 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
         onChange(layer, [...joins.slice(0, index), ...joins.slice(index + 1)]);
       };
 
-      if (joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
-        throw new Error(
-          'PEBKAC - Table sources cannot be edited in the UX and should only be used in MapEmbeddable'
-        );
-      } else {
-        return (
-          <Fragment key={index}>
-            <EuiSpacer size="m" />
-            <Join
-              join={joinDescriptor}
-              layer={layer}
-              onChange={handleOnChange}
-              onRemove={handleOnRemove}
-              leftFields={leftJoinFields}
-              leftSourceName={layerDisplayName}
-            />
-          </Fragment>
-        );
-      }
+      return (
+        <Join
+          key={joinDescriptor?.right?.id ?? index}
+          join={joinDescriptor}
+          onChange={handleOnChange}
+          onRemove={handleOnRemove}
+          leftFields={leftJoinFields}
+          leftSourceName={layerDisplayName}
+        />
+      );
     });
   };
 
-  const addJoin = () => {
+  const addJoin = (joinDescriptor: Partial<JoinDescriptor>) => {
     onChange(layer, [
       ...joins,
       {
-        right: {
-          id: uuidv4(),
-          type: SOURCE_TYPES.ES_TERM_SOURCE,
-          applyGlobalQuery: true,
-          applyGlobalTime: true,
-        },
-      } as JoinDescriptor,
+        ...joinDescriptor
+      },
     ]);
   };
 
@@ -84,17 +69,16 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
     return disabledReason ? (
       <EuiCallOut color="warning">{disabledReason}</EuiCallOut>
     ) : (
-      <Fragment>
+      <>
         {renderJoins()}
-        <EuiSpacer size="s" />
         <EuiTextAlign textAlign="center">
-          <AddJoinButton
+          <AddTermJoinButton
             addJoin={addJoin}
             isLayerSourceMvt={layer.getSource().isMvt()}
             numJoins={joins.length}
           />
         </EuiTextAlign>
-      </Fragment>
+      </>
     );
   }
 
@@ -103,8 +87,8 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
-            defaultMessage="Term joins"
+            id="xpack.maps.layerPanel.joinEditor.title"
+            defaultMessage="Joins"
           />{' '}
           <JoinDocumentationPopover />
         </h5>

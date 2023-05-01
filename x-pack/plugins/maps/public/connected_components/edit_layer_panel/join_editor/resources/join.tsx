@@ -22,7 +22,6 @@ import {
   JoinDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../common/descriptor_types';
-import { ILayer } from '../../../../classes/layers/layer';
 
 import { getIndexPatternService } from '../../../../kibana_services';
 import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
@@ -31,7 +30,6 @@ import type { JoinField } from '../join_editor';
 
 interface Props {
   join: JoinDescriptor;
-  layer: ILayer;
   onChange: (joinDescriptor: JoinDescriptor) => void;
   onRemove: () => void;
   leftFields: JoinField[];
@@ -181,8 +179,8 @@ export class Join extends Component<Props, State> {
         <EuiText size="small">
           <p>
             <EuiTextColor color="warning">
-              {i18n.translate('xpack.maps.layerPanel.join.joinExpression.unknownType', {
-                defaultMessage: 'Unknown join {type}.',
+              {i18n.translate('xpack.maps.layerPanel.join.joinExpression.noEditorMsg', {
+                defaultMessage: 'Unable to edit {type} join.',
                 values: { type: right.type },
               })}
             </EuiTextColor>
