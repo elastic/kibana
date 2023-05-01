@@ -800,6 +800,7 @@ The top values of a specified field ranked by the chosen metric.
               }}
               column={currentColumn.params.orderAgg}
               incompleteColumn={incompleteColumn}
+              onResetIncomplete={() => setIncompleteColumn(undefined)}
               onDeleteColumn={() => {
                 throw new Error('Should not be called');
               }}

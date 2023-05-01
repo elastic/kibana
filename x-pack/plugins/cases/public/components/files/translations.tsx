@@ -113,3 +113,7 @@ export const DELETE = i18n.translate('xpack.cases.caseView.files.delete', {
 export const DELETE_FILE_TITLE = i18n.translate('xpack.cases.caseView.files.deleteThisFile', {
   defaultMessage: 'Delete this file?',
 });
+
+export const REMOVED_FILE = i18n.translate('xpack.cases.caseView.files.removedFile', {
+  defaultMessage: 'removed file',
+});

@@ -22,8 +22,24 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
   renderContent,
   ...otherPopoverProps
 }) => {
-  const header = (isOpen && renderHeader?.()) || null;
-  const content = (isOpen && renderContent?.()) || null;
+  let header = null;
+  let content = null;
+
+  if (isOpen) {
+    try {
+      header = renderHeader?.() || null;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+
+    try {
+      content = renderContent?.() || null;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  }
 
   return (
     <EuiPopover
