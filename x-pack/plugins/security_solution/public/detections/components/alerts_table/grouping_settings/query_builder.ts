@@ -41,14 +41,6 @@ export const getAlertsGroupingQuery = ({
       ? getAggregationsByGroupField(selectedGroup)
       : [],
     pageNumber: pageIndex * pageSize,
-    rootAggregations: [
-      {
-        unitsCount: { value_count: { field: selectedGroup } },
-      },
-      ...(!isNoneGroup([selectedGroup])
-        ? [{ groupsCount: { cardinality: { field: selectedGroup } } }]
-        : []),
-    ],
     runtimeMappings,
     selectedGroupEsTypes,
     size: pageSize,
