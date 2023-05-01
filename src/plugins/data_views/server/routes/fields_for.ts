@@ -17,14 +17,24 @@ import {
 import { IndexPatternsFetcher } from '../fetcher';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
 
-const parseMetaFields = (metaFields: string | string[]) => {
-  let parsedFields: string[] = [];
-  if (typeof metaFields === 'string') {
-    parsedFields = JSON.parse(metaFields);
-  } else {
-    parsedFields = metaFields;
+/**
+ * Accepts one of the following:
+ * 1. An array of field names
+ * 2. A JSON-stringified array of field names
+ * 3. A single field name (not comma-separated)
+ * @returns an array of field names
+ * @param metaFields
+ */
+export const parseMetaFields = (metaFields: string | string[]): string[] => {
+  if (Array.isArray(metaFields)) return metaFields;
+  try {
+    return JSON.parse(metaFields);
+  } catch (e) {
+    if (!metaFields.includes(',')) return [metaFields];
+    throw new Error(
+      'metaFields should be an array of field names, a JSON-stringified array of field names, or a single field name'
+    );
   }
-  return parsedFields;
 };
 
 const path = '/api/index_patterns/_fields_for_wildcard';
@@ -32,7 +42,7 @@ const path = '/api/index_patterns/_fields_for_wildcard';
 type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
 interface IQuery {
   pattern: string;
-  meta_fields: string[];
+  meta_fields: string | string[];
   type?: string;
   rollup_index?: string;
   allow_no_index?: boolean;
