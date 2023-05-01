@@ -56,8 +56,6 @@ function ErrorWithTemplate({ error }: { error: Error }) {
   const { services } = useKibana<ApmPluginStartDeps>();
   const { observabilityShared } = services;
 
-  console.log('rendering error');
-
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
   if (error instanceof NotFoundRouteException) {
