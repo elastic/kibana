@@ -17,7 +17,7 @@ import {
   getFooType,
   getLegacyType,
   dummyModelVersion,
-  dummyMigration,
+  noopMigration,
 } from '../fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'update_mappings.test.log');
@@ -75,7 +75,7 @@ describe('ZDT with v2 compat - basic mapping update', () => {
 
     legacyType.migrations = {
       ...legacyType.migrations,
-      '8.0.0': dummyMigration,
+      '8.0.0': noopMigration,
     };
     legacyType.mappings.properties = {
       ...legacyType.mappings.properties,

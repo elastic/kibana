@@ -14,7 +14,7 @@ import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
 import { getBaseMigratorParams, getFooType, getLegacyType } from '../fixtures/zdt_base.fixtures';
 
-export const logFilePath = Path.join(__dirname, 'create_index.test.log');
+const logFilePath = Path.join(__dirname, 'create_index.test.log');
 
 describe('ZDT with v2 compat - running on a fresh cluster', () => {
   let esServer: TestElasticsearchUtils['es'];

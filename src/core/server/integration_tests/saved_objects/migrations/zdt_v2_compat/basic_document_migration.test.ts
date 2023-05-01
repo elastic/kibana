@@ -20,7 +20,7 @@ import {
   getLegacyType,
 } from '../fixtures/zdt_base.fixtures';
 
-export const logFilePath = Path.join(__dirname, 'basic_document_migration.test.log');
+const logFilePath = Path.join(__dirname, 'basic_document_migration.test.log');
 
 describe('ZDT with v2 compat - basic document migration', () => {
   let esServer: TestElasticsearchUtils['es'];

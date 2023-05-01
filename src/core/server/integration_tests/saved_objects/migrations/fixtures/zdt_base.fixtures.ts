@@ -29,7 +29,7 @@ export const dummyModelVersion: SavedObjectsModelVersion = {
   },
 };
 
-export const dummyMigration: SavedObjectMigrationFn = (doc) => doc;
+export const noopMigration: SavedObjectMigrationFn = (doc) => doc;
 
 export const getFooType = () => {
   return createType({
@@ -142,8 +142,8 @@ export const getLegacyType = () => {
       },
     },
     migrations: {
-      '7.0.0': dummyMigration,
-      '7.5.0': dummyMigration,
+      '7.0.0': noopMigration,
+      '7.5.0': noopMigration,
     },
   });
 };
