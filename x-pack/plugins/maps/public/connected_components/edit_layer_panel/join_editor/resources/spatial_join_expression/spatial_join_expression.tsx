@@ -14,48 +14,28 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import {
-  ESTermSourceDescriptor,
+  ESDistanceSourceDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';
 import type { JoinField } from '../../join_editor';
 import { TermJoinPopoverContent } from './term_join_popover_content';
 
 interface Props {
-  // Left source props (static - can not change)
-  leftSourceName?: string;
-
-  // Left field props
-  leftValue?: string;
-  leftFields: JoinField[];
-  onLeftFieldChange: (leftField: string) => void;
-
-  // Right source props
-  sourceDescriptor: Partial<ESTermSourceDescriptor>;
+  sourceDescriptor: Partial<ESDistanceSourceDescriptor>;
   onSourceDescriptorChange: (sourceDescriptor: Partial<JoinSourceDescriptor>) => void;
-  rightFields: DataViewField[];
 }
 
-export function TermJoinExpression(props: Props) {
+export function SpatialJoinExpression(props: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const { size, term } = props.sourceDescriptor;
-  const expressionValue = term !== undefined
-    ? i18n.translate('xpack.maps.layerPanel.termJoinExpression.value', {
+  const expressionValue = props.sourceDescriptor.geoField !== undefined
+    ? i18n.translate('xpack.maps.layerPanel.spatialJoinExpression.value', {
         defaultMessage:
-          '{topTerms} terms from {term}',
-        values: {
-          topTerms:
-            size !== undefined
-              ? i18n.translate('xpack.maps.layerPanel.termJoinExpression.topTerms', {
-                  defaultMessage: 'top {size}',
-                  values: { size },
-                })
-              : '',
-          term,
-        },
+          'features within {distance} km',
+        values: { distance: props.sourceDescriptor.distance },
       })
-    : i18n.translate('xpack.maps.layerPanel.termJoinExpression.placeholder', {
-        defaultMessage: '-- configure term join --',
+    : i18n.translate('xpack.maps.layerPanel.spatialJoinExpression.placeholder', {
+        defaultMessage: '-- configure spatial join --',
       });
 
   return (
@@ -81,15 +61,7 @@ export function TermJoinExpression(props: Props) {
         />
       }
     >
-      <TermJoinPopoverContent 
-        leftSourceName={props.leftSourceName}
-        leftValue={props.leftValue}
-        leftFields={props.leftFields}
-        onLeftFieldChange={props.onLeftFieldChange}
-        sourceDescriptor={props.sourceDescriptor}
-        onSourceDescriptorChange={props.onSourceDescriptorChange}
-        rightFields={props.rightFields}
-      />
+      <div></div>
     </EuiPopover>
   );
 }

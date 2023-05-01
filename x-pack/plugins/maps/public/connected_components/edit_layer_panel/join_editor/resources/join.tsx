@@ -11,6 +11,7 @@ import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiText, EuiTextColor } from 
 import { i18n } from '@kbn/i18n';
 import type { DataViewField, DataView, Query } from '@kbn/data-plugin/common';
 import { indexPatterns } from '@kbn/data-plugin/public';
+import { SpatialJoinExpression } from './spatial_join_expression';
 import { TermJoinExpression } from './term_join_expression';
 import { MetricsExpression } from './metrics_expression';
 import { WhereExpression } from './where_expression';
@@ -27,6 +28,7 @@ import { getIndexPatternService } from '../../../../kibana_services';
 import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
 import { AGG_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
 import type { JoinField } from '../join_editor';
+import { isSpatialJoin } from '../../../../classes/joins/is_spatial_join';
 
 interface Props {
   join: JoinDescriptor;
@@ -172,6 +174,14 @@ export class Join extends Component<Props, State> {
           sourceDescriptor={right as ESTermSourceDescriptor}
           onSourceDescriptorChange={this._onRightSourceDescriptorChange}
           rightFields={rightFields}
+        />
+      )
+    } else if (isSpatialJoin(this.props.join)) {
+      isJoinConfigComplete = join.leftField && right.indexPatternId && right.geoField;
+      joinExpression = (
+        <SpatialJoinExpression
+          sourceDescriptor={right as ESDistanceSourceDescriptor}
+          onSourceDescriptorChange={this._onRightSourceDescriptorChange}
         />
       )
     } else {
