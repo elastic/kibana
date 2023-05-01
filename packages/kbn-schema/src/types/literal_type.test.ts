@@ -49,7 +49,7 @@ test('returns error when not correct', () => {
 });
 
 test('includes namespace in failure', () => {
-  expect(() =>
-    literal('test').validate('foo', {}, 'foo-namespace')
-  ).toThrowErrorMatchingInlineSnapshot(`"[foo-namespace]: expected value to equal [test]"`);
+  expect(() => literal('test').validate('foo', 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
+    `"[foo-namespace]: expected value to equal [test]"`
+  );
 });

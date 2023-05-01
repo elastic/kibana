@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import z from 'zod';
 import { internals } from '../internals';
 import { Type } from './type';
 
-export class LiteralType<T> extends Type<T> {
-  constructor(value: T) {
-    super(internals.any().valid(value));
+const errorMap: z.ZodErrorMap = (issue, ctx) => {
+  if (issue.code === z.ZodIssueCode.invalid_literal) {
+    return { message: `expected value to equal [${issue.expected}]` };
   }
+  return { message: ctx.defaultError };
+};
 
-  protected handleError(type: string, { value, valids: [expectedValue] }: Record<string, any>) {
-    switch (type) {
-      case 'any.required':
-      case 'any.only':
-        return `expected value to equal [${expectedValue}]`;
-    }
+export class LiteralType<T extends z.Primitive> extends Type<T> {
+  constructor(value: T) {
+    super(internals.literal(value, { errorMap }));
   }
 }
