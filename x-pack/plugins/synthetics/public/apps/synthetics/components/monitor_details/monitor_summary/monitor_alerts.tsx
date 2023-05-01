@@ -104,7 +104,6 @@ export const MonitorAlerts = ({
             dataTestSubj="monitorActiveAlertsCount"
             customHeight={'120px'}
             reportType="single-metric"
-            skipLoadingWrapper={true}
             attributes={[
               {
                 dataType: 'alerts',
@@ -136,7 +135,6 @@ export const MonitorAlerts = ({
             sparklineMode
             customHeight="100px"
             reportType="kpi-over-time"
-            skipLoadingWrapper={true}
             attributes={[
               {
                 seriesType: 'area',
@@ -169,7 +167,6 @@ export const MonitorAlerts = ({
           <ExploratoryViewEmbeddable
             customHeight={'120px'}
             reportType="single-metric"
-            skipLoadingWrapper={true}
             attributes={[
               {
                 dataType: 'alerts',
@@ -201,7 +198,6 @@ export const MonitorAlerts = ({
             sparklineMode
             customHeight="100px"
             reportType="kpi-over-time"
-            skipLoadingWrapper={true}
             attributes={[
               {
                 seriesType: 'area',
