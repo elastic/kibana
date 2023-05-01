@@ -72,23 +72,14 @@ import {
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
-import { DiscoverExtensionRegistry } from './extensions';
-import type { DiscoverStateContainer } from './application/main/services/discover_state';
+import type { RegisterExtensions } from './extensions/types';
+import { createProfileRegistry } from './extensions/profile_registry';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
 );
 const DocViewerTable = React.lazy(() => import('./services/doc_views/components/doc_viewer_table'));
 const SourceViewer = React.lazy(() => import('./services/doc_views/components/doc_viewer_source'));
-
-export interface RegisterExtensionsContext {
-  extensions: DiscoverExtensionRegistry;
-  stateContainer: DiscoverStateContainer;
-}
-
-export type RegisterExtensions = (
-  options: RegisterExtensionsContext
-) => void | (() => void) | Promise<void | (() => void)>;
 
 /**
  * @public
@@ -167,7 +158,7 @@ export interface DiscoverStart {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly registerExtensions: (profile: string, register: RegisterExtensions) => void;
+  readonly registerExtensions: (profileName: string, register: RegisterExtensions) => void;
 }
 
 /**
@@ -223,7 +214,7 @@ export class DiscoverPlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
-  private registerExtensionsMap = new Map<string, RegisterExtensions[]>();
+  private profileRegistry = createProfileRegistry();
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
@@ -351,7 +342,7 @@ export class DiscoverPlugin
         const unmount = renderApp({
           element: params.element,
           services,
-          registerExtensionsMap: this.registerExtensionsMap,
+          profileRegistry: this.profileRegistry,
           isDev,
         });
         return () => {
@@ -414,10 +405,13 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      registerExtensions: (profile: string, register: RegisterExtensions) => {
-        const registerExtensions = this.registerExtensionsMap.get(profile) || [];
-        registerExtensions.push(register);
-        this.registerExtensionsMap.set(profile, registerExtensions);
+      registerExtensions: (profileName: string, register: RegisterExtensions) => {
+        const profile = this.profileRegistry.get(profileName) ?? {
+          name: profileName,
+          registerExtensions: [],
+        };
+        profile.registerExtensions.push(register);
+        this.profileRegistry.set(profile);
       },
     };
   }

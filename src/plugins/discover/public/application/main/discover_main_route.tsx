@@ -32,7 +32,7 @@ import {
   DiscoverExtensionProvider,
   useDiscoverExtensionRegistry,
 } from '../../extensions/extension_provider';
-import type { RegisterExtensions } from '../../plugin';
+import type { RegisterExtensions } from '../../extensions/types';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 

@@ -19,7 +19,8 @@ import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
-import type { RegisterExtensions } from '../plugin';
+import type { RegisterExtensions } from '../extensions/types';
+import type { DiscoverProfileRegistry } from '../extensions/profile_registry';
 
 interface DiscoverRoutesProps {
   prefix?: string;
@@ -64,15 +65,15 @@ const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProps) => {
 };
 
 interface CustomDiscoverRoutesProps {
-  registerExtensionsMap: Map<string, RegisterExtensions[]>;
+  profileRegistry: DiscoverProfileRegistry;
   isDev: boolean;
 }
 
-const CustomDiscoverRoutes = ({ registerExtensionsMap, ...props }: CustomDiscoverRoutesProps) => {
+const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscoverRoutesProps) => {
   const { profile } = useParams<{ profile: string }>();
   const registerExtensions = useMemo(
-    () => registerExtensionsMap.get(profile),
-    [profile, registerExtensionsMap]
+    () => profileRegistry.get(profile)?.registerExtensions,
+    [profile, profileRegistry]
   );
 
   if (registerExtensions) {
@@ -86,7 +87,7 @@ const CustomDiscoverRoutes = ({ registerExtensionsMap, ...props }: CustomDiscove
 
 export interface DiscoverRouterProps {
   services: DiscoverServices;
-  registerExtensionsMap: Map<string, RegisterExtensions[]>;
+  profileRegistry: DiscoverProfileRegistry;
   history: History;
   isDev: boolean;
 }
@@ -94,12 +95,12 @@ export interface DiscoverRouterProps {
 export const DiscoverRouter = ({
   services,
   history,
-  registerExtensionsMap,
+  profileRegistry,
   ...routeProps
 }: DiscoverRouterProps) => {
   const registerDefaultExtensions = useMemo(
-    () => registerExtensionsMap.get('default') ?? [],
-    [registerExtensionsMap]
+    () => profileRegistry.get('default')?.registerExtensions ?? [],
+    [profileRegistry]
   );
 
   return (
@@ -109,10 +110,7 @@ export const DiscoverRouter = ({
           <CompatRouter>
             <Switch>
               <Route path="/p/:profile">
-                <CustomDiscoverRoutes
-                  registerExtensionsMap={registerExtensionsMap}
-                  {...routeProps}
-                />
+                <CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />
               </Route>
               <Route path="/">
                 <DiscoverRoutes registerExtensions={registerDefaultExtensions} {...routeProps} />
