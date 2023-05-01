@@ -12,7 +12,7 @@ import '../jest_matchers';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
-import { getBaseMigratorParams, getFooType, getBarType } from './base.fixtures';
+import { getBaseMigratorParams, getFooType, getBarType } from '../fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'create_index.test.log');
 

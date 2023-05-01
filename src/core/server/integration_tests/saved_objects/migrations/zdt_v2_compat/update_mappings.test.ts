@@ -12,11 +12,17 @@ import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-h
 import '../jest_matchers';
 import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
-import { getBaseMigratorParams, getFooType, getBarType, dummyModelVersion } from './base.fixtures';
+import {
+  getBaseMigratorParams,
+  getFooType,
+  getLegacyType,
+  dummyModelVersion,
+  dummyMigration,
+} from '../fixtures/zdt_base.fixtures';
 
-export const logFilePath = Path.join(__dirname, 'mapping_version_conflict.test.log');
+export const logFilePath = Path.join(__dirname, 'update_mappings.test.log');
 
-describe('ZDT upgrades - mapping model version conflict', () => {
+describe('ZDT with v2 compat - basic mapping update', () => {
   let esServer: TestElasticsearchUtils['es'];
 
   const startElasticsearch = async () => {
@@ -31,8 +37,6 @@ describe('ZDT upgrades - mapping model version conflict', () => {
     return await startES();
   };
 
-  const baseMigratorParams = getBaseMigratorParams();
-
   beforeAll(async () => {
     await fs.unlink(logFilePath).catch(() => {});
     esServer = await startElasticsearch();
@@ -45,31 +49,21 @@ describe('ZDT upgrades - mapping model version conflict', () => {
 
   const createBaseline = async () => {
     const fooType = getFooType();
-    const barType = getBarType();
-
-    // increasing bar model version on the baseline
-    barType.modelVersions = {
-      ...barType.modelVersions,
-      '2': dummyModelVersion,
-    };
-    barType.mappings.properties = {
-      ...barType.mappings.properties,
-      anotherAddedField: { type: 'boolean' },
-    };
+    const legacyType = getLegacyType();
     const { runMigrations } = await getKibanaMigratorTestKit({
-      ...baseMigratorParams,
-      types: [fooType, barType],
+      ...getBaseMigratorParams(),
+      types: [fooType, legacyType],
     });
     await runMigrations();
   };
 
-  it('fails the migration with an error', async () => {
+  it('updates the mappings and the meta', async () => {
     await createBaseline();
 
     const fooType = getFooType();
-    const barType = getBarType();
+    const legacyType = getLegacyType();
 
-    // increasing foo model version
+    // increasing the model version of the types
     fooType.modelVersions = {
       ...fooType.modelVersions,
       '3': dummyModelVersion,
@@ -79,20 +73,30 @@ describe('ZDT upgrades - mapping model version conflict', () => {
       someAddedField: { type: 'keyword' },
     };
 
-    // we have the following versions:
-    // baseline : bar:2, foo: 2
-    // upgrade: bar:3, foo:1
-    // which should cause a migration failure.
+    legacyType.migrations = {
+      ...legacyType.migrations,
+      '8.0.0': dummyMigration,
+    };
+    legacyType.mappings.properties = {
+      ...legacyType.mappings.properties,
+      anotherAddedField: { type: 'boolean' },
+    };
 
     const { runMigrations, client } = await getKibanaMigratorTestKit({
-      ...baseMigratorParams,
+      ...getBaseMigratorParams(),
       logFilePath,
-      types: [fooType, barType],
+      types: [fooType, legacyType],
     });
 
-    await expect(runMigrations()).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to complete saved object migrations for the [.kibana] index: Model version conflict: inconsistent higher/lower versions"`
-    );
+    const result = await runMigrations();
+
+    expect(result).toEqual([
+      {
+        destIndex: '.kibana',
+        elapsedMs: expect.any(Number),
+        status: 'patched',
+      },
+    ]);
 
     const indices = await client.indices.get({ index: '.kibana*' });
 
@@ -105,14 +109,28 @@ describe('ZDT upgrades - mapping model version conflict', () => {
 
     expect(aliases).toEqual(['.kibana', '.kibana_8.8.0']);
 
+    expect(mappings.properties).toEqual(
+      expect.objectContaining({
+        foo: fooType.mappings,
+        legacy: legacyType.mappings,
+      })
+    );
+
     expect(mappingMeta.mappingVersions).toEqual({
-      foo: '10.2.0',
-      bar: '10.2.0',
+      foo: '10.3.0',
+      legacy: '8.0.0',
     });
 
     const records = await parseLogFile(logFilePath);
 
-    expect(records).toContainLogEntry('Mappings model version check result: conflict');
-    expect(records).toContainLogEntry('INIT -> FATAL');
+    expect(records).toContainLogEntry('INIT -> UPDATE_INDEX_MAPPINGS');
+    expect(records).toContainLogEntry(
+      'UPDATE_INDEX_MAPPINGS -> UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'
+    );
+    expect(records).toContainLogEntry(
+      'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> UPDATE_MAPPING_MODEL_VERSIONS'
+    );
+    expect(records).toContainLogEntry('UPDATE_MAPPING_MODEL_VERSIONS -> INDEX_STATE_UPDATE_DONE');
+    expect(records).toContainLogEntry('Migration completed');
   });
 });

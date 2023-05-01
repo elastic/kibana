@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
+import { SavedObjectsModelVersion, SavedObjectMigrationFn } from '@kbn/core-saved-objects-server';
 import { createType } from '../test_utils';
 import { type KibanaMigratorTestKitParams } from '../kibana_migrator_test_kit';
 
@@ -28,6 +28,8 @@ export const dummyModelVersion: SavedObjectsModelVersion = {
     type: 'expansion',
   },
 };
+
+export const dummyMigration: SavedObjectMigrationFn = (doc) => doc;
 
 export const getFooType = () => {
   return createType({
@@ -127,6 +129,21 @@ export const getExcludedType = () => {
           must: [{ term: { type: 'excluded' } }, { range: { 'excluded.value': { lte: 1 } } }],
         },
       };
+    },
+  });
+};
+
+export const getLegacyType = () => {
+  return createType({
+    name: 'legacy',
+    mappings: {
+      properties: {
+        someField: { type: 'text' },
+      },
+    },
+    migrations: {
+      '7.0.0': dummyMigration,
+      '7.5.0': dummyMigration,
     },
   });
 };
