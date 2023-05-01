@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { EuiButtonIcon, EuiLink, EuiPopover, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiLink, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDocLinks } from '../../../../kibana_services';
 
@@ -41,7 +41,7 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
   _renderContent() {
     return (
       <div>
-        <EuiText style={{ maxWidth: '36em' }}>
+        <EuiText size="s" style={{ maxWidth: '36em' }}>
           <dl>
             <dt>{this.props.mvtOptionLabel} (Default)</dt>
             <dd>
@@ -72,8 +72,12 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.clustersUseCase"
-                  defaultMessage="Use this option to display large data sets. Does not support joins."
+                  defaultMessage="Use this option to display large data sets. "
                 />
+                <i><FormattedMessage
+                  id="xpack.maps.scalingDocs.doesNotSupportJoins"
+                  defaultMessage="Does not support joins."
+                /></i>
               </p>
             </dd>
 
@@ -86,44 +90,42 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
                   values={{ maxResultWindow: this.props.maxResultWindow }}
                 />
               </p>
-              <p>
-                <FormattedMessage
-                  id="xpack.maps.scalingDocs.limitUseCases"
-                  defaultMessage="Use this option when you can not use vector tiles for the following reasons:"
-                />
-                <ul>
-                  <li>
-                    <FormattedMessage
-                      id="xpack.maps.scalingDocs.limitUseCase.formatLabels"
-                      defaultMessage="Formatted labels"
-                    />
-                  </li>
-                  <li>
-                    <FormattedMessage
-                      id="xpack.maps.scalingDocs.limitUseCase.multipleJoins"
-                      defaultMessage="Spatial joins"
-                    />
-                  </li>
-                  <li>
-                    <FormattedMessage
-                      id="xpack.maps.scalingDocs.limitUseCase.multipleJoins"
-                      defaultMessage="Multiple term joins"
-                    />
-                  </li>
-                  <li>
-                    <FormattedMessage
-                      id="xpack.maps.scalingDocs.limitUseCase.joinFieldsWithLayoutStyles"
-                      defaultMessage="Data driven styling from join metrics with 'Label', 'Label size', icon 'Symbol size', and 'Symbol orientation' style properties"
-                    />
-                  </li>
-                  <li>
-                    <FormattedMessage
-                      id="xpack.maps.scalingDocs.limitUseCase.scriptedFields"
-                      defaultMessage="Data driven styling from scripted fields"
-                    />
-                  </li>
-                </ul>
-              </p>
+              <FormattedMessage
+                id="xpack.maps.scalingDocs.limitUseCases"
+                defaultMessage="Use this option when you can not use vector tiles for the following reasons:"
+              />
+              <ul>
+                <li>
+                  <FormattedMessage
+                    id="xpack.maps.scalingDocs.limitUseCase.formatLabels"
+                    defaultMessage="Formatted labels"
+                  />
+                </li>
+                <li>
+                  <FormattedMessage
+                    id="xpack.maps.scalingDocs.limitUseCase.multipleJoins"
+                    defaultMessage="Spatial joins"
+                  />
+                </li>
+                <li>
+                  <FormattedMessage
+                    id="xpack.maps.scalingDocs.limitUseCase.multipleJoins"
+                    defaultMessage="Multiple term joins"
+                  />
+                </li>
+                <li>
+                  <FormattedMessage
+                    id="xpack.maps.scalingDocs.limitUseCase.joinFieldsWithLayoutStyles"
+                    defaultMessage="Data driven styling from join metrics with 'Label', 'Label size', icon 'Symbol size', and 'Symbol orientation' style properties"
+                  />
+                </li>
+                <li>
+                  <FormattedMessage
+                    id="xpack.maps.scalingDocs.limitUseCase.scriptedFields"
+                    defaultMessage="Data driven styling from scripted fields"
+                  />
+                </li>
+              </ul>
             </dd>
           </dl>
 
@@ -167,6 +169,12 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
         repositionOnScroll
         ownFocus
       >
+        <EuiPopoverTitle>
+          <FormattedMessage
+            id="xpack.maps.scalingDocs.title"
+            defaultMessage="Scaling"
+          />
+        </EuiPopoverTitle>
         {this._renderContent()}
       </EuiPopover>
     );
