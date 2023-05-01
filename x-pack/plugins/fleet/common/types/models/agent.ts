@@ -180,6 +180,9 @@ export interface AgentDiagnostics {
 }
 
 // Generated from FleetServer schema.json
+/**
+ * Fleet Server agent component unit
+ */
 export interface FleetServerAgentComponentUnit {
   id: string;
   type: 'input' | 'output';
@@ -190,6 +193,9 @@ export interface FleetServerAgentComponentUnit {
   };
 }
 
+/**
+ * Fleet server agent component
+ */
 export interface FleetServerAgentComponent {
   id: string;
   type: string;
