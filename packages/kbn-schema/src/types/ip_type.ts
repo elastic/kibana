@@ -10,7 +10,7 @@ import typeDetect from 'type-detect';
 import { internals } from '../internals';
 import { Type, TypeOptions } from './type';
 
-export type IpVersion = 'ipv4' | 'ipv6';
+export type IpVersion = 'v4' | 'v6';
 export type IpOptions = TypeOptions<string> & {
   /**
    * IP versions to accept, defaults to ['ipv4', 'ipv6'].
@@ -19,7 +19,7 @@ export type IpOptions = TypeOptions<string> & {
 };
 
 export class IpType extends Type<string> {
-  constructor(options: IpOptions = { versions: ['ipv4', 'ipv6'] }) {
+  constructor(options: IpOptions = { versions: ['v4', 'v6'] }) {
     const schema = internals.string().ip({ version: options.versions, cidr: 'forbidden' });
     super(schema, options);
   }
