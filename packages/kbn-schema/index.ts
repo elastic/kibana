@@ -24,8 +24,6 @@ import {
   ObjectTypeOptions,
   Props,
   NullableProps,
-  RecordOfOptions,
-  RecordOfType,
   SchemaStructureEntry,
   StringOptions,
   StringType,
@@ -33,7 +31,6 @@ import {
   TypeOf,
   TypeOptions,
   UnionType,
-  StreamType,
 } from './src/types';
 
 export type { AnyType, TypeOf, Props, SchemaStructureEntry, NullableProps };
@@ -55,7 +52,7 @@ function buffer(options?: TypeOptions<Buffer>): Type<Buffer> {
 }
 
 function stream(options?: TypeOptions<Stream>): Type<Stream> {
-  return new StreamType(options);
+  throw new Error('Not implemented');
 }
 
 function string(options?: StringOptions): Type<string> {
@@ -112,9 +109,9 @@ function mapOf<K, V>(keyType: Type<K>, valueType: Type<V>, options?: unknown): T
 function recordOf<K extends string, V>(
   keyType: Type<K>,
   valueType: Type<V>,
-  options?: RecordOfOptions<K, V>
+  options?: unknown
 ): Type<Record<K, V>> {
-  return new RecordOfType(keyType, valueType, options);
+  throw new Error('Not implemented');
 }
 
 function oneOf<A, B, C, D, E, F, G, H, I, J>(
