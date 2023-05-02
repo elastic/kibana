@@ -91,9 +91,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.INSTALLED_LIST_PATTERN,
       validate: GetInstalledPackagesRequestSchema,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true }, // TODO: Visit permissions
-      },
     },
     getInstalledListHandler
   );
@@ -220,9 +217,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.DATA_STREAMS_PATTERN,
       validate: GetDataStreamsRequestSchema,
-      fleetAuthz: {
-        fleet: { all: true },
-      },
     },
     getDataStreamsHandler
   );
