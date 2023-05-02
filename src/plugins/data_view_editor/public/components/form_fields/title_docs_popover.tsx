@@ -50,8 +50,8 @@ export const TitleDocsPopover: React.FC = () => {
       <EuiPanel
         className="eui-yScroll"
         css={css`
-          max-height: 70vh;
-          max-width: 70vw;
+          max-height: 50vh;
+          max-width: 500px;
         `}
         color="transparent"
         paddingSize="m"
