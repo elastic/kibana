@@ -30,7 +30,7 @@ import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import moment from 'moment-timezone';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../utils/kibana_react';
-import { asDuration } from '../../common/utils/formatters';
+import { asDuration, toMicroseconds } from '../../common/utils/formatters';
 import { paths } from '../config/paths';
 import { translations } from '../config/translations';
 import { formatAlertEvaluationValue } from '../utils/format_alert_evaluation_value';
@@ -45,7 +45,7 @@ interface FlyoutProps {
 // For APM Latency threshold rule, threshold is in ms but the duration formatter works with microseconds
 const normalizeUnit = (ruleTypeId: string, value?: number) => {
   if (ruleTypeId === 'apm.transaction_duration' && value) {
-    return value * 1000;
+    return toMicroseconds(value, 'milliseconds');
   }
   return value;
 };
