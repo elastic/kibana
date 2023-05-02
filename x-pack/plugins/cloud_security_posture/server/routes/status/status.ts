@@ -167,12 +167,7 @@ export const getCspStatus = async ({
     checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'kspm'),
     checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'kspm'),
 
-    checkIndexStatus(
-      esClient,
-      LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
-      logger,
-      VULN_MGMT_POLICY_TEMPLATE
-    ),
+    checkIndexStatus(esClient, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, logger),
     checkIndexStatus(esClient, VULNERABILITIES_INDEX_PATTERN, logger, VULN_MGMT_POLICY_TEMPLATE),
 
     packageService.asInternalUser.getInstallation(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),

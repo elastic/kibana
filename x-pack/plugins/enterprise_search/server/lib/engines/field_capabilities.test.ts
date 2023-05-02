@@ -72,6 +72,7 @@ describe('engines field_capabilities', () => {
         fields: '*',
         include_unmapped: true,
         index: ['index-001'],
+        filters: '-metadata',
       });
     });
   });

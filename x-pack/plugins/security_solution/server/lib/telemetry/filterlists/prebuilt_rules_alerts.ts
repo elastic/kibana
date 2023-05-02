@@ -215,6 +215,9 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
         target_resources: true,
       },
     },
+    properties: {
+      category: true,
+    },
     signinlogs: {
       properties: {
         app_display_name: true,
@@ -253,6 +256,85 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       setting: {
         name: true,
       },
+      application: {
+        name: true,
+      },
+      old_value: true,
+      role: {
+        name: true,
+      },
+    },
+    event: {
+      type: true,
+    },
+  },
+  // kubernetes
+  kubernetes: {
+    audit: {
+      annotations: true,
+      verb: true,
+      user: {
+        groups: true,
+      },
+      impersonatedUser: {
+        groups: true,
+      },
+      objectRef: {
+        name: true,
+        namespace: true,
+        resource: true,
+        subresource: true,
+      },
+      requestObject: {
+        spec: {
+          containers: {
+            image: true,
+            securityContext: {
+              allowPrivilegeEscalation: true,
+              capabilities: {
+                add: true,
+              },
+              privileged: true,
+              procMount: true,
+              runAsGroup: true,
+              runAsUser: true,
+            },
+          },
+          hostIPC: true,
+          hostNetwork: true,
+          hostPID: true,
+          securityContext: {
+            runAsGroup: true,
+            runAsUser: true,
+          },
+          serviceAccountName: true,
+          type: true,
+          volumes: {
+            hostPath: {
+              path: true,
+            },
+          },
+        },
+      },
+      requestURI: true,
+      responseObject: {
+        roleRef: {
+          kind: true,
+          resourceName: true,
+        },
+        rules: true,
+        spec: {
+          containers: {
+            securityContext: {
+              allowPrivilegeEscalation: true,
+            },
+          },
+        },
+      },
+      responseStatus: {
+        code: true,
+      },
+      userAgent: true,
     },
   },
   // office 360
@@ -275,6 +357,11 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
         Enabled: true,
         ForwardAsAttachmentTo: true,
         ForwardTo: true,
+        ModifiedProperties: {
+          Role_DisplayName: {
+            NewValue: true,
+          },
+        },
         RedirectTo: true,
       },
     },

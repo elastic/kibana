@@ -8,6 +8,7 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 
+import { SLO_ID_FIELD } from '../../common/field_names/infra_metrics';
 import { ConfigSchema } from '../plugin';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import { SLO_BURN_RATE_RULE_ID } from '../../common/constants';
@@ -25,12 +26,12 @@ export const registerObservabilityRuleTypes = (
     format: ({ fields }) => {
       return {
         reason: fields[ALERT_REASON] ?? '-',
-        link: '/app/observability/slos',
+        link: `/app/observability/slos/${fields[SLO_ID_FIELD]}`,
       };
     },
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return '/unknown/docs';
+      return 'https://www.elastic.co/guide/en/observability/current/slo-burn-rate-alert.html';
     },
     ruleParamsExpression: lazy(() => import('../components/app/burn_rate_rule_editor')),
     validate: validateBurnRateRule,

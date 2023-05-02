@@ -138,11 +138,11 @@ describe('ruleType', () => {
       threshold: [0],
     };
 
-    expect(ruleType.validate?.params?.validate(params)).toBeTruthy();
+    expect(ruleType.validate.params.validate(params)).toBeTruthy();
   });
 
   it('validator fails with invalid params', async () => {
-    const paramsSchema = ruleType.validate?.params;
+    const paramsSchema = ruleType.validate.params;
     if (!paramsSchema) throw new Error('params validator not set');
 
     const params: Partial<Writable<Params>> = {
@@ -203,10 +203,10 @@ describe('ruleType', () => {
         tags: [],
         consumer: '',
         producer: '',
+        revision: 0,
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
-        revision: 0,
         schedule: {
           interval: '1h',
         },
@@ -270,10 +270,10 @@ describe('ruleType', () => {
         tags: [],
         consumer: '',
         producer: '',
+        revision: 0,
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
-        revision: 0,
         schedule: {
           interval: '1h',
         },
@@ -337,10 +337,10 @@ describe('ruleType', () => {
         tags: [],
         consumer: '',
         producer: '',
+        revision: 0,
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
-        revision: 0,
         schedule: {
           interval: '1h',
         },
@@ -403,10 +403,10 @@ describe('ruleType', () => {
         tags: [],
         consumer: '',
         producer: '',
+        revision: 0,
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
-        revision: 0,
         schedule: {
           interval: '1h',
         },

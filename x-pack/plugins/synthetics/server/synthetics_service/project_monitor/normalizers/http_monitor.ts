@@ -7,11 +7,11 @@
 import { get } from 'lodash';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import {
+  CodeEditorMode,
   ConfigKey,
   DataStream,
   FormMonitorType,
   HTTPFields,
-  Mode,
   TLSVersion,
 } from '../../../../common/runtime_types/monitor_management';
 import {
@@ -70,6 +70,11 @@ export const getNormalizeHTTPFields = ({
       (yamlConfig as Record<keyof HTTPFields, unknown>)[ConfigKey.REQUEST_BODY_CHECK] as string,
       defaultFields[ConfigKey.REQUEST_BODY_CHECK]
     ),
+    [ConfigKey.RESPONSE_BODY_MAX_BYTES]: `${get(
+      yamlConfig,
+      ConfigKey.RESPONSE_BODY_MAX_BYTES,
+      defaultFields[ConfigKey.RESPONSE_BODY_MAX_BYTES]
+    )}`,
     [ConfigKey.TLS_VERSION]: get(monitor, ConfigKey.TLS_VERSION)
       ? (getOptionalListField(get(monitor, ConfigKey.TLS_VERSION)) as TLSVersion[])
       : defaultFields[ConfigKey.TLS_VERSION],
@@ -94,14 +99,14 @@ export const getRequestBodyField = (
   defaultValue: HTTPFields[ConfigKey.REQUEST_BODY_CHECK]
 ): HTTPFields[ConfigKey.REQUEST_BODY_CHECK] => {
   let parsedValue: string;
-  let type: Mode;
+  let type: CodeEditorMode;
 
   if (typeof value === 'object') {
     parsedValue = JSON.stringify(value);
-    type = Mode.JSON;
+    type = CodeEditorMode.JSON;
   } else {
     parsedValue = value;
-    type = Mode.PLAINTEXT;
+    type = CodeEditorMode.PLAINTEXT;
   }
   return {
     type,

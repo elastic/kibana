@@ -29,7 +29,7 @@ export interface MaintenanceWindowAggregationResult {
 
 export interface ActiveParams {
   start?: string;
-  interval: string;
+  interval?: string;
 }
 
 export async function getActiveMaintenanceWindows(
@@ -40,7 +40,7 @@ export async function getActiveMaintenanceWindows(
   const { start, interval } = params;
 
   const startDate = start ? new Date(start) : new Date();
-  const duration = parseDuration(interval);
+  const duration = interval ? parseDuration(interval) : 0;
   const endDate = moment.utc(startDate).add(duration, 'ms').toDate();
 
   const startDateISO = startDate.toISOString();

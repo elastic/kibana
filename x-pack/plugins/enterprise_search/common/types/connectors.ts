@@ -5,18 +5,45 @@
  * 2.0.
  */
 
-export interface SelectOptions {
+export interface SelectOption {
   label: string;
   value: string;
 }
 
+export interface Dependency {
+  field: string;
+  value: string | number | boolean | null;
+}
+
+export type DependencyLookup = Record<string, string | number | boolean | null>;
+
+export enum DisplayType {
+  TEXTBOX = 'textbox',
+  TEXTAREA = 'textarea',
+  NUMERIC = 'numeric',
+  TOGGLE = 'toggle',
+  DROPDOWN = 'dropdown',
+}
+
+export enum FieldType {
+  STRING = 'str',
+  INTEGER = 'int',
+  LIST = 'list',
+  BOOLEAN = 'bool',
+}
+
 export interface ConnectorConfigProperties {
-  display: string;
+  default_value: string | number | boolean | null;
+  depends_on: Dependency[];
+  display: DisplayType;
   label: string;
-  options: SelectOptions[];
+  options: SelectOption[];
   order?: number | null;
   required: boolean;
   sensitive: boolean;
+  tooltip: string;
+  type: FieldType;
+  ui_restrictions: string[];
   value: string | number | boolean | null;
 }
 

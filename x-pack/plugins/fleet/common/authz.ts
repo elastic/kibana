@@ -7,7 +7,15 @@
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
 
+import { TRANSFORM_PLUGIN_ID } from './constants/plugin';
+
 import { ENDPOINT_PRIVILEGES } from './constants';
+
+export type TransformPrivilege =
+  | 'canGetTransform'
+  | 'canCreateTransform'
+  | 'canDeleteTransform'
+  | 'canStartStopTransform';
 
 export interface FleetAuthz {
   fleet: {
@@ -99,16 +107,28 @@ export function calculatePackagePrivilegesFromCapabilities(
       return {
         ...acc,
         [privilege]: {
-          executePackageAction: capabilities.siem[privilegeName] || false,
+          executePackageAction: (capabilities.siem && capabilities.siem[privilegeName]) || false,
         },
       };
     },
     {}
   );
 
+  const transformActions = Object.keys(capabilities.transform).reduce((acc, privilegeName) => {
+    return {
+      ...acc,
+      [privilegeName]: {
+        executePackageAction: capabilities.transform[privilegeName] || false,
+      },
+    };
+  }, {});
+
   return {
     endpoint: {
       actions: endpointActions,
+    },
+    transform: {
+      actions: transformActions,
     },
   };
 }
@@ -158,9 +178,40 @@ export function calculatePackagePrivilegesFromKibanaPrivileges(
     {}
   );
 
+  const hasTransformAdmin = getAuthorizationFromPrivileges(
+    kibanaPrivileges,
+    `${TRANSFORM_PLUGIN_ID}-`,
+    `admin`
+  );
+  const transformActions: {
+    [key in TransformPrivilege]: {
+      executePackageAction: boolean;
+    };
+  } = {
+    canCreateTransform: {
+      executePackageAction: hasTransformAdmin,
+    },
+    canDeleteTransform: {
+      executePackageAction: hasTransformAdmin,
+    },
+    canStartStopTransform: {
+      executePackageAction: hasTransformAdmin,
+    },
+    canGetTransform: {
+      executePackageAction: getAuthorizationFromPrivileges(
+        kibanaPrivileges,
+        `${TRANSFORM_PLUGIN_ID}-`,
+        `read`
+      ),
+    },
+  };
+
   return {
     endpoint: {
       actions: endpointActions,
+    },
+    transform: {
+      actions: transformActions,
     },
   };
 }

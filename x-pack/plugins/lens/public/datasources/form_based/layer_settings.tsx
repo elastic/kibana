@@ -21,10 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TooltipWrapper } from '@kbn/visualization-ui-components/public';
 import type { DatasourceLayerSettingsProps } from '../../types';
 import type { FormBasedPrivateState } from './types';
 import { isSamplingValueEnabled } from './utils';
-import { TooltipWrapper } from '../../shared_components';
 
 const samplingValues = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1];
 interface SamplingSliderProps {
@@ -109,101 +109,86 @@ export function LayerSettingsPanel({
   setState,
   layerId,
 }: DatasourceLayerSettingsProps<FormBasedPrivateState>) {
-  const { euiTheme } = useEuiTheme();
   const isSamplingValueDisabled = !isSamplingValueEnabled(state.layers[layerId]);
   const currentValue = isSamplingValueDisabled
     ? samplingValues[samplingValues.length - 1]
     : state.layers[layerId].sampling;
   return (
-    <div id={layerId}>
-      <EuiText
-        size="s"
-        css={css`
-          margin-bottom: ${euiTheme.size.base};
-        `}
-      >
-        <h4>
-          {i18n.translate('xpack.lens.indexPattern.layerSettings.headingData', {
-            defaultMessage: 'Data',
-          })}
-        </h4>
-      </EuiText>
-      <EuiFormRow
-        display="rowCompressed"
-        data-test-subj="lns-indexPattern-random-sampling-row"
-        fullWidth
-        helpText={
-          <>
-            <EuiSpacer size="s" />
-            <p>
-              <FormattedMessage
-                id="xpack.lens.indexPattern.randomSampling.help"
-                defaultMessage="Lower sampling percentages increases the performance, but lowers the accuracy. Lower sampling percentages are best for large datasets. {link}"
-                values={{
-                  link: (
-                    <EuiLink
-                      href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-random-sampler-aggregation.html"
-                      target="_blank"
-                      external
-                    >
-                      <FormattedMessage
-                        id="xpack.lens.indexPattern.randomSampling.learnMore"
-                        defaultMessage="View documentation"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          </>
-        }
-        label={
-          <>
-            {i18n.translate('xpack.lens.indexPattern.randomSampling.label', {
-              defaultMessage: 'Sampling',
-            })}{' '}
-            <EuiToolTip
-              content={i18n.translate('xpack.lens.indexPattern.randomSampling.experimentalLabel', {
+    <EuiFormRow
+      display="rowCompressed"
+      data-test-subj="lns-indexPattern-random-sampling-row"
+      fullWidth
+      helpText={
+        <>
+          <EuiSpacer size="s" />
+          <p>
+            <FormattedMessage
+              id="xpack.lens.indexPattern.randomSampling.help"
+              defaultMessage="Lower sampling percentages increases the performance, but lowers the accuracy. Lower sampling percentages are best for large datasets. {link}"
+              values={{
+                link: (
+                  <EuiLink
+                    href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-random-sampler-aggregation.html"
+                    target="_blank"
+                    external
+                  >
+                    <FormattedMessage
+                      id="xpack.lens.indexPattern.randomSampling.learnMore"
+                      defaultMessage="View documentation"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </>
+      }
+      label={
+        <>
+          {i18n.translate('xpack.lens.indexPattern.randomSampling.label', {
+            defaultMessage: 'Sampling',
+          })}{' '}
+          <EuiToolTip
+            content={i18n.translate('xpack.lens.indexPattern.randomSampling.experimentalLabel', {
+              defaultMessage: 'Technical preview',
+            })}
+          >
+            <EuiBetaBadge
+              css={css`
+                vertical-align: middle;
+              `}
+              iconType="beaker"
+              label={i18n.translate('xpack.lens.indexPattern.randomSampling.experimentalLabel', {
                 defaultMessage: 'Technical preview',
               })}
-            >
-              <EuiBetaBadge
-                css={css`
-                  vertical-align: middle;
-                `}
-                iconType="beaker"
-                label={i18n.translate('xpack.lens.indexPattern.randomSampling.experimentalLabel', {
-                  defaultMessage: 'Technical preview',
-                })}
-                size="s"
-              />
-            </EuiToolTip>
-          </>
-        }
-      >
-        <SamplingSlider
-          disabled={isSamplingValueDisabled}
-          disabledReason={i18n.translate('xpack.lens.indexPattern.randomSampling.disabledMessage', {
-            defaultMessage:
-              'In order to select a reduced sampling percentage, you must remove any maximum or minimum functions applied on this layer.',
-          })}
-          values={samplingValues}
-          currentValue={currentValue}
-          data-test-subj="lns-indexPattern-random-sampling-slider"
-          onChange={(newSamplingValue) => {
-            setState({
-              ...state,
-              layers: {
-                ...state.layers,
-                [layerId]: {
-                  ...state.layers[layerId],
-                  sampling: newSamplingValue,
-                },
+              size="s"
+            />
+          </EuiToolTip>
+        </>
+      }
+    >
+      <SamplingSlider
+        disabled={isSamplingValueDisabled}
+        disabledReason={i18n.translate('xpack.lens.indexPattern.randomSampling.disabledMessage', {
+          defaultMessage:
+            'In order to select a reduced sampling percentage, you must remove any maximum or minimum functions applied on this layer.',
+        })}
+        values={samplingValues}
+        currentValue={currentValue}
+        data-test-subj="lns-indexPattern-random-sampling-slider"
+        onChange={(newSamplingValue) => {
+          setState({
+            ...state,
+            layers: {
+              ...state.layers,
+              [layerId]: {
+                ...state.layers[layerId],
+                sampling: newSamplingValue,
               },
-            });
-          }}
-        />
-      </EuiFormRow>
-    </div>
+            },
+          });
+        }}
+      />
+    </EuiFormRow>
   );
 }
