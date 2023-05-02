@@ -13,7 +13,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { getAncestorLinksInfo } from '../../../links';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useGetSecuritySolutionLinkProps } from '../../links';
-import { useAppNavLinks } from '../nav_links';
+import { useNavLinks } from '../../../links/nav_links';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
 import { track } from '../../../lib/telemetry';
@@ -30,7 +30,7 @@ const isGetStartedNavItem = (id: SecurityPageName) => id === SecurityPageName.la
  * Returns the formatted `items` and `footerItems` to be rendered in the navigation
  */
 const useSolutionSideNavItems = () => {
-  const navLinks = useAppNavLinks();
+  const navLinks = useNavLinks();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
 
   const sideNavItems = useMemo(() => {
