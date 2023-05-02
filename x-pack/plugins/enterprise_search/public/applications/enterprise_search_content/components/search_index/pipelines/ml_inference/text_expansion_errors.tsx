@@ -13,17 +13,21 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { HttpError } from '../../../../../../../common/types/api';
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 import { HttpLogic } from '../../../../../shared/http';
-import { HttpError } from '../../../../../../../common/types/api';
 
 import { ML_NOTIFICATIONS_PATH } from '../../../../routes';
 
 export const TextExpansionErrors = ({
   createError,
   fetchError,
-  startError
-}: { createError: HttpError | undefined, fetchError: HttpError | undefined, startError: HttpError  | undefined }) => {
+  startError,
+}: {
+  createError: HttpError | undefined;
+  fetchError: HttpError | undefined;
+  startError: HttpError | undefined;
+}) => {
   const { http } = useValues(HttpLogic);
 
   // Extract the topmost error in precedence order
