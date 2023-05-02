@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { IRouter, KibanaRequest, CustomRequestHandlerContext } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { KueryNode } from '@kbn/es-query';
 
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
@@ -84,22 +84,3 @@ export interface IEventLogger {
   startTiming(event: IEvent, startTime?: Date): void;
   stopTiming(event: IEvent): void;
 }
-
-/**
- * @internal
- */
-export interface EventLogApiRequestHandlerContext {
-  getEventLogClient(): IEventLogClient;
-}
-
-/**
- * @internal
- */
-export type EventLogRequestHandlerContext = CustomRequestHandlerContext<{
-  eventLog: EventLogApiRequestHandlerContext;
-}>;
-
-/**
- * @internal
- */
-export type EventLogRouter = IRouter<EventLogRequestHandlerContext>;

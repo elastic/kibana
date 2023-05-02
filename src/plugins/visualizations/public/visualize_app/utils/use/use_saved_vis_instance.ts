@@ -17,6 +17,7 @@ import { SavedVisInstance, VisualizeServices, IEditorController } from '../../ty
 import { VisualizeConstants } from '../../../../common/constants';
 import { getTypes } from '../../../services';
 import { redirectToSavedObjectPage } from '../utils';
+import type { VisualizeInput } from '../../..';
 
 /**
  * This effect is responsible for instantiating a saved vis or creating a new one
@@ -27,13 +28,13 @@ export const useSavedVisInstance = (
   eventEmitter: EventEmitter,
   isChromeVisible: boolean | undefined,
   originatingApp: string | undefined,
-  visualizationIdFromUrl: string | undefined
+  visualizationIdFromUrl: string | undefined,
+  embeddableInput?: VisualizeInput
 ) => {
   const [state, setState] = useState<{
     savedVisInstance?: SavedVisInstance;
     visEditorController?: IEditorController;
   }>({});
-
   const visEditorRef = useRef<HTMLDivElement | null>(null);
   const visId = useRef('');
 
@@ -82,6 +83,9 @@ export const useSavedVisInstance = (
           savedVisInstance = await getVisualizationInstance(services, visualizationIdFromUrl);
         }
 
+        if (embeddableInput && embeddableInput.timeRange) {
+          savedVisInstance.panelTimeRange = embeddableInput.timeRange;
+        }
         const { embeddableHandler, savedVis, vis } = savedVisInstance;
 
         const originatingAppName = originatingApp
@@ -166,6 +170,7 @@ export const useSavedVisInstance = (
     visualizationIdFromUrl,
     state.savedVisInstance,
     state.visEditorController,
+    embeddableInput,
   ]);
 
   useEffect(() => {
