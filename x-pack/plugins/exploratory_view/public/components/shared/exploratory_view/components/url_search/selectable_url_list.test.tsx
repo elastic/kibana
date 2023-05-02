@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import * as fetcherHook from '@kbn/observability-shared-plugin/public';
+import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 
 import { SelectableUrlList } from './selectable_url_list';
 import { I18LABELS } from './translations';

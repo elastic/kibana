@@ -13,7 +13,7 @@ import * as obsvDataViews from '../../../utils/observability_data_views/observab
 import * as pluginHook from '../../../hooks/use_plugin_context';
 import { createStubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { noCasesPermissions as mockUseGetCasesPermissions } from '@kbn/observability-shared-plugin/public/utils/cases_permissions';
-import * as obsHooks from '@kbn/observability-shared-plugin/public';
+import * as obsHooks from '@kbn/observability-shared-plugin/public/hooks/use_get_user_cases_permissions';
 
 jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
   appMountParameters: {
