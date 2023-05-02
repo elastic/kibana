@@ -80,6 +80,7 @@ export function TermJoinExpression(props: Props) {
           value={expressionValue}
         />
       }
+      repositionOnScroll={true}
     >
       <TermJoinPopoverContent 
         leftSourceName={props.leftSourceName}

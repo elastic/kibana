@@ -116,6 +116,7 @@ export class MetricsExpression extends Component<Props, State> {
             value={metricExpressions.length > 0 ? metricExpressions.join(', ') : AGG_TYPE.COUNT}
           />
         }
+        repositionOnScroll={true}
       >
         <div style={{ width: 400 }}>
           <EuiPopoverTitle>

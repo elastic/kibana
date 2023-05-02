@@ -18,7 +18,7 @@ import {
   JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';
 import type { JoinField } from '../../join_editor';
-import { TermJoinPopoverContent } from './term_join_popover_content';
+import { SpatialJoinPopoverContent } from './spatial_join_popover_content';
 
 interface Props {
   sourceDescriptor: Partial<ESDistanceSourceDescriptor>;
@@ -61,8 +61,12 @@ export function SpatialJoinExpression(props: Props) {
           value={expressionValue}
         />
       }
+      repositionOnScroll={true}
     >
-      <div></div>
+      <SpatialJoinPopoverContent
+        sourceDescriptor={props.sourceDescriptor}
+        onSourceDescriptorChange={props.onSourceDescriptorChange}
+      />
     </EuiPopover>
   );
 }
