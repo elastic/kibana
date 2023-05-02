@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useReducer,
+} from 'react';
 import { ActionType } from './actions';
 import { reducer, State } from './reducer';
 import type { FlyoutPanel } from './types';
@@ -59,18 +67,43 @@ export const ExpandableFlyoutContext = createContext<ExpandableFlyoutContext | u
   undefined
 );
 
+export type ExpandableFlyoutApi = Pick<ExpandableFlyoutContext, 'openFlyout'> & {
+  getState: () => State;
+};
+
 export interface ExpandableFlyoutProviderProps {
   /**
    * React children
    */
   children: React.ReactNode;
+  /**
+   * Triggered whenever flyout state changes. You can use it to store it's state somewhere for instance.
+   */
+  onChanges?: (state: State) => void;
+  /**
+   * Triggered whenever flyout is closed. This is independent from the onChanges above.
+   */
+  onClosePanels?: () => void;
 }
 
 /**
  * Wrap your plugin with this context for the ExpandableFlyout React component.
  */
-export const ExpandableFlyoutProvider = ({ children }: ExpandableFlyoutProviderProps) => {
+export const ExpandableFlyoutProvider = React.forwardRef<
+  ExpandableFlyoutApi,
+  ExpandableFlyoutProviderProps
+>(({ children, onChanges = () => {}, onClosePanels = () => {} }, ref) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    const closed = !state.right;
+    if (closed) {
+      // manual close is singalled via separate callback
+      return;
+    }
+
+    onChanges(state);
+  }, [state, onChanges]);
 
   const openPanels = useCallback(
     ({
@@ -87,40 +120,45 @@ export const ExpandableFlyoutProvider = ({ children }: ExpandableFlyoutProviderP
 
   const openRightPanel = useCallback(
     (panel: FlyoutPanel) => dispatch({ type: ActionType.openRightPanel, payload: panel }),
-    [dispatch]
+    []
   );
 
   const openLeftPanel = useCallback(
     (panel: FlyoutPanel) => dispatch({ type: ActionType.openLeftPanel, payload: panel }),
-    [dispatch]
+    []
   );
 
   const openPreviewPanel = useCallback(
     (panel: FlyoutPanel) => dispatch({ type: ActionType.openPreviewPanel, payload: panel }),
-    [dispatch]
+    []
   );
 
-  const closeRightPanel = useCallback(
-    () => dispatch({ type: ActionType.closeRightPanel }),
-    [dispatch]
-  );
+  const closeRightPanel = useCallback(() => dispatch({ type: ActionType.closeRightPanel }), []);
 
-  const closeLeftPanel = useCallback(
-    () => dispatch({ type: ActionType.closeLeftPanel }),
-    [dispatch]
-  );
+  const closeLeftPanel = useCallback(() => dispatch({ type: ActionType.closeLeftPanel }), []);
 
-  const closePreviewPanel = useCallback(
-    () => dispatch({ type: ActionType.closePreviewPanel }),
-    [dispatch]
-  );
+  const closePreviewPanel = useCallback(() => dispatch({ type: ActionType.closePreviewPanel }), []);
 
   const previousPreviewPanel = useCallback(
     () => dispatch({ type: ActionType.previousPreviewPanel }),
-    [dispatch]
+    []
   );
 
-  const closePanels = useCallback(() => dispatch({ type: ActionType.closeFlyout }), [dispatch]);
+  const closePanels = useCallback(() => {
+    dispatch({ type: ActionType.closeFlyout });
+    onClosePanels();
+  }, [onClosePanels]);
+
+  useImperativeHandle(
+    ref,
+    () => {
+      return {
+        openFlyout: openPanels,
+        getState: () => state,
+      };
+    },
+    [openPanels, state]
+  );
 
   const contextValue = useMemo(
     () => ({
@@ -154,7 +192,7 @@ export const ExpandableFlyoutProvider = ({ children }: ExpandableFlyoutProviderP
       {children}
     </ExpandableFlyoutContext.Provider>
   );
-};
+});
 
 /**
  * Retrieve context's properties

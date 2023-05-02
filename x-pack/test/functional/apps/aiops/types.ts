@@ -7,6 +7,15 @@
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+interface TestDataTableActionLogPatternAnalysis {
+  type: 'LogPatternAnalysis';
+  tableRowId: string;
+  expected: {
+    queryBar: string;
+    totalDocCount: string;
+  };
+}
+
 interface TestDataExpectedWithSampleProbability {
   totalDocCountFormatted: string;
   sampleProbabilityFormatted: string;
@@ -40,11 +49,12 @@ export interface TestData {
   sourceIndexOrSavedSearch: string;
   rowsPerPage?: 10 | 25 | 50;
   brushBaselineTargetTimestamp?: number;
-  brushDeviationTargetTimestamp: number;
+  brushDeviationTargetTimestamp?: number;
   brushIntervalFactor: number;
   chartClickCoordinates: [number, number];
   fieldSelectorSearch: string;
   fieldSelectorApplyAvailable: boolean;
   query?: string;
+  action?: TestDataTableActionLogPatternAnalysis;
   expected: TestDataExpectedWithSampleProbability | TestDataExpectedWithoutSampleProbability;
 }

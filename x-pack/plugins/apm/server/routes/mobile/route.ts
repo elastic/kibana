@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
@@ -26,6 +26,14 @@ import {
   getMobileTermsByField,
   MobileTermsByFieldResponse,
 } from './get_mobile_terms_by_field';
+import {
+  getMobileMainStatisticsByField,
+  MobileMainStatisticsResponse,
+} from './get_mobile_main_statistics_by_field';
+import {
+  getMobileDetailedStatisticsByFieldPeriods,
+  MobileDetailedStatisticsResponse,
+} from './get_mobile_detailed_statistics_by_field';
 import {
   getMobileMostUsedCharts,
   MobileMostUsedChartResponse,
@@ -329,6 +337,84 @@ const mobileTermsByFieldRoute = createApmServerRoute({
   },
 });
 
+const mobileMainStatisticsByField = createApmServerRoute({
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/main_statistics',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      environmentRt,
+      t.type({
+        field: t.string,
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (resources): Promise<MobileMainStatisticsResponse> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { kuery, environment, start, end, field } = params.query;
+
+    return await getMobileMainStatisticsByField({
+      kuery,
+      environment,
+      start,
+      end,
+      serviceName,
+      apmEventClient,
+      field,
+    });
+  },
+});
+
+const mobileDetailedStatisticsByField = createApmServerRoute({
+  endpoint:
+    'GET /internal/apm/mobile-services/{serviceName}/detailed_statistics',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      offsetRt,
+      environmentRt,
+      t.type({
+        field: t.string,
+        fieldValues: jsonRt.pipe(t.array(t.string)),
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (resources): Promise<MobileDetailedStatisticsResponse> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { kuery, environment, start, end, field, offset, fieldValues } =
+      params.query;
+
+    return await getMobileDetailedStatisticsByFieldPeriods({
+      kuery,
+      environment,
+      start,
+      end,
+      serviceName,
+      apmEventClient,
+      field,
+      fieldValues,
+      offset,
+    });
+  },
+});
+
 export const mobileRouteRepository = {
   ...mobileFiltersRoute,
   ...mobileChartsRoute,
@@ -337,4 +423,6 @@ export const mobileRouteRepository = {
   ...mobileStatsRoute,
   ...mobileLocationStatsRoute,
   ...mobileTermsByFieldRoute,
+  ...mobileMainStatisticsByField,
+  ...mobileDetailedStatisticsByField,
 };

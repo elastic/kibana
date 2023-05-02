@@ -18,7 +18,7 @@ import {
   EuiTitle,
   SearchFilterConfig,
 } from '@elastic/eui';
-
+import { groupBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -27,15 +27,27 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { BUILT_IN_MODEL_TYPE, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
+import {
+  BUILT_IN_MODEL_TYPE,
+  BUILT_IN_MODEL_TAG,
+  DEPLOYMENT_STATE,
+} from '@kbn/ml-trained-models-utils';
+import { isDefined } from '@kbn/ml-is-defined';
+import {
+  CURATED_MODEL_DEFINITIONS,
+  CURATED_MODEL_TAG,
+  CURATED_MODEL_TYPE,
+  MODEL_STATE,
+} from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../components/stats_bar';
 import { useMlKibana } from '../contexts/kibana';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
-import {
+import type {
   ModelPipelines,
   TrainedModelConfigResponse,
+  TrainedModelDeploymentStatsResponse,
   TrainedModelStat,
 } from '../../../common/types/trained_models';
 import { DeleteModelsModal } from './delete_models_modal';
@@ -49,12 +61,15 @@ import { useRefresh } from '../routing/use_refresh';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { TestTrainedModelFlyout } from './test_models';
 
-type Stats = Omit<TrainedModelStat, 'model_id'>;
+type Stats = Omit<TrainedModelStat, 'model_id' | 'deployment_stats'>;
 
 export type ModelItem = TrainedModelConfigResponse & {
   type?: string[];
-  stats?: Stats;
+  stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
   pipelines?: ModelPipelines['pipelines'] | null;
+  deployment_ids: string[];
+  putModelConfig?: object;
+  state: string;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -120,11 +135,40 @@ export const ModelsList: FC<Props> = ({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
-  const [showTestFlyout, setShowTestFlyout] = useState<string | null>(null);
+  const [modelToTest, setModelToTest] = useState<ModelItem | null>(null);
 
   const isBuiltInModel = useCallback(
     (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG),
     []
+  );
+
+  const isCuratedModel = useCallback(
+    (item: ModelItem) => item.tags.includes(CURATED_MODEL_TAG),
+    []
+  );
+
+  /**
+   * Checks if the model download complete.
+   */
+  const isDownloadComplete = useCallback(
+    async (modelId: string): Promise<boolean> => {
+      try {
+        const response = await trainedModelsApiService.getTrainedModels(modelId, {
+          include: 'definition_status',
+        });
+        // @ts-ignore
+        return !!response[0]?.fully_defined;
+      } catch (error) {
+        displayErrorToast(
+          error,
+          i18n.translate('xpack.ml.trainedModels.modelsList.downloadStatusCheckErrorMessage', {
+            defaultMessage: 'Failed to check download status',
+          })
+        );
+      }
+      return false;
+    },
+    [trainedModelsApiService, displayErrorToast]
   );
 
   /**
@@ -150,11 +194,12 @@ export const ModelsList: FC<Props> = ({
                 type: [
                   model.model_type,
                   ...Object.keys(model.inference_config),
-                  ...(isBuiltInModel(model) ? [BUILT_IN_MODEL_TYPE] : []),
+                  ...(isBuiltInModel(model as ModelItem) ? [BUILT_IN_MODEL_TYPE] : []),
+                  ...(isCuratedModel(model as ModelItem) ? [CURATED_MODEL_TYPE] : []),
                 ],
               }
             : {}),
-        };
+        } as ModelItem;
         newItems.push(tableItem);
 
         if (itemIdToExpandedRowMap[model.model_id]) {
@@ -162,7 +207,8 @@ export const ModelsList: FC<Props> = ({
         }
       }
 
-      // Need to fetch state for all models to enable/disable actions
+      // Need to fetch stats for all models to enable/disable actions
+      // TODO combine fetching models definitions and stats into a single function
       await fetchModelsStats(newItems);
 
       setItems(newItems);
@@ -219,13 +265,36 @@ export const ModelsList: FC<Props> = ({
         const { trained_model_stats: modelsStatsResponse } =
           await trainedModelsApiService.getTrainedModelStats(models.map((m) => m.model_id));
 
-        for (const { model_id: id, ...stats } of modelsStatsResponse) {
-          const model = models.find((m) => m.model_id === id);
-          if (model) {
-            model.stats = {
-              ...(model.stats ?? {}),
-              ...stats,
-            };
+        const groupByModelId = groupBy(modelsStatsResponse, 'model_id');
+
+        models.forEach((model) => {
+          const modelStats = groupByModelId[model.model_id];
+          model.stats = {
+            ...(model.stats ?? {}),
+            ...modelStats[0],
+            deployment_stats: modelStats.map((d) => d.deployment_stats).filter(isDefined),
+          };
+          model.deployment_ids = modelStats
+            .map((v) => v.deployment_stats?.deployment_id)
+            .filter(isDefined);
+          model.state = model.stats.deployment_stats?.some(
+            (v) => v.state === DEPLOYMENT_STATE.STARTED
+          )
+            ? DEPLOYMENT_STATE.STARTED
+            : '';
+        });
+
+        const curatedModels = models.filter((model) =>
+          CURATED_MODEL_DEFINITIONS.hasOwnProperty(model.model_id)
+        );
+        if (curatedModels.length > 0) {
+          for (const model of curatedModels) {
+            if (model.state === MODEL_STATE.STARTED) {
+              // no need to check for the download status if the model has been deployed
+              continue;
+            }
+            const isDownloaded = await isDownloadComplete(model.model_id);
+            model.state = isDownloaded ? MODEL_STATE.DOWNLOADED : MODEL_STATE.DOWNLOADING;
           }
         }
       }
@@ -263,15 +332,23 @@ export const ModelsList: FC<Props> = ({
       }));
   }, [items]);
 
+  const modelAndDeploymentIds = useMemo(
+    () => [
+      ...new Set([...items.flatMap((v) => v.deployment_ids), ...items.map((i) => i.model_id)]),
+    ],
+    [items]
+  );
+
   /**
    * Table actions
    */
   const actions = useModelActions({
     isLoading,
     fetchModels: fetchModelsData,
-    onTestAction: setShowTestFlyout,
+    onTestAction: setModelToTest,
     onModelsDeleteRequest: setModelIdsToDelete,
     onLoading: setIsLoading,
+    modelAndDeploymentIds,
   });
 
   const toggleDetails = async (item: ModelItem) => {
@@ -290,21 +367,26 @@ export const ModelsList: FC<Props> = ({
       align: 'left',
       width: '40px',
       isExpander: true,
-      render: (item: ModelItem) => (
-        <EuiButtonIcon
-          onClick={toggleDetails.bind(null, item)}
-          aria-label={
-            itemIdToExpandedRowMap[item.model_id]
-              ? i18n.translate('xpack.ml.trainedModels.modelsList.collapseRow', {
-                  defaultMessage: 'Collapse',
-                })
-              : i18n.translate('xpack.ml.trainedModels.modelsList.expandRow', {
-                  defaultMessage: 'Expand',
-                })
-          }
-          iconType={itemIdToExpandedRowMap[item.model_id] ? 'arrowDown' : 'arrowRight'}
-        />
-      ),
+      render: (item: ModelItem) => {
+        if (!item.stats) {
+          return null;
+        }
+        return (
+          <EuiButtonIcon
+            onClick={toggleDetails.bind(null, item)}
+            aria-label={
+              itemIdToExpandedRowMap[item.model_id]
+                ? i18n.translate('xpack.ml.trainedModels.modelsList.collapseRow', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('xpack.ml.trainedModels.modelsList.expandRow', {
+                    defaultMessage: 'Expand',
+                  })
+            }
+            iconType={itemIdToExpandedRowMap[item.model_id] ? 'arrowDown' : 'arrowRight'}
+          />
+        );
+      },
       'data-test-subj': 'mlModelsTableRowDetailsToggle',
     },
     {
@@ -348,14 +430,13 @@ export const ModelsList: FC<Props> = ({
       'data-test-subj': 'mlModelsTableColumnType',
     },
     {
+      field: 'state',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
         defaultMessage: 'State',
       }),
-      sortable: (item) => item.stats?.deployment_stats?.state,
       align: 'left',
-      truncateText: true,
-      render: (model: ModelItem) => {
-        const state = model.stats?.deployment_stats?.state;
+      truncateText: false,
+      render: (state: string) => {
         return state ? <EuiBadge color="hollow">{state}</EuiBadge> : null;
       },
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
@@ -450,7 +531,10 @@ export const ModelsList: FC<Props> = ({
 
           return '';
         },
-        selectable: (item) => !isPopulatedObject(item.pipelines) && !isBuiltInModel(item),
+        selectable: (item) =>
+          !isPopulatedObject(item.pipelines) &&
+          !isBuiltInModel(item) &&
+          !(isCuratedModel(item) && !item.state),
         onSelectionChange: (selectedItems) => {
           setSelectedModels(selectedItems);
         },
@@ -487,6 +571,22 @@ export const ModelsList: FC<Props> = ({
       : {}),
   };
 
+  const resultItems = useMemo<ModelItem[]>(() => {
+    const idSet = new Set(items.map((i) => i.model_id));
+    const notDownloaded: ModelItem[] = Object.entries(CURATED_MODEL_DEFINITIONS)
+      .filter(([modelId]) => !idSet.has(modelId))
+      .map(([modelId, modelDefinition]) => {
+        return {
+          model_id: modelId,
+          type: [CURATED_MODEL_TYPE],
+          tags: [CURATED_MODEL_TAG],
+          putModelConfig: modelDefinition.config,
+          description: modelDefinition.description,
+        } as ModelItem;
+      });
+    return [...items, ...notDownloaded];
+  }, [items]);
+
   return (
     <>
       <SavedObjectsWarning onCloseFlyout={fetchModelsData} forceRefresh={isLoading} />
@@ -508,7 +608,7 @@ export const ModelsList: FC<Props> = ({
           isExpandable={true}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isSelectable={false}
-          items={items}
+          items={resultItems}
           itemId={ModelsTableToConfigMapping.id}
           loading={isLoading}
           search={search}
@@ -533,11 +633,8 @@ export const ModelsList: FC<Props> = ({
           modelIds={modelIdsToDelete}
         />
       )}
-      {showTestFlyout === null ? null : (
-        <TestTrainedModelFlyout
-          modelId={showTestFlyout}
-          onClose={setShowTestFlyout.bind(null, null)}
-        />
+      {modelToTest === null ? null : (
+        <TestTrainedModelFlyout model={modelToTest} onClose={setModelToTest.bind(null, null)} />
       )}
     </>
   );

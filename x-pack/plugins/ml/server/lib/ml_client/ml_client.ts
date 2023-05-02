@@ -491,7 +491,6 @@ export function getMlClient(
       return mlClient.startTrainedModelDeployment(...p);
     },
     async updateTrainedModelDeployment(...p: Parameters<MlClient['updateTrainedModelDeployment']>) {
-      await modelIdsCheck(p);
       const { model_id: modelId, number_of_allocations: numberOfAllocations } = p[0];
       return client.asInternalUser.transport.request({
         method: 'POST',
@@ -500,11 +499,9 @@ export function getMlClient(
       });
     },
     async stopTrainedModelDeployment(...p: Parameters<MlClient['stopTrainedModelDeployment']>) {
-      await modelIdsCheck(p);
       return mlClient.stopTrainedModelDeployment(...p);
     },
     async inferTrainedModel(...p: Parameters<MlClient['inferTrainedModel']>) {
-      await modelIdsCheck(p);
       // Temporary workaround for the incorrect inferTrainedModelDeployment function in the esclient
       if (
         // @ts-expect-error TS complains it's always false
