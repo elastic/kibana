@@ -6,50 +6,50 @@
  */
 
 import {
-  ML_DETECTUR_RULE_ACTION,
-  ML_DETECTUR_RULE_APPLIES_TO,
-  ML_DETECTUR_RULE_OPERATOR,
-  ML_DETECTUR_RULE_FILTER_TYPE,
+  ML_DETECTOR_RULE_ACTION,
+  ML_DETECTOR_RULE_APPLIES_TO,
+  ML_DETECTOR_RULE_OPERATOR,
+  ML_DETECTOR_RULE_FILTER_TYPE,
 } from '@kbn/ml-anomaly-utils';
 
 import { isValidRule, buildRuleDescription, getAppliesToValueFromAnomaly } from './utils';
 
 describe('ML - rule editor utils', () => {
   const ruleWithCondition = {
-    actions: [ML_DETECTUR_RULE_ACTION.SKIP_RESULT],
+    actions: [ML_DETECTOR_RULE_ACTION.SKIP_RESULT],
     conditions: [
       {
-        applies_to: ML_DETECTUR_RULE_APPLIES_TO.ACTUAL,
-        operator: ML_DETECTUR_RULE_OPERATOR.GREATER_THAN,
+        applies_to: ML_DETECTOR_RULE_APPLIES_TO.ACTUAL,
+        operator: ML_DETECTOR_RULE_OPERATOR.GREATER_THAN,
         value: 10,
       },
     ],
   };
 
   const ruleWithScope = {
-    actions: [ML_DETECTUR_RULE_ACTION.SKIP_RESULT],
+    actions: [ML_DETECTOR_RULE_ACTION.SKIP_RESULT],
     scope: {
       instance: {
         filter_id: 'test_aws_instances',
-        filter_type: ML_DETECTUR_RULE_FILTER_TYPE.INCLUDE,
+        filter_type: ML_DETECTOR_RULE_FILTER_TYPE.INCLUDE,
         enabled: true,
       },
     },
   };
 
   const ruleWithConditionAndScope = {
-    actions: [ML_DETECTUR_RULE_ACTION.SKIP_RESULT],
+    actions: [ML_DETECTOR_RULE_ACTION.SKIP_RESULT],
     conditions: [
       {
-        applies_to: ML_DETECTUR_RULE_APPLIES_TO.TYPICAL,
-        operator: ML_DETECTUR_RULE_OPERATOR.LESS_THAN,
+        applies_to: ML_DETECTOR_RULE_APPLIES_TO.TYPICAL,
+        operator: ML_DETECTOR_RULE_OPERATOR.LESS_THAN,
         value: 100,
       },
     ],
     scope: {
       instance: {
         filter_id: 'test_aws_instances',
-        filter_type: ML_DETECTUR_RULE_FILTER_TYPE.EXCLUDE,
+        filter_type: ML_DETECTOR_RULE_FILTER_TYPE.EXCLUDE,
         enabled: true,
       },
     },
@@ -73,8 +73,8 @@ describe('ML - rule editor utils', () => {
         actions: [],
         conditions: [
           {
-            applies_to: ML_DETECTUR_RULE_APPLIES_TO.TYPICAL,
-            operator: ML_DETECTUR_RULE_OPERATOR.LESS_THAN,
+            applies_to: ML_DETECTOR_RULE_APPLIES_TO.TYPICAL,
+            operator: ML_DETECTOR_RULE_OPERATOR.LESS_THAN,
             value: 100,
           },
         ],
@@ -85,7 +85,7 @@ describe('ML - rule editor utils', () => {
 
     test('returns false for a rule with no scope or conditions', () => {
       const ruleWithNoScopeOrCondition = {
-        actions: [ML_DETECTUR_RULE_ACTION.SKIP_RESULT],
+        actions: [ML_DETECTOR_RULE_ACTION.SKIP_RESULT],
       };
 
       expect(isValidRule(ruleWithNoScopeOrCondition)).toBe(false);
@@ -113,16 +113,16 @@ describe('ML - rule editor utils', () => {
     };
 
     test('returns expected actual value from an anomaly', () => {
-      expect(getAppliesToValueFromAnomaly(anomaly, ML_DETECTUR_RULE_APPLIES_TO.ACTUAL)).toBe(210);
+      expect(getAppliesToValueFromAnomaly(anomaly, ML_DETECTOR_RULE_APPLIES_TO.ACTUAL)).toBe(210);
     });
 
     test('returns expected typical value from an anomaly', () => {
-      expect(getAppliesToValueFromAnomaly(anomaly, ML_DETECTUR_RULE_APPLIES_TO.TYPICAL)).toBe(1.23);
+      expect(getAppliesToValueFromAnomaly(anomaly, ML_DETECTOR_RULE_APPLIES_TO.TYPICAL)).toBe(1.23);
     });
 
     test('returns expected diff from typical value from an anomaly', () => {
       expect(
-        getAppliesToValueFromAnomaly(anomaly, ML_DETECTUR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL)
+        getAppliesToValueFromAnomaly(anomaly, ML_DETECTOR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL)
       ).toBe(208.77);
     });
   });

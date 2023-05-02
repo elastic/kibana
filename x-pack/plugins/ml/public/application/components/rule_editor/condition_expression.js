@@ -25,7 +25,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ML_DETECTUR_RULE_APPLIES_TO, ML_DETECTUR_RULE_OPERATOR } from '@kbn/ml-anomaly-utils';
+import { ML_DETECTOR_RULE_APPLIES_TO, ML_DETECTOR_RULE_OPERATOR } from '@kbn/ml-anomaly-utils';
 
 import { appliesToText, operatorToText } from './utils';
 
@@ -33,15 +33,15 @@ export class ConditionExpression extends Component {
   static propTypes = {
     index: PropTypes.number.isRequired,
     appliesTo: PropTypes.oneOf([
-      ML_DETECTUR_RULE_APPLIES_TO.ACTUAL,
-      ML_DETECTUR_RULE_APPLIES_TO.TYPICAL,
-      ML_DETECTUR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL,
+      ML_DETECTOR_RULE_APPLIES_TO.ACTUAL,
+      ML_DETECTOR_RULE_APPLIES_TO.TYPICAL,
+      ML_DETECTOR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL,
     ]),
     operator: PropTypes.oneOf([
-      ML_DETECTUR_RULE_OPERATOR.LESS_THAN,
-      ML_DETECTUR_RULE_OPERATOR.LESS_THAN_OR_EQUAL,
-      ML_DETECTUR_RULE_OPERATOR.GREATER_THAN,
-      ML_DETECTUR_RULE_OPERATOR.GREATER_THAN_OR_EQUAL,
+      ML_DETECTOR_RULE_OPERATOR.LESS_THAN,
+      ML_DETECTOR_RULE_OPERATOR.LESS_THAN_OR_EQUAL,
+      ML_DETECTOR_RULE_OPERATOR.GREATER_THAN,
+      ML_DETECTOR_RULE_OPERATOR.GREATER_THAN_OR_EQUAL,
     ]),
     value: PropTypes.number.isRequired,
     updateCondition: PropTypes.func.isRequired,
@@ -113,16 +113,16 @@ export class ConditionExpression extends Component {
             onChange={this.changeAppliesTo}
             options={[
               {
-                value: ML_DETECTUR_RULE_APPLIES_TO.ACTUAL,
-                text: appliesToText(ML_DETECTUR_RULE_APPLIES_TO.ACTUAL),
+                value: ML_DETECTOR_RULE_APPLIES_TO.ACTUAL,
+                text: appliesToText(ML_DETECTOR_RULE_APPLIES_TO.ACTUAL),
               },
               {
-                value: ML_DETECTUR_RULE_APPLIES_TO.TYPICAL,
-                text: appliesToText(ML_DETECTUR_RULE_APPLIES_TO.TYPICAL),
+                value: ML_DETECTOR_RULE_APPLIES_TO.TYPICAL,
+                text: appliesToText(ML_DETECTOR_RULE_APPLIES_TO.TYPICAL),
               },
               {
-                value: ML_DETECTUR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL,
-                text: appliesToText(ML_DETECTUR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL),
+                value: ML_DETECTOR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL,
+                text: appliesToText(ML_DETECTOR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL),
               },
             ]}
           />
@@ -148,20 +148,20 @@ export class ConditionExpression extends Component {
                 onChange={this.changeOperator}
                 options={[
                   {
-                    value: ML_DETECTUR_RULE_OPERATOR.LESS_THAN,
-                    text: operatorToText(ML_DETECTUR_RULE_OPERATOR.LESS_THAN),
+                    value: ML_DETECTOR_RULE_OPERATOR.LESS_THAN,
+                    text: operatorToText(ML_DETECTOR_RULE_OPERATOR.LESS_THAN),
                   },
                   {
-                    value: ML_DETECTUR_RULE_OPERATOR.LESS_THAN_OR_EQUAL,
-                    text: operatorToText(ML_DETECTUR_RULE_OPERATOR.LESS_THAN_OR_EQUAL),
+                    value: ML_DETECTOR_RULE_OPERATOR.LESS_THAN_OR_EQUAL,
+                    text: operatorToText(ML_DETECTOR_RULE_OPERATOR.LESS_THAN_OR_EQUAL),
                   },
                   {
-                    value: ML_DETECTUR_RULE_OPERATOR.GREATER_THAN,
-                    text: operatorToText(ML_DETECTUR_RULE_OPERATOR.GREATER_THAN),
+                    value: ML_DETECTOR_RULE_OPERATOR.GREATER_THAN,
+                    text: operatorToText(ML_DETECTOR_RULE_OPERATOR.GREATER_THAN),
                   },
                   {
-                    value: ML_DETECTUR_RULE_OPERATOR.GREATER_THAN_OR_EQUAL,
-                    text: operatorToText(ML_DETECTUR_RULE_OPERATOR.GREATER_THAN_OR_EQUAL),
+                    value: ML_DETECTOR_RULE_OPERATOR.GREATER_THAN_OR_EQUAL,
+                    text: operatorToText(ML_DETECTOR_RULE_OPERATOR.GREATER_THAN_OR_EQUAL),
                   },
                 ]}
               />

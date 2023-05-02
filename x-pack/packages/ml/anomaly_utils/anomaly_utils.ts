@@ -14,7 +14,7 @@ import type { MlSeverityType } from './anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 import { ML_ANOMALY_SEVERITY_TYPES } from './anomaly_severity_types';
 import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from './types';
-import { ML_DETECTUR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_rule';
+import { ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_rule';
 
 /**
  * Enum of entity field types
@@ -291,7 +291,7 @@ export function isRuleSupported(record: MlAnomalyRecordDoc): boolean {
   // A rule can be configured with a numeric condition if the function supports it,
   // and/or with scope if there is a partitioning fields.
   return (
-    ML_DETECTUR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(record.function) === -1 ||
+    ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(record.function) === -1 ||
     getEntityFieldName(record) !== undefined
   );
 }

@@ -34,8 +34,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
-  ML_DETECTUR_RULE_ACTION,
-  ML_DETECTUR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
+  ML_DETECTOR_RULE_ACTION,
+  ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
 } from '@kbn/ml-anomaly-utils';
 
 import { DetectorDescriptionList } from './components/detector_description_list';
@@ -202,9 +202,9 @@ class RuleEditorFlyoutUI extends Component {
     const checked = e.target.checked;
     this.setState((prevState) => {
       const actions = [...prevState.rule.actions];
-      const idx = actions.indexOf(ML_DETECTUR_RULE_ACTION.SKIP_RESULT);
+      const idx = actions.indexOf(ML_DETECTOR_RULE_ACTION.SKIP_RESULT);
       if (idx === -1 && checked) {
-        actions.push(ML_DETECTUR_RULE_ACTION.SKIP_RESULT);
+        actions.push(ML_DETECTOR_RULE_ACTION.SKIP_RESULT);
       } else if (idx > -1 && !checked) {
         actions.splice(idx, 1);
       }
@@ -219,9 +219,9 @@ class RuleEditorFlyoutUI extends Component {
     const checked = e.target.checked;
     this.setState((prevState) => {
       const actions = [...prevState.rule.actions];
-      const idx = actions.indexOf(ML_DETECTUR_RULE_ACTION.SKIP_MODEL_UPDATE);
+      const idx = actions.indexOf(ML_DETECTOR_RULE_ACTION.SKIP_MODEL_UPDATE);
       if (idx === -1 && checked) {
-        actions.push(ML_DETECTUR_RULE_ACTION.SKIP_MODEL_UPDATE);
+        actions.push(ML_DETECTOR_RULE_ACTION.SKIP_MODEL_UPDATE);
       } else if (idx > -1 && !checked) {
         actions.splice(idx, 1);
       }
@@ -551,7 +551,7 @@ class RuleEditorFlyoutUI extends Component {
       const hasPartitioningFields =
         this.partitioningFieldNames && this.partitioningFieldNames.length > 0;
       const conditionSupported =
-        ML_DETECTUR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(anomaly.source.function) === -1;
+        ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(anomaly.source.function) === -1;
       const conditionsText = i18n.translate(
         'xpack.ml.ruleEditor.ruleEditorFlyout.conditionsDescription',
         {

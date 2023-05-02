@@ -32,7 +32,7 @@ jest.mock('../../../services/ml_api_service', () => ({
 import React from 'react';
 
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { ML_DETECTUR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
+import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
 
 import { RuleActionPanel } from './rule_action_panel';
 
@@ -45,7 +45,7 @@ describe('RuleActionPanel', () => {
           detector_description: 'mean response time',
           custom_rules: [
             {
-              actions: [ML_DETECTUR_RULE_ACTION.SKIP_RESULT],
+              actions: [ML_DETECTOR_RULE_ACTION.SKIP_RESULT],
               conditions: [
                 {
                   applies_to: 'actual',
@@ -55,7 +55,7 @@ describe('RuleActionPanel', () => {
               ],
             },
             {
-              actions: [ML_DETECTUR_RULE_ACTION.SKIP_MODEL_UPDATE],
+              actions: [ML_DETECTOR_RULE_ACTION.SKIP_MODEL_UPDATE],
               scope: {
                 airline: {
                   filter_id: 'eu-airlines',
@@ -64,7 +64,7 @@ describe('RuleActionPanel', () => {
               },
             },
             {
-              actions: [ML_DETECTUR_RULE_ACTION.SKIP_MODEL_UPDATE],
+              actions: [ML_DETECTOR_RULE_ACTION.SKIP_MODEL_UPDATE],
               scope: {
                 airline: {
                   filter_id: 'eu-airlines',
