@@ -31,9 +31,9 @@ export const createContextMock = (
     kibanaVersion: '8.7.0',
     indexPrefix: '.kibana',
     types: ['foo', 'bar'],
-    typeModelVersions: {
-      foo: 1,
-      bar: 2,
+    typeVirtualVersions: {
+      foo: '10.1.0',
+      bar: '10.2.0',
     },
     documentMigrator: createDocumentMigrator(),
     migrationConfig: {

@@ -39,7 +39,7 @@ describe('Stage: init', () => {
       aliases: {},
       mappings: {
         properties: {},
-        _meta: { mappingVersions: { foo: 1, bar: 1 } },
+        _meta: { mappingVersions: { foo: '10.1.0', bar: '10.1.0' } },
       },
       settings: {},
     },
