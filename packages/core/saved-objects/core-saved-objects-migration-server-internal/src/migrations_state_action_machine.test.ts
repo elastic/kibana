@@ -56,6 +56,7 @@ describe('migrationsStateActionMachine', () => {
       retryAttempts: 5,
       zdt: {
         metaPickupSyncDelaySec: 120,
+        runOnNonMigratorNodes: false,
       },
     },
     typeRegistry,

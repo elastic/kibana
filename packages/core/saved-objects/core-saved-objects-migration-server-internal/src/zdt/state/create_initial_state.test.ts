@@ -7,7 +7,7 @@
  */
 
 import { createInitialState } from './create_initial_state';
-import { createContextMock } from '../test_helpers';
+import { createContextMock, createMigrationConfigMock } from '../test_helpers';
 
 describe('createInitialState', () => {
   test('`skipDocumentMigration` is `false` if the node has the `migrator` role', () => {
@@ -23,5 +23,18 @@ describe('createInitialState', () => {
     });
     const state = createInitialState(context);
     expect(state.skipDocumentMigration).toEqual(true);
+  });
+  test('`skipDocumentMigration` is `false` if the node does not have the `migrator` role but `runOnNonMigratorNodes` is true', () => {
+    const context = createContextMock({
+      migrationConfig: createMigrationConfigMock({
+        zdt: {
+          metaPickupSyncDelaySec: 120,
+          runOnNonMigratorNodes: true,
+        },
+      }),
+      nodeRoles: { backgroundTasks: false, ui: false, migrator: false },
+    });
+    const state = createInitialState(context);
+    expect(state.skipDocumentMigration).toEqual(false);
   });
 });

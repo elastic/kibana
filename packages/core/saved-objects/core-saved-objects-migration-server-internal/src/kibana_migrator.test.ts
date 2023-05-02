@@ -558,6 +558,7 @@ const mockOptions = () => {
       retryAttempts: 20,
       zdt: {
         metaPickupSyncDelaySec: 120,
+        runOnNonMigratorNodes: false,
       },
     },
     client: mockedClient,
