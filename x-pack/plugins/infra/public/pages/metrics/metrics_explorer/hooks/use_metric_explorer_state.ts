@@ -8,6 +8,7 @@
 import DateMath from '@kbn/datemath';
 import { useCallback, useEffect } from 'react';
 import { DataViewBase } from '@kbn/es-query';
+import { MetricsExplorerView } from '../../../../../common/metrics_explorer_views';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
   MetricsExplorerMetric,
@@ -124,19 +125,19 @@ export const useMetricsExplorerState = (
   );
 
   const onViewStateChange = useCallback(
-    (vs: MetricExplorerViewState) => {
-      if (vs.chartOptions) {
-        setChartOptions(vs.chartOptions);
+    (view: MetricsExplorerView) => {
+      if (view.attributes.chartOptions) {
+        setChartOptions(view.attributes.chartOptions as MetricsExplorerChartOptions);
       }
-      if (vs.currentTimerange) {
+      if (view.attributes.currentTimerange) {
         // if this is the "Default View" view, don't update the time range to the view's time range,
         // this way it will use the global Kibana time or the default time already set
-        if (vs.id !== '0') {
-          setTimeRange(vs.currentTimerange);
+        if (!view.attributes.isStatic) {
+          setTimeRange(view.attributes.currentTimerange as MetricsExplorerTimeOptions);
         }
       }
-      if (vs.options) {
-        setOptions(vs.options);
+      if (view.attributes.options) {
+        setOptions(view.attributes.options as MetricsExplorerOptions);
       }
     },
     [setChartOptions, setOptions, setTimeRange]
