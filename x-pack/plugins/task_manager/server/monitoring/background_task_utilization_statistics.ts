@@ -10,7 +10,7 @@ import { get, pick } from 'lodash';
 import stats from 'stats-lite';
 import { combineLatest, filter, map, Observable, startWith } from 'rxjs';
 import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
-import { Ok, unwrap } from '../lib/result_type';
+import { mapOk, unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import { ConcreteTaskInstance } from '../task';
 import {
@@ -89,10 +89,8 @@ export function createBackgroundTaskUtilizationAggregator(
   const taskManagerWorkerUtilizationEvent$: Observable<
     Pick<BackgroundTaskUtilizationStat, 'load'>
   > = taskPollingLifecycle.events.pipe(
-    filter((taskEvent: TaskLifecycleEvent) => isTaskManagerWorkerUtilizationStatEvent(taskEvent)),
-    map((taskEvent: TaskLifecycleEvent) =>
-      taskManagerUtilizationEventToLoadStat((taskEvent.event as unknown as Ok<number>).value)
-    )
+    filter(isTaskManagerWorkerUtilizationStatEvent),
+    mapOk((num: number) => taskManagerUtilizationEventToLoadStat(num))
   );
 
   return combineLatest([
