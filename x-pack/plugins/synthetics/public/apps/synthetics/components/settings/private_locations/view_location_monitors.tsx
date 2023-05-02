@@ -35,7 +35,7 @@ export const ViewLocationMonitors = ({
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
       <FormattedMessage
         id="xpack.synthetics.monitorManagement.viewMonitors"
-        defaultMessage='Location "{name}" has {count, number} {count, plural,one {monitor} other {monitors}} configured.'
+        defaultMessage='Location "{name}" is used in {count, number} {count, plural,one {monitor} other {monitors}}.'
         values={{ count, name: <strong>{locationName}</strong> }}
       />
       <EuiSpacer size="s" />
