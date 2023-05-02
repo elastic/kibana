@@ -40,7 +40,7 @@ export interface CasesBulkGetResponse {
 
 export const bulkGetCases = async (
   http: HttpStart,
-  params: { ids: string[]; fields: string[] },
+  params: { ids: string[] },
   signal?: AbortSignal
 ): Promise<CasesBulkGetResponse> => {
   const res = await http.post<CasesBulkGetResponse>(INTERNAL_BULK_GET_CASES_URL, {
