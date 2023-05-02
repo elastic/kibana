@@ -14,7 +14,7 @@ import {
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -180,7 +180,7 @@ export const EditExample = () => {
         {isLoading ? (
           <>
             <EuiSpacer />
-            <EuiLoadingContent lines={1} />
+            <EuiSkeletonText lines={1} />
           </>
         ) : null}
         <ControlGroupRenderer
