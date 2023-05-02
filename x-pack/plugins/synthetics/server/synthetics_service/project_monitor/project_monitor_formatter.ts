@@ -63,13 +63,6 @@ export const FAILED_TO_UPDATE_MONITOR = i18n.translate(
   }
 );
 
-export const FAILED_TO_UPDATE_MONITORS = i18n.translate(
-  'xpack.synthetics.service.projectMonitors.failedToUpdateMonitors',
-  {
-    defaultMessage: 'Failed to create or update monitors',
-  }
-);
-
 export class ProjectMonitorFormatter {
   private projectId: string;
   private spaceId: string;
@@ -436,7 +429,7 @@ export class ProjectMonitorFormatter {
         this.failedMonitors.push({
           reason: error?.message ?? FAILED_TO_UPDATE_MONITOR,
           details: i18n.translate(
-            'xpack.synthetics.service.projectMonitors.failedToUpdateMonitor',
+            'xpack.synthetics.service.projectMonitors.failedToUpdateJourney',
             {
               defaultMessage: 'Failed to update journey: {journeyId}',
               values: {
