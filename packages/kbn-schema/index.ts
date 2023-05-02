@@ -23,7 +23,6 @@ import {
   ObjectTypeOptions,
   Props,
   NullableProps,
-  SchemaStructureEntry,
   StringOptions,
   StringType,
   Type,

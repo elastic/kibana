@@ -13,11 +13,6 @@ export interface TypeOptions<T> {
   validate?: (value: T) => string | void;
 }
 
-export interface SchemaStructureEntry {
-  path: string[];
-  type: string;
-}
-
 export function convertValidationToRefinement<T = unknown>(
   validate: (value: T) => string | void,
   defaultValue: unknown
