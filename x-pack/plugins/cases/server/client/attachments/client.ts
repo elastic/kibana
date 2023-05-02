@@ -9,7 +9,7 @@ import type {
   AlertResponse,
   AllCommentsResponse,
   BulkGetAttachmentsResponse,
-  CaseResponse,
+  Case,
   CommentResponse,
   CommentsResponse,
 } from '../../../common/api';
@@ -45,8 +45,8 @@ export interface AttachmentsSubClient {
   /**
    * Adds an attachment to a case.
    */
-  add(params: AddArgs): Promise<CaseResponse>;
-  bulkCreate(params: BulkCreateArgs): Promise<CaseResponse>;
+  add(params: AddArgs): Promise<Case>;
+  bulkCreate(params: BulkCreateArgs): Promise<Case>;
   bulkGet(params: BulkGetArgs): Promise<BulkGetAttachmentsResponse>;
   /**
    * Deletes all attachments associated with a single case.
@@ -78,7 +78,7 @@ export interface AttachmentsSubClient {
    *
    * The request must include all fields for the attachment. Even the fields that are not changing.
    */
-  update(updateArgs: UpdateArgs): Promise<CaseResponse>;
+  update(updateArgs: UpdateArgs): Promise<Case>;
 }
 
 /**
