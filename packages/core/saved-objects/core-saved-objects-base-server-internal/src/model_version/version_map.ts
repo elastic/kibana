@@ -10,8 +10,26 @@ import Semver from 'semver';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { assertValidModelVersion, modelVersionToVirtualVersion } from './conversion';
 
-export type ModelVersionMap = Record<string, number>;
+/**
+ * Represents the virtual version of a given SO type.
+ * The virtual version is a compatibility format between the old
+ * migration system's versioning, based on the stack version, and the new model versioning.
+ *
+ * A virtual version is a plain semver version. Depending on its major version value, the
+ * underlying version can be the following:
+ * - Major < 10: Old migrations system (stack versions), using the equivalent value (e.g `8.7.0` => migration version `8.7.0`)
+ * - Major == 10: Model versions, using the `10.{modelVersion}.0` format (e.g `10.3.0` => model version 3)
+ */
 export type VirtualVersion = string;
+
+/**
+ * A map of SO type name to Model Version.
+ */
+export type ModelVersionMap = Record<string, number>;
+
+/**
+ * A map of SO type name to {@link VirtualVersion}.
+ */
 export type VirtualVersionMap = Record<string, VirtualVersion>;
 
 /**
@@ -45,7 +63,7 @@ export const getModelVersionMapForTypes = (types: SavedObjectsType[]): ModelVers
 
 /**
  * Returns the current virtual version for the given type.
- * If will either be the latest model version if the type
+ * It will either be the latest model version if the type
  * already switched to using them (switchToModelVersionAt is set),
  * or the latest migration version for the type otherwise.
  */
