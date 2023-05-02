@@ -7,7 +7,7 @@
 
 import React, { FC, useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import { MMLCallout } from '../mml_callout';
@@ -58,7 +58,6 @@ export const ModelPlotSwitch: FC = () => {
         />
       </Description>
       <MMLCallout />
-      <EuiSpacer />
     </>
   );
 };

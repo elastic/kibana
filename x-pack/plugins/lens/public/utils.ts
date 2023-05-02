@@ -361,3 +361,7 @@ export const getSearchWarningMessages = (
 
   return [...warningsMap.values()].flat();
 };
+
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
