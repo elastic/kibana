@@ -11,18 +11,14 @@ import React from 'react';
 import { act, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import type { RenderResult } from '@testing-library/react';
 
-import { createIntegrationsTestRendererMock } from '../../mock';
+import { createFleetTestRendererMock } from '../../mock';
 import type { AgentPolicy } from '../../../common';
 import {
   useGetFleetServerHosts,
   sendGetOneAgentPolicy,
   useGetAgents,
 } from '../../hooks/use_request';
-import {
-  useAgentEnrollmentFlyoutData,
-  useFleetStatus,
-  useFleetServerStandalone,
-} from '../../hooks';
+import { useAgentEnrollmentFlyoutData, useFleetServerStandalone } from '../../hooks';
 
 import { useAdvancedForm } from '../../applications/fleet/components/fleet_server_instructions/hooks';
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
@@ -30,15 +26,9 @@ import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agent
 import type { FlyOutProps } from './types';
 import { AgentEnrollmentFlyout } from '.';
 
-jest.mock('../../hooks/use_fleet_status', () => ({
-  FleetStatusProvider: (props: any) => {
-    return props.children;
-  },
-}));
-
 const render = (props?: Partial<FlyOutProps>) => {
   cleanup();
-  const renderer = createIntegrationsTestRendererMock();
+  const renderer = createFleetTestRendererMock();
   const results = renderer.render(<AgentEnrollmentFlyout onClose={jest.fn()} {...props} />);
 
   return results;
@@ -72,7 +62,6 @@ describe('<AgentEnrollmentFlyout />', () => {
     });
     jest.mocked(useFleetServerStandalone).mockReturnValue({ isFleetServerStandalone: false });
 
-    (useFleetStatus as jest.Mock).mockReturnValue({ isReady: true });
     (useFleetServerUnhealthy as jest.Mock).mockReturnValue({
       isLoading: false,
       isUnhealthy: false,

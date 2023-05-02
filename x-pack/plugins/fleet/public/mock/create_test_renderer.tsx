@@ -161,6 +161,11 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
           routerHistory={testRendererMocks.history}
           theme$={themeServiceMock.createTheme$()}
           setHeaderActionMenu={() => {}}
+          fleetStatus={{
+            enabled: true,
+            isLoading: false,
+            isReady: true,
+          }}
         >
           {children}
         </IntegrationsAppContext>
