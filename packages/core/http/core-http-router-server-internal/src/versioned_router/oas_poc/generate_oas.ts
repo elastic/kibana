@@ -57,17 +57,14 @@ export function generateOpenApiDocument(
       },
     ],
     paths: getOpenApiPathsObject(appRouter),
-    // components: {
-    //   securitySchemes: {
-    //     Authorization: {
-    //       type: 'http',
-    //       scheme: 'bearer',
-    //     },
-    //   },
-    //   responses: {
-    //     error: errorResponseObject,
-    //   },
-    // },
+    security: [
+      {
+        basicAuth: [],
+      },
+      {
+        apiKeyAuth: [],
+      },
+    ],
     tags: opts.tags?.map((tag) => ({ name: tag })),
     externalDocs: opts.docsUrl ? { url: opts.docsUrl } : undefined,
   };
