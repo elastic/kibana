@@ -9,7 +9,6 @@
 import { Duration } from 'moment';
 import { Stream } from 'stream';
 
-import { ByteSizeValue } from './src/byte_size_value';
 import {
   AnyType,
   ArrayOptions,
@@ -35,7 +34,6 @@ import {
 
 export type { AnyType, TypeOf, Props, SchemaStructureEntry, NullableProps };
 export { ObjectType, Type };
-export { ByteSizeValue } from './src/byte_size_value';
 export { ValidationError } from './src/errors';
 export { isKbnSchema } from './src/typeguards';
 
