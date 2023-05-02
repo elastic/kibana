@@ -49,8 +49,9 @@ const DashboardViewComponent: React.FC = () => {
 
   const { show: canReadDashboard, showWriteControls } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
-  const [errorState] = useState<DashboardViewPromptState | null>(
-    canReadDashboard ? null : DashboardViewPromptState.NoReadPermission
+  const errorState = useMemo(
+    () => (canReadDashboard ? null : DashboardViewPromptState.NoReadPermission),
+    [canReadDashboard]
   );
   const [dashboardDetails, setDashboardDetails] = useState<DashboardDetails | undefined>();
   const onDashboardContainerLoaded = useCallback((dashboard: DashboardAPI) => {
