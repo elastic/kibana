@@ -494,7 +494,7 @@ For string comparison using wildcards or regular expressions, use \`LIKE\` or \`
   | PROJECT first_name, last_name
   \`\`\`
 
-* Use \`RLIKE\` to match strings using regular expressions:
+* Use \`RLIKE\` to match strings using [regular expressions](https://www.elastic.co/guide/en/elasticsearch/reference/current/regexp-syntax.html):
 
   \`\`\`
   FROM employees 
