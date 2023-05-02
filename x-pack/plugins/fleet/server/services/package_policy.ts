@@ -146,10 +146,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PackagePolicy> {
-    // Ensure an ID is provided, so we can include it in the audit logs below
-    if (!options.id) {
-      options.id = SavedObjectsUtils.generateId();
-    }
+    const packagePolicyId = options?.id || uuidv4();
 
     let authorizationHeader = options.authorizationHeader;
 
@@ -159,7 +156,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
-      id: options.id,
+      id: packagePolicyId,
       savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     });
 
@@ -195,11 +192,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
-    // Add ids to stream
-    const packagePolicyId = options?.id || uuidv4();
-    let inputs: PackagePolicyInput[] = enrichedPackagePolicy.inputs.map((input) =>
-      assignStreamIdToInput(packagePolicyId, input)
-    );
+    let inputs = getInputsWithStreamIds(enrichedPackagePolicy, packagePolicyId);
 
     // Make sure the associated package is installed
     if (enrichedPackagePolicy.package?.name) {
@@ -252,6 +245,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         enrichedPackagePolicy = secretsRes.packagePolicy;
         secretReferences = secretsRes.secret_references;
+
+        inputs = getInputsWithStreamIds(enrichedPackagePolicy, packagePolicyId);
       }
       inputs = await _compilePackagePolicyInputs(pkgInfo, enrichedPackagePolicy.vars || {}, inputs);
 
@@ -343,9 +338,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const packagePolicyId = packagePolicy.id ?? uuidv4();
         const agentPolicyId = packagePolicy.policy_id;
 
-        let inputs = packagePolicy.inputs.map((input) =>
-          assignStreamIdToInput(packagePolicyId, input)
-        );
+        let inputs = getInputsWithStreamIds(packagePolicy, packagePolicyId);
 
         const { id, ...pkgPolicyWithoutId } = packagePolicy;
 
@@ -640,9 +633,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await requireUniqueName(soClient, enrichedPackagePolicy, id);
     }
 
-    let inputs = restOfPackagePolicy.inputs.map((input) =>
-      assignStreamIdToInput(oldPackagePolicy.id, input)
-    );
+    let inputs = getInputsWithStreamIds(restOfPackagePolicy, oldPackagePolicy.id);
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
@@ -779,9 +770,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
         }
 
-        let inputs = restOfPackagePolicy.inputs.map((input) =>
-          assignStreamIdToInput(oldPackagePolicy.id, input)
-        );
+        let inputs = getInputsWithStreamIds(restOfPackagePolicy, oldPackagePolicy.id);
 
         inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
         let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
@@ -1679,13 +1668,19 @@ function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: 
   }
 }
 
-function assignStreamIdToInput(packagePolicyId: string, input: NewPackagePolicyInput) {
-  return {
-    ...input,
-    streams: input.streams.map((stream) => {
-      return { ...stream, id: `${input.type}-${stream.data_stream.dataset}-${packagePolicyId}` };
-    }),
-  };
+function getInputsWithStreamIds(
+  packagePolicy: NewPackagePolicy,
+  packagePolicyId: string
+): PackagePolicy['inputs'] {
+  return packagePolicy.inputs.map((input) => {
+    return {
+      ...input,
+      streams: input.streams.map((stream) => ({
+        ...stream,
+        id: `${input.type}-${stream.data_stream.dataset}-${packagePolicyId}`,
+      })),
+    };
+  });
 }
 
 export async function _compilePackagePolicyInputs(
