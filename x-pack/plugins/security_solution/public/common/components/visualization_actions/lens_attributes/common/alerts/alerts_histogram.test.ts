@@ -47,8 +47,6 @@ describe('getAlertsHistogramLensAttributes', () => {
     expect(result?.current).toMatchSnapshot();
   });
 
-
-
   it('should render with extra options - filters', () => {
     const { result } = renderHook(
       () =>
