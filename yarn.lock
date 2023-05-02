@@ -4894,10 +4894,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/schema@link:packages/kbn-schema":
-  version "0.0.0"
-  uid ""
-
 "@kbn/screenshot-mode-example-plugin@link:examples/screenshot_mode_example":
   version "0.0.0"
   uid ""
@@ -5643,6 +5639,10 @@
   uid ""
 
 "@kbn/yarn-lock-validator@link:packages/kbn-yarn-lock-validator":
+  version "0.0.0"
+  uid ""
+
+"@kbn/zod@link:packages/kbn-zod":
   version "0.0.0"
   uid ""
 

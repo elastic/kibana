@@ -7,13 +7,6 @@
  */
 
 import z from 'zod';
-import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
-
-export type NumberOptions = TypeOptions<number> & {
-  min?: number;
-  max?: number;
-};
 
 const errorMap: z.ZodErrorMap = (issue, ctx) => {
   if (issue.code === z.ZodIssueCode.too_small) {
@@ -31,17 +24,4 @@ const errorMap: z.ZodErrorMap = (issue, ctx) => {
   };
 };
 
-export class NumberType extends Type<number> {
-  constructor(options: NumberOptions = {}) {
-    let schema = internals.number({ errorMap });
-    if (options.min !== undefined) {
-      schema = schema.min(options.min);
-    }
-
-    if (options.max !== undefined) {
-      schema = schema.max(options.max);
-    }
-
-    super(schema, options);
-  }
-}
+export const number: typeof z.number = (options) => z.number({ errorMap, ...options });

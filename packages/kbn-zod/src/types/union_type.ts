@@ -7,8 +7,6 @@
  */
 
 import z from 'zod';
-import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
 
 export function extractExpectedUnionValues(
   issue: z.ZodInvalidUnionIssue,
@@ -44,14 +42,4 @@ const errorMap: z.ZodErrorMap = (issue, ctx) => {
   return { message: ctx.defaultError };
 };
 
-export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
-  constructor(types: RTS, options?: TypeOptions<T>) {
-    const ts = types.map((type) => type.getSchema()) as [
-      z.ZodTypeAny,
-      z.ZodTypeAny,
-      ...z.ZodTypeAny[]
-    ];
-    const schema = internals.union(ts, { errorMap });
-    super(schema, options);
-  }
-}
+export const union: typeof z.union = (types, options) => z.union(types, { errorMap, ...options });

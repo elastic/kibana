@@ -10,10 +10,7 @@
  * Heavily adapted version of https://github.com/jlalmes/trpc-openapi
  */
 
-/* eslint-disable import/no-extraneous-dependencies */
-
 import type { OpenAPIV3 } from 'openapi-types';
-import { isKbnSchema } from '@kbn/schema';
 import z from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
@@ -164,8 +161,8 @@ function extractRequestBody(route: VersionedRouterRoute): OpenAPIV3.RequestBodyO
   return route.handlers.reduce<OpenAPIV3.RequestBodyObject['content']>((acc, handler) => {
     if (!handler.options.validate) return acc;
     if (!handler.options.validate.request) return acc;
-    const schema = isKbnSchema(handler.options.validate.request.body)
-      ? runtimeSchemaToJsonSchema(handler.options.validate.request.body.getSchema())
+    const schema = instanceofZodType(handler.options.validate.request.body)
+      ? runtimeSchemaToJsonSchema(handler.options.validate.request.body)
       : {};
     return {
       ...acc,
@@ -183,9 +180,7 @@ function extractResponses(route: VersionedRouterRoute): OpenAPIV3.ResponsesObjec
     const statusCodes = Object.keys(handler.options.validate.response);
     for (const statusCode of statusCodes) {
       const maybeSchema = handler.options.validate.response[statusCode as unknown as number].body;
-      const schema = isKbnSchema(maybeSchema)
-        ? runtimeSchemaToJsonSchema(maybeSchema.getSchema())
-        : {};
+      const schema = instanceofZodType(maybeSchema) ? runtimeSchemaToJsonSchema(maybeSchema) : {};
       acc[statusCode] = {
         ...acc[statusCode],
         description: route.options.description ?? 'No description',
@@ -226,12 +221,12 @@ function getOpenApiPathsObject(appRouter: CoreVersionedRouter): OpenAPIV3.PathsO
     let queryObjects: OpenAPIV3.ParameterObject[] = [];
     if (route.handlers[0].options.validate !== false) {
       const params = route.handlers[0].options.validate.request?.params as any;
-      if (params && isKbnSchema(params)) {
-        pathObjects = extractParameterObjects(params.getSchema(), pathParams, 'path') ?? [];
+      if (params && instanceofZodType(params)) {
+        pathObjects = extractParameterObjects(params, pathParams, 'path') ?? [];
       }
       const query = route.handlers[0].options.validate.request?.query as any;
-      if (query && isKbnSchema(query)) {
-        queryObjects = extractParameterObjects(query.getSchema(), pathParams, 'query') ?? [];
+      if (query && instanceofZodType(query)) {
+        queryObjects = extractParameterObjects(query, pathParams, 'query') ?? [];
       }
     }
 

@@ -7,14 +7,6 @@
  */
 
 import z from 'zod';
-import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
-
-export type StringOptions = TypeOptions<string> & {
-  minLength?: number;
-  maxLength?: number;
-  hostname?: boolean;
-};
 
 const errorMap: z.ZodErrorMap = (issue, ctx) => {
   const value = ctx.data as string;
@@ -31,18 +23,4 @@ const errorMap: z.ZodErrorMap = (issue, ctx) => {
   return { message: ctx.defaultError };
 };
 
-export class StringType extends Type<string> {
-  constructor(options: StringOptions = {}) {
-    let schema = internals.string({ errorMap });
-
-    if (options.minLength !== undefined) {
-      schema = schema.min(options.minLength);
-    }
-
-    if (options.maxLength !== undefined) {
-      schema = schema.max(options.maxLength);
-    }
-
-    super(schema, options);
-  }
-}
+export const string: typeof z.string = (options) => z.string({ errorMap, ...options });
