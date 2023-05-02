@@ -43,7 +43,6 @@ export const SearchApplicationAPI = () => {
   const { engineName } = useValues(EngineViewLogic);
   const { isGenerateModalOpen } = useValues(EngineApiLogic);
   const { openGenerateModal, closeGenerateModal } = useActions(EngineApiLogic);
-  const { navigateToUrl } = useValues(KibanaLogic);
   const cloudContext = useCloudDetails();
 
   const steps = [
