@@ -117,7 +117,7 @@ export function Header({
       <SkipToMainContent />
 
       <HeaderTopBanner headerBanner$={observables.headerBanner$} />
-      <header className={className} data-test-subj="headerGlobalNav kibanaClassicHeader">
+      <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars" className="header__bars">
           <EuiHeader
             theme="dark"
