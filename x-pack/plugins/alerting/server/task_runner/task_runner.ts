@@ -332,9 +332,8 @@ export class TaskRunner<
     const maintenanceWindowIds = activeMaintenanceWindows.map(
       (maintenanceWindow) => maintenanceWindow.id
     );
-    if (maintenanceWindowIds.length) {
-      this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowIds);
-    }
+
+    this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowIds);
 
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
@@ -417,7 +416,7 @@ export class TaskRunner<
               },
               logger: this.logger,
               flappingSettings,
-              ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
+              maintenanceWindowIds,
             })
           );
 
