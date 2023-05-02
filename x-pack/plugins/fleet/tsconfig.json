@@ -63,7 +63,6 @@
     "@kbn/global-search-plugin",
     "@kbn/utility-types",
     "@kbn/utility-types-jest",
-    "@kbn/test-jest-helpers",
     "@kbn/es-query",
     "@kbn/ui-theme",
     "@kbn/rison",
