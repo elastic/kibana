@@ -168,6 +168,7 @@ jest.mock('./epm/packages', () => {
   return {
     getPackageInfo: jest.fn().mockImplementation(mockedGetPackageInfo),
     getInstallation: mockedGetInstallation,
+    ensureInstalledPackage: jest.fn(),
   };
 });
 
