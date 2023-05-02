@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import typeDetect from 'type-detect';
+import z from 'zod';
 import { internals } from '../internals';
 import { Type, TypeOptions } from './type';
 
@@ -15,9 +15,25 @@ export type NumberOptions = TypeOptions<number> & {
   max?: number;
 };
 
+const errorMap: z.ZodErrorMap = (issue, ctx) => {
+  if (issue.code === z.ZodIssueCode.too_small) {
+    return {
+      message: `Value must be equal to or greater than [${issue.minimum}].`,
+    };
+  }
+  if (issue.code === z.ZodIssueCode.too_big) {
+    return {
+      message: `Value must be equal to or lower than [${issue.maximum}].`,
+    };
+  }
+  return {
+    message: ctx.defaultError,
+  };
+};
+
 export class NumberType extends Type<number> {
   constructor(options: NumberOptions = {}) {
-    let schema = internals.number();
+    let schema = internals.number({ errorMap });
     if (options.min !== undefined) {
       schema = schema.min(options.min);
     }
@@ -27,17 +43,5 @@ export class NumberType extends Type<number> {
     }
 
     super(schema, options);
-  }
-
-  protected handleError(type: string, { limit, value }: Record<string, any>) {
-    switch (type) {
-      case 'any.required':
-      case 'number.base':
-        return `expected value of type [number] but got [${typeDetect(value)}]`;
-      case 'number.min':
-        return `Value must be equal to or greater than [${limit}].`;
-      case 'number.max':
-        return `Value must be equal to or lower than [${limit}].`;
-    }
   }
 }

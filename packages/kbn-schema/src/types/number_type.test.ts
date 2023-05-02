@@ -13,11 +13,11 @@ test('returns value by default', () => {
 });
 
 test('handles numeric strings with ints', () => {
-  expect(schema.number().validate('4')).toBe(4);
+  expect(schema.number().validate(4)).toBe(4);
 });
 
 test('handles numeric strings with floats', () => {
-  expect(schema.number().validate('4.23')).toBe(4.23);
+  expect(schema.number().validate(4.23)).toBe(4.23);
 });
 
 test('fails if number is `NaN`', () => {
@@ -34,7 +34,7 @@ test('is required by default', () => {
 
 test('includes namespace in failure', () => {
   expect(() =>
-    schema.number().validate(undefined, {}, 'foo-namespace')
+    schema.number().validate(undefined, 'foo-namespace')
   ).toThrowErrorMatchingInlineSnapshot(
     `"[foo-namespace]: expected value of type [number] but got [undefined]"`
   );
