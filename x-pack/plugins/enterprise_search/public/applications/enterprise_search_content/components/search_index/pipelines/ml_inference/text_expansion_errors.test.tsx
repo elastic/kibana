@@ -13,8 +13,6 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { HttpError } from '../../../../../../../common/types/api';
-
 import { TextExpansionErrors } from './text_expansion_errors';
 
 describe('TextExpansionErrors', () => {
@@ -23,38 +21,14 @@ describe('TextExpansionErrors', () => {
     setMockValues({});
   });
   const error = {
-    body: {
-      error: 'some-error',
-      message: 'some-error-message',
-      statusCode: 500,
-    },
-  } as HttpError;
-  it('renders error panel if ELSER deployment fails', () => {
-    const wrapper = shallow(
-      <TextExpansionErrors createError={error} fetchError={undefined} startError={undefined} />
-    );
+    title: 'some-error-title',
+    message: 'some-error-message',
+  };
+  it('extracts error panel with the given title and message', () => {
+    const wrapper = shallow(<TextExpansionErrors error={error} />);
     expect(wrapper.find(EuiCallOut).length).toBe(1);
-    expect(wrapper.find(EuiCallOut).prop('title')).toEqual('Error with ELSER deployment');
-  });
-  it('renders error panel if ELSER fetching fails', () => {
-    const wrapper = shallow(
-      <TextExpansionErrors createError={undefined} fetchError={error} startError={undefined} />
-    );
-    expect(wrapper.find(EuiCallOut).length).toBe(1);
-    expect(wrapper.find(EuiCallOut).prop('title')).toEqual('Error fetching ELSER model');
-  });
-  it('renders error panel if ELSER starting fails', () => {
-    const wrapper = shallow(
-      <TextExpansionErrors createError={undefined} fetchError={undefined} startError={error} />
-    );
-    expect(wrapper.find(EuiCallOut).length).toBe(1);
-    expect(wrapper.find(EuiCallOut).prop('title')).toEqual('Error starting ELSER deployment');
-  });
-  it('extracts and renders the error message', () => {
-    const wrapper = shallow(
-      <TextExpansionErrors createError={error} fetchError={undefined} startError={undefined} />
-    );
+    expect(wrapper.find(EuiCallOut).prop('title')).toEqual(error.title);
     expect(wrapper.find(EuiCallOut).find('p').length).toBe(1);
-    expect(wrapper.find(EuiCallOut).find('p').text()).toEqual(error?.body?.message);
+    expect(wrapper.find(EuiCallOut).find('p').text()).toEqual(error.message);
   });
 });

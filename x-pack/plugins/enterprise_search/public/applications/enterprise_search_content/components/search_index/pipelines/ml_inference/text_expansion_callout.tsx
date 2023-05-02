@@ -29,7 +29,7 @@ import { docLinks } from '../../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../../shared/kibana';
 
 import { useTextExpansionCallOutData } from './text_expansion_callout_data';
-import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
+import { getTextExpansionError, TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 import { TextExpansionErrors } from './text_expansion_errors';
 
 export interface TextExpansionCallOutState {
@@ -339,19 +339,12 @@ export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props)
   } = useValues(TextExpansionCalloutLogic);
 
   // In case of an error, show the error callout only
-  if (
-    createTextExpansionModelError !== undefined ||
-    fetchTextExpansionModelError !== undefined ||
-    startTextExpansionModelError !== undefined
-  ) {
-    return (
-      <TextExpansionErrors
-        createError={createTextExpansionModelError}
-        fetchError={fetchTextExpansionModelError}
-        startError={startTextExpansionModelError}
-      />
-    );
-  }
+  const error = getTextExpansionError(
+    createTextExpansionModelError,
+    fetchTextExpansionModelError,
+    startTextExpansionModelError
+  );
+  if (error) return <TextExpansionErrors error={error} />;
 
   if (!show) return null;
 

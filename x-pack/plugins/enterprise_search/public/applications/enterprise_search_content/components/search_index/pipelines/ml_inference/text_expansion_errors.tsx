@@ -13,59 +13,17 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { HttpError } from '../../../../../../../common/types/api';
-import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 import { HttpLogic } from '../../../../../shared/http';
 
 import { ML_NOTIFICATIONS_PATH } from '../../../../routes';
 
-export const TextExpansionErrors = ({
-  createError,
-  fetchError,
-  startError,
-}: {
-  createError: HttpError | undefined;
-  fetchError: HttpError | undefined;
-  startError: HttpError | undefined;
-}) => {
+export const TextExpansionErrors = ({ error }: { error: { title: string; message: string } }) => {
   const { http } = useValues(HttpLogic);
-
-  // Extract the topmost error in precedence order
-  const error: HttpError | undefined = createError ?? startError ?? fetchError;
-  if (error === undefined) {
-    return null;
-  }
-  const topError = getErrorsFromHttpResponse(error)[0];
 
   return (
     <>
-      <EuiCallOut
-        color="danger"
-        iconType="error"
-        title={
-          createError !== undefined
-            ? i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCreateError.title',
-                {
-                  defaultMessage: 'Error with ELSER deployment',
-                }
-              )
-            : startError !== undefined
-            ? i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.textExpansionStartError.title',
-                {
-                  defaultMessage: 'Error starting ELSER deployment',
-                }
-              )
-            : i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.textExpansionFetchError.title',
-                {
-                  defaultMessage: 'Error fetching ELSER model',
-                }
-              )
-        }
-      >
-        <p>{topError}</p>
+      <EuiCallOut color="danger" iconType="error" title={error.title}>
+        <p>{error.message}</p>
         <EuiLink href={http.basePath.prepend(ML_NOTIFICATIONS_PATH)} target="_blank">
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCreateError.mlNotificationsLink',

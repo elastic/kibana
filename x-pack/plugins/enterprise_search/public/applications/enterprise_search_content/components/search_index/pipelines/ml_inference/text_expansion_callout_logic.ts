@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { kea, MakeLogicType } from 'kea';
 
 import { HttpError, Status } from '../../../../../../../common/types/api';
@@ -23,6 +24,7 @@ import {
   StartTextExpansionModelApiLogic,
   StartTextExpansionModelApiLogicActions,
 } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
+import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 
 const FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION = 5000; // 5 seconds
 const FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
@@ -61,6 +63,51 @@ export interface TextExpansionCalloutValues {
   textExpansionModel: FetchTextExpansionModelResponse | undefined;
   textExpansionModelPollTimeoutId: null | ReturnType<typeof setTimeout>;
 }
+
+/**
+ * Extracts the topmost error in precedence order (create > start > fetch).
+ * @param createError 
+ * @param fetchError 
+ * @param startError 
+ * @returns the extracted error or null if there is no error
+ */
+export const getTextExpansionError = (
+  createError: HttpError | undefined,
+  fetchError: HttpError | undefined,
+  startError: HttpError | undefined
+) => {
+  return createError !== undefined
+    ? {
+        title: i18n.translate(
+          'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCreateError.title',
+          {
+            defaultMessage: 'Error with ELSER deployment',
+          }
+        ),
+        message: getErrorsFromHttpResponse(createError)[0],
+      }
+    : startError !== undefined
+    ? {
+        title: i18n.translate(
+          'xpack.enterpriseSearch.content.indices.pipelines.textExpansionStartError.title',
+          {
+            defaultMessage: 'Error starting ELSER deployment',
+          }
+        ),
+        message: getErrorsFromHttpResponse(startError)[0],
+      }
+    : fetchError !== undefined
+    ? {
+        title: i18n.translate(
+          'xpack.enterpriseSearch.content.indices.pipelines.textExpansionFetchError.title',
+          {
+            defaultMessage: 'Error fetching ELSER model',
+          }
+        ),
+        message: getErrorsFromHttpResponse(fetchError)[0],
+      }
+    : null;
+};
 
 export const TextExpansionCalloutLogic = kea<
   MakeLogicType<TextExpansionCalloutValues, TextExpansionCalloutActions>

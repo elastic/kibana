@@ -9,12 +9,13 @@ import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
 import { HttpResponse } from '@kbn/core/public';
 
-import { ErrorResponse, Status } from '../../../../../../../common/types/api';
+import { ErrorResponse, HttpError, Status } from '../../../../../../../common/types/api';
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { CreateTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
 import { FetchTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
 
 import {
+  getTextExpansionError,
   TextExpansionCalloutLogic,
   TextExpansionCalloutValues,
 } from './text_expansion_callout_logic';
@@ -56,6 +57,37 @@ describe('TextExpansionCalloutLogic', () => {
 
   it('has expected default values', () => {
     expect(TextExpansionCalloutLogic.values).toEqual(DEFAULT_VALUES);
+  });
+
+  describe('getTextExpansionError', () => {
+    const error = {
+      body: {
+        error: 'some-error',
+        message: 'some-error-message',
+        statusCode: 500,
+      },
+    } as HttpError;
+    it('returns null if there is no error', () => {
+      expect(getTextExpansionError(undefined, undefined, undefined)).toBe(null);
+    });
+    it('uses the correct title and message from a create error', () => {
+      expect(getTextExpansionError(error, undefined, undefined)).toEqual({
+        title: 'Error with ELSER deployment',
+        message: error.body?.message,
+      });
+    });
+    it('uses the correct title and message from a create error', () => {
+      expect(getTextExpansionError(undefined, error, undefined)).toEqual({
+        title: 'Error fetching ELSER model',
+        message: error.body?.message,
+      });
+    });
+    it('uses the correct title and message from a create error', () => {
+      expect(getTextExpansionError(undefined, undefined, error)).toEqual({
+        title: 'Error starting ELSER deployment',
+        message: error.body?.message,
+      });
+    });
   });
 
   describe('listeners', () => {
