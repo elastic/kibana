@@ -31,6 +31,7 @@ import { ValidatedNumberInput } from '../../../../../components/validated_number
 import { getTermsFields } from '../../../../../index_pattern_util';
 import { getIndexPatternSelectComponent } from '../../../../../kibana_services';
 import type { JoinField } from '../../join_editor';
+import { inputStrings } from '../../../../input_strings';
 
 interface Props {
   // Left source props (static - can not change)
@@ -105,15 +106,15 @@ export function TermJoinPopoverContent(props: Props) {
 
     return (
       <EuiFormRow
-        label={i18n.translate('xpack.maps.layerPanel.joinExpression.leftFieldLabel', {
+        label={i18n.translate('xpack.maps.termJoinExpression.leftFieldLabel', {
           defaultMessage: 'Left field',
         })}
-        helpText={i18n.translate('xpack.maps.layerPanel.joinExpression.leftSourceLabelHelpText', {
+        helpText={i18n.translate('xpack.maps.termJoinExpression.leftSourceLabelHelpText', {
           defaultMessage: 'Left source field that contains the shared key.',
         })}
       >
         <EuiComboBox
-          placeholder={getSelectFieldPlaceholder()}
+          placeholder={inputStrings.fieldSelectPlaceholder}
           singleSelection={true}
           isClearable={false}
           options={options}
@@ -132,7 +133,7 @@ export function TermJoinPopoverContent(props: Props) {
 
     return (
       <EuiFormRow
-        label={i18n.translate('xpack.maps.layerPanel.joinExpression.rightSourceLabel', {
+        label={i18n.translate('xpack.maps.termJoinExpression.rightSourceLabel', {
           defaultMessage: 'Right source',
         })}
       >
@@ -153,15 +154,15 @@ export function TermJoinPopoverContent(props: Props) {
 
     return (
       <EuiFormRow
-        label={i18n.translate('xpack.maps.layerPanel.joinExpression.rightFieldLabel', {
+        label={i18n.translate('xpack.maps.termJoinExpression.rightFieldLabel', {
           defaultMessage: 'Right field',
         })}
-        helpText={i18n.translate('xpack.maps.layerPanel.joinExpression.rightSourceLabelHelpText', {
+        helpText={i18n.translate('xpack.maps.termJoinExpression.rightSourceLabelHelpText', {
           defaultMessage: 'Right source field that contains the shared key.',
         })}
       >
         <SingleFieldSelect
-          placeholder={getSelectFieldPlaceholder()}
+          placeholder={inputStrings.fieldSelectPlaceholder}
           value={props.sourceDescriptor.term}
           onChange={onRightFieldChange}
           fields={getTermsFields(props.rightFields)}
@@ -189,10 +190,10 @@ export function TermJoinPopoverContent(props: Props) {
             size,
           });
         }}
-        label={i18n.translate('xpack.maps.layerPanel.joinExpression.rightSizeLabel', {
+        label={i18n.translate('xpack.maps.termJoinExpression.rightSizeLabel', {
           defaultMessage: 'Right size',
         })}
-        helpText={i18n.translate('xpack.maps.layerPanel.joinExpression.rightSizeHelpText', {
+        helpText={i18n.translate('xpack.maps.termJoinExpression.rightSizeHelpText', {
           defaultMessage: 'Right field term limit.',
         })}
       />
@@ -204,18 +205,18 @@ export function TermJoinPopoverContent(props: Props) {
     <div style={{ width: 300 }}>
       <EuiPopoverTitle>
         <FormattedMessage
-          id="xpack.maps.layerPanel.joinExpression.termJoin.popoverTitle"
+          id="xpack.maps.termJoinExpression.popoverTitle"
           defaultMessage="Configure term join"
         />
       </EuiPopoverTitle>
       <EuiFormHelpText className="mapJoinExpressionHelpText">
         <FormattedMessage
-          id="xpack.maps.layerPanel.joinExpression.helpText"
-          defaultMessage="Configure the shared key."
+          id="xpack.maps.termJoinExpression.helpText"
+          defaultMessage="Configure the shared key that combines vector features, the left source, with the results of an Elasticsearch aggregation, the right source."
         />
       </EuiFormHelpText>
       <EuiFormRow
-        label={i18n.translate('xpack.maps.layerPanel.joinExpression.leftSourceLabel', {
+        label={i18n.translate('xpack.maps.termJoinExpression.leftSourceLabel', {
           defaultMessage: 'Left source',
         })}
       >
@@ -235,10 +236,4 @@ export function TermJoinPopoverContent(props: Props) {
       {renderRightFieldSizeInput()}
     </div>
   );
-}
-
-function getSelectFieldPlaceholder() {
-  return i18n.translate('xpack.maps.layerPanel.joinExpression.selectFieldPlaceholder', {
-    defaultMessage: 'Select field',
-  });
 }

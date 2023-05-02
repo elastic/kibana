@@ -34,6 +34,7 @@ import {
   createEmsChoroplethLayerDescriptor,
   createEsChoroplethLayerDescriptor,
 } from './create_choropleth_layer_descriptor';
+import { inputStrings  } from '../../../../connected_components/input_strings';
 
 export enum BOUNDARIES_SOURCE {
   ELASTICSEARCH = 'ELASTICSEARCH',
@@ -305,9 +306,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
             })}
           >
             <SingleFieldSelect
-              placeholder={i18n.translate('xpack.maps.choropleth.joinFieldPlaceholder', {
-                defaultMessage: 'Select field',
-              })}
+              placeholder={inputStrings.fieldSelectPlaceholder}
               value={this.state.leftElasticsearchJoinField}
               onChange={this._onLeftJoinFieldSelect}
               fields={this.state.leftJoinFields}
@@ -405,9 +404,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
           })}
         >
           <SingleFieldSelect
-            placeholder={i18n.translate('xpack.maps.choropleth.joinFieldPlaceholder', {
-              defaultMessage: 'Select field',
-            })}
+            placeholder={inputStrings.fieldSelectPlaceholder}
             value={this.state.rightJoinField}
             onChange={this._onRightJoinFieldSelect}
             fields={this.state.rightTermsFields}

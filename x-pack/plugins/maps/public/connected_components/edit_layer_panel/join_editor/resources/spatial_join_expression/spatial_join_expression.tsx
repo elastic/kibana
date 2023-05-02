@@ -30,12 +30,12 @@ export function SpatialJoinExpression(props: Props) {
 
   const { geoField } = props.sourceDescriptor;
   const expressionValue = geoField !== undefined
-    ? i18n.translate('xpack.maps.layerPanel.spatialJoinExpression.value', {
+    ? i18n.translate('xpack.maps.spatialJoinExpression.value', {
         defaultMessage:
           'features from {geoField}',
         values: { geoField },
       })
-    : i18n.translate('xpack.maps.layerPanel.spatialJoinExpression.placeholder', {
+    : i18n.translate('xpack.maps.spatialJoinExpression.emptyValue', {
         defaultMessage: '-- configure spatial join --',
       });
 
@@ -54,7 +54,7 @@ export function SpatialJoinExpression(props: Props) {
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);
           }}
-          description={i18n.translate('xpack.maps.layerPanel.joinExpression.description', {
+          description={i18n.translate('xpack.maps.spatialJoinExpression.description', {
             defaultMessage: 'Join with',
           })}
           uppercase={false}

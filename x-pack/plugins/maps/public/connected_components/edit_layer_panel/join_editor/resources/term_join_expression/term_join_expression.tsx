@@ -40,13 +40,13 @@ export function TermJoinExpression(props: Props) {
 
   const { size, term } = props.sourceDescriptor;
   const expressionValue = term !== undefined
-    ? i18n.translate('xpack.maps.layerPanel.termJoinExpression.value', {
+    ? i18n.translate('xpack.maps.termJoinExpression.value', {
         defaultMessage:
           '{topTerms} terms from {term}',
         values: {
           topTerms:
             size !== undefined
-              ? i18n.translate('xpack.maps.layerPanel.termJoinExpression.topTerms', {
+              ? i18n.translate('xpack.maps.termJoinExpression.topTerms', {
                   defaultMessage: 'top {size}',
                   values: { size },
                 })
@@ -54,7 +54,7 @@ export function TermJoinExpression(props: Props) {
           term,
         },
       })
-    : i18n.translate('xpack.maps.layerPanel.termJoinExpression.placeholder', {
+    : i18n.translate('xpack.maps.termJoinExpression.placeholder', {
         defaultMessage: '-- configure term join --',
       });
 
@@ -73,7 +73,7 @@ export function TermJoinExpression(props: Props) {
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);
           }}
-          description={i18n.translate('xpack.maps.layerPanel.joinExpression.description', {
+          description={i18n.translate('xpack.maps.termJoinExpression.description', {
             defaultMessage: 'Join with',
           })}
           uppercase={false}
