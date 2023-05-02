@@ -21,164 +21,164 @@ import { useDockerRegistry, waitForFleetSetup, getSupertestWithAdminUser } from 
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
-for (let i = 1; i <= 50; i++) {
-  describe(`Fleet preconfiguration reset, run #${i}`, () => {
-    let esServer: TestElasticsearchUtils;
-    let kbnServer: TestKibanaUtils;
+describe('Fleet preconfiguration reset', () => {
+  let esServer: TestElasticsearchUtils;
+  let kbnServer: TestKibanaUtils;
 
-    const registryUrl = useDockerRegistry();
+  const registryUrl = useDockerRegistry();
 
-    const startServers = async () => {
-      const { startES } = createTestServers({
-        adjustTimeout: (t) => jest.setTimeout(t),
-        settings: {
-          es: {
-            license: 'trial',
-          },
-          kbn: {},
+  const startServers = async () => {
+    const { startES } = createTestServers({
+      adjustTimeout: (t) => jest.setTimeout(t),
+      settings: {
+        es: {
+          license: 'trial',
         },
-      });
+        kbn: {},
+      },
+    });
 
-      esServer = await startES();
-      const startKibana = async () => {
-        const root = createRootWithCorePlugins(
-          {
-            xpack: {
-              fleet: {
-                registryUrl,
-                packages: [
-                  {
-                    name: 'fleet_server',
-                    version: 'latest',
-                  },
-                ],
-                // Preconfigure two policies test-12345 and test-456789
-                agentPolicies: [
-                  {
-                    name: 'Elastic Cloud agent policy 0001',
-                    description: 'Default agent policy for agents hosted on Elastic Cloud',
-                    is_default: false,
-                    is_managed: true,
-                    id: 'test-12345',
-                    namespace: 'default',
-                    monitoring_enabled: [],
-                    package_policies: [
-                      {
-                        name: 'fleet_server123456789',
-                        package: {
-                          name: 'fleet_server',
-                        },
-                        inputs: [
-                          {
-                            type: 'fleet-server',
-                            keep_enabled: true,
-                            vars: [
-                              {
-                                name: 'host',
-                                value: '127.0.0.1',
-                                frozen: true,
-                              },
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                  {
-                    name: 'Second preconfigured policy',
-                    description: 'second policy',
-                    is_default: false,
-                    is_managed: true,
-                    id: 'test-456789',
-                    namespace: 'default',
-                    monitoring_enabled: [],
-                    package_policies: [
-                      {
-                        name: 'fleet_server987654321',
-                        package: {
-                          name: 'fleet_server',
-                        },
-                        inputs: [
-                          {
-                            type: 'fleet-server',
-                            keep_enabled: true,
-                            vars: [
-                              {
-                                name: 'host',
-                                value: '127.0.0.1',
-                                frozen: true,
-                              },
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            },
-            logging: {
-              appenders: {
-                file: {
-                  type: 'file',
-                  fileName: logFilePath,
-                  layout: {
-                    type: 'json',
-                  },
-                },
-              },
-              loggers: [
+    esServer = await startES();
+    const startKibana = async () => {
+      const root = createRootWithCorePlugins(
+        {
+          xpack: {
+            fleet: {
+              registryUrl,
+              packages: [
                 {
-                  name: 'root',
-                  appenders: ['file'],
+                  name: 'fleet_server',
+                  version: 'latest',
+                },
+              ],
+              // Preconfigure two policies test-12345 and test-456789
+              agentPolicies: [
+                {
+                  name: 'Elastic Cloud agent policy 0001',
+                  description: 'Default agent policy for agents hosted on Elastic Cloud',
+                  is_default: false,
+                  is_managed: true,
+                  id: 'test-12345',
+                  namespace: 'default',
+                  monitoring_enabled: [],
+                  package_policies: [
+                    {
+                      name: 'fleet_server123456789',
+                      package: {
+                        name: 'fleet_server',
+                      },
+                      inputs: [
+                        {
+                          type: 'fleet-server',
+                          keep_enabled: true,
+                          vars: [
+                            {
+                              name: 'host',
+                              value: '127.0.0.1',
+                              frozen: true,
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
                 },
                 {
-                  name: 'plugins.fleet',
-                  level: 'all',
+                  name: 'Second preconfigured policy',
+                  description: 'second policy',
+                  is_default: false,
+                  is_managed: true,
+                  id: 'test-456789',
+                  namespace: 'default',
+                  monitoring_enabled: [],
+                  package_policies: [
+                    {
+                      name: 'fleet_server987654321',
+                      package: {
+                        name: 'fleet_server',
+                      },
+                      inputs: [
+                        {
+                          type: 'fleet-server',
+                          keep_enabled: true,
+                          vars: [
+                            {
+                              name: 'host',
+                              value: '127.0.0.1',
+                              frozen: true,
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
                 },
               ],
             },
           },
-          { oss: false }
-        );
+          logging: {
+            appenders: {
+              file: {
+                type: 'file',
+                fileName: logFilePath,
+                layout: {
+                  type: 'json',
+                },
+              },
+            },
+            loggers: [
+              {
+                name: 'root',
+                appenders: ['file'],
+              },
+              {
+                name: 'plugins.fleet',
+                level: 'all',
+              },
+            ],
+          },
+        },
+        { oss: false }
+      );
 
-        await root.preboot();
-        const coreSetup = await root.setup();
-        const coreStart = await root.start();
+      await root.preboot();
+      const coreSetup = await root.setup();
+      const coreStart = await root.start();
 
-        return {
-          root,
-          coreSetup,
-          coreStart,
-          stop: async () => await root.shutdown(),
-        };
+      return {
+        root,
+        coreSetup,
+        coreStart,
+        stop: async () => await root.shutdown(),
       };
-      kbnServer = await startKibana();
-      await waitForFleetSetup(kbnServer.root);
     };
+    kbnServer = await startKibana();
+    await waitForFleetSetup(kbnServer.root);
+  };
 
-    const stopServers = async () => {
-      if (kbnServer) {
-        await kbnServer.stop();
-      }
+  const stopServers = async () => {
+    if (kbnServer) {
+      await kbnServer.stop();
+    }
 
-      if (esServer) {
-        await esServer.stop();
-      }
+    if (esServer) {
+      await esServer.stop();
+    }
 
-      await new Promise((res) => setTimeout(res, 10000));
-    };
+    await new Promise((res) => setTimeout(res, 10000));
+  };
 
-    // Share the same servers for all the test to make test a lot faster (but test are not isolated anymore)
-    beforeAll(async () => {
-      await startServers();
-    });
+  // Share the same servers for all the test to make test a lot faster (but test are not isolated anymore)
+  beforeAll(async () => {
+    await startServers();
+  });
 
-    afterAll(async () => {
-      await stopServers();
-    });
+  afterAll(async () => {
+    await stopServers();
+  });
 
-    describe('Reset all policy', () => {
+  for (let i = 1; i <= 50; i++) {
+    describe(`Reset all policy, run #${i}`, () => {
       it('Works and reset all preconfigured policies', async () => {
         const resetAPI = getSupertestWithAdminUser(
           kbnServer.root,
@@ -207,7 +207,7 @@ for (let i = 1; i <= 50; i++) {
       });
     });
 
-    describe('Reset one preconfigured policy', () => {
+    describe(`Reset one preconfigured policy, run #${i}`, () => {
       const POLICY_ID = 'test-12345';
 
       it('Works and reset one preconfigured policies if the policy is already deleted (with a ghost package policy)', async () => {
@@ -314,5 +314,5 @@ for (let i = 1; i <= 50; i++) {
         );
       });
     });
-  });
-}
+  }
+});
