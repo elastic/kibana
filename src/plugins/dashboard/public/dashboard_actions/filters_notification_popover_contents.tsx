@@ -67,31 +67,29 @@ export function FiltersNotificationPopoverContents({ context }: FiltersNotificat
       `}
     >
       <EuiSkeletonText isLoading={isLoading} lines={3}>
-        <>
-          {queryString !== '' && (
-            <EuiFormRow
-              label={dashboardFilterNotificationActionStrings.getQueryTitle()}
-              display="rowCompressed"
+        {queryString !== '' && (
+          <EuiFormRow
+            label={dashboardFilterNotificationActionStrings.getQueryTitle()}
+            display="rowCompressed"
+          >
+            <EuiCodeBlock
+              language={queryLanguage}
+              paddingSize="none"
+              transparentBackground
+              aria-labelledby={`${dashboardFilterNotificationActionStrings.getQueryTitle()}: ${queryString}`}
+              tabIndex={0} // focus so that keyboard controls will not skip over the code block
             >
-              <EuiCodeBlock
-                language={queryLanguage}
-                paddingSize="none"
-                transparentBackground
-                aria-labelledby={`${dashboardFilterNotificationActionStrings.getQueryTitle()}: ${queryString}`}
-                tabIndex={0} // focus so that keyboard controls will not skip over the code block
-              >
-                {queryString}
-              </EuiCodeBlock>
-            </EuiFormRow>
-          )}
-          {filters && filters.length > 0 && (
-            <EuiFormRow label={dashboardFilterNotificationActionStrings.getFiltersTitle()}>
-              <EuiFlexGroup wrap={true} gutterSize="xs">
-                <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
-              </EuiFlexGroup>
-            </EuiFormRow>
-          )}
-        </>
+              {queryString}
+            </EuiCodeBlock>
+          </EuiFormRow>
+        )}
+        {filters && filters.length > 0 && (
+          <EuiFormRow label={dashboardFilterNotificationActionStrings.getFiltersTitle()}>
+            <EuiFlexGroup wrap={true} gutterSize="xs">
+              <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
+            </EuiFlexGroup>
+          </EuiFormRow>
+        )}
       </EuiSkeletonText>
     </EuiForm>
   );
