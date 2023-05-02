@@ -141,6 +141,7 @@ mathFunctionExpressionArgument
    | number
    | operatorExpression
    | number (DATE_LITERAL)
+   | comparison
    ;
 
 qualifiedName

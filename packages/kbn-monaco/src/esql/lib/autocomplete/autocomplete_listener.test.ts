@@ -129,6 +129,9 @@ describe('autocomplete_listener', () => {
       'starts_with',
       'date_format',
       'date_trunc',
+      'is_finite',
+      'is_infinite',
+      'case',
       'FieldIdentifier',
     ]);
     testSuggestions('from a | eval a=b', ['|', '+', '-', '/', '*']);

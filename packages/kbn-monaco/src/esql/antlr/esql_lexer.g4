@@ -142,6 +142,7 @@ MATH_FUNCTION
     | D A T E UNDERSCORE T R U N C
     | I S UNDERSCORE F I N I T E
     | I S UNDERSCORE I N F I N I T E
+    | C A S E
     ;
 
 UNARY_FUNCTION
@@ -154,8 +155,8 @@ UNARY_FUNCTION
     ;
 
 WHERE_FUNCTIONS
-    : 'is_null'
-    | 'cidr_match'
+    : I S UNDERSCORE N U L L
+    | C I D R UNDERSCORE M A T C H
     ;
 
 UNQUOTED_IDENTIFIER

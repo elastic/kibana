@@ -173,6 +173,24 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     },
     sortText: 'C',
   },
+  {
+    label: 'case',
+    insertText: 'case',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.caseDoc', {
+      defaultMessage:
+        'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        `from index where field="value" | eval type = case(
+          languages <= 1, "monolingual",
+          languages <= 2, "bilingual",
+           "polyglot")`,
+      ]),
+    },
+    sortText: 'C',
+  },
 ];
 
 export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = [
