@@ -9,7 +9,7 @@
 import type {
   IContextContainer,
   IContextProvider,
-  IRouter,
+  IRouterWithVersion,
   RequestHandlerContextBase,
 } from './router';
 import type {
@@ -123,7 +123,7 @@ export interface HttpServicePreboot<
    */
   registerRoutes<ContextType extends DefaultRequestHandlerType = DefaultRequestHandlerType>(
     path: string,
-    callback: (router: IRouter<ContextType>) => void
+    callback: (router: IRouterWithVersion<ContextType>) => void
   ): void;
 
   /**
@@ -309,7 +309,7 @@ export interface HttpServiceSetup<
    */
   createRouter: <
     Context extends DefaultRequestHandlerType = DefaultRequestHandlerType
-  >() => IRouter<Context>;
+  >() => IRouterWithVersion<Context>;
 
   /**
    * Register a context provider for a route handler.
