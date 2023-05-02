@@ -21,8 +21,7 @@ export const getSafePostureTypeRuntimeMapping = (): MappingRuntimeFields => ({
 
         if (!postureTypeAvailable) {
           // Before 8.7 release
-          def safe_posture_type = 'kspm';
-          emit(safe_posture_type);
+          emit("kspm");
         } else {
           emit(doc["rule.benchmark.posture_type"].value);
         }
