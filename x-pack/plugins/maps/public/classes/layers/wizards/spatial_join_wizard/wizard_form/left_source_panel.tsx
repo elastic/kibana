@@ -47,8 +47,8 @@ export function LeftSourcePanel(props: Props) {
     <EuiPanel>
       <EuiTitle size="xs">
         <h5>
-          {i18n.translate('xxpack.maps.spatialJoin.wizard.leftSourceTitle', {
-            defaultMessage: 'Features',
+          {i18n.translate('xpack.maps.spatialJoin.wizard.leftSourceTitle', {
+            defaultMessage: 'Vector features source',
           })}
         </h5>
       </EuiTitle>

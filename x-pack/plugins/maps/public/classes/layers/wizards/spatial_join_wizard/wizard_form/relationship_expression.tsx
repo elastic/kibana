@@ -31,10 +31,16 @@ export function RelationshipExpression(props: Props) {
       button={
         <EuiExpression
           color="subdued"
-          description={i18n.translate('xpack.maps.spatialJoin.wizardForm.withinRelastionshipDescription', {
+          description={i18n.translate('xpack.maps.spatialJoin.wizardForm.withinExpressionDescription', {
             defaultMessage: 'within',
           })}
-          value={`${props.distance} ${KM_ABBREVIATION}`}
+          value={i18n.translate('xpack.maps.spatialJoin.wizardForm.withinExpressionValue', {
+            defaultMessage: '{distance} {units} of vector features',
+            values: {
+              distance: props.distance,
+              units: KM_ABBREVIATION
+            }
+          })}
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);
           }}
