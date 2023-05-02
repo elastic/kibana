@@ -73,7 +73,7 @@ import {
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
 import type { RegisterExtensions } from './extensions/types';
 import { createProfileRegistry } from './extensions/profile_registry';
-import { ProfileAwareLocatorDefinition } from './extensions/profile_aware_locator';
+import { ProfileAwareLocator } from './extensions/profile_aware_locator';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
@@ -225,25 +225,22 @@ export class DiscoverPlugin
 
     if (plugins.share) {
       const useHash = core.uiSettings.get('state:storeInSessionStorage');
-      const appLocatorDefinition = new DiscoverAppLocatorDefinition({ useHash, setStateToKbnUrl });
-      const contextLocatorDefinition = new DiscoverContextAppLocatorDefinition({ useHash });
-      const singleDocLocatorDefinition = new DiscoverSingleDocLocatorDefinition();
+
+      // Create locators for external use without profile-awareness
+      this.locator = plugins.share.url.locators.create(
+        new DiscoverAppLocatorDefinition({ useHash, setStateToKbnUrl })
+      );
+      const contextLocator = plugins.share.url.locators.create(
+        new DiscoverContextAppLocatorDefinition({ useHash })
+      );
+      const singleDocLocator = plugins.share.url.locators.create(
+        new DiscoverSingleDocLocatorDefinition()
+      );
 
       // Create profile-aware locators for internal use
-      this.profileAwareLocator = plugins.share.url.locators.create(
-        new ProfileAwareLocatorDefinition(appLocatorDefinition)
-      );
-      this.contextLocator = plugins.share.url.locators.create(
-        new ProfileAwareLocatorDefinition(contextLocatorDefinition)
-      );
-      this.singleDocLocator = plugins.share.url.locators.create(
-        new ProfileAwareLocatorDefinition(singleDocLocatorDefinition)
-      );
-
-      // Recreate/re-register locators for external use without profile-awareness
-      this.locator = plugins.share.url.locators.create(appLocatorDefinition);
-      plugins.share.url.locators.create(contextLocatorDefinition);
-      plugins.share.url.locators.create(singleDocLocatorDefinition);
+      this.profileAwareLocator = new ProfileAwareLocator(this.locator);
+      this.contextLocator = new ProfileAwareLocator(contextLocator);
+      this.singleDocLocator = new ProfileAwareLocator(singleDocLocator);
     }
 
     this.docViewsRegistry = new DocViewsRegistry();
