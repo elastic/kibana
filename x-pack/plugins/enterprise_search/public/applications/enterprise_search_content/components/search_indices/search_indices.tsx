@@ -106,7 +106,12 @@ export const SearchIndices: React.FC = () => {
             ? []
             : [
                 <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>
-                  <EuiButton iconType="plusInCircle" color="primary" fill>
+                  <EuiButton
+                    iconType="plusInCircle"
+                    color="primary"
+                    fill
+                    data-test-subj="entSearchContent-searchIndices-createButton"
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.searchIndices.create.buttonTitle',
                       {
