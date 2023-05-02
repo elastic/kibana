@@ -11,6 +11,10 @@ import { Type } from './type';
 
 export class NeverType extends Type<never> {
   constructor() {
-    super(internals.never());
+    super(
+      internals
+        .never({ errorMap: () => ({ message: `a value wasn't expected to be present` }) })
+        .optional()
+    );
   }
 }

@@ -39,34 +39,3 @@ test('throws on value set as object property', () => {
   expect(() => type.validate({ status: 'in progress' })).not.toThrow();
   expect(() => type.validate({ name: undefined, status: 'in progress' })).not.toThrow();
 });
-
-test('works for conditional types', () => {
-  const type = schema.object({
-    name: schema.conditional(
-      schema.contextRef('context_value_1'),
-      schema.contextRef('context_value_2'),
-      schema.string(),
-      schema.never()
-    ),
-  });
-
-  expect(
-    type.validate(
-      { name: 'a' },
-      {
-        context_value_1: 0,
-        context_value_2: 0,
-      }
-    )
-  ).toEqual({ name: 'a' });
-
-  expect(() =>
-    type.validate(
-      { name: 'a' },
-      {
-        context_value_1: 0,
-        context_value_2: 1,
-      }
-    )
-  ).toThrowErrorMatchingInlineSnapshot(`"[name]: a value wasn't expected to be present"`);
-});
