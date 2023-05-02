@@ -10,13 +10,13 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export const DiscoverError = ({ error }: { error: Error }) => {
-  const history = useHistory();
+  const { locator } = useDiscoverServices();
 
   const goToMain = () => {
-    history.push('/');
+    locator.navigate({});
   };
 
   return (

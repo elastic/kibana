@@ -5,8 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { useEffect } from 'react';
 import { History } from 'history';
+import { matchPath } from 'react-router-dom';
+
 export function useUrl({
   history,
   savedSearchId,
@@ -24,7 +27,9 @@ export function useUrl({
     // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
     // to reload the page in a right way
     const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
-      if (!search && !hash && pathname === '/' && !savedSearchId) {
+      const isProfileRoot = Boolean(matchPath(pathname, { path: '/p/:profile', exact: true }));
+
+      if ((pathname === '/' || isProfileRoot) && !search && !hash && !savedSearchId) {
         onNewUrl();
       }
     });

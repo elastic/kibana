@@ -13,14 +13,13 @@ import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DiscoverLayoutProps } from '../layout/discover_layout';
 import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
 import { useDiscoverExtension } from '../../../../extensions/extension_provider';
 
-export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'navigateTo'> & {
+export interface DiscoverTopNavProps {
   onOpenInspector: () => void;
   query?: Query | AggregateQuery;
   savedQuery?: string;
@@ -32,7 +31,7 @@ export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'navigateTo'> & {
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => Promise<void>;
-};
+}
 
 export const DiscoverTopNav = ({
   onOpenInspector,
@@ -40,7 +39,6 @@ export const DiscoverTopNav = ({
   savedQuery,
   stateContainer,
   updateQuery,
-  navigateTo,
   isPlainRecord,
   textBasedLanguageModeErrors,
   onFieldEdited,
@@ -114,7 +112,6 @@ export const DiscoverTopNav = ({
     () =>
       getTopNavLinks({
         dataView,
-        navigateTo,
         services,
         state: stateContainer,
         onOpenInspector,
@@ -126,7 +123,6 @@ export const DiscoverTopNav = ({
       adHocDataViews,
       dataView,
       isPlainRecord,
-      navigateTo,
       onOpenInspector,
       services,
       stateContainer,
@@ -190,13 +186,12 @@ export const DiscoverTopNav = ({
       onSaveSearch({
         savedSearch: stateContainer.savedSearchState.getState(),
         services,
-        navigateTo,
         state: stateContainer,
         onClose: onCancel,
         onSaveCb: onSave,
       });
     },
-    [navigateTo, services, stateContainer]
+    [services, stateContainer]
   );
 
   const searchBarExtension = useDiscoverExtension('search_bar');

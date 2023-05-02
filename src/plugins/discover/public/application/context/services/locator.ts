@@ -70,8 +70,14 @@ export class DiscoverContextAppLocatorDefinition
     }
 
     path = `${path}context/${dataViewId}/${rowId}`;
-    path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
-    path = setStateToKbnUrl('_a', appState, { useHash }, path);
+
+    if (Object.keys(queryState).length) {
+      path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
+    }
+
+    if (Object.keys(appState).length) {
+      path = setStateToKbnUrl('_a', appState, { useHash }, path);
+    }
 
     return {
       app: 'discover',

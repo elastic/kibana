@@ -29,7 +29,7 @@ export class DiscoverExtenderPlugin implements Plugin {
   start(core: CoreStart, plugins: DiscoverExtenderStartPlugins) {
     const { discover } = plugins;
 
-    discover.registerExtensions('default', ({ extensions, stateContainer }) => {
+    discover.registerExtensions('default', ({ extensions }) => {
       extensions.set({
         id: 'top_nav',
         defaultMenu: {
@@ -48,7 +48,7 @@ export class DiscoverExtenderPlugin implements Plugin {
               label: 'Logs explorer',
               iconType: 'logsApp',
               run: () => {
-                // stateContainer.appState.update({ profile: 'extender' });
+                discover.locator?.navigate({ profile: 'extender' });
               },
             },
             order: 700,
@@ -146,7 +146,7 @@ export class DiscoverExtenderPlugin implements Plugin {
               label: 'Document explorer',
               iconType: 'discoverApp',
               run: () => {
-                // stateContainer.appState.update({ profile: 'default' });
+                discover.locator?.navigate({});
               },
             },
             order: 300,
