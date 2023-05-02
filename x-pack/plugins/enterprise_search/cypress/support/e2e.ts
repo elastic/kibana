@@ -30,8 +30,9 @@ declare global {
   namespace Cypress {
     interface Chainable {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      findBySel(value: string, ...args: any[]): Chainable<any>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       getBySel(value: string, ...args: any[]): Chainable<any>;
-      getKibanaVersion(): Chainable<string>;
     }
   }
 }
@@ -41,7 +42,13 @@ function getBySel(selector: string, ...args: any[]) {
   return cy.get(`[data-test-subj="${selector}"]`, ...args);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function findBySel(selector: string, ...args: any[]) {
+  return cy.find(`[data-test-subj="${selector}"]`, ...args);
+}
+
 Cypress.Commands.add('getBySel', getBySel);
+Cypress.Commands.add('findBySel', findBySel);
 
 Cypress.on('uncaught:exception', () => {
   return false;
