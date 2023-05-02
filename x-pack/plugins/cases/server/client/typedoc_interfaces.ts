@@ -17,14 +17,14 @@ import type {
   AllCommentsResponse,
   CasePostRequest,
   CaseResolveResponse,
-  CaseResponse,
+  Case,
   CasesConfigurePatch,
   CasesConfigureRequest,
   CasesConfigureResponse,
   CasesFindRequest,
   CasesFindResponse,
   CasesPatchRequest,
-  CasesResponse,
+  Cases,
   CaseUserActionsResponse,
   CommentsResponse,
   CasesBulkGetResponse,
@@ -38,9 +38,9 @@ import type {
 export interface ICasePostRequest extends CasePostRequest {}
 export interface ICasesFindRequest extends CasesFindRequest {}
 export interface ICasesPatchRequest extends CasesPatchRequest {}
-export interface ICaseResponse extends CaseResponse {}
+export interface ICaseResponse extends Case {}
 export interface ICaseResolveResponse extends CaseResolveResponse {}
-export interface ICasesResponse extends CasesResponse {}
+export interface ICasesResponse extends Cases {}
 export interface ICasesFindResponse extends CasesFindResponse {}
 export interface ICasesBulkGetResponse extends CasesBulkGetResponse {}
 
