@@ -106,7 +106,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
 
   path: ['enterprise_search', 'content', 'engine_list_logic'],
 
-  reducers: ({ }) => ({
+  reducers: ({}) => ({
     deleteModalEngine: [
       null,
       {
