@@ -541,6 +541,7 @@ packages/kbn-saved-objects-settings @elastic/appex-sharedux
 src/plugins/saved_objects_tagging_oss @elastic/appex-sharedux
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
 src/plugins/saved_search @elastic/kibana-data-discovery
+packages/kbn-schema @elastic/kibana-core
 examples/screenshot_mode_example @elastic/kibana-app-services
 src/plugins/screenshot_mode @elastic/appex-sharedux
 x-pack/examples/screenshotting_example @elastic/appex-sharedux
