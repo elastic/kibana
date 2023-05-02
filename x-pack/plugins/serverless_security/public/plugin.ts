@@ -30,10 +30,14 @@ export class ServerlessSecurityPlugin
   }
 
   public start(
-    _core: CoreStart,
-    { securitySolution }: ServerlessSecurityPluginStartDependencies
+    core: CoreStart,
+    startDeps: ServerlessSecurityPluginStartDependencies
   ): ServerlessSecurityPluginStart {
+    const { securitySolution, serverless } = startDeps;
+
     securitySolution.setIsSidebarEnabled(false);
+    // serverless.setServerlessNavigation(getSecuritySideNavigation(core, startDeps));
+
     return {};
   }
 
