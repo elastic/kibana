@@ -7,7 +7,7 @@
 
 import { getEndpointListPath } from '../../../common/routing';
 import {
-  checkEndpointListForOnlyIsolatedHosts,
+  checkEndpointIsIsolated,
   checkFlyoutEndpointIsolation,
   filterOutIsolatedHosts,
   interceptActionRequests,
@@ -32,7 +32,8 @@ describe('Isolate command', () => {
   describe('from Manage', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let isolatedEndpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
-
+    let isolatedEndpointHostnames: [string, string];
+    let endpointHostnames: [string, string];
     before(() => {
       indexEndpointHosts({
         count: 2,
@@ -40,6 +41,10 @@ describe('Isolate command', () => {
         isolation: false,
       }).then((indexEndpoints) => {
         endpointData = indexEndpoints;
+        endpointHostnames = [
+          endpointData.data.hosts[0].host.name,
+          endpointData.data.hosts[1].host.name,
+        ];
       });
 
       indexEndpointHosts({
@@ -48,6 +53,10 @@ describe('Isolate command', () => {
         isolation: true,
       }).then((indexEndpoints) => {
         isolatedEndpointData = indexEndpoints;
+        isolatedEndpointHostnames = [
+          isolatedEndpointData.data.hosts[0].host.name,
+          isolatedEndpointData.data.hosts[1].host.name,
+        ];
       });
     });
 
@@ -67,13 +76,15 @@ describe('Isolate command', () => {
     beforeEach(() => {
       login();
     });
-    // FLAKY: https://github.com/elastic/security-team/issues/6518
-    it.skip('should allow filtering endpoint by Isolated status', () => {
+
+    it('should allow filtering endpoint by Isolated status', () => {
       cy.visit(APP_PATH + getEndpointListPath({ name: 'endpointList' }));
       closeAllToasts();
       filterOutIsolatedHosts();
-      cy.contains('Showing 2 endpoints');
-      checkEndpointListForOnlyIsolatedHosts();
+      isolatedEndpointHostnames.forEach(checkEndpointIsIsolated);
+      endpointHostnames.forEach((hostname) => {
+        cy.contains(hostname).should('not.exist');
+      });
     });
   });
 
