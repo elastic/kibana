@@ -145,6 +145,34 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     },
     sortText: 'C',
   },
+  {
+    label: 'is_finite',
+    insertText: 'is_finite',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.isFiniteDoc', {
+      defaultMessage: 'Returns a boolean that indicates whether its input is a finite number.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        'from index where field="value" | eval s = is_finite(field/0)',
+      ]),
+    },
+    sortText: 'C',
+  },
+  {
+    label: 'is_infinite',
+    insertText: 'is_infinite',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.isInfiniteDoc', {
+      defaultMessage: 'Returns a boolean that indicates whether its input is infinite.',
+    }),
+    documentation: {
+      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+        'from index where field="value" | eval s = is_infinite(field/0)',
+      ]),
+    },
+    sortText: 'C',
+  },
 ];
 
 export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = [
