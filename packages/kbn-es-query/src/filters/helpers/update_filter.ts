@@ -17,6 +17,7 @@ export const updateFilter = (
   params?: Filter['meta']['params'],
   fieldType?: string
 ) => {
+  console.log('IN UPDATE_FILTERS', { operator, filter });
   if (!field || !operator) {
     return updateField(filter, field);
   }

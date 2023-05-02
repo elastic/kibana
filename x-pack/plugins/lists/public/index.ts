@@ -6,6 +6,15 @@
  */
 
 export { getExceptionBuilderComponentLazy } from './exceptions/components/builder';
+export {
+  doesNotExistOperator,
+  existsOperator,
+  getFieldFromFilter,
+  getOperatorFromFilter,
+  isNotOneOfOperator,
+  isNotOperator,
+} from './exceptions/components/build/filter_bar/filter_editor/lib';
+
 export type { OnChangeProps } from './exceptions/components/builder';
 
 import type { PluginInitializerContext } from '@kbn/core/public';

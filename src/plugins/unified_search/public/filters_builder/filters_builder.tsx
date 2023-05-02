@@ -41,6 +41,7 @@ function FiltersBuilder({
   hideOr = false,
   disabled = false,
 }: FiltersBuilderProps) {
+  console.log({ dataView });
   const filtersRef = useRef(filters);
   const [state, dispatch] = useReducer(FiltersBuilderReducer, { filters });
   const [dropTarget, setDropTarget] = useState('');

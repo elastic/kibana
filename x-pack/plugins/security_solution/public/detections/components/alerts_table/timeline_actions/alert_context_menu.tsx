@@ -75,7 +75,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const onMenuItemClick = useCallback(() => {
     setPopover(false);
   }, []);
-
+  console.log({ ecsRowData });
   const getAlertId = () => (ecsRowData?.kibana?.alert ? ecsRowData?._id : null);
   const alertId = getAlertId();
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);

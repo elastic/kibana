@@ -121,6 +121,6 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
 
   return {
     isLoading: isIndexPatternLoading || mlJobLoading || dataViewLoading,
-    indexPatterns: indexPatternsToUse,
+    indexPatterns: { ...indexPatternsToUse, id: `security-solution-default` },
   };
 };

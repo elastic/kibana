@@ -66,6 +66,7 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps)
           max-width: 100%;
         `}
       >
+        {console.log({ IP: props.indexPatterns })}
         <FilterItem
           id={`${i}`}
           intl={props.intl}

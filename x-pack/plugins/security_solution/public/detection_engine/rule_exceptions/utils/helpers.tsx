@@ -870,3 +870,46 @@ export const enrichSharedExceptions = (
     });
   });
 };
+
+const fieldsToLookFor = [
+  'host.name',
+  'agent.id',
+  'user.name',
+  'rule.name',
+  'event.category',
+  'cloud.provider',
+  'cloud.region',
+  'cloud.provider',
+  'cloud.region',
+  'orchestrator.cluster.id',
+  'orchestrator.cluster.name',
+  'container.image.name',
+  'container.image.tag',
+  'orchestrator.namespace',
+  'orchestrator.resource.parent.type',
+  'orchestrator.resource.type',
+  'process.executable',
+  'file.path',
+];
+
+export const prepopulateAlertData = (
+  name = 'foo',
+  alertData: AlertData
+): ExceptionsBuilderExceptionItem[] => {
+  console.log({ alertData });
+  const item = getNewExceptionItem({
+    listId: undefined,
+    namespaceType: undefined,
+    name,
+  });
+  const entries = fieldsToLookFor.reduce((acc, field) => {
+    if (alertData[field]) {
+      return [...acc, { field, operator: 'is_one_of', type: 'matches', value: alertData[field] }];
+    } else {
+      return acc;
+    }
+  }, []);
+  item.entries = entries;
+  console.log({ item });
+  return [item];
+};

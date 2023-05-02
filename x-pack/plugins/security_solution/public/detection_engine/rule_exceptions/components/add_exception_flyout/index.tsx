@@ -41,6 +41,7 @@ import {
   defaultEndpointExceptionItems,
   retrieveAlertOsTypes,
   filterIndexPatterns,
+  prepopulateAlertData,
 } from '../../utils/helpers';
 import type { AlertData } from '../../utils/types';
 import { initialState, createExceptionItemsReducer } from './reducer';
@@ -341,6 +342,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       setInitialExceptionItems(
         defaultEndpointExceptionItems(ENDPOINT_LIST_ID, exceptionItemName, alertData)
       );
+    }
+    if (alertData != null) {
+      setInitialExceptionItems(prepopulateAlertData(exceptionItemName, alertData));
     }
   }, [listType, exceptionItemName, alertData, setInitialExceptionItems]);
 

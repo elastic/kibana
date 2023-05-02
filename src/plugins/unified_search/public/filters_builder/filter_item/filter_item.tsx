@@ -99,6 +99,7 @@ export function FilterItem({
     filtersForSuggestions,
     disabled,
   } = useContext(FiltersBuilderContextType);
+  console.log({ filter });
   const conditionalOperationType = getBooleanRelationType(filter);
   const { euiTheme } = useEuiTheme();
   let field: DataViewField | undefined;

@@ -1,0 +1,24 @@
+.kbnFilterButtonGroup {
+  height: $euiFormControlHeight;
+  background-color: $euiFormInputGroupLabelBackground;
+  border-radius: $euiFormControlBorderRadius;
+  box-shadow: 0 0 1px inset rgba($euiFormBorderOpaqueColor, .4);
+
+  // Targets any interactable elements
+  *:enabled {
+    transform: none !important;
+  }
+
+  &--s {
+    height: $euiFormControlCompressedHeight;
+  }
+
+  &--attached {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  > *:not(:last-of-type) {
+    border-right: 1px solid $euiFormBorderColor;
+  }
+}

@@ -8,7 +8,15 @@
 import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import {
+  getExceptionBuilderComponentLazy,
+  doesNotExistOperator,
+  existsOperator,
+  getFieldFromFilter,
+  getOperatorFromFilter,
+  isNotOneOfOperator,
+  isNotOperator,
+} from '@kbn/lists-plugin/public';
 import type {
   CreateRuleExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -24,9 +32,14 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import type { DataViewBase } from '@kbn/es-query';
+import { getFilterParams } from '@kbn/es-query';
 import styled, { css, createGlobalStyle } from 'styled-components';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { hasEqlSequenceQuery, isEqlRule } from '../../../../../../common/detection_engine/utils';
+import {
+  hasEqlSequenceQuery,
+  isEqlRule,
+  transformExceptionsToFilter,
+} from '../../../../../../common/detection_engine/utils';
 import type { Rule } from '../../../../rule_management/logic/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -153,19 +166,23 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
   }, [exceptionListItems, isEdit, isEndpointException]);
 
   const handleBuilderOnChange = useCallback(
-    ({
-      exceptionItems,
-      errorExists,
-    }: {
-      exceptionItems: Array<
-        ExceptionListItemSchema | CreateExceptionListItemSchema | CreateRuleExceptionListItemSchema
-      >;
-      errorExists: boolean;
-    }) => {
-      onExceptionItemAdd(exceptionItems);
-      onSetErrorExists(errorExists);
+    (fil) => {
+      let field: DataViewField | undefined;
+      let operator: Operator | undefined;
+      let params: Filter['meta']['params'];
+      field = getFieldFromFilter(fil, indexPatterns!);
+      if (field) {
+        operator = getOperatorFromFilter(fil, [
+          doesNotExistOperator,
+          existsOperator,
+          isNotOneOfOperator,
+          isNotOperator,
+        ]);
+        params = getFilterParams(fil);
+      }
+      console.log({ FILTER: fil, field, operator, params });
     },
-    [onSetErrorExists, onExceptionItemAdd]
+    [indexPatterns]
   );
 
   const handleOSSelectionChange = useCallback(
@@ -215,6 +232,12 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
     return (isEdit ? exceptionListItems[0].os_types : selectedOs) ?? [];
   }, [exceptionListItems, isEdit, selectedOs]);
 
+  const filter = useMemo(() => {
+    console.log('CONDITIONS', { exceptionListItems });
+    return transformExceptionsToFilter(exceptionListItems, indexPatterns);
+  }, [exceptionListItems, indexPatterns]);
+
+  console.log('ITEM CONDITIONS', { filter });
   return (
     <>
       <SectionHeader size="xs">
@@ -258,6 +281,12 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
         </>
       )}
       {getExceptionBuilderComponentLazy({
+        indexPatterns: [indexPatterns],
+        filter,
+        operators: [doesNotExistOperator, existsOperator, isNotOneOfOperator, isNotOperator],
+        onLocalFilterUpdate: handleBuilderOnChange,
+      })}
+      {/* {getExceptionBuilderComponentLazy({
         allowLargeValueLists,
         httpService: http,
         autocompleteService: unifiedSearch.autocomplete,
@@ -277,7 +306,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
         onChange: handleBuilderOnChange,
         isDisabled: isExceptionBuilderFormDisabled,
         allowCustomFieldOptions: !isEndpointException,
-      })}
+      })} */}
     </>
   );
 };
