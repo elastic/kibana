@@ -24,6 +24,7 @@ export const LicensePrompt = React.memo(() => {
 
   return (
     <EuiPageTemplate.EmptyPrompt
+      data-test-subj="mw-license-prompt"
       title={title}
       body={
         <EuiFlexGroup direction="column">
