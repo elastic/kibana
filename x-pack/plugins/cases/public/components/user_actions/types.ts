@@ -10,9 +10,9 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { ActionTypes, UserActionWithResponse } from '../../../common/api';
 import type {
-  Case,
+  CaseUI,
   CaseConnectors,
-  CaseUserActions,
+  UserActionUI,
   Comment,
   UseFetchAlertData,
   CaseUserActionsStats,
@@ -31,7 +31,7 @@ export interface UserActionTreeProps {
   caseConnectors: CaseConnectors;
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
-  data: Case;
+  data: CaseUI;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   actionsNavigation?: ActionsNavigation;
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
@@ -48,13 +48,13 @@ export type SupportedUserActionTypes = keyof Omit<typeof ActionTypes, Unsupporte
 
 export interface UserActionBuilderArgs {
   appId?: string;
-  caseData: Case;
+  caseData: CaseUI;
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   caseConnectors: CaseConnectors;
-  userAction: CaseUserActions;
+  userAction: UserActionUI;
   comments: Comment[];
   index: number;
   commentRefs: React.MutableRefObject<

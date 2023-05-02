@@ -13,15 +13,15 @@ import {
 } from '../../common/utils/attachments';
 import type {
   CasesFindResponse,
-  CaseResponse,
-  CaseUserActionsResponse,
+  Case,
+  UserActions,
   CommentRequest,
   CommentResponse,
   CaseResolveResponse,
-  CasesResponse,
+  Cases,
 } from '../../common/api';
 import { isCommentUserAction } from '../../common/utils/user_actions';
-import type { Cases, Case, Comment, ResolvedCase } from '../containers/types';
+import type { CasesUI, CaseUI, Comment, ResolvedCase } from '../containers/types';
 
 export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
   arrayOfSnakes.reduce((acc: unknown[], value) => {
@@ -46,15 +46,15 @@ export const convertToCamelCase = <T, U extends {}>(obj: T): U =>
     return acc;
   }, {} as U);
 
-export const convertCaseToCamelCase = (theCase: CaseResponse): Case => {
+export const convertCaseToCamelCase = (theCase: Case): CaseUI => {
   const { comments, ...restCase } = theCase;
   return {
-    ...convertToCamelCase<CaseResponse, Case>(restCase),
+    ...convertToCamelCase<Case, CaseUI>(restCase),
     ...(comments != null ? { comments: convertAttachmentsToCamelCase(comments) } : {}),
   };
 };
 
-export const convertCasesToCamelCase = (cases: CasesResponse): Case[] =>
+export const convertCasesToCamelCase = (cases: Cases): CaseUI[] =>
   cases.map(convertCaseToCamelCase);
 
 export const convertCaseResolveToCamelCase = (res: CaseResolveResponse): ResolvedCase => {
@@ -81,7 +81,7 @@ export const convertAttachmentToCamelCase = (attachment: CommentRequest): Commen
   return convertToCamelCase<CommentRequest, Comment>(attachment);
 };
 
-export const convertUserActionsToCamelCase = (userActions: CaseUserActionsResponse) => {
+export const convertUserActionsToCamelCase = (userActions: UserActions) => {
   return userActions.map((userAction) => {
     if (isCommentUserAction(userAction)) {
       const userActionWithoutPayload = omit(userAction, 'payload.comment');
@@ -113,7 +113,7 @@ const convertAttachmentToCamelExceptProperty = (
   } as Comment;
 };
 
-export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): Cases => ({
+export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): CasesUI => ({
   cases: convertCasesToCamelCase(snakeCases.cases),
   countOpenCases: snakeCases.count_open_cases,
   countInProgressCases: snakeCases.count_in_progress_cases,

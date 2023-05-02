@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
 import { resolve } from 'path';
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
@@ -56,27 +56,21 @@ export class ServerlessPlugin implements Plugin<ServerlessPluginSetup, Serverles
         },
         async (_context, request, response) => {
           const { id } = request.body;
-          const path = resolve(getConfigDirectory(), `serverless.${typeToIdMap[id]}.yml`);
+          const selectedProjectType = typeToIdMap[id];
 
           try {
-            if (existsSync(path)) {
-              const data = readFileSync(path, 'utf8');
+            // The switcher is not enabled by default, in cases where one has started Serverless
+            // with a specific config.  So in this case, to ensure the switcher remains enabled,
+            // write the selected config to `recent` and tack on the setting to enable the switcher.
+            writeFileSync(
+              resolve(getConfigDirectory(), 'serverless.recent.yml'),
+              `xpack.serverless.plugin.developer.projectSwitcher.enabled: true\nserverless: ${selectedProjectType}\n`
+            );
 
-              // The switcher is not enabled by default, in cases where one has started Serverless
-              // with a specific config.  So in this case, to ensure the switcher remains enabled,
-              // erite the selected config to `recent` and tack on the setting to enable the switcher.
-              writeFileSync(
-                resolve(getConfigDirectory(), 'serverless.recent.yml'),
-                `${data}\nxpack.serverless.plugin.developer.projectSwitcher.enabled: true\n`
-              );
-
-              return response.ok({ body: id });
-            }
+            return response.ok({ body: id });
           } catch (e) {
             return response.badRequest({ body: e });
           }
-
-          return response.badRequest();
         }
       );
     }
