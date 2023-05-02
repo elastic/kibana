@@ -1554,22 +1554,6 @@
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
           },
           {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
           },
@@ -1712,18 +1696,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/server/search/saved_objects/search_session_migration.test.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/user_actions/operations/find.ts"
           },
           {
             "plugin": "synthetics",
@@ -3065,18 +3037,6 @@
           {
             "plugin": "cases",
             "path": "x-pack/plugins/cases/server/attachment_framework/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/server/services/so_references.ts"
           },
           {
             "plugin": "maps",
