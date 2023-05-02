@@ -25,6 +25,7 @@ import {
   EuiFlexItem,
   EuiBetaBadge,
   EuiBadge,
+  EuiSwitch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -284,6 +285,36 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             });
           }}
         />
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.tamperingLabel"
+              defaultMessage="Agent tampering"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.tamperingDescription"
+            defaultMessage="some description"
+          />
+        }
+      >
+        <EuiSwitch
+          label={i18n.translate('xpack.fleet.agentPolicyForm.tamperingSwitchLabel', {
+            defaultMessage: 'Turn on agent tampering',
+          })}
+          checked={agentPolicy.tampering_enabled || false}
+          onChange={(e) => updateAgentPolicy({ tampering_enabled: e.target.checked })}
+        />
+        <EuiSpacer size="s" />
+        <EuiLink onClick={() => {}} disabled={agentPolicy.tampering_enabled === false}>
+          {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
+            defaultMessage: 'Get uninstall command',
+          })}
+        </EuiLink>
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
