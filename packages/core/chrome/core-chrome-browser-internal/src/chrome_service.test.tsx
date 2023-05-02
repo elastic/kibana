@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
@@ -19,6 +19,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { getAppInfo } from '@kbn/core-application-browser-internal';
+import { findTestSubject } from '@kbn/test-jest-helpers';
 import { ChromeService } from './chrome_service';
 
 class FakeApp implements App {
@@ -175,6 +176,41 @@ describe('start', () => {
       // Have to do some fanagling to get the type system and enzyme to accept this.
       // Don't capture the snapshot because it's 600+ lines long.
       expect(shallow(React.createElement(() => chrome.getHeaderComponent()))).toBeDefined();
+    });
+
+    it('renders the default project side navigation', async () => {
+      const { chrome } = await start();
+
+      chrome.setChromeStyle('project');
+
+      const component = mount(chrome.getHeaderComponent());
+
+      const projectHeader = findTestSubject(component, 'kibanaProjectHeader');
+      expect(projectHeader.length).toBe(1);
+
+      const defaultProjectSideNav = findTestSubject(component, 'defaultProjectSideNav');
+      expect(defaultProjectSideNav.length).toBe(1);
+    });
+
+    it('renders the custom project side navigation', async () => {
+      const { chrome } = await start();
+
+      const MyNav = function MyNav() {
+        return <div data-test-subj="customProjectSideNav">HELLO</div>;
+      };
+      chrome.setChromeStyle('project');
+      chrome.project.setSideNavComponent(MyNav);
+
+      const component = mount(chrome.getHeaderComponent());
+
+      const projectHeader = findTestSubject(component, 'kibanaProjectHeader');
+      expect(projectHeader.length).toBe(1);
+
+      const defaultProjectSideNav = findTestSubject(component, 'defaultProjectSideNav');
+      expect(defaultProjectSideNav.length).toBe(0); // Default side nav not mounted
+
+      const customProjectSideNav = findTestSubject(component, 'customProjectSideNav');
+      expect(customProjectSideNav.text()).toBe('HELLO');
     });
   });
 
