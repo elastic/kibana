@@ -17,6 +17,7 @@ export interface DiscoverSingleDocLocatorParams extends SerializableRecord {
   rowId: string;
   rowIndex: string;
   referrer: string; // discover main view url
+  profile?: string;
 }
 
 export type DiscoverSingleDocLocator = LocatorPublic<DiscoverSingleDocLocatorParams>;
@@ -45,7 +46,13 @@ export class DiscoverSingleDocLocatorDefinition
       dataViewId = index;
     }
 
-    const path = `#/doc/${dataViewId}/${rowIndex}?id=${rowId}`;
+    let path = '#/';
+
+    if (params.profile) {
+      path = `${path}p/${params.profile}/`;
+    }
+
+    path = `${path}doc/${dataViewId}/${rowIndex}?id=${rowId}`;
 
     return {
       app: 'discover',
