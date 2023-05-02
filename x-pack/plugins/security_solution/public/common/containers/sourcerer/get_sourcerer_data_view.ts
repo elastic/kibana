@@ -7,22 +7,26 @@
 
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
+import type { SourcererDataView } from '../../store/sourcerer/model';
 
 export const getSourcererDataView = async (
   dataViewId: string,
   dataViewsService: DataViewsContract,
   refreshFields = false
-) => {
+): Promise<SourcererDataView> => {
   const dataViewData = await dataViewsService.get(dataViewId, true, refreshFields);
   const defaultPatternsList = ensurePatternFormat(dataViewData.getIndexPattern().split(','));
   const patternList = defaultPatternsList;
 
   return {
+    loading: false,
     id: dataViewData.id ?? '',
     title: dataViewData.getIndexPattern(),
     indexFields: dataViewData.fields,
-    fields: { ...dataViewData.fields, ...dataViewData.getAllRuntimeFields() },
+    fields: dataViewData.fields,
     patternList,
     dataView: dataViewData,
+    browserFields: {},
+    runtimeMappings: dataViewData.getRuntimeMappings(),
   };
 };
