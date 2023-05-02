@@ -69,6 +69,6 @@ export const pipelineDocs = schema.arrayOf(schema.string());
 
 export const stopDeploymentSchema = schema.object({
   modelId: schema.string(),
-  /** force close */
+  /** force stop */
   force: schema.maybe(schema.boolean()),
 });
