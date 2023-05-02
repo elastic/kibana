@@ -146,7 +146,7 @@ describe('CreateEngineButton', () => {
 
       expect(popover).toHaveLength(1);
       expect(popover.text()).toMatch(
-        'This functionality is in technical preview and may be changed or removed completely in a future release.'
+        'This functionality may be changed or removed completely in a future release.'
       );
     });
   });
@@ -177,7 +177,7 @@ describe('CreateEngineButton', () => {
 
       expect(popover).toHaveLength(1);
       expect(popover.text()).toMatch(
-        'This functionality is in technical preview and may be changed or removed completely in a future release.'
+        'This functionality may be changed or removed completely in a future release.'
       );
     });
   });
