@@ -13,6 +13,8 @@ import { shallow } from 'enzyme';
 
 import { EuiButton } from '@elastic/eui';
 
+import { HttpError } from '../../../../../../../common/types/api';
+
 import {
   TextExpansionCallOut,
   DeployModel,
@@ -23,7 +25,6 @@ import {
 } from './text_expansion_callout';
 
 import { TextExpansionErrors } from './text_expansion_errors';
-import { HttpError } from '../../../../../../../common/types/api';
 
 jest.mock('./text_expansion_callout_data', () => ({
   useTextExpansionCallOutData: jest.fn(() => ({

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
 import { setMockValues } from '../../../../../__mocks__/kea_logic';
+
+import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { TextExpansionErrors } from './text_expansion_errors';
-import { HttpError } from '../../../../../../../common/types/api';
 import { EuiCallOut } from '@elastic/eui';
+
+import { HttpError } from '../../../../../../../common/types/api';
+
+import { TextExpansionErrors } from './text_expansion_errors';
 
 describe('TextExpansionErrors', () => {
   beforeEach(() => {
