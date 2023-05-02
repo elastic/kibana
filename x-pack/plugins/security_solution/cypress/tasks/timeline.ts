@@ -397,7 +397,6 @@ export const persistNoteToFirstEvent = (notes: string) => {
 
 export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
-  executeTimelineKQL(hostExistsQuery);
   cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
 };
 

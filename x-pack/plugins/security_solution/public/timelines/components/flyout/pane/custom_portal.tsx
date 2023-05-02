@@ -10,6 +10,7 @@
  * into portals.
  */
 
+import deepEqual from 'fast-deep-equal';
 import type { ReactNode } from 'react';
 import { Component } from 'react';
 import { createPortal } from 'react-dom';
@@ -29,7 +30,7 @@ export interface EuiPortalProps {
    * ReactNode to render as this component's content
    */
   children: ReactNode;
-  insert?: { sibling: HTMLElement; position: 'before' | 'after' };
+  insert?: { sibling: HTMLElement | null; position: 'before' | 'after' };
   portalRef?: (ref: HTMLDivElement | null) => void;
 }
 
@@ -45,7 +46,7 @@ export class EuiPortal extends Component<EuiPortalProps> {
     this.portalNode = document.createElement('div');
     this.portalNode.dataset.euiportal = 'true';
 
-    if (insert == null) {
+    if (insert == null || insert.sibling == null) {
       // no insertion defined, append to body
       document.body.appendChild(this.portalNode);
     } else {
@@ -67,12 +68,12 @@ export class EuiPortal extends Component<EuiPortalProps> {
   }
 
   componentDidUpdate(prevProps: Readonly<EuiPortalProps>): void {
-    if (prevProps.insert !== this.props.insert && this.portalNode?.parentNode) {
+    if (!deepEqual(prevProps.insert, this.props.insert) && this.portalNode?.parentNode) {
       this.portalNode.parentNode.removeChild(this.portalNode);
     }
 
     if (this.portalNode) {
-      if (this.props.insert == null) {
+      if (this.props.insert == null || this.props.insert.sibling == null) {
         // no insertion defined, append to body
         document.body.appendChild(this.portalNode);
       } else {

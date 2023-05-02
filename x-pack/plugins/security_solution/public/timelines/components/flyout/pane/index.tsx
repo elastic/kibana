@@ -40,9 +40,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
 
   return (
     <div data-test-subj="flyout-pane" ref={ref}>
-      <EuiPortal
-        insert={!visible && ref?.current ? { sibling: ref?.current, position: 'after' } : undefined}
-      >
+      <EuiPortal insert={{ sibling: !visible ? ref?.current : null, position: 'after' }}>
         <div
           aria-label={i18n.TIMELINE_DESCRIPTION}
           className="euiFlyout"
