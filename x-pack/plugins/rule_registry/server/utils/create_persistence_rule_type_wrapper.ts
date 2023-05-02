@@ -12,6 +12,7 @@ import { chunk, partition } from 'lodash';
 import {
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
+  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_NAMESPACE,
   ALERT_START,
   ALERT_SUPPRESSION_DOCS_COUNT,
@@ -48,6 +49,7 @@ const augmentAlerts = <T>({
       _source: {
         [ALERT_START]: currentTimeOverride ?? new Date(),
         [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
+        [ALERT_MAINTENANCE_WINDOW_IDS]: options?.maintenanceWindowIds ?? [],
         [VERSION]: kibanaVersion,
         ...commonRuleFields,
         ...alert._source,
