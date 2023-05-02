@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { Header } from './header';
-export { ProjectHeader, SideNavigation as ProjectSideNavigation } from './project';
-export { LoadingIndicator } from './loading_indicator';
-export type { NavType } from './header';
+export { ProjectNavigationService } from './project_navigation_service';
