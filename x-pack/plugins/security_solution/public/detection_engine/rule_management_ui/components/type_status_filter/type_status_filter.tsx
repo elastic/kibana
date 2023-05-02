@@ -15,8 +15,8 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
 } from '@elastic/eui';
-import * as i18n from './translations';
 import { css } from '@emotion/react';
+import * as i18n from './translations';
 
 const POPOVER_WIDTH = 275;
 

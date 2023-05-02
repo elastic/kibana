@@ -15,9 +15,9 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
 } from '@elastic/eui';
+import { css } from '@emotion/react/dist/emotion-react.cjs';
 import * as i18n from './translations';
 import { caseInsensitiveSort } from '../rules_table/helpers';
-import { css } from '@emotion/react/dist/emotion-react.cjs';
 
 const TAGS_POPOVER_WIDTH = 300;
 
@@ -61,7 +61,7 @@ const TagsFilterComponent: React.FC<TagsFilterProps> = ({
   }, [selectedTags]);
 
   // prepend selectedTags to tags
-  const [options, setOptions] = useState<Array<EuiSelectableOption>>([
+  const [options, setOptions] = useState<EuiSelectableOption[]>([
     ...sortedSelectedTags,
     ...sortedTags,
   ]);

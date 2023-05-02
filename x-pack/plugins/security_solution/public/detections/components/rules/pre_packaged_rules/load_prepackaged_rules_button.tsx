@@ -7,8 +7,8 @@
 
 import { EuiBadge, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
+import { css } from '@emotion/react';
 import { usePrePackagedRulesInstallationStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_rules_installation_status';
-import { usePrePackagedRulesStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_rules_status';
 import { usePrePackagedTimelinesInstallationStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_timelines_installation_status';
 import { INSTALL_PREBUILT_RULES_ANCHOR } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/rules_management_tour';
 import type {
@@ -16,13 +16,8 @@ import type {
   PrePackagedTimelineInstallationStatus,
 } from '../../../pages/detection_engine/rules/helpers';
 import * as i18n from './translations';
-import {
-  SecuritySolutionLinkButton,
-  useGetSecuritySolutionLinkProps,
-} from '../../../../common/components/links';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
+import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../../common/constants';
-import { css } from '@emotion/react';
 import { usePrebuiltRulesStatus } from '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 
 const getLoadRulesOrTimelinesButtonTitle = (
