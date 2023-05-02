@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { kea, MakeLogicType } from 'kea';
+
+import { i18n } from '@kbn/i18n';
 
 import { HttpError, Status } from '../../../../../../../common/types/api';
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
+import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 import {
   CreateTextExpansionModelApiLogic,
   CreateTextExpansionModelApiLogicActions,
@@ -24,7 +26,6 @@ import {
   StartTextExpansionModelApiLogic,
   StartTextExpansionModelApiLogicActions,
 } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
-import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 
 const FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION = 5000; // 5 seconds
 const FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
@@ -66,9 +67,9 @@ export interface TextExpansionCalloutValues {
 
 /**
  * Extracts the topmost error in precedence order (create > start > fetch).
- * @param createError 
- * @param fetchError 
- * @param startError 
+ * @param createError
+ * @param fetchError
+ * @param startError
  * @returns the extracted error or null if there is no error
  */
 export const getTextExpansionError = (
