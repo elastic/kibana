@@ -60,6 +60,7 @@ import {
 import { createCallObservabilityApi } from './services/call_observability_api';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import { getAlertsTableConfiguration } from './components/alerts_table/get_alerts_table_configuration';
 
 export interface ConfigSchema {
   unsafe: {
@@ -328,18 +329,12 @@ export class Plugin
       updater$: this.appUpdater$,
     });
 
-    const getAsyncO11yAlertsTableConfiguration = async () => {
-      const { getAlertsTableConfiguration } = await import(
-        './components/alerts_table/get_alerts_table_configuration'
-      );
-      return getAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
-    };
+    const alertsTableConfig = getAlertsTableConfiguration(
+      this.observabilityRuleTypeRegistry,
+      config
+    );
 
-    const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
-
-    getAsyncO11yAlertsTableConfiguration().then((alertsTableConfig) => {
-      alertsTableConfigurationRegistry.register(alertsTableConfig);
-    });
+    pluginsStart.triggersActionsUi.alertsTableConfigurationRegistry.register(alertsTableConfig);
 
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,

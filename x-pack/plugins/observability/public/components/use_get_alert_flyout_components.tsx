@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
 
 import type { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
@@ -19,36 +19,18 @@ export { AlertsFlyout } from './alerts_flyout';
 export const useGetAlertFlyoutComponents = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
 ) => {
-  const body = useCallback(
-    (props: AlertsTableFlyoutBaseProps) => {
+  return {
+    body: (props: AlertsTableFlyoutBaseProps) => {
       const alert = parseAlert(observabilityRuleTypeRegistry)(props.alert);
       return <AlertsFlyoutBody alert={alert} id={props.id} />;
     },
-    [observabilityRuleTypeRegistry]
-  );
-
-  const header = useCallback(
-    (props: AlertsTableFlyoutBaseProps) => {
+    header: (props: AlertsTableFlyoutBaseProps) => {
       const alert = parseAlert(observabilityRuleTypeRegistry)(props.alert);
       return <AlertsFlyoutHeader alert={alert} />;
     },
-    [observabilityRuleTypeRegistry]
-  );
-
-  const footer = useCallback(
-    (props: AlertsTableFlyoutBaseProps) => {
+    footer: (props: AlertsTableFlyoutBaseProps) => {
       const alert = parseAlert(observabilityRuleTypeRegistry)(props.alert);
       return <AlertsFlyoutFooter isInApp={false} alert={alert} />;
     },
-    [observabilityRuleTypeRegistry]
-  );
-
-  return useMemo(
-    () => ({
-      body,
-      header,
-      footer,
-    }),
-    [body, header, footer]
-  );
+  };
 };
