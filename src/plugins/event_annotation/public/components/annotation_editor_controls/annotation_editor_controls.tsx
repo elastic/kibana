@@ -7,6 +7,7 @@
  */
 
 import './index.scss';
+import { isFieldLensCompatible } from '@kbn/visualization-ui-components/public';
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
@@ -139,8 +140,9 @@ export const AnnotationEditorControls = ({
                   timeField:
                     (dataView.timeFieldName ||
                       // fallback to the first avaiable date field in the dataView
-                      dataView.fields.find(({ type: fieldType }) => fieldType === 'date')
-                        ?.displayName) ??
+                      dataView.fields
+                        .filter(isFieldLensCompatible)
+                        .find(({ type: fieldType }) => fieldType === 'date')?.displayName) ??
                     '',
                   key: { type: 'point_in_time' },
                   ...additionalRangeResets,
@@ -203,6 +205,7 @@ export const AnnotationEditorControls = ({
                   return null;
                 }
                 const options = dataView.fields
+                  .filter(isFieldLensCompatible)
                   .filter(({ displayName, type }) => displayName && type !== 'document')
                   .map(
                     (field) =>

@@ -19,6 +19,7 @@ import {
   type QueryInputServices,
 } from '@kbn/visualization-ui-components/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { isFieldLensCompatible } from '@kbn/visualization-ui-components/public';
 import type { QueryPointEventAnnotationConfig } from '../../../common';
 
 export const defaultQuery: Query = {
@@ -42,6 +43,7 @@ export const ConfigPanelQueryAnnotation = ({
   const { hasFieldData } = useExistingFieldsReader();
   // list only date fields
   const options = dataView.fields
+    .filter(isFieldLensCompatible)
     .filter((field) => field.type === 'date' && field.displayName)
     .map((field) => {
       return {

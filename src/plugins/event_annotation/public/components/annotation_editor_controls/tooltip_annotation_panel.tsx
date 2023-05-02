@@ -21,6 +21,7 @@ import {
   FieldsBucketContainer,
 } from '@kbn/visualization-ui-components/public';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { isFieldLensCompatible } from '@kbn/visualization-ui-components/public';
 import { QueryPointEventAnnotationConfig } from '../../../common';
 
 export const MAX_TOOLTIP_FIELDS_SIZE = 2;
@@ -126,6 +127,7 @@ export function TooltipSection({
   }
 
   const options = dataView.fields
+    .filter(isFieldLensCompatible)
     .filter(
       ({ displayName, type }) =>
         displayName && !rawValuesLookup.has(displayName) && supportedTypes.has(type)

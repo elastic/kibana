@@ -35,6 +35,8 @@ export {
   TextDecorationSetting,
 } from './components';
 
+export { isFieldLensCompatible } from './util';
+
 export type {
   DataType,
   FieldOptionValue,
