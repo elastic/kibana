@@ -124,6 +124,10 @@ export class HttpServer {
     return this.server !== undefined && this.server.listener.listening;
   }
 
+  public getRegisteredRouters() {
+    return [...this.registeredRouters];
+  }
+
   private registerRouter(router: IRouter) {
     if (this.isListening()) {
       throw new Error('Routers can be registered only when HTTP server is stopped.');

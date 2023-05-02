@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable import/no-extraneous-dependencies */
-
 import z from 'zod';
 
 // Entire file copied from https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/zod.ts#L1

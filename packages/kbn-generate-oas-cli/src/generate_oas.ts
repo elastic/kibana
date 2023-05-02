@@ -14,6 +14,9 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 import zodToJsonSchema from 'zod-to-json-schema';
+
+import type { CoreVersionedRouter } from '@kbn/core-http-router-server-internal/src/versioned_router';
+import type { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/versioned_router/types';
 import {
   instanceofZodType,
   instanceofZodTypeObject,
@@ -25,9 +28,6 @@ import {
   instanceofZodTypeCoercible,
   getPathParameters,
 } from './util';
-
-import type { CoreVersionedRouter } from '..';
-import type { VersionedRouterRoute } from '../types';
 
 export const openApiVersion = '3.0.0';
 
@@ -41,9 +41,13 @@ export interface GenerateOpenApiDocumentOptions {
 }
 
 export function generateOpenApiDocument(
-  appRouter: CoreVersionedRouter,
+  appRouters: CoreVersionedRouter[],
   opts: GenerateOpenApiDocumentOptions
 ): OpenAPIV3.Document {
+  const paths: OpenAPIV3.PathsObject = {};
+  for (const appRouter of appRouters) {
+    Object.assign(paths, getOpenApiPathsObject(appRouter));
+  }
   return {
     openapi: openApiVersion,
     info: {
@@ -56,7 +60,7 @@ export function generateOpenApiDocument(
         url: opts.baseUrl,
       },
     ],
-    paths: getOpenApiPathsObject(appRouter),
+    paths,
     security: [
       {
         basicAuth: [],
@@ -202,7 +206,7 @@ function getOperationId(name: string): string {
 }
 
 function getOpenApiPathsObject(appRouter: CoreVersionedRouter): OpenAPIV3.PathsObject {
-  const routes = appRouter.getRoutes();
+  const routes = appRouter.getRoutes().filter((route) => route.options.access === 'public');
   const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {
     const pathParams = getPathParameters(route.path);
