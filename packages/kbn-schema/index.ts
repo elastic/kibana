@@ -31,7 +31,7 @@ import {
   UnionType,
 } from './src/types';
 
-export type { AnyType, TypeOf, Props, SchemaStructureEntry, NullableProps };
+export type { AnyType, TypeOf, Props, NullableProps };
 export { ObjectType, Type };
 export { ValidationError } from './src/errors';
 export { isKbnSchema } from './src/typeguards';
