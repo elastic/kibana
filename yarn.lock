@@ -4921,6 +4921,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-solution-packages-storybook-config@link:x-pack/packages/security-solution/storybook/config":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-solution-plugin@link:x-pack/plugins/security_solution":
   version "0.0.0"
   uid ""
@@ -4929,7 +4933,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-storybook-config@link:x-pack/packages/security-solution/storybook/config":
+"@kbn/security-solution-storybook-config@link:x-pack/plugins/security_solution/.storybook":
   version "0.0.0"
   uid ""
 

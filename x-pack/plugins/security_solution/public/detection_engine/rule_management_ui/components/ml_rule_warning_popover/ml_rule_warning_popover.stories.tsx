@@ -16,7 +16,7 @@ import type { MlRuleWarningPopoverComponentProps } from './ml_rule_warning_popov
 import { mockSecurityJobs } from '../../../../common/components/ml_popover/api.mock';
 
 const mlRuleWarningPopover: ComponentMeta<typeof MlRuleWarningPopover> = {
-  title: 'Rules Table/MlRuleWarningPopover',
+  title: 'Rule Mgmt/MlRuleWarningPopover',
   component: MlRuleWarningPopover,
   decorators: [
     (Story: Story) => (

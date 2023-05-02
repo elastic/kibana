@@ -13,8 +13,6 @@ import { useSyncRulesTableSavedState } from './rules_table/use_sync_rules_table_
 import { RulesTables } from './rules_tables';
 import type { AllRulesTabs } from './rules_table_toolbar';
 import { RulesTableToolbar } from './rules_table_toolbar';
-import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
-import { useRulesTableContext } from './rules_table/rules_table_context';
 
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
@@ -27,20 +25,11 @@ import { useRulesTableContext } from './rules_table/rules_table_context';
 export const AllRules = React.memo(() => {
   useSyncRulesTableSavedState();
   const [{ tabName }] = useRouteSpy();
-  const rulesTableContext = useRulesTableContext();
-  const totalRules = rulesTableContext.state.pagination.total;
-
-  const { num_prebuilt_rules_to_install, num_prebuilt_rules_to_upgrade } =
-    usePrebuiltRulesStatus().data?.attributes?.stats || {};
 
   return (
     <>
       <RulesManagementTour />
-      <RulesTableToolbar
-        installedTotal={totalRules}
-        newTotal={num_prebuilt_rules_to_install}
-        updateTotal={num_prebuilt_rules_to_upgrade}
-      />
+      <RulesTableToolbar />
       <EuiSpacer />
       <RulesTables selectedTab={tabName as AllRulesTabs} />
     </>

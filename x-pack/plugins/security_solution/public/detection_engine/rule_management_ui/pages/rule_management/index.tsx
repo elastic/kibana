@@ -38,10 +38,14 @@ import { RulesTableContextProvider } from '../../components/rules_table/rules_ta
 
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
-import { PrebuiltRulesInfoCallout } from '../../components/info_callout/prebuilt_rules_info_callout';
-import { NewRulesCallout } from '../../components/new_rules_callout/new_rules_callout';
+import { MiniCallout } from '../../components/mini_callout/mini_callout';
+import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 
 import { MaintenanceWindowCallout } from '../../components/maintenance_window_callout/maintenance_window_callout';
+import {
+  NEW_PREBUILT_RULES_CALLOUT_TITLE,
+  UPDATE_RULES_CALLOUT_TITLE,
+} from '../../components/mini_callout/translations';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -53,6 +57,12 @@ const RulesPageComponent: React.FC = () => {
     invalidateFindRulesQuery();
     invalidateFetchRuleManagementFilters();
   }, [invalidateFindRulesQuery, invalidateFetchRuleManagementFilters]);
+
+  const { data: preBuiltRulesStatus } = usePrebuiltRulesStatus();
+  const shouldDisplayUpdateRulesCallout =
+    (preBuiltRulesStatus?.attributes?.stats?.num_prebuilt_rules_to_upgrade ?? 0) > 0;
+  const shouldDisplayNewRulesCallout =
+    (preBuiltRulesStatus?.attributes?.stats?.num_prebuilt_rules_to_install ?? 0) > 0;
 
   const [
     {
@@ -112,7 +122,6 @@ const RulesPageComponent: React.FC = () => {
       <RulesTableContextProvider>
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
-            {/* */}
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
               <EuiFlexItem grow={false}>
                 <LoadPrePackagedRules>
@@ -154,9 +163,28 @@ const RulesPageComponent: React.FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
-          <PrebuiltRulesInfoCallout data-test-subj="update-callout-button" />
-          <EuiSpacer size={'s'} />
-          <NewRulesCallout data-test-subj="new-callout-button" />
+
+          {shouldDisplayUpdateRulesCallout && (
+            <MiniCallout
+              iconType={'iInCircle'}
+              data-test-subj="prebuilt-rules-update-callout"
+              title={UPDATE_RULES_CALLOUT_TITLE}
+            />
+          )}
+
+          {shouldDisplayUpdateRulesCallout && shouldDisplayNewRulesCallout && (
+            <EuiSpacer size={'s'} />
+          )}
+
+          {shouldDisplayNewRulesCallout && (
+            <MiniCallout
+              color="success"
+              data-test-subj="prebuilt-rules-new-callout"
+              iconType={'iInCircle'}
+              title={NEW_PREBUILT_RULES_CALLOUT_TITLE}
+            />
+          )}
+          {/*<ChatGPTPlugin />*/}
           <MaintenanceWindowCallout />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -15,35 +15,37 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
 } from '@elastic/eui';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
-import { RULE_TYPE_STATUS_FILTER_TITLE } from '../info_callout/translations';
+import * as i18n from './translations';
+import { css } from '@emotion/react';
 
-const TAGS_POPOVER_WIDTH = 274;
+const POPOVER_WIDTH = 275;
 
 export interface TypeStatusFilterPopoverProps {
-  selectedTags: string[];
-  tags: string[];
-  onSelectedTagsChanged: (newTags: string[]) => void;
+  selectedFilters: string[];
+  onFilterChanged: (newFilters: string[]) => void;
 }
 
 /**
- * Popover for selecting tags to filter on
+ * Filter component for selecting Rule Type and Status filters
  *
- * @param tags to display for filtering
- * @param onSelectedTagsChanged change listener to be notified when tag selection changes
+ * @param selectedFilters filters that are currently selected
+ * @param onFilterChanged change listener to be notified of filter selection changes
  */
-const TypeStatusFilterPopoverComponent = ({
-  tags,
-  selectedTags,
-  onSelectedTagsChanged,
+const TypeStatusFilterPopoverComponent: React.FC<TypeStatusFilterPopoverProps> = ({
+  selectedFilters,
+  onFilterChanged,
 }: TypeStatusFilterPopoverProps) => {
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [items, setItems] = useState<EuiSelectableOption[]>([
     { label: `${i18n.ELASTIC_RULES}`, checked: 'on' },
     { label: `${i18n.CUSTOM_RULES}`, checked: 'on' },
     { label: `${i18n.ENABLED_RULES}` },
     { label: `${i18n.DISABLED_RULES}` },
   ]);
-  const [isPopoverOpen, setPopoverOpen] = useState(false);
+
+  const clearItems = useCallback(() => {
+    setItems(items.map((i) => ({ ...i, checked: undefined })));
+  }, []);
 
   const selectedItems = items.filter((i) => i.checked === 'on');
 
@@ -53,13 +55,13 @@ const TypeStatusFilterPopoverComponent = ({
       iconSide={'left'}
       iconType="filterInCircle"
       onClick={() => setPopoverOpen(!isPopoverOpen)}
-      numFilters={tags.length}
+      numFilters={items.length}
       isSelected={isPopoverOpen}
       hasActiveFilters={selectedItems.length > 0}
       numActiveFilters={selectedItems.length}
-      data-test-subj="tags-filter-popover-button"
+      data-test-subj="rule-status-filter-popover-button"
     >
-      {RULE_TYPE_STATUS_FILTER_TITLE}
+      {i18n.TITLE}
     </EuiFilterButton>
   );
 
@@ -72,29 +74,30 @@ const TypeStatusFilterPopoverComponent = ({
       panelPaddingSize="none"
       repositionOnScroll
       panelProps={{
-        'data-test-subj': 'tags-filter-popover',
+        'data-test-subj': 'rule-status-filter-popover',
       }}
     >
       <EuiSelectable
-        aria-label={i18n.RULES_TAG_SEARCH}
+        aria-label={i18n.TITLE}
         options={items}
         onChange={(newOptions) => setItems(newOptions)}
       >
         {(list, search) => (
-          <div style={{ width: TAGS_POPOVER_WIDTH }}>
+          <div style={{ width: POPOVER_WIDTH }}>
             <EuiPopoverTitle paddingSize="s">{'Filters'}</EuiPopoverTitle>
             {list}
             <EuiPopoverFooter paddingSize="s">
               <EuiButtonEmpty
+                onClick={clearItems}
                 disabled={selectedItems.length === 0}
                 color={'danger'}
                 iconType={'cross'}
                 size="xs"
-                css={`
+                css={css`
                   width: 100%;
                 `}
               >
-                {'Clear all'}
+                {i18n.CLEAR_ALL}
               </EuiButtonEmpty>
             </EuiPopoverFooter>
           </div>
@@ -104,8 +107,5 @@ const TypeStatusFilterPopoverComponent = ({
   );
 };
 
-TypeStatusFilterPopoverComponent.displayName = 'TypeStatusFilterPopoverComponent';
-
 export const TypeStatusFilterPopover = React.memo(TypeStatusFilterPopoverComponent);
-
 TypeStatusFilterPopover.displayName = 'TypeStatusFilterPopover';

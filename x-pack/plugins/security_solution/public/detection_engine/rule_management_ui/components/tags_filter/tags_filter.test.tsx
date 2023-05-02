@@ -8,12 +8,12 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { TagsFilterPopover } from './tags_filter';
+import { TagsFilter } from './tags_filter';
 
-describe('TagsFilterPopover', () => {
+describe('TagsFilter', () => {
   it('renders correctly', () => {
     const wrapper = shallow(
-      <TagsFilterPopover tags={[]} selectedTags={[]} onSelectedTagsChanged={jest.fn()} />
+      <TagsFilter tags={[]} selectedTags={[]} onSelectedTagsChanged={jest.fn()} />
     );
 
     expect(wrapper.find('EuiPopover')).toHaveLength(1);

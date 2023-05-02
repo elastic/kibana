@@ -10,28 +10,12 @@ import { ThemeProvider } from 'styled-components';
 import type { Story } from '@storybook/react';
 import { euiLightVars } from '@kbn/ui-theme';
 
-import type { TagsFilterPopoverProps } from './tags_filter';
-import { TagsFilterPopover } from './tags_filter';
-
-// addDecorator((storyFn) => (
-//   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-// ));
-//
-// storiesOf('RulesTable/TagsFilter', module)
-//   .add('One OS', () => {
-//     return (
-//       <TagsFilterPopover
-//         onSelectedTagsChanged={() => {}}
-//         selectedTags={[]}
-//         tags={[]}
-//         data-test-subj="allRulesTagPopover"
-//           />
-//     );
-//   });
+import type { TagsFilterProps } from './tags_filter';
+import { TagsFilter } from './tags_filter';
 
 export default {
-  title: 'Rules Table/TagsFilterPopover',
-  component: TagsFilterPopover,
+  title: 'Rule Mgmt/Rules Table/TagsFilter',
+  component: TagsFilter,
   decorators: [
     (Story: Story) => (
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -52,9 +36,7 @@ export default {
   },
 };
 
-export const DefaultState: Story<TagsFilterPopoverProps> = (args) => (
-  <TagsFilterPopover {...args} />
-);
+export const DefaultState: Story<TagsFilterProps> = (args) => <TagsFilter {...args} />;
 
 // DefaultState.args = {
 //

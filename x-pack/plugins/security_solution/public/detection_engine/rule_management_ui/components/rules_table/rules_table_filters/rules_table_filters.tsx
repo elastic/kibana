@@ -6,7 +6,7 @@
  */
 
 // import { EuiFilterButton, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSelectableOption } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
@@ -15,7 +15,7 @@ import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions'
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 // import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
-import { TagsFilterPopover } from '../../tags_filter/tags_filter';
+import { TagsFilter } from '../../tags_filter/tags_filter';
 import { RuleSearchField } from './rule_search_field';
 import { TypeStatusFilterPopover } from '../../type_status_filter/type_status_filter';
 
@@ -39,7 +39,8 @@ const RulesTableFiltersComponent = () => {
   // const rulesPrebuiltInstalledCount = ruleManagementFields?.rules_summary.prebuilt_installed_count;
 
   // @ts-ignore-next-line
-  const { showCustomRules, showElasticRules, tags: selectedTags, enabled } = filterOptions;
+  const { showCustomRules, showElasticRules, tags, enabled } = filterOptions;
+  const selectedTags: EuiSelectableOption[] = tags.map((t) => ({ label: t, checked: 'on' }));
 
   const handleOnSearch = useCallback(
     (filterString) => {
@@ -93,7 +94,7 @@ const RulesTableFiltersComponent = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          <TagsFilterPopover
+          <TagsFilter
             onSelectedTagsChanged={handleSelectedTags}
             selectedTags={selectedTags}
             tags={allTags}

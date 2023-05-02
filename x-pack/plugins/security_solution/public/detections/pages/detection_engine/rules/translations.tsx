@@ -602,59 +602,10 @@ export const COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION = i18n.translate(
   }
 );
 
-export const ENABLED_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.filters.enabledRulesTitle',
-  {
-    defaultMessage: 'Enabled rules',
-  }
-);
-
-export const DISABLED_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.filters.disabledRulesTitle',
-  {
-    defaultMessage: 'Disabled rules',
-  }
-);
-
-export const CUSTOM_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.filters.customRulesTitle',
-  {
-    defaultMessage: 'Custom rules',
-  }
-);
-
-export const ELASTIC_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.filters.elasticRulesTitle',
-  {
-    defaultMessage: 'Elastic rules',
-  }
-);
-
 export const TAGS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.tagsLabel',
   {
     defaultMessage: 'Tags',
-  }
-);
-
-export const SEARCH_TAGS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.filters.searchTagsPlaceholder',
-  {
-    defaultMessage: 'Search tags',
-  }
-);
-
-export const RULES_TAG_SEARCH = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.filters.rulesTagSearchText',
-  {
-    defaultMessage: 'Rules tag search',
-  }
-);
-
-export const NO_TAGS_AVAILABLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.filters.noTagsAvailableDescription',
-  {
-    defaultMessage: 'No tags available',
   }
 );
 

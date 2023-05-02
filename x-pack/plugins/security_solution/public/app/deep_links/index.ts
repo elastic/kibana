@@ -24,6 +24,7 @@ import { AppNavLinkStatus } from '@kbn/core/public';
 import type { Subject, Subscription } from 'rxjs';
 import { SecurityPageName } from '../types';
 import {
+  ADD_RULES,
   ALERTS,
   BLOCKLIST,
   CREATE_NEW_RULE,
@@ -76,6 +77,7 @@ import {
   TIMELINES_PATH,
   TRUSTED_APPS_PATH,
   USERS_PATH,
+  RULES_ADD_PATH,
 } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { hasCapabilities, subscribeAppLinks } from '../../common/links';
@@ -234,6 +236,13 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             id: SecurityPageName.rulesCreate,
             title: CREATE_NEW_RULE,
             path: RULES_CREATE_PATH,
+            navLinkStatus: AppNavLinkStatus.hidden,
+            searchable: false,
+          },
+          {
+            id: SecurityPageName.rulesAdd,
+            title: ADD_RULES,
+            path: RULES_ADD_PATH,
             navLinkStatus: AppNavLinkStatus.hidden,
             searchable: false,
           },

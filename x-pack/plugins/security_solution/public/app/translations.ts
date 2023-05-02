@@ -60,6 +60,10 @@ export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
   defaultMessage: 'Rules',
 });
 
+export const ADD_RULES = i18n.translate('xpack.securitySolution.navigation.addRules', {
+  defaultMessage: 'Add Rules',
+});
+
 export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
   defaultMessage: 'Shared Exception Lists',
 });

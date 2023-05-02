@@ -14,7 +14,7 @@ import { RulesTableUtilityBar } from './rules_table_utility_bar';
 import type { RulesTableUtilityBarProps } from './rules_table_utility_bar';
 
 const rulesTableUtilityBar: ComponentMeta<typeof RulesTableUtilityBar> = {
-  title: 'Rules Table/UtilityBar',
+  title: 'Rule Mgmt/Rules Table/UtilityBar',
   component: RulesTableUtilityBar,
   decorators: [
     (Story: Story) => (

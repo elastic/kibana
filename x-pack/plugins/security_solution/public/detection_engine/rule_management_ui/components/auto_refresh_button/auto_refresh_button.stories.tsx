@@ -14,7 +14,7 @@ import { AutoRefreshButton } from './auto_refresh_button';
 import type { AutoRefreshButtonProps } from './auto_refresh_button';
 
 const rulesTableUtilityBar: ComponentMeta<typeof AutoRefreshButton> = {
-  title: 'Rules Table/AutoRefreshButton',
+  title: 'Rule Mgmt/Rules Table/AutoRefreshButton',
   component: AutoRefreshButton,
   decorators: [
     (Story: Story) => (

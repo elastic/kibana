@@ -16,6 +16,14 @@ import type {
   PrePackagedTimelineInstallationStatus,
 } from '../../../pages/detection_engine/rules/helpers';
 import * as i18n from './translations';
+import {
+  SecuritySolutionLinkButton,
+  useGetSecuritySolutionLinkProps,
+} from '../../../../common/components/links';
+import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
+import { SecurityPageName } from '../../../../../common/constants';
+import { css } from '@emotion/react';
+import { usePrebuiltRulesStatus } from '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 
 const getLoadRulesOrTimelinesButtonTitle = (
   rulesStatus: PrePackagedRuleInstallationStatus,
@@ -53,9 +61,17 @@ export const LoadPrePackagedRulesButton = ({
   isDisabled,
   onClick,
 }: LoadPrePackagedRulesButtonProps) => {
-  const { data: prePackagedRulesStatus } = usePrePackagedRulesStatus();
   const prePackagedAssetsStatus = usePrePackagedRulesInstallationStatus();
   const prePackagedTimelineStatus = usePrePackagedTimelinesInstallationStatus();
+
+  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+  const { onClick: onClickLink } = getSecuritySolutionLinkProps({
+    deepLinkId: SecurityPageName.rulesAdd,
+    path: '/rules/add_rules',
+  });
+
+  const { data: preBuiltRulesStatus } = usePrebuiltRulesStatus();
+  const newRulesCount = preBuiltRulesStatus?.attributes?.stats?.num_prebuilt_rules_to_install ?? 0;
 
   const showInstallButton =
     (prePackagedAssetsStatus === 'ruleNotInstalled' ||
@@ -67,28 +83,27 @@ export const LoadPrePackagedRulesButton = ({
     // Failed to execute 'removeChild' on 'Node': The node to be removed is not
     // a child of this node.
     return (
-      <div>
-        <EuiButtonEmpty
-          id={INSTALL_PREBUILT_RULES_ANCHOR}
-          iconType="plusInCircle"
-          isLoading={isLoading}
-          isDisabled={isDisabled}
-          color={'primary'}
-          onClick={onClick}
-          data-test-subj={dataTestSubj}
-        >
-          {'Add Elastic Rules'}
+      <EuiButtonEmpty
+        id={INSTALL_PREBUILT_RULES_ANCHOR}
+        iconType="plusInCircle"
+        isLoading={isLoading}
+        isDisabled={isDisabled}
+        color={'primary'}
+        onClick={onClickLink}
+        data-test-subj={dataTestSubj}
+      >
+        {'Add Elastic Rules'}
+        {newRulesCount > 0 && (
           <EuiBadge
             color={'#E0E5EE'}
-            css={`
+            css={css`
               margin-left: 5px;
             `}
           >
-            {'3'}
+            {newRulesCount}
           </EuiBadge>
-          {/* {getLoadRulesOrTimelinesButtonTitle(prePackagedAssetsStatus, prePackagedTimelineStatus)}*/}
-        </EuiButtonEmpty>
-      </div>
+        )}
+      </EuiButtonEmpty>
     );
   }
 
