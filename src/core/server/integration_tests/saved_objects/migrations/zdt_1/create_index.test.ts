@@ -12,7 +12,7 @@ import '../jest_matchers';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
-import { getBaseMigratorParams, getFooType, getBarType } from './base.fixtures';
+import { getBaseMigratorParams, getFooType, getBarType } from '../fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'create_index.test.log');
 
@@ -81,12 +81,12 @@ describe('ZDT upgrades - running on a fresh cluster', () => {
 
     expect(mappingMeta).toEqual({
       docVersions: {
-        foo: 2,
-        bar: 1,
+        foo: '10.2.0',
+        bar: '10.1.0',
       },
       mappingVersions: {
-        foo: 2,
-        bar: 1,
+        foo: '10.2.0',
+        bar: '10.1.0',
       },
       migrationState: expect.objectContaining({
         convertingDocuments: false,

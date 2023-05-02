@@ -14,11 +14,15 @@ import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server
 import '../jest_matchers';
 import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
-import { getBaseMigratorParams, getSampleAType, getSampleBType } from './base.fixtures';
+import {
+  getBaseMigratorParams,
+  getSampleAType,
+  getLegacyType,
+} from '../fixtures/zdt_base.fixtures';
 
-export const logFilePath = Path.join(__dirname, 'basic_document_migration.test.log');
+const logFilePath = Path.join(__dirname, 'basic_document_migration.test.log');
 
-describe('ZDT upgrades - basic document migration', () => {
+describe('ZDT with v2 compat - basic document migration', () => {
   let esServer: TestElasticsearchUtils['es'];
 
   const startElasticsearch = async () => {
@@ -46,7 +50,7 @@ describe('ZDT upgrades - basic document migration', () => {
   const createBaseline = async () => {
     const { runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams(),
-      types: [getSampleAType(), getSampleBType()],
+      types: [getSampleAType(), getLegacyType()],
     });
     await runMigrations();
 
@@ -61,23 +65,22 @@ describe('ZDT upgrades - basic document migration', () => {
 
     await savedObjectsRepository.bulkCreate(sampleAObjs);
 
-    const sampleBObjs = range(5).map<SavedObjectsBulkCreateObject>((number) => ({
-      id: `b-${number}`,
-      type: 'sample_b',
+    const legacyTypeObjs = range(5).map<SavedObjectsBulkCreateObject>((number) => ({
+      id: `legacy-${number}`,
+      type: 'legacy',
       attributes: {
-        text: `i am number ${number}`,
-        text2: `some static text`,
+        someField: `legacy ${number}`,
       },
     }));
 
-    await savedObjectsRepository.bulkCreate(sampleBObjs);
+    await savedObjectsRepository.bulkCreate(legacyTypeObjs);
   };
 
   it('migrates the documents', async () => {
     await createBaseline();
 
     const typeA = getSampleAType();
-    const typeB = getSampleBType();
+    const legacyType = getLegacyType();
 
     // typeA -> we add a new field and bump the model version by one with a migration
 
@@ -112,54 +115,30 @@ describe('ZDT upgrades - basic document migration', () => {
       },
     };
 
-    // typeB -> we add two new model version with migrations
+    // legacyType -> we add a new migration
 
-    typeB.modelVersions = {
-      ...typeB.modelVersions,
-      '2': {
-        modelChange: {
-          type: 'expansion',
-          transformation: {
-            up: (doc) => {
-              return {
-                document: {
-                  ...doc,
-                  attributes: {
-                    ...doc.attributes,
-                    text2: `${doc.attributes.text2} - mig2`,
-                  },
-                },
-              };
-            },
-            down: jest.fn(),
+    legacyType.mappings.properties = {
+      ...legacyType.mappings.properties,
+      newField: { type: 'text' },
+    };
+
+    legacyType.migrations = {
+      ...legacyType.migrations,
+      '8.0.0': (document) => {
+        return {
+          ...document,
+          attributes: {
+            ...document.attributes,
+            newField: `populated ${document.id}`,
           },
-        },
-      },
-      '3': {
-        modelChange: {
-          type: 'expansion',
-          transformation: {
-            up: (doc) => {
-              return {
-                document: {
-                  ...doc,
-                  attributes: {
-                    ...doc.attributes,
-                    text2: `${doc.attributes.text2} - mig3`,
-                  },
-                },
-              };
-            },
-            down: jest.fn(),
-          },
-        },
+        };
       },
     };
 
     const { runMigrations, client, savedObjectsRepository } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams(),
       logFilePath,
-      types: [typeA, typeB],
+      types: [typeA, legacyType],
     });
 
     await runMigrations();
@@ -174,20 +153,20 @@ describe('ZDT upgrades - basic document migration', () => {
     expect(mappings.properties).toEqual(
       expect.objectContaining({
         sample_a: typeA.mappings,
-        sample_b: typeB.mappings,
+        legacy: legacyType.mappings,
       })
     );
 
     expect(mappingMeta.docVersions).toEqual({
-      sample_a: 2,
-      sample_b: 3,
+      sample_a: '10.2.0',
+      legacy: '8.0.0',
     });
 
     const { saved_objects: sampleADocs } = await savedObjectsRepository.find({ type: 'sample_a' });
-    const { saved_objects: sampleBDocs } = await savedObjectsRepository.find({ type: 'sample_b' });
+    const { saved_objects: legacyDocs } = await savedObjectsRepository.find({ type: 'legacy' });
 
     expect(sampleADocs).toHaveLength(5);
-    expect(sampleBDocs).toHaveLength(5);
+    expect(legacyDocs).toHaveLength(5);
 
     const sampleAData = sortBy(sampleADocs, 'id').map((object) => ({
       id: object.id,
@@ -223,7 +202,7 @@ describe('ZDT upgrades - basic document migration', () => {
       },
     ]);
 
-    const sampleBData = sortBy(sampleBDocs, 'id').map((object) => ({
+    const sampleBData = sortBy(legacyDocs, 'id').map((object) => ({
       id: object.id,
       type: object.type,
       attributes: object.attributes,
@@ -231,29 +210,29 @@ describe('ZDT upgrades - basic document migration', () => {
 
     expect(sampleBData).toEqual([
       {
-        id: 'b-0',
-        type: 'sample_b',
-        attributes: { text: 'i am number 0', text2: 'some static text - mig2 - mig3' },
+        id: 'legacy-0',
+        type: 'legacy',
+        attributes: { someField: `legacy 0`, newField: `populated legacy-0` },
       },
       {
-        id: 'b-1',
-        type: 'sample_b',
-        attributes: { text: 'i am number 1', text2: 'some static text - mig2 - mig3' },
+        id: 'legacy-1',
+        type: 'legacy',
+        attributes: { someField: `legacy 1`, newField: `populated legacy-1` },
       },
       {
-        id: 'b-2',
-        type: 'sample_b',
-        attributes: { text: 'i am number 2', text2: 'some static text - mig2 - mig3' },
+        id: 'legacy-2',
+        type: 'legacy',
+        attributes: { someField: `legacy 2`, newField: `populated legacy-2` },
       },
       {
-        id: 'b-3',
-        type: 'sample_b',
-        attributes: { text: 'i am number 3', text2: 'some static text - mig2 - mig3' },
+        id: 'legacy-3',
+        type: 'legacy',
+        attributes: { someField: `legacy 3`, newField: `populated legacy-3` },
       },
       {
-        id: 'b-4',
-        type: 'sample_b',
-        attributes: { text: 'i am number 4', text2: 'some static text - mig2 - mig3' },
+        id: 'legacy-4',
+        type: 'legacy',
+        attributes: { someField: `legacy 4`, newField: `populated legacy-4` },
       },
     ]);
 

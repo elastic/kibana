@@ -8,15 +8,15 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import '../jest_matchers';
+import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
-import { getBaseMigratorParams, getFooType, getBarType, dummyModelVersion } from './base.fixtures';
+import { getBaseMigratorParams, getFooType, getLegacyType } from '../fixtures/zdt_base.fixtures';
 
-export const logFilePath = Path.join(__dirname, 'update_mappings.test.log');
+const logFilePath = Path.join(__dirname, 'create_index.test.log');
 
-describe('ZDT upgrades - basic mapping update', () => {
+describe('ZDT with v2 compat - running on a fresh cluster', () => {
   let esServer: TestElasticsearchUtils['es'];
 
   const startElasticsearch = async () => {
@@ -41,45 +41,14 @@ describe('ZDT upgrades - basic mapping update', () => {
     await delay(10);
   });
 
-  const createBaseline = async () => {
+  it('create the index with the correct mappings and meta', async () => {
     const fooType = getFooType();
-    const barType = getBarType();
-    const { runMigrations } = await getKibanaMigratorTestKit({
-      ...getBaseMigratorParams(),
-      types: [fooType, barType],
-    });
-    await runMigrations();
-  };
-
-  it('updates the mappings and the meta', async () => {
-    await createBaseline();
-
-    const fooType = getFooType();
-    const barType = getBarType();
-
-    // increasing the model version of the types
-    fooType.modelVersions = {
-      ...fooType.modelVersions,
-      '3': dummyModelVersion,
-    };
-    fooType.mappings.properties = {
-      ...fooType.mappings.properties,
-      someAddedField: { type: 'keyword' },
-    };
-
-    barType.modelVersions = {
-      ...barType.modelVersions,
-      '2': dummyModelVersion,
-    };
-    barType.mappings.properties = {
-      ...barType.mappings.properties,
-      anotherAddedField: { type: 'boolean' },
-    };
+    const legacyType = getLegacyType();
 
     const { runMigrations, client } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams(),
       logFilePath,
-      types: [fooType, barType],
+      types: [fooType, legacyType],
     });
 
     const result = await runMigrations();
@@ -106,25 +75,30 @@ describe('ZDT upgrades - basic mapping update', () => {
     expect(mappings.properties).toEqual(
       expect.objectContaining({
         foo: fooType.mappings,
-        bar: barType.mappings,
+        legacy: legacyType.mappings,
       })
     );
 
-    expect(mappingMeta.mappingVersions).toEqual({
-      foo: 3,
-      bar: 2,
+    expect(mappingMeta).toEqual({
+      docVersions: {
+        foo: '10.2.0',
+        legacy: '7.5.0',
+      },
+      mappingVersions: {
+        foo: '10.2.0',
+        legacy: '7.5.0',
+      },
+      migrationState: expect.objectContaining({
+        convertingDocuments: false,
+      }),
     });
 
     const records = await parseLogFile(logFilePath);
 
-    expect(records).toContainLogEntry('INIT -> UPDATE_INDEX_MAPPINGS');
-    expect(records).toContainLogEntry(
-      'UPDATE_INDEX_MAPPINGS -> UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'
-    );
-    expect(records).toContainLogEntry(
-      'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> UPDATE_MAPPING_MODEL_VERSIONS'
-    );
-    expect(records).toContainLogEntry('UPDATE_MAPPING_MODEL_VERSIONS -> INDEX_STATE_UPDATE_DONE');
+    expect(records).toContainLogEntry('INIT -> CREATE_TARGET_INDEX');
+    expect(records).toContainLogEntry('CREATE_TARGET_INDEX -> UPDATE_ALIASES');
+    expect(records).toContainLogEntry('UPDATE_ALIASES -> INDEX_STATE_UPDATE_DONE');
+    expect(records).toContainLogEntry('INDEX_STATE_UPDATE_DONE -> DONE');
     expect(records).toContainLogEntry('Migration completed');
   });
 });
