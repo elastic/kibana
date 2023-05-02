@@ -30,3 +30,22 @@ export const createGroupFilter = (selectedGroup: string, query?: string) =>
         },
       ]
     : [];
+
+export const getNullGroupFilter = (selectedGroup: string) => [
+  {
+    meta: {
+      disabled: false,
+      negate: true,
+      alias: null,
+      key: selectedGroup,
+      field: selectedGroup,
+      value: 'exists',
+      type: 'exists',
+    },
+    query: {
+      exists: {
+        field: selectedGroup,
+      },
+    },
+  },
+];

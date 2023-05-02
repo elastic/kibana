@@ -18,7 +18,7 @@ export const fetchIndicesStats = async (client: IScopedClusterClient, indices: s
   const indicesWithStats = indices.map((indexName: string) => {
     const indexStats = indicesStats[indexName];
     const hydratedIndex: EnterpriseSearchEngineIndex = {
-      count: indexStats?.total?.docs?.count ?? 0,
+      count: indexStats?.primaries?.docs?.count ?? 0,
       health: indexStats?.health ?? 'unknown',
       name: indexName,
     };
