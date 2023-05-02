@@ -51,9 +51,11 @@ export const ConnectorConfigurationForm = () => {
           depends_on: dependencies,
           key,
           display,
+          is_valid: isValid,
           label,
           sensitive,
           tooltip,
+          validation_errors: validationErrors,
         } = configEntry;
         const helpText = defaultValue
           ? i18n.translate(
@@ -89,7 +91,14 @@ export const ConnectorConfigurationForm = () => {
             <>
               {topSpacing}
               <EuiPanel color="subdued" borderRadius="none">
-                <EuiFormRow label={rowLabel} key={key} helpText={helpText}>
+                <EuiFormRow
+                  label={rowLabel}
+                  key={key}
+                  helpText={helpText}
+                  error={validationErrors}
+                  isInvalid={!isValid}
+                  data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
+                >
                   <ConnectorConfigurationField configEntry={configEntry} />
                 </EuiFormRow>
               </EuiPanel>
@@ -99,7 +108,14 @@ export const ConnectorConfigurationForm = () => {
         }
 
         return (
-          <EuiFormRow label={rowLabel} key={key} helpText={helpText}>
+          <EuiFormRow
+            label={rowLabel}
+            key={key}
+            helpText={helpText}
+            error={validationErrors}
+            isInvalid={!isValid}
+            data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
+          >
             <ConnectorConfigurationField configEntry={configEntry} />
           </EuiFormRow>
         );
