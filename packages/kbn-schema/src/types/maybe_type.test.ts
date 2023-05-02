@@ -53,7 +53,7 @@ test('fails if null', () => {
 
 test('includes namespace in failure', () => {
   const type = schema.maybe(schema.string());
-  expect(() => type.validate(null, {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
+  expect(() => type.validate(null, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
     `"[foo-namespace]: expected value of type [string] but got [null]"`
   );
 });

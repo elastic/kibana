@@ -15,16 +15,7 @@ import {
   ArrayOptions,
   ArrayType,
   BooleanType,
-  BufferType,
-  ByteSizeOptions,
-  ByteSizeType,
-  DurationOptions,
-  DurationType,
-  IpOptions,
-  IpType,
   LiteralType,
-  MapOfOptions,
-  MapOfType,
   MaybeType,
   NeverType,
   NumberOptions,
@@ -60,7 +51,7 @@ function boolean(options?: TypeOptions<boolean>): Type<boolean> {
 }
 
 function buffer(options?: TypeOptions<Buffer>): Type<Buffer> {
-  return new BufferType(options);
+  throw new Error('Not implemented');
 }
 
 function stream(options?: TypeOptions<Stream>): Type<Stream> {
@@ -79,20 +70,20 @@ function number(options?: NumberOptions): Type<number> {
   return new NumberType(options);
 }
 
-function byteSize(options?: ByteSizeOptions): Type<ByteSizeValue> {
-  return new ByteSizeType(options);
+function byteSize(options?: unknown): Type<ByteSizeValue> {
+  throw new Error('Not implemented');
 }
 
-function duration(options?: DurationOptions): Type<Duration> {
-  return new DurationType(options);
+function duration(options?: unknown): Type<Duration> {
+  throw new Error('Not implemented');
 }
 
 function never(): Type<never> {
   return new NeverType();
 }
 
-function ip(options?: IpOptions): Type<string> {
-  return new IpType(options);
+function ip(options?: unknown): Type<string> {
+  throw new Error('Not implemented');
 }
 
 /**
@@ -114,12 +105,8 @@ function arrayOf<T>(itemType: Type<T>, options?: ArrayOptions<T>): Type<T[]> {
   return new ArrayType(itemType, options);
 }
 
-function mapOf<K, V>(
-  keyType: Type<K>,
-  valueType: Type<V>,
-  options?: MapOfOptions<K, V>
-): Type<Map<K, V>> {
-  return new MapOfType(keyType, valueType, options);
+function mapOf<K, V>(keyType: Type<K>, valueType: Type<V>, options?: unknown): Type<Map<K, V>> {
+  throw new Error('Not implemented');
 }
 
 function recordOf<K extends string, V>(
