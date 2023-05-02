@@ -71,13 +71,14 @@ export class ManagementPlugin
 
   private hasAnyEnabledApps = true;
 
-  private isSidebarEnabled = true;
+  private isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { home, share }: ManagementSetupDependencies) {
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
     const locator = share.url.locators.create(new ManagementAppLocatorDefinition());
+    const managementPlugin = this;
 
     if (home) {
       home.featureCatalogue.register({
@@ -95,7 +96,6 @@ export class ManagementPlugin
         visible: () => this.hasAnyEnabledApps,
       });
     }
-    const managementPlugin = this;
 
     core.application.register({
       id: MANAGEMENT_APP_ID,
@@ -110,15 +110,11 @@ export class ManagementPlugin
         const { renderApp } = await import('./application');
         const [coreStart] = await core.getStartServices();
 
-        coreStart.chrome
-          .getChromeStyle$()
-          .subscribe((style) => (managementPlugin.isSidebarEnabled = style !== 'project'));
-
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
           kibanaVersion,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
-          getIsSidebarEnabled: () => managementPlugin.isSidebarEnabled,
+          isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
         });
       },
     });
@@ -129,7 +125,7 @@ export class ManagementPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: ManagementStartDependencies) {
+  public start(core: CoreStart, _plugins: ManagementStartDependencies): ManagementStart {
     this.managementSections.start({ capabilities: core.application.capabilities });
     this.hasAnyEnabledApps = getSectionsServiceStartPrivate()
       .getSectionsEnabled()
@@ -144,6 +140,9 @@ export class ManagementPlugin
       });
     }
 
-    return {};
+    return {
+      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
+        this.isSidebarEnabled$.next(isSidebarEnabled),
+    };
   }
 }
