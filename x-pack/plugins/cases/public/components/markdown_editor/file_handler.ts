@@ -35,6 +35,11 @@ export const createFileHandler = ({
   owner: Owner;
   domain: string;
 }): EuiMarkdownDropHandler => ({
+  /**
+   * This is the message being shown in the
+   * footer when the user selects an
+   * unsupported file.
+   */
   supportedFiles: [IMAGES],
   accepts: (itemType) => SUPPORTED_MIME_TYPES.includes(itemType),
   getFormattingForItem: (item) => {
