@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { Headers, RouteRegistrar } from '@kbn/core/server';
 import type { CasesRequestHandlerContext } from '../../types';
 import type { RegisterRoutesDeps } from './types';
+import { registerGetTagsRoute } from './cases/tags/get_tags';
 import {
   escapeHatch,
   getIsKibanaRequest,
@@ -72,6 +73,8 @@ const logAndIncreaseDeprecationTelemetryCounters = ({
 
 export const registerRoutes = (deps: RegisterRoutesDeps) => {
   const { router, routes, logger, kibanaVersion, telemetryUsageCounter } = deps;
+
+  registerGetTagsRoute(router.versioned);
 
   routes.forEach((route) => {
     const { method, path, params, options, routerOptions, handler } = route;

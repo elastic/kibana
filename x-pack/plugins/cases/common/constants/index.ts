@@ -173,3 +173,6 @@ export const LOCAL_STORAGE_KEYS = {
   casesQueryParams: 'cases.list.queryParams',
   casesFilterOptions: 'cases.list.filterOptions',
 };
+
+/** Naming and value all WIP, just needed a shared constant for now */
+export const PUBLIC_VERSION_2023_05_02 = '2023-05-02';

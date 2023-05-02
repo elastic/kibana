@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { IRouter, CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
+import type { IRouterWithVersion } from '@kbn/core-http-server';
+import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type {
   ActionTypeConfig,
   ActionTypeSecrets,
@@ -31,7 +32,7 @@ export type CasesRequestHandlerContext = CustomRequestHandlerContext<{
 /**
  * @internal
  */
-export type CasesRouter = IRouter<CasesRequestHandlerContext>;
+export type CasesRouter = IRouterWithVersion<CasesRequestHandlerContext>;
 
 export type RegisterActionType = <
   Config extends ActionTypeConfig = ActionTypeConfig,
