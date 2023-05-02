@@ -10,6 +10,17 @@ import { ApmRuleType } from '../../../../../plugins/apm/common/rules/apm_rule_ty
 import { ApmRuleParamsType } from '../../../../../plugins/apm/common/rules/schema';
 import { RULE_ENDPOINT } from './constants';
 
+type Action = {
+  group: string;
+  id: string;
+  params: {
+    documents: [{ message: string; id: string }];
+  };
+  frequency: {
+    notify_when: string;
+    summary: boolean;
+  };
+};
 export async function createApmRule<T extends ApmRuleType>({
   supertest,
   name,
@@ -21,7 +32,7 @@ export async function createApmRule<T extends ApmRuleType>({
   ruleTypeId: T;
   name: string;
   params: ApmRuleParamsType[T];
-  actions?: any[];
+  actions?: Action[];
 }) {
   const { body } = await supertest
     .post(`${RULE_ENDPOINT}`)

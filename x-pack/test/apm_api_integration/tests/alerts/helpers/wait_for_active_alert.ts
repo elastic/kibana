@@ -5,18 +5,14 @@
  * 2.0.
  */
 import pRetry from 'p-retry';
-import { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
 import { APM_ALERTS_INDEX } from './constants';
 async function getActiveAlert({
   ruleId,
   esClient,
-  log,
 }: {
   ruleId: string;
-  waitMillis?: number;
   esClient: Client;
-  log: ToolingLog;
 }): Promise<Record<string, any>> {
   const searchParams = {
     index: APM_ALERTS_INDEX,
@@ -54,14 +50,11 @@ async function getActiveAlert({
 export function waitForActiveAlert({
   ruleId,
   esClient,
-  log,
 }: {
   ruleId: string;
-  waitMillis?: number;
   esClient: Client;
-  log: ToolingLog;
 }): Promise<Record<string, any>> {
-  return pRetry(() => getActiveAlert({ ruleId, esClient, log }), {
+  return pRetry(() => getActiveAlert({ ruleId, esClient }), {
     retries: 10,
     factor: 1.5,
   });

@@ -39,12 +39,12 @@ export async function waitForDocumentInIndex<T>({
   es,
   indexName,
 }: {
-  es: Client;
+  esClient: Client;
   indexName: string;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
   return pRetry(
     async () => {
-      const response = await es.search<T>({ index: indexName });
+      const response = await esClient.search<T>({ index: indexName });
       if (response.hits.hits.length === 0) {
         throw new Error('No hits found');
       }
@@ -59,13 +59,13 @@ export async function waitForAlertInIndex<T>({
   indexName,
   ruleId,
 }: {
-  es: Client;
+  esClient: Client;
   indexName: string;
   ruleId: string;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
   return pRetry(
     async () => {
-      const response = await es.search<T>({
+      const response = await esClient.search<T>({
         index: indexName,
         body: {
           query: {
