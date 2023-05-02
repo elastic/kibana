@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiCallOut, EuiLoadingContent, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiPopoverTitle, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternService } from '../../../../../kibana_services';
 import { getGeoFields } from '../../../../../index_pattern_util';
@@ -69,49 +69,30 @@ export function SpatialJoinPopoverContent(props: Props) {
 
   }
 
-  function renderContent() {
-    if (isLoading) {
-      return <EuiLoadingContent lines={3} />
-    }
-
-    const dataViewCallout = unableToLoadDataView
-      ? <>
-          <EuiCallOut
-            color="warning"
-          >
-            <p>
-              {i18n.translate('xpack.maps.spatialJoinExpression.noDataViewTitle', {
-                defaultMessage: 'Unable to load data view {dataViewId}.',
-                values: { dataViewId: props.sourceDescriptor.indexPatternId }
-              })}
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="s" />
-        </>
-      : null;
-
-    const geoFieldSelect = rightDataView 
-      ? <GeoFieldSelect
-          value={props.sourceDescriptor.geoField ? props.sourceDescriptor.geoField : ''}
-          onChange={onGeoFieldSelect}
-          geoFields={rightGeoFields}
-          isClearable={false}
-        />
-      : null;
-
-    return (
-      <>
-        {dataViewCallout}
-
-        <GeoIndexPatternSelect
-          dataView={rightDataView}
-          onChange={onDataViewSelect}
-        />
-
-        {geoFieldSelect}
+  const dataViewCallout = unableToLoadDataView
+    ? <>
+        <EuiCallOut
+          color="warning"
+        >
+          <p>
+            {i18n.translate('xpack.maps.spatialJoinExpression.noDataViewTitle', {
+              defaultMessage: 'Unable to load data view {dataViewId}.',
+              values: { dataViewId: props.sourceDescriptor.indexPatternId }
+            })}
+          </p>
+        </EuiCallOut>
+        <EuiSpacer size="s" />
       </>
-    );
-  }
+    : null;
+
+  const geoFieldSelect = rightDataView 
+    ? <GeoFieldSelect
+        value={props.sourceDescriptor.geoField ? props.sourceDescriptor.geoField : ''}
+        onChange={onGeoFieldSelect}
+        geoFields={rightGeoFields}
+        isClearable={false}
+      />
+    : null;
 
   return (
     <div style={{ width: 300 }}>
@@ -121,7 +102,19 @@ export function SpatialJoinPopoverContent(props: Props) {
         })}
       </EuiPopoverTitle>
 
-      {renderContent()}
+      <EuiSkeletonText
+        lines={3}
+        isLoading={isLoading}
+      >
+        {dataViewCallout}
+
+        <GeoIndexPatternSelect
+          dataView={rightDataView}
+          onChange={onDataViewSelect}
+        />
+
+        {geoFieldSelect}
+      </EuiSkeletonText>
     </div>
   );
 }
