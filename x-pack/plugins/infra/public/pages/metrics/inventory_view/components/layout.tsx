@@ -36,7 +36,7 @@ import { LegendControls } from './waffle/legend_controls';
 import { TryItButton } from '../../../../components/try_it_button';
 
 interface Props {
-  currentView: InventoryView;
+  currentView?: InventoryView | null;
   reload: () => Promise<any>;
   interval: string;
   nodes: SnapshotNode[];
