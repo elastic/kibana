@@ -216,7 +216,7 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
     onVisTypeSelected(visType);
   }, [onVisTypeSelected, visType]);
   // hide the experimental visualization if lab mode is not enabled
-  if (!showExperimental && visType.stage === 'experimental') {
+  if (visType.hidden || (!showExperimental && visType.stage === 'experimental')) {
     return null;
   }
   return (
