@@ -66,7 +66,7 @@ export const ViewLocationMonitors = ({
 const VIEW_LOCATION_MONITORS = i18n.translate(
   'xpack.synthetics.monitorManagement.viewLocationMonitors',
   {
-    defaultMessage: 'View configured monitors',
+    defaultMessage: 'View monitors',
   }
 );
 
