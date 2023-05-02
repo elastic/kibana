@@ -4270,6 +4270,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/generate-oas-cli@link:packages/kbn-generate-oas-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/generate@link:packages/kbn-generate":
   version "0.0.0"
   uid ""

@@ -27,6 +27,7 @@ import type {
 } from '@kbn/core-http-context-server-internal';
 import { Router } from '@kbn/core-http-router-server-internal';
 
+import { IRouterWithVersion } from '@kbn/core-http-server/src/router';
 import { CspConfigType, cspConfig } from './csp';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
@@ -79,6 +80,10 @@ export class HttpService
     this.prebootServer = new HttpServer(logger, 'Preboot', shutdownTimeout$);
     this.httpServer = new HttpServer(logger, 'Kibana', shutdownTimeout$);
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
+  }
+
+  public getRegisteredRouters(): IRouterWithVersion[] {
+    return this.httpServer.getRegisteredRouters() as IRouterWithVersion[];
   }
 
   public async preboot(deps: PrebootDeps): Promise<InternalHttpServicePreboot> {
@@ -191,6 +196,8 @@ export class HttpService
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
 
       registerPrebootRoutes: this.internalPreboot!.registerRoutes,
+
+      getRegisteredRouters: this.getRegisteredRouters.bind(this),
     };
 
     return this.internalSetup;

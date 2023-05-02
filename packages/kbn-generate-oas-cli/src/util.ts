@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable import/no-extraneous-dependencies */
-
 import z from 'zod';
 
 // Entire file copied from https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/zod.ts#L1
@@ -94,6 +92,9 @@ export const instanceofZodTypeLikeString = (_type: z.ZodTypeAny): _type is ZodTy
   }
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUnion)) {
     return !type._def.options.some((option) => !instanceofZodTypeLikeString(option));
+  }
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodArray)) {
+    return instanceofZodTypeLikeString(type._def.type);
   }
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodIntersection)) {
     return (

@@ -13,7 +13,12 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import type { OpenAPIV3 } from 'openapi-types';
+import { isKbnSchema } from '@kbn/schema';
+import z from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
+
+import type { CoreVersionedRouter } from '@kbn/core-http-router-server-internal/src/versioned_router';
+import type { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/versioned_router/types';
 import {
   instanceofZodType,
   instanceofZodTypeObject,
@@ -25,9 +30,6 @@ import {
   instanceofZodTypeCoercible,
   getPathParameters,
 } from './util';
-
-import type { CoreVersionedRouter } from '..';
-import type { VersionedRouterRoute } from '../types';
 
 export const openApiVersion = '3.0.0';
 
@@ -41,9 +43,13 @@ export interface GenerateOpenApiDocumentOptions {
 }
 
 export function generateOpenApiDocument(
-  appRouter: CoreVersionedRouter,
+  appRouters: CoreVersionedRouter[],
   opts: GenerateOpenApiDocumentOptions
 ): OpenAPIV3.Document {
+  const paths: OpenAPIV3.PathsObject = {};
+  for (const appRouter of appRouters) {
+    Object.assign(paths, getOpenApiPathsObject(appRouter));
+  }
   return {
     openapi: openApiVersion,
     info: {
@@ -56,7 +62,7 @@ export function generateOpenApiDocument(
         url: opts.baseUrl,
       },
     ],
-    paths: getOpenApiPathsObject(appRouter),
+    paths,
     security: [
       {
         basicAuth: [],
@@ -71,7 +77,7 @@ export function generateOpenApiDocument(
 }
 
 /* For this PoC we assume that we are able to get JSONSchema from our runtime validation types */
-function runtimeSchemaToJsonSchema(schema: any): OpenAPIV3.SchemaObject {
+function runtimeSchemaToJsonSchema(schema: z.ZodTypeAny): OpenAPIV3.SchemaObject {
   return zodToJsonSchema(schema, { target: 'openApi3', $refStrategy: 'none' }) as any;
 }
 
@@ -82,7 +88,7 @@ function getVersionedContentString(version: string): string {
 function extractParameterObjects(
   schema: unknown,
   pathParameters: string[],
-  inType: 'all' | 'path' | 'query'
+  inType: 'path' | 'query'
 ): OpenAPIV3.ParameterObject[] | undefined {
   if (!instanceofZodType(schema)) {
     throw new Error('Zod validator expected');
@@ -158,10 +164,13 @@ function extractRequestBody(route: VersionedRouterRoute): OpenAPIV3.RequestBodyO
   return route.handlers.reduce<OpenAPIV3.RequestBodyObject['content']>((acc, handler) => {
     if (!handler.options.validate) return acc;
     if (!handler.options.validate.request) return acc;
+    const schema = isKbnSchema(handler.options.validate.request.body)
+      ? runtimeSchemaToJsonSchema(handler.options.validate.request.body.getSchema())
+      : {};
     return {
       ...acc,
       [getVersionedContentString(handler.options.version)]: {
-        schema: runtimeSchemaToJsonSchema(handler.options.validate.request.body),
+        schema,
       },
     };
   }, {} as OpenAPIV3.RequestBodyObject['content']);
@@ -173,15 +182,17 @@ function extractResponses(route: VersionedRouterRoute): OpenAPIV3.ResponsesObjec
     if (!handler.options.validate.response) return acc;
     const statusCodes = Object.keys(handler.options.validate.response);
     for (const statusCode of statusCodes) {
+      const maybeSchema = handler.options.validate.response[statusCode as unknown as number].body;
+      const schema = isKbnSchema(maybeSchema)
+        ? runtimeSchemaToJsonSchema(maybeSchema.getSchema())
+        : {};
       acc[statusCode] = {
         ...acc[statusCode],
         description: route.options.description ?? 'No description',
         content: {
           ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
           [getVersionedContentString(handler.options.version)]: {
-            schema: runtimeSchemaToJsonSchema(
-              handler.options.validate.response[statusCode as unknown as number].body
-            ),
+            schema,
           },
         },
       };
@@ -202,7 +213,7 @@ function getOperationId(name: string): string {
 }
 
 function getOpenApiPathsObject(appRouter: CoreVersionedRouter): OpenAPIV3.PathsObject {
-  const routes = appRouter.getRoutes();
+  const routes = appRouter.getRoutes().filter((route) => route.options.access === 'public');
   const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {
     const pathParams = getPathParameters(route.path);
@@ -215,12 +226,12 @@ function getOpenApiPathsObject(appRouter: CoreVersionedRouter): OpenAPIV3.PathsO
     let queryObjects: OpenAPIV3.ParameterObject[] = [];
     if (route.handlers[0].options.validate !== false) {
       const params = route.handlers[0].options.validate.request?.params as any;
-      if (params) {
-        pathObjects = extractParameterObjects(params, pathParams, 'path') ?? [];
+      if (params && isKbnSchema(params)) {
+        pathObjects = extractParameterObjects(params.getSchema(), pathParams, 'path') ?? [];
       }
       const query = route.handlers[0].options.validate.request?.query as any;
-      if (query) {
-        queryObjects = extractParameterObjects(query, pathParams, 'query') ?? [];
+      if (query && isKbnSchema(query)) {
+        queryObjects = extractParameterObjects(query.getSchema(), pathParams, 'query') ?? [];
       }
     }
 
