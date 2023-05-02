@@ -6,7 +6,6 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { ExportTypesRegistry } from './export_types_registry';
 import { ReportingPublicPlugin } from './plugin';
 import type { ReportingPublicComponents } from './shared/get_shared_components';
 
@@ -25,11 +24,6 @@ export interface ReportingSetup {
    * A set of React components for displaying a Reporting share menu in an application
    */
   components: ReportingPublicComponents;
-
-  /**
-   * Used to control UI for plugins that have reporting for PNG/PDF/CSV
-   */
-  registerExportType: ExportTypesRegistry['setup']['register'];
 }
 
 /**
