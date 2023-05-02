@@ -76,13 +76,13 @@ describe('TextExpansionCalloutLogic', () => {
         message: error.body?.message,
       });
     });
-    it('uses the correct title and message from a create error', () => {
+    it('uses the correct title and message from a fetch error', () => {
       expect(getTextExpansionError(undefined, error, undefined)).toEqual({
         title: 'Error fetching ELSER model',
         message: error.body?.message,
       });
     });
-    it('uses the correct title and message from a create error', () => {
+    it('uses the correct title and message from a start error', () => {
       expect(getTextExpansionError(undefined, undefined, error)).toEqual({
         title: 'Error starting ELSER deployment',
         message: error.body?.message,
