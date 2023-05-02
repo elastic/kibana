@@ -16,6 +16,7 @@ export const createMockConfig = (): ConfigType => {
     'responseActionGetFileEnabled',
     // remove property below once `execute` FF is enabled or removed
     'responseActionExecuteEnabled',
+    'responseActionUploadEnabled',
   ];
 
   return {
@@ -29,6 +30,7 @@ export const createMockConfig = (): ConfigType => {
     prebuiltRulesPackageVersion: '',
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],
+    maxUploadResponseActionFileBytes: 26214400,
 
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
     enabled: true,

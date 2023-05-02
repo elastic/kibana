@@ -76,7 +76,7 @@ export const createMockEndpointAppContext = (
     config: () => Promise.resolve(config),
     serverConfig: config,
     service: createMockEndpointAppContextService(mockManifestManager),
-    experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
+    experimentalFeatures: parseExperimentalConfigValue(config.enableExperimental),
   };
 };
 
@@ -223,6 +223,11 @@ export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
     method: keyof Pick<IRouter, 'get' | 'put' | 'post' | 'patch' | 'delete'>,
     path: string
   ) => RequestHandler;
+  /** Retrieves the route handler configuration that was registered with the router */
+  getRegisteredRouteConfig: (
+    method: keyof Pick<IRouter, 'get' | 'put' | 'post' | 'patch' | 'delete'>,
+    path: string
+  ) => RouteConfig<any, any, any, any>;
 }
 
 /**
@@ -246,7 +251,7 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
     path
   ): RequestHandler => {
     const methodCalls = routerMock[method].mock.calls as Array<
-      [route: RouteConfig<unknown, unknown, unknown, 'get'>, handler: RequestHandler]
+      [route: RouteConfig<unknown, unknown, unknown, typeof method>, handler: RequestHandler]
     >;
     const handler = methodCalls.find(([routeConfig]) => routeConfig.path.startsWith(path));
 
@@ -255,6 +260,21 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
     }
 
     return handler[1];
+  };
+  const getRegisteredRouteConfig: HttpApiTestSetupMock['getRegisteredRouteConfig'] = (
+    method,
+    path
+  ): RouteConfig<any, any, any, any> => {
+    const methodCalls = routerMock[method].mock.calls as Array<
+      [route: RouteConfig<unknown, unknown, unknown, typeof method>, handler: RequestHandler]
+    >;
+    const handler = methodCalls.find(([routeConfig]) => routeConfig.path.startsWith(path));
+
+    if (!handler) {
+      throw new Error(`Handler for [${method}][${path}] not found`);
+    }
+
+    return handler[0];
   };
 
   return {
@@ -280,5 +300,6 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
     },
 
     getRegisteredRouteHandler,
+    getRegisteredRouteConfig,
   };
 };
