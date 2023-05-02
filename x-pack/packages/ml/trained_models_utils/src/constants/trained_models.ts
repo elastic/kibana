@@ -57,7 +57,7 @@ export const CURATED_MODEL_DEFINITIONS = {
       },
     },
     description: i18n.translate('xpack.ml.trainedModels.modelsList.elserDescription', {
-      defaultMessage: 'Elastic Learned Sparse EncodeR',
+      defaultMessage: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
     }),
   },
 } as const;
