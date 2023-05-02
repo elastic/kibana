@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/schema';
+import { z } from '@kbn/zod';
 import { type VersionedRouter } from '@kbn/core-http-server';
 import type { CasesRequestHandlerContext } from '../../../../types';
 import type { AllTagsFindRequest } from '../../../../../common/api';
@@ -23,13 +23,13 @@ export function registerGetTagsRoute(router: VersionedRouter<CasesRequestHandler
         version: PUBLIC_VERSION_2023_05_02,
         validate: {
           request: {
-            query: schema.object({
-              owner: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+            query: z.object({
+              owner: z.union([z.array(z.string()), z.string()]),
             }),
           },
           response: {
             200: {
-              body: schema.arrayOf(schema.string()),
+              body: z.array(z.string()),
             },
           },
         },
