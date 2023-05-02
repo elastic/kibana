@@ -16,7 +16,6 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './types';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
@@ -25,7 +24,7 @@ import {
   STATUS_ESMODEL_TO_EXTERNAL,
   STATUS_EXTERNAL_TO_ESMODEL,
 } from '../../common/constants';
-import type { CaseAttributes, CaseFullExternalService } from '../../../common/api';
+import type { CaseFullExternalService } from '../../../common/api';
 import { CaseSeverity, CaseStatuses, NONE_CONNECTOR_ID } from '../../../common/api';
 import {
   findConnectorIdReference,
@@ -34,11 +33,12 @@ import {
   transformESConnectorToExternalModel,
 } from '../transform';
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
-import type { CaseSavedObject } from '../../common/types';
+import type { CasePersistedAttributes, CaseTransformedAttributes } from '../../common/types/case';
+import type { ExternalServicePersisted } from '../../common/types/external_service';
 
 export function transformUpdateResponsesToExternalModels(
-  response: SavedObjectsBulkUpdateResponse<ESCaseAttributes>
-): SavedObjectsBulkUpdateResponse<CaseAttributes> {
+  response: SavedObjectsBulkUpdateResponse<CasePersistedAttributes>
+): SavedObjectsBulkUpdateResponse<CaseTransformedAttributes> {
   return {
     ...response,
     saved_objects: response.saved_objects.map((so) => ({
@@ -49,8 +49,8 @@ export function transformUpdateResponsesToExternalModels(
 }
 
 export function transformUpdateResponseToExternalModel(
-  updatedCase: SavedObjectsUpdateResponse<ESCaseAttributes>
-): SavedObjectsUpdateResponse<CaseAttributes> {
+  updatedCase: SavedObjectsUpdateResponse<CasePersistedAttributes>
+): SavedObjectsUpdateResponse<CaseTransformedAttributes> {
   const {
     connector,
     external_service,
@@ -64,7 +64,7 @@ export function transformUpdateResponseToExternalModel(
     ({
       total_alerts: -1,
       total_comments: -1,
-    } as ESCaseAttributes);
+    } as CasePersistedAttributes);
 
   const transformedConnector = transformESConnectorToExternalModel({
     // if the saved object had an error the attributes field will not exist
@@ -94,16 +94,16 @@ export function transformUpdateResponseToExternalModel(
   };
 }
 
-export function transformAttributesToESModel(caseAttributes: CaseAttributes): {
-  attributes: ESCaseAttributes;
+export function transformAttributesToESModel(caseAttributes: CaseTransformedAttributes): {
+  attributes: CasePersistedAttributes;
   referenceHandler: ConnectorReferenceHandler;
 };
-export function transformAttributesToESModel(caseAttributes: Partial<CaseAttributes>): {
-  attributes: Partial<ESCaseAttributes>;
+export function transformAttributesToESModel(caseAttributes: Partial<CaseTransformedAttributes>): {
+  attributes: Partial<CasePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 };
-export function transformAttributesToESModel(caseAttributes: Partial<CaseAttributes>): {
-  attributes: Partial<ESCaseAttributes>;
+export function transformAttributesToESModel(caseAttributes: Partial<CaseTransformedAttributes>): {
+  attributes: Partial<CasePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {
   const { connector, external_service, severity, status, ...restAttributes } = caseAttributes;
@@ -154,15 +154,15 @@ function buildReferenceHandler(
  * definition like this:
  *
  * export function transformArrayResponseToExternalModel(
- *  response: SavedObjectsBulkResponse<ESCaseAttributes> | SavedObjectsFindResponse<ESCaseAttributes>
- * ): SavedObjectsBulkResponse<CaseAttributes> | SavedObjectsFindResponse<CaseAttributes> {
+ *  response: SavedObjectsBulkResponse<CasePersistedAttributes> | SavedObjectsFindResponse<CasePersistedAttributes>
+ * ): SavedObjectsBulkResponse<CaseTransformedAttributes> | SavedObjectsFindResponse<CaseTransformedAttributes> {
  *
  * See this issue for more details: https://stackoverflow.com/questions/49510832/typescript-how-to-map-over-union-array-type
  */
 
 export function transformBulkResponseToExternalModel(
-  response: SavedObjectsBulkResponse<ESCaseAttributes>
-): SavedObjectsBulkResponse<CaseAttributes> {
+  response: SavedObjectsBulkResponse<CasePersistedAttributes>
+): SavedObjectsBulkResponse<CaseTransformedAttributes> {
   return {
     ...response,
     saved_objects: response.saved_objects.map((so) => ({
@@ -173,8 +173,8 @@ export function transformBulkResponseToExternalModel(
 }
 
 export function transformFindResponseToExternalModel(
-  response: SavedObjectsFindResponse<ESCaseAttributes>
-): SavedObjectsFindResponse<CaseAttributes> {
+  response: SavedObjectsFindResponse<CasePersistedAttributes>
+): SavedObjectsFindResponse<CaseTransformedAttributes> {
   return {
     ...response,
     saved_objects: response.saved_objects.map((so) => ({
@@ -185,8 +185,8 @@ export function transformFindResponseToExternalModel(
 }
 
 export function transformSavedObjectToExternalModel(
-  caseSavedObject: SavedObject<ESCaseAttributes>
-): CaseSavedObject {
+  caseSavedObject: SavedObject<CasePersistedAttributes>
+): SavedObject<CaseTransformedAttributes> {
   const connector = transformESConnectorOrUseDefault({
     // if the saved object had an error the attributes field will not exist
     connector: caseSavedObject.attributes?.connector,
@@ -209,7 +209,7 @@ export function transformSavedObjectToExternalModel(
     ({
       total_alerts: -1,
       total_comments: -1,
-    } as ESCaseAttributes);
+    } as CasePersistedAttributes);
 
   return {
     ...caseSavedObject,
@@ -226,7 +226,7 @@ export function transformSavedObjectToExternalModel(
 function transformESExternalService(
   // this type needs to match that of CaseFullExternalService except that it does not include the connector_id, see: x-pack/plugins/cases/common/api/cases/case.ts
   // that's why it can be null here
-  externalService: ExternalServicesWithoutConnectorId | null | undefined,
+  externalService: ExternalServicePersisted | null | undefined,
   references: SavedObjectReference[] | undefined
 ): CaseFullExternalService | null {
   const connectorIdRef = findConnectorIdReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, references);
