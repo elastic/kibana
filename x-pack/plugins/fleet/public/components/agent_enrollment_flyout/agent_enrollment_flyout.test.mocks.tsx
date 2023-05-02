@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 // TODO(jbudz): should be removed when upgrading to TS@4.8
 // this is a skip for the errors created when typechecking with isolatedModules
 export {};
@@ -12,7 +13,6 @@ export {};
 jest.mock('../../hooks', () => {
   return {
     ...jest.requireActual('../../hooks'),
-    useFleetStatus: jest.fn(),
     useFleetServerStandalone: jest.fn(),
     useAgentEnrollmentFlyoutData: jest.fn(),
   };
@@ -96,14 +96,28 @@ jest.mock('./steps', () => {
     AgentPolicySelectionStep: jest.fn().mockReturnValue({
       'data-test-subj': 'agent-policy-selection-step',
       title: 'agent-policy-selection-step',
+      children: <>TEST</>,
     }),
     AgentEnrollmentKeySelectionStep: jest.fn().mockReturnValue({
       'data-test-subj': 'agent-enrollment-key-selection-step',
       title: 'agent-enrollment-key-selection-step',
+      children: <>TEST</>,
     }),
-    DownloadStep: jest
-      .fn()
-      .mockReturnValue({ 'data-test-subj': 'download-step', title: 'download-step' }),
+    ConfigureStandaloneAgentStep: jest.fn().mockReturnValue({
+      'data-test-subj': 'configure-standalone-step',
+      title: 'configure-standalone-step',
+      children: <>TEST</>,
+    }),
+    DownloadStep: jest.fn().mockReturnValue({
+      'data-test-subj': 'download-step',
+      title: 'download-step',
+      children: <>TEST</>,
+    }),
+    IncomingDataConfirmationStep: jest.fn().mockReturnValue({
+      'data-test-subj': 'incoming-data-confirmation-step',
+      title: 'incoming-data-confirmation-step',
+      children: <>TEST</>,
+    }),
   };
 });
 

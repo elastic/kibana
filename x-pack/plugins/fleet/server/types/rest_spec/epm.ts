@@ -134,7 +134,13 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
     prerelease: schema.maybe(schema.boolean()),
   }),
   body: schema.object({
-    packages: schema.arrayOf(schema.string(), { minSize: 1 }),
+    packages: schema.arrayOf(
+      schema.oneOf([
+        schema.string(),
+        schema.object({ name: schema.string(), version: schema.string() }),
+      ]),
+      { minSize: 1 }
+    ),
     force: schema.boolean({ defaultValue: false }),
   }),
 };

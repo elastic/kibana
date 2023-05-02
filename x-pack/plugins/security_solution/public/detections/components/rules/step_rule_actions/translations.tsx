@@ -40,6 +40,6 @@ export const RULE_SNOOZE_DESCRIPTION = i18n.translate(
 export const SNOOZED_ACTIONS_WARNING = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.snoozedActionsWarning',
   {
-    defaultMessage: 'Actions will not be preformed until it is unsnoozed.',
+    defaultMessage: 'Actions will not be performed until it is unsnoozed.',
   }
 );
