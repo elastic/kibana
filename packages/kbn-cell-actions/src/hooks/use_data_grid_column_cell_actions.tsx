@@ -30,7 +30,7 @@ interface BulkField extends Pick<CellActionField, 'name' | 'type'> {
 
 export interface UseDataGridColumnsCellActionsProps
   extends Pick<CellActionsProps, 'triggerId' | 'metadata' | 'disabledActionTypes'> {
-  fields: BulkField[] | undefined;
+  fields?: BulkField[];
   dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 }
 export type UseDataGridColumnsCellActions<
