@@ -240,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
     query: Record<string, any> = {}
   ) {
     const urlPrefix = urlPrefixFromNamespace(namespace);
-    const url = `${urlPrefix}/internal/event_log/event_log_test/${id}/_find${
+    const url = `${urlPrefix}/_test/event_log/event_log_test/${id}/_find${
       isEmpty(query)
         ? ''
         : `?${Object.entries(query)
@@ -261,7 +261,7 @@ export default function ({ getService }: FtrProviderContext) {
     legacyIds: string[] = []
   ) {
     const urlPrefix = urlPrefixFromNamespace(namespace);
-    const url = `${urlPrefix}/internal/event_log/event_log_test/_find${
+    const url = `${urlPrefix}/_test/event_log/event_log_test/_find${
       isEmpty(query)
         ? ''
         : `?${Object.entries(query)
