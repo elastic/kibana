@@ -25,7 +25,7 @@ import type {
   CasesFindResponse,
   CasesPatchRequest,
   Cases,
-  CaseUserActionsResponse,
+  UserActions,
   CommentsFindResponse,
   CasesBulkGetResponse,
 } from '../../common/api';
@@ -51,4 +51,4 @@ export interface ICasesConfigurePatch extends CasesConfigurePatch {}
 export interface ICommentsResponse extends CommentsFindResponse {}
 export interface IAllCommentsResponse extends Comments {}
 
-export interface ICaseUserActionsResponse extends CaseUserActionsResponse {}
+export interface ICaseUserActionsResponse extends UserActions {}
