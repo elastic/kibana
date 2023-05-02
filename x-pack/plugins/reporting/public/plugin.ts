@@ -42,6 +42,7 @@ import { reportingCsvShareProvider } from './share_context_menu/register_csv_rep
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
 import { JobId, JobSummarySet } from '../common/types';
+import { ExportTypesRegistry } from './export_types_registry';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
@@ -112,6 +113,7 @@ export class ReportingPublicPlugin
   });
   private config: ClientConfigType;
   private contract?: ReportingSetup;
+  private exportTypeRegistry = new ExportTypesRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
@@ -133,6 +135,7 @@ export class ReportingPublicPlugin
       this.contract = {
         usesUiCapabilities: () => this.config.roles?.enabled === false,
         components: getSharedComponents(core, this.getApiClient(core.http, core.uiSettings)),
+        registerExportType: (id) => this.exportTypeRegistry.setup.register(id),
       };
     }
 

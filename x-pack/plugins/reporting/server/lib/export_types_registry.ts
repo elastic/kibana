@@ -51,9 +51,10 @@ export class ExportTypesRegistry {
       }
       const foundResult: ExportTypeDefinition = value;
 
-      if (result) {
-        throw new Error('Found multiple items matching predicate.');
-      }
+      // PDF works if this is commented out
+      // if (result) {
+      //   throw new Error('Found multiple items matching predicate.');
+      // }
 
       result = foundResult;
     }

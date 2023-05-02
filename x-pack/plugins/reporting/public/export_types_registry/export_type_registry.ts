@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { ComponentType } from 'react';
+import type { ExportTypeDefinition } from '../../server/types';
 
-type RegistryComponent = ComponentType<Record<string, any> | undefined>;
+type RegistryComponent = ExportTypeDefinition<Record<string, any> | undefined>;
 
 export class ExportTypesRegistry {
   static readonly defaultRegistry: Record<string, RegistryComponent>;
   registry: { [key in string]?: RegistryComponent } = {};
 
   setup = {
-    register: (id: string, component: RegistryComponent) => {
-      this.registry[id] = component;
+    register: (id: string) => {
+      this.registry[id] = id;
     },
   };
+
   start = {
     /**  @link advanced_settings/public/component_registry */
     get: (id: string): RegistryComponent => {
