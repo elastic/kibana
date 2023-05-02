@@ -23,6 +23,4 @@ z.setErrorMap(errorMap);
 /**
  * To add custom types to Zod we can add them to the internals object here.
  */
-export const internals = {
-  ...z,
-};
+export const internals = z;
