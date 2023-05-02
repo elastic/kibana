@@ -53,7 +53,6 @@ export interface ThreadingParams {
   threadsPerAllocations?: number;
   priority?: 'low' | 'normal';
   deploymentId?: string;
-  modelId?: string;
 }
 
 const THREADS_MAX_EXPONENT = 4;
@@ -354,7 +353,6 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       threadsPerAllocations: 1,
       priority: isCloudTrial() ? 'low' : 'normal',
       deploymentId: model.model_id,
-      modelId: model.model_id,
     }
   );
 

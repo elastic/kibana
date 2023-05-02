@@ -227,7 +227,6 @@ export function useModelActions({
 
           const deploymentParams = await getUserInputModelDeploymentParams(item, {
             deploymentId: deploymentToUpdate,
-            modelId: item.model_id,
             numOfAllocations: item.stats!.deployment_stats.find(
               (v) => v.deployment_id === deploymentToUpdate
             )!.number_of_allocations,
@@ -238,7 +237,7 @@ export function useModelActions({
           try {
             onLoading(true);
             await trainedModelsApiService.updateModelDeployment(
-              deploymentParams.modelId!,
+              item.model_id,
               deploymentParams.deploymentId!,
               {
                 number_of_allocations: deploymentParams.numOfAllocations,
