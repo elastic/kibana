@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export * from './es_term_source';
-export { isTermSourceComplete } from './is_term_source_complete';
+import { ESTermSourceDescriptor } from '../../../../../common/descriptor_types';
+
+export function isTermSourceComplete(descriptor: Partial<ESTermSourceDescriptor>) {
+  return descriptor.indexPatternId !== undefined && descriptor.term !== undefined;
+}

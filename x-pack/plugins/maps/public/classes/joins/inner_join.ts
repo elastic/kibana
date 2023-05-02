@@ -25,7 +25,13 @@ import { IVectorSource } from '../sources/vector_source';
 import { IField } from '../fields/field';
 import { PropertiesMap } from '../../../common/elasticsearch_util';
 import { IJoinSource } from '../sources/join_sources';
-import { ESDistanceSource, ESTermSource, TableSource } from '../sources/join_sources';
+import {
+  ESDistanceSource,
+  isSpatialSourceComplete,
+  ESTermSource,
+  isTermSourceComplete,
+  TableSource,
+} from '../sources/join_sources';
 
 export function createJoinSource(
   descriptor: Partial<JoinSourceDescriptor> | undefined
@@ -35,15 +41,13 @@ export function createJoinSource(
   }
 
   if (descriptor.type === SOURCE_TYPES.ES_DISTANCE_SOURCE &&
-    descriptor.indexPatternId !== undefined &&
-    descriptor.geoField !== undefined) {
+    isSpatialSourceComplete(descriptor)) {
     return new ESDistanceSource(descriptor as ESDistanceSourceDescriptor)
   }
 
   if (
     descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE &&
-    descriptor.indexPatternId !== undefined &&
-    descriptor.term !== undefined
+    isTermSourceComplete(descriptor)
   ) {
     return new ESTermSource(descriptor as ESTermSourceDescriptor);
   }

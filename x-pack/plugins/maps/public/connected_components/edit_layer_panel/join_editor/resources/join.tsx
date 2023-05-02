@@ -29,6 +29,7 @@ import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
 import { AGG_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
 import type { JoinField } from '../join_editor';
 import { isSpatialJoin } from '../../../../classes/joins/is_spatial_join';
+import { isSpatialSourceComplete, isTermSourceComplete } from '../../../../classes/sources/join_sources';
 
 interface Props {
   join: JoinDescriptor;
@@ -164,23 +165,23 @@ export class Join extends Component<Props, State> {
     let isJoinConfigComplete = false;
     let joinExpression;
     if (right.type === SOURCE_TYPES.ES_TERM_SOURCE) {
-      isJoinConfigComplete = join.leftField && right.indexPatternId && right.term;
+      isJoinConfigComplete = join.leftField && isTermSourceComplete(right as Partial<ESTermSourceDescriptor>);
       joinExpression = (
         <TermJoinExpression
           leftSourceName={leftSourceName}
           leftValue={join.leftField}
           leftFields={leftFields}
           onLeftFieldChange={this._onLeftFieldChange}
-          sourceDescriptor={right as ESTermSourceDescriptor}
+          sourceDescriptor={right as Partial<ESTermSourceDescriptor>}
           onSourceDescriptorChange={this._onRightSourceDescriptorChange}
           rightFields={rightFields}
         />
       )
     } else if (isSpatialJoin(this.props.join)) {
-      isJoinConfigComplete = join.leftField && right.indexPatternId && right.geoField;
+      isJoinConfigComplete = join.leftField && isSpatialSourceComplete(right as Partial<ESDistanceSourceDescriptor>);
       joinExpression = (
         <SpatialJoinExpression
-          sourceDescriptor={right as ESDistanceSourceDescriptor}
+          sourceDescriptor={right as Partial<ESDistanceSourceDescriptor>}
           onSourceDescriptorChange={this._onRightSourceDescriptorChange}
         />
       )

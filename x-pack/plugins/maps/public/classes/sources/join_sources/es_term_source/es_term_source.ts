@@ -34,6 +34,7 @@ import { ITermJoinSource } from '../types';
 import type { IESAggSource } from '../../es_agg_source';
 import { IField } from '../../../fields/field';
 import { mergeExecutionContext } from '../../execution_context_utils';
+import { isTermSourceComplete } from './is_term_source_complete';
 
 const TERMS_AGG_NAME = 'join';
 const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
@@ -83,7 +84,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
   }
 
   hasCompleteConfig(): boolean {
-    return this._descriptor.indexPatternId !== undefined && this._descriptor.term !== undefined;
+    return isTermSourceComplete(this._descriptor);
   }
 
   getTermField(): ESDocField {
