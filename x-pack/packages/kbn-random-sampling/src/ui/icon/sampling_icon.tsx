@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 
 interface CustomProps {
@@ -11,11 +12,9 @@ interface CustomProps {
   titleId?: string;
 }
 
-export function RandomSamplingIcon({
-  title,
-  titleId,
-  ...props
-}: React.SVGProps<SVGSVGElement> & CustomProps) {
+export type RandomSamplingIconProps = React.SVGProps<SVGSVGElement> & CustomProps;
+
+export function RandomSamplingIcon({ title, titleId, ...props }: RandomSamplingIconProps) {
   return (
     <svg
       width="15"

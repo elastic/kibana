@@ -14,7 +14,11 @@ import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server
 import '../jest_matchers';
 import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
-import { getBaseMigratorParams, getSampleAType, getSampleBType } from './base.fixtures';
+import {
+  getBaseMigratorParams,
+  getSampleAType,
+  getSampleBType,
+} from '../fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'conversion_failures.test.log');
 
