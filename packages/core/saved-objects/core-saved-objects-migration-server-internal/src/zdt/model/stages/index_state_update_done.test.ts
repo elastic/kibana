@@ -33,7 +33,7 @@ describe('Stage: indexStateUpdateDone', () => {
 
   it('INDEX_STATE_UPDATE_DONE -> DOCUMENTS_UPDATE_INIT when successful and newIndexCreation is false', () => {
     const state = createState({
-      newIndexCreation: false,
+      skipDocumentMigration: false,
     });
     const res = Either.right('noop') as StateActionResponse<'INDEX_STATE_UPDATE_DONE'>;
 
@@ -47,7 +47,7 @@ describe('Stage: indexStateUpdateDone', () => {
 
   it('INDEX_STATE_UPDATE_DONE -> DONE when successful and newIndexCreation is true', () => {
     const state = createState({
-      newIndexCreation: true,
+      skipDocumentMigration: true,
     });
     const res = Either.right('noop') as StateActionResponse<'INDEX_STATE_UPDATE_DONE'>;
 

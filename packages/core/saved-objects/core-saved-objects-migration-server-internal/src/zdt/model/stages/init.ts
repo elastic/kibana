@@ -105,7 +105,6 @@ export const init: ModelStage<
         controlState: 'UPDATE_INDEX_MAPPINGS',
         ...commonState,
         additiveMappingChanges,
-        newIndexCreation: false,
       };
     // app version and index mapping version are the same.
     // either application upgrade without model change, or a simple reboot on the same version.
@@ -115,7 +114,6 @@ export const init: ModelStage<
         ...state,
         controlState: aliasActions.length ? 'UPDATE_ALIASES' : 'INDEX_STATE_UPDATE_DONE',
         ...commonState,
-        newIndexCreation: false,
       };
     // app version is lower than the index mapping version.
     // likely a rollback scenario - unsupported for the initial implementation

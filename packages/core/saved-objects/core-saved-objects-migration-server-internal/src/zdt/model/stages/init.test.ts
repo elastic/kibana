@@ -30,6 +30,7 @@ describe('Stage: init', () => {
     retryDelay: 0,
     retryCount: 0,
     logs: [],
+    skipDocumentMigration: false,
     ...parts,
   });
 
@@ -184,7 +185,7 @@ describe('Stage: init', () => {
           currentIndex,
           previousMappings: fetchIndexResponse[currentIndex].mappings,
           additiveMappingChanges: { someToken: {} },
-          newIndexCreation: false,
+          skipDocumentMigration: false,
         })
       );
     });
@@ -223,7 +224,7 @@ describe('Stage: init', () => {
           controlState: 'UPDATE_ALIASES',
           currentIndex,
           previousMappings: fetchIndexResponse[currentIndex].mappings,
-          newIndexCreation: false,
+          skipDocumentMigration: false,
         })
       );
     });
@@ -245,7 +246,7 @@ describe('Stage: init', () => {
           controlState: 'INDEX_STATE_UPDATE_DONE',
           currentIndex,
           previousMappings: fetchIndexResponse[currentIndex].mappings,
-          newIndexCreation: false,
+          skipDocumentMigration: false,
         })
       );
     });

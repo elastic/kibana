@@ -55,6 +55,7 @@ export const createContextMock = (
     serializer: serializerMock.create(),
     deletedTypes: ['deleted-type'],
     discardCorruptObjects: false,
+    nodeRoles: { migrator: true, ui: true, backgroundTasks: true },
     ...parts,
   };
 };
