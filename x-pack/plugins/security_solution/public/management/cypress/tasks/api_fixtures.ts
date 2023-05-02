@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CaseResponse } from '@kbn/cases-plugin/common';
+import type { Case } from '@kbn/cases-plugin/common';
 import type { RuleResponse } from '../../../../common/detection_engine/rule_schema';
 import { request } from './common';
 
@@ -69,7 +69,7 @@ export const loadRule = (includeResponseActions = true) =>
   }).then((response) => response.body);
 
 export const loadCase = (owner: string) =>
-  request<CaseResponse>({
+  request<Case>({
     method: 'POST',
     url: '/api/cases',
     body: {

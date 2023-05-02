@@ -31,6 +31,7 @@ export const createMockConfig = (): ConfigType => {
     alertIgnoreFields: [],
 
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
+    enabled: true,
   };
 };
 

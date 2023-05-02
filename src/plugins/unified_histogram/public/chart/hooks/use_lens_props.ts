@@ -13,41 +13,44 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 import type { UnifiedHistogramInputMessage, UnifiedHistogramRequestContext } from '../../types';
+import type { LensAttributesContext } from '../utils/get_lens_attributes';
 import { useStableCallback } from './use_stable_callback';
 
 export const useLensProps = ({
   request,
   getTimeRange,
   refetch$,
-  attributes,
+  attributesContext,
   onLoad,
 }: {
   request?: UnifiedHistogramRequestContext;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
-  attributes: TypedLensByValueInput['attributes'];
+  attributesContext: LensAttributesContext;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
 }) => {
-  const buildLensProps = useCallback(
-    () =>
-      getLensProps({
+  const buildLensProps = useCallback(() => {
+    const { attributes, requestData } = attributesContext;
+    return {
+      requestData: JSON.stringify(requestData),
+      lensProps: getLensProps({
         searchSessionId: request?.searchSessionId,
         getTimeRange,
         attributes,
         onLoad,
       }),
-    [attributes, getTimeRange, onLoad, request?.searchSessionId]
-  );
+    };
+  }, [attributesContext, getTimeRange, onLoad, request?.searchSessionId]);
 
-  const [lensProps, setLensProps] = useState(buildLensProps());
-  const updateLensProps = useStableCallback(() => setLensProps(buildLensProps()));
+  const [lensPropsContext, setLensPropsContext] = useState(buildLensProps());
+  const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));
 
   useEffect(() => {
-    const subscription = refetch$.subscribe(updateLensProps);
+    const subscription = refetch$.subscribe(updateLensPropsContext);
     return () => subscription.unsubscribe();
-  }, [refetch$, updateLensProps]);
+  }, [refetch$, updateLensPropsContext]);
 
-  return lensProps;
+  return lensPropsContext;
 };
 
 export const getLensProps = ({

@@ -8,7 +8,6 @@
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import { Feature, GeoJsonProperties } from 'geojson';
-import { ESTermSource } from '../sources/es_term_source';
 import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
 import {
   FORMATTERS_DATA_REQUEST_ID_SUFFIX,
@@ -18,18 +17,18 @@ import {
 import {
   ESTermSourceDescriptor,
   JoinDescriptor,
+  JoinSourceDescriptor,
   TableSourceDescriptor,
-  TermJoinSourceDescriptor,
 } from '../../../common/descriptor_types';
 import { IVectorSource } from '../sources/vector_source';
 import { IField } from '../fields/field';
 import { PropertiesMap } from '../../../common/elasticsearch_util';
-import { ITermJoinSource } from '../sources/term_join_source';
-import { TableSource } from '../sources/table_source';
+import { IJoinSource } from '../sources/join_sources';
+import { ESTermSource, TableSource } from '../sources/join_sources';
 
-export function createJoinTermSource(
-  descriptor: Partial<TermJoinSourceDescriptor> | undefined
-): ITermJoinSource | undefined {
+export function createJoinSource(
+  descriptor: Partial<JoinSourceDescriptor> | undefined
+): IJoinSource | undefined {
   if (!descriptor) {
     return;
   }
@@ -47,12 +46,12 @@ export function createJoinTermSource(
 
 export class InnerJoin {
   private readonly _descriptor: JoinDescriptor;
-  private readonly _rightSource?: ITermJoinSource;
+  private readonly _rightSource?: IJoinSource;
   private readonly _leftField?: IField;
 
   constructor(joinDescriptor: JoinDescriptor, leftSource: IVectorSource) {
     this._descriptor = joinDescriptor;
-    this._rightSource = createJoinTermSource(this._descriptor.right);
+    this._rightSource = createJoinSource(this._descriptor.right);
     this._leftField = joinDescriptor.leftField
       ? leftSource.createField({ fieldName: joinDescriptor.leftField })
       : undefined;
@@ -127,7 +126,7 @@ export class InnerJoin {
     return joinKey === undefined || joinKey === null ? null : joinKey.toString();
   }
 
-  getRightJoinSource(): ITermJoinSource {
+  getRightJoinSource(): IJoinSource {
     if (!this._rightSource) {
       throw new Error('Cannot get rightSource from InnerJoin with incomplete config');
     }

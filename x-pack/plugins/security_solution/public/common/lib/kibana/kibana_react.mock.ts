@@ -45,6 +45,7 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { mockApm } from '../apm/service.mock';
 import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
+import { of } from 'rxjs';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -116,6 +117,12 @@ export const createStartServicesMock = (
     unifiedSearch,
     data: {
       ...data,
+      dataViews: {
+        create: jest.fn(),
+        getIdsWithTitle: jest.fn(),
+        get: jest.fn(),
+        getIndexPattern: jest.fn(),
+      },
       query: {
         ...data.query,
         savedQueries: {
@@ -177,6 +184,7 @@ export const createStartServicesMock = (
     triggersActionsUi,
     cloudExperiments,
     guidedOnboarding,
+    isSidebarEnabled$: of(true),
   } as unknown as StartServices;
 };
 

@@ -217,6 +217,7 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   // Set up search sessions integration.
   // --------------------------------------------------------------------------------------
+  let initialSearchSessionId;
   if (searchSessionSettings) {
     const { sessionIdToRestore } = searchSessionSettings;
 
@@ -229,7 +230,7 @@ export const createDashboard = async (
     }
     const existingSession = session.getSessionId();
 
-    const initialSearchSessionId =
+    initialSearchSessionId =
       sessionIdToRestore ??
       (existingSession && incomingEmbeddable ? existingSession : session.start());
 
@@ -238,7 +239,6 @@ export const createDashboard = async (
         creationOptions?.searchSessionSettings
       );
     });
-    initialInput.searchSessionId = initialSearchSessionId;
   }
 
   // --------------------------------------------------------------------------------------
@@ -284,6 +284,7 @@ export const createDashboard = async (
   const dashboardContainer = new DashboardContainer(
     initialInput,
     reduxEmbeddablePackage,
+    initialSearchSessionId,
     savedObjectResult?.dashboardInput,
     dashboardCreationStartTime,
     undefined,
