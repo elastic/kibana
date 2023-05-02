@@ -33,6 +33,22 @@
         "children": [
           {
             "parentPluginId": "observabilityShared",
+            "id": "def-public.ObservabilitySharedPlugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityShared",
             "id": "def-public.ObservabilitySharedPlugin.setup",
             "type": "Function",
             "tags": [],
@@ -89,7 +105,7 @@
                 "section": "def-common.AppUpdater",
                 "text": "AppUpdater"
               },
-              ">; }) => void; }"
+              ">; }) => void; setIsSidebarEnabled: (isEnabled: boolean) => void; }"
             ],
             "path": "x-pack/plugins/observability_shared/public/plugin.ts",
             "deprecated": false,
@@ -433,8 +449,9 @@
         "label": "ObservabilityPageTemplateProps",
         "description": [],
         "signature": [
+          "Omit<",
           "ObservabilityPageTemplateDependencies",
-          " & Pick<",
+          ", \"isSidebarEnabled$\"> & Pick<",
           "KibanaPageTemplateProps",
           ", \"children\" | \"paddingSize\" | \"data-test-subj\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
@@ -494,7 +511,7 @@
             "section": "def-common.AppUpdater",
             "text": "AppUpdater"
           },
-          ">; }) => void; }"
+          ">; }) => void; setIsSidebarEnabled: (isEnabled: boolean) => void; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/plugin.ts",
         "deprecated": false,
