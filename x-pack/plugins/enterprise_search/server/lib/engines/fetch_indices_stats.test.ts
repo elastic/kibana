@@ -18,7 +18,7 @@ describe('fetchIndicesStats lib function', () => {
     asInternalUser: {},
   };
   const indices = ['test-index-name-1', 'test-index-name-2', 'test-index-name-3'];
-  const indicesStats = {
+  const indexStats1 = {
     indices: {
       'test-index-name-1': {
         health: 'GREEN',
@@ -37,6 +37,10 @@ describe('fetchIndicesStats lib function', () => {
         },
         uuid: 'YOLLiZ_mSRiDYDk0DJ-p8B',
       },
+    },
+  };
+  const indexStats2 = {
+    indices: {
       'test-index-name-2': {
         health: 'YELLOW',
         primaries: {
@@ -54,6 +58,10 @@ describe('fetchIndicesStats lib function', () => {
         },
         uuid: 'QOLLiZ_mGRiDYD30D2-p8B',
       },
+    },
+  };
+  const indexStats3 = {
+    indices: {
       'test-index-name-3': {
         health: 'RED',
         primaries: {
@@ -96,15 +104,13 @@ describe('fetchIndicesStats lib function', () => {
   });
 
   it('should return hydrated indices', async () => {
-    mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indicesStats);
+    mockClient.asCurrentUser.indices.stats
+      .mockImplementationOnce(() => indexStats1)
+      .mockImplementationOnce(() => indexStats2)
+      .mockImplementationOnce(() => indexStats3);
 
     await expect(
       fetchIndicesStats(mockClient as unknown as IScopedClusterClient, indices)
     ).resolves.toEqual(fetchIndicesStatsResponse);
-
-    expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
-      index: indices,
-      metric: ['docs'],
-    });
   });
 });
