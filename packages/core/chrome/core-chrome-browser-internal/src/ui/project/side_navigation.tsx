@@ -5,8 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import React from 'react';
+import { EuiText } from '@elastic/eui';
+import type { SideNavComponent } from '@kbn/core-chrome-browser';
 
-export { Header } from './header';
-export { ProjectHeader, SideNavigation as ProjectSideNavigation } from './project';
-export { LoadingIndicator } from './loading_indicator';
-export type { NavType } from './header';
+export const SideNavigation: SideNavComponent = () => {
+  return <EuiText color="white">TODO - Build navigation based on config</EuiText>;
+};

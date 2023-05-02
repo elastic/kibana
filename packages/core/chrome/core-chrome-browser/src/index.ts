@@ -32,6 +32,6 @@ export type {
   ChromeProjectNavigation,
   ChromeProjectNavigationNode,
   ChromeProjectNavigationLink,
-  CustomNavigationCompProps,
-  CustomNavigationComponent,
+  SideNavCompProps,
+  SideNavComponent,
 } from './project_navigation';

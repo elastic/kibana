@@ -37,10 +37,10 @@ export interface ChromeProjectNavigation {
 
 /** @public */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CustomNavigationCompProps {
+export interface SideNavCompProps {
   // TODO: provide the Chrome state to the component through props
   // e.g. "navTree", "activeRoute", "recentItems"...
 }
 
 /** @public */
-export type CustomNavigationComponent = ComponentType<CustomNavigationCompProps>;
+export type SideNavComponent = ComponentType<SideNavCompProps>;

@@ -15,7 +15,7 @@ import type { ChromeHelpExtension } from './help_extension';
 import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
-import type { ChromeProjectNavigation, CustomNavigationComponent } from './project_navigation';
+import type { ChromeProjectNavigation, SideNavComponent } from './project_navigation';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -182,6 +182,6 @@ export interface ChromeStart {
      *
      * @remarks Has no effect if the chrome style is not `project`.
      */
-    setNavigationComponent(getter: () => CustomNavigationComponent): void;
+    setSideNavComponent(component: SideNavComponent): void;
   };
 }

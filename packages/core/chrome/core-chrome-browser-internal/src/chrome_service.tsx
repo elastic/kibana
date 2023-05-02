@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -31,14 +31,14 @@ import type {
   ChromeProjectNavigation,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import type { CustomNavigationComponent } from '@kbn/core-chrome-browser';
+import type { SideNavComponent as ISideNavComponent } from '@kbn/core-chrome-browser';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
 import { RecentlyAccessedService } from './recently_accessed';
-import { Header, ProjectHeader } from './ui';
+import { Header, ProjectHeader, ProjectSideNavigation } from './ui';
 import type { InternalChromeStart } from './types';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
@@ -176,8 +176,8 @@ export class ChromeService {
       chromeStyle$.next(style);
     };
 
-    const setProjectSideNavComponent = (getter: () => CustomNavigationComponent) => {
-      projectNavigation.setProjectSideNavComponent(getter);
+    const setProjectSideNavComponent = (component: ISideNavComponent) => {
+      projectNavigation.setProjectSideNavComponent(component);
     };
 
     const setProjectNavigation = (config: ChromeProjectNavigation) => {
@@ -232,19 +232,19 @@ export class ChromeService {
         //   throw new Erorr(`Project navigation config must be provided for project.`);
         // }
 
-        const projectNavigationComponent$ = projectNavigation.getProjectNavigationComponent$();
+        const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
 
         const ProjectHeaderWithNavigation = () => {
-          const projectNavigationComponent = useObservable(projectNavigationComponent$, {
-            get: () => null,
-          });
+          const CustomSideNavComponent = useObservable(projectNavigationComponent$, undefined);
 
-          let Navigation = projectNavigationComponent.get();
+          let SideNavComponent: ISideNavComponent = () => null;
 
-          if (!Navigation) {
-            Navigation = () => (
-              <EuiText color="white">TODO - Build navigation based on config</EuiText>
-            );
+          if (CustomSideNavComponent !== undefined) {
+            // We have the state from the Observable
+            SideNavComponent =
+              CustomSideNavComponent.current !== null
+                ? CustomSideNavComponent.current
+                : ProjectSideNavigation;
           }
 
           return (
@@ -261,8 +261,8 @@ export class ChromeService {
               kibanaDocLink={docLinks.links.kibana.guide}
               kibanaVersion={injectedMetadata.getKibanaVersion()}
             >
-              {/* We'll pass the CustomNavigationCompProps once they are defined  */}
-              <Navigation />
+              {/* TODO: pass down the SideNavCompProps once they are defined  */}
+              {<SideNavComponent />}
             </ProjectHeader>
           );
         };

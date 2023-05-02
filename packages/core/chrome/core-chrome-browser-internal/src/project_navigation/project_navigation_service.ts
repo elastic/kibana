@@ -10,7 +10,7 @@ import { InternalApplicationStart } from '@kbn/core-application-browser-internal
 import {
   ChromeNavLinks,
   ChromeProjectNavigation,
-  CustomNavigationComponent,
+  SideNavComponent,
 } from '@kbn/core-chrome-browser';
 import { BehaviorSubject } from 'rxjs';
 
@@ -21,8 +21,8 @@ interface StartDeps {
 
 export class ProjectNavigationService {
   private customProjectSideNavComponent$ = new BehaviorSubject<{
-    get: () => CustomNavigationComponent | null;
-  }>({ get: () => null });
+    current: SideNavComponent | null;
+  }>({ current: null });
   private projectNavigation$ = new BehaviorSubject<ChromeProjectNavigation | undefined>(undefined);
 
   public start({ application, navLinks }: StartDeps) {
@@ -38,8 +38,8 @@ export class ProjectNavigationService {
       getProjectNavigation$: () => {
         return this.projectNavigation$.asObservable();
       },
-      setProjectSideNavComponent: (get: () => CustomNavigationComponent) => {
-        this.customProjectSideNavComponent$.next({ get });
+      setProjectSideNavComponent: (component: SideNavComponent | null) => {
+        this.customProjectSideNavComponent$.next({ current: component });
       },
       getProjectSideNavComponent$: () => {
         return this.customProjectSideNavComponent$.asObservable();
