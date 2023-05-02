@@ -30,6 +30,8 @@ import type {
   GetStatsResponse,
   UpdatePackageResponse,
   GetVerificationKeyIdResponse,
+  GetInstalledPackagesResponse,
+  GetEpmDataStreamsResponse,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -124,16 +126,14 @@ export const getInstalledListHandler: FleetRequestHandler<
   TypeOf<typeof GetInstalledPackagesRequestSchema.query>
 > = async (context, request, response) => {
   try {
-    const savedObjectsClient = (await context.fleet).internalSoClient; // TODO: Visit permissions
+    const coreContext = await context.core;
+    const savedObjectsClient = coreContext.savedObjects.client;
     const res = await getInstalledPackages({
       savedObjectsClient,
       ...request.query,
     });
 
-    const body: GetInstalledPackagesResponse = {
-      // TODO: Add type
-      ...res,
-    };
+    const body: GetInstalledPackagesResponse = { ...res };
 
     return response.ok({
       body,
@@ -149,14 +149,13 @@ export const getDataStreamsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   try {
     const coreContext = await context.core;
-    const esClient = coreContext.elasticsearch.client.asInternalUser; // TODO: Visit permissions
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
     const res = await getDataStreams({
       esClient,
       ...request.query,
     });
 
-    const body: GetDataStreamsResponse = {
-      // TODO: Add type
+    const body: GetEpmDataStreamsResponse = {
       ...res,
     };
 

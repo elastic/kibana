@@ -198,13 +198,8 @@ export async function getInstalledPackages(options: {
       });
 
     return {
-      // description: string;
-      // download: string;
       // icons: string; // TODO: implement
       name,
-      // path: string;
-      // title: string;
-      // type: string;
       version,
       status: installStatus,
       dataStreams,
