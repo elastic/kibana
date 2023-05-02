@@ -10,11 +10,11 @@ import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-
 import { useCallback, useMemo } from 'react';
 import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import { VIEW_SELECTION } from '../../../../common/constants';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionsTrigger } from '../../../actions/constants';
+import { VIEW_SELECTION } from '../../../../common/constants';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -62,17 +62,20 @@ export const getUseCellActionsHook = (tableId: TableId) => {
       tableDefaults.viewMode;
 
     const cellActionProps = useMemo<UseDataGridColumnsSecurityCellActionsProps>(() => {
-      const fields = columns.map((col) => {
-        const fieldMeta: Partial<BrowserField> | undefined = browserFieldsByName[col.id];
-        return {
-          name: col.id,
-          type: fieldMeta?.type ?? 'keyword',
-          values: (finalData as TimelineNonEcsData[][]).map(
-            (row) => row.find((rowData) => rowData.field === col.id)?.value ?? []
-          ),
-          aggregatable: fieldMeta?.aggregatable ?? false,
-        };
-      });
+      const fields =
+        viewMode === VIEW_SELECTION.eventRenderedView
+          ? []
+          : columns.map((col) => {
+              const fieldMeta: Partial<BrowserField> | undefined = browserFieldsByName[col.id];
+              return {
+                name: col.id,
+                type: fieldMeta?.type ?? 'keyword',
+                values: (finalData as TimelineNonEcsData[][]).map(
+                  (row) => row.find((rowData) => rowData.field === col.id)?.value ?? []
+                ),
+                aggregatable: fieldMeta?.aggregatable ?? false,
+              };
+            });
 
       return {
         triggerId: SecurityCellActionsTrigger.DEFAULT,
@@ -83,16 +86,16 @@ export const getUseCellActionsHook = (tableId: TableId) => {
         },
         dataGridRef,
       };
-    }, [browserFieldsByName, columns, finalData, dataGridRef]);
+    }, [viewMode, browserFieldsByName, columns, finalData, dataGridRef]);
 
     const cellActions = useDataGridColumnsSecurityCellActions(cellActionProps);
 
     const getCellActions = useCallback(
       (_columnId: string, columnIndex: number) => {
-        if (cellActions.length === 0 || viewMode === VIEW_SELECTION.eventRenderedView) return [];
+        if (cellActions.length === 0) return [];
         return cellActions[columnIndex];
       },
-      [cellActions, viewMode]
+      [cellActions]
     );
 
     return {
