@@ -49,6 +49,7 @@ export class StatusRuleExecutor {
   monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> = [];
 
   public locationIdNameMap: Record<string, string> = {};
+  public locationNameIdMap: Record<string, string> = {};
 
   constructor(
     previousStartedAt: Date | null,
@@ -75,10 +76,12 @@ export class StatusRuleExecutor {
 
     publicLocations.forEach((loc) => {
       this.locationIdNameMap[loc.label] = loc.id;
+      this.locationNameIdMap[loc.id] = loc.label;
     });
 
     privateLocations.forEach((loc) => {
       this.locationIdNameMap[loc.label] = loc.id;
+      this.locationIdNameMap[loc.id] = loc.label;
     });
   }
 
@@ -195,7 +198,13 @@ export class StatusRuleExecutor {
         delete downConfigs[locPlusId];
       } else {
         const { locations } = monitor.attributes;
-        if (!locations.some((l) => l.label === downConfig.location)) {
+        if (
+          !locations.some(
+            (l) =>
+              l.label === downConfig.location ||
+              this.locationNameIdMap[l.id] === downConfig.location
+          )
+        ) {
           staleDownConfigs[locPlusId] = { ...downConfig, isLocationRemoved: true };
           delete downConfigs[locPlusId];
         }
