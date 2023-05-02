@@ -14,7 +14,11 @@ import {
   isRangeAnnotationConfig,
   annotationsIconSet,
 } from '@kbn/event-annotation-plugin/public';
-import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import {
+  createCopiedAnnotation,
+  EventAnnotationConfig,
+  getDefaultQueryAnnotation,
+} from '@kbn/event-annotation-plugin/common';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
@@ -127,50 +131,6 @@ export const getAnnotationsSupportedLayer = (
       : undefined,
     initialDimensions,
     noDatasource: true,
-  };
-};
-
-const getDefaultManualAnnotation = (id: string, timestamp: string): EventAnnotationConfig => ({
-  label: defaultAnnotationLabel,
-  type: 'manual',
-  key: {
-    type: 'point_in_time',
-    timestamp,
-  },
-  icon: 'triangle',
-  id,
-});
-
-const getDefaultQueryAnnotation = (
-  id: string,
-  fieldName: string,
-  timeField: string
-): EventAnnotationConfig => ({
-  filter: {
-    type: 'kibana_query',
-    query: `${fieldName}: *`,
-    language: 'kuery',
-  },
-  timeField,
-  type: 'query',
-  key: {
-    type: 'point_in_time',
-  },
-  id,
-  label: `${fieldName}: *`,
-});
-
-const createCopiedAnnotation = (
-  newId: string,
-  timestamp: string,
-  source?: EventAnnotationConfig
-): EventAnnotationConfig => {
-  if (!source) {
-    return getDefaultManualAnnotation(newId, timestamp);
-  }
-  return {
-    ...source,
-    id: newId,
   };
 };
 

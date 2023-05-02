@@ -9,6 +9,7 @@
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AvailableAnnotationIcons } from '../constants';
+import { EventAnnotationConfig } from '../types';
 
 import type {
   ManualRangeEventAnnotationArgs,
@@ -163,3 +164,24 @@ export const manualRangeEventAnnotation: ExpressionFunctionDefinition<
     };
   },
 };
+
+export const defaultAnnotationLabel = i18n.translate(
+  'eventAnnotation.manualAnnotation.defaultAnnotationLabel',
+  {
+    defaultMessage: 'Event',
+  }
+);
+
+export const getDefaultManualAnnotation = (
+  id: string,
+  timestamp: string
+): EventAnnotationConfig => ({
+  label: defaultAnnotationLabel,
+  type: 'manual',
+  key: {
+    type: 'point_in_time',
+    timestamp,
+  },
+  icon: 'triangle',
+  id,
+});

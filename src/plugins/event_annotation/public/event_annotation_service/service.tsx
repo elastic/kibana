@@ -21,6 +21,7 @@ import {
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import { defaultAnnotationLabel } from '../../common/manual_event_annotation';
 import { EventAnnotationGroupContent } from '../../common/types';
 import {
   EventAnnotationConfig,
@@ -32,7 +33,6 @@ import { EventAnnotationServiceType } from './types';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
-  defaultAnnotationLabel,
   isRangeAnnotationConfig,
   isQueryAnnotationConfig,
 } from './helpers';

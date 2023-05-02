@@ -15,6 +15,7 @@ import { EuiSelectProps, EuiTextAreaProps, EuiTextProps } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { act } from 'react-dom/test-utils';
 import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
+import { AnnotationEditorControls } from '.';
 
 describe('event annotation group editor', () => {
   const dataViewId = 'my-index-pattern';
@@ -35,11 +36,13 @@ describe('event annotation group editor', () => {
   };
 
   let wrapper: ReactWrapper;
-  const updateMock = jest.fn();
+  let updateMock: jest.Mock;
 
   const TagSelector = (_props: { onTagsSelected: (tags: string[]) => void }) => <div />;
 
   beforeEach(async () => {
+    updateMock = jest.fn();
+
     wrapper = mountWithIntl(
       <GroupEditorControls
         group={group}
@@ -180,5 +183,16 @@ describe('event annotation group editor', () => {
         ],
       ]
     `);
+  });
+
+  it('adds a new annotation group', () => {
+    act(() => {
+      wrapper.find('button[data-test-subj="addAnnotation"]').simulate('click');
+    });
+
+    expect(updateMock).toHaveBeenCalledTimes(1);
+    const newAnnotations = (updateMock.mock.calls[0][0] as EventAnnotationGroupConfig).annotations;
+    expect(newAnnotations.length).toBe(group.annotations.length + 1);
+    expect(wrapper.exists(AnnotationEditorControls)); // annotation controls opened
   });
 });

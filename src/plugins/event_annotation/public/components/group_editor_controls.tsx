@@ -24,7 +24,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
 import React, { useEffect, useMemo, useState } from 'react';
-import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  createCopiedAnnotation,
+  EventAnnotationConfig,
+  EventAnnotationGroupConfig,
+} from '../../common';
 import { AnnotationEditorControls } from './annotation_editor_controls';
 
 export const GroupEditorControls = ({
@@ -69,6 +74,11 @@ export const GroupEditorControls = ({
     () => dataViews.find((dataView) => dataView.id === group.indexPatternId) || dataViews[0],
     [dataViews, group.indexPatternId]
   );
+
+  const [newAnnotationId, setNewAnnotationId] = useState<string>(uuidv4());
+  useEffect(() => {
+    setNewAnnotationId(uuidv4());
+  }, [group.annotations.length]);
 
   return !selectedAnnotation ? (
     <>
@@ -147,7 +157,11 @@ export const GroupEditorControls = ({
             }
           />
         </EuiFormRow>
-        <EuiFormRow label="Annotations">
+        <EuiFormRow
+          label={i18n.translate('eventAnnotation.groupEditor.addAnnotation', {
+            defaultMessage: 'Annotations',
+          })}
+        >
           <div>
             {group.annotations.map((annotation) => (
               <>
@@ -157,6 +171,25 @@ export const GroupEditorControls = ({
                 <EuiSpacer size="s" />
               </>
             ))}
+            <EuiButton
+              data-test-subj="addAnnotation"
+              fullWidth
+              onClick={() => {
+                const newAnnotation = createCopiedAnnotation(
+                  newAnnotationId,
+                  new Date().toISOString()
+                );
+
+                update({ ...group, annotations: [...group.annotations, newAnnotation] });
+
+                setSelectedAnnotation(newAnnotation);
+              }}
+            >
+              <FormattedMessage
+                id="eventAnnotation.groupEditor.addAnnotation"
+                defaultMessage="Add annotation"
+              />
+            </EuiButton>
           </div>
         </EuiFormRow>
       </EuiForm>
