@@ -148,11 +148,15 @@ const validateThrottleValue = (speed: string | undefined, allowZero?: boolean) =
 const validateBrowser: ValidationLibrary = {
   ...validateCommon,
   [ConfigKey.SOURCE_INLINE]: ({ [ConfigKey.SOURCE_INLINE]: inlineScript }) => !inlineScript,
-  [ConfigKey.DOWNLOAD_SPEED]: ({ [ConfigKey.DOWNLOAD_SPEED]: downloadSpeed }) =>
-    validateThrottleValue(downloadSpeed),
-  [ConfigKey.UPLOAD_SPEED]: ({ [ConfigKey.UPLOAD_SPEED]: uploadSpeed }) =>
-    validateThrottleValue(uploadSpeed),
-  [ConfigKey.LATENCY]: ({ [ConfigKey.LATENCY]: latency }) => validateThrottleValue(latency, true),
+  [ConfigKey.THROTTLING_CONFIG]: ({ throttling }) => {
+    if (!throttling || throttling.value === null) return true;
+    const { download, upload, latency } = throttling.value;
+    return (
+      validateThrottleValue(String(download)) ||
+      validateThrottleValue(String(upload)) ||
+      validateThrottleValue(String(latency), true)
+    );
+  },
   [ConfigKey.PLAYWRIGHT_OPTIONS]: ({ [ConfigKey.PLAYWRIGHT_OPTIONS]: playwrightOptions }) =>
     playwrightOptions ? !validJSONFormat(playwrightOptions) : false,
   [ConfigKey.PARAMS]: ({ [ConfigKey.PARAMS]: params }) =>

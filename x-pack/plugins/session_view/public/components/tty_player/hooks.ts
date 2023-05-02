@@ -33,7 +33,11 @@ import {
   TTY_LINES_PRE_SEEK,
 } from '../../../common/constants';
 
-export const useFetchIOEvents = (sessionEntityId: string) => {
+export const useFetchIOEvents = (
+  index: string,
+  sessionEntityId: string,
+  sessionStartTime: string
+) => {
   const { http } = useKibana<CoreStart>().services;
   const cachingKeys = useMemo(() => [QUERY_KEY_IO_EVENTS, sessionEntityId], [sessionEntityId]);
 
@@ -43,7 +47,9 @@ export const useFetchIOEvents = (sessionEntityId: string) => {
       const { cursor } = pageParam;
       const res = await http.get<ProcessEventResults>(IO_EVENTS_ROUTE, {
         query: {
+          index,
           sessionEntityId,
+          sessionStartTime,
           cursor,
         },
       });

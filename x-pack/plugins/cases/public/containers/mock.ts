@@ -4,8 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import type { ActionLicense, Cases, Case, CasesStatus, CaseUserActions, Comment } from './types';
+import type {
+  ActionLicense,
+  CasesUI,
+  CaseUI,
+  CasesStatus,
+  CaseUserActions,
+  Comment,
+} from './types';
 
 import type {
   ResolvedCase,
@@ -21,9 +29,9 @@ import type {
 } from '../../common/ui/types';
 import type {
   CaseConnector,
-  CaseResponse,
+  Case,
   CasesFindResponse,
-  CasesResponse,
+  Cases,
   CasesStatusResponse,
   CaseUserActionResponse,
   CaseUserActionsResponse,
@@ -207,7 +215,7 @@ export const persistableStateAttachment: PersistableComment = {
   version: 'WzQ3LDFc',
 };
 
-export const basicCase: Case = {
+export const basicCase: CaseUI = {
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
   closedBy: null,
@@ -238,6 +246,20 @@ export const basicCase: Case = {
   },
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+};
+
+export const basicFileMock: FileJSON = {
+  id: '7d47d130-bcec-11ed-afa1-0242ac120002',
+  name: 'my-super-cool-screenshot',
+  mimeType: 'image/png',
+  created: basicCreatedAt,
+  updated: basicCreatedAt,
+  size: 999,
+  meta: '',
+  alt: '',
+  fileKind: '',
+  status: 'READY',
+  extension: 'png',
 };
 
 export const caseWithAlerts = {
@@ -310,7 +332,7 @@ export const basicCaseMetrics: SingleCaseMetrics = {
   },
 };
 
-export const mockCase: Case = {
+export const mockCase: CaseUI = {
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
   closedBy: null,
@@ -342,7 +364,7 @@ export const mockCase: Case = {
   assignees: [],
 };
 
-export const basicCasePost: Case = {
+export const basicCasePost: CaseUI = {
   ...basicCase,
   updatedAt: null,
   updatedBy: null,
@@ -383,7 +405,7 @@ export const basicPush = {
   pushedBy: elasticUser,
 };
 
-export const pushedCase: Case = {
+export const pushedCase: CaseUI = {
   ...basicCase,
   connector: {
     id: pushConnectorId,
@@ -404,7 +426,7 @@ const basicAction = {
   type: 'title',
 };
 
-export const cases: Case[] = [
+export const cases: CaseUI[] = [
   basicCase,
   {
     ...pushedCase,
@@ -422,7 +444,7 @@ export const cases: Case[] = [
   caseWithRegisteredAttachments,
 ];
 
-export const allCases: Cases = {
+export const allCases: CasesUI = {
   cases,
   page: 1,
   perPage: 5,
@@ -500,7 +522,7 @@ export const persistableStateAttachmentSnake: CommentResponse = {
   version: 'WzQ3LDFc',
 };
 
-export const basicCaseSnake: CaseResponse = {
+export const basicCaseSnake: Case = {
   ...basicCase,
   status: CaseStatuses.open,
   closed_at: null,
@@ -514,7 +536,7 @@ export const basicCaseSnake: CaseResponse = {
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
   owner: SECURITY_SOLUTION_OWNER,
-} as CaseResponse;
+} as Case;
 
 export const caseWithAlertsSnake = {
   ...basicCaseSnake,
@@ -568,7 +590,7 @@ export const pushedCaseSnake = {
   external_service: { ...basicPushSnake, connector_id: pushConnectorId },
 };
 
-export const casesSnake: CasesResponse = [
+export const casesSnake: Cases = [
   basicCaseSnake,
   {
     ...pushedCaseSnake,
@@ -895,7 +917,7 @@ export const useGetCasesMockState = {
   isError: false,
 };
 
-export const basicCaseClosed: Case = {
+export const basicCaseClosed: CaseUI = {
   ...basicCase,
   closedAt: '2020-02-25T23:06:33.798Z',
   closedBy: elasticUser,

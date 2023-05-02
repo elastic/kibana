@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BaseCspSetupBothPolicy } from '../../../../common/types';
+import { CspStatusCode } from '../../../../common/types';
 
 export interface CspmUsage {
   indices: CspmIndicesStats;
@@ -14,14 +14,22 @@ export interface CspmUsage {
   rules_stats: CspmRulesStats[];
 }
 
+export interface PackageSetupStatus {
+  status: CspStatusCode;
+  installedPackagePolicies: number;
+  healthyAgents: number;
+}
+
 export interface CspmIndicesStats {
   findings: IndexStats | {};
   latest_findings: IndexStats | {};
+  vulnerabilities: IndexStats | {};
+  latest_vulnerabilities: IndexStats | {};
   score: IndexStats | {};
   latestPackageVersion: string;
-  cspm: BaseCspSetupBothPolicy;
-  kspm: BaseCspSetupBothPolicy;
-  vuln_mgmt: BaseCspSetupBothPolicy;
+  cspm: PackageSetupStatus;
+  kspm: PackageSetupStatus;
+  vuln_mgmt: PackageSetupStatus;
 }
 
 export interface IndexStats {

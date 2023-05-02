@@ -136,9 +136,11 @@ describe('install', () => {
     jest
       .spyOn(Registry, 'fetchFindLatestPackageOrThrow')
       .mockImplementation(() => Promise.resolve({ version: '1.3.0' } as any));
-    jest
-      .spyOn(Registry, 'getPackage')
-      .mockImplementation(() => Promise.resolve({ packageInfo: { license: 'basic' } } as any));
+    jest.spyOn(Registry, 'getPackage').mockImplementation(() =>
+      Promise.resolve({
+        packageInfo: { license: 'basic', conditions: { elastic: { subscription: 'basic' } } },
+      } as any)
+    );
 
     mockGetBundledPackages.mockReset();
     (install._installPackage as jest.Mock).mockClear();

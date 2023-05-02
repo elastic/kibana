@@ -82,12 +82,20 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   }
 
   function createBadge({ badgeText, toolTipProps, ...badgeProps }: Badge, i: number): ReactElement {
-    const badge = (
-      <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
+    const Badge = ({ key, ...rest }: { key?: string }) => (
+      <EuiBadge key={key} tabIndex={0} {...rest} {...badgeProps}>
         {badgeText}
       </EuiBadge>
     );
-    return toolTipProps ? <EuiToolTip {...toolTipProps}>{badge}</EuiToolTip> : badge;
+
+    const key = `nav-menu-badge-${i}`;
+    return toolTipProps ? (
+      <EuiToolTip key={key} {...toolTipProps}>
+        <Badge />
+      </EuiToolTip>
+    ) : (
+      <Badge key={key} />
+    );
   }
 
   function renderBadges(): ReactElement | null {

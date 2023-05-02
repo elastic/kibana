@@ -119,7 +119,7 @@ export function AlertActions({
   };
 
   const handleAddToExistingCaseClick = () => {
-    selectCaseModal.open({ attachments: caseAttachments });
+    selectCaseModal.open({ getAttachments: () => caseAttachments });
     closeActionsPopover();
   };
 

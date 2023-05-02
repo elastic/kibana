@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useState } from 'react';
 
@@ -14,9 +14,10 @@ interface Props {
   maxBurnRate: number;
   errors?: string[];
   onChange: (burnRate: number) => void;
+  helpText?: string;
 }
 
-export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors }: Props) {
+export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors, helpText }: Props) {
   const [burnRate, setBurnRate] = useState<number>(initialBurnRate);
   const hasError = errors !== undefined && errors.length > 0;
 
@@ -28,10 +29,24 @@ export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors }:
 
   return (
     <EuiFormRow
-      label={rowLabel}
+      label={
+        <>
+          {i18n.translate('xpack.observability.slo.rules.burnRate.rowLabel', {
+            defaultMessage: 'Burn rate threshold',
+          })}{' '}
+          <EuiIconTip
+            position="top"
+            content={i18n.translate('xpack.observability.slo.rules.burnRate.tooltip', {
+              defaultMessage:
+                'The burn rate is how fast the service consumes the error budget over the lookback period.',
+            })}
+          />
+        </>
+      }
       fullWidth
       isInvalid={hasError}
       error={hasError ? errors[0] : undefined}
+      helpText={helpText}
     >
       <EuiFieldNumber
         fullWidth
@@ -45,7 +60,3 @@ export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors }:
     </EuiFormRow>
   );
 }
-
-const rowLabel = i18n.translate('xpack.observability.slo.rules.burnRate.rowLabel', {
-  defaultMessage: 'Burn rate threshold',
-});

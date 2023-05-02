@@ -11,11 +11,13 @@ import {
   AllCommentsResponse,
   BulkCreateCommentRequest,
   BulkGetAttachmentsResponse,
-  CaseResponse,
+  Case,
   CommentPatchRequest,
   CommentRequest,
   CommentResponse,
+  CommentsResponse,
   CommentType,
+  getCaseFindAttachmentsUrl,
   getCasesDeleteFileAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
 import { User } from '../authentication/types';
@@ -61,7 +63,7 @@ export const createComment = async ({
   auth?: { user: User; space: string | null } | null;
   expectedHttpCode?: number;
   headers?: Record<string, unknown>;
-}): Promise<CaseResponse> => {
+}): Promise<Case> => {
   const apiCall = supertest.post(
     `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/comments`
   );
@@ -89,7 +91,7 @@ export const bulkCreateAttachments = async ({
   params: BulkCreateCommentRequest;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
-}): Promise<CaseResponse> => {
+}): Promise<Case> => {
   const { body: theCase } = await supertest
     .post(
       `${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/${caseId}/attachments/_bulk_create`
@@ -112,7 +114,7 @@ export const createCaseAndBulkCreateAttachments = async ({
   numberOfAttachments?: number;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
-}): Promise<{ theCase: CaseResponse; attachments: BulkCreateCommentRequest }> => {
+}): Promise<{ theCase: Case; attachments: BulkCreateCommentRequest }> => {
   const postedCase = await createCase(supertest, postCaseReq);
   const attachments = getAttachments(numberOfAttachments);
   const patchedCase = await bulkCreateAttachments({
@@ -125,8 +127,8 @@ export const createCaseAndBulkCreateAttachments = async ({
 };
 
 export const getAttachments = (numberOfAttachments: number): BulkCreateCommentRequest => {
-  return [...Array(numberOfAttachments)].map((index) => {
-    if (index % 0) {
+  return [...Array(numberOfAttachments)].map((_, index) => {
+    if (index % 10 === 0) {
       return {
         type: CommentType.user,
         comment: `Test ${index + 1}`,
@@ -136,8 +138,8 @@ export const getAttachments = (numberOfAttachments: number): BulkCreateCommentRe
 
     return {
       type: CommentType.alert,
-      alertId: `test-id-${index + 1}`,
-      index: `test-index-${index + 1}`,
+      alertId: [`test-id-${index + 1}`],
+      index: [`test-index-${index + 1}`],
       rule: {
         id: `rule-test-id-${index + 1}`,
         name: `Test ${index + 1}`,
@@ -245,7 +247,7 @@ export const updateComment = async ({
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null } | null;
   headers?: Record<string, unknown>;
-}): Promise<CaseResponse> => {
+}): Promise<Case> => {
   const apiCall = supertest.patch(
     `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/comments`
   );
@@ -279,4 +281,27 @@ export const bulkDeleteFileAttachments = async ({
     .send({ ids: fileIds })
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
+};
+
+export const findAttachments = async ({
+  supertest,
+  caseId,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CommentsResponse> => {
+  const { body } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseFindAttachmentsUrl(caseId)}`)
+    .set('kbn-xsrf', 'true')
+    .query(query)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return body;
 };

@@ -1,24 +1,17 @@
 {
   "description": "Security: Cloudtrail - Looks for a spike in the rate of an error message which may simply indicate an impending service failure but these can also be byproducts of attempted or successful persistence, privilege escalation, defense evasion, discovery, lateral movement, or collection activity by a threat actor.",
-  "groups": [
-    "security",
-    "cloudtrail"
-  ],
+  "groups": ["security", "cloudtrail"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "high_distinct_count(\"aws.cloudtrail.error_message\")",
+        "detector_description": "Detects high distinct count of Cloudtrail error messages.",
         "function": "high_distinct_count",
-        "field_name": "aws.cloudtrail.error_message"
+        "field_name": "aws.cloudtrail.error_message",
+        "detector_index": 0
       }
     ],
-    "influencers": [
-      "aws.cloudtrail.user_identity.arn",
-      "source.ip",
-      "source.geo.city_name"
-    ],
-    "model_prune_window": "30d"
+    "influencers": ["aws.cloudtrail.user_identity.arn", "source.ip", "source.geo.city_name"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -29,6 +22,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-cloudtrail",
-    "security_app_display_name": "Spike in AWS Error Messages"
+    "security_app_display_name": "Spike in AWS Error Messages",
+    "managed": true,
+    "job_revision": 4
   }
 }

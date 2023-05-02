@@ -47,7 +47,7 @@ export const MonitorAlerts = ({
 
   return (
     <EuiPanel hasShadow={false} paddingSize="m" hasBorder>
-      <EuiFlexGroup alignItems="center" gutterSize="m">
+      <EuiFlexGroup alignItems="center" gutterSize="m" wrap={true}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h3>
@@ -98,7 +98,7 @@ export const MonitorAlerts = ({
           <AlertActions monitorId={monitorId} from={from} to={to} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="xs" wrap={true}>
         <EuiFlexItem style={{ width: 80 }} grow={false}>
           <ExploratoryViewEmbeddable
             dataTestSubj="monitorActiveAlertsCount"
@@ -130,7 +130,7 @@ export const MonitorAlerts = ({
             ]}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ minWidth: 80 }}>
           <ExploratoryViewEmbeddable
             sparklineMode
             customHeight="100px"
@@ -193,7 +193,7 @@ export const MonitorAlerts = ({
             ]}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ minWidth: 80 }}>
           <ExploratoryViewEmbeddable
             sparklineMode
             customHeight="100px"

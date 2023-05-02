@@ -73,11 +73,9 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
 };
 
 const calculateRuleStats = (buckets: VersionBuckets): PrebuiltRulesStatusStats => {
-  const { latestVersions, installedVersions, latestVersionsToInstall, installedVersionsToUpgrade } =
-    buckets;
+  const { installedVersions, latestVersionsToInstall, installedVersionsToUpgrade } = buckets;
 
   return {
-    num_prebuilt_rules_total: latestVersions.length,
     num_prebuilt_rules_installed: installedVersions.length,
     num_prebuilt_rules_to_install: latestVersionsToInstall.length,
     num_prebuilt_rules_to_upgrade: installedVersionsToUpgrade.length,

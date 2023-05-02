@@ -332,7 +332,7 @@ export function MonitorDetailFlyout(props: Props) {
               configId={configId}
               monitor={{
                 ...monitorSavedObject.attributes,
-                id: monitorSavedObject.id,
+                id,
                 updated_at: monitorSavedObject.updated_at!,
                 created_at: monitorSavedObject.created_at!,
               }}

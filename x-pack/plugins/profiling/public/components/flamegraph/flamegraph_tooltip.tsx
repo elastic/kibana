@@ -22,6 +22,7 @@ import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates
 import { asCost } from '../../utils/formatters/as_cost';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
+import { CPULabelWithHint } from '../shared/cpu_label_with_hint';
 import { TooltipRow } from './tooltip_row';
 
 interface Props {
@@ -86,9 +87,14 @@ export function FlameGraphTooltip({
           {isRoot === false && (
             <>
               <TooltipRow
-                label={i18n.translate('xpack.profiling.flameGraphTooltip.inclusiveCpuLabel', {
-                  defaultMessage: `CPU incl. subfunctions`,
-                })}
+                label={
+                  <CPULabelWithHint
+                    type="total"
+                    labelSize="xs"
+                    iconSize="s"
+                    labelStyle={{ fontWeight: 'bold' }}
+                  />
+                }
                 value={impactEstimates.percentage}
                 comparison={comparisonImpactEstimates?.percentage}
                 formatValue={asPercentage}
@@ -96,9 +102,14 @@ export function FlameGraphTooltip({
                 formatDifferenceAsPercentage
               />
               <TooltipRow
-                label={i18n.translate('xpack.profiling.flameGraphTooltip.exclusiveCpuLabel', {
-                  defaultMessage: `CPU`,
-                })}
+                label={
+                  <CPULabelWithHint
+                    type="self"
+                    labelSize="xs"
+                    iconSize="s"
+                    labelStyle={{ fontWeight: 'bold' }}
+                  />
+                }
                 value={impactEstimates.percentageNoChildren}
                 comparison={comparisonImpactEstimates?.percentageNoChildren}
                 showDifference

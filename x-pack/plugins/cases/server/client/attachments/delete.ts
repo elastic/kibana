@@ -151,6 +151,5 @@ const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlerts
   }
 
   const alerts = getAlertInfoFromComments(alertAttachments);
-  await alertsService.ensureAlertsAuthorized({ alerts });
   await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
 };

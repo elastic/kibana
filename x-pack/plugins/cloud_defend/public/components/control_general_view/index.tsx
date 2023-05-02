@@ -24,22 +24,26 @@ import {
   getSelectorsAndResponsesFromYaml,
   getDefaultSelectorByType,
   getDefaultResponseByType,
+  getTotalsByType,
 } from '../../common/utils';
 import { SelectorType, Selector, Response, ViewDeps } from '../../types';
 import * as i18n from './translations';
 import { ControlGeneralViewSelector } from '../control_general_view_selector';
 import { ControlGeneralViewResponse } from '../control_general_view_response';
+import { MAX_SELECTORS_AND_RESPONSES_PER_TYPE } from '../../common/constants';
 
 interface AddSelectorButtonProps {
   type: 'Selector' | 'Response';
   onSelectType(type: SelectorType): void;
   selectors: Selector[];
+  responses: Response[];
 }
 
 /**
  * dual purpose button for adding selectors and responses by type
  */
-const AddButton = ({ type, onSelectType, selectors }: AddSelectorButtonProps) => {
+const AddButton = ({ type, onSelectType, selectors, responses }: AddSelectorButtonProps) => {
+  const totalsByType = useMemo(() => getTotalsByType(selectors, responses), [responses, selectors]);
   const [isPopoverOpen, setPopover] = useState(false);
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -84,7 +88,10 @@ const AddButton = ({ type, onSelectType, selectors }: AddSelectorButtonProps) =>
       key={`addFile${type}`}
       icon="document"
       onClick={addFile}
-      disabled={type === 'Response' && selectorCounts.file === 0}
+      disabled={
+        (type === 'Response' && selectorCounts.file === 0) ||
+        totalsByType.file >= MAX_SELECTORS_AND_RESPONSES_PER_TYPE
+      }
       data-test-subj={`cloud-defend-btnAddFile${type}`}
     >
       {isSelector ? i18n.fileSelector : i18n.fileResponse}
@@ -93,7 +100,10 @@ const AddButton = ({ type, onSelectType, selectors }: AddSelectorButtonProps) =>
       key={`addProcess${type}`}
       icon="gear"
       onClick={addProcess}
-      disabled={type === 'Response' && selectorCounts.process === 0}
+      disabled={
+        (type === 'Response' && selectorCounts.process === 0) ||
+        totalsByType.process >= MAX_SELECTORS_AND_RESPONSES_PER_TYPE
+      }
       data-test-subj={`cloud-defend-btnAddProcess${type}`}
     >
       {isSelector ? i18n.processSelector : i18n.processResponse}
@@ -328,6 +338,11 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
       </EuiFlexItem>
 
       {selectors.map((selector, i) => {
+        const usedByResponse = !!responses.find(
+          (response) =>
+            response.match.includes(selector.name) || response?.exclude?.includes(selector.name)
+        );
+
         return (
           <EuiFlexItem key={i}>
             <ControlGeneralViewSelector
@@ -335,6 +350,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
               index={i}
               selector={selector}
               selectors={selectors}
+              usedByResponse={usedByResponse}
               onDuplicate={onDuplicateSelector}
               onRemove={onRemoveSelector}
               onChange={onSelectorChange}
@@ -343,7 +359,12 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
         );
       })}
 
-      <AddButton type="Selector" onSelectType={onAddSelector} selectors={selectors} />
+      <AddButton
+        type="Selector"
+        onSelectType={onAddSelector}
+        selectors={selectors}
+        responses={responses}
+      />
 
       <EuiSpacer size="m" />
 
@@ -371,7 +392,12 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
           </EuiFlexItem>
         );
       })}
-      <AddButton type="Response" onSelectType={onAddResponse} selectors={selectors} />
+      <AddButton
+        type="Response"
+        onSelectType={onAddResponse}
+        selectors={selectors}
+        responses={responses}
+      />
       <EuiSpacer size="m" />
     </EuiFlexGroup>
   );

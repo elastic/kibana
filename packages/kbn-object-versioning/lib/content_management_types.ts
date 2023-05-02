@@ -59,57 +59,67 @@ export interface ServicesDefinition {
       result?: VersionableObject<any, any, any, any>;
     };
   };
+  mSearch?: {
+    out?: {
+      result?: VersionableObject<any, any, any, any>;
+    };
+  };
 }
 
 export interface ServiceTransforms {
   get: {
     in: {
-      options: ObjectTransforms;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
   bulkGet: {
     in: {
-      options: ObjectTransforms;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
   create: {
     in: {
-      data: ObjectTransforms;
-      options: ObjectTransforms;
+      data: ObjectTransforms<any, any, any, any>;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
   update: {
     in: {
-      data: ObjectTransforms;
-      options: ObjectTransforms;
+      data: ObjectTransforms<any, any, any, any>;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
   delete: {
     in: {
-      options: ObjectTransforms;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
   search: {
     in: {
-      options: ObjectTransforms;
+      options: ObjectTransforms<any, any, any, any>;
     };
     out: {
-      result: ObjectTransforms;
+      result: ObjectTransforms<any, any, any, any>;
+    };
+  };
+  mSearch: {
+    out: {
+      result: ObjectTransforms<any, any, any, any>;
     };
   };
 }

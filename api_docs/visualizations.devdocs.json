@@ -4166,15 +4166,7 @@
             "label": "timefilter",
             "description": [],
             "signature": [
-              "{ setRefreshInterval: (refreshInterval: Partial<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              ">) => void; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
+              "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
               "Observable",
@@ -4218,7 +4210,15 @@
                 "section": "def-common.RefreshInterval",
                 "text": "RefreshInterval"
               },
-              "; createFilter: (indexPattern: ",
+              "; setRefreshInterval: (refreshInterval: Partial<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.RefreshInterval",
+                "text": "RefreshInterval"
+              },
+              ">) => void; createFilter: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -6328,7 +6328,7 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          "; getDescription: () => string; reload: () => Promise<void>; destroy: () => void; getQuery: () => Promise<",
+          "; getDescription: () => string; destroy: () => void; getQuery: () => Promise<",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -6400,7 +6400,7 @@
             "section": "def-public.ExpressionRenderError",
             "text": "ExpressionRenderError"
           },
-          ") => void; supportedTriggers: () => string[]; getExpressionVariables$: () => ",
+          ") => void; reload: () => Promise<void>; supportedTriggers: () => string[]; getExpressionVariables$: () => ",
           "Observable",
           "<Record<string, unknown> | undefined>; getExpressionVariables: () => Record<string, unknown> | undefined; inputIsRefType: (input: ",
           {
@@ -8716,7 +8716,7 @@
             "label": "alignment",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
+              "\"left\" | \"right\" | \"center\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -9858,7 +9858,7 @@
             "label": "position",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"top\" | \"bottom\""
+              "\"top\" | \"left\" | \"right\" | \"bottom\""
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -10134,7 +10134,7 @@
             "label": "position",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"top\" | \"bottom\""
+              "\"top\" | \"left\" | \"right\" | \"bottom\""
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -10176,7 +10176,7 @@
             "label": "horizontalAlignment",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | undefined"
+              "\"left\" | \"right\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13091,7 +13091,7 @@
             "label": "iconPosition",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\" | undefined"
+              "\"left\" | \"right\" | \"above\" | \"below\" | \"auto\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -14545,7 +14545,7 @@
         "label": "Operation",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"range\" | \"filters\" | \"date_histogram\" | \"percentile\" | \"average\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"last_value\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"date_histogram\" | \"percentile\" | \"average\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"last_value\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,
@@ -14575,7 +14575,7 @@
         "label": "OperationWithSourceField",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"range\" | \"filters\" | \"date_histogram\" | \"percentile\" | \"average\" | \"terms\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"last_value\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"date_histogram\" | \"percentile\" | \"average\" | \"terms\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"last_value\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,
@@ -15132,7 +15132,7 @@
         "label": "YAxisMode",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"bottom\" | \"auto\""
+          "\"left\" | \"right\" | \"bottom\" | \"auto\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,

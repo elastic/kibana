@@ -45,6 +45,7 @@ import type {
   DragContextState,
   DropType,
 } from '@kbn/dom-drag-drop';
+import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
@@ -164,6 +165,7 @@ export interface VisualizationInfo {
     icon?: IconType;
     label?: string;
     dimensions: Array<{ name: string; id: string; dimensionType: string }>;
+    palette?: string[];
   }>;
 }
 
@@ -244,6 +246,8 @@ export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   searchQuery?: Query;
   searchFilters?: Filter[];
   title?: string;
+  description?: string;
+  panelTimeRange?: TimeRange;
   visTypeTitle?: string;
   isEmbeddable?: boolean;
 } & NavigateToLensContext<T>;
@@ -801,21 +805,6 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   panelRef: MutableRefObject<HTMLDivElement | null>;
 };
 
-export interface AccessorConfig {
-  columnId: string;
-  triggerIconType?:
-    | 'color'
-    | 'disabled'
-    | 'colorBy'
-    | 'none'
-    | 'invisible'
-    | 'aggregate'
-    | 'custom';
-  customIcon?: IconType;
-  color?: string;
-  palette?: string[] | Array<{ color: string; stop: number }>;
-}
-
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
   dimensionEditorGroupLabel?: string;
@@ -1188,11 +1177,11 @@ export interface Visualization<T = unknown, P = T> {
   /**
    * Allows the visualization to announce whether or not it has any settings to show
    */
-  hasLayerSettings?: (props: VisualizationConfigProps<T>) => boolean;
+  hasLayerSettings?: (props: VisualizationConfigProps<T>) => Record<'data' | 'appearance', boolean>;
 
   renderLayerSettings?: (
     domElement: Element,
-    props: VisualizationLayerSettingsProps<T>
+    props: VisualizationLayerSettingsProps<T> & { section: 'data' | 'appearance' }
   ) => ((cleanupElement: Element) => void) | void;
 
   /**
@@ -1290,7 +1279,11 @@ export interface Visualization<T = unknown, P = T> {
     props: VisualizationStateFromContextChangeProps
   ) => Suggestion<T> | undefined;
 
-  getVisualizationInfo?: (state: T) => VisualizationInfo;
+  getVisualizationInfo?: (state: T, frame?: FramePublicAPI) => VisualizationInfo;
+  /**
+   * A visualization can return custom dimensions for the reporting tool
+   */
+  getReportingLayout?: (state: T) => { height: number; width: number };
 }
 
 // Use same technique as TriggerContext

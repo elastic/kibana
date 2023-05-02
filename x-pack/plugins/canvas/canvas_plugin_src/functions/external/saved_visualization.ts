@@ -97,6 +97,7 @@ export function savedVisualization(): ExpressionFunctionDefinition<
           id,
           savedObjectId: id,
           disableTriggers: true,
+          disabledActions: ['ACTION_EDIT_IN_LENS'],
           timeRange: timerange ? omit(timerange, 'type') : defaultTimeRange,
           filters: getQueryFilters(filters),
           vis: visOptions,

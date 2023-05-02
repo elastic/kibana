@@ -34,11 +34,11 @@ export class RpcClient implements CrudClient {
   constructor(private http: { post: HttpSetup['post'] }) {}
 
   public get<I extends GetIn = GetIn, O = unknown, M = unknown>(input: I) {
-    return this.sendMessage<GetResponse<O, M>>('get', input).then((r) => r.item);
+    return this.sendMessage<GetResponse<O, M>>('get', input).then((r) => r.result);
   }
 
   public bulkGet<I extends BulkGetIn = BulkGetIn, O = unknown, M = unknown>(input: I) {
-    return this.sendMessage<BulkGetResponse<O, M>>('bulkGet', input).then((r) => r.items);
+    return this.sendMessage<BulkGetResponse<O, M>>('bulkGet', input).then((r) => r.result);
   }
 
   public create<I extends CreateIn = CreateIn, O = unknown, M = unknown>(input: I) {

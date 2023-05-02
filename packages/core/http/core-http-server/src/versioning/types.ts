@@ -34,7 +34,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
 > & {
   options?: Omit<RouteConfigOptions<Method>, 'access'>;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
-  access: RouteConfigOptions<Method>['access'];
+  access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
 };
 
 /**

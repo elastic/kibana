@@ -21,8 +21,6 @@ import type {
   AlertSuppressionCamel,
 } from '../../../../../common/detection_engine/rule_schema';
 
-// eslint-disable-next-line no-restricted-imports
-import type { LegacyRulesActionsSavedObject } from '../../rule_actions_legacy';
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
 import type { BulkError, OutputError } from '../../routes/utils';
@@ -91,11 +89,8 @@ export const getIdBulkError = ({
   }
 };
 
-export const transformAlertsToRules = (
-  rules: RuleAlertType[],
-  legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
-): RuleResponse[] => {
-  return rules.map((rule) => internalRuleToAPIResponse(rule, legacyRuleActions[rule.id]));
+export const transformAlertsToRules = (rules: RuleAlertType[]): RuleResponse[] => {
+  return rules.map((rule) => internalRuleToAPIResponse(rule));
 };
 
 /**
@@ -116,8 +111,7 @@ export const transformRuleToExportableFormat = (
 };
 
 export const transformFindAlerts = (
-  ruleFindResults: FindResult<RuleParams>,
-  legacyRuleActions: Record<string, LegacyRulesActionsSavedObject | undefined>
+  ruleFindResults: FindResult<RuleParams>
 ): {
   page: number;
   perPage: number;
@@ -129,17 +123,14 @@ export const transformFindAlerts = (
     perPage: ruleFindResults.perPage,
     total: ruleFindResults.total,
     data: ruleFindResults.data.map((rule) => {
-      return internalRuleToAPIResponse(rule, legacyRuleActions[rule.id]);
+      return internalRuleToAPIResponse(rule);
     }),
   };
 };
 
-export const transform = (
-  rule: PartialRule<RuleParams>,
-  legacyRuleActions?: LegacyRulesActionsSavedObject | null
-): RuleResponse | null => {
+export const transform = (rule: PartialRule<RuleParams>): RuleResponse | null => {
   if (isAlertType(rule)) {
-    return internalRuleToAPIResponse(rule, legacyRuleActions);
+    return internalRuleToAPIResponse(rule);
   }
 
   return null;
@@ -379,6 +370,7 @@ export const convertAlertSuppressionToCamel = (
     ? {
         groupBy: input.group_by,
         duration: input.duration,
+        missingFieldsStrategy: input.missing_fields_strategy,
       }
     : undefined;
 
@@ -389,5 +381,6 @@ export const convertAlertSuppressionToSnake = (
     ? {
         group_by: input.groupBy,
         duration: input.duration,
+        missing_fields_strategy: input.missingFieldsStrategy,
       }
     : undefined;

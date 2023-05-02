@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useRef } from 'react';
 import {
   Axis,
   Chart,
@@ -17,6 +17,7 @@ import {
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
 import { first, last } from 'lodash';
 
@@ -48,25 +49,27 @@ import { CUSTOM_EQUATION } from '../i18n_strings';
 interface Props {
   expression: MetricExpression;
   derivedIndexPattern: DataViewBase;
-  source?: MetricsSourceConfiguration;
+  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
+  chartType?: MetricsExplorerChartType;
   filterQuery?: string;
   groupBy?: string | string[];
-  chartType?: MetricsExplorerChartType;
+  hideTitle?: boolean;
+  source?: MetricsSourceConfiguration;
   timeRange?: TimeRange;
-  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
 }
 
 export const ExpressionChart: React.FC<Props> = ({
   expression,
   derivedIndexPattern,
-  source,
+  annotations,
+  chartType = MetricsExplorerChartType.bar,
   filterQuery,
   groupBy,
-  chartType = MetricsExplorerChartType.bar,
+  hideTitle = false,
+  source,
   timeRange,
-  annotations,
 }) => {
-  const { uiSettings } = useKibanaContextForPlugin().services;
+  const { uiSettings, charts } = useKibanaContextForPlugin().services;
 
   const { isLoading, data } = useMetricsExplorerChartData(
     expression,
@@ -76,6 +79,11 @@ export const ExpressionChart: React.FC<Props> = ({
     groupBy,
     timeRange
   );
+
+  const chartRef = useRef(null);
+  const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
+    isDateHistogram: true,
+  });
 
   if (isLoading) {
     return <LoadingState />;
@@ -141,7 +149,7 @@ export const ExpressionChart: React.FC<Props> = ({
   return (
     <>
       <ChartContainer>
-        <Chart>
+        <Chart ref={chartRef}>
           <MetricExplorerSeriesChart
             type={chartType}
             metric={metric}
@@ -184,28 +192,37 @@ export const ExpressionChart: React.FC<Props> = ({
             tickFormat={createFormatterForMetric(metric)}
             domain={domain}
           />
-          <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
+          <Settings
+            onPointerUpdate={handleCursorUpdate}
+            tooltip={tooltipProps}
+            externalPointerEvents={{
+              tooltip: { visible: true },
+            }}
+            theme={getChartTheme(isDarkMode)}
+          />
         </Chart>
       </ChartContainer>
-      <div style={{ textAlign: 'center' }}>
-        {series.id !== 'ALL' ? (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.infra.metrics.alerts.dataTimeRangeLabelWithGrouping"
-              defaultMessage="Last {lookback} {timeLabel} of data for {id}"
-              values={{ id: series.id, timeLabel, lookback: timeSize! * 20 }}
-            />
-          </EuiText>
-        ) : (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.infra.metrics.alerts.dataTimeRangeLabel"
-              defaultMessage="Last {lookback} {timeLabel}"
-              values={{ timeLabel, lookback: timeSize! * 20 }}
-            />
-          </EuiText>
-        )}
-      </div>
+      {!hideTitle && (
+        <div style={{ textAlign: 'center' }}>
+          {series.id !== 'ALL' ? (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.infra.metrics.alerts.dataTimeRangeLabelWithGrouping"
+                defaultMessage="Last {lookback} {timeLabel} of data for {id}"
+                values={{ id: series.id, timeLabel, lookback: timeSize! * 20 }}
+              />
+            </EuiText>
+          ) : (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.infra.metrics.alerts.dataTimeRangeLabel"
+                defaultMessage="Last {lookback} {timeLabel}"
+                values={{ timeLabel, lookback: timeSize! * 20 }}
+              />
+            </EuiText>
+          )}
+        </div>
+      )}
     </>
   );
 };

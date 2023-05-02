@@ -117,6 +117,7 @@ export class LegacyAlertsClient<
     shouldLogAndScheduleActionsForAlerts,
     flappingSettings,
     notifyWhen,
+    maintenanceWindowIds,
   }: {
     eventLogger: AlertingEventLogger;
     ruleLabel: string;
@@ -124,6 +125,7 @@ export class LegacyAlertsClient<
     ruleRunMetricsStore: RuleRunMetricsStore;
     flappingSettings: RulesSettingsFlappingProperties;
     notifyWhen: RuleNotifyWhenType | null;
+    maintenanceWindowIds?: string[];
   }) {
     const {
       newAlerts: processedAlertsNew,
@@ -176,6 +178,7 @@ export class LegacyAlertsClient<
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAndScheduleActionsForAlerts,
+      maintenanceWindowIds,
     });
   }
 

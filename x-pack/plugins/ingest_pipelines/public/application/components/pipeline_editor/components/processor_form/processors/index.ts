@@ -8,6 +8,7 @@
 // please try to keep this list sorted by module name (e.g. './bar' before './foo')
 
 export { Append } from './append';
+export { Attachment } from './attachment';
 export { Bytes } from './bytes';
 export { Circle } from './circle';
 export { CommunityId } from './community_id';
@@ -22,6 +23,7 @@ export { Enrich } from './enrich';
 export { Fail } from './fail';
 export { Fingerprint } from './fingerprint';
 export { Foreach } from './foreach';
+export { GeoGrid } from './geogrid';
 export { GeoIP } from './geoip';
 export { Grok } from './grok';
 export { Gsub } from './gsub';

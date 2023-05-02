@@ -100,7 +100,7 @@ export const downloadCsvShareProvider = ({
   formatFactoryFn,
 }: DownloadPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({ objectType, sharingData, onClose }: ShareContext) => {
-    if ('lens_visualization' !== objectType) {
+    if ('lens' !== objectType) {
       return [];
     }
 

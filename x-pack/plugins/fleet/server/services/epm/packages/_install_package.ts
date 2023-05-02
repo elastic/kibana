@@ -16,6 +16,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
+import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
+
 import { getNormalizedDataStreams } from '../../../../common/services';
 
 import {
@@ -73,7 +75,9 @@ export async function _installPackage({
   installType,
   installSource,
   spaceId,
+  force,
   verificationResult,
+  authorizationHeader,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -87,7 +91,9 @@ export async function _installPackage({
   installType: InstallType;
   installSource: InstallSource;
   spaceId: string;
+  force?: boolean;
   verificationResult?: PackageVerificationResult;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
 }): Promise<AssetReference[]> {
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
 
@@ -153,20 +159,24 @@ export async function _installPackage({
     // currently only the base package has an ILM policy
     // at some point ILM policies can be installed/modified
     // per data stream and we should then save them
-    esReferences = await withPackageSpan('Install ILM policies', () =>
-      installILMPolicy(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
-    );
+    const isILMPoliciesDisabled =
+      appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+    if (!isILMPoliciesDisabled) {
+      esReferences = await withPackageSpan('Install ILM policies', () =>
+        installILMPolicy(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
+      );
 
-    ({ esReferences } = await withPackageSpan('Install Data Stream ILM policies', () =>
-      installIlmForDataStream(
-        packageInfo,
-        paths,
-        esClient,
-        savedObjectsClient,
-        logger,
-        esReferences
-      )
-    ));
+      ({ esReferences } = await withPackageSpan('Install Data Stream ILM policies', () =>
+        installIlmForDataStream(
+          packageInfo,
+          paths,
+          esClient,
+          savedObjectsClient,
+          logger,
+          esReferences
+        )
+      ));
+    }
 
     // installs ml models
     esReferences = await withPackageSpan('Install ML models', () =>
@@ -241,7 +251,16 @@ export async function _installPackage({
     );
 
     ({ esReferences } = await withPackageSpan('Install transforms', () =>
-      installTransforms(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
+      installTransforms({
+        installablePackage: packageInfo,
+        paths,
+        esClient,
+        savedObjectsClient,
+        logger,
+        esReferences,
+        force,
+        authorizationHeader,
+      })
     ));
 
     // If this is an update or retrying an update, delete the previous version's pipelines

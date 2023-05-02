@@ -13,7 +13,9 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Agent available_versions API', () => {
+  // Skipped due to agent versions list not being built in CI
+  // Ref https://github.com/elastic/kibana/pull/154808
+  describe.skip('Agent available_versions API', () => {
     it('should return a non empty list of versions', async () => {
       const kibanaVersion = await kibanaServer.version.get();
       const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version;

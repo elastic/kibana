@@ -6,7 +6,6 @@
  */
 import React, { useMemo } from 'react';
 import {
-  EuiEmptyPrompt,
   EuiBasicTable,
   type EuiTableFieldDataColumnType,
   type CriteriaWithPagination,
@@ -28,6 +27,7 @@ import {
   type OnAddFilter,
   baseFindingsColumns,
 } from '../layout/findings_layout';
+import { EmptyState } from '../../../components/empty_state';
 
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
@@ -41,6 +41,7 @@ interface Props {
   sorting: Sorting;
   setTableOptions(options: CriteriaWithPagination<FindingsByResourcePage>): void;
   onAddFilter: OnAddFilter;
+  onResetFilters: () => void;
 }
 
 export const getResourceId = (resource: FindingsByResourcePage) => {
@@ -55,6 +56,7 @@ const FindingsByResourceTableComponent = ({
   sorting,
   setTableOptions,
   onAddFilter,
+  onResetFilters,
 }: Props) => {
   const getRowProps = (row: FindingsByResourcePage) => ({
     'data-test-subj': TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(row)),
@@ -88,21 +90,9 @@ const FindingsByResourceTableComponent = ({
     [onAddFilter]
   );
 
-  if (!loading && !items.length)
-    return (
-      <EuiEmptyPrompt
-        data-test-subj={TEST_SUBJECTS.FINDINGS_BY_RESOURCE_TABLE_NO_FINDINGS_EMPTY_STATE}
-        iconType="logoKibana"
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.csp.findings.findingsByResource.noFindingsTitle"
-              defaultMessage="There are no Findings"
-            />
-          </h2>
-        }
-      />
-    );
+  if (!loading && !items.length) {
+    return <EmptyState onResetFilters={onResetFilters} />;
+  }
 
   return (
     <EuiBasicTable

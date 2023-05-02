@@ -7,7 +7,6 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '../../../services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -26,9 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const security = getService('security');
 
-  const clickFieldAndCheckUrl = async (fieldLink: WebElementWrapper) => {
-    const fieldValue = await fieldLink.getVisibleText();
-    await fieldLink.click();
+  const checkUrl = async (fieldValue: string) => {
     const windowHandlers = await browser.getAllWindowHandles();
     expect(windowHandlers.length).to.equal(2);
     await browser.switchToWindow(windowHandlers[1]);
@@ -37,8 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(currentUrl).to.equal(fieldUrl);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/154367
-  describe.skip('Changing field formatter to Url', () => {
+  describe('Changing field formatter to Url', () => {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await kibanaServer.savedObjects.cleanStandardList();
@@ -68,7 +64,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.loadSavedDashboard('dashboard with table');
       await dashboard.waitForRenderComplete();
       const fieldLink = await visChart.getFieldLinkInVisTable(`${fieldName}: Descending`);
-      await clickFieldAndCheckUrl(fieldLink);
+      const fieldValue = await fieldLink.getVisibleText();
+      await fieldLink.click();
+      await retry.try(async () => {
+        await checkUrl(fieldValue);
+      });
     });
 
     it('applied on discover', async () => {
@@ -82,9 +82,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return await testSubjects.isDisplayed(`tableDocViewRow-${fieldName}-value`);
       });
       const fieldLink = await testSubjects.find(`tableDocViewRow-${fieldName}-value`);
-      await clickFieldAndCheckUrl(fieldLink);
+      const fieldValue = await fieldLink.getVisibleText();
+      await fieldLink.click();
+      await retry.try(async () => {
+        await checkUrl(fieldValue);
+      });
     });
-
     afterEach(async function () {
       const windowHandlers = await browser.getAllWindowHandles();
       if (windowHandlers.length > 1) {

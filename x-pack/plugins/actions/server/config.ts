@@ -125,6 +125,7 @@ export const configSchema = schema.object({
       connectorTypeOverrides: schema.maybe(schema.arrayOf(connectorTypeSchema)),
     })
   ),
+  enableFooterInEmail: schema.boolean({ defaultValue: true }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

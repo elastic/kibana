@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Control, Controller, FieldPath } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
 import { CreateSLOInput } from '@kbn/slo-schema';
@@ -20,6 +20,7 @@ export interface Props {
   label: string;
   name: FieldPath<CreateSLOInput>;
   placeholder: string;
+  tooltip?: ReactNode;
 }
 
 export function QueryBuilder({
@@ -29,6 +30,7 @@ export function QueryBuilder({
   label,
   name,
   placeholder,
+  tooltip,
 }: Props) {
   const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
     useKibana().services;
@@ -36,9 +38,20 @@ export function QueryBuilder({
   const { dataView } = useCreateDataView({ indexPatternString });
 
   return (
-    <EuiFormRow label={label} fullWidth>
+    <EuiFormRow
+      label={
+        !!tooltip ? (
+          <span>
+            {label} {tooltip}
+          </span>
+        ) : (
+          label
+        )
+      }
+      fullWidth
+    >
       <Controller
-        shouldUnregister={true}
+        shouldUnregister
         defaultValue=""
         name={name}
         control={control}
