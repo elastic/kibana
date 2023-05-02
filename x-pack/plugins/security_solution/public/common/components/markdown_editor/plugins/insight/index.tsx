@@ -65,7 +65,7 @@ interface InsightComponentProps {
   relativeTo?: string;
 }
 
-const insightPrefix = '!{investigate';
+export const insightPrefix = '!{investigate';
 
 export const parser: Plugin = function () {
   const Parser = this.Parser;

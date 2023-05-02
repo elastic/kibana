@@ -8,10 +8,14 @@
 import React, { memo, useMemo } from 'react';
 import { cloneDeep } from 'lodash/fp';
 import type { EuiLinkAnchorProps } from '@elastic/eui';
-import { EuiMarkdownFormat } from '@elastic/eui';
+import { EuiMarkdownFormat, EuiCallOut, EuiLink } from '@elastic/eui';
+import unified from 'unified';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { parsingPlugins, processingPlugins } from './plugins';
+import { parsingPlugins, processingPlugins, platinumOnlyPluginTokens } from './plugins';
 import { MarkdownLink } from './markdown_link';
+import { useKibana } from '../../lib/kibana';
+import { useLicense } from '../../hooks/use_license';
 
 interface Props {
   children: string;
@@ -28,14 +32,72 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) 
   const processingPluginList = cloneDeep(processingPlugins);
   // This line of code is TS-compatible and it will break if [1][1] change in the future.
   processingPluginList[1][1].components.a = MarkdownLinkProcessingComponent;
-
+  const isPlatinum = useLicense().isAtLeast('platinum');
+  const { application } = useKibana().services;
+  const platinumPluginDetected = useMemo(() => {
+    if (isPlatinum === false) {
+      const markdownString = String(children);
+      return platinumOnlyPluginTokens.some((token) => {
+        const regex = new RegExp(token);
+        return regex.test(markdownString);
+      });
+    } else {
+      return false;
+    }
+  }, [children, isPlatinum]);
+  const processor = useMemo(
+    () => unified().use(parsingPlugins).use(processingPluginList),
+    [processingPluginList]
+  );
+  const markdownParseResult = useMemo(() => {
+    try {
+      throw new Error('error with the markdown, line 5 column 4');
+      processor.processSync(children);
+      return null;
+    } catch (err) {
+      return String(err);
+    }
+  }, [children, processor]);
   return (
-    <EuiMarkdownFormat
-      parsingPluginList={parsingPlugins}
-      processingPluginList={processingPluginList}
-    >
-      {children}
-    </EuiMarkdownFormat>
+    <>
+      {platinumPluginDetected && (
+        <EuiCallOut
+          title="The following markdown may make use of subscription features"
+          color="primary"
+          iconType="lock"
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.markdown.premiumPlugin"
+            defaultMessage="To use these interactive markdown features, you must {link}."
+            values={{
+              link: (
+                <EuiLink
+                  href={application.getUrlForApp('management', {
+                    path: 'stack/license_management/home',
+                  })}
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.markdown.premiumPlugin"
+                    defaultMessage="start a trial or upgrade your subscription"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiCallOut>
+      )}
+      {markdownParseResult !== null && (
+        <EuiCallOut title="Invalid markdown detected" color="danger" iconType="error">
+          {markdownParseResult}
+        </EuiCallOut>
+      )}
+      <EuiMarkdownFormat
+        parsingPluginList={parsingPlugins}
+        processingPluginList={processingPluginList}
+      >
+        {children}
+      </EuiMarkdownFormat>
+    </>
   );
 };
 
