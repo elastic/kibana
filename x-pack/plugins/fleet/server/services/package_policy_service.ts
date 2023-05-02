@@ -9,6 +9,8 @@ import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/ser
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import type {
@@ -64,7 +66,10 @@ export interface PackagePolicyClient {
       force?: true;
       authorizationHeader?: HTTPAuthorizationHeader | null;
     }
-  ): Promise<PackagePolicy[]>;
+  ): Promise<{
+    created: PackagePolicy[];
+    failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
+  }>;
 
   bulkUpdate(
     soClient: SavedObjectsClientContract,
@@ -72,7 +77,13 @@ export interface PackagePolicyClient {
     packagePolicyUpdates: Array<NewPackagePolicy & { version?: string; id: string }>,
     options?: { user?: AuthenticatedUser; force?: boolean },
     currentVersion?: string
-  ): Promise<PackagePolicy[] | null>;
+  ): Promise<{
+    updatedPolicies: PackagePolicy[] | null;
+    failedPolicies: Array<{
+      packagePolicy: NewPackagePolicyWithId;
+      error: Error | SavedObjectError;
+    }>;
+  }>;
 
   get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
 

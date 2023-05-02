@@ -299,9 +299,12 @@ export class SyntheticsService {
     };
   }
 
-  async addConfig(config: ConfigData | ConfigData[]) {
+  async addConfigs(configs: ConfigData[]) {
+    if (configs.length === 0) {
+      return;
+    }
     try {
-      const monitors = this.formatConfigs(Array.isArray(config) ? config : [config]);
+      const monitors = this.formatConfigs(configs);
       const license = await this.getLicense();
 
       const output = await this.getOutput();
@@ -320,12 +323,13 @@ export class SyntheticsService {
     }
   }
 
-  async editConfig(monitorConfig: ConfigData | ConfigData[], isEdit = true) {
+  async editConfig(monitorConfig: ConfigData[], isEdit = true) {
+    if (monitorConfig.length === 0) {
+      return;
+    }
     try {
       const license = await this.getLicense();
-      const monitors = this.formatConfigs(
-        Array.isArray(monitorConfig) ? monitorConfig : [monitorConfig]
-      );
+      const monitors = this.formatConfigs(monitorConfig);
 
       const output = await this.getOutput();
       if (output) {
@@ -419,6 +423,9 @@ export class SyntheticsService {
   }
 
   async deleteConfigs(configs: ConfigData[]) {
+    if (configs.length === 0) {
+      return;
+    }
     const license = await this.getLicense();
     const hasPublicLocations = configs.some((config) =>
       config.monitor.locations.some(({ isServiceManaged }) => isServiceManaged)

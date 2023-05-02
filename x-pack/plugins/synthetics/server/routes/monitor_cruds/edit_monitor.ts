@@ -6,16 +6,10 @@
  */
 import { mergeWith } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import {
-  SavedObjectsUpdateResponse,
-  SavedObject,
-  SavedObjectsClientContract,
-  KibanaRequest,
-} from '@kbn/core/server';
+import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   MonitorFields,
   EncryptedSyntheticsMonitor,
@@ -23,7 +17,7 @@ import {
   SyntheticsMonitor,
   ConfigKey,
 } from '../../../common/runtime_types';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
@@ -33,7 +27,6 @@ import {
   formatTelemetryUpdateEvent,
 } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
-import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -130,21 +123,15 @@ export const syncEditedMonitor = async ({
   normalizedMonitor,
   previousMonitor,
   decryptedPreviousMonitor,
-  server,
-  syntheticsMonitorClient,
-  savedObjectsClient,
-  request,
   spaceId,
 }: {
   normalizedMonitor: SyntheticsMonitor;
   previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
   decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>;
-  server: UptimeServerSetup;
-  syntheticsMonitorClient: SyntheticsMonitorClient;
-  savedObjectsClient: SavedObjectsClientContract;
-  request: KibanaRequest;
+  routeContext: RouteContext;
   spaceId: string;
 }) => {
+  const { server, request, savedObjectsClient, syntheticsMonitorClient } = routeContext;
   try {
     const monitorWithId = {
       ...normalizedMonitor,
