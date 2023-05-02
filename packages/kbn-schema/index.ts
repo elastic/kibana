@@ -64,7 +64,7 @@ function number(options?: NumberOptions): Type<number> {
   return new NumberType(options);
 }
 
-function byteSize(options?: unknown): Type<ByteSizeValue> {
+function byteSize(options?: unknown): Type<unknown> {
   throw new Error('Not implemented');
 }
 
