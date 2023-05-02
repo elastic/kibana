@@ -20,6 +20,20 @@ export const MAINTENANCE_WINDOWS_DESCRIPTION = i18n.translate(
   }
 );
 
+export const READ_ONLY_BADGE_TEXT = i18n.translate(
+  'xpack.alerting.maintenanceWindows.badge.readOnly.text',
+  {
+    defaultMessage: 'Read only',
+  }
+);
+
+export const READ_ONLY_BADGE_TOOLTIP = i18n.translate(
+  'xpack.alerting.maintenanceWindows.badge.readOnly.tooltip',
+  {
+    defaultMessage: 'Unable to create or edit maintenance Windows',
+  }
+);
+
 export const CREATE_NEW_BUTTON = i18n.translate(
   'xpack.alerting.maintenanceWindows.createNewButton',
   {
