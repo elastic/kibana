@@ -8,6 +8,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { Readable } from 'stream';
+import type { HapiReadableStream } from '../../../types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
 import type {
@@ -214,4 +216,16 @@ export const generateFileMetadataDocumentMock = (
 
     ...overrides,
   };
+};
+
+export const createHapiReadableStreamMock = (): HapiReadableStream => {
+  const readable = Readable.from(['test']) as HapiReadableStream;
+  readable.hapi = {
+    filename: 'foo.txt',
+    headers: {
+      'content-type': 'application/text',
+    },
+  };
+
+  return readable;
 };
