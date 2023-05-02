@@ -40,3 +40,9 @@ export const closeAllToasts = (): Cypress.Chainable<JQuery<HTMLBodyElement>> => 
       });
   });
 };
+
+export const expectAndCloseSuccessToast = () => {
+  cy.contains('Success');
+  cy.getByTestSubj('toastCloseButton').click();
+  cy.contains('Success').should('not.exist');
+};

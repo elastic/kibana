@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { closeAllToasts } from '../../tasks/close_all_toasts';
+import { closeAllToasts } from '../../tasks/toasts';
 import type { ReturnTypeFromChainable } from '../../types';
 import { addAlertsToCase } from '../../tasks/add_alerts_to_case';
 import { APP_CASES_PATH } from '../../../../../common/constants';

@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { visitPolicyDetailsPage } from '../../screens/policy_details';
+import {
+  checkMalwareUserNotificationInOpenedPolicy,
+  visitPolicyDetailsPage,
+} from '../../screens/policy_details';
 import { removeAllArtifacts } from '../../tasks/artifacts';
 import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
 import { login } from '../../tasks/login';
+import { expectAndCloseSuccessToast } from '../../tasks/toasts';
 
 describe('Policy Details', () => {
   before(() => {
@@ -48,6 +52,26 @@ describe('Policy Details', () => {
       // Changing back to Prevent -> Notify user enabled
       cy.getByTestSubj('malwareProtectionMode_prevent').find('label').click();
       cy.getByTestSubj('malwareUserNotificationCheckbox').should('be.checked');
+    });
+
+    it('disabling protection should disable notification in yaml', () => {
+      // Enable malware protection and user notification
+      cy.getByTestSubj('malwareProtectionSwitch').click();
+      cy.getByTestSubj('malwareProtectionSwitch').should('have.attr', 'aria-checked', 'true');
+      cy.getByTestSubj('policyDetailsSaveButton').click();
+      cy.getByTestSubj('confirmModalConfirmButton').click();
+      expectAndCloseSuccessToast();
+
+      checkMalwareUserNotificationInOpenedPolicy({ isEnabled: true });
+
+      // disable malware protection
+      cy.getByTestSubj('malwareProtectionSwitch').click();
+      cy.getByTestSubj('malwareProtectionSwitch').should('have.attr', 'aria-checked', 'false');
+      cy.getByTestSubj('policyDetailsSaveButton').click();
+      cy.getByTestSubj('confirmModalConfirmButton').click();
+      expectAndCloseSuccessToast();
+
+      checkMalwareUserNotificationInOpenedPolicy({ isEnabled: false });
     });
   });
 });

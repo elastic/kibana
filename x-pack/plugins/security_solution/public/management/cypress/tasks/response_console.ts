@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { closeAllToasts } from './close_all_toasts';
+import { closeAllToasts } from './toasts';
 import { APP_ENDPOINTS_PATH } from '../../../../common/constants';
 import Chainable = Cypress.Chainable;
 
