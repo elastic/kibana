@@ -122,7 +122,6 @@ export function GeoIndexPatternSelect(props: Props) {
       })
     : '';
 
-    console.log(props.dataView);
   return (
     <>
       {_renderNoIndexPatternWarning()}
