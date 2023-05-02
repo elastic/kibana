@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { formatAlertEvaluationValue } from '@kbn/observability-plugin/public';
 import {
@@ -17,7 +17,7 @@ import {
   ALERT_RULE_UUID,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -92,7 +92,6 @@ export function AlertDetailsAppSection({
   const params = rule.params;
   const environment = alert.fields[SERVICE_ENVIRONMENT];
   const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
-  const [latencyMaxY, setLatencyMaxY] = useState(0);
 
   // duration is us, convert it to MS
   const alertDurationMS = alert.fields[ALERT_DURATION]! / 1000;
@@ -166,8 +165,8 @@ export function AlertDetailsAppSection({
               latencyAggregationType={latencyAggregationType}
               comparisonEnabled={comparisonEnabled}
               offset={offset}
-              setLatencyMaxY={setLatencyMaxY}
             />
+            <EuiSpacer size="s" />
             <EuiFlexGroup direction="row" gutterSize="s">
               <ThroughputChart
                 transactionType={transactionType}
@@ -177,7 +176,6 @@ export function AlertDetailsAppSection({
                 end={end}
                 comparisonChartTheme={comparisonChartTheme}
                 comparisonEnabled={comparisonEnabled}
-                latencyMaxY={latencyMaxY}
                 offset={offset}
                 timeZone={timeZone}
               />
