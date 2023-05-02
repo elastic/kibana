@@ -55,7 +55,7 @@ export const ProjectHeader = ({
 
   return (
     <>
-      <EuiHeader position="fixed">
+      <EuiHeader position="fixed" data-test-subj="kibanaProjectHeader">
         <EuiHeaderSection grow={false}>
           <EuiHeaderSectionItem border="right">{renderLogo()}</EuiHeaderSectionItem>
           <EuiHeaderSectionItem>

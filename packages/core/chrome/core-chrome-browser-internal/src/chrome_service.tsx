@@ -262,7 +262,7 @@ export class ChromeService {
               kibanaVersion={injectedMetadata.getKibanaVersion()}
             >
               {/* TODO: pass down the SideNavCompProps once they are defined  */}
-              {<SideNavComponent />}
+              <SideNavComponent />
             </ProjectHeader>
           );
         };
