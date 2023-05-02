@@ -15,12 +15,6 @@ import { useAuthz } from '../../../../../../hooks/use_authz';
 
 import { TableRowActions } from './table_row_actions';
 
-jest.mock('../../../../../../hooks/use_fleet_status', () => ({
-  FleetStatusProvider: (props: any) => {
-    return props.children;
-  },
-}));
-
 jest.mock('../../../../../../services/experimental_features');
 jest.mock('../../../../../../hooks/use_authz');
 
