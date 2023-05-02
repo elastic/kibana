@@ -8,11 +8,13 @@
 
 import Fsp from 'fs/promises';
 import Path from 'path';
+
 import { run } from '@kbn/dev-cli-runner';
 import { set } from '@kbn/safer-lodash-set';
-import { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
 import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
+import { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
 import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
+
 import { generateOpenApiDocument } from './generate_oas';
 
 const OUTPUT_FILE = Path.resolve(__dirname, '../openapi.json');
@@ -57,6 +59,9 @@ run(
 
       log.success('Done!');
       done = true;
+    } catch (e) {
+      log.error(e);
+      throw e;
     } finally {
       await root.shutdown().catch(() => {});
       process.exit(done ? 0 : 1);

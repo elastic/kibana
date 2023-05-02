@@ -93,6 +93,9 @@ export const instanceofZodTypeLikeString = (_type: z.ZodTypeAny): _type is ZodTy
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUnion)) {
     return !type._def.options.some((option) => !instanceofZodTypeLikeString(option));
   }
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodArray)) {
+    return instanceofZodTypeLikeString(type._def.type);
+  }
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodIntersection)) {
     return (
       instanceofZodTypeLikeString(type._def.left) && instanceofZodTypeLikeString(type._def.right)
