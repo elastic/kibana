@@ -56,7 +56,7 @@ export function LeftSourcePanel(props: Props) {
       <EuiSpacer size="m" />
 
       <GeoIndexPatternSelect
-        value={props.dataView ? props.dataView.id : ''}
+        dataView={props.dataView}
         onChange={props.onDataViewSelect}
         isGeoPointsOnly={true}
       />

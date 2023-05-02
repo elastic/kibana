@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-plugin/common';
 import {
   getIndexPatternSelectComponent,
@@ -20,36 +22,41 @@ import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../../common/constants';
 
 interface Props {
   onChange: (indexPattern: DataView) => void;
-  value: string | null;
+  dataView?: DataView | null;
   isGeoPointsOnly?: boolean;
 }
 
 interface State {
-  doesIndexPatternHaveGeoField: boolean;
   noIndexPatternsExist: boolean;
 }
 
-export class GeoIndexPatternSelect extends Component<Props, State> {
-  private _isMounted: boolean = false;
+export function GeoIndexPatternSelect(props: Props) {
+  const [isDataViewInvalid, setIsDataViewInvalid] = useState(false);
+  const [noDataViews, setNoDataViews] = useState(false);
 
-  state = {
-    doesIndexPatternHaveGeoField: false,
-    noIndexPatternsExist: false,
-  };
+  useEffect(() => {
+    if (!props.dataView) {
+      setIsDataViewInvalid(false);
+      return;
+    }
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
+    const hasGeoFields = props.dataView.fields.some((field) => {
+      return !indexPatterns.isNestedField(field) && props?.isGeoPointsOnly
+        ? (ES_GEO_FIELD_TYPE.GEO_POINT as string) === field.type
+        : ES_GEO_FIELD_TYPES.includes(field.type);
+    });
+    setIsDataViewInvalid(!hasGeoFields);
+  }, [props.dataView, setIsDataViewInvalid]);
 
-  componentDidMount() {
-    this._isMounted = true;
-  }
+  const isMounted = useMountedState();
+  const dataViewIdRef = useRef<string | undefined>();
 
-  _onIndexPatternSelect = async (indexPatternId?: string) => {
+  async function _onIndexPatternSelect(indexPatternId?: string) {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
 
+    dataViewIdRef.current = indexPatternId;
     let indexPattern;
     try {
       indexPattern = await getIndexPatternService().get(indexPatternId);
@@ -59,24 +66,14 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
 
     // method may be called again before 'get' returns
     // ignore response when fetched index pattern does not match active index pattern
-    if (this._isMounted && indexPattern.id === indexPatternId) {
-      this.setState({
-        doesIndexPatternHaveGeoField: indexPattern.fields.some((field) => {
-          return this.props?.isGeoPointsOnly
-            ? (ES_GEO_FIELD_TYPE.GEO_POINT as string) === field.type
-            : ES_GEO_FIELD_TYPES.includes(field.type);
-        }),
-      });
-      this.props.onChange(indexPattern);
+    if (isMounted() && indexPattern.id === dataViewIdRef.current) {
+      props.onChange(indexPattern);
     }
   };
 
-  _onNoIndexPatterns = () => {
-    this.setState({ noIndexPatternsExist: true });
-  };
 
-  _renderNoIndexPatternWarning() {
-    if (!this.state.noIndexPatternsExist) {
+  function _renderNoIndexPatternWarning() {
+    if (!noDataViews) {
       return null;
     }
 
@@ -118,31 +115,32 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
     );
   }
 
-  render() {
-    const IndexPatternSelect = getIndexPatternSelectComponent();
-    const isIndexPatternInvalid = !!this.props.value && !this.state.doesIndexPatternHaveGeoField;
-    const error = isIndexPatternInvalid
-      ? i18n.translate('xpack.maps.noGeoFieldInIndexPattern.message', {
-          defaultMessage: 'Data view does not contain any geospatial fields',
-        })
-      : '';
-    return (
-      <>
-        {this._renderNoIndexPatternWarning()}
+  const IndexPatternSelect = getIndexPatternSelectComponent();
+  const error = isDataViewInvalid
+    ? i18n.translate('xpack.maps.noGeoFieldInIndexPattern.message', {
+        defaultMessage: 'Data view does not contain any geospatial fields',
+      })
+    : '';
 
-        <EuiFormRow label={getDataViewLabel()} isInvalid={isIndexPatternInvalid} error={error}>
-          <IndexPatternSelect
-            isInvalid={isIndexPatternInvalid}
-            isDisabled={this.state.noIndexPatternsExist}
-            indexPatternId={this.props.value ? this.props.value : ''}
-            onChange={this._onIndexPatternSelect}
-            placeholder={getDataViewSelectPlaceholder()}
-            onNoIndexPatterns={this._onNoIndexPatterns}
-            isClearable={false}
-            data-test-subj="mapGeoIndexPatternSelect"
-          />
-        </EuiFormRow>
-      </>
-    );
-  }
+    console.log(props.dataView);
+  return (
+    <>
+      {_renderNoIndexPatternWarning()}
+
+      <EuiFormRow label={getDataViewLabel()} isInvalid={isDataViewInvalid} error={error}>
+        <IndexPatternSelect
+          isInvalid={isDataViewInvalid}
+          isDisabled={noDataViews}
+          indexPatternId={props.dataView ? props.dataView.id : ''}
+          onChange={_onIndexPatternSelect}
+          placeholder={getDataViewSelectPlaceholder()}
+          onNoIndexPatterns={() => {
+            setNoDataViews(true);
+          }}
+          isClearable={false}
+          data-test-subj="mapGeoIndexPatternSelect"
+        />
+      </EuiFormRow>
+    </>
+  );
 }

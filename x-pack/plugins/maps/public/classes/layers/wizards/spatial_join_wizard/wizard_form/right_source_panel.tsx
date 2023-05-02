@@ -14,7 +14,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { GeoIndexPatternSelect } from '../../../../../components/geo_index_pattern_select';
-import { SingleFieldSelect } from '../../../../../components/single_field_select';
+import { GeoFieldSelect } from '../../../../../components/geo_field_select';
 import { RelationshipExpression } from './relationship_expression';
 
 interface Props {
@@ -28,22 +28,13 @@ interface Props {
 }
 
 export function RightSourcePanel(props: Props) {
-  const geoFieldSelect = props.geoFields.length 
-    ? <EuiFormRow
-        label={i18n.translate('xpack.maps.spatialJoin.wizardForm.geofieldLabel', {
-          defaultMessage: 'Geospatial field',
-        })}
-      >
-        <SingleFieldSelect
-          placeholder={i18n.translate('xpack.maps.spatialJoin.wizardForm.geofieldPlaceholder', {
-            defaultMessage: 'Select geo field',
-          })}
-          value={props.geoField ? props.geoField : null}
-          onChange={props.onGeoFieldSelect}
-          fields={props.geoFields}
-          isClearable={false}
-        />
-      </EuiFormRow>
+  const geoFieldSelect = props.dataView 
+    ? <GeoFieldSelect
+        value={props.geoField ? props.geoField : ''}
+        onChange={props.onGeoFieldSelect}
+        geoFields={props.geoFields}
+        isClearable={false}
+      />
     : null;
 
   return (
@@ -67,7 +58,7 @@ export function RightSourcePanel(props: Props) {
       </EuiFormRow>
 
       <GeoIndexPatternSelect
-        value={props.dataView ? props.dataView.id : ''}
+        dataView={props.dataView}
         onChange={props.onDataViewSelect}
       />
 

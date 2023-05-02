@@ -318,8 +318,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
       return (
         <>
           <GeoIndexPatternSelect
-            // @ts-expect-error - avoid wrong "Property 'id' does not exist on type 'never'." compile error
-            value={this.state.leftIndexPattern ? this.state.leftIndexPattern!.id : ''}
+            dataView={this.state.leftIndexPattern}
             onChange={this._onLeftIndexPatternChange}
           />
           {geoFieldSelect}
