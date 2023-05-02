@@ -31,7 +31,7 @@ export const WEB_API = i18n.translate('xpack.stackConnectors.components.slack.we
 export const SELECT_MESSAGE = i18n.translate(
   'xpack.stackConnectors.components.slack.selectMessageText',
   {
-    defaultMessage: 'Send a message to a Slack channel or user.',
+    defaultMessage: 'Send messages to Slack channels.',
   }
 );
 export const ACTION_TYPE_TITLE = i18n.translate(
