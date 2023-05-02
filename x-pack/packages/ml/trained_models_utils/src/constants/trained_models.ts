@@ -50,7 +50,7 @@ export const BUILT_IN_MODEL_TAG = 'prepackaged';
 export const CURATED_MODEL_TAG = 'curated';
 
 export const CURATED_MODEL_DEFINITIONS = {
-  '.elser_model_1_SNAPSHOT': {
+  '.elser_model_1': {
     config: {
       input: {
         field_names: ['text_field'],
