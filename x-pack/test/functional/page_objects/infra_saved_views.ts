@@ -18,7 +18,6 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     clickSavedViewsButton() {
       return testSubjects.click('savedViews-openPopover');
     },
-
     pressEsc() {
       return browser.pressKeys([Key.ESCAPE]);
     },
@@ -69,6 +68,6 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
         const subject = await testSubjects.find('savedViews-openPopover');
         expect(await subject.getVisibleText()).to.be(name);
       });
-    },
+    }
   };
 }
