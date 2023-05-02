@@ -193,6 +193,17 @@ function extractResponses(route: VersionedRouterRoute): OpenAPIV3.ResponsesObjec
   }, {});
 }
 
+const operationIdCounters = new Map<string, number>();
+function getOperationId(name: string): string {
+  // Aliases an operationId to ensure it is unique across
+  // multiple method+path combinations sharing a name.
+  // "search" -> "search#0", "search#1", etc.
+  const operationIdCount = operationIdCounters.get(name) ?? 0;
+  const aliasedName = name + '#' + operationIdCount.toString();
+  operationIdCounters.set(name, operationIdCount + 1);
+  return aliasedName;
+}
+
 function getOpenApiPathsObject(appRouter: CoreVersionedRouter): OpenAPIV3.PathsObject {
   const routes = appRouter.getRoutes();
   const paths: OpenAPIV3.PathsObject = {};
@@ -225,6 +236,7 @@ function getOpenApiPathsObject(appRouter: CoreVersionedRouter): OpenAPIV3.PathsO
           : undefined,
         responses: extractResponses(route),
         parameters: pathObjects.concat(queryObjects),
+        operationId: getOperationId(route.path),
       },
     };
 
