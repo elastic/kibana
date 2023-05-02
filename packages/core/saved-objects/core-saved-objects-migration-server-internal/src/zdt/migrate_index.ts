@@ -17,13 +17,13 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import { NodeRoles } from '@kbn/core-node-server';
 import { migrationStateActionMachine } from './migration_state_action_machine';
 import type { VersionedTransformer } from '../document_migrator';
 import { createContext } from './context';
 import { next } from './next';
 import { model } from './model';
 import { createInitialState } from './state';
-import { NodeRoles } from "@kbn/core-node-server";
 
 export interface MigrateIndexOptions {
   kibanaVersion: string;
