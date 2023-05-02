@@ -82,7 +82,7 @@ export const entityAnalyticsLinks: LinkItem = {
   landingImage: entityAnalyticsDashboard,
   description: i18n.translate('xpack.securitySolution.appLinks.entityAnalyticsDescription', {
     defaultMessage:
-      'Entity analytics, notable anomalies, and threats to narrow down the monitoring surface area.',
+      'Entity analytics, anomalies, and threats to narrow down the monitoring surface area.',
   }),
   path: ENTITY_ANALYTICS_PATH,
   capabilities: [`${SERVER_APP_ID}.show`],
@@ -103,7 +103,6 @@ export const ecsDataQualityDashboardLinks: LinkItem = {
   ),
   path: DATA_QUALITY_PATH,
   capabilities: [`${SERVER_APP_ID}.show`],
-  isBeta: true,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.ecsDataQualityDashboard', {
       defaultMessage: 'Data Quality',

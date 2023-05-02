@@ -12,6 +12,7 @@ import {
   getPrebuiltRuleWithExceptionsMock,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 /**
  * A helper function to create a rule asset saved object
@@ -73,7 +74,12 @@ export const createPrebuiltRuleAssetSavedObjects = async (
   await es.bulk({
     refresh: true,
     body: rules.flatMap((doc) => [
-      { index: { _index: '.kibana', _id: `security-rule:${doc['security-rule'].rule_id}` } },
+      {
+        index: {
+          _index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
+          _id: `security-rule:${doc['security-rule'].rule_id}`,
+        },
+      },
       doc,
     ]),
   });
@@ -97,7 +103,7 @@ export const createHistoricalPrebuiltRuleAssetSavedObjects = async (
     body: rules.flatMap((doc) => [
       {
         index: {
-          _index: '.kibana',
+          _index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
           _id: `security-rule:${doc['security-rule'].rule_id}_${doc['security-rule'].version}`,
         },
       },

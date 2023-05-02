@@ -9,11 +9,12 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SavedViewCreateModal } from './create_modal';
-import { SavedViewUpdateModal } from './update_modal';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedViewManageViewsFlyout } from './manage_views_flyout';
 import { useSavedViewContext } from '../../containers/saved_view/saved_view';
 import { SavedViewListModal } from './view_list_modal';
+import { useBoolean } from '../../hooks/use_boolean';
+import { UpsertViewModal } from './upsert_modal';
 
 interface Props<ViewState> {
   viewState: ViewState;
@@ -28,7 +29,6 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     updateView,
     deletedId,
     deleteView,
-    defaultViewId,
     makeDefault,
     sourceIsLoading,
     find,
@@ -39,48 +39,40 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     currentView,
     setCurrentView,
   } = useSavedViewContext();
-  const [modalOpen, setModalOpen] = useState(false);
-  const [viewListModalOpen, setViewListModalOpen] = useState(false);
+
+  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
+
+  const [isManageFlyoutOpen, { on: openManageFlyout, off: closeManageFlyout }] = useBoolean(false);
+  const [isUpdateModalOpen, { on: openUpdateModal, off: closeUpdateModal }] = useBoolean(false);
+  const [isLoadModalOpen, { on: openLoadModal, off: closeLoadModal }] = useBoolean(false);
+  const [isCreateModalOpen, { on: openCreateModal, off: closeCreateModal }] = useBoolean(false);
+
   const [isInvalid, setIsInvalid] = useState(false);
-  const [isSavedViewMenuOpen, setIsSavedViewMenuOpen] = useState(false);
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [updateModalOpen, setUpdateModalOpen] = useState(false);
-  const hideSavedViewMenu = useCallback(() => {
-    setIsSavedViewMenuOpen(false);
-  }, [setIsSavedViewMenuOpen]);
-  const openViewListModal = useCallback(() => {
-    hideSavedViewMenu();
+
+  const goToManageViews = () => {
+    closePopover();
     find();
-    setViewListModalOpen(true);
-  }, [setViewListModalOpen, find, hideSavedViewMenu]);
-  const closeViewListModal = useCallback(() => {
-    setViewListModalOpen(false);
-  }, [setViewListModalOpen]);
-  const openSaveModal = useCallback(() => {
-    hideSavedViewMenu();
-    setIsInvalid(false);
-    setCreateModalOpen(true);
-  }, [hideSavedViewMenu]);
-  const openUpdateModal = useCallback(() => {
-    hideSavedViewMenu();
-    setIsInvalid(false);
-    setUpdateModalOpen(true);
-  }, [hideSavedViewMenu]);
-  const closeModal = useCallback(() => setModalOpen(false), []);
-  const closeCreateModal = useCallback(() => setCreateModalOpen(false), []);
-  const closeUpdateModal = useCallback(() => setUpdateModalOpen(false), []);
-  const loadViews = useCallback(() => {
-    hideSavedViewMenu();
+    openManageFlyout();
+  };
+
+  const goToLoadView = () => {
+    closePopover();
     find();
-    setModalOpen(true);
-  }, [find, hideSavedViewMenu]);
-  const showSavedViewMenu = useCallback(() => {
-    if (isSavedViewMenuOpen) {
-      setIsSavedViewMenuOpen(false);
-      return;
-    }
-    setIsSavedViewMenuOpen(true);
-  }, [setIsSavedViewMenuOpen, isSavedViewMenuOpen]);
+    openLoadModal();
+  };
+
+  const goToCreateView = () => {
+    closePopover();
+    setIsInvalid(false);
+    openCreateModal();
+  };
+
+  const goToUpdateView = () => {
+    closePopover();
+    setIsInvalid(false);
+    openUpdateModal();
+  };
+
   const save = useCallback(
     (name: string, hasTime: boolean = false) => {
       const currentState = {
@@ -146,7 +138,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
         data-test-subj="savedViews-popover"
         button={
           <EuiButton
-            onClick={showSavedViewMenu}
+            onClick={togglePopover}
             data-test-subj="savedViews-openPopover"
             iconType="arrowDown"
             iconSide="right"
@@ -159,81 +151,90 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
                 })}
           </EuiButton>
         }
-        isOpen={isSavedViewMenuOpen}
-        closePopover={hideSavedViewMenu}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
         anchorPosition="leftCenter"
       >
         <EuiListGroup flush={true}>
           <EuiListGroupItem
             data-test-subj="savedViews-manageViews"
-            iconType={'indexSettings'}
-            onClick={loadViews}
+            iconType="indexSettings"
+            onClick={goToManageViews}
             label={i18n.translate('xpack.infra.savedView.manageViews', {
               defaultMessage: 'Manage views',
             })}
           />
-
           <EuiListGroupItem
             data-test-subj="savedViews-updateView"
-            iconType={'refresh'}
-            onClick={openUpdateModal}
+            iconType="refresh"
+            onClick={goToUpdateView}
             isDisabled={!currentView || currentView.id === '0'}
             label={i18n.translate('xpack.infra.savedView.updateView', {
               defaultMessage: 'Update view',
             })}
           />
-
           <EuiListGroupItem
             data-test-subj="savedViews-loadView"
-            iconType={'importAction'}
-            onClick={openViewListModal}
+            iconType="importAction"
+            onClick={goToLoadView}
             label={i18n.translate('xpack.infra.savedView.loadView', {
               defaultMessage: 'Load view',
             })}
           />
-
           <EuiListGroupItem
             data-test-subj="savedViews-saveNewView"
-            iconType={'save'}
-            onClick={openSaveModal}
+            iconType="save"
+            onClick={goToCreateView}
             label={i18n.translate('xpack.infra.savedView.saveNewView', {
               defaultMessage: 'Save new view',
             })}
           />
         </EuiListGroup>
       </EuiPopover>
-
-      {createModalOpen && (
-        <SavedViewCreateModal isInvalid={isInvalid} close={closeCreateModal} save={save} />
-      )}
-
-      {updateModalOpen && (
-        <SavedViewUpdateModal
-          currentView={currentView}
+      {isCreateModalOpen && (
+        <UpsertViewModal
           isInvalid={isInvalid}
-          close={closeUpdateModal}
-          save={update}
+          onClose={closeCreateModal}
+          onSave={save}
+          title={
+            <FormattedMessage
+              defaultMessage="Save View"
+              id="xpack.infra.waffle.savedView.createHeader"
+            />
+          }
         />
       )}
-
-      {viewListModalOpen && (
+      {isUpdateModalOpen && (
+        <UpsertViewModal
+          isInvalid={isInvalid}
+          onClose={closeUpdateModal}
+          onSave={update}
+          initialName={currentView.name}
+          initialIncludeTime={Boolean(currentView.time)}
+          title={
+            <FormattedMessage
+              defaultMessage="Update View"
+              id="xpack.infra.waffle.savedView.updateHeader"
+            />
+          }
+        />
+      )}
+      {isLoadModalOpen && (
         <SavedViewListModal<any>
           currentView={currentView}
           views={views}
-          close={closeViewListModal}
+          onClose={closeLoadModal}
           setView={setCurrentView}
         />
       )}
-
-      {modalOpen && (
+      {isManageFlyoutOpen && (
         <SavedViewManageViewsFlyout<ViewState>
           sourceIsLoading={sourceIsLoading}
           loading={loading}
           views={views}
-          defaultViewId={defaultViewId}
-          makeDefault={makeDefault}
-          deleteView={deleteView}
-          close={closeModal}
+          onMakeDefaultView={makeDefault}
+          onDeleteView={deleteView}
+          onClose={closeManageFlyout}
           setView={setCurrentView}
         />
       )}

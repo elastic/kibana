@@ -111,6 +111,7 @@ export interface DocLinks {
     readonly apiKeys: string;
     readonly behavioralAnalytics: string;
     readonly behavioralAnalyticsEvents: string;
+    readonly buildConnector: string;
     readonly bulkApi: string;
     readonly configuration: string;
     readonly connectors: string;
@@ -138,6 +139,7 @@ export interface DocLinks {
     readonly licenseManagement: string;
     readonly machineLearningStart: string;
     readonly mailService: string;
+    readonly mlDocumentEnrichment: string;
     readonly start: string;
     readonly syncRules: string;
     readonly troubleshootSetup: string;
