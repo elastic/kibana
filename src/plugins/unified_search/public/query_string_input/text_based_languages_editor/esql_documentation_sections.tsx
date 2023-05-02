@@ -482,6 +482,26 @@ These comparison operators are supported:
   * larger than: \`>\`
   * larger than or equal: \`>=\`
 
+For string comparison using wildcards or regular expressions, use \`LIKE\` or \`RLIKE\`:
+
+* Use \`LIKE\` to match strings using wildcards. The following wildcard characters are supported:
+  * \`*\` matches zero or more characters. 
+  * \`?\` matches one character. 
+
+  \`\`\`
+  FROM employees 
+  | WHERE first_name LIKE "?b*" 
+  | PROJECT first_name, last_name
+  \`\`\`
+
+* Use \`RLIKE\` to match strings using regular expressions:
+
+  \`\`\`
+  FROM employees 
+  | WHERE first_name RLIKE ".leja.*" 
+  | PROJECT first_name, last_name
+  \`\`\`
+
 You can use the following boolean operators:
 
 * \`AND\`
