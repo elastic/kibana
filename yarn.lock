@@ -5042,6 +5042,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/serverless-security@link:x-pack/plugins/serverless_security":
+  version "0.0.0"
+  uid ""
+
 "@kbn/serverless@link:x-pack/plugins/serverless":
   version "0.0.0"
   uid ""

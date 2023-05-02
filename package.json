@@ -579,6 +579,7 @@
     "@kbn/serverless-observability": "link:x-pack/plugins/serverless_observability",
     "@kbn/serverless-project-switcher": "link:packages/serverless/project_switcher",
     "@kbn/serverless-search": "link:x-pack/plugins/serverless_search",
+    "@kbn/serverless-security": "link:x-pack/plugins/serverless_security",
     "@kbn/serverless-types": "link:packages/serverless/types",
     "@kbn/session-notifications-plugin": "link:test/plugin_functional/plugins/session_notifications",
     "@kbn/session-view-plugin": "link:x-pack/plugins/session_view",

@@ -1,20 +1,22 @@
 {
   "type": "plugin",
-  "id": "@kbn/serverless",
+  "id": "@kbn/serverless-security",
   "owner": "@elastic/appex-sharedux",
-  "description": "The core Serverless plugin, providing APIs to Serverless Project plugins.",
+  "description": "Serverless customizations for security.",
   "plugin": {
-    "id": "serverless",
+    "id": "serverlessSecurity",
     "server": true,
     "browser": true,
     "configPath": [
       "xpack",
       "serverless",
-      "plugin",
+      "security"
     ],
     "requiredPlugins": [
-      "kibanaReact",
-      "management",
+      "serverless",
+      "security",
+      "securitySolution",
+      "kibanaReact"
     ],
     "optionalPlugins": [],
     "requiredBundles": []
