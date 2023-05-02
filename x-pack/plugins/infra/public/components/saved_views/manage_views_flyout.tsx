@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
 import { MetricsExplorerView } from '../../../common/metrics_explorer_views';
-import { InventoryView } from '../../../common/inventory_views';
+import type { InventoryView } from '../../../common/inventory_views';
 import { UseInventoryViewsResult } from '../../hooks/use_inventory_views';
 import { UseMetricsExplorerViewsResult } from '../../hooks/use_metrics_explorer_views';
 
