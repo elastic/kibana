@@ -112,6 +112,11 @@ export function getFleetPolicyStep({
         {
           policy_id: cloudAgentPolicyId,
           enabled: true,
+          package: {
+            name: 'profiler_symbolizer',
+            title: 'Universal Profiling Symbolizer',
+            version: '8.8.0-preview',
+          },
           name: 'elastic-universal-profiling-symbolizer',
           namespace: 'default',
           inputs: [
