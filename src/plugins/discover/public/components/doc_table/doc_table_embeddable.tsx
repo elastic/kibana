@@ -121,7 +121,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
               </EuiText>
             </EuiFlexItem>
           )}
-          {props.totalHitCount !== 0 && (
+          {Boolean(props.totalHitCount) && (
             <EuiFlexItem grow={false} data-test-subj="toolBarTotalDocsText">
               <TotalDocuments totalHitCount={props.totalHitCount} />
             </EuiFlexItem>

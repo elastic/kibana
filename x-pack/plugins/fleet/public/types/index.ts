@@ -113,6 +113,7 @@ export type {
   ServiceName,
   GetCategoriesRequest,
   GetCategoriesResponse,
+  GetVerificationKeyIdResponse,
   GetPackagesRequest,
   GetPackagesResponse,
   GetLimitedPackagesResponse,

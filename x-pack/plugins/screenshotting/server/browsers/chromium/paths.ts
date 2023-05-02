@@ -18,7 +18,7 @@ export interface PackageInfo {
   location: 'custom' | 'common';
 }
 
-const REVISION = 1036745;
+const REVISION = 1045629;
 
 enum BaseUrl {
   // see https://www.chromium.org/getting-involved/download-chromium
@@ -45,8 +45,8 @@ export class ChromiumArchivePaths {
       platform: 'darwin',
       architecture: 'x64',
       archiveFilename: 'chrome-mac.zip',
-      archiveChecksum: 'dd4d44ad97ba2fef5dc47d7f2a39ccaa',
-      binaryChecksum: '4a7a663b2656d66ce975b00a30df3ab4',
+      archiveChecksum: '028606a28586800b70d249d050a360d5',
+      binaryChecksum: 'db876895b31ed6923cb1e99fea12062e',
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
       location: 'common',
       archivePath: 'Mac',
@@ -56,8 +56,8 @@ export class ChromiumArchivePaths {
       platform: 'darwin',
       architecture: 'arm64',
       archiveFilename: 'chrome-mac.zip',
-      archiveChecksum: '5afc0d49865d55b69ea1ff65b9cc5794',
-      binaryChecksum: '4a7a663b2656d66ce975b00a30df3ab4',
+      archiveChecksum: '727029f573d3b85be596b80b810b0237',
+      binaryChecksum: '8668272094c610c15bad15b068f8f73c',
       binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
       location: 'common',
       archivePath: 'Mac_Arm',
@@ -87,8 +87,8 @@ export class ChromiumArchivePaths {
       platform: 'win32',
       architecture: 'x64',
       archiveFilename: 'chrome-win.zip',
-      archiveChecksum: '42db052673414b89d8cb45657c1a6aeb',
-      binaryChecksum: '1b6eef775198ffd48fb9669ac0c818f7',
+      archiveChecksum: '2e24beb0e1d7201bad98b8c231c63d97',
+      binaryChecksum: '47b1e6d9179fb8cadeef9c8939dce12d',
       binaryRelativePath: path.join('chrome-win', 'chrome.exe'),
       location: 'common',
       archivePath: 'Win',

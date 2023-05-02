@@ -176,6 +176,7 @@ enabled:
   - x-pack/test/api_integration/apis/uptime/config.ts
   - x-pack/test/api_integration/apis/watcher/config.ts
   - x-pack/test/apm_api_integration/basic/config.ts
+  - x-pack/test/apm_api_integration/cloud/config.ts
   - x-pack/test/apm_api_integration/rules/config.ts
   - x-pack/test/apm_api_integration/trial/config.ts
   - x-pack/test/banners_functional/config.ts
@@ -243,6 +244,9 @@ enabled:
   - x-pack/test/functional/apps/lens/group1/config.ts
   - x-pack/test/functional/apps/lens/group2/config.ts
   - x-pack/test/functional/apps/lens/group3/config.ts
+  - x-pack/test/functional/apps/lens/group4/config.ts
+  - x-pack/test/functional/apps/lens/group5/config.ts
+  - x-pack/test/functional/apps/lens/group6/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/tsvb/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/agg_based/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/dashboard/config.ts

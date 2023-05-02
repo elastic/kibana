@@ -19,7 +19,7 @@ describe('Rules talbes links', () => {
   });
   beforeEach(() => {
     deleteAlertsAndRules();
-    createRule({ ...getNewRule(), rule_id: 'rule1' });
+    createRule(getNewRule({ rule_id: 'rule1' }));
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
   });
 

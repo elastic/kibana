@@ -234,6 +234,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           <>
             <EuiLink
               data-test-subj={`edit${item.id}`}
+              title={name}
               onClick={() => editItem(item, EditConnectorTabs.Configuration)}
               key={item.id}
               disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}

@@ -36,7 +36,7 @@ describe('Enable risk scores', () => {
   before(() => {
     cleanKibana();
     login();
-    createRule({ ...getNewRule(), rule_id: 'rule1' });
+    createRule(getNewRule({ rule_id: 'rule1' }));
   });
 
   beforeEach(() => {

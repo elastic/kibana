@@ -39,7 +39,10 @@ export const DisabledCallout = () => {
         ) : (
           <p>
             {CALLOUT_MANAGEMENT_CONTACT_ADMIN}{' '}
-            <EuiLink href="#" target="_blank">
+            <EuiLink
+              href="https://www.elastic.co/guide/en/observability/current/synthetics-get-started-ui.html#uptime-set-up-prereq"
+              target="_blank"
+            >
               {LEARN_MORE_LABEL}
             </EuiLink>
           </p>

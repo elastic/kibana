@@ -60,7 +60,7 @@ describe.skip('Detections : Page Filters', () => {
   before(() => {
     cleanKibana();
     login();
-    createRule({ ...getNewRule(), rule_id: 'custom_rule_filters' });
+    createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
   });
 
   beforeEach(() => {

@@ -11,6 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+
   const PageObjects = getPageObjects(['common', 'dashboard', 'home', 'dashboardControls']);
   const browser = getService('browser');
 
@@ -56,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Options control panel & dashboard with options control', async () => {
-      await testSubjects.click('field-picker-select-OriginCityName');
+      await PageObjects.dashboardControls.controlsEditorSetfield('OriginCityName');
       await a11y.testAppSnapshot();
       await testSubjects.click('control-editor-save');
       await a11y.testAppSnapshot();

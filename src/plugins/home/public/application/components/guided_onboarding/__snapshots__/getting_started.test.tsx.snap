@@ -18,7 +18,7 @@ exports[`getting started should render getting started component 1`] = `
         "toString": [Function],
       }
     }
-    data-test-subj="onboarding--landing-page"
+    data-test-subj="guided-onboarding--landing-page"
   >
     <EuiTitle
       className="eui-textCenter"

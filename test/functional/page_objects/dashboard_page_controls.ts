@@ -576,7 +576,7 @@ export class DashboardPageControls extends FtrService {
   public async controlsEditorSetfield(
     fieldName: string,
     expectedType?: string,
-    shouldSearch: boolean = false
+    shouldSearch: boolean = true
   ) {
     this.log.debug(`Setting control field to ${fieldName}`);
     if (shouldSearch) {

@@ -31,7 +31,7 @@ export function DataViewPicker({
   selectedDataViewId?: string;
   trigger: DataViewTriggerProps;
   onChangeDataViewId: (newId: string) => void;
-  selectableProps?: EuiSelectableProps;
+  selectableProps?: Partial<EuiSelectableProps>;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 

@@ -154,7 +154,7 @@ describe('Changing alert status', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
-      createRule({ ...getNewRule(), rule_id: '1', max_signals: 100 });
+      createRule(getNewRule({ rule_id: '1', max_signals: 100 }));
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();

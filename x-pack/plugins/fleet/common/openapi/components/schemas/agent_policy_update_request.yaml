@@ -1,8 +1,6 @@
-title: New agent policy
+title: Update agent policy request
 type: object
 properties:
-  id:
-    type: string
   name:
     type: string
   namespace:
@@ -32,6 +30,18 @@ properties:
     type: number
   inactivity_timeout:
     type: number
+  agent_features:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+        enabled:
+          type: boolean
+      required:
+        - name
+        - enabled
 required:
   - name
   - namespace

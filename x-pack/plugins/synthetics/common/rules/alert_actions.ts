@@ -36,6 +36,7 @@ interface Translations {
   defaultActionMessage: string;
   defaultRecoveryMessage: string;
   defaultSubjectMessage: string;
+  defaultRecoverySubjectMessage: string;
 }
 
 export function populateAlertActions({
@@ -107,6 +108,8 @@ export function populateAlertActions({
       case EMAIL_ACTION_ID:
         if (defaultEmail) {
           action.params = getEmailActionParams(translations, defaultEmail);
+          recoveredAction.params = getEmailActionParams(translations, defaultEmail, true);
+          actions.push(recoveredAction);
         }
         break;
       default:
@@ -270,13 +273,19 @@ function getJiraActionParams({ defaultActionMessage }: Translations): JiraAction
 }
 
 function getEmailActionParams(
-  { defaultActionMessage, defaultSubjectMessage }: Translations,
-  defaultEmail: DefaultEmail
+  {
+    defaultActionMessage,
+    defaultSubjectMessage,
+    defaultRecoverySubjectMessage,
+    defaultRecoveryMessage,
+  }: Translations,
+  defaultEmail: DefaultEmail,
+  isRecovery?: boolean
 ): EmailActionParams {
   return {
     to: defaultEmail.to,
-    subject: defaultSubjectMessage,
-    message: defaultActionMessage,
+    subject: isRecovery ? defaultRecoverySubjectMessage : defaultSubjectMessage,
+    message: isRecovery ? defaultRecoveryMessage : defaultActionMessage,
     cc: defaultEmail.cc ?? [],
     bcc: defaultEmail.bcc ?? [],
     kibanaFooterLink: {

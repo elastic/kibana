@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  RuleActionThrottle,
-  SeverityMappingItem,
-  Threat,
-} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { SeverityMappingItem, Threat } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import type {
   EqlRuleCreateProps,
@@ -17,17 +13,13 @@ import type {
   NewTermsRuleCreateProps,
   QueryRuleCreateProps,
   RuleResponse,
+  SavedQueryRuleCreateProps,
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
 } from '../../common/detection_engine/rule_schema';
-import type { Connectors } from './connector';
+import type { CreateRulePropsRewrites } from './types';
 
 const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
-
-export interface Actions {
-  throttle: RuleActionThrottle;
-  connectors: Connectors[];
-}
 
 export const getIndexPatterns = (): string[] => [
   'apm-*-transaction*',
@@ -123,7 +115,9 @@ const getSeverityOverride4 = (): SeverityMappingItem => ({
   severity: 'critical',
 });
 
-export const getDataViewRule = (): QueryRuleCreateProps => ({
+export const getDataViewRule = (
+  rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
+): QueryRuleCreateProps => ({
   type: 'query',
   query: 'host.name: *',
   data_view_id: 'auditbeat-2022',
@@ -139,9 +133,12 @@ export const getDataViewRule = (): QueryRuleCreateProps => ({
   interval: '100m',
   from: 'now-50000h',
   max_signals: 100,
+  ...rewrites,
 });
 
-export const getNewRule = (): QueryRuleCreateProps => ({
+export const getNewRule = (
+  rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
+): QueryRuleCreateProps => ({
   type: 'query',
   query: 'host.name: *',
   index: getIndexPatterns(),
@@ -157,9 +154,28 @@ export const getNewRule = (): QueryRuleCreateProps => ({
   interval: '100m',
   from: 'now-50000h',
   max_signals: 100,
+  ...rewrites,
 });
 
-export const getSimpleCustomQueryRule = (): QueryRuleCreateProps => ({
+export const getSavedQueryRule = (
+  rewrites?: CreateRulePropsRewrites<SavedQueryRuleCreateProps>
+): SavedQueryRuleCreateProps => ({
+  type: 'saved_query',
+  saved_id: 'some-id',
+  query: 'host.name: *',
+  index: getIndexPatterns(),
+  name: 'New Rule Test',
+  description: 'The new rule description.',
+  interval: '100m',
+  from: 'now-50000h',
+  severity: 'low',
+  risk_score: 21,
+  ...rewrites,
+});
+
+export const getSimpleCustomQueryRule = (
+  rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
+): QueryRuleCreateProps => ({
   type: 'query',
   query: 'host.name: *',
   index: getIndexPatterns(),
@@ -169,9 +185,12 @@ export const getSimpleCustomQueryRule = (): QueryRuleCreateProps => ({
   from: 'now-50000h',
   severity: 'low',
   risk_score: 21,
+  ...rewrites,
 });
 
-export const getBuildingBlockRule = (): QueryRuleCreateProps => ({
+export const getBuildingBlockRule = (
+  rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
+): QueryRuleCreateProps => ({
   type: 'query',
   query: 'host.name: *',
   index: getIndexPatterns(),
@@ -188,9 +207,12 @@ export const getBuildingBlockRule = (): QueryRuleCreateProps => ({
   from: 'now-50000h',
   max_signals: 100,
   building_block_type: 'default',
+  ...rewrites,
 });
 
-export const getUnmappedRule = (): QueryRuleCreateProps => ({
+export const getUnmappedRule = (
+  rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
+): QueryRuleCreateProps => ({
   type: 'query',
   query: '*:*',
   index: ['unmapped*'],
@@ -206,9 +228,12 @@ export const getUnmappedRule = (): QueryRuleCreateProps => ({
   interval: '100m',
   from: 'now-50000h',
   max_signals: 100,
+  ...rewrites,
 });
 
-export const getUnmappedCCSRule = (): QueryRuleCreateProps => ({
+export const getUnmappedCCSRule = (
+  rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
+): QueryRuleCreateProps => ({
   type: 'query',
   query: '*:*',
   index: [`${ccsRemoteName}:unmapped*`],
@@ -224,9 +249,12 @@ export const getUnmappedCCSRule = (): QueryRuleCreateProps => ({
   interval: '100m',
   from: 'now-50000h',
   max_signals: 100,
+  ...rewrites,
 });
 
-export const getExistingRule = (): QueryRuleCreateProps => ({
+export const getExistingRule = (
+  rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
+): QueryRuleCreateProps => ({
   type: 'query',
   query: 'host.name: *',
   name: 'Rule 1',
@@ -244,9 +272,12 @@ export const getExistingRule = (): QueryRuleCreateProps => ({
   // Please do not change, or if you do, needs
   // to be any number other than default value
   max_signals: 500,
+  ...rewrites,
 });
 
-export const getNewOverrideRule = (): QueryRuleCreateProps => ({
+export const getNewOverrideRule = (
+  rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
+): QueryRuleCreateProps => ({
   type: 'query',
   query: 'host.name: *',
   index: getIndexPatterns(),
@@ -273,9 +304,12 @@ export const getNewOverrideRule = (): QueryRuleCreateProps => ({
   interval: '100m',
   from: 'now-50000h',
   max_signals: 100,
+  ...rewrites,
 });
 
-export const getNewThresholdRule = (): ThresholdRuleCreateProps => ({
+export const getNewThresholdRule = (
+  rewrites?: CreateRulePropsRewrites<ThresholdRuleCreateProps>
+): ThresholdRuleCreateProps => ({
   type: 'threshold',
   query: 'host.name: *',
   index: getIndexPatterns(),
@@ -295,9 +329,12 @@ export const getNewThresholdRule = (): ThresholdRuleCreateProps => ({
   interval: '100m',
   from: 'now-50000h',
   max_signals: 100,
+  ...rewrites,
 });
 
-export const getNewTermsRule = (): NewTermsRuleCreateProps => ({
+export const getNewTermsRule = (
+  rewrites?: CreateRulePropsRewrites<NewTermsRuleCreateProps>
+): NewTermsRuleCreateProps => ({
   type: 'new_terms',
   query: 'host.name: *',
   index: getIndexPatterns(),
@@ -315,9 +352,12 @@ export const getNewTermsRule = (): NewTermsRuleCreateProps => ({
   interval: '100m',
   from: 'now-50000h',
   max_signals: 100,
+  ...rewrites,
 });
 
-export const getMachineLearningRule = (): MachineLearningRuleCreateProps => ({
+export const getMachineLearningRule = (
+  rewrites?: CreateRulePropsRewrites<MachineLearningRuleCreateProps>
+): MachineLearningRuleCreateProps => ({
   type: 'machine_learning',
   machine_learning_job_id: [
     'Unusual Linux Network Activity',
@@ -335,9 +375,12 @@ export const getMachineLearningRule = (): MachineLearningRuleCreateProps => ({
   note: '# test markdown',
   interval: '100m',
   from: 'now-50000h',
+  ...rewrites,
 });
 
-export const getEqlRule = (): EqlRuleCreateProps => ({
+export const getEqlRule = (
+  rewrites?: CreateRulePropsRewrites<EqlRuleCreateProps>
+): EqlRuleCreateProps => ({
   type: 'eql',
   language: 'eql',
   query: 'any where process.name == "zsh"',
@@ -354,9 +397,12 @@ export const getEqlRule = (): EqlRuleCreateProps => ({
   interval: '100m',
   from: 'now-50000h',
   max_signals: 100,
+  ...rewrites,
 });
 
-export const getCCSEqlRule = (): EqlRuleCreateProps => ({
+export const getCCSEqlRule = (
+  rewrites?: CreateRulePropsRewrites<EqlRuleCreateProps>
+): EqlRuleCreateProps => ({
   type: 'eql',
   language: 'eql',
   query: 'any where process.name == "run-parts"',
@@ -373,9 +419,12 @@ export const getCCSEqlRule = (): EqlRuleCreateProps => ({
   interval: '100m',
   from: 'now-50000h',
   max_signals: 100,
+  ...rewrites,
 });
 
-export const getEqlSequenceRule = (): EqlRuleCreateProps => ({
+export const getEqlSequenceRule = (
+  rewrites?: CreateRulePropsRewrites<EqlRuleCreateProps>
+): EqlRuleCreateProps => ({
   type: 'eql',
   language: 'eql',
   query:
@@ -395,9 +444,12 @@ export const getEqlSequenceRule = (): EqlRuleCreateProps => ({
   interval: '100m',
   from: 'now-50000h',
   max_signals: 100,
+  ...rewrites,
 });
 
-export const getNewThreatIndicatorRule = (): ThreatMatchRuleCreateProps => ({
+export const getNewThreatIndicatorRule = (
+  rewrites?: CreateRulePropsRewrites<ThreatMatchRuleCreateProps>
+): ThreatMatchRuleCreateProps => ({
   type: 'threat_match',
   name: 'Threat Indicator Rule Test',
   description: 'The threat indicator rule description.',
@@ -429,6 +481,7 @@ export const getNewThreatIndicatorRule = (): ThreatMatchRuleCreateProps => ({
   threat_indicator_path: 'threat.indicator',
   timeline_title: 'Generic Threat Match Timeline',
   timeline_id: '495ad7a7-316e-4544-8a0f-9c098daee76e',
+  ...rewrites,
 });
 
 export const indicatorRuleMatchingDoc = {
@@ -442,12 +495,12 @@ export const duplicatedRuleName = `${getNewThreatIndicatorRule().name} [Duplicat
 
 export const getSeveritiesOverride = (): string[] => ['Low', 'Medium', 'High', 'Critical'];
 
-export const getEditedRule = (): QueryRuleCreateProps => ({
-  ...getExistingRule(),
-  severity: 'medium',
-  description: 'Edited Rule description',
-  tags: [...(getExistingRule().tags || []), 'edited'],
-});
+export const getEditedRule = (): QueryRuleCreateProps =>
+  getExistingRule({
+    severity: 'medium',
+    description: 'Edited Rule description',
+    tags: [...(getExistingRule().tags || []), 'edited'],
+  });
 
 export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse>): string => {
   const {

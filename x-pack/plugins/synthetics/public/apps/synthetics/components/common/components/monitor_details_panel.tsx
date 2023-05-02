@@ -120,7 +120,7 @@ export const MonitorDetailsPanel = ({
             </>
           )}
           <TitleLabel>{MONITOR_ID_ITEM_TEXT}</TitleLabel>
-          <DescriptionLabel>{configId}</DescriptionLabel>
+          <DescriptionLabel>{monitor.id}</DescriptionLabel>
           <TitleLabel>{MONITOR_TYPE_LABEL}</TitleLabel>
           <DescriptionLabel>
             <MonitorTypeBadge monitor={monitor} />

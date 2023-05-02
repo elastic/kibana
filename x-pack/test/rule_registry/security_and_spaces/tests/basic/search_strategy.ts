@@ -17,7 +17,7 @@ import {
   getRuleForSignalTesting,
   createRule,
   waitForSignalsToBePresent,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
 } from '../../../../detection_engine_api_integration/utils';
 import {
   obsOnlySpacesAllEsRead,
@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
           query: `_id:${ID}`,
         };
         const { id: createdId } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, createdId);
+        await waitForRuleSuccess({ supertest, log, id: createdId });
         await waitForSignalsToBePresent(supertest, log, 1, [createdId]);
       });
 
