@@ -21175,7 +21175,6 @@
     "xpack.ml.trainedModels.modelsList.startFailed": "无法启动“{modelId}”",
     "xpack.ml.trainedModels.modelsList.startSuccess": "已成功启动“{modelId}”的部署。",
     "xpack.ml.trainedModels.modelsList.stopFailed": "无法停止“{modelId}”",
-    "xpack.ml.trainedModels.modelsList.stopSuccess": "已成功停止“{modelId}”的部署。",
     "xpack.ml.trainedModels.modelsList.successfullyDeletedMessage": "{modelsCount, plural, one {模型 {modelIds}} other {# 个模型}} {modelsCount, plural, other {已}}成功删除",
     "xpack.ml.trainedModels.modelsList.updateDeployment.modalTitle": "更新 {modelId} 部署",
     "xpack.ml.trainedModels.modelsList.updateFailed": "无法更新“{modelId}”",
