@@ -153,48 +153,6 @@ export const SearchApplicationAPI = () => {
       }),
       children: <EngineApiIntegrationStage />,
     },
-    {
-      title: i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step4.title', {
-        defaultMessage: '(Optional) Power up your analytics',
-      }),
-      children: (
-        <>
-          <EuiText>
-            <p>
-              {i18n.translate('xpack.enterpriseSearch.content.searchApplication.api.step4.copy', {
-                defaultMessage:
-                  'Your search application provides basic analytics data as part of this installation. To receive more granular and custom metrics, integrate our Behavioral Analytics script on your platform.',
-              })}
-            </p>
-          </EuiText>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-telemetry-id="entSearchContent-searchApplications-api-step4-learnHowLink"
-                onClick={() =>
-                  navigateToUrl(
-                    generateEncodedPath(`${ANALYTICS_PLUGIN.URL}${COLLECTION_INTEGRATE_PATH}`, {
-                      id: engineName,
-                    }),
-                    { shouldNotCreateHref: true }
-                  )
-                }
-                iconSide="left"
-                iconType="popout"
-              >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchApplication.api.step4.learnHowLink',
-                  {
-                    defaultMessage: 'Learn how',
-                  }
-                )}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      ),
-    },
   ];
 
   return (
