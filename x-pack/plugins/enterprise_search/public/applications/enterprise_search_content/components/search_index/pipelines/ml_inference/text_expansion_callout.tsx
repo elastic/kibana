@@ -28,10 +28,6 @@ import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../../shared/kibana';
 
-import { CreateTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
-import { FetchTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
-import { StartTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
-
 import { useTextExpansionCallOutData } from './text_expansion_callout_data';
 import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 import { TextExpansionErrors } from './text_expansion_errors';
@@ -332,22 +328,27 @@ export const ModelStarted = ({
 export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props) => {
   const { dismiss, isDismissable, show } = useTextExpansionCallOutData(props);
   const {
+    createTextExpansionModelError,
+    fetchTextExpansionModelError,
     isCreateButtonDisabled,
     isModelDownloadInProgress,
     isModelDownloaded,
     isModelStarted,
     isStartButtonDisabled,
+    startTextExpansionModelError,
   } = useValues(TextExpansionCalloutLogic);
-  const { error: createError } = useValues(CreateTextExpansionModelApiLogic);
-  const { error: fetchError } = useValues(FetchTextExpansionModelApiLogic);
-  const { error: startError } = useValues(StartTextExpansionModelApiLogic);
 
-  if (createError !== undefined || fetchError !== undefined || startError !== undefined) {
+  // In case of an error, show the error callout only
+  if (
+    createTextExpansionModelError !== undefined ||
+    fetchTextExpansionModelError !== undefined ||
+    startTextExpansionModelError !== undefined
+  ) {
     return (
       <TextExpansionErrors
-        createError={createError}
-        fetchError={fetchError}
-        startError={startError}
+        createError={createTextExpansionModelError}
+        fetchError={fetchTextExpansionModelError}
+        startError={startTextExpansionModelError}
       />
     );
   }

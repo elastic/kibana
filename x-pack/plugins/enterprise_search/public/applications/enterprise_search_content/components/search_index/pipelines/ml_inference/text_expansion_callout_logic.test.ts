@@ -20,14 +20,17 @@ import {
 } from './text_expansion_callout_logic';
 
 const DEFAULT_VALUES: TextExpansionCalloutValues = {
+  createTextExpansionModelError: undefined,
   createTextExpansionModelStatus: Status.IDLE,
   createdTextExpansionModel: undefined,
+  fetchTextExpansionModelError: undefined,
   isCreateButtonDisabled: false,
   isModelDownloadInProgress: false,
   isModelDownloaded: false,
   isModelStarted: false,
   isPollingTextExpansionModelActive: false,
   isStartButtonDisabled: false,
+  startTextExpansionModelError: undefined,
   startTextExpansionModelStatus: Status.IDLE,
   textExpansionModel: undefined,
   textExpansionModelPollTimeoutId: null,

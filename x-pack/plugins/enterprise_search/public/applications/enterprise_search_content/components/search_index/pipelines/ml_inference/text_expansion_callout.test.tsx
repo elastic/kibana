@@ -36,7 +36,7 @@ jest.mock('./text_expansion_callout_data', () => ({
 }));
 
 const DEFAULT_VALUES = {
-  error: undefined,
+  startTextExpansionModelError: undefined,
   isCreateButtonDisabled: false,
   isModelDownloadInProgress: false,
   isModelDownloaded: false,
@@ -52,7 +52,7 @@ describe('TextExpansionCallOut', () => {
   it('renders error panel instead of normal panel if there are some errors', () => {
     setMockValues({
       ...DEFAULT_VALUES,
-      error: {
+      startTextExpansionModelError: {
         body: {
           error: 'some-error',
           message: 'some-error-message',

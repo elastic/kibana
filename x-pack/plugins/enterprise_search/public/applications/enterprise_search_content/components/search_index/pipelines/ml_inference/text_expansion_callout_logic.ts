@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Status } from '../../../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../../../common/types/api';
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import {
   CreateTextExpansionModelApiLogic,
@@ -46,14 +46,17 @@ interface TextExpansionCalloutActions {
 }
 
 export interface TextExpansionCalloutValues {
+  createTextExpansionModelError: HttpError | undefined;
   createTextExpansionModelStatus: Status;
   createdTextExpansionModel: CreateTextExpansionModelResponse | undefined;
+  fetchTextExpansionModelError: HttpError | undefined;
   isCreateButtonDisabled: boolean;
   isModelDownloadInProgress: boolean;
   isModelDownloaded: boolean;
   isModelStarted: boolean;
   isPollingTextExpansionModelActive: boolean;
   isStartButtonDisabled: boolean;
+  startTextExpansionModelError: HttpError | undefined;
   startTextExpansionModelStatus: Status;
   textExpansionModel: FetchTextExpansionModelResponse | undefined;
   textExpansionModelPollTimeoutId: null | ReturnType<typeof setTimeout>;
@@ -94,11 +97,15 @@ export const TextExpansionCalloutLogic = kea<
     ],
     values: [
       CreateTextExpansionModelApiLogic,
-      ['data as createdTextExpansionModel', 'status as createTextExpansionModelStatus'],
+      [
+        'data as createdTextExpansionModel',
+        'status as createTextExpansionModelStatus',
+        'error as createTextExpansionModelError',
+      ],
       FetchTextExpansionModelApiLogic,
-      ['data as textExpansionModel'],
+      ['data as textExpansionModel', 'error as fetchTextExpansionModelError'],
       StartTextExpansionModelApiLogic,
-      ['status as startTextExpansionModelStatus'],
+      ['status as startTextExpansionModelStatus', 'error as startTextExpansionModelError'],
     ],
   },
   events: ({ actions, values }) => ({
