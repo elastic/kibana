@@ -21,12 +21,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ANALYTICS_PLUGIN } from '../../../../../../common/constants';
-import { COLLECTION_INTEGRATE_PATH } from '../../../../analytics/routes';
 import { CloudDetails, useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { decodeCloudId } from '../../../../shared/decode_cloud_id/decode_cloud_id';
 import { docLinks } from '../../../../shared/doc_links';
-import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
 
 import { EngineViewLogic } from '../engine_view_logic';
