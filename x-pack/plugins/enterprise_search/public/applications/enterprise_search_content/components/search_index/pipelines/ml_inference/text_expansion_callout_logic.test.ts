@@ -25,7 +25,10 @@ const DEFAULT_VALUES: TextExpansionCalloutValues = {
   isCreateButtonDisabled: false,
   isModelDownloadInProgress: false,
   isModelDownloaded: false,
+  isModelStarted: false,
   isPollingTextExpansionModelActive: false,
+  isStartButtonDisabled: false,
+  startTextExpansionModelStatus: Status.IDLE,
   textExpansionModel: undefined,
   textExpansionModelPollTimeoutId: null,
 };
@@ -184,6 +187,19 @@ describe('TextExpansionCalloutLogic', () => {
       });
     });
 
+    describe('startTextExpansionModelSuccess', () => {
+      it('sets startedTextExpansionModel', () => {
+        jest.spyOn(TextExpansionCalloutLogic.actions, 'fetchTextExpansionModel');
+
+        TextExpansionCalloutLogic.actions.startTextExpansionModelSuccess({
+          deploymentState: MlModelDeploymentState.FullyAllocated,
+          modelId: 'mock-model-id',
+        });
+
+        expect(TextExpansionCalloutLogic.actions.fetchTextExpansionModel).toHaveBeenCalled();
+      });
+    });
+
     describe('stopPollingTextExpansionModel', () => {
       it('clears polling timeout and poll timeout ID if it is set', () => {
         mount({
@@ -266,6 +282,23 @@ describe('TextExpansionCalloutLogic', () => {
           modelId: 'mock-model-id',
         });
         expect(TextExpansionCalloutLogic.values.isModelDownloaded).toBe(false);
+      });
+    });
+
+    describe('isModelStarted', () => {
+      it('is set to true if the model is started', () => {
+        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+          deploymentState: MlModelDeploymentState.FullyAllocated,
+          modelId: 'mock-model-id',
+        });
+        expect(TextExpansionCalloutLogic.values.isModelStarted).toBe(true);
+      });
+      it('is set to false if the model is not started', () => {
+        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+          deploymentState: MlModelDeploymentState.NotDeployed,
+          modelId: 'mock-model-id',
+        });
+        expect(TextExpansionCalloutLogic.values.isModelStarted).toBe(false);
       });
     });
 
