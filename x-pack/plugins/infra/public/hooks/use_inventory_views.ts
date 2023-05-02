@@ -25,7 +25,7 @@ import {
   CreateInventoryViewAttributesRequestPayload,
   UpdateInventoryViewAttributesRequestPayload,
 } from '../../common/http_api/latest';
-import { InventoryView } from '../../common/inventory_views';
+import type { InventoryView } from '../../common/inventory_views';
 import { useKibanaContextForPlugin } from './use_kibana';
 import { useUrlState } from '../utils/use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
