@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { first, isEmpty, last, meanBy } from 'lodash';
 import moment from 'moment';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
-import { asPercent } from '@kbn/apm-plugin/common/utils/formatters';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { ApmDocumentType, ApmTransactionDocumentType } from '@kbn/apm-plugin/common/document_type';
@@ -209,7 +208,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             metricsOneMinErrorRateMean,
             metricsTenMinErrorRateMean,
             metricsSixtyMinErrorRateMean,
-          ].forEach((value) => expect(asPercent(value, 1)).to.be.equal(`${GO_PROD_ERROR_RATE}%`));
+          ].forEach((value) => expect(value).to.be.equal(GO_PROD_ERROR_RATE / 100));
         });
 
         it('has same throughput mean value for metrics and transactions data', () => {
@@ -253,16 +252,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const metricsSixtyMinPeriod =
             metricsStatisticsSixtyMinute.currentPeriod[transactionNames[0]];
 
-          const transactionsImpact = transactionsCurrentPeriod.impact;
-          const metricsOneMinImpact = metricsOneMinPeriod.impact;
-          const metricsTenMinImpact = metricsTenMinPeriod.impact;
-          const metricsSixtyMinImpact = metricsSixtyMinPeriod.impact;
-
           [
-            transactionsImpact,
-            metricsOneMinImpact,
-            metricsTenMinImpact,
-            metricsSixtyMinImpact,
+            transactionsCurrentPeriod.impact,
+            metricsOneMinPeriod.impact,
+            metricsTenMinPeriod.impact,
+            metricsSixtyMinPeriod.impact,
           ].forEach((value) => expect(value).to.be.equal(100));
         });
       });
