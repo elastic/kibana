@@ -8,7 +8,6 @@
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
 import type { ActionTypeValues, FindTypeField } from '../../../../common/api';
@@ -24,6 +23,7 @@ import { transformFindResponseToExternalModel, transformToExternalModel } from '
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../../../client/utils';
 import type {
   UserActionPersistedAttributes,
+  UserActionSavedObjectTransformed,
   UserActionTransformedAttributes,
 } from '../../../common/types/user_actions';
 
@@ -167,7 +167,7 @@ export class UserActionFinder {
   }: {
     caseId: string;
     filter?: KueryNode;
-  }): Promise<Array<SavedObject<UserActionTransformedAttributes>>> {
+  }): Promise<UserActionSavedObjectTransformed[]> {
     try {
       this.context.log.debug('Attempting to find status changes');
 
@@ -199,7 +199,7 @@ export class UserActionFinder {
           }
         );
 
-      let userActions: Array<SavedObject<UserActionTransformedAttributes>> = [];
+      let userActions: UserActionSavedObjectTransformed[] = [];
       for await (const findResults of finder.find()) {
         userActions = userActions.concat(
           findResults.saved_objects.map((so) =>

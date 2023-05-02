@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { UserActionAttributesWithInjectedId } from '../../../common/api';
+import type { SavedObject } from '@kbn/core/server';
+import type { UserActionAttributes } from '../../../common/api';
 import type { User } from './user';
 
 interface UserActionCommonPersistedAttributes {
@@ -20,4 +21,5 @@ export interface UserActionPersistedAttributes extends UserActionCommonPersisted
   payload: Record<string, unknown>;
 }
 
-export type UserActionTransformedAttributes = UserActionAttributesWithInjectedId;
+export type UserActionTransformedAttributes = UserActionAttributes;
+export type UserActionSavedObjectTransformed = SavedObject<UserActionTransformedAttributes>;

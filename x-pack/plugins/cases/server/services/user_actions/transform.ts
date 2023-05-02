@@ -14,10 +14,7 @@ import {
   isCreateCaseUserAction,
   isCommentUserAction,
 } from '../../../common/utils/user_actions';
-import type {
-  CaseUserActionAttributes,
-  CaseUserActionDeprecatedResponse,
-} from '../../../common/api';
+import type { CaseUserActionDeprecatedResponse, UserActionAttributes } from '../../../common/api';
 import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 import {
@@ -34,6 +31,7 @@ import { injectPersistableReferencesToSO } from '../../attachment_framework/so_r
 import { findReferenceId } from '../../common/references';
 import type {
   UserActionPersistedAttributes,
+  UserActionSavedObjectTransformed,
   UserActionTransformedAttributes,
 } from '../../common/types/user_actions';
 
@@ -53,7 +51,7 @@ export function transformFindResponseToExternalModel(
 export function transformToExternalModel(
   userAction: SavedObject<UserActionPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): SavedObject<UserActionTransformedAttributes> {
+): UserActionSavedObjectTransformed {
   const { references } = userAction;
 
   const commentId =
@@ -118,7 +116,7 @@ function legacyTransformToExternalModel(
 const addReferenceIdToPayload = (
   userAction: SavedObject<UserActionPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): CaseUserActionAttributes['payload'] => {
+): UserActionAttributes['payload'] => {
   const connectorId = getConnectorIdFromReferences(userAction);
   const userActionAttributes = userAction.attributes;
 

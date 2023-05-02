@@ -10,7 +10,6 @@ import type {
   SavedObjectsClientContract,
   Logger,
   ISavedObjectsSerializer,
-  SavedObject,
   SavedObjectsRawDoc,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
@@ -37,7 +36,7 @@ import type {
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
   UserActionPersistedAttributes,
-  UserActionTransformedAttributes,
+  UserActionSavedObjectTransformed,
 } from '../../common/types/user_actions';
 import type { IndexRefresh } from '../types';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
@@ -157,17 +156,17 @@ export interface ServiceContext {
 }
 
 export interface PushTimeFrameInfo {
-  mostRecent: SavedObject<UserActionTransformedAttributes>;
-  oldest: SavedObject<UserActionTransformedAttributes>;
+  mostRecent: UserActionSavedObjectTransformed;
+  oldest: UserActionSavedObjectTransformed;
 }
 
 export interface CaseConnectorActivity {
   connectorId: string;
-  fields: SavedObject<UserActionTransformedAttributes>;
+  fields: UserActionSavedObjectTransformed;
   push?: PushTimeFrameInfo;
 }
 
-export type CaseConnectorFields = Map<string, SavedObject<UserActionTransformedAttributes>>;
+export type CaseConnectorFields = Map<string, UserActionSavedObjectTransformed>;
 
 export interface PushInfo {
   date: Date;
