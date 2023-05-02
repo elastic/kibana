@@ -15,10 +15,7 @@ import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import { metricsExplorerViewSavedObjectName } from '../../saved_objects/metrics_explorer_view';
 import { MetricsExplorerViewsClient } from './metrics_explorer_views_client';
 import { createMetricsExplorerViewMock } from '../../../common/metrics_explorer_views/metrics_explorer_view.mock';
-import {
-  CreateMetricsExplorerViewAttributesRequestPayload,
-  UpdateMetricsExplorerViewAttributesRequestPayload,
-} from '../../../common/http_api/latest';
+import { UpdateMetricsExplorerViewAttributesRequestPayload } from '../../../common/http_api/latest';
 
 describe('MetricsExplorerViewsClient class', () => {
   const mockFindMetricsExplorerList = (
@@ -118,45 +115,6 @@ describe('MetricsExplorerViewsClient class', () => {
     expect(metricsExplorerView).toEqual(metricsExplorerViewMock);
   });
 
-  describe('.create', () => {
-    it('generate a new metrics explorer view', async () => {
-      const { metricsExplorerViewsClient, savedObjectsClient } = createMetricsExplorerViewsClient();
-
-      const metricsExplorerViewMock = createMetricsExplorerViewMock('new_id', {
-        name: 'New view',
-        isStatic: false,
-      } as MetricsExplorerViewAttributes);
-
-      mockFindMetricsExplorerList(savedObjectsClient);
-
-      savedObjectsClient.create.mockResolvedValue({
-        ...metricsExplorerViewMock,
-        type: metricsExplorerViewSavedObjectName,
-        references: [],
-      });
-
-      const metricsExplorerView = await metricsExplorerViewsClient.create({
-        name: 'New view',
-      } as CreateMetricsExplorerViewAttributesRequestPayload);
-
-      expect(savedObjectsClient.create).toHaveBeenCalled();
-      expect(metricsExplorerView).toEqual(metricsExplorerViewMock);
-    });
-
-    it('throws an error when a conflicting name is given', async () => {
-      const { metricsExplorerViewsClient, savedObjectsClient } = createMetricsExplorerViewsClient();
-
-      mockFindMetricsExplorerList(savedObjectsClient);
-
-      await expect(
-        async () =>
-          await metricsExplorerViewsClient.create({
-            name: 'Custom',
-          } as CreateMetricsExplorerViewAttributesRequestPayload)
-      ).rejects.toThrow('A view with that name already exists.');
-    });
-  });
-
   describe('.update', () => {
     it('update an existing metrics explorer view by id', async () => {
       const { metricsExplorerViewsClient, infraSources, savedObjectsClient } =
@@ -174,7 +132,7 @@ describe('MetricsExplorerViewsClient class', () => {
 
       infraSources.getSourceConfiguration.mockResolvedValue(basicTestSourceConfiguration);
 
-      savedObjectsClient.update.mockResolvedValue({
+      savedObjectsClient.create.mockResolvedValue({
         ...metricsExplorerViewMock,
         type: metricsExplorerViewSavedObjectName,
         references: [],
@@ -188,7 +146,7 @@ describe('MetricsExplorerViewsClient class', () => {
         {}
       );
 
-      expect(savedObjectsClient.update).toHaveBeenCalled();
+      expect(savedObjectsClient.create).toHaveBeenCalled();
       expect(metricsExplorerView).toEqual(metricsExplorerViewMock);
     });
 
