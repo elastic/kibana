@@ -69,6 +69,7 @@ export function getPreferredBucketSizeAndDataSource({
       documentType: ApmDocumentType.TransactionEvent,
       rollupInterval: RollupInterval.None,
       hasDurationSummaryField: false,
+      hasDocs: true,
     };
   }
 

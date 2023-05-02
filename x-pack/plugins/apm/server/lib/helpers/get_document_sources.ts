@@ -13,7 +13,7 @@ import { getConfigForDocumentType } from './create_es_client/document_type';
 import { TRANSACTION_DURATION_SUMMARY } from '../../../common/es_fields/apm';
 import { TimeRangeMetadata } from '../../../common/time_range_metadata';
 
-const getFilters = ({
+const getRequestQuery = ({
   documentType,
   rollupInterval,
   filters,
@@ -87,14 +87,14 @@ export async function getDocumentSources({
         documentType,
         rollupInterval,
         meta: {
-          checkSummaryExistsField: false,
+          checkSummaryFieldExists: false,
         },
-        before: getFilters({
+        before: getRequestQuery({
           documentType,
           rollupInterval,
           filters: [...kql, ...beforeRange],
         }),
-        current: getFilters({
+        current: getRequestQuery({
           documentType,
           rollupInterval,
           filters: [...kql, ...currentRange],
@@ -129,14 +129,14 @@ export async function getDocumentSources({
         documentType,
         rollupInterval,
         meta: {
-          checkSummaryExistsField: true,
+          checkSummaryFieldExists: true,
         },
-        before: getFilters({
+        before: getRequestQuery({
           documentType,
           rollupInterval,
           filters: [...kql, ...beforeRange, summaryExistsFilter],
         }),
-        current: getFilters({
+        current: getRequestQuery({
           documentType,
           rollupInterval,
           filters: [...kql, ...currentRange, summaryExistsFilter],
@@ -145,18 +145,12 @@ export async function getDocumentSources({
     });
   });
 
-  const docSearches = sourcesToCheck.flatMap(({ before, current }) => [
+  const allSourcesToCheck = [...sourcesToCheck, ...sourcesToCheckWithSummary];
+
+  const allSearches = allSourcesToCheck.flatMap(({ before, current }) => [
     before,
     current,
   ]);
-
-  const summaryFieldSearches = sourcesToCheckWithSummary.flatMap(
-    ({ before, current }) => [before, current]
-  );
-
-  const allSourcesToCheck = [...sourcesToCheck, ...sourcesToCheckWithSummary];
-
-  const allSearches = [...docSearches, ...summaryFieldSearches];
 
   const allResponses = (
     await apmEventClient.msearch('get_document_availability', ...allSearches)
@@ -175,13 +169,13 @@ export async function getDocumentSources({
       rollupInterval,
       hasDataBefore,
       hasDataAfter,
-      checkSummaryExistsField: source.meta.checkSummaryExistsField,
+      checkSummaryFieldExists: source.meta.checkSummaryFieldExists,
     };
   });
 
-  const hasAnyDataBefore = checkedSources
-    .filter((source) => !source.checkSummaryExistsField)
-    .some((source) => source.hasDataBefore);
+  const hasAnyDataBefore = checkedSources.some(
+    (source) => source.hasDataBefore
+  );
 
   const sources: TimeRangeMetadata['sources'] = [];
 
@@ -191,7 +185,7 @@ export async function getDocumentSources({
       hasDataAfter,
       hasDataBefore,
       rollupInterval,
-      checkSummaryExistsField,
+      checkSummaryFieldExists,
     } = source;
     const hasData = hasDataBefore || hasDataAfter;
     const hasDocsData = hasAnyDataBefore ? hasDataBefore : hasData;
@@ -213,13 +207,13 @@ export async function getDocumentSources({
 
     if (
       documentType === ApmDocumentType.TransactionMetric &&
-      !checkSummaryExistsField
+      !checkSummaryFieldExists
     ) {
       const equivalentSourceWithSummary = checkedSources.find(
         (eSource) =>
           eSource.documentType === documentType &&
           eSource.rollupInterval === rollupInterval &&
-          eSource.checkSummaryExistsField
+          eSource.checkSummaryFieldExists
       );
       if (equivalentSourceWithSummary) {
         const hasSummaryData =
