@@ -19,6 +19,12 @@ export const controlGroupReducers = {
   ) => {
     state.explicitInput.controlStyle = action.payload;
   },
+  setChainingSystem: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupInput['chainingSystem']>
+  ) => {
+    state.explicitInput.chainingSystem = action.payload;
+  },
   setDefaultControlWidth: (
     state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<ControlGroupInput['defaultControlWidth']>

@@ -735,6 +735,7 @@ describe('workspace_panel', () => {
       />
     );
     instance = mounted.instance;
+    instance.update();
 
     // EuiFlexItem duplicates internally the attribute, so we need to filter only the most inner one here
     expect(instance.find('[data-test-subj="workspace-more-errors-button"]').last().text()).toEqual(

@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
 import { ClientPluginsStart } from '../../plugin';

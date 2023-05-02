@@ -138,7 +138,7 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
 
     const accordionButtonContent = useMemo(
       () => (
-        <EuiText size={textSize}>
+        <EuiText size={textSize} data-test-subj={getTestId('title')}>
           {type !== 'context'
             ? isTruncated
               ? ACCORDION_BUTTON_TEXT[type].truncated
@@ -146,7 +146,7 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
             : ACCORDION_BUTTON_TEXT[type]}
         </EuiText>
       ),
-      [isTruncated, textSize, type]
+      [getTestId, isTruncated, textSize, type]
     );
 
     return (

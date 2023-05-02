@@ -27,7 +27,7 @@ import { HostsTableType } from '../../store/model';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
-import { TableId } from '../../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../common/lib/kibana');

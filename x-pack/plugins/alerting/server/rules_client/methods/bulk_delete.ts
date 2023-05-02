@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import pMap from 'p-map';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
@@ -13,7 +13,13 @@ import { convertRuleIdsToKueryNode } from '../../lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { tryToRemoveTasks } from '../common';
-import { getAuthorizationFilter, checkAuthorizationAndGetTotal, getAlertFromRaw } from '../lib';
+import { API_KEY_GENERATE_CONCURRENCY } from '../common/constants';
+import {
+  getAuthorizationFilter,
+  checkAuthorizationAndGetTotal,
+  getAlertFromRaw,
+  migrateLegacyActions,
+} from '../lib';
 import {
   retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
@@ -165,6 +171,20 @@ const bulkDeleteWithOCC = async (
     }
   });
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
+
+  // migrate legacy actions only for SIEM rules
+  await pMap(
+    rules,
+    async (rule) => {
+      await migrateLegacyActions(context, {
+        ruleId: rule.id,
+        attributes: rule.attributes as RawRule,
+        skipActionsValidation: true,
+      });
+    },
+    // max concurrency for bulk edit operations, that is limited by api key generations, should be sufficient for bulk migrations
+    { concurrency: API_KEY_GENERATE_CONCURRENCY }
+  );
 
   return {
     errors,

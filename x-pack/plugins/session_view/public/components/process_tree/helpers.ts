@@ -266,6 +266,20 @@ export const autoExpandProcessTree = (processMap: ProcessMap, jumpToEntityId?: s
   return processMap;
 };
 
+// recusively collapses all children below provided node
+export const collapseProcessTree = (node: Process) => {
+  if (!node.autoExpand) {
+    return;
+  }
+
+  if (node.children) {
+    node.children.forEach((child) => {
+      child.autoExpand = false;
+      collapseProcessTree(child);
+    });
+  }
+};
+
 export const processNewEvents = (
   eventsProcessMap: ProcessMap,
   events: ProcessEvent[] | undefined,

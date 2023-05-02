@@ -78,7 +78,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../../common/components/navigation/use_get_url_search');
+jest.mock('../../../../common/components/navigation/use_url_state_query_params');
 
 const defaultUseQueryAlertsReturn = {
   loading: true,
@@ -112,11 +112,15 @@ jest.mock('../common/hooks', () => {
 
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../hooks/alerts_visualization/use_alert_histogram_count', () => ({
+  useAlertHistogramCount: jest.fn().mockReturnValue(999),
+}));
 
 const defaultProps = {
   setQuery: jest.fn(),
   showBuildingBlockAlerts: false,
   showOnlyThreatIndicatorAlerts: false,
+  showTotalAlertsCount: true,
   signalIndexName: 'signalIndexName',
   updateDateRange: jest.fn(),
 };
@@ -779,6 +783,27 @@ describe('AlertsHistogramPanel', () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
       mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(true); // for chartEmbeddablesEnabled flag
       mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(false); // for alertsPageChartsEnabled flag
+    });
+
+    test('it renders the header with alerts count', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} alignHeader="flexEnd" />
+        </TestProviders>
+      );
+
+      mockUseQueryAlerts.mockReturnValue({
+        loading: false,
+        setQuery: () => undefined,
+        data: null,
+        response: '',
+        request: '',
+        refetch: null,
+      });
+      wrapper.setProps({ filters: [] });
+      wrapper.update();
+
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toContain('999');
     });
 
     it('renders LensEmbeddable', async () => {

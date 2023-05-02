@@ -118,12 +118,6 @@ export function getBaseMappings(): IndexMapping {
   return {
     dynamic: 'strict',
     properties: {
-      migrationVersion: {
-        // Saved Objects can't redefine dynamic, but we cheat here to support migrations
-        // @ts-expect-error
-        dynamic: 'true',
-        type: 'object',
-      },
       type: {
         type: 'keyword',
       },
@@ -161,6 +155,9 @@ export function getBaseMappings(): IndexMapping {
       },
       typeMigrationVersion: {
         type: 'version',
+      },
+      managed: {
+        type: 'boolean',
       },
     },
   };

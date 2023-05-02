@@ -6,7 +6,7 @@
  */
 
 import { pick } from 'lodash/fp';
-import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { InputsModelId } from '../../store/inputs/constants';
@@ -15,15 +15,18 @@ import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 import type { SetQuery, DeleteQuery } from './types';
 
-export const useGlobalTime = (clearAllQuery: boolean = true) => {
+export const useGlobalTime = () => {
   const dispatch = useDispatch();
   const { from, to } = useDeepEqualSelector((state) =>
     pick(['from', 'to'], inputsSelectors.globalTimeRangeSelector(state))
   );
   const [isInitializing, setIsInitializing] = useState(true);
 
+  const queryId = useRef<string[]>([]);
+
   const setQuery = useCallback(
-    ({ id, inspect, loading, refetch, searchSessionId }: SetQuery) =>
+    ({ id, inspect, loading, refetch, searchSessionId }: SetQuery) => {
+      queryId.current = [...queryId.current, id];
       dispatch(
         inputsActions.setQuery({
           inputId: InputsModelId.global,
@@ -33,7 +36,8 @@ export const useGlobalTime = (clearAllQuery: boolean = true) => {
           refetch,
           searchSessionId,
         })
-      ),
+      );
+    },
     [dispatch]
   );
 
@@ -50,13 +54,13 @@ export const useGlobalTime = (clearAllQuery: boolean = true) => {
   // This effect must not have any mutable dependencies. Otherwise, the cleanup function gets called before the component unmounts.
   useEffect(() => {
     return () => {
-      if (clearAllQuery) {
-        dispatch(inputsActions.deleteAllQuery({ id: InputsModelId.global }));
+      if (queryId.current.length > 0) {
+        queryId.current.forEach((id) => deleteQuery({ id }));
       }
     };
-  }, [dispatch, clearAllQuery]);
+  }, [deleteQuery]);
 
-  const memoizedReturn = useMemo(
+  return useMemo(
     () => ({
       isInitializing,
       from,
@@ -66,8 +70,6 @@ export const useGlobalTime = (clearAllQuery: boolean = true) => {
     }),
     [deleteQuery, from, isInitializing, setQuery, to]
   );
-
-  return memoizedReturn;
 };
 
 export type GlobalTimeArgs = Omit<ReturnType<typeof useGlobalTime>, 'deleteQuery'> &

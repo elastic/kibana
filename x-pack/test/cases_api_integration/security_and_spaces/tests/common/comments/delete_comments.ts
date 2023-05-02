@@ -128,7 +128,7 @@ export default ({ getService }: FtrProviderContext): void => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
           await createSignalsIndex(supertest, log);
-          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const signals = await createSecuritySolutionAlerts(supertest, log, 2);
           alerts = [signals.hits.hits[0], signals.hits.hits[1]];
         });
 
@@ -214,7 +214,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('should NOT delete case ID from the alert schema when the user does NOT have access to the alert', async () => {
+        it('should delete case ID from the alert schema when the user does NOT have access to the alert', async () => {
           await createCaseAttachAlertAndDeleteAlert({
             supertest: supertestWithoutAuth,
             totalCases: 1,
@@ -222,7 +222,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             alerts,
             getAlerts,
-            expectedHttpCode: 403,
+            expectedHttpCode: 204,
             deleteCommentAuth: { user: obsSec, space: 'space1' },
           });
         });
@@ -248,6 +248,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ];
 
         const getAlerts = async (_alerts: Alerts) => {
+          await es.indices.refresh({ index: '.alerts-observability.apm.alerts' });
           const updatedAlerts = await Promise.all(
             _alerts.map((alert) =>
               getAlertById({
@@ -346,12 +347,12 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('should NOT delete case ID from the alert schema when the user does NOT have access to the alert', async () => {
+        it('should delete case ID from the alert schema when the user does NOT have access to the alert', async () => {
           await createCaseAttachAlertAndDeleteAlert({
             supertest: supertestWithoutAuth,
             totalCases: 1,
             indexOfCaseToDelete: 0,
-            expectedHttpCode: 403,
+            expectedHttpCode: 204,
             owner: 'observabilityFixture',
             alerts,
             getAlerts,

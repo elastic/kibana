@@ -15,6 +15,7 @@ import {
   GenericValidationResult,
   ActionConnectorMode,
   ActionVariables,
+  NotifyWhenSelectOptions,
 } from '../../../types';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
@@ -22,7 +23,30 @@ import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import { transformActionVariables } from '../../lib/action_variables';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { RuleNotifyWhen, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+
+const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
+  {
+    isSummaryOption: true,
+    isForEachAlertOption: true,
+    value: {
+      value: 'onActiveAlert',
+      inputDisplay: 'Per rule run',
+      'data-test-subj': 'onActiveAlert',
+      dropdownDisplay: <>{'Per rule run'}</>,
+    },
+  },
+  {
+    isSummaryOption: true,
+    isForEachAlertOption: false,
+    value: {
+      value: 'onThrottleInterval',
+      inputDisplay: 'Custom frequency',
+      'data-test-subj': 'onThrottleInterval',
+      dropdownDisplay: <>{'Custom frequency'}</>,
+    },
+  },
+];
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
@@ -353,6 +377,11 @@ describe('action_type_form', () => {
           params: [],
           state: [],
         },
+        {
+          context: [],
+          params: [],
+          state: [],
+        },
         undefined,
         false,
       ],
@@ -362,10 +391,125 @@ describe('action_type_form', () => {
           params: [],
           state: [],
         },
+        {
+          context: [],
+          params: [],
+          state: [],
+        },
         undefined,
         true,
       ],
     ]);
+  });
+
+  describe('Customize notify when options', () => {
+    it('should not have "On status changes" notify when option for summary actions', async () => {
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: '.pagerduty',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+        actionParamsFields: mockedActionParamsFields,
+        defaultActionParams: {
+          dedupKey: 'test',
+          eventAction: 'resolve',
+        },
+      });
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      const actionItem = {
+        id: '123',
+        actionTypeId: '.pagerduty',
+        group: 'default',
+        params: {},
+        frequency: {
+          notifyWhen: RuleNotifyWhen.ACTIVE,
+          throttle: null,
+          summary: true,
+        },
+      };
+      const wrapper = render(
+        <IntlProvider locale="en">
+          {getActionTypeForm({
+            index: 1,
+            actionItem,
+            notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
+            defaultNotifyWhenValue: RuleNotifyWhen.ACTIVE,
+          })}
+        </IntlProvider>
+      );
+
+      wrapper.getByTestId('notifyWhenSelect').click();
+      await act(async () => {
+        expect(wrapper.queryByText('On status changes')).not.toBeTruthy();
+        expect(wrapper.queryByText('On check intervals')).not.toBeTruthy();
+        expect(wrapper.queryByText('On custom action intervals')).not.toBeTruthy();
+
+        expect(wrapper.getAllByText('Per rule run')).toBeTruthy();
+        expect(wrapper.getAllByText('Custom frequency')).toBeTruthy();
+
+        expect(wrapper.queryByTestId('onActionGroupChange')).not.toBeTruthy();
+        expect(wrapper.getByTestId('onActiveAlert')).toBeTruthy();
+        expect(wrapper.getByTestId('onThrottleInterval')).toBeTruthy();
+      });
+    });
+
+    it('should have only "Per rule run" notify when option for "For each alert" actions', async () => {
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: '.pagerduty',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+        actionParamsFields: mockedActionParamsFields,
+        defaultActionParams: {
+          dedupKey: 'test',
+          eventAction: 'resolve',
+        },
+      });
+      actionTypeRegistry.get.mockReturnValue(actionType);
+      const actionItem = {
+        id: '123',
+        actionTypeId: '.pagerduty',
+        group: 'default',
+        params: {},
+        frequency: {
+          notifyWhen: RuleNotifyWhen.ACTIVE,
+          throttle: null,
+          summary: false,
+        },
+      };
+      const wrapper = render(
+        <IntlProvider locale="en">
+          {getActionTypeForm({
+            index: 1,
+            actionItem,
+            notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
+            defaultNotifyWhenValue: RuleNotifyWhen.ACTIVE,
+          })}
+        </IntlProvider>
+      );
+
+      wrapper.getByTestId('notifyWhenSelect').click();
+      await act(async () => {
+        expect(wrapper.queryByText('On status changes')).not.toBeTruthy();
+        expect(wrapper.queryByText('On check intervals')).not.toBeTruthy();
+        expect(wrapper.queryByText('On custom action intervals')).not.toBeTruthy();
+
+        expect(wrapper.getAllByText('Per rule run')).toBeTruthy();
+        expect(wrapper.queryByText('Custom frequency')).not.toBeTruthy();
+
+        expect(wrapper.queryByTestId('onActionGroupChange')).not.toBeTruthy();
+        expect(wrapper.getByTestId('onActiveAlert')).toBeTruthy();
+        expect(wrapper.queryByTestId('onThrottleInterval')).not.toBeTruthy();
+      });
+    });
   });
 });
 
@@ -383,6 +527,9 @@ function getActionTypeForm({
   setActionAlertsFilterProperty,
   hasSummary = true,
   messageVariables = { context: [], state: [], params: [] },
+  summaryMessageVariables = { context: [], state: [], params: [] },
+  notifyWhenSelectOptions,
+  defaultNotifyWhenValue,
 }: {
   index?: number;
   actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>;
@@ -397,6 +544,9 @@ function getActionTypeForm({
   setActionAlertsFilterProperty?: () => void;
   hasSummary?: boolean;
   messageVariables?: ActionVariables;
+  summaryMessageVariables?: ActionVariables;
+  notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
+  defaultNotifyWhenValue?: RuleNotifyWhenType;
 }) {
   const actionConnectorDefault = {
     actionTypeId: '.pagerduty',
@@ -481,6 +631,9 @@ function getActionTypeForm({
       actionTypeRegistry={actionTypeRegistry}
       hasSummary={hasSummary}
       messageVariables={messageVariables}
+      summaryMessageVariables={summaryMessageVariables}
+      notifyWhenSelectOptions={notifyWhenSelectOptions}
+      defaultNotifyWhenValue={defaultNotifyWhenValue}
     />
   );
 }

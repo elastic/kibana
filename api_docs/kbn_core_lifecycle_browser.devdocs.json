@@ -682,10 +682,6 @@
                 "path": "x-pack/plugins/file_upload/public/kibana_services.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/kibana_services.ts"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/app.tsx"
               },
@@ -816,10 +812,6 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/use_csp_rules.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/hooks/use_dashboard_button_href.ts"
               },
               {
                 "plugin": "securitySolution",

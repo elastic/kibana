@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import fetch from 'node-fetch';
+import pRetry from 'p-retry';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -14,6 +15,7 @@ import { FetchAgentVersionsList } from './fetch_agent_versions_list';
 import { Build, Config, write } from '../lib';
 
 jest.mock('node-fetch');
+jest.mock('p-retry');
 jest.mock('../lib');
 
 const config = new Config(
@@ -46,14 +48,41 @@ const config = new Config(
 );
 
 const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
+const mockedPRetry = pRetry as jest.MockedFunction<typeof pRetry>;
 const mockedWrite = write as jest.MockedFunction<typeof write>;
 const mockedBuild = new Build(config);
 
+mockedPRetry.mockImplementation((fn: any) => {
+  return fn();
+});
+
+const processEnv = process.env;
+
 describe('FetchAgentVersionsList', () => {
   beforeEach(() => {
+    process.env = {
+      ...processEnv,
+      // Ensure these tests can run in PR builds
+      BUILDKITE_PULL_REQUEST: undefined,
+    };
+
     mockedFetch.mockReset();
     (mockedBuild.resolvePath as jest.Mock<any>).mockReset();
     mockedWrite.mockReset();
+  });
+
+  afterEach(() => {
+    process.env = processEnv;
+  });
+
+  describe('when BUILDKITE_PULL_REQUEST is set', () => {
+    it('does not run task', async () => {
+      process.env.BUILDKITE_PULL_REQUEST = '1234';
+
+      await FetchAgentVersionsList.run(config, new ToolingLog(), mockedBuild);
+
+      expect(mockedFetch).not.toHaveBeenCalled();
+    });
   });
 
   describe('when valid JSON is returned from versions endpoint', () => {

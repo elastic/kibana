@@ -11,7 +11,7 @@ import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import {
   BulkCreateCommentRequest,
-  CaseResponse,
+  Case,
   CaseStatuses,
   CommentRequestExternalReferenceSOType,
   CommentType,
@@ -27,6 +27,7 @@ import {
   fileAttachmentMetadata,
   postExternalReferenceSOReq,
   fileMetadata,
+  postCommentAlertMultipleIdsReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -40,6 +41,7 @@ import {
   removeServerGeneratedPropertiesFromUserAction,
   createAndUploadFile,
   deleteAllFiles,
+  getAllComments,
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
@@ -67,6 +69,7 @@ import {
 } from '../../../../common/lib/alerts';
 import { User } from '../../../../common/lib/authentication/types';
 import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
+import { arraysToEqual } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -76,21 +79,32 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  const validateComments = (
-    comments: CaseResponse['comments'],
+  const validateCommentsIgnoringOrder = (
+    comments: Case['comments'],
     attachments: BulkCreateCommentRequest
   ) => {
-    comments?.forEach((attachment, index) => {
-      const comment = removeServerGeneratedPropertiesFromSavedObject(attachment);
+    expect(comments?.length).to.eql(attachments.length);
 
-      expect(comment).to.eql({
-        ...attachments[index],
+    const commentsWithoutGeneratedProps = [];
+    const attachmentsWithoutGeneratedProps = [];
+
+    for (const comment of comments!) {
+      commentsWithoutGeneratedProps.push(removeServerGeneratedPropertiesFromSavedObject(comment));
+    }
+
+    for (const attachment of attachments) {
+      attachmentsWithoutGeneratedProps.push({
+        ...attachment,
         created_by: defaultUser,
         pushed_at: null,
         pushed_by: null,
         updated_by: null,
       });
-    });
+    }
+
+    expect(arraysToEqual(commentsWithoutGeneratedProps, attachmentsWithoutGeneratedProps)).to.be(
+      true
+    );
   };
 
   describe('bulk_create_attachments', () => {
@@ -114,7 +128,7 @@ export default ({ getService }: FtrProviderContext): void => {
           numberOfAttachments: 1,
         });
 
-        validateComments(theCase.comments, attachments);
+        validateCommentsIgnoringOrder(theCase.comments, attachments);
       });
 
       it('should bulk create multiple attachments', async () => {
@@ -125,7 +139,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(theCase.totalComment).to.eql(attachments.length);
         expect(theCase.updated_by).to.eql(defaultUser);
 
-        validateComments(theCase.comments, attachments);
+        validateCommentsIgnoringOrder(theCase.comments, attachments);
       });
 
       it('creates the correct user action', async () => {
@@ -1213,6 +1227,192 @@ export default ({ getService }: FtrProviderContext): void => {
           params: attachments,
           expectedHttpCode: 200,
         });
+      });
+    });
+
+    describe('alert filtering', () => {
+      it('does not create a new attachment if the alert is already attached to the case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertReq],
+          expectedHttpCode: 200,
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertReq],
+          expectedHttpCode: 200,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(1);
+      });
+
+      it('does not create a new attachment if the alert is already attached to the case on the same request', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertReq, postCommentAlertReq],
+          expectedHttpCode: 200,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(1);
+      });
+
+      it('should not create a new attachment if the alerts are already attached to the case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertMultipleIdsReq],
+          expectedHttpCode: 200,
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertMultipleIdsReq],
+          expectedHttpCode: 200,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(1);
+      });
+
+      it('should not create a new attachment if the alerts are already attached to the case on the same request', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertMultipleIdsReq, postCommentAlertMultipleIdsReq],
+          expectedHttpCode: 200,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(1);
+      });
+
+      it('should create a new attachment without alerts attached to the case', async () => {
+        const alertCommentWithId3 = {
+          ...postCommentAlertMultipleIdsReq,
+          alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
+          index: ['test-index-1', 'test-index-2', 'test-index-3'],
+        };
+
+        const alertCommentOnlyId3 = {
+          ...postCommentAlertMultipleIdsReq,
+          alertId: ['test-id-3'],
+          index: ['test-index-3'],
+        };
+
+        const allAttachments = [postCommentAlertMultipleIdsReq, alertCommentOnlyId3];
+
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertMultipleIdsReq],
+          expectedHttpCode: 200,
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [alertCommentWithId3],
+          expectedHttpCode: 200,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(2);
+
+        validateCommentsIgnoringOrder(attachments, allAttachments);
+      });
+
+      it('should create a new attachment without alerts attached to the case on the same request', async () => {
+        const alertCommentWithId3 = {
+          ...postCommentAlertMultipleIdsReq,
+          alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
+          index: ['test-index-1', 'test-index-2', 'test-index-3'],
+        };
+
+        const alertCommentOnlyId3 = {
+          ...postCommentAlertMultipleIdsReq,
+          alertId: ['test-id-3'],
+          index: ['test-index-3'],
+        };
+
+        const allAttachments = [postCommentAlertMultipleIdsReq, alertCommentOnlyId3];
+
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertMultipleIdsReq, alertCommentWithId3],
+          expectedHttpCode: 200,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(2);
+
+        validateCommentsIgnoringOrder(attachments, allAttachments);
+      });
+
+      it('does not remove user comments when filtering out duplicate alerts', async () => {
+        const alertCommentWithId3 = {
+          ...postCommentAlertMultipleIdsReq,
+          alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
+          index: ['test-index-1', 'test-index-2', 'test-index-3'],
+        };
+
+        const alertCommentOnlyId3 = {
+          ...postCommentAlertMultipleIdsReq,
+          alertId: ['test-id-3'],
+          index: ['test-index-3'],
+        };
+
+        const superComment = {
+          ...postCommentUserReq,
+          comment: 'Super comment',
+        };
+
+        const allAttachments = [
+          postCommentAlertMultipleIdsReq,
+          alertCommentOnlyId3,
+          postCommentUserReq,
+          superComment,
+        ];
+
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentAlertMultipleIdsReq],
+          expectedHttpCode: 200,
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [superComment, alertCommentWithId3, postCommentUserReq],
+          expectedHttpCode: 200,
+        });
+
+        const attachments = await getAllComments({ supertest, caseId: postedCase.id });
+        expect(attachments.length).to.eql(4);
+
+        validateCommentsIgnoringOrder(attachments, allAttachments);
       });
     });
 

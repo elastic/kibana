@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import { roundToDecimalPlace } from '../utils';
+import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import {
   MIN_SAMPLER_PROBABILITY,
   RANDOM_SAMPLER_PROBABILITIES,

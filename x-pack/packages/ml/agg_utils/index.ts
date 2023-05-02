@@ -16,6 +16,7 @@ export type {
   NumericChartData,
   NumericHistogramField,
 } from './src/fetch_histograms_for_fields';
+export { isSignificantTerm } from './src/type_guards';
 export type {
   AggCardinality,
   SignificantTerm,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaAssetType } from '../../../../../types';
+import { ElasticsearchAssetType, KibanaAssetType } from '../../../../../types';
 
 import type { AllowedAssetTypes } from './types';
 
@@ -13,4 +13,5 @@ export const allowedAssetTypes: AllowedAssetTypes = [
   KibanaAssetType.dashboard,
   KibanaAssetType.search,
   KibanaAssetType.visualization,
+  ElasticsearchAssetType.transform,
 ];

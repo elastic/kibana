@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import {
+  type ISavedObjectTypeRegistry,
+  MAIN_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
 import { getIndexForType } from './get_index_for_type';
 
 const createTypeRegistry = () => {
@@ -17,7 +20,7 @@ const createTypeRegistry = () => {
 
 describe('getIndexForType', () => {
   const kibanaVersion = '8.0.0';
-  const defaultIndex = '.kibana';
+  const defaultIndex = MAIN_SAVED_OBJECT_INDEX;
   let typeRegistry: ReturnType<typeof createTypeRegistry>;
 
   beforeEach(() => {

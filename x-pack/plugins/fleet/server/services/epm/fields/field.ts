@@ -40,6 +40,10 @@ export interface Field {
   dimension?: boolean;
   default_field?: boolean;
 
+  // Fields specific of the aggregate_metric_double type
+  metrics?: string[];
+  default_metric?: string;
+
   // Meta fields
   metric_type?: string;
   unit?: string;

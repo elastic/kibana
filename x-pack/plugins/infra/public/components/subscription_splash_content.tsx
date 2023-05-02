@@ -11,7 +11,7 @@ import { EuiText, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HttpStart } from '@kbn/core/public';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { useTrialStatus } from '../hooks/use_trial_status';
 import { LoadingPrompt } from './loading_page';
 import { PageTemplate } from './page_template';

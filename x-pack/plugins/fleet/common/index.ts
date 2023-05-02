@@ -52,6 +52,8 @@ export {
   // Statuses
   // Authz
   ENDPOINT_PRIVILEGES,
+  // dashboards ids
+  DASHBOARD_LOCATORS_IDS,
 } from './constants';
 export {
   // Route services

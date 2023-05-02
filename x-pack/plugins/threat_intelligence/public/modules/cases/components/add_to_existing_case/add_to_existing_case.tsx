@@ -59,7 +59,7 @@ export const AddToExistingCase: VFC<AddToExistingCaseProps> = ({
   );
   const menuItemClicked = () => {
     onClick();
-    selectCaseModal.open({ attachments });
+    selectCaseModal.open({ getAttachments: () => attachments });
   };
 
   const disabled: boolean = useCaseDisabled(attachmentMetadata.indicatorName);
