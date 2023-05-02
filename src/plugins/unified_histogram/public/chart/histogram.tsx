@@ -14,7 +14,7 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { Observable } from 'rxjs';
 import {
@@ -31,6 +31,7 @@ import { buildBucketInterval } from './utils/build_bucket_interval';
 import { useTimeRange } from './hooks/use_time_range';
 import { useStableCallback } from './hooks/use_stable_callback';
 import { useLensProps } from './hooks/use_lens_props';
+import type { LensAttributesContext } from './utils/get_lens_attributes';
 
 export interface HistogramProps {
   services: UnifiedHistogramServices;
@@ -41,7 +42,7 @@ export interface HistogramProps {
   isPlainRecord?: boolean;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
-  lensAttributes: TypedLensByValueInput['attributes'];
+  lensAttributesContext: LensAttributesContext;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
@@ -59,7 +60,7 @@ export function Histogram({
   isPlainRecord,
   getTimeRange,
   refetch$,
-  lensAttributes: attributes,
+  lensAttributesContext: attributesContext,
   disableTriggers,
   disabledActions,
   onTotalHitsChange,
@@ -78,6 +79,8 @@ export function Histogram({
   });
   const chartRef = useRef<HTMLDivElement | null>(null);
   const { height: containerHeight, width: containerWidth } = useResizeObserver(chartRef.current);
+  const { attributes } = attributesContext;
+
   useEffect(() => {
     if (attributes.visualizationType === 'lnsMetric') {
       const size = containerHeight < containerWidth ? containerHeight : containerWidth;
@@ -131,11 +134,11 @@ export function Histogram({
     }
   );
 
-  const lensProps = useLensProps({
+  const { lensProps, requestData } = useLensProps({
     request,
     getTimeRange,
     refetch$,
-    attributes,
+    attributesContext,
     onLoad,
   });
 
@@ -172,6 +175,7 @@ export function Histogram({
       <div
         data-test-subj="unifiedHistogramChart"
         data-time-range={timeRangeText}
+        data-request-data={requestData}
         css={chartCss}
         ref={chartRef}
       >

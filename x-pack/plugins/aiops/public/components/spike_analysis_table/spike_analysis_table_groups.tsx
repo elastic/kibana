@@ -40,6 +40,7 @@ import { useSpikeAnalysisTableRowContext } from './spike_analysis_table_row_prov
 import type { GroupTableItem } from './types';
 import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';
 import { useViewInDiscoverAction } from './use_view_in_discover_action';
+import { useViewInLogPatternAnalysisAction } from './use_view_in_log_pattern_analysis_action';
 
 const NARROW_COLUMN_WIDTH = '120px';
 const EXPAND_COLUMN_WIDTH = '40px';
@@ -121,6 +122,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
 
   const copyToClipBoardAction = useCopyToClipboardAction();
   const viewInDiscoverAction = useViewInDiscoverAction(dataViewId);
+  const viewInLogPatternAnalysisAction = useViewInLogPatternAnalysisAction(dataViewId);
 
   const columns: Array<EuiBasicTableColumn<GroupTableItem>> = [
     {
@@ -187,12 +189,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
           const { fieldName, fieldValue, duplicate } = groupItem;
           if (valuesBadges.length >= MAX_GROUP_BADGES) break;
           valuesBadges.push(
-            <>
-              <EuiBadge
-                key={`${fieldName}-id`}
-                data-test-subj="aiopsSpikeAnalysisTableColumnGroupBadge"
-                color="hollow"
-              >
+            <span key={`${fieldName}-id`}>
+              <EuiBadge data-test-subj="aiopsSpikeAnalysisTableColumnGroupBadge" color="hollow">
                 <span>
                   {(duplicate ?? 0) <= 1 ? '* ' : ''}
                   {`${fieldName}: `}
@@ -200,7 +198,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                 <span style={{ color: visColors[2] }}>{`${fieldValue}`}</span>
               </EuiBadge>
               <EuiSpacer size="xs" />
-            </>
+            </span>
           );
         }
 
@@ -355,7 +353,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       name: i18n.translate('xpack.aiops.spikeAnalysisTable.actionsColumnName', {
         defaultMessage: 'Actions',
       }),
-      actions: [viewInDiscoverAction, copyToClipBoardAction],
+      actions: [viewInDiscoverAction, viewInLogPatternAnalysisAction, copyToClipBoardAction],
       width: ACTIONS_COLUMN_WIDTH,
       valign: 'top',
     },

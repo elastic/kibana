@@ -23,16 +23,13 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 import {
-  LazyControlGroupRenderer,
-  ControlGroupContainer,
-  ControlGroupInput,
+  type ControlGroupInput,
+  ControlGroupRenderer,
+  AwaitingControlGroupAPI,
   ACTION_EDIT_CONTROL,
   ACTION_DELETE_CONTROL,
 } from '@kbn/controls-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { ControlInputTransform } from '@kbn/controls-plugin/common/types';
-
-const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 
@@ -41,7 +38,7 @@ const WITH_CUSTOM_PLACEHOLDER = 'Custom Placeholder';
 export const EditExample = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
+  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>(null);
   const [toggleIconIdToSelectedMapIcon, setToggleIconIdToSelectedMapIcon] = useState<{
     [id: string]: boolean;
   }>({});
@@ -54,20 +51,21 @@ export const EditExample = () => {
       },
     };
 
-    if (controlGroup) {
+    if (controlGroupAPI) {
       const disabledActions: string[] = Object.keys(
         pickBy(newToggleIconIdToSelectedMapIcon, (value) => value)
       );
-      controlGroup.updateInput({ disabledActions });
+      controlGroupAPI.updateInput({ disabledActions });
     }
 
     setToggleIconIdToSelectedMapIcon(newToggleIconIdToSelectedMapIcon);
   }
 
   async function onSave() {
-    setIsSaving(true);
+    if (!controlGroupAPI) return;
 
-    localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroup!.getInput()));
+    setIsSaving(true);
+    localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroupAPI.getInput()));
 
     // simulated async save await
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -133,9 +131,9 @@ export const EditExample = () => {
             <EuiButtonEmpty
               color="primary"
               iconType="plusInCircle"
-              isDisabled={controlGroup === undefined}
+              isDisabled={controlGroupAPI === undefined}
               onClick={() => {
-                controlGroup!.openAddDataControlFlyout(controlInputTransform);
+                controlGroupAPI!.openAddDataControlFlyout({ controlInputTransform });
               }}
             >
               Add control
@@ -171,7 +169,7 @@ export const EditExample = () => {
             <EuiButton
               fill
               color="primary"
-              isDisabled={controlGroup === undefined || isSaving}
+              isDisabled={controlGroupAPI === undefined || isSaving}
               onClick={onSave}
               isLoading={isSaving}
             >
@@ -186,6 +184,7 @@ export const EditExample = () => {
           </>
         ) : null}
         <ControlGroupRenderer
+          ref={setControlGroupAPI}
           getCreationOptions={async (initialInput, builder) => {
             const persistedInput = await onLoad();
             return {
@@ -195,9 +194,6 @@ export const EditExample = () => {
                 viewMode: ViewMode.EDIT,
               },
             };
-          }}
-          onLoadComplete={async (newControlGroup) => {
-            setControlGroup(newControlGroup);
           }}
         />
       </EuiPanel>

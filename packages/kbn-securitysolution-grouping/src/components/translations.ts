@@ -35,9 +35,11 @@ export const GROUP_BY_CUSTOM_FIELD = i18n.translate('grouping.customGroupByPanel
   defaultMessage: 'Group By Custom Field',
 });
 
-export const SELECT_FIELD = i18n.translate('grouping.groupByPanelTitle', {
-  defaultMessage: 'Select Field',
-});
+export const SELECT_FIELD = (groupingLevelsCount: number) =>
+  i18n.translate('grouping.groupByPanelTitle', {
+    values: { groupingLevelsCount },
+    defaultMessage: 'Select up to {groupingLevelsCount} groupings',
+  });
 
 export const NONE = i18n.translate('grouping.noneGroupByOptionName', {
   defaultMessage: 'None',
@@ -51,4 +53,11 @@ export const DEFAULT_UNIT = (totalCount: number) =>
   i18n.translate('grouping.eventsTab.unit', {
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {event} other {events}}`,
+  });
+
+export const NULL_GROUP = (selectedGroup: string, unit: string) =>
+  i18n.translate('grouping.nullGroup.title', {
+    values: { selectedGroup, unit },
+    defaultMessage:
+      'The selected group by field, {selectedGroup}, is missing a value for this group of {unit}.',
   });

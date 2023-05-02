@@ -27,6 +27,7 @@ export default function maintenanceWindowTests({ loadTestFile, getService }: Ftr
       loadTestFile(require.resolve('./archive_maintenance_window'));
       loadTestFile(require.resolve('./finish_maintenance_window'));
       loadTestFile(require.resolve('./find_maintenance_windows'));
+      loadTestFile(require.resolve('./active_maintenance_windows'));
     });
   });
 }

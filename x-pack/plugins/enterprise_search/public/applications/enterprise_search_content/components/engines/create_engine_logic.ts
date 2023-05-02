@@ -8,27 +8,27 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
+import { KibanaLogic } from '../../../shared/kibana';
 
 import {
   CreateEngineApiLogic,
   CreateEngineApiLogicActions,
 } from '../../api/engines/create_engine_api_logic';
+import { ENGINES_PATH } from '../../routes';
 
 import { EnginesListLogic } from './engines_list_logic';
 
 const NAME_VALIDATION = new RegExp(/^[a-z0-9\-]+$/);
 
 export interface CreateEngineLogicActions {
-  closeEngineCreate: () => void;
   createEngine: () => void;
   createEngineRequest: CreateEngineApiLogicActions['makeRequest'];
   engineCreateError: CreateEngineApiLogicActions['apiError'];
   engineCreated: CreateEngineApiLogicActions['apiSuccess'];
   fetchEngines: () => void;
   setEngineName: (engineName: string) => { engineName: string };
-  setSelectedIndices: (indices: ElasticsearchIndexWithIngestion[]) => {
-    indices: ElasticsearchIndexWithIngestion[];
+  setSelectedIndices: (indices: string[]) => {
+    indices: string[];
   };
 }
 
@@ -40,7 +40,7 @@ export interface CreateEngineLogicValues {
   engineNameStatus: 'complete' | 'incomplete' | 'warning';
   formDisabled: boolean;
   indicesStatus: 'complete' | 'incomplete';
-  selectedIndices: ElasticsearchIndexWithIngestion[];
+  selectedIndices: string[];
 }
 
 export const CreateEngineLogic = kea<
@@ -49,12 +49,12 @@ export const CreateEngineLogic = kea<
   actions: {
     createEngine: true,
     setEngineName: (engineName: string) => ({ engineName }),
-    setSelectedIndices: (indices: ElasticsearchIndexWithIngestion[]) => ({ indices }),
+    setSelectedIndices: (indices: string[]) => ({ indices }),
   },
   connect: {
     actions: [
       EnginesListLogic,
-      ['closeEngineCreate', 'fetchEngines'],
+      ['fetchEngines'],
       CreateEngineApiLogic,
       [
         'makeRequest as createEngineRequest',
@@ -68,12 +68,12 @@ export const CreateEngineLogic = kea<
     createEngine: () => {
       actions.createEngineRequest({
         engineName: values.engineName,
-        indices: values.selectedIndices.map((index) => index.name),
+        indices: values.selectedIndices,
       });
     },
     engineCreated: () => {
       actions.fetchEngines();
-      actions.closeEngineCreate();
+      KibanaLogic.values.navigateToUrl(ENGINES_PATH);
     },
   }),
   path: ['enterprise_search', 'content', 'create_engine_logic'],

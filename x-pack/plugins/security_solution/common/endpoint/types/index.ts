@@ -703,6 +703,7 @@ export type SafeEndpointEvent = Partial<{
   }>;
   event: Partial<{
     category: ECSField<string>;
+    outcome: ECSField<string>;
     type: ECSField<string>;
     id: ECSField<string>;
     kind: ECSField<string>;

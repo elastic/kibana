@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
+import { DimensionButton } from '@kbn/visualization-ui-components/public';
 import { LayerType } from '../../../../common/types';
 import { LayerActions } from './layer_actions';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
@@ -38,7 +39,6 @@ import { LayerSettings } from './layer_settings';
 import { LayerPanelProps, ActiveDimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
 import { EmptyDimensionButton } from './buttons/empty_dimension_button';
-import { DimensionButton } from './buttons/dimension_button';
 import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
 import { useFocusUpdate } from './use_focus_update';
 import {
@@ -557,46 +557,48 @@ export function LayerPanel(
                             onDrop={onDrop}
                             indexPatterns={dataViews.indexPatterns}
                           >
-                            <div className="lnsLayerPanel__dimension">
-                              <DimensionButton
-                                accessorConfig={accessorConfig}
-                                label={columnLabelMap?.[accessorConfig.columnId] ?? ''}
-                                group={group}
-                                onClick={(id: string) => {
-                                  setActiveDimension({
-                                    isNew: false,
-                                    activeGroup: group,
-                                    activeId: id,
-                                  });
-                                }}
-                                onRemoveClick={(id: string) => {
-                                  props.onRemoveDimension({ columnId: id, layerId });
-                                  removeButtonRef(id);
-                                }}
-                                message={messages[0]}
-                              >
-                                {layerDatasource ? (
-                                  <NativeRenderer
-                                    render={layerDatasource.renderDimensionTrigger}
-                                    nativeProps={{
-                                      ...layerDatasourceConfigProps,
-                                      columnId: accessorConfig.columnId,
-                                      groupId: group.groupId,
-                                      filterOperations: group.filterOperations,
-                                      indexPatterns: dataViews.indexPatterns,
-                                    }}
-                                  />
-                                ) : (
-                                  <>
-                                    {activeVisualization?.renderDimensionTrigger?.({
-                                      columnId,
-                                      label: columnLabelMap?.[columnId] ?? '',
-                                      hideTooltip,
-                                    })}
-                                  </>
-                                )}
-                              </DimensionButton>
-                            </div>
+                            <DimensionButton
+                              className="lnsLayerPanel__dimension"
+                              accessorConfig={accessorConfig}
+                              label={columnLabelMap?.[accessorConfig.columnId] ?? ''}
+                              groupLabel={group.groupLabel}
+                              onClick={(id: string) => {
+                                setActiveDimension({
+                                  isNew: false,
+                                  activeGroup: group,
+                                  activeId: id,
+                                });
+                              }}
+                              onRemoveClick={(id: string) => {
+                                props.onRemoveDimension({ columnId: id, layerId });
+                                removeButtonRef(id);
+                              }}
+                              message={{
+                                severity: messages[0]?.severity,
+                                content: messages[0]?.shortMessage || messages[0]?.longMessage,
+                              }}
+                            >
+                              {layerDatasource ? (
+                                <NativeRenderer
+                                  render={layerDatasource.renderDimensionTrigger}
+                                  nativeProps={{
+                                    ...layerDatasourceConfigProps,
+                                    columnId: accessorConfig.columnId,
+                                    groupId: group.groupId,
+                                    filterOperations: group.filterOperations,
+                                    indexPatterns: dataViews.indexPatterns,
+                                  }}
+                                />
+                              ) : (
+                                <>
+                                  {activeVisualization?.renderDimensionTrigger?.({
+                                    columnId,
+                                    label: columnLabelMap?.[columnId] ?? '',
+                                    hideTooltip,
+                                  })}
+                                </>
+                              )}
+                            </DimensionButton>
                           </DraggableDimensionButton>
                         );
                       })}
