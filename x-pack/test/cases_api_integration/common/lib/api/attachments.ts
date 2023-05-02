@@ -8,14 +8,14 @@
 import type SuperTest from 'supertest';
 import { CASES_INTERNAL_URL, CASES_URL } from '@kbn/cases-plugin/common/constants';
 import {
-  AllCommentsResponse,
+  Comments,
   BulkCreateCommentRequest,
   BulkGetAttachmentsResponse,
   Case,
   CommentPatchRequest,
   CommentRequest,
   Comment,
-  Comments,
+  CommentsFindResponse,
   CommentType,
   getCaseFindAttachmentsUrl,
   getCasesDeleteFileAttachmentsUrl,
@@ -203,7 +203,7 @@ export const getAllComments = async ({
   caseId: string;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
-}): Promise<AllCommentsResponse> => {
+}): Promise<Comments> => {
   const { body: comments } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
     .auth(auth.user.username, auth.user.password)
@@ -295,7 +295,7 @@ export const findAttachments = async ({
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<Comments> => {
+}): Promise<CommentsFindResponse> => {
   const { body } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${getCaseFindAttachmentsUrl(caseId)}`)
     .set('kbn-xsrf', 'true')
