@@ -26,6 +26,7 @@ import type {
   AttachmentPersistedAttributes,
   AttachmentRequestAttributes,
   AttachmentTransformedAttributes,
+  AttachmentSavedObjectTransformed,
 } from '../common/types/attachments';
 import { isCommentRequestTypeExternalReferenceSO } from './type_guards';
 import type { PartialField } from '../types';
@@ -74,7 +75,7 @@ const hasAttributes = <T>(savedObject: OptionalAttributes<T>): savedObject is Sa
 export const injectAttachmentSOAttributesFromRefs = (
   savedObject: SavedObject<AttachmentPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
-): SavedObject<AttachmentTransformedAttributes> => {
+): AttachmentSavedObjectTransformed => {
   const soExtractor = getAttachmentSOExtractor(savedObject.attributes);
   const so = soExtractor.populateFieldsFromReferences<AttachmentTransformedAttributes>(savedObject);
   const injectedAttributes = injectPersistableReferencesToSO(so.attributes, so.references, {

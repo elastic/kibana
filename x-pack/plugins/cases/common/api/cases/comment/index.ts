@@ -233,8 +233,6 @@ export const CommentResponseTypePersistableStateRt = rt.intersection([
   }),
 ]);
 
-export const AllCommentsResponseRT = rt.array(CommentRt);
-
 export const CommentPatchRequestRt = rt.intersection([
   /**
    * Partial updates are not allowed.
@@ -266,14 +264,14 @@ export const CommentPatchAttributesRt = rt.intersection([
   rt.partial(CommentAttributesBasicRt.props),
 ]);
 
-export const CommentsRt = rt.type({
+export const CommentsFindResponseRt = rt.type({
   comments: rt.array(CommentRt),
   page: rt.number,
   per_page: rt.number,
   total: rt.number,
 });
 
-export const AllCommentsResponseRt = rt.array(CommentRt);
+export const CommentsRt = rt.array(CommentRt);
 
 export const FindQueryParamsRt = rt.partial({
   ...SavedObjectFindOptionsRt.props,
@@ -286,7 +284,7 @@ export const BulkGetAttachmentsRequestRt = rt.type({
 });
 
 export const BulkGetAttachmentsResponseRt = rt.type({
-  attachments: AllCommentsResponseRt,
+  attachments: CommentsRt,
   errors: rt.array(
     rt.type({
       error: rt.string,
@@ -324,8 +322,8 @@ export type CommentResponseExternalReferenceType = rt.TypeOf<
   typeof CommentResponseTypeExternalReferenceRt
 >;
 export type CommentResponseActionsType = rt.TypeOf<typeof CommentResponseTypeActionsRt>;
-export type AllCommentsResponse = rt.TypeOf<typeof AllCommentsResponseRt>;
 export type Comments = rt.TypeOf<typeof CommentsRt>;
+export type CommentsFindResponse = rt.TypeOf<typeof CommentsFindResponseRt>;
 export type CommentPatchRequest = rt.TypeOf<typeof CommentPatchRequestRt>;
 export type CommentPatchAttributes = rt.TypeOf<typeof CommentPatchAttributesRt>;
 export type CommentRequestUserType = rt.TypeOf<typeof ContextTypeUserRt>;

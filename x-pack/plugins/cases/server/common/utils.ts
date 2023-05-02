@@ -36,7 +36,7 @@ import type {
   CommentRequestAlertType,
   CommentRequestUserType,
   Comment,
-  Comments,
+  CommentsFindResponse,
   User,
 } from '../../common/api';
 import {
@@ -133,7 +133,7 @@ export const flattenCaseSavedObject = ({
 
 export const transformComments = (
   comments: SavedObjectsFindResponse<CommentAttributes>
-): Comments => ({
+): CommentsFindResponse => ({
   page: comments.page,
   per_page: comments.per_page,
   total: comments.total,

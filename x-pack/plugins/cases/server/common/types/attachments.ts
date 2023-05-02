@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { CommentAttributes } from '../../../common/api';
 import type { User } from './user';
@@ -49,3 +50,4 @@ export type AttachmentPersistedAttributes = AttachmentRequestAttributes &
   AttachmentCommonPersistedAttributes;
 
 export type AttachmentTransformedAttributes = CommentAttributes;
+export type AttachmentSavedObjectTransformed = SavedObject<AttachmentTransformedAttributes>;

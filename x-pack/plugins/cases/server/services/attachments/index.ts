@@ -6,7 +6,6 @@
  */
 
 import type {
-  SavedObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
@@ -40,6 +39,7 @@ import { AttachmentGetter } from './operations/get';
 import type {
   AttachmentPersistedAttributes,
   AttachmentTransformedAttributes,
+  AttachmentSavedObjectTransformed,
 } from '../../common/types/attachments';
 
 export class AttachmentService {
@@ -157,7 +157,7 @@ export class AttachmentService {
     references,
     id,
     refresh,
-  }: CreateAttachmentArgs): Promise<SavedObject<AttachmentTransformedAttributes>> {
+  }: CreateAttachmentArgs): Promise<AttachmentSavedObjectTransformed> {
     try {
       this.context.log.debug(`Attempting to POST a new comment`);
 

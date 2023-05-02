@@ -11,6 +11,7 @@ import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import type {
   AttachmentPersistedAttributes,
   AttachmentTransformedAttributes,
+  AttachmentSavedObjectTransformed,
 } from '../../../common/types/attachments';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -189,9 +190,7 @@ export class AttachmentGetter {
     }
   }
 
-  public async get({
-    attachmentId,
-  }: GetAttachmentArgs): Promise<SavedObject<AttachmentTransformedAttributes>> {
+  public async get({ attachmentId }: GetAttachmentArgs): Promise<AttachmentSavedObjectTransformed> {
     try {
       this.context.log.debug(`Attempting to GET attachment ${attachmentId}`);
       const res = await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
@@ -301,7 +300,7 @@ export class AttachmentGetter {
   }: {
     caseId: string;
     fileIds: string[];
-  }): Promise<Array<SavedObject<AttachmentTransformedAttributes>>> {
+  }): Promise<AttachmentSavedObjectTransformed[]> {
     try {
       this.context.log.debug('Attempting to find file attachments');
 
@@ -330,7 +329,7 @@ export class AttachmentGetter {
           }
         );
 
-      const foundAttachments: Array<SavedObject<AttachmentTransformedAttributes>> = [];
+      const foundAttachments: AttachmentSavedObjectTransformed[] = [];
 
       for await (const attachmentSavedObjects of finder.find()) {
         foundAttachments.push(
