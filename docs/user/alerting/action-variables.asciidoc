@@ -2,7 +2,7 @@
 == Rule action variables
 
 Alerting rules can use the https://mustache.github.io/mustache.5.html[Mustache] template syntax
-(`{{variable name}}`) to pass values when the actions run. Note that "partials" are not supported.
+(`{{variable name}}`) to pass values when the actions run.
 
 [float]
 [[common-rule-action-variables]]
