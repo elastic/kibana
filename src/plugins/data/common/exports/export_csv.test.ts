@@ -84,4 +84,16 @@ describe('CSV exporter', () => {
       })
     ).toMatch('columnOne\r\n"\'=1"\r\n');
   });
+
+  test('should escape text with csvSeparator char in it', () => {
+    const datatable = getDataTable();
+    datatable.rows[0].col1 = 'a,b';
+    expect(
+      datatableToCSV(datatable, {
+        ...getDefaultOptions(),
+        escapeFormulaValues: true,
+        formatFactory: () => ({ convert: (v: unknown) => v } as FieldFormat),
+      })
+    ).toMatch('columnOne\r\n"a,b"\r\n');
+  });
 });
