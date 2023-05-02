@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { findRoute } from './find';
+export const PLUGIN_ID = 'serverlessSecurity';
+export const PLUGIN_NAME = 'serverlessSecurity';
