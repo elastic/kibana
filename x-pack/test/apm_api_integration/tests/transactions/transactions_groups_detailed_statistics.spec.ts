@@ -26,7 +26,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
-  const end = new Date('2021-01-01T00:15:59.999Z').getTime();
+  const end = new Date('2021-01-01T01:00:00.000Z').getTime() - 1;
   const transactionNames = ['GET /api/product/list'];
 
   async function callApi(overrides?: {
@@ -142,12 +142,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 documentType: ApmDocumentType.TransactionMetric,
                 rollupInterval: RollupInterval.TenMinutes,
+                bucketSizeInSeconds: 600,
               },
             }),
             callApi({
               query: {
                 documentType: ApmDocumentType.TransactionMetric,
                 rollupInterval: RollupInterval.SixtyMinutes,
+                bucketSizeInSeconds: 3600,
               },
             }),
             callApi({
@@ -172,38 +174,73 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('has same latency mean value for metrics and transactions data', () => {
           const transactionsCurrentPeriod =
             transactionsStatistics.currentPeriod[transactionNames[0]];
-          const metricsCurrentPeriod =
-            metricsStatisticsOneMinute.currentPeriod[transactionNames[0]];
+          const metricsOneMinPeriod = metricsStatisticsOneMinute.currentPeriod[transactionNames[0]];
+          const metricsTenMinPeriod = metricsStatisticsTenMinute.currentPeriod[transactionNames[0]];
+          const metricsSixtyMinPeriod =
+            metricsStatisticsSixtyMinute.currentPeriod[transactionNames[0]];
           const transactionsLatencyMean = meanBy(transactionsCurrentPeriod.latency, 'y');
-          const metricsLatencyMean = meanBy(metricsCurrentPeriod.latency, 'y');
-          [transactionsLatencyMean, metricsLatencyMean].forEach((value) =>
-            expect(value).to.be.equal(1000000)
-          );
+          const metricsOneMinLatencyMean = meanBy(metricsOneMinPeriod.latency, 'y');
+          const metricsTenMinLatencyMean = meanBy(metricsTenMinPeriod.latency, 'y');
+          const metricsSixtyMinLatencyMean = meanBy(metricsSixtyMinPeriod.latency, 'y');
+          [
+            transactionsLatencyMean,
+            metricsOneMinLatencyMean,
+            metricsTenMinLatencyMean,
+            metricsSixtyMinLatencyMean,
+          ].forEach((value) => expect(value).to.be.equal(1000000));
         });
 
         it('has same error rate mean value for metrics and transactions data', () => {
           const transactionsCurrentPeriod =
             transactionsStatistics.currentPeriod[transactionNames[0]];
-          const metricsCurrentPeriod =
-            metricsStatisticsOneMinute.currentPeriod[transactionNames[0]];
+          const metricsOneMinPeriod = metricsStatisticsOneMinute.currentPeriod[transactionNames[0]];
+          const metricsTenMinPeriod = metricsStatisticsTenMinute.currentPeriod[transactionNames[0]];
+          const metricsSixtyMinPeriod =
+            metricsStatisticsSixtyMinute.currentPeriod[transactionNames[0]];
 
           const transactionsErrorRateMean = meanBy(transactionsCurrentPeriod.errorRate, 'y');
-          const metricsErrorRateMean = meanBy(metricsCurrentPeriod.errorRate, 'y');
-          [transactionsErrorRateMean, metricsErrorRateMean].forEach((value) =>
-            expect(asPercent(value, 1)).to.be.equal(`${GO_PROD_ERROR_RATE}%`)
-          );
+
+          const metricsOneMinErrorRateMean = meanBy(metricsOneMinPeriod.errorRate, 'y');
+          const metricsTenMinErrorRateMean = meanBy(metricsTenMinPeriod.errorRate, 'y');
+          const metricsSixtyMinErrorRateMean = meanBy(metricsSixtyMinPeriod.errorRate, 'y');
+
+          [
+            transactionsErrorRateMean,
+            metricsOneMinErrorRateMean,
+            metricsTenMinErrorRateMean,
+            metricsSixtyMinErrorRateMean,
+          ].forEach((value) => expect(asPercent(value, 1)).to.be.equal(`${GO_PROD_ERROR_RATE}%`));
         });
 
         it('has same throughput mean value for metrics and transactions data', () => {
           const transactionsCurrentPeriod =
             transactionsStatistics.currentPeriod[transactionNames[0]];
-          const metricsCurrentPeriod =
-            metricsStatisticsOneMinute.currentPeriod[transactionNames[0]];
+          const metricsOneMinPeriod = metricsStatisticsOneMinute.currentPeriod[transactionNames[0]];
+          const metricsTenMinPeriod = metricsStatisticsTenMinute.currentPeriod[transactionNames[0]];
+          const metricsSixtyMinPeriod =
+            metricsStatisticsSixtyMinute.currentPeriod[transactionNames[0]];
+
           const transactionsThroughputMean = roundNumber(
             meanBy(transactionsCurrentPeriod.throughput, 'y')
           );
-          const metricsThroughputMean = roundNumber(meanBy(metricsCurrentPeriod.throughput, 'y'));
-          [transactionsThroughputMean, metricsThroughputMean].forEach((value) =>
+          const metricsOneMinThroughputMean = roundNumber(
+            meanBy(metricsOneMinPeriod.throughput, 'y')
+          );
+          const metricsTenMinThroughputMean = roundNumber(
+            meanBy(metricsTenMinPeriod.throughput, 'y')
+          );
+          const metricsSixtyMinThroughputMean = roundNumber(
+            meanBy(metricsSixtyMinPeriod.throughput, 'y')
+          );
+
+          expect(metricsTenMinThroughputMean).to.be.equal(
+            roundNumber(10 * (GO_PROD_RATE + GO_PROD_ERROR_RATE))
+          );
+          expect(metricsSixtyMinThroughputMean).to.be.equal(
+            roundNumber(60 * (GO_PROD_RATE + GO_PROD_ERROR_RATE))
+          );
+
+          [transactionsThroughputMean, metricsOneMinThroughputMean].forEach((value) =>
             expect(value).to.be.equal(roundNumber(GO_PROD_RATE + GO_PROD_ERROR_RATE))
           );
         });
@@ -211,12 +248,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('has same impact value for metrics and transactions data', () => {
           const transactionsCurrentPeriod =
             transactionsStatistics.currentPeriod[transactionNames[0]];
-          const metricsCurrentPeriod =
-            metricsStatisticsOneMinute.currentPeriod[transactionNames[0]];
+          const metricsOneMinPeriod = metricsStatisticsOneMinute.currentPeriod[transactionNames[0]];
+          const metricsTenMinPeriod = metricsStatisticsTenMinute.currentPeriod[transactionNames[0]];
+          const metricsSixtyMinPeriod =
+            metricsStatisticsSixtyMinute.currentPeriod[transactionNames[0]];
 
           const transactionsImpact = transactionsCurrentPeriod.impact;
-          const metricsImpact = metricsCurrentPeriod.impact;
-          [transactionsImpact, metricsImpact].forEach((value) => expect(value).to.be.equal(100));
+          const metricsOneMinImpact = metricsOneMinPeriod.impact;
+          const metricsTenMinImpact = metricsTenMinPeriod.impact;
+          const metricsSixtyMinImpact = metricsSixtyMinPeriod.impact;
+
+          [
+            transactionsImpact,
+            metricsOneMinImpact,
+            metricsTenMinImpact,
+            metricsSixtyMinImpact,
+          ].forEach((value) => expect(value).to.be.equal(100));
         });
       });
 
