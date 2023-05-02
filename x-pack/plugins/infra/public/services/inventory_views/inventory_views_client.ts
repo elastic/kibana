@@ -68,7 +68,9 @@ export class InventoryViewsClient implements IInventoryViewsClient {
         ),
       })
       .catch((error) => {
-        throw new UpsertInventoryViewError(`Failed to create new inventory view : ${error}`);
+        throw new UpsertInventoryViewError(
+          `Failed to create new inventory view: ${error.body?.message ?? error.message}`
+        );
       });
 
     const { data } = decodeOrThrow(
@@ -92,7 +94,9 @@ export class InventoryViewsClient implements IInventoryViewsClient {
       })
       .catch((error) => {
         throw new UpsertInventoryViewError(
-          `Failed to update inventory view "${inventoryViewId}": ${error}`
+          `Failed to update inventory view "${inventoryViewId}": ${
+            error.body?.message ?? error.message
+          }`
         );
       });
 

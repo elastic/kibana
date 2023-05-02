@@ -12,6 +12,5 @@ export const createMetricsExplorerViewsClientMock =
     delete: jest.fn(),
     find: jest.fn(),
     get: jest.fn(),
-    create: jest.fn(),
     update: jest.fn(),
   });
