@@ -10,6 +10,6 @@ import { ApmDataSource } from './data_source';
 export interface TimeRangeMetadata {
   isUsingServiceDestinationMetrics: boolean;
   sources: Array<
-    ApmDataSource & { hasDocs: boolean; isSummaryFieldAvailable: boolean }
+    ApmDataSource & { hasDocs: boolean; hasDurationSummaryField: boolean }
   >;
 }

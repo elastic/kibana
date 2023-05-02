@@ -122,13 +122,32 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('without comparisons', () => {
         let transactionsStatistics: TransactionsGroupsDetailedStatistics;
-        let metricsStatistics: TransactionsGroupsDetailedStatistics;
+        let metricsStatisticsOneMinute: TransactionsGroupsDetailedStatistics;
+        let metricsStatisticsTenMinute: TransactionsGroupsDetailedStatistics;
+        let metricsStatisticsSixtyMinute: TransactionsGroupsDetailedStatistics;
         before(async () => {
-          [metricsStatistics, transactionsStatistics] = await Promise.all([
+          [
+            metricsStatisticsOneMinute,
+            metricsStatisticsTenMinute,
+            metricsStatisticsSixtyMinute,
+            transactionsStatistics,
+          ] = await Promise.all([
             callApi({
               query: {
                 documentType: ApmDocumentType.TransactionMetric,
                 rollupInterval: RollupInterval.OneMinute,
+              },
+            }),
+            callApi({
+              query: {
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.TenMinutes,
+              },
+            }),
+            callApi({
+              query: {
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.SixtyMinutes,
               },
             }),
             callApi({
@@ -145,13 +164,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns some metrics data', () => {
-          expect(isEmpty(metricsStatistics.currentPeriod)).to.be.equal(false);
+          expect(isEmpty(metricsStatisticsOneMinute.currentPeriod)).to.be.equal(false);
+          expect(isEmpty(metricsStatisticsTenMinute.currentPeriod)).to.be.equal(false);
+          expect(isEmpty(metricsStatisticsSixtyMinute.currentPeriod)).to.be.equal(false);
         });
 
         it('has same latency mean value for metrics and transactions data', () => {
           const transactionsCurrentPeriod =
             transactionsStatistics.currentPeriod[transactionNames[0]];
-          const metricsCurrentPeriod = metricsStatistics.currentPeriod[transactionNames[0]];
+          const metricsCurrentPeriod =
+            metricsStatisticsOneMinute.currentPeriod[transactionNames[0]];
           const transactionsLatencyMean = meanBy(transactionsCurrentPeriod.latency, 'y');
           const metricsLatencyMean = meanBy(metricsCurrentPeriod.latency, 'y');
           [transactionsLatencyMean, metricsLatencyMean].forEach((value) =>
@@ -162,7 +184,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('has same error rate mean value for metrics and transactions data', () => {
           const transactionsCurrentPeriod =
             transactionsStatistics.currentPeriod[transactionNames[0]];
-          const metricsCurrentPeriod = metricsStatistics.currentPeriod[transactionNames[0]];
+          const metricsCurrentPeriod =
+            metricsStatisticsOneMinute.currentPeriod[transactionNames[0]];
 
           const transactionsErrorRateMean = meanBy(transactionsCurrentPeriod.errorRate, 'y');
           const metricsErrorRateMean = meanBy(metricsCurrentPeriod.errorRate, 'y');
@@ -174,7 +197,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('has same throughput mean value for metrics and transactions data', () => {
           const transactionsCurrentPeriod =
             transactionsStatistics.currentPeriod[transactionNames[0]];
-          const metricsCurrentPeriod = metricsStatistics.currentPeriod[transactionNames[0]];
+          const metricsCurrentPeriod =
+            metricsStatisticsOneMinute.currentPeriod[transactionNames[0]];
           const transactionsThroughputMean = roundNumber(
             meanBy(transactionsCurrentPeriod.throughput, 'y')
           );
@@ -187,7 +211,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('has same impact value for metrics and transactions data', () => {
           const transactionsCurrentPeriod =
             transactionsStatistics.currentPeriod[transactionNames[0]];
-          const metricsCurrentPeriod = metricsStatistics.currentPeriod[transactionNames[0]];
+          const metricsCurrentPeriod =
+            metricsStatisticsOneMinute.currentPeriod[transactionNames[0]];
 
           const transactionsImpact = transactionsCurrentPeriod.impact;
           const metricsImpact = metricsCurrentPeriod.impact;

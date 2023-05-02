@@ -207,7 +207,7 @@ export async function getDocumentSources({
         // If we only check before, users with a new deployment will use raw transaction
         // events.
         hasDocs: hasDocsData,
-        isSummaryFieldAvailable: true,
+        hasDurationSummaryField: true,
       });
     }
 
@@ -229,7 +229,7 @@ export async function getDocumentSources({
           documentType,
           rollupInterval,
           hasDocs: hasDocsData,
-          isSummaryFieldAvailable: hasAnyDataBefore
+          hasDurationSummaryField: hasAnyDataBefore
             ? equivalentSourceWithSummary.hasDataBefore
             : hasSummaryData,
         });
@@ -241,6 +241,6 @@ export async function getDocumentSources({
     documentType: ApmDocumentType.TransactionEvent,
     rollupInterval: RollupInterval.None,
     hasDocs: true,
-    isSummaryFieldAvailable: false,
+    hasDurationSummaryField: false,
   });
 }

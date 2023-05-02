@@ -16,17 +16,17 @@ const serviceTransactionMetricSources: ApmDataSourceWithSummary[] = [
   {
     documentType: ApmDocumentType.ServiceTransactionMetric,
     rollupInterval: RollupInterval.OneMinute,
-    isSummaryFieldAvailable: true,
+    hasDurationSummaryField: true,
   },
   {
     documentType: ApmDocumentType.ServiceTransactionMetric,
     rollupInterval: RollupInterval.TenMinutes,
-    isSummaryFieldAvailable: true,
+    hasDurationSummaryField: true,
   },
   {
     documentType: ApmDocumentType.ServiceTransactionMetric,
     rollupInterval: RollupInterval.SixtyMinutes,
-    isSummaryFieldAvailable: true,
+    hasDurationSummaryField: true,
   },
 ];
 
@@ -34,17 +34,17 @@ const txMetricSources: ApmDataSourceWithSummary[] = [
   {
     documentType: ApmDocumentType.TransactionMetric,
     rollupInterval: RollupInterval.OneMinute,
-    isSummaryFieldAvailable: true,
+    hasDurationSummaryField: true,
   },
   {
     documentType: ApmDocumentType.TransactionMetric,
     rollupInterval: RollupInterval.TenMinutes,
-    isSummaryFieldAvailable: true,
+    hasDurationSummaryField: true,
   },
   {
     documentType: ApmDocumentType.TransactionMetric,
     rollupInterval: RollupInterval.SixtyMinutes,
-    isSummaryFieldAvailable: true,
+    hasDurationSummaryField: true,
   },
 ];
 
@@ -52,7 +52,7 @@ const txEventSources: ApmDataSourceWithSummary[] = [
   {
     documentType: ApmDocumentType.TransactionEvent,
     rollupInterval: RollupInterval.None,
-    isSummaryFieldAvailable: false,
+    hasDurationSummaryField: false,
   },
 ];
 
