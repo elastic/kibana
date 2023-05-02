@@ -22,6 +22,7 @@ export function AlertsSearchBar({
   query,
   filters,
   onQueryChange,
+  onQuerySubmit,
   onFiltersUpdated,
   rangeFrom,
   rangeTo,
@@ -40,9 +41,20 @@ export function AlertsSearchBar({
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { value: dataView, loading, error } = useAlertDataView(featureIds);
 
-  const onQuerySubmit = useCallback(
+  const onSearchQuerySubmit = useCallback(
     ({ dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query }) => {
-      onQueryChange({
+      onQuerySubmit({
+        dateRange,
+        query: typeof nextQuery?.query === 'string' ? nextQuery.query : undefined,
+      });
+      setQueryLanguage((nextQuery?.language ?? 'kuery') as QueryLanguageType);
+    },
+    [onQuerySubmit, setQueryLanguage]
+  );
+
+  const onSearchQueryChange = useCallback(
+    ({ dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query }) => {
+      onQueryChange?.({
         dateRange,
         query: typeof nextQuery?.query === 'string' ? nextQuery.query : undefined,
       });
@@ -51,7 +63,7 @@ export function AlertsSearchBar({
     [onQueryChange, setQueryLanguage]
   );
   const onRefresh = ({ dateRange }: { dateRange: TimeRange }) => {
-    onQueryChange({
+    onQuerySubmit({
       dateRange,
     });
   };
@@ -68,7 +80,7 @@ export function AlertsSearchBar({
       dateRangeTo={rangeTo}
       displayStyle="inPage"
       showFilterBar={showFilterBar}
-      onQuerySubmit={onQuerySubmit}
+      onQuerySubmit={onSearchQuerySubmit}
       onFiltersUpdated={onFiltersUpdated}
       onRefresh={onRefresh}
       showDatePicker={showDatePicker}
@@ -76,7 +88,7 @@ export function AlertsSearchBar({
       showSaveQuery={true}
       showSubmitButton={showSubmitButton}
       submitOnBlur={submitOnBlur}
-      onQueryChange={onQuerySubmit}
+      onQueryChange={onSearchQueryChange}
     />
   );
 }

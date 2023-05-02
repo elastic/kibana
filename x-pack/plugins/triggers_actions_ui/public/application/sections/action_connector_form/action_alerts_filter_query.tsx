@@ -78,6 +78,7 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
             query={query.kql}
             filters={query.filters ?? []}
             onQueryChange={onQueryChange}
+            onQuerySubmit={onQueryChange}
             onFiltersUpdated={onFiltersUpdated}
             showFilterBar
             submitOnBlur

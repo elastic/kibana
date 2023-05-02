@@ -12,7 +12,7 @@ import type {
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
 import type {
-  ModelVersionMap,
+  VirtualVersionMap,
   SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { DocLinks } from '@kbn/doc-links';
@@ -30,8 +30,8 @@ export interface MigratorContext {
   readonly indexPrefix: string;
   /** Name of the types that are living in the index */
   readonly types: string[];
-  /** Model versions for the registered types */
-  readonly typeModelVersions: ModelVersionMap;
+  /** Virtual versions for the registered types */
+  readonly typeVirtualVersions: VirtualVersionMap;
   /** The client to use for communications with ES */
   readonly elasticsearchClient: ElasticsearchClient;
   /** The maximum number of retries to attempt for a failing action */

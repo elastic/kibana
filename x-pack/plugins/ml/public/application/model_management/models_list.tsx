@@ -39,6 +39,7 @@ import {
   CURATED_MODEL_TYPE,
   MODEL_STATE,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
 import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../components/stats_bar';
@@ -407,6 +408,16 @@ export const ModelsList: FC<Props> = ({
       sortable: false,
       truncateText: false,
       'data-test-subj': 'mlModelsTableColumnDescription',
+      render: (description: string) => {
+        if (!description) return null;
+        const isTechPreview = description.includes('(Tech Preview)');
+        return (
+          <>
+            {description.replace('(Tech Preview)', '')}
+            {isTechPreview ? <TechnicalPreviewBadge compressed /> : null}
+          </>
+        );
+      },
     },
     {
       field: ModelsTableToConfigMapping.type,
