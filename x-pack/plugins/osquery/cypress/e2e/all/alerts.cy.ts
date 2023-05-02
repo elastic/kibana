@@ -607,7 +607,7 @@ describe('Alert Event Details', () => {
             });
         });
       cy.contains(timelineRegex);
-      cy.contains('Untitled timeline').click();
+      cy.getBySel('flyoutBottomBar').contains('Untitled timeline').click();
       cy.contains(filterRegex);
     });
   });
