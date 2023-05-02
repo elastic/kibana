@@ -121,10 +121,10 @@ export function getFleetPolicyStep({
           namespace: 'default',
           inputs: [
             {
-              id: 'universal_profiling_symbolizer-pf-elastic-symbolizer',
+              policy_template: 'universal_profiling_symbolizer',
               enabled: true,
               streams: [],
-              type: 'profiler_symbolizer',
+              type: 'pf-elastic-symbolizer',
             },
           ],
         },
