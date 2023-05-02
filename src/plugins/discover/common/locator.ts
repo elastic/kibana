@@ -190,8 +190,19 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     }
 
     path = `${path}${savedSearchPath}`;
-    path = this.deps.setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
-    path = this.deps.setStateToKbnUrl('_a', appState, { useHash }, path);
+
+    if (Object.keys(queryState).length) {
+      path = this.deps.setStateToKbnUrl<GlobalQueryStateFromUrl>(
+        '_g',
+        queryState,
+        { useHash },
+        path
+      );
+    }
+
+    if (Object.keys(appState).length) {
+      path = this.deps.setStateToKbnUrl('_a', appState, { useHash }, path);
+    }
 
     if (searchSessionId) {
       path = `${path}&searchSessionId=${searchSessionId}`;
