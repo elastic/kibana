@@ -7,7 +7,7 @@
 
 import { getEndpointListPath } from '../../../common/routing';
 import {
-  checkEndpointListForIsolatedHosts,
+  checkEndpointListForOnlyIsolatedHosts,
   checkFlyoutEndpointIsolation,
   filterOutIsolatedHosts,
   interceptActionRequests,
@@ -73,7 +73,7 @@ describe('Isolate command', () => {
       closeAllToasts();
       filterOutIsolatedHosts();
       cy.contains('Showing 2 endpoints');
-      checkEndpointListForIsolatedHosts();
+      checkEndpointListForOnlyIsolatedHosts();
     });
   });
 
