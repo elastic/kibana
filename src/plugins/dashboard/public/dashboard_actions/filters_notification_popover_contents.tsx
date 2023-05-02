@@ -66,9 +66,7 @@ export function FiltersNotificationPopoverContents({ context }: FiltersNotificat
         min-width: 300px;
       `}
     >
-      {isLoading ? (
-        <EuiSkeletonText lines={3} />
-      ) : (
+      <EuiSkeletonText isLoading={isLoading} lines={3}>
         <>
           {queryString !== '' && (
             <EuiFormRow
@@ -94,7 +92,7 @@ export function FiltersNotificationPopoverContents({ context }: FiltersNotificat
             </EuiFormRow>
           )}
         </>
-      )}
+      </EuiSkeletonText>
     </EuiForm>
   );
 }
