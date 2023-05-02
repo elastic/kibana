@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('cases visualization screenshot', async () => {
       await cases.navigation.navigateToApp();
       await cases.navigation.navigateToSingleCase('cases', CASE_ID);
-      await cases.singleCase.addVisualization('[Logs] Bytes distribution');
+      await cases.singleCase.addVisualizationToNewComment('[Logs] Bytes distribution');
 
       await cases.singleCase.openVisualizationButtonTooltip();
       await commonScreenshots.takeScreenshot(

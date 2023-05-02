@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
+
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
@@ -26,7 +28,7 @@ import { createDashboard } from './create_dashboard';
 import { getSampleDashboardPanel } from '../../../mocks';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
-import { Observable } from 'rxjs';
+import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 
 const embeddableId = 'create-dat-dashboard';
 
@@ -54,18 +56,28 @@ test('throws error when provided validation function returns invalid', async () 
 test('pulls state from dashboard saved object when given a saved object id', async () => {
   pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject = jest
     .fn()
-    .mockResolvedValue({ dashboardInput: { description: 'wow would you look at that? Wow.' } });
+    .mockResolvedValue({
+      dashboardInput: {
+        ...DEFAULT_DASHBOARD_INPUT,
+        description: `wow would you look at that? Wow.`,
+      },
+    });
   const dashboard = await createDashboard(embeddableId, {}, 0, 'wow-such-id');
   expect(
     pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject
   ).toHaveBeenCalledWith({ id: 'wow-such-id' });
-  expect(dashboard.getState().explicitInput.description).toBe('wow would you look at that? Wow.');
+  expect(dashboard.getState().explicitInput.description).toBe(`wow would you look at that? Wow.`);
 });
 
 test('pulls state from session storage which overrides state from saved object', async () => {
   pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject = jest
     .fn()
-    .mockResolvedValue({ dashboardInput: { description: 'wow this description is okay' } });
+    .mockResolvedValue({
+      dashboardInput: {
+        ...DEFAULT_DASHBOARD_INPUT,
+        description: 'wow this description is okay',
+      },
+    });
   pluginServices.getServices().dashboardSessionStorage.getState = jest
     .fn()
     .mockReturnValue({ description: 'wow this description marginally better' });
@@ -83,7 +95,12 @@ test('pulls state from session storage which overrides state from saved object',
 test('pulls state from creation options initial input which overrides all other state sources', async () => {
   pluginServices.getServices().dashboardSavedObject.loadDashboardStateFromSavedObject = jest
     .fn()
-    .mockResolvedValue({ dashboardInput: { description: 'wow this description is okay' } });
+    .mockResolvedValue({
+      dashboardInput: {
+        ...DEFAULT_DASHBOARD_INPUT,
+        description: 'wow this description is okay',
+      },
+    });
   pluginServices.getServices().dashboardSessionStorage.getState = jest
     .fn()
     .mockReturnValue({ description: 'wow this description marginally better' });
@@ -213,6 +230,7 @@ test('creates new embeddable with incoming embeddable if id does not match exist
       },
     },
   });
+
   // flush promises
   await new Promise((r) => setTimeout(r, 1));
   expect(mockContactCardFactory.create).toHaveBeenCalledWith(

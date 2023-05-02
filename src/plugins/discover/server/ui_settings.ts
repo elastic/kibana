@@ -30,7 +30,6 @@ import {
   TRUNCATE_MAX_HEIGHT,
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
-  SHOW_LEGACY_FIELD_TOP_VALUES,
   ENABLE_SQL,
 } from '../common';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
@@ -124,25 +123,6 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     }),
     category: ['discover'],
     schema: schema.boolean(),
-  },
-  [SHOW_LEGACY_FIELD_TOP_VALUES]: {
-    name: i18n.translate('discover.advancedSettings.showLegacyFieldStatsTitle', {
-      defaultMessage: 'Top values calculation',
-    }),
-    value: false,
-    type: 'boolean',
-    description: i18n.translate('discover.advancedSettings.showLegacyFieldStatsText', {
-      defaultMessage:
-        'To calculate the top values for a field in the sidebar using 500 instead of 5,000 records per shard, turn on this option.',
-    }),
-    category: ['discover'],
-    schema: schema.boolean(),
-    deprecation: {
-      message: i18n.translate('discover.advancedSettings.showLegacyFieldStatsTextDeprecation', {
-        defaultMessage: 'This setting is deprecated and will not be supported in a future version.',
-      }),
-      docLinksKey: 'discoverSettings',
-    },
   },
   [DOC_HIDE_TIME_COLUMN_SETTING]: {
     name: i18n.translate('discover.advancedSettings.docTableHideTimeColumnTitle', {

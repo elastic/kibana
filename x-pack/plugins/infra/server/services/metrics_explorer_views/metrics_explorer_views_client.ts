@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type {
+import {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
+  SavedObjectsUtils,
 } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import {
@@ -98,24 +99,8 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
     );
   }
 
-  public async create(
-    attributes: CreateMetricsExplorerViewAttributesRequestPayload
-  ): Promise<MetricsExplorerView> {
-    this.logger.debug(`Trying to create metrics explorer view ...`);
-
-    // Validate there is not a view with the same name
-    await this.assertNameConflict(attributes.name);
-
-    const metricsExplorerViewSavedObject = await this.savedObjectsClient.create(
-      metricsExplorerViewSavedObjectName,
-      attributes
-    );
-
-    return this.mapSavedObjectToMetricsExplorerView(metricsExplorerViewSavedObject);
-  }
-
   public async update(
-    metricsExplorerViewId: string,
+    metricsExplorerViewId: string | null,
     attributes: CreateMetricsExplorerViewAttributesRequestPayload,
     query: MetricsExplorerViewRequestQuery
   ): Promise<MetricsExplorerView> {
@@ -123,18 +108,19 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
       `Trying to update metrics explorer view with id "${metricsExplorerViewId}"...`
     );
 
+    const viewId = metricsExplorerViewId ?? SavedObjectsUtils.generateId();
+
     // Validate there is not a view with the same name
-    await this.assertNameConflict(attributes.name, [metricsExplorerViewId]);
+    await this.assertNameConflict(attributes.name, [viewId]);
 
     const sourceId = query.sourceId ?? MetricsExplorerViewsClient.DEFAULT_SOURCE_ID;
 
     const [sourceConfiguration, metricsExplorerViewSavedObject] = await Promise.all([
       this.infraSources.getSourceConfiguration(this.savedObjectsClient, sourceId),
-      this.savedObjectsClient.update(
-        metricsExplorerViewSavedObjectName,
-        metricsExplorerViewId,
-        attributes
-      ),
+      this.savedObjectsClient.create(metricsExplorerViewSavedObjectName, attributes, {
+        id: viewId,
+        overwrite: true,
+      }),
     ]);
 
     return this.mapSavedObjectToMetricsExplorerView(

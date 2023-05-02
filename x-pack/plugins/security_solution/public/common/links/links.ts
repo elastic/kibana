@@ -7,7 +7,8 @@
 
 import type { Capabilities } from '@kbn/core/public';
 import { get, isArray } from 'lodash';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import type { SecurityPageName } from '../../../common/constants';
 import type {
@@ -20,59 +21,17 @@ import type {
 } from './types';
 
 /**
- * App links updater, it keeps the value of the app links in sync with all application.
- * It can be updated using `updateAppLinks` or `excludeAppLink`
- * Read it using `subscribeAppLinks` or `useAppLinks` hook.
+ * App links updater, it stores the `appLinkItems` recursive hierarchy and keeps
+ * the value of the app links in sync with all application components.
+ * It can be updated using `updateAppLinks`.
+ * Read it using subscription or `useAppLinks` hook.
  */
-const appLinksUpdater$ = new BehaviorSubject<{
-  links: AppLinkItems;
-  normalizedLinks: NormalizedLinks;
-}>({
-  links: [], // stores the appLinkItems recursive hierarchy
-  normalizedLinks: {}, // stores a flatten normalized object for direct id access
-});
+const appLinksUpdater$ = new BehaviorSubject<AppLinkItems>([]);
+// stores a flatten normalized appLinkItems object for internal direct id access
+const normalizedAppLinksUpdater$ = new BehaviorSubject<NormalizedLinks>({});
 
-const getAppLinksValue = (): AppLinkItems => appLinksUpdater$.getValue().links;
-const getNormalizedLinksValue = (): NormalizedLinks => appLinksUpdater$.getValue().normalizedLinks;
-
-/**
- * Subscribes to the updater to get the app links updates
- */
-export const subscribeAppLinks = (onChange: (links: AppLinkItems) => void) =>
-  appLinksUpdater$.subscribe(({ links }) => onChange(links));
-
-/**
- * Hook to get the app links updated value
- */
-export const useAppLinks = (): AppLinkItems => {
-  const [appLinks, setAppLinks] = useState(getAppLinksValue);
-
-  useEffect(() => {
-    const linksSubscription = subscribeAppLinks((newAppLinks) => {
-      setAppLinks(newAppLinks);
-    });
-    return () => linksSubscription.unsubscribe();
-  }, []);
-
-  return appLinks;
-};
-
-/**
- * Hook to check if a link exists in the application links,
- * It can be used to know if a link access is authorized.
- */
-export const useLinkExists = (id: SecurityPageName): boolean => {
-  const [linkExists, setLinkExists] = useState(!!getNormalizedLink(id));
-
-  useEffect(() => {
-    const linksSubscription = subscribeAppLinks(() => {
-      setLinkExists(!!getNormalizedLink(id));
-    });
-    return () => linksSubscription.unsubscribe();
-  }, [id]);
-
-  return linkExists;
-};
+// AppLinks observable
+export const appLinks$ = appLinksUpdater$.asObservable();
 
 /**
  * Updates the app links applying the filter by permissions
@@ -82,10 +41,28 @@ export const updateAppLinks = (
   linksPermissions: LinksPermissions
 ) => {
   const filteredAppLinks = getFilteredAppLinks(appLinksToUpdate, linksPermissions);
-  appLinksUpdater$.next({
-    links: Object.freeze(filteredAppLinks),
-    normalizedLinks: Object.freeze(getNormalizedLinks(filteredAppLinks)),
-  });
+  appLinksUpdater$.next(Object.freeze(filteredAppLinks));
+  normalizedAppLinksUpdater$.next(Object.freeze(getNormalizedLinks(filteredAppLinks)));
+};
+
+/**
+ * Hook to get the app links updated value
+ */
+export const useAppLinks = (): AppLinkItems =>
+  useObservable(appLinksUpdater$, appLinksUpdater$.getValue());
+/**
+ * Hook to get the normalized app links updated value
+ */
+export const useNormalizedAppLinks = (): NormalizedLinks =>
+  useObservable(normalizedAppLinksUpdater$, normalizedAppLinksUpdater$.getValue());
+
+/**
+ * Hook to check if a link exists in the application links,
+ * It can be used to know if a link access is authorized.
+ */
+export const useLinkExists = (id: SecurityPageName): boolean => {
+  const normalizedLinks = useNormalizedAppLinks();
+  return useMemo(() => !!normalizedLinks[id], [normalizedLinks, id]);
 };
 
 /**
@@ -128,6 +105,10 @@ export const needsUrlState = (id: SecurityPageName): boolean => {
   return !getNormalizedLink(id)?.skipUrlState;
 };
 
+export const getLinksWithHiddenTimeline = (): LinkInfo[] => {
+  return Object.values(normalizedAppLinksUpdater$.getValue()).filter((link) => link.hideTimeline);
+};
+
 // Internal functions
 
 /**
@@ -136,8 +117,8 @@ export const needsUrlState = (id: SecurityPageName): boolean => {
 const getNormalizedLinks = (
   currentLinks: AppLinkItems,
   parentId?: SecurityPageName
-): NormalizedLinks => {
-  return currentLinks.reduce<NormalizedLinks>((normalized, { links, ...currentLink }) => {
+): NormalizedLinks =>
+  currentLinks.reduce<NormalizedLinks>((normalized, { links, ...currentLink }) => {
     normalized[currentLink.id] = {
       ...currentLink,
       parentId,
@@ -147,10 +128,9 @@ const getNormalizedLinks = (
     }
     return normalized;
   }, {});
-};
 
 const getNormalizedLink = (id: SecurityPageName): Readonly<NormalizedLink> | undefined =>
-  getNormalizedLinksValue()[id];
+  normalizedAppLinksUpdater$.getValue()[id];
 
 const getFilteredAppLinks = (
   appLinkToFilter: AppLinkItems,
@@ -225,8 +205,4 @@ const isLinkAllowed = (
     return false;
   }
   return true;
-};
-
-export const getLinksWithHiddenTimeline = (): LinkInfo[] => {
-  return Object.values(getNormalizedLinksValue()).filter((link) => link.hideTimeline);
 };
