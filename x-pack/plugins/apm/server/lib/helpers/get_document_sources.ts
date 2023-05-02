@@ -161,20 +161,20 @@ export async function getDocumentSources({
     const responseBefore = allResponses[index * 2];
     const responseAfter = allResponses[index * 2 + 1];
 
-    const hasDataBefore = responseBefore.hits.total.value > 0;
-    const hasDataAfter = responseAfter.hits.total.value > 0;
+    const hasDocBefore = responseBefore.hits.total.value > 0;
+    const hasDocAfter = responseAfter.hits.total.value > 0;
 
     return {
       documentType,
       rollupInterval,
-      hasDataBefore,
-      hasDataAfter,
+      hasDocBefore,
+      hasDocAfter,
       checkSummaryFieldExists: source.meta.checkSummaryFieldExists,
     };
   });
 
-  const hasAnyDataBefore = checkedSources.some(
-    (source) => source.hasDataBefore
+  const hasAnySourceDocBefore = checkedSources.some(
+    (source) => source.hasDocBefore
   );
 
   const sources: TimeRangeMetadata['sources'] = [];
@@ -182,33 +182,24 @@ export async function getDocumentSources({
   checkedSources.forEach((source) => {
     const {
       documentType,
-      hasDataAfter,
-      hasDataBefore,
+      hasDocAfter,
+      hasDocBefore,
       rollupInterval,
       checkSummaryFieldExists,
     } = source;
-    const hasData = hasDataBefore || hasDataAfter;
-    const hasDocsData = hasAnyDataBefore ? hasDataBefore : hasData;
+    const hasDocBeforeOrAfter = hasDocBefore || hasDocAfter;
+    // If there is any data before, we require that data is available before
+    // this time range to mark this source as available. If we don't do that,
+    // users that upgrade to a version that starts generating service tx metrics
+    // will see a mostly empty screen for a while after upgrading.
+    // If we only check before, users with a new deployment will use raw transaction
+    // events.
+    const hasDocs = hasAnySourceDocBefore ? hasDocBefore : hasDocBeforeOrAfter;
 
-    if (documentType === ApmDocumentType.ServiceTransactionMetric) {
-      sources.push({
-        documentType,
-        rollupInterval,
-        // If there is any data before, we require that data is available before
-        // this time range to mark this source as available. If we don't do that,
-        // users that upgrade to a version that starts generating service tx metrics
-        // will see a mostly empty screen for a while after upgrading.
-        // If we only check before, users with a new deployment will use raw transaction
-        // events.
-        hasDocs: hasDocsData,
-        hasDurationSummaryField: true,
-      });
-    }
+    // Default this to true for ServiceTransactionMetric
+    let isSummaryDurationFieldAvailable = true;
 
-    if (
-      documentType === ApmDocumentType.TransactionMetric &&
-      !checkSummaryFieldExists
-    ) {
+    if (!checkSummaryFieldExists) {
       const equivalentSourceWithSummary = checkedSources.find(
         (eSource) =>
           eSource.documentType === documentType &&
@@ -216,18 +207,20 @@ export async function getDocumentSources({
           eSource.checkSummaryFieldExists
       );
       if (equivalentSourceWithSummary) {
-        const hasSummaryData =
-          equivalentSourceWithSummary.hasDataBefore ||
-          equivalentSourceWithSummary.hasDataAfter;
-        sources.push({
-          documentType,
-          rollupInterval,
-          hasDocs: hasDocsData,
-          hasDurationSummaryField: hasAnyDataBefore
-            ? equivalentSourceWithSummary.hasDataBefore
-            : hasSummaryData,
-        });
+        // This means the document is TransactionMetric
+        const hasSummaryDocBeforeOrAfter =
+          equivalentSourceWithSummary.hasDocBefore ||
+          equivalentSourceWithSummary.hasDocAfter;
+        isSummaryDurationFieldAvailable = hasAnySourceDocBefore
+          ? equivalentSourceWithSummary.hasDocBefore
+          : hasSummaryDocBeforeOrAfter;
       }
+      sources.push({
+        documentType,
+        rollupInterval,
+        hasDocs,
+        hasDurationSummaryField: isSummaryDurationFieldAvailable,
+      });
     }
   });
 
