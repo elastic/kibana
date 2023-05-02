@@ -409,6 +409,7 @@ export const ModelsList: FC<Props> = ({
       truncateText: false,
       'data-test-subj': 'mlModelsTableColumnDescription',
       render: (description: string) => {
+        if (!description) return null;
         const isTechPreview = description.includes('(Tech Preview)');
         return (
           <>
