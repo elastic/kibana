@@ -39,8 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/153796
-  describe.skip('discover feature controls security', () => {
+  describe('discover feature controls security', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
@@ -430,6 +429,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           password: 'no_discover_privileges_user-password',
           roles: ['no_discover_privileges_role'],
           full_name: 'test user',
+        });
+
+        // Navigate home before attempting to login or we may get redirected to
+        // Discover with a forbidden error, which hides the chrome and causes
+        // PageObjects.security.login to fail when checking for the logout button
+        await PageObjects.common.navigateToUrl('home', '', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
 
         await PageObjects.security.login(
