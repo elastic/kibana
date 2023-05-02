@@ -11,12 +11,12 @@ import deepEqual from 'fast-deep-equal';
 import type { CaseConnector } from '../../../common/api';
 import type { CaseAttributes } from '../../../common/api/cases/case';
 import type { CaseStatuses } from '../../../common/api/cases/status';
-import type { Case, UpdateByKey, UpdateKey } from '../../containers/types';
+import type { CaseUI, UpdateByKey, UpdateKey } from '../../containers/types';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
 import type { OnUpdateFields } from './types';
 
-export const useOnUpdateField = ({ caseData }: { caseData: Case }) => {
+export const useOnUpdateField = ({ caseData }: { caseData: CaseUI }) => {
   const { isLoading, updateKey: loadingKey, updateCaseProperty } = useUpdateCase();
 
   const onUpdateField = useCallback(

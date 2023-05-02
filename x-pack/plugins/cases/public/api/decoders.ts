@@ -16,12 +16,12 @@ import type {
   CasesStatusResponse,
   CasesMetricsResponse,
   CasesBulkGetResponseCertainFields,
-  CaseResponse,
+  Case,
 } from '../../common/api';
 import {
   CasesFindResponseRt,
   CasesStatusResponseRt,
-  CasesResponseRt,
+  CasesRt,
   getTypeForCertainFieldsFromArray,
   CasesMetricsResponseRt,
 } from '../../common/api';
@@ -41,11 +41,11 @@ export const decodeCasesMetricsResponse = (metrics?: CasesMetricsResponse) =>
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-export const decodeCasesBulkGetResponse = <Field extends keyof CaseResponse = keyof CaseResponse>(
+export const decodeCasesBulkGetResponse = <Field extends keyof Case = keyof Case>(
   res: CasesBulkGetResponseCertainFields<Field>,
   fields?: string[]
 ) => {
-  const typeToDecode = getTypeForCertainFieldsFromArray(CasesResponseRt, fields);
+  const typeToDecode = getTypeForCertainFieldsFromArray(CasesRt, fields);
   pipe(typeToDecode.decode(res.cases), fold(throwErrors(createToasterPlainError), identity));
 
   return res;
