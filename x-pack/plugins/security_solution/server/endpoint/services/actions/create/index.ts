@@ -35,6 +35,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionsExecuteParameters,
+  EndpointActionDataParameterTypes,
 } from '../../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../../types';
 import type { FeatureKeys } from '../../feature_usage';
@@ -55,7 +56,10 @@ const returnActionIdCommands: ResponseActionsApiCommandNames[] = ['isolate', 'un
 export class ActionCreateService {
   constructor(private esClient: ElasticsearchClient, private endpointContext: EndpointAppContext) {}
 
-  async createAction(
+  async createAction<
+    TOutputContent extends object = object,
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  >(
     payload: TypeOf<typeof ResponseActionBodySchema> & {
       command: ResponseActionsApiCommandNames;
       user?: ReturnType<AuthenticationServiceStart['getCurrentUser']>;
@@ -63,7 +67,7 @@ export class ActionCreateService {
       rule_name?: string;
     },
     casesClient?: CasesClient
-  ): Promise<ActionDetails> {
+  ): Promise<ActionDetails<TOutputContent, TParameters>> {
     const featureKey = commandToFeatureKeyMap.get(payload.command) as FeatureKeys;
     if (featureKey) {
       this.endpointContext.service.getFeatureUsageService().notifyUsage(featureKey);
@@ -267,7 +271,7 @@ export class ActionCreateService {
     return {
       ...actionId,
       ...data,
-    };
+    } as ActionDetails<TOutputContent, TParameters>;
   }
 }
 
