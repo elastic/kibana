@@ -177,8 +177,6 @@ export const EditExample = () => {
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {/* Can't wrap the ControlGroupRenderer in the `EuiSkeletonTitle` component like it's
-             upposed to be used since it's the one that sets loading to false. */}
         {isLoading ? (
           <>
             <EuiSpacer />
