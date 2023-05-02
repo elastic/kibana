@@ -8,9 +8,9 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { useMemo } from 'react';
-import { HttpFetchQuery } from '@kbn/core/public';
-import { ErrorType } from '@kbn/ml-error-utils';
-import { MlSavedObjectType } from '../../../../common/types/saved_objects';
+import type { HttpFetchQuery } from '@kbn/core/public';
+import type { ErrorType } from '@kbn/ml-error-utils';
+import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { HttpService } from '../http_service';
 import { basePath } from '.';
 import { useMlKibana } from '../../contexts/kibana';
