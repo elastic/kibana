@@ -460,6 +460,7 @@ export const useField = <T, FormType = FormData, I = T>(
         if (typeof _newValue === 'function') {
           _newValue = (_newValue as Function)(prev);
         }
+
         return formatInputValue(_newValue);
       });
     },
