@@ -61,7 +61,7 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterQueryToggleLabel',
           {
-            defaultMessage: 'Send alert notification only if alert fields match a query',
+            defaultMessage: 'if alert matches a query',
           }
         )}
         checked={queryEnabled}
@@ -77,6 +77,7 @@ export const ActionAlertsFilterQuery: React.FC<ActionAlertsFilterQueryProps> = (
             query={query.kql}
             filters={query.filters ?? []}
             onQueryChange={onQueryChange}
+            onQuerySubmit={onQueryChange}
             onFiltersUpdated={onFiltersUpdated}
             showFilterBar
             submitOnBlur
