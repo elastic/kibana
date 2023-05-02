@@ -91,10 +91,10 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   return (
     <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
       <>
+        <FlyoutBottomBar showTimelineHeaderPanel={!show} timelineId={timelineId} />
         <EuiFocusTrap disabled={!focusOwnership}>
           <Pane timelineId={timelineId} visible={show} />
         </EuiFocusTrap>
-        <FlyoutBottomBar showTimelineHeaderPanel={!show} timelineId={timelineId} />
         <EuiWindowEvent event="keydown" handler={onKeyDown} />
       </>
     </EuiOutsideClickDetector>
