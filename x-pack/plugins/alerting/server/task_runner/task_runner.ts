@@ -320,9 +320,7 @@ export class TaskRunner<
 
     let activeMaintenanceWindows: MaintenanceWindow[] = [];
     try {
-      activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows({
-        interval: rule.schedule.interval,
-      });
+      activeMaintenanceWindows = await maintenanceWindowClient.getActiveMaintenanceWindows();
     } catch (err) {
       this.logger.error(
         `error getting active maintenance window for ${ruleTypeId}:${ruleId} ${err.message}`
