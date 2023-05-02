@@ -17,7 +17,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - group 1', () => {
+  describe('lens app - group 4', () => {
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
@@ -37,7 +37,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     };
     let indexPatternString: string;
     before(async () => {
-      log.debug('Starting lens before method');
+      await log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
       await kibanaServer.savedObjects.cleanStandardList();
       try {
@@ -64,19 +64,22 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     });
 
     after(async () => {
-      await esNode.unload(esArchive);
+      await esArchiver.unload(esArchive);
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    if (config.get('esTestCluster.ccs')) {
-      loadTestFile(require.resolve('./smokescreen'));
-    } else {
-      // total run time ~16 min
-      loadTestFile(require.resolve('./smokescreen')); // 12m 12s
-      loadTestFile(require.resolve('./ad_hoc_data_view')); // 3m 40s
-    }
+    // total run time ~16m 30s
+    loadTestFile(require.resolve('./colors')); // 1m 2s
+    loadTestFile(require.resolve('./chart_data')); // 1m 10s
+    loadTestFile(require.resolve('./time_shift')); // 1m
+    loadTestFile(require.resolve('./dashboard')); // 6m 45s
+    loadTestFile(require.resolve('./show_underlying_data')); // 2m
+    loadTestFile(require.resolve('./show_underlying_data_dashboard')); // 2m 10s
+    loadTestFile(require.resolve('./share')); // 1m 20s
+    // keep it last in the group
+    loadTestFile(require.resolve('./tsdb')); // 1m
   });
 };

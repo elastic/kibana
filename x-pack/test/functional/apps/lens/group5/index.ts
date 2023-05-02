@@ -17,7 +17,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - group 1', () => {
+  describe('lens app - group 5', () => {
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
@@ -64,19 +64,18 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     });
 
     after(async () => {
-      await esNode.unload(esArchive);
+      await esArchiver.unload(esArchive);
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    if (config.get('esTestCluster.ccs')) {
-      loadTestFile(require.resolve('./smokescreen'));
-    } else {
-      // total run time ~16 min
-      loadTestFile(require.resolve('./smokescreen')); // 12m 12s
-      loadTestFile(require.resolve('./ad_hoc_data_view')); // 3m 40s
-    }
+    // total run time ~ 16m
+    loadTestFile(require.resolve('./drag_and_drop')); // 7m 40s
+    loadTestFile(require.resolve('./geo_field')); // 26s
+    loadTestFile(require.resolve('./formula')); // 5m 52s
+    loadTestFile(require.resolve('./heatmap')); // 51s
+    loadTestFile(require.resolve('./gauge')); // 1m 17s
   });
 };
