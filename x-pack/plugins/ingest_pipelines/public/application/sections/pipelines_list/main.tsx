@@ -20,7 +20,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { FilterListButton, Filters } from '@kbn/index-management-plugin/public';
+import { FilterListButton, Filters } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
@@ -83,36 +83,44 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     redirectToPathOrRedirectPath(getListPath());
   };
 
-  const isManagedPipelines = (allPipelines: Pipeline[], isManaged: boolean) => {
-    return allPipelines.filter((pipeline) => {
-      return isManaged ? pipeline.isManaged : !pipeline.isManaged;
-    });
-  };
-
-  function filteredPipelines(allPipelines: Pipeline[]) {
-    let filteredItems: Pipeline[] = [];
-
-    if (filters.managed.checked === 'on')
-      filteredItems = filteredItems.concat(isManagedPipelines(allPipelines, true));
-    if (filters.notManaged.checked === 'on')
-      filteredItems = filteredItems.concat(isManagedPipelines(allPipelines, false));
-    return filteredItems;
-  }
-
   const [filters, setFilters] = useState<Filters<FilterName>>({
     managed: {
       name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewManagedTemplateLabel', {
         defaultMessage: 'Managed pipelines',
       }),
       checked: 'on',
+      handleFilter: (allPipelines: Pipeline[]) => isManagedPipelines(allPipelines, true),
     },
     notManaged: {
       name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewNotManagedTemplateLabel', {
         defaultMessage: 'Not managed pipelines',
       }),
       checked: 'on',
+      handleFilter: (allPipelines: Pipeline[]) => isManagedPipelines(allPipelines, false),
     },
   });
+
+  const isManagedPipelines = (allPipelines: Pipeline[], isManaged: boolean) =>
+    allPipelines.filter((pipeline) => pipeline.isManaged === isManaged);
+
+  const selectedFilters = Object.entries(filters)
+    .filter((item) => item[1].checked === 'on')
+    .map(([filterName]) => filterName as FilterName);
+
+  const filteredPipelines = (allPipelines: Pipeline[]) => {
+    if (!selectedFilters) return allPipelines;
+
+    let filteredItems: Pipeline[] = [];
+
+    selectedFilters.forEach((filter) => {
+      const filterFunction = filters[filter]?.handleFilter;
+      if (filterFunction) {
+        filteredItems = filteredItems.concat(filterFunction(allPipelines));
+      }
+    });
+
+    return filteredItems;
+  };
 
   if (error) {
     return (

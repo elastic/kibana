@@ -31,12 +31,14 @@ describe('<PipelinesList />', () => {
       name: 'test_pipeline1',
       description: 'test_pipeline1 description',
       processors: [],
+      isManaged: false,
     };
 
     const pipeline2 = {
       name: 'test_pipeline2',
       description: 'test_pipeline2 description',
       processors: [],
+      isManaged: false,
     };
 
     const pipelines = [pipeline1, pipeline2];
