@@ -21,7 +21,7 @@ import {
   getFooType,
   getBarType,
   dummyModelVersion,
-} from './base.fixtures';
+} from '../fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'document_cleanup.test.log');
 
