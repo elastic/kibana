@@ -12,7 +12,12 @@ import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-h
 import '../jest_matchers';
 import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
-import { getBaseMigratorParams, getFooType, getBarType, dummyModelVersion } from './base.fixtures';
+import {
+  getBaseMigratorParams,
+  getFooType,
+  getBarType,
+  dummyModelVersion,
+} from '../fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'mapping_version_conflict.test.log');
 
@@ -106,8 +111,8 @@ describe('ZDT upgrades - mapping model version conflict', () => {
     expect(aliases).toEqual(['.kibana', '.kibana_8.8.0']);
 
     expect(mappingMeta.mappingVersions).toEqual({
-      foo: 2,
-      bar: 2,
+      foo: '10.2.0',
+      bar: '10.2.0',
     });
 
     const records = await parseLogFile(logFilePath);
