@@ -56,16 +56,11 @@ const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export interface DiscoverLayoutProps {
-  navigateTo: (url: string) => void;
   stateContainer: DiscoverStateContainer;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 }
 
-export function DiscoverLayout({
-  navigateTo,
-  stateContainer,
-  persistDataView,
-}: DiscoverLayoutProps) {
+export function DiscoverLayout({ stateContainer, persistDataView }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
     capabilities,
@@ -275,7 +270,6 @@ export function DiscoverLayout({
       <TopNavMemoized
         onOpenInspector={onOpenInspector}
         query={query}
-        navigateTo={navigateTo}
         savedQuery={savedQuery}
         stateContainer={stateContainer}
         updateQuery={stateContainer.actions.onUpdateQuery}

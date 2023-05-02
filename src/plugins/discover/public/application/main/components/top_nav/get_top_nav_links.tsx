@@ -24,7 +24,6 @@ import type { TopNavExtension } from '../../../../extensions';
  */
 export const getTopNavLinks = ({
   dataView,
-  navigateTo,
   services,
   state,
   onOpenInspector,
@@ -34,7 +33,6 @@ export const getTopNavLinks = ({
   topNavExtension,
 }: {
   dataView: DataView;
-  navigateTo: (url: string) => void;
   services: DiscoverServices;
   state: DiscoverStateContainer;
   onOpenInspector: () => void;
@@ -90,7 +88,7 @@ export const getTopNavLinks = ({
     description: i18n.translate('discover.localMenu.newSearchDescription', {
       defaultMessage: 'New Search',
     }),
-    run: () => navigateTo('/'),
+    run: () => services.locator.navigate({}),
     testId: 'discoverNewButton',
   };
 
@@ -109,7 +107,6 @@ export const getTopNavLinks = ({
       onSaveSearch({
         savedSearch: state.savedSearchState.getState(),
         services,
-        navigateTo,
         state,
         onClose: () => {
           anchorElement?.focus();

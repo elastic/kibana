@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect } from 'react';
+
+import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { useHistory } from 'react-router-dom';
 import { useUrlTracking } from './hooks/use_url_tracking';
 import { useSearchSession } from './hooks/use_search_session';
 import { DiscoverStateContainer } from './services/discover_state';
@@ -34,13 +34,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
-  const usedHistory = useHistory();
-  const navigateTo = useCallback(
-    (path: string) => {
-      usedHistory.push(path);
-    },
-    [usedHistory]
-  );
 
   useUrlTracking(stateContainer.savedSearchState);
 
@@ -97,11 +90,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
 
   return (
     <RootDragDropProvider>
-      <DiscoverLayoutMemoized
-        navigateTo={navigateTo}
-        stateContainer={stateContainer}
-        persistDataView={persistDataView}
-      />
+      <DiscoverLayoutMemoized stateContainer={stateContainer} persistDataView={persistDataView} />
     </RootDragDropProvider>
   );
 }
