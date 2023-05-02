@@ -13,8 +13,9 @@ import type {
 } from '@kbn/core/server';
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import { set } from '@kbn/safer-lodash-set';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
-import type { CasesConfigureAttributes, CasesConfigurePatch } from '../../../common/api';
+import type { ConfigurationAttributes, ConfigurationPatchRequest } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import {
   transformFieldsToESModel,
@@ -29,7 +30,11 @@ import type {
   PatchCaseConfigureArgs,
   PostCaseConfigureArgs,
 } from './types';
-import type { ConfigurePersistedAttributes } from '../../common/types/configure';
+import type {
+  ConfigurationSavedObjectTransformed,
+  ConfigurationTransformedAttributes,
+  ConfigurePersistedAttributes,
+} from '../../common/types/configure';
 
 export class CaseConfigureService {
   constructor(private readonly log: Logger) {}
@@ -55,7 +60,7 @@ export class CaseConfigureService {
   public async get({
     unsecuredSavedObjectsClient,
     configurationId,
-  }: GetCaseConfigureArgs): Promise<SavedObject<CasesConfigureAttributes>> {
+  }: GetCaseConfigureArgs): Promise<ConfigurationSavedObjectTransformed> {
     try {
       this.log.debug(`Attempting to GET case configuration ${configurationId}`);
       const configuration = await unsecuredSavedObjectsClient.get<ConfigurePersistedAttributes>(
@@ -73,7 +78,7 @@ export class CaseConfigureService {
   public async find({
     unsecuredSavedObjectsClient,
     options,
-  }: FindCaseConfigureArgs): Promise<SavedObjectsFindResponse<CasesConfigureAttributes>> {
+  }: FindCaseConfigureArgs): Promise<SavedObjectsFindResponse<ConfigurationTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to find all case configuration`);
 
@@ -97,7 +102,7 @@ export class CaseConfigureService {
     attributes,
     id,
     refresh,
-  }: PostCaseConfigureArgs): Promise<SavedObject<CasesConfigureAttributes>> {
+  }: PostCaseConfigureArgs): Promise<ConfigurationSavedObjectTransformed> {
     try {
       this.log.debug(`Attempting to POST a new case configuration`);
       const esConfigInfo = transformAttributesToESModel(attributes);
@@ -120,7 +125,9 @@ export class CaseConfigureService {
     updatedAttributes,
     originalConfiguration,
     refresh,
-  }: PatchCaseConfigureArgs): Promise<SavedObjectsUpdateResponse<CasesConfigurePatch>> {
+  }: PatchCaseConfigureArgs): Promise<
+    SavedObjectsUpdateResponse<ConfigurationTransformedAttributes>
+  > {
     try {
       this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
       const esUpdateInfo = transformAttributesToESModel(updatedAttributes);
@@ -148,7 +155,7 @@ export class CaseConfigureService {
 
 function transformUpdateResponseToExternalModel(
   updatedConfiguration: SavedObjectsUpdateResponse<ConfigurePersistedAttributes>
-): SavedObjectsUpdateResponse<CasesConfigurePatch> {
+): SavedObjectsUpdateResponse<ConfigurationPatchRequest> {
   const { connector, ...restUpdatedAttributes } = updatedConfiguration.attributes ?? {};
 
   const transformedConnector = transformESConnectorToExternalModel({
@@ -157,21 +164,25 @@ function transformUpdateResponseToExternalModel(
     referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
 
-  const castedAttributesWithoutConnector = restUpdatedAttributes as CasesConfigurePatch;
+  const castedAttributesWithoutConnector = restUpdatedAttributes as ConfigurationPatchRequest;
 
-  return {
+  const response = {
     ...updatedConfiguration,
     attributes: {
-      ...castedAttributesWithoutConnector,
-      // this will avoid setting connector to undefined, it won't include to field at all
-      ...(transformedConnector && { connector: transformedConnector }),
+      closure_type: castedAttributesWithoutConnector.closure_type,
     },
   };
+
+  if (transformedConnector) {
+    set(response, 'attributes.connector', transformedConnector);
+  }
+
+  return response;
 }
 
 function transformToExternalModel(
   configuration: SavedObject<ConfigurePersistedAttributes>
-): SavedObject<CasesConfigureAttributes> {
+): ConfigurationSavedObjectTransformed {
   const connector = transformESConnectorOrUseDefault({
     // if the saved object had an error the attributes field will not exist
     connector: configuration.attributes?.connector,
@@ -179,12 +190,17 @@ function transformToExternalModel(
     referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
 
-  const castedAttributes = configuration.attributes as CasesConfigureAttributes;
+  const castedAttributes = configuration.attributes as ConfigurationAttributes;
 
   return {
     ...configuration,
     attributes: {
-      ...castedAttributes,
+      closure_type: castedAttributes.closure_type,
+      created_at: castedAttributes.created_at,
+      created_by: castedAttributes.created_by,
+      owner: castedAttributes.owner,
+      updated_at: castedAttributes.updated_at,
+      updated_by: castedAttributes.updated_by,
       connector,
     },
   };
@@ -192,7 +208,7 @@ function transformToExternalModel(
 
 function transformFindResponseToExternalModel(
   configurations: SavedObjectsFindResponse<ConfigurePersistedAttributes>
-): SavedObjectsFindResponse<CasesConfigureAttributes> {
+): SavedObjectsFindResponse<ConfigurationTransformedAttributes> {
   return {
     ...configurations,
     saved_objects: configurations.saved_objects.map((so) => ({
@@ -202,15 +218,15 @@ function transformFindResponseToExternalModel(
   };
 }
 
-function transformAttributesToESModel(configuration: CasesConfigureAttributes): {
+function transformAttributesToESModel(configuration: ConfigurationAttributes): {
   attributes: ConfigurePersistedAttributes;
   referenceHandler: ConnectorReferenceHandler;
 };
-function transformAttributesToESModel(configuration: Partial<CasesConfigureAttributes>): {
+function transformAttributesToESModel(configuration: Partial<ConfigurationAttributes>): {
   attributes: Partial<ConfigurePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 };
-function transformAttributesToESModel(configuration: Partial<CasesConfigureAttributes>): {
+function transformAttributesToESModel(configuration: Partial<ConfigurationAttributes>): {
   attributes: Partial<ConfigurePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {

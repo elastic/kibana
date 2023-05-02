@@ -17,21 +17,21 @@ import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
-  CasesConfigurationsResponse,
-  CasesConfigureAttributes,
-  CasesConfigurePatch,
-  CasesConfigureRequest,
-  CasesConfigureResponse,
+  Configurations,
+  ConfigurationAttributes,
+  ConfigurationPatchRequest,
+  ConfigurationRequest,
+  Configuration,
   ConnectorMappings,
   ConnectorMappingsAttributes,
-  GetConfigureFindRequest,
+  GetConfigurationFindRequest,
 } from '../../../common/api';
 import {
-  CaseConfigurationsResponseRt,
-  CaseConfigureResponseRt,
-  CasesConfigurePatchRt,
+  ConfigurationsRt,
+  ConfigurationRt,
+  ConfigurationPatchRequestRt,
   excess,
-  GetConfigureFindRequestRt,
+  GetConfigurationFindRequestRt,
   throwErrors,
 } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
@@ -71,7 +71,7 @@ export interface ConfigureSubClient {
   /**
    * Retrieves the external connector configuration for a particular case owner.
    */
-  get(params: GetConfigureFindRequest): Promise<ICasesConfigureResponse | {}>;
+  get(params: GetConfigurationFindRequest): Promise<ICasesConfigureResponse | {}>;
   /**
    * Retrieves the valid external connectors supported by the cases plugin.
    */
@@ -121,20 +121,20 @@ export const createConfigurationSubClient = (
   casesInternalClient: CasesClientInternal
 ): ConfigureSubClient => {
   return Object.freeze({
-    get: (params: GetConfigureFindRequest) => get(params, clientArgs, casesInternalClient),
+    get: (params: GetConfigurationFindRequest) => get(params, clientArgs, casesInternalClient),
     getConnectors: () => getConnectors(clientArgs),
-    update: (configurationId: string, configuration: CasesConfigurePatch) =>
+    update: (configurationId: string, configuration: ConfigurationPatchRequest) =>
       update(configurationId, configuration, clientArgs, casesInternalClient),
-    create: (configuration: CasesConfigureRequest) =>
+    create: (configuration: ConfigurationRequest) =>
       create(configuration, clientArgs, casesInternalClient),
   });
 };
 
 async function get(
-  params: GetConfigureFindRequest,
+  params: GetConfigurationFindRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
-): Promise<CasesConfigurationsResponse> {
+): Promise<Configurations> {
   const {
     unsecuredSavedObjectsClient,
     services: { caseConfigureService },
@@ -143,7 +143,7 @@ async function get(
   } = clientArgs;
   try {
     const queryParams = pipe(
-      excess(GetConfigureFindRequestRt).decode(params),
+      excess(GetConfigurationFindRequestRt).decode(params),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
@@ -171,7 +171,7 @@ async function get(
 
     const configurations = await pMap(
       myCaseConfigure.saved_objects,
-      async (configuration: SavedObject<CasesConfigureAttributes>) => {
+      async (configuration: SavedObject<ConfigurationAttributes>) => {
         const { connector, ...caseConfigureWithoutConnector } = configuration?.attributes ?? {
           connector: null,
         };
@@ -201,7 +201,7 @@ async function get(
       }
     );
 
-    return CaseConfigurationsResponseRt.encode(configurations);
+    return ConfigurationsRt.encode(configurations);
   } catch (error) {
     throw createCaseError({ message: `Failed to get case configure: ${error}`, error, logger });
   }
@@ -238,10 +238,10 @@ function isConnectorSupported(
 
 async function update(
   configurationId: string,
-  req: CasesConfigurePatch,
+  req: ConfigurationPatchRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
-): Promise<CasesConfigureResponse> {
+): Promise<Configuration> {
   const {
     services: { caseConfigureService },
     logger,
@@ -252,7 +252,7 @@ async function update(
 
   try {
     const request = pipe(
-      CasesConfigurePatchRt.decode(req),
+      ConfigurationPatchRequestRt.decode(req),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
@@ -266,7 +266,7 @@ async function update(
      * The owner attribute should not be allowed.
      */
     pipe(
-      excess(CasesConfigurePatchRt.types[0]).decode(queryWithoutVersion),
+      excess(ConfigurationPatchRequestRt.types[0]).decode(queryWithoutVersion),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
@@ -333,7 +333,7 @@ async function update(
       originalConfiguration: configuration,
     });
 
-    return CaseConfigureResponseRt.encode({
+    return ConfigurationRt.encode({
       ...configuration.attributes,
       ...patch.attributes,
       connector: patch.attributes.connector ?? configuration.attributes.connector,
@@ -352,10 +352,10 @@ async function update(
 }
 
 async function create(
-  configuration: CasesConfigureRequest,
+  configuration: ConfigurationRequest,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
-): Promise<CasesConfigureResponse> {
+): Promise<Configuration> {
   const {
     unsecuredSavedObjectsClient,
     services: { caseConfigureService },
@@ -395,7 +395,7 @@ async function create(
     );
 
     if (myCaseConfigure.saved_objects.length > 0) {
-      const deleteConfigurationMapper = async (c: SavedObject<CasesConfigureAttributes>) =>
+      const deleteConfigurationMapper = async (c: SavedObject<ConfigurationAttributes>) =>
         caseConfigureService.delete({
           unsecuredSavedObjectsClient,
           configurationId: c.id,
@@ -443,7 +443,7 @@ async function create(
       id: savedObjectID,
     });
 
-    return CaseConfigureResponseRt.encode({
+    return ConfigurationRt.encode({
       ...post.attributes,
       // Reserve for future implementations
       connector: post.attributes.connector,

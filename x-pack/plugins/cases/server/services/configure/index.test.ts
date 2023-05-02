@@ -7,8 +7,8 @@
 
 import type {
   CaseConnector,
-  CasesConfigureAttributes,
-  CasesConfigurePatch,
+  ConfigurationAttributes,
+  ConfigurationPatchRequest,
 } from '../../../common/api';
 import { ConnectorTypes } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
@@ -47,13 +47,11 @@ const basicConfigFields = {
   },
 };
 
-const createConfigUpdateParams = (
-  connector?: CaseConnector
-): Partial<CasesConfigureAttributes> => ({
+const createConfigUpdateParams = (connector?: CaseConnector): Partial<ConfigurationAttributes> => ({
   connector,
 });
 
-const createConfigPostParams = (connector: CaseConnector): CasesConfigureAttributes => ({
+const createConfigPostParams = (connector: CaseConnector): ConfigurationAttributes => ({
   ...basicConfigFields,
   connector,
 });
@@ -152,14 +150,14 @@ describe('CaseConfigureService', () => {
     describe('patch', () => {
       it('creates the update attributes with the fields that were passed in', async () => {
         unsecuredSavedObjectsClient.update.mockReturnValue(
-          Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+          Promise.resolve({} as SavedObjectsUpdateResponse<ConfigurationPatchRequest>)
         );
 
         await service.patch({
           configurationId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createConfigPostParams(createJiraConnector()),
-          originalConfiguration: {} as SavedObject<CasesConfigureAttributes>,
+          originalConfiguration: {} as SavedObject<ConfigurationAttributes>,
         });
 
         const { connector: ignoreConnector, ...restUpdateAttributes } = unsecuredSavedObjectsClient
@@ -187,14 +185,14 @@ describe('CaseConfigureService', () => {
 
       it('transforms the connector.fields to an array of key/value pairs', async () => {
         unsecuredSavedObjectsClient.update.mockReturnValue(
-          Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+          Promise.resolve({} as SavedObjectsUpdateResponse<ConfigurationPatchRequest>)
         );
 
         await service.patch({
           configurationId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createConfigPostParams(createJiraConnector()),
-          originalConfiguration: {} as SavedObject<CasesConfigureAttributes>,
+          originalConfiguration: {} as SavedObject<ConfigurationAttributes>,
         });
 
         const { connector } = unsecuredSavedObjectsClient.update.mock
@@ -220,14 +218,14 @@ describe('CaseConfigureService', () => {
 
       it('preserves the connector fields but does not include the id', async () => {
         unsecuredSavedObjectsClient.update.mockReturnValue(
-          Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+          Promise.resolve({} as SavedObjectsUpdateResponse<ConfigurationPatchRequest>)
         );
 
         await service.patch({
           configurationId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createConfigPostParams(createJiraConnector()),
-          originalConfiguration: {} as SavedObject<CasesConfigureAttributes>,
+          originalConfiguration: {} as SavedObject<ConfigurationAttributes>,
         });
 
         const { connector } = unsecuredSavedObjectsClient.update.mock
@@ -258,14 +256,14 @@ describe('CaseConfigureService', () => {
 
       it('moves the connector.id to the references', async () => {
         unsecuredSavedObjectsClient.update.mockReturnValue(
-          Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+          Promise.resolve({} as SavedObjectsUpdateResponse<ConfigurationPatchRequest>)
         );
 
         await service.patch({
           configurationId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createConfigPostParams(createJiraConnector()),
-          originalConfiguration: {} as SavedObject<CasesConfigureAttributes>,
+          originalConfiguration: {} as SavedObject<ConfigurationAttributes>,
         });
 
         const updateAttributes = unsecuredSavedObjectsClient.update.mock
@@ -288,7 +286,7 @@ describe('CaseConfigureService', () => {
 
       it('moves the connector.id to the references and includes the existing references', async () => {
         unsecuredSavedObjectsClient.update.mockReturnValue(
-          Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+          Promise.resolve({} as SavedObjectsUpdateResponse<ConfigurationPatchRequest>)
         );
 
         await service.patch({
@@ -297,7 +295,7 @@ describe('CaseConfigureService', () => {
           updatedAttributes: createConfigPostParams(createJiraConnector()),
           originalConfiguration: {
             references: [{ id: '123', name: 'awesome', type: 'hello' }],
-          } as SavedObject<CasesConfigureAttributes>,
+          } as SavedObject<ConfigurationAttributes>,
         });
 
         const updateOptions = unsecuredSavedObjectsClient.update.mock
@@ -320,7 +318,7 @@ describe('CaseConfigureService', () => {
 
       it('does not remove the connector.id reference when the update attributes do not include it', async () => {
         unsecuredSavedObjectsClient.update.mockReturnValue(
-          Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+          Promise.resolve({} as SavedObjectsUpdateResponse<ConfigurationPatchRequest>)
         );
 
         await service.patch({
@@ -331,7 +329,7 @@ describe('CaseConfigureService', () => {
             references: [
               { id: '123', name: CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
             ],
-          } as SavedObject<CasesConfigureAttributes>,
+          } as SavedObject<ConfigurationAttributes>,
         });
 
         const updateOptions = unsecuredSavedObjectsClient.update.mock
@@ -349,14 +347,14 @@ describe('CaseConfigureService', () => {
 
       it('creates an empty update object and null reference when there is no connector', async () => {
         unsecuredSavedObjectsClient.update.mockReturnValue(
-          Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+          Promise.resolve({} as SavedObjectsUpdateResponse<ConfigurationPatchRequest>)
         );
 
         await service.patch({
           configurationId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createConfigUpdateParams(),
-          originalConfiguration: {} as SavedObject<CasesConfigureAttributes>,
+          originalConfiguration: {} as SavedObject<ConfigurationAttributes>,
         });
 
         expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(
@@ -372,14 +370,14 @@ describe('CaseConfigureService', () => {
 
       it('creates an update object with the none connector', async () => {
         unsecuredSavedObjectsClient.update.mockReturnValue(
-          Promise.resolve({} as SavedObjectsUpdateResponse<CasesConfigurePatch>)
+          Promise.resolve({} as SavedObjectsUpdateResponse<ConfigurationPatchRequest>)
         );
 
         await service.patch({
           configurationId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createConfigUpdateParams(getNoneCaseConnector()),
-          originalConfiguration: {} as SavedObject<CasesConfigureAttributes>,
+          originalConfiguration: {} as SavedObject<ConfigurationAttributes>,
         });
 
         expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -488,7 +486,7 @@ describe('CaseConfigureService', () => {
         });
 
         const postAttributes = unsecuredSavedObjectsClient.create.mock
-          .calls[0][1] as CasesConfigureAttributes;
+          .calls[0][1] as ConfigurationAttributes;
         expect(postAttributes.connector).toMatchInlineSnapshot(`
           Object {
             "fields": Array [],
@@ -527,7 +525,7 @@ describe('CaseConfigureService', () => {
           configurationId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createConfigUpdateParams(),
-          originalConfiguration: {} as SavedObject<CasesConfigureAttributes>,
+          originalConfiguration: {} as SavedObject<ConfigurationAttributes>,
         });
 
         expect(res.attributes).toMatchInlineSnapshot(`
@@ -552,7 +550,7 @@ describe('CaseConfigureService', () => {
           configurationId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createConfigUpdateParams(),
-          originalConfiguration: {} as SavedObject<CasesConfigureAttributes>,
+          originalConfiguration: {} as SavedObject<ConfigurationAttributes>,
         });
 
         expect(res).toMatchInlineSnapshot(`
@@ -584,7 +582,7 @@ describe('CaseConfigureService', () => {
           configurationId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createConfigUpdateParams(),
-          originalConfiguration: {} as SavedObject<CasesConfigureAttributes>,
+          originalConfiguration: {} as SavedObject<ConfigurationAttributes>,
         });
 
         expect(res.attributes.connector).toMatchInlineSnapshot(`
@@ -606,7 +604,7 @@ describe('CaseConfigureService', () => {
           configurationId: '1',
           unsecuredSavedObjectsClient,
           updatedAttributes: createConfigUpdateParams(),
-          originalConfiguration: {} as SavedObject<CasesConfigureAttributes>,
+          originalConfiguration: {} as SavedObject<ConfigurationAttributes>,
         });
 
         expect(res.attributes.connector).toMatchInlineSnapshot(`

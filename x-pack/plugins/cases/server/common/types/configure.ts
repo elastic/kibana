@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core/server';
+import type { ConfigurationAttributes } from '../../../common/api';
 import type { ConnectorPersisted } from './connectors';
 import type { User } from './user';
 
@@ -17,3 +19,6 @@ export interface ConfigurePersistedAttributes {
   updated_at: string | null;
   updated_by: User | null;
 }
+
+export type ConfigurationTransformedAttributes = ConfigurationAttributes;
+export type ConfigurationSavedObjectTransformed = SavedObject<ConfigurationTransformedAttributes>;

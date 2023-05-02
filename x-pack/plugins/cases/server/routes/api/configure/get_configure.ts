@@ -6,7 +6,7 @@
  */
 
 import { CASE_CONFIGURE_URL } from '../../../../common/constants';
-import type { GetConfigureFindRequest } from '../../../../common/api';
+import type { GetConfigurationFindRequest } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 
@@ -17,7 +17,7 @@ export const getCaseConfigureRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
-      const options = request.query as GetConfigureFindRequest;
+      const options = request.query as GetConfigurationFindRequest;
 
       return response.ok({
         body: await client.configure.get({ ...options }),

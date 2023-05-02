@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import type { CasesConfigurePatch } from '../../../../common/api';
+import type { ConfigurationPatchRequest } from '../../../../common/api';
 import { CaseConfigureRequestParamsRt, throwErrors, excess } from '../../../../common/api';
 import { CASE_CONFIGURE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -28,7 +28,7 @@ export const patchCaseConfigureRoute = createCasesRoute({
 
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
-      const configuration = request.body as CasesConfigurePatch;
+      const configuration = request.body as ConfigurationPatchRequest;
 
       return response.ok({
         body: await client.configure.update(params.configuration_id, configuration),

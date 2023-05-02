@@ -16,7 +16,7 @@ import type {
   ActionConnector,
   Case,
   ExternalServiceResponse,
-  CasesConfigureAttributes,
+  ConfigurationAttributes,
   CommentRequestAlertType,
   CommentAttributes,
 } from '../../../common/api';
@@ -41,7 +41,7 @@ import type { ICaseResponse } from '../typedoc_interfaces';
  * Returns true if the case should be closed based on the configuration settings.
  */
 function shouldCloseByPush(
-  configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>
+  configureSettings: SavedObjectsFindResponse<ConfigurationAttributes>
 ): boolean {
   return (
     configureSettings.total > 0 &&

@@ -7,7 +7,7 @@
 
 import type { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { CasesConfigureAttributes } from '../../../common/api';
+import type { ConfigurationAttributes } from '../../../common/api';
 import { ConnectorTypes } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
@@ -99,7 +99,7 @@ describe('configuration migrations', () => {
     it('does not modify the other attributes of the saved object', () => {
       const config = createConnectorAttributeMigration(create_7_9_0_configSchema());
 
-      const configAttributes = config as SavedObjectSanitizedDoc<CasesConfigureAttributes>;
+      const configAttributes = config as SavedObjectSanitizedDoc<ConfigurationAttributes>;
       expect(configAttributes.attributes.created_by.email).toEqual('test@test.com');
     });
 

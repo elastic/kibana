@@ -32,7 +32,7 @@ import {
   Cases,
   CasesFindResponse,
   CasesPatchRequest,
-  CasesConfigurePatch,
+  ConfigurationPatchRequest,
   CasesStatusResponse,
   CasesConfigurationsResponse,
   AlertResponse,
@@ -464,7 +464,7 @@ export type CreateConnectorResponse = Omit<ActionResult, 'actionTypeId'> & {
 export const updateConfiguration = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   id: string,
-  req: CasesConfigurePatch,
+  req: ConfigurationPatchRequest,
   expectedHttpCode: number = 200,
   auth: { user: User; space: string | null } | null = { user: superUser, space: null },
   headers: Record<string, unknown> = {}
