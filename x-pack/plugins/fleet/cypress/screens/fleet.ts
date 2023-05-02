@@ -113,11 +113,20 @@ export const AGENT_POLICY_FORM = {
 export const FLEET_AGENT_LIST_PAGE = {
   TABLE: 'fleetAgentListTable',
   STATUS_FILTER: 'agentList.statusFilter',
+  TAGS_FILTER: 'agentList.tagsFilter',
   POLICY_FILTER: 'agentList.policyFilter',
   QUERY_INPUT: 'agentList.queryInput',
   SHOW_UPGRADEABLE: 'agentList.showUpgradeable',
   CHECKBOX_SELECT_ALL: 'checkboxSelectAll',
   BULK_ACTIONS_BUTTON: 'agentBulkActionsButton',
+  ACTIVITY_BUTTON: 'agentActivityButton',
+  ACTIVITY_FLYOUT: {
+    FLYOUT_ID: 'agentActivityFlyout',
+    CLOSE_BUTTON: 'euiFlyoutCloseButton',
+  },
+  BULK_ACTIONS: {
+    ADD_REMOVE_TAG_INPUT: 'addRemoveTags',
+  },
 };
 
 export const FLEET_SERVER_HOST_FLYOUT = {
