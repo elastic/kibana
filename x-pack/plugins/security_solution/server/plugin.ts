@@ -238,6 +238,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       lists: plugins.lists,
       logger: this.logger,
       config: this.config,
+      publicBaseUrl: core.http.basePath.publicBaseUrl,
       ruleDataClient,
       ruleExecutionLoggerFactory: ruleExecutionLogService.createClientForExecutors,
       version: pluginContext.env.packageInfo.version,

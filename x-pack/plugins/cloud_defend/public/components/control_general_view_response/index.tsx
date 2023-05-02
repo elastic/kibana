@@ -29,7 +29,12 @@ import {
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import { useStyles as useSelectorStyles } from '../control_general_view_selector/styles';
-import { ControlGeneralViewResponseDeps, ResponseAction } from '../../types';
+import {
+  ControlGeneralViewResponseDeps,
+  ResponseAction,
+  Response,
+  ControlFormErrorMap,
+} from '../../types';
 import * as i18n from '../control_general_view/translations';
 import { getSelectorTypeIcon } from '../../common/utils';
 
@@ -59,6 +64,21 @@ export const ControlGeneralViewResponse = ({
   const [accordionState, setAccordionState] = useState<'open' | 'closed'>(
     responses.length - 1 === index ? 'open' : 'closed'
   );
+  const onResponseChange = useCallback(
+    (resp: Response, i: number) => {
+      const hasMatch = resp.match.length > 0;
+      const hasActions = resp.actions.length > 0;
+
+      if (!hasMatch || !hasActions) {
+        resp.hasErrors = true;
+      } else {
+        delete resp.hasErrors;
+      }
+
+      onChange(resp, i);
+    },
+    [onChange]
+  );
 
   const onTogglePopover = useCallback(() => {
     setPopoverOpen(!isPopoverOpen);
@@ -81,15 +101,10 @@ export const ControlGeneralViewResponse = ({
   const onChangeMatches = useCallback(
     (options) => {
       response.match = options.map((option: EuiComboBoxOptionOption) => option.value);
-      if (response.match.length === 0) {
-        response.hasErrors = true;
-      } else {
-        delete response.hasErrors; // keeps it out of the yaml.
-      }
 
-      onChange(response, index);
+      onResponseChange(response, index);
     },
-    [index, onChange, response]
+    [index, onResponseChange, response]
   );
 
   const onChangeExcludes = useCallback(
@@ -100,9 +115,9 @@ export const ControlGeneralViewResponse = ({
         delete response.exclude;
       }
 
-      onChange(response, index);
+      onResponseChange(response, index);
     },
-    [index, onChange, response]
+    [index, onResponseChange, response]
   );
 
   const selectorOptions = useMemo(() => {
@@ -142,8 +157,8 @@ export const ControlGeneralViewResponse = ({
   const onShowExclude = useCallback(() => {
     const updatedResponse = { ...response };
     updatedResponse.exclude = [];
-    onChange(updatedResponse, index);
-  }, [index, onChange, response]);
+    onResponseChange(updatedResponse, index);
+  }, [index, onResponseChange, response]);
 
   const logSelected = response.actions.includes('log');
   const alertSelected = response.actions.includes('alert');
@@ -170,20 +185,24 @@ export const ControlGeneralViewResponse = ({
         updatedResponse.actions.splice(actionIndex, 1);
       }
 
-      onChange(updatedResponse, index);
+      onResponseChange(updatedResponse, index);
     },
-    [index, onChange, response]
+    [index, onResponseChange, response]
   );
 
   const errors = useMemo(() => {
-    const errs: string[] = [];
+    const errs: ControlFormErrorMap = {};
 
     if (response.match.length === 0) {
-      errs.push(i18n.errorValueRequired);
+      errs.match = [i18n.errorValueRequired];
+    }
+
+    if (response.actions.length === 0) {
+      errs.actions = [i18n.errorActionRequired];
     }
 
     return errs;
-  }, [response.match.length]);
+  }, [response.actions.length, response.match.length]);
 
   const onToggleAccordion = useCallback((isOpen: boolean) => {
     setAccordionState(isOpen ? 'open' : 'closed');
@@ -204,6 +223,8 @@ export const ControlGeneralViewResponse = ({
       remainingNames: response.match.slice(titleThresholdCollapsed).join(','),
     };
   }, [accordionState, response.match]);
+
+  const errorList = useMemo(() => Object.values(errors), [errors]);
 
   return (
     <EuiAccordion
@@ -296,8 +317,8 @@ export const ControlGeneralViewResponse = ({
         </EuiFlexGroup>
       }
     >
-      <EuiForm component="form" fullWidth error={errors} isInvalid={errors.length > 0}>
-        <EuiFormRow label={i18n.matchSelectors} fullWidth isInvalid={errors.length > 0}>
+      <EuiForm component="form" fullWidth error={errorList} isInvalid={errorList.length > 0}>
+        <EuiFormRow label={i18n.matchSelectors} fullWidth isInvalid={!!errors.match}>
           <EuiComboBox
             aria-label={i18n.matchSelectors}
             fullWidth
@@ -333,7 +354,7 @@ export const ControlGeneralViewResponse = ({
           </EuiButtonEmpty>
         )}
         <EuiSpacer size="m" />
-        <EuiFormRow label={i18n.actions} fullWidth>
+        <EuiFormRow label={i18n.actions} fullWidth isInvalid={!!errors.actions}>
           <EuiFlexGroup direction="row" gutterSize="l">
             <EuiFlexItem grow={false}>
               <EuiCheckbox

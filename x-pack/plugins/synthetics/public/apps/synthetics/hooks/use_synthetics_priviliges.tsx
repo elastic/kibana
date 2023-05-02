@@ -12,13 +12,20 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiButton,
   EuiMarkdownFormat,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { selectOverviewStatus } from '../state/overview_status';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
+import {
+  LICENSE_MISSING_ERROR,
+  LICENSE_NOT_ACTIVE_ERROR,
+  LICENSE_NOT_SUPPORTED_ERROR,
+  SYNTHETICS_INDEX_PATTERN,
+} from '../../../../common/constants';
+import { useSyntheticsSettingsContext } from '../contexts';
 
 export const useSyntheticsPrivileges = () => {
   const { error } = useSelector(selectOverviewStatus);
@@ -32,6 +39,24 @@ export const useSyntheticsPrivileges = () => {
       >
         <EuiFlexItem grow={false}>
           <Unprivileged unprivilegedIndices={[SYNTHETICS_INDEX_PATTERN]} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+  if (
+    error?.body?.message &&
+    [LICENSE_NOT_ACTIVE_ERROR, LICENSE_MISSING_ERROR, LICENSE_NOT_SUPPORTED_ERROR].includes(
+      error?.body?.message
+    )
+  ) {
+    return (
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="center"
+        style={{ height: 'calc(100vh - 150px)' }}
+      >
+        <EuiFlexItem grow={false}>
+          <LicenseExpired />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -77,3 +102,40 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
     }
   />
 );
+
+const LicenseExpired = () => {
+  const { basePath } = useSyntheticsSettingsContext();
+  return (
+    <EuiEmptyPrompt
+      data-test-subj="syntheticsUnprivileged"
+      iconType="warning"
+      iconColor="warning"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.synthetics.license.invalidLicenseTitle"
+            defaultMessage="Invalid License"
+          />
+        </h2>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.synthetics.license.invalidLicenseDescription"
+            defaultMessage="The Synthetics UI is not available because your current license has expired or is no longer valid."
+          />
+        </p>
+      }
+      actions={[
+        <EuiButton
+          data-test-subj="apmInvalidLicenseNotificationManageYourLicenseButton"
+          href={basePath + '/app/management/stack/license_management'}
+        >
+          {i18n.translate('xpack.synthetics.invalidLicense.licenseManagementLink', {
+            defaultMessage: 'Manage your license',
+          })}
+        </EuiButton>,
+      ]}
+    />
+  );
+};

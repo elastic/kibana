@@ -72,6 +72,7 @@ import {
   ResultsView,
   Sorting,
 } from './search_ui_components';
+import '../search_application_layout.scss';
 
 class InternalEngineTransporter implements Transporter {
   constructor(
@@ -313,6 +314,8 @@ export const EngineSearchPreview: React.FC = () => {
       pageViewTelemetry={EngineViewTabs.PREVIEW}
       isLoading={isLoadingEngine}
       pageHeader={{
+        bottomBorder: false,
+        className: 'searchApplicationHeaderBackgroundColor',
         pageTitle: (
           <FormattedMessage
             id="xpack.enterpriseSearch.content.engine.searchPreview.pageTitle"
