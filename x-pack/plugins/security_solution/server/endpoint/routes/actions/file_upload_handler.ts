@@ -6,8 +6,11 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { createFile, deleteFile } from '../../services';
-import type { UploadActionParams } from '../../../../common/endpoint/types';
+import { createFile, deleteFile, setFileActionId } from '../../services';
+import type {
+  ResponseActionUploadParameters,
+  ResponseActionUploadOutputContent,
+} from '../../../../common/endpoint/types';
 import { UPLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import {
   type UploadActionRequestBody,
@@ -65,7 +68,7 @@ export const getActionFileUploadHandler = (
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const fileStream = req.body.file as HapiReadableStream;
     const { file: _, parameters: userParams, ...actionPayload } = req.body;
-    const uploadParameters: UploadActionParams = {
+    const uploadParameters: ResponseActionUploadParameters = {
       ...userParams,
       file: {
         file_id: '',
@@ -96,7 +99,7 @@ export const getActionFileUploadHandler = (
       const casesClient = await endpointContext.service.getCasesClient(req);
       const { action: actionId, ...data } = await endpointContext.service
         .getActionCreateService()
-        .createAction(
+        .createAction<ResponseActionUploadOutputContent, ResponseActionUploadParameters>(
           {
             ...actionPayload,
             parameters: uploadParameters,
@@ -105,6 +108,8 @@ export const getActionFileUploadHandler = (
           },
           casesClient
         );
+
+      await setFileActionId(esClient, logger, data);
 
       return res.ok({
         body: {
@@ -118,7 +123,10 @@ export const getActionFileUploadHandler = (
         try {
           await deleteFile(esClient, logger, uploadParameters.file.file_id);
         } catch (e) {
-          logger.error(`Attempt to clean up created file failed; ${e.message}`, e);
+          logger.error(
+            `Attempt to clean up file (after action creation was unsuccessful) failed; ${e.message}`,
+            e
+          );
         }
       }
 
