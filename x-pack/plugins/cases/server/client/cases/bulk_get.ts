@@ -71,18 +71,12 @@ export const bulkGet = async (
         operation: Operations.bulkGetCases,
       });
 
-    const requestForTotals = ['totalComment', 'totalAlerts'].some(
-      (totalKey) => !fields || fields.includes(totalKey)
-    );
-
-    const commentTotals = requestForTotals
-      ? await attachmentService.getter.getCaseCommentStats({
-          caseIds: authorizedCases.map((theCase) => theCase.id),
-        })
-      : new Map();
+    const commentTotals = await attachmentService.getter.getCaseCommentStats({
+      caseIds: authorizedCases.map((theCase) => theCase.id),
+    });
 
     const flattenedCases = authorizedCases.map((theCase) => {
-      const { alerts, userComments } = commentTotals.get(theCase.id) ?? {
+      const { userComments } = commentTotals.get(theCase.id) ?? {
         alerts: 0,
         userComments: 0,
       };
@@ -90,7 +84,6 @@ export const bulkGet = async (
       const flattenedCase = flattenCaseSavedObject({
         savedObject: theCase,
         totalComment: userComments,
-        totalAlerts: alerts,
       });
 
       if (!fields?.length) {
