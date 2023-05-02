@@ -21,8 +21,6 @@ import {
   CasesBulkGetResponseFieldsRt,
   CasesFindResponseRt,
   CasesStatusResponseRt,
-  CasesRt,
-  getTypeForCertainFieldsFromArray,
   CasesMetricsResponseRt,
 } from '../../common/api';
 
@@ -42,9 +40,10 @@ export const decodeCasesMetricsResponse = (metrics?: CasesMetricsResponse) =>
   );
 
 export const decodeCasesBulkGetResponse = (res: CasesBulkGetResponse) => {
-  const fields = Object.keys(CasesBulkGetResponseFieldsRt.props);
-  const typeToDecode = getTypeForCertainFieldsFromArray(CasesRt, fields);
-  pipe(typeToDecode.decode(res.cases), fold(throwErrors(createToasterPlainError), identity));
+  pipe(
+    CasesBulkGetResponseFieldsRt.decode(res.cases),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
 
   return res;
 };

@@ -20,10 +20,9 @@ import type {
 import {
   CasesBulkGetRequestRt,
   CasesBulkGetResponseFieldsRt,
-  CasesRt,
   excess,
   throwErrors,
-  getTypeForCertainFieldsFromArray,
+  CasesBulkGetResponseRt,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
@@ -32,6 +31,7 @@ import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
 type CaseSavedObjectWithErrors = SOWithErrors<CaseAttributes>;
+type BulkGetCase = CasesBulkGetResponse['cases'][number];
 
 /**
  * Retrieves multiple cases by ids.
@@ -86,19 +86,13 @@ export const bulkGet = async (
         totalComment: userComments,
       });
 
-      if (!fields?.length) {
-        return flattenedCase;
-      }
-
       return {
-        ...pick(flattenedCase, [...fields, 'id', 'version']),
+        ...(pick(flattenedCase, [...fields, 'id', 'version']) as BulkGetCase),
         totalComments: flattenedCase.totalComment,
       };
     });
 
-    const typeToEncode = getTypeForCertainFieldsFromArray(CasesRt, fields);
-    const casesToReturn = typeToEncode.encode(flattenedCases);
-
+    const casesToReturn = CasesBulkGetResponseRt.props.cases.encode(flattenedCases);
     const errors = constructErrors(soBulkGetErrors, unauthorizedCases);
 
     return { cases: casesToReturn, errors };

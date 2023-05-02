@@ -63,7 +63,7 @@ describe('api', () => {
     it('should have been called with the correct path', async () => {
       await bulkGetCases({ http, params: { ids: ['test'] } });
       expect(http.post).toHaveBeenCalledWith('/internal/cases/_bulk_get', {
-        body: '{"ids":["test"],"fields":["title"]}',
+        body: '{"ids":["test"]}',
       });
     });
   });
