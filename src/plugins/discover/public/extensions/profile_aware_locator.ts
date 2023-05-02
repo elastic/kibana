@@ -6,22 +6,33 @@
  * Side Public License, v 1.
  */
 
-import { LocatorDefinition } from '@kbn/share-plugin/public';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import type {
+  MigrateFunctionsObject,
+  GetMigrationFunctionObjectFn,
+} from '@kbn/kibana-utils-plugin/common';
+import type {
+  LocatorGetUrlParams,
+  FormatSearchParamsOptions,
+  LocatorNavigationParams,
+} from '@kbn/share-plugin/common/url_service';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { DependencyList } from 'react';
 import { matchPath } from 'react-router-dom';
 import { getHistory } from '../kibana_services';
 
-export class ProfileAwareLocatorDefinition<T extends { profile?: string }>
-  implements LocatorDefinition<T>
-{
-  public readonly id: string;
+export class ProfileAwareLocator<T extends { profile?: string }> implements LocatorPublic<T> {
+  id: string;
+  migrations: MigrateFunctionsObject | GetMigrationFunctionObjectFn;
 
-  constructor(private readonly definition: LocatorDefinition<T>) {
-    this.id = definition.id;
+  constructor(private readonly locator: LocatorPublic<T>) {
+    this.id = locator.id;
+    this.migrations = locator.migrations;
   }
 
-  getLocation(params: T) {
+  private injectProfile(params: T) {
     if (params.profile) {
-      return this.definition.getLocation(params);
+      return params;
     }
 
     const history = getHistory();
@@ -36,6 +47,46 @@ export class ProfileAwareLocatorDefinition<T extends { profile?: string }>
       };
     }
 
-    return this.definition.getLocation(params);
+    return params;
+  }
+
+  getLocation(params: T) {
+    return this.locator.getLocation(this.injectProfile(params));
+  }
+
+  getUrl(params: T, getUrlParams?: LocatorGetUrlParams) {
+    return this.locator.getUrl(this.injectProfile(params), getUrlParams);
+  }
+
+  getRedirectUrl(params: T, options?: FormatSearchParamsOptions) {
+    return this.locator.getRedirectUrl(this.injectProfile(params), options);
+  }
+
+  navigate(params: T, navigationParams?: LocatorNavigationParams) {
+    return this.locator.navigate(this.injectProfile(params), navigationParams);
+  }
+
+  navigateSync(params: T, navigationParams?: LocatorNavigationParams) {
+    return this.locator.navigateSync(this.injectProfile(params), navigationParams);
+  }
+
+  useUrl(
+    params: T,
+    getUrlParams?: LocatorGetUrlParams | undefined,
+    deps?: DependencyList | undefined
+  ) {
+    return this.locator.useUrl(this.injectProfile(params), getUrlParams, deps);
+  }
+
+  telemetry(state: T, stats: Record<string, unknown>) {
+    return this.locator.telemetry(this.injectProfile(state), stats);
+  }
+
+  inject(state: T, references: SavedObjectReference[]) {
+    return this.locator.inject(this.injectProfile(state), references);
+  }
+
+  extract(state: T) {
+    return this.locator.extract(this.injectProfile(state));
   }
 }
