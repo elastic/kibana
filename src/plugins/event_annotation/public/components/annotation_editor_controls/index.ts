@@ -7,3 +7,4 @@
  */
 
 export { AnnotationEditorControls } from './annotation_editor_controls';
+export { annotationsIconSet } from './icon_set';

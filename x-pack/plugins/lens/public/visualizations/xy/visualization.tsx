@@ -26,6 +26,7 @@ import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common'
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { isEqual } from 'lodash';
 import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -37,8 +38,8 @@ import {
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import {
+  DataDimensionEditor,
   DataDimensionEditorDataSectionExtra,
-  DimensionEditor,
 } from './xy_config_panel/dimension_editor';
 import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
 import type {
@@ -129,6 +130,7 @@ export const getXyVisualization = ({
   kibanaTheme,
   eventAnnotationService,
   unifiedSearch,
+  dataViewsService,
   savedObjectsTagging,
 }: {
   core: CoreStart;
@@ -140,6 +142,7 @@ export const getXyVisualization = ({
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  dataViewsService: DataViewsPublicPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }): Visualization<State, PersistedState, ExtraAppendLayerArg> => ({
   id: XY_ID,
@@ -641,9 +644,9 @@ export const getXyVisualization = ({
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} />
     ) : isAnnotationsLayer(layer) ? (
-      <AnnotationsPanel {...allProps} />
+      <AnnotationsPanel {...allProps} dataViewsService={dataViewsService} />
     ) : (
-      <DimensionEditor {...allProps} />
+      <DataDimensionEditor {...allProps} />
     );
 
     render(

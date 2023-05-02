@@ -12,6 +12,7 @@ import {
   defaultAnnotationRangeColor,
   isQueryAnnotationConfig,
   isRangeAnnotationConfig,
+  annotationsIconSet,
 } from '@kbn/event-annotation-plugin/public';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
@@ -20,7 +21,6 @@ import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
 import { isDraggedDataViewField } from '../../../utils';
 import type { FramePublicAPI, Visualization } from '../../../types';
 import { isHorizontalChart } from '../state_helpers';
-import { annotationsIconSet } from '../xy_config_panel/annotations_config_panel/icon_set';
 import type { XYState, XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../types';
 import {
   checkScaleOperation,

@@ -29,7 +29,7 @@
     "@kbn/data-views-plugin",
     "@kbn/visualization-ui-components",
     "@kbn/chart-icons",
-    "@kbn/unified-field-list"
+    "@kbn/unified-field-list-plugin"
   ],
   "exclude": [
     "target/**/*",

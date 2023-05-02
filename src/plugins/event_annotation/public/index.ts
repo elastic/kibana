@@ -21,3 +21,4 @@ export {
   isManualPointAnnotationConfig,
   isQueryAnnotationConfig,
 } from './event_annotation_service/helpers';
+export { AnnotationEditorControls, annotationsIconSet } from './components';
