@@ -9,17 +9,16 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
+    "../../../typings/**/*"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/config-schema",
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
-    "@kbn/management-plugin",
-    "@kbn/serverless-project-switcher",
-    "@kbn/serverless-types",
-    "@kbn/utils",
+    "@kbn/config-schema",
+    "@kbn/security-plugin",
+    "@kbn/security-solution-plugin",
+    "@kbn/serverless",
   ]
 }
