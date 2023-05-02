@@ -44,7 +44,6 @@ export function FiltersNotificationPopoverContents({ context }: FiltersNotificat
     Promise.all([
       (embeddable as IEmbeddable & FilterableEmbeddable).getFilters(),
       (embeddable as IEmbeddable & FilterableEmbeddable).getQuery(),
-      new Promise<void>((res) => setTimeout(() => res(), 1000)),
     ]).then(([embeddableFilters, embeddableQuery]) => {
       setFilters(embeddableFilters);
       if (embeddableQuery) {
@@ -56,7 +55,6 @@ export function FiltersNotificationPopoverContents({ context }: FiltersNotificat
           setQueryString(embeddableQuery[language as keyof AggregateQuery]);
         }
       }
-      console.log('set loading');
       setIsLoading(false);
     });
   });
