@@ -16,7 +16,29 @@ export const getSourcererDataView = async (
 ): Promise<SourcererDataView> => {
   const dataViewData = await dataViewsService.get(dataViewId, true, refreshFields);
   const defaultPatternsList = ensurePatternFormat(dataViewData.getIndexPattern().split(','));
-  const patternList = defaultPatternsList;
+  let patternList = [];
+
+  try {
+    for (const pattern of defaultPatternsList) {
+      let indexExist = false;
+      try {
+        await dataViewsService.getFieldsForWildcard({
+          type: dataViewData.type,
+          rollupIndex: dataViewData?.typeMeta?.params?.rollup_index,
+          allowNoIndex: false,
+          pattern,
+        });
+        indexExist = true;
+      } catch {
+        indexExist = false;
+      }
+      if (indexExist) {
+        patternList.push(pattern);
+      }
+    }
+  } catch (exc) {
+    patternList = defaultPatternsList;
+  }
 
   return {
     loading: false,
