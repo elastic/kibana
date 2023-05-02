@@ -80,12 +80,7 @@ export function useCloneSlo() {
         );
       },
       onSuccess: () => {
-        if (
-          queryClient.getQueryCache().find(['fetchSloList'], { exact: false })?.options // @ts-ignore
-            .refetchInterval === undefined
-        ) {
-          queryClient.invalidateQueries(['fetchSloList'], { exact: false });
-        }
+        queryClient.invalidateQueries(['fetchSloList'], { exact: false });
       },
     }
   );
