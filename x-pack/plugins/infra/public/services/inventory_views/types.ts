@@ -10,7 +10,7 @@ import {
   CreateInventoryViewAttributesRequestPayload,
   UpdateInventoryViewAttributesRequestPayload,
 } from '../../../common/http_api/latest';
-import { InventoryView } from '../../../common/inventory_views';
+import type { InventoryView } from '../../../common/inventory_views';
 
 export type InventoryViewsServiceSetup = void;
 
