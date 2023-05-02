@@ -166,319 +166,6 @@ describe('#validate', () => {
       },
     });
   });
-
-  test(`allowUnknowns allows top-level unknown fields`, () => {
-    const type = schema.object({
-      foo: schema.string(),
-    });
-
-    const value = {
-      foo: 'hello world',
-      baz: 'hello world',
-    };
-
-    type.extendsDeep({ unknowns: 'allow' }).validate(value, undefined, undefined);
-  });
-
-  test(`allowUnknowns allows top-level unknown fields and overrides schema options`, () => {
-    const type = schema.object(
-      {
-        foo: schema.string(),
-      },
-      { unknowns: 'forbid' }
-    );
-
-    const value = {
-      foo: 'hello world',
-      baz: 'hello world',
-    };
-
-    type.extendsDeep({ unknowns: 'allow' }).validate(value, undefined, undefined);
-  });
-
-  test(`allowUnknowns allows nested unknown fields`, () => {
-    const type = schema.object({
-      foo: schema.object({
-        foo: schema.string(),
-      }),
-    });
-    const value = {
-      foo: {
-        foo: 'hello world',
-        baz: 'hello world',
-      },
-    };
-
-    type.extendsDeep({ unknowns: 'allow' }).validate(value, undefined, undefined);
-  });
-
-  test(`allowUnknowns allows nested unknown fields and overrides schema options`, () => {
-    const type = schema.object({
-      foo: schema.object(
-        {
-          foo: schema.string(),
-        },
-        { unknowns: 'forbid' }
-      ),
-    });
-    const value = {
-      foo: {
-        foo: 'hello world',
-        baz: 'hello world',
-      },
-    };
-
-    type.extendsDeep({ unknowns: 'allow' }).validate(value, undefined, undefined);
-  });
-
-  // test(`allowUnknowns=false disallows top-level unknown fields`, () => {
-  //   const type = schema.object({
-  //     foo: schema.string(),
-  //   });
-
-  //   const value = {
-  //     foo: 'hello world',
-  //     baz: 'hello world',
-  //   };
-
-  //   expect(() => {
-  //     type.validate(value, undefined, undefined);
-  //   }).toThrowErrorMatchingInlineSnapshot(`"[baz]: definition for this key is missing"`);
-  // });
-
-  // test(`allowUnknowns=false allows top-level unknown fields when schema option unknowns=allow`, () => {
-  //   const type = schema.object(
-  //     {
-  //       foo: schema.string(),
-  //     },
-  //     { unknowns: 'allow' }
-  //   );
-
-  //   const value = {
-  //     foo: 'hello world',
-  //     baz: 'hello world',
-  //   };
-
-  //   type.validate(value, undefined, undefined);
-  // });
-
-  test(`allowUnknowns=false disallows nested unknown fields`, () => {
-    const type = schema.object({
-      bar: schema.object({
-        foo: schema.string(),
-      }),
-    });
-
-    const value = {
-      bar: {
-        foo: 'hello world',
-        baz: 'hello world',
-      },
-    };
-
-    expect(() => {
-      type.validate(value, undefined, undefined);
-    }).toThrowErrorMatchingInlineSnapshot(`"[bar.baz]: definition for this key is missing"`);
-  });
-
-  test(`allowUnknowns=false allows nested unknown fields when schema option unknowns=allow`, () => {
-    const type = schema.object({
-      bar: schema.object(
-        {
-          foo: schema.string(),
-        },
-        { unknowns: 'allow' }
-      ),
-    });
-
-    const value = {
-      bar: {
-        foo: 'hello world',
-        baz: 'hello world',
-      },
-    };
-
-    expect(() => {
-      type.extendsDeep({ unknowns: 'forbid' }).validate(value, undefined, undefined);
-    }).toThrowErrorMatchingInlineSnapshot(`"[bar.baz]: definition for this key is missing"`);
-  });
-
-  test(`allowUnknowns=false allows array unknown fields when schema option unknowns=allow`, () => {
-    const type = schema.object({
-      bar: schema.arrayOf(
-        schema.object(
-          {
-            foo: schema.string(),
-          },
-          { unknowns: 'allow' }
-        )
-      ),
-    });
-
-    const value = {
-      bar: [
-        {
-          foo: 'hello world',
-          baz: 'hello world',
-        },
-      ],
-    };
-
-    expect(() => {
-      type.extendsDeep({ unknowns: 'forbid' }).validate(value, undefined, undefined);
-    }).toThrowErrorMatchingInlineSnapshot(`"[bar.0.baz]: definition for this key is missing"`);
-  });
-
-  test(`allowUnknowns=false allows maybe fields when schema option unknowns=allow`, () => {
-    const type = schema.object({
-      bar: schema.maybe(
-        schema.object(
-          {
-            foo: schema.string(),
-          },
-          { unknowns: 'allow' }
-        )
-      ),
-    });
-
-    const value = {
-      bar: {
-        foo: 'hello world',
-        baz: 'hello world',
-      },
-    };
-
-    expect(() => {
-      type.extendsDeep({ unknowns: 'forbid' }).validate(value, undefined, undefined);
-    }).toThrowErrorMatchingInlineSnapshot(`"[bar.baz]: definition for this key is missing"`);
-  });
-
-  test(`allowUnknowns=false allows union fields when schema option unknowns=allow`, () => {
-    const type = schema.object({
-      bar: schema.oneOf([
-        schema.object(
-          {
-            foo: schema.string(),
-          },
-          { unknowns: 'allow' }
-        ),
-      ]),
-    });
-
-    const value = {
-      bar: {
-        foo: 'hello world',
-        baz: 'hello world',
-      },
-    };
-
-    expect(() => {
-      type.extendsDeep({ unknowns: 'forbid' }).validate(value, undefined, undefined);
-    }).toThrowErrorMatchingInlineSnapshot(`"[bar.baz]: definition for this key is missing"`);
-  });
-
-  test(`allowUnknowns=false allows nullable fields when schema option unknowns=allow`, () => {
-    const type = schema.object({
-      bar: schema.conditional(
-        schema.contextRef('foo'),
-        schema.contextRef('hello world'),
-        schema.object(
-          {
-            foo: schema.string(),
-          },
-          { unknowns: 'allow' }
-        ),
-        schema.never()
-      ),
-    });
-
-    const value = {
-      bar: {
-        foo: 'hello world',
-        baz: 'hello world',
-      },
-    };
-
-    expect(() => {
-      type.extendsDeep({ unknowns: 'forbid' }).validate(value, undefined, undefined);
-    }).toThrowErrorMatchingInlineSnapshot(`"[bar]: a value wasn't expected to be present"`);
-  });
-
-  test(`allowUnknowns=false allows nested conditional unknown fields when schema option unknowns=allow`, () => {
-    const type = schema.object({
-      bar: schema.object(
-        {
-          foo: schema.string(),
-        },
-        { unknowns: 'allow' }
-      ),
-    });
-
-    const value = {
-      bar: {
-        foo: 'hello world',
-        baz: 'hello world',
-      },
-    };
-
-    expect(() => {
-      type.extendsDeep({ unknowns: 'forbid' }).validate(value, undefined, undefined);
-    }).toThrowErrorMatchingInlineSnapshot(`"[bar.baz]: definition for this key is missing"`);
-  });
-
-  test(`allowUnknowns=false allows mapped unknown fields when schema option unknowns=allow`, () => {
-    const type = schema.object({
-      bar: schema.mapOf(
-        schema.string(),
-        schema.object(
-          {
-            foo: schema.string(),
-          },
-          { unknowns: 'allow' }
-        )
-      ),
-    });
-
-    const value = {
-      bar: {
-        test: {
-          foo: 'hello world',
-          baz: 'hello world',
-        },
-      },
-    };
-
-    expect(() => {
-      type.extendsDeep({ unknowns: 'forbid' }).validate(value, undefined, undefined);
-    }).toThrowErrorMatchingInlineSnapshot(`"[bar.test.baz]: definition for this key is missing"`);
-  });
-
-  test(`allowUnknowns=false allows record unknown fields when schema option unknowns=allow`, () => {
-    const type = schema.object({
-      bar: schema.recordOf(
-        schema.string(),
-        schema.object(
-          {
-            foo: schema.string(),
-          },
-          { unknowns: 'allow' }
-        )
-      ),
-    });
-
-    const value = {
-      bar: {
-        test: {
-          foo: 'hello world',
-          baz: 'hello world',
-        },
-      },
-    };
-
-    expect(() => {
-      type.extendsDeep({ unknowns: 'forbid' }).validate(value, undefined, undefined);
-    }).toThrowErrorMatchingInlineSnapshot(`"[bar.test.baz]: definition for this key is missing"`);
-  });
 });
 
 test('called with wrong type', () => {
@@ -875,4 +562,28 @@ test('returns schema structure', () => {
     { path: ['nested', 'union'], type: 'alternatives' },
     { path: ['nested', 'uri'], type: 'string' },
   ]);
+});
+
+describe('#extendsDeep', () => {
+  const type = schema.object({ test: schema.object({ foo: schema.string() }) });
+
+  test('objects with unknown attributes are kept when extending with unknowns=allow', () => {
+    const result = type
+      .extendsDeep({ unknowns: 'allow' })
+      .validate({ test: { foo: 'test', bar: 'test' } });
+    expect(result).toEqual({ test: { foo: 'test', bar: 'test' } });
+  });
+
+  test('objects with unknown attributes are dropped when extending with unknowns=ignore', () => {
+    const result = type
+      .extendsDeep({ unknowns: 'ignore' })
+      .validate({ test: { foo: 'test', bar: 'test' } });
+    expect(result).toEqual({ test: { foo: 'test' } });
+  });
+
+  test('objects with unknown attributes fail validation when extending with unknowns=forbid', () => {
+    expect(() =>
+      type.extendsDeep({ unknowns: 'forbid' }).validate({ test: { foo: 'test', bar: 'test' } })
+    ).toThrowErrorMatchingInlineSnapshot(`"[test.bar]: definition for this key is missing"`);
+  });
 });
