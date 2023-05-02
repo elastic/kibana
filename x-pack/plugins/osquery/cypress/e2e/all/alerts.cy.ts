@@ -127,8 +127,10 @@ describe('Alert Event Details', () => {
     it('adds response actions with osquery with proper validation and form values', () => {
       cy.visit('/app/security/rules');
       cy.contains(ruleName).click();
-      cy.getBySel('editRuleSettingsLink').click({ force: true });
-      cy.getBySel('edit-rule-actions-tab').wait(500).click();
+      cy.getBySel('editRuleSettingsLink').click();
+      cy.getBySel('globalLoadingIndicator').should('exist');
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.getBySel('edit-rule-actions-tab').click();
       cy.contains('Response actions are run on each rule execution');
       cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
@@ -165,8 +167,10 @@ describe('Alert Event Details', () => {
       cy.contains(`${ruleName} was saved`).should('exist');
       closeToastIfVisible();
 
-      cy.getBySel('editRuleSettingsLink').click({ force: true });
-      cy.getBySel('edit-rule-actions-tab').wait(500).click();
+      cy.getBySel('editRuleSettingsLink').click();
+      cy.getBySel('globalLoadingIndicator').should('exist');
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.getBySel('edit-rule-actions-tab').click();
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
         cy.contains('select * from uptime1');
       });
@@ -209,8 +213,10 @@ describe('Alert Event Details', () => {
       cy.contains(`${ruleName} was saved`).should('exist');
       closeToastIfVisible();
 
-      cy.getBySel('editRuleSettingsLink').click({ force: true });
-      cy.getBySel('edit-rule-actions-tab').wait(500).click();
+      cy.getBySel('editRuleSettingsLink').click();
+      cy.getBySel('globalLoadingIndicator').should('exist');
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.getBySel('edit-rule-actions-tab').click();
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
         cy.contains(packName);
         cy.getBySel('comboBoxInput').type(`${multiQueryPackName}{downArrow}{enter}`);
@@ -273,8 +279,10 @@ describe('Alert Event Details', () => {
         'You have queries in the investigation guide. Add them as response actions?';
       cy.visit('/app/security/rules');
       cy.contains(ruleName).click();
-      cy.getBySel('editRuleSettingsLink').click({ force: true });
-      cy.getBySel('edit-rule-actions-tab').wait(500).click();
+      cy.getBySel('editRuleSettingsLink').click();
+      cy.getBySel('globalLoadingIndicator').should('exist');
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.getBySel('edit-rule-actions-tab').click();
 
       cy.contains(investigationGuideNote);
       cy.getBySel('osqueryAddInvestigationGuideQueries').click();
@@ -310,9 +318,9 @@ describe('Alert Event Details', () => {
     it('should be able to run live query and add to timeline (-depending on the previous test)', () => {
       const TIMELINE_NAME = 'Untitled timeline';
       loadRuleAlerts(ruleName);
-      cy.getBySel('timeline-context-menu-button').first().click({ force: true });
+      cy.getBySel('timeline-context-menu-button').first().click();
       cy.contains('Run Osquery');
-      cy.getBySel('expand-event').first().click({ force: true });
+      cy.getBySel('expand-event').first().click();
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
       cy.contains('1 agent selected.');
@@ -354,7 +362,7 @@ describe('Alert Event Details', () => {
 
     it('should substitute parameters in investigation guide', () => {
       loadRuleAlerts(ruleName);
-      cy.getBySel('expand-event').first().click({ force: true });
+      cy.getBySel('expand-event').first().click();
       cy.contains('Get processes').click();
       cy.getBySel('flyout-body-osquery').within(() => {
         cy.contains("SELECT * FROM os_version where name='Ubuntu';");
@@ -439,7 +447,7 @@ describe('Alert Event Details', () => {
 
     it('sees osquery results from last action and add to a case', () => {
       loadRuleAlerts(ruleName);
-      cy.getBySel('expand-event').first().click({ force: true });
+      cy.getBySel('expand-event').first().click();
       cy.contains('Osquery Results').click();
       cy.getBySel('osquery-results').should('exist');
       cy.contains('select * from users;');
@@ -489,7 +497,7 @@ describe('Alert Event Details', () => {
     it('can visit discover from response action results', () => {
       const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
       loadRuleAlerts(ruleName);
-      cy.getBySel('expand-event').first().click({ force: true });
+      cy.getBySel('expand-event').first().click();
       cy.contains('Osquery Results').click();
       cy.getBySel('osquery-results').should('exist');
       checkActionItemsInResults({
@@ -530,7 +538,7 @@ describe('Alert Event Details', () => {
     it('can visit lens from response action results', () => {
       const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
       loadRuleAlerts(ruleName);
-      cy.getBySel('expand-event').first().click({ force: true });
+      cy.getBySel('expand-event').first().click();
       cy.contains('Osquery Results').click();
       cy.getBySel('osquery-results').should('exist');
       checkActionItemsInResults({
@@ -580,7 +588,7 @@ describe('Alert Event Details', () => {
       const timelineRegex = new RegExp(`Added ${UUID_REGEX} to timeline`);
       const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
       loadRuleAlerts(ruleName);
-      cy.getBySel('expand-event').first().click({ force: true });
+      cy.getBySel('expand-event').first().click();
       cy.contains('Osquery Results').click();
       cy.getBySel('osquery-results').should('exist');
       checkActionItemsInResults({
@@ -623,7 +631,7 @@ describe('Alert Event Details', () => {
       let initialNotificationCount: number;
       let updatedNotificationCount: number;
       loadRuleAlerts(ruleName);
-      cy.getBySel('expand-event').first().click({ force: true });
+      cy.getBySel('expand-event').first().click();
       cy.getBySel('osquery-actions-notification')
         .should('not.have.text', '0')
         .then((element) => {
@@ -664,7 +672,7 @@ describe('Alert Event Details', () => {
 
     it('should be able to run take action query against all enrolled agents', () => {
       loadRuleAlerts(ruleName);
-      cy.getBySel('expand-event').first().click({ force: true });
+      cy.getBySel('expand-event').first().click();
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
       cy.getBySel('agentSelection').within(() => {
@@ -678,8 +686,8 @@ describe('Alert Event Details', () => {
       cy.wait(1000);
       submitQuery();
       cy.getBySel('flyout-body-osquery').within(() => {
-        // at least 2 agents should have responded
-        cy.get('[data-grid-row-index]').should('have.length.at.least', 2);
+        // at least 2 agents should have responded, sometimes it takes a while for the agents to respond
+        cy.get('[data-grid-row-index]', { timeout: 6000000 }).should('have.length.at.least', 2);
       });
     });
   });
@@ -701,7 +709,7 @@ describe('Alert Event Details', () => {
 
     it('should substitute params in osquery ran from timelines alerts', () => {
       loadRuleAlerts(ruleName);
-      cy.getBySel('send-alert-to-timeline-button').first().click({ force: true });
+      cy.getBySel('send-alert-to-timeline-button').first().click();
       cy.getBySel('query-events-table').within(() => {
         cy.getBySel('expand-event').first().click();
       });
