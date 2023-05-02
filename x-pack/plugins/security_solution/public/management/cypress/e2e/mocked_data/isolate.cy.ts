@@ -7,7 +7,7 @@
 
 import { getEndpointListPath } from '../../../common/routing';
 import {
-  checkEndpointListForIsolatedHosts,
+  checkEndpointListForOnlyIsolatedHosts,
   checkFlyoutEndpointIsolation,
   filterOutIsolatedHosts,
   interceptActionRequests,
@@ -67,12 +67,13 @@ describe('Isolate command', () => {
     beforeEach(() => {
       login();
     });
-    it('should allow filtering endpoint by Isolated status', () => {
+    // FLAKY: https://github.com/elastic/security-team/issues/6518
+    it.skip('should allow filtering endpoint by Isolated status', () => {
       cy.visit(APP_PATH + getEndpointListPath({ name: 'endpointList' }));
       closeAllToasts();
       filterOutIsolatedHosts();
       cy.contains('Showing 2 endpoints');
-      checkEndpointListForIsolatedHosts();
+      checkEndpointListForOnlyIsolatedHosts();
     });
   });
 
