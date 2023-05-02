@@ -20,6 +20,7 @@ export interface DiscoverContextAppLocatorParams extends SerializableRecord {
   columns?: string[];
   filters?: Filter[];
   referrer: string; // discover main view url
+  profile?: string;
 }
 
 export type DiscoverContextAppLocator = LocatorPublic<DiscoverContextAppLocatorParams>;
@@ -62,7 +63,13 @@ export class DiscoverContextAppLocatorDefinition
       dataViewId = index;
     }
 
-    let path = `#/context/${dataViewId}/${rowId}`;
+    let path = '#/';
+
+    if (params.profile) {
+      path = `${path}p/${params.profile}/`;
+    }
+
+    path = `${path}context/${dataViewId}/${rowId}`;
     path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
     path = setStateToKbnUrl('_a', appState, { useHash }, path);
 
