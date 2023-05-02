@@ -23,6 +23,7 @@ import { createContext } from './context';
 import { next } from './next';
 import { model } from './model';
 import { createInitialState } from './state';
+import { NodeRoles } from "@kbn/core-node-server";
 
 export interface MigrateIndexOptions {
   kibanaVersion: string;
@@ -42,6 +43,8 @@ export interface MigrateIndexOptions {
   serializer: ISavedObjectsSerializer;
   /** The client to use for communications with ES */
   elasticsearchClient: ElasticsearchClient;
+  /** The node roles of the Kibana instance*/
+  readonly nodeRoles: NodeRoles;
 }
 
 export const migrateIndex = async ({

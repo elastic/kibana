@@ -562,6 +562,7 @@ const mockOptions = () => {
     },
     client: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),
+    nodeRoles: { backgroundTasks: true, ui: true, migrator: true },
   };
   return options;
 };
