@@ -167,6 +167,9 @@ export class TaskPollingLifecycle {
           // if there isn't capacity, emit a load event so that we can expose how often
           // high load causes the poller to skip work (work isn'tcalled when there is no capacity)
           this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
+
+          // Emit event indicating task manager utilization
+          this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad)));
         }
         return capacity;
       },
@@ -263,6 +266,14 @@ export class TaskPollingLifecycle {
               );
             }
             this.logger.error(error.message);
+          })
+        )
+      )
+      .pipe(
+        tap(
+          mapOk(() => {
+            // Emit event indicating task manager utilization % at the end of a polling cycle
+            this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad)));
           })
         )
       )

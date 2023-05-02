@@ -334,7 +334,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     setShowFiltersChangedBanner(false);
   }, [controlGroup, switchToViewMode, getStoredControlInput, hasPendingChanges]);
 
-  const upsertPersistableControls = useCallback(() => {
+  const upsertPersistableControls = useCallback(async () => {
     const persistableControls = initialControls.filter((control) => control.persist === true);
     if (persistableControls.length > 0) {
       const currentPanels = Object.values(controlGroup?.getInput().panels ?? []) as Array<
@@ -342,7 +342,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       >;
       const orderedPanels = currentPanels.sort((a, b) => a.order - b.order);
       let filterControlsDeleted = false;
-      persistableControls.forEach((control) => {
+      for (const control of persistableControls) {
         const controlExists = currentPanels.some(
           (currControl) => control.fieldName === currControl.explicitInput.fieldName
         );
@@ -354,7 +354,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
           }
 
           // add persitable controls
-          controlGroup?.addOptionsListControl({
+          await controlGroup?.addOptionsListControl({
             title: control.title,
             hideExclude: true,
             hideSort: true,
@@ -367,21 +367,22 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             ...control,
           });
         }
-      });
-      orderedPanels.forEach((panel) => {
+      }
+
+      for (const panel of orderedPanels) {
         if (panel.explicitInput.fieldName)
-          controlGroup?.addOptionsListControl({
+          await controlGroup?.addOptionsListControl({
             selectedOptions: [],
             fieldName: panel.explicitInput.fieldName,
             dataViewId: dataViewId ?? '',
             ...panel.explicitInput,
           });
-      });
+      }
     }
   }, [controlGroup, dataViewId, initialControls]);
 
-  const saveChangesHandler = useCallback(() => {
-    upsertPersistableControls();
+  const saveChangesHandler = useCallback(async () => {
+    await upsertPersistableControls();
     switchToViewMode();
     setShowFiltersChangedBanner(false);
   }, [switchToViewMode, upsertPersistableControls]);

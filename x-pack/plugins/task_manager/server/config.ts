@@ -17,8 +17,11 @@ export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
 // ===================
 // Refresh aggregated monitored stats at a default rate of once a minute
 export const DEFAULT_MONITORING_REFRESH_RATE = 60 * 1000;
-export const DEFAULT_MONITORING_STATS_RUNNING_AVERGAE_WINDOW = 50;
+export const DEFAULT_MONITORING_STATS_RUNNING_AVERAGE_WINDOW = 50;
 export const DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS = 60;
+
+// At the default poll interval of 3sec, this averages over the last 15sec.
+export const DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW = 5;
 
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
@@ -92,7 +95,7 @@ export const configSchema = schema.object(
     }),
     /* The size of the running average window for monitored stats. */
     monitored_stats_running_average_window: schema.number({
-      defaultValue: DEFAULT_MONITORING_STATS_RUNNING_AVERGAE_WINDOW,
+      defaultValue: DEFAULT_MONITORING_STATS_RUNNING_AVERAGE_WINDOW,
       max: 100,
       min: 10,
     }),
@@ -124,6 +127,11 @@ export const configSchema = schema.object(
       }),
     }),
     event_loop_delay: eventLoopDelaySchema,
+    worker_utilization_running_average_window: schema.number({
+      defaultValue: DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW,
+      max: 100,
+      min: 1,
+    }),
     /* These are not designed to be used by most users. Please use caution when changing these */
     unsafe: schema.object({
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),

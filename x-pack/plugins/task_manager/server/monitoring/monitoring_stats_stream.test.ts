@@ -48,6 +48,7 @@ describe('createMonitoringStatsStream', () => {
       monitor: true,
       warn_threshold: 5000,
     },
+    worker_utilization_running_average_window: 5,
   };
 
   it('returns the initial config used to configure Task Manager', async () => {

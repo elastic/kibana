@@ -412,6 +412,7 @@ kibana_vars=(
     xpack.task_manager.version_conflict_threshold
     xpack.task_manager.event_loop_delay.monitor
     xpack.task_manager.event_loop_delay.warn_threshold
+    xpack.task_manager.worker_utilization_running_average_window
     xpack.uptime.index
     serverless
 )
