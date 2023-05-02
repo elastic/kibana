@@ -33,7 +33,7 @@ export function useCloneSlo() {
     {
       onMutate: async ({ slo, idToCopyFrom }) => {
         // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries(['fetchSloList']);
+        await queryClient.cancelQueries(['fetchSloList'], { exact: false });
 
         const latestFetchSloListRequest = (
           queryClient.getQueriesData<FindSLOResponse>(['fetchSloList']) || []
@@ -80,7 +80,12 @@ export function useCloneSlo() {
         );
       },
       onSuccess: () => {
-        queryClient.invalidateQueries(['fetchSloList']);
+        if (
+          queryClient.getQueryCache().find(['fetchSloList'], { exact: false })?.options // @ts-ignore
+            .refetchInterval === undefined
+        ) {
+          queryClient.invalidateQueries(['fetchSloList'], { exact: false });
+        }
       },
     }
   );
