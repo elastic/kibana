@@ -158,7 +158,7 @@ export interface SavedObjectReference {
 export interface LensDataTableAttributes<TVisType, TVisState> {
   description?: string;
   references: SavedObjectReference[];
-  sualizationType: TVisType;
+  visualizationType: TVisType;
   state: {
     query: Query;
     globalPalette?: {
