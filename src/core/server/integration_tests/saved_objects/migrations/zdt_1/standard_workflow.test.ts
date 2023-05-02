@@ -19,7 +19,7 @@ import {
   getSampleAType,
   getSampleBType,
   dummyModelVersion,
-} from './base.fixtures';
+} from '../fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'standard_workflow.test.log');
 
