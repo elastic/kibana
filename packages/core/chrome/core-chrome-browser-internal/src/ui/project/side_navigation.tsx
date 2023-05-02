@@ -10,5 +10,5 @@ import { EuiText } from '@elastic/eui';
 import type { SideNavComponent } from '@kbn/core-chrome-browser';
 
 export const SideNavigation: SideNavComponent = () => {
-  return <EuiText color="white">TODO - Build navigation based on config</EuiText>;
+  return <EuiText color="white">TODO - Build navigation from config</EuiText>;
 };

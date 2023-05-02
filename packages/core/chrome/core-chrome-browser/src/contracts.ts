@@ -182,6 +182,6 @@ export interface ChromeStart {
      *
      * @remarks Has no effect if the chrome style is not `project`.
      */
-    setSideNavComponent(component: SideNavComponent): void;
+    setSideNavComponent(component: SideNavComponent | null): void;
   };
 }

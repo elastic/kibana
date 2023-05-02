@@ -176,7 +176,7 @@ export class ChromeService {
       chromeStyle$.next(style);
     };
 
-    const setProjectSideNavComponent = (component: ISideNavComponent) => {
+    const setProjectSideNavComponent = (component: ISideNavComponent | null) => {
       projectNavigation.setProjectSideNavComponent(component);
     };
 
