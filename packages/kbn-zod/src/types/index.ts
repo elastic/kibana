@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { SchemaError } from './schema_error';
-export { ValidationError } from './validation_error';
+export { array } from './array_type';
+export { literal } from './literal_type';
+export { number } from './number_type';
+export { object } from './object_type';
+export { string } from './string_type';
+export { union } from './union_type';
+export { never } from './never_type';

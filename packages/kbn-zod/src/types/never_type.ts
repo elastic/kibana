@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
+import z from 'zod';
 
-export class AnyType extends Type<any> {
-  constructor(options?: TypeOptions<any>) {
-    super(internals.any(), options);
-  }
-}
+export const never: typeof z.never = (options) =>
+  z.never({
+    errorMap: () => ({ message: `a value wasn't expected to be present` }),
+    ...options,
+  });

@@ -7,13 +7,6 @@
  */
 
 import z from 'zod';
-import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
-
-export type ArrayOptions<T> = TypeOptions<T[]> & {
-  minSize?: number;
-  maxSize?: number;
-};
 
 const errorMap: z.ZodErrorMap = (issue, ctx) => {
   const value = ctx.data as unknown[];
@@ -30,18 +23,4 @@ const errorMap: z.ZodErrorMap = (issue, ctx) => {
   return { message: ctx.defaultError };
 };
 
-export class ArrayType<T> extends Type<T[]> {
-  constructor(type: Type<T>, options: ArrayOptions<T> = {}) {
-    let schema = internals.array(type.getSchema(), { errorMap });
-
-    if (options.minSize !== undefined) {
-      schema = schema.min(options.minSize);
-    }
-
-    if (options.maxSize !== undefined) {
-      schema = schema.max(options.maxSize);
-    }
-
-    super(schema, options);
-  }
-}
+export const array: typeof z.array = (schema, options) => z.array(schema, { errorMap, ...options });

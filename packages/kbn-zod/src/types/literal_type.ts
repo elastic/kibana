@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
+import z from 'zod';
 
-export class BooleanType extends Type<boolean> {
-  constructor(options?: TypeOptions<boolean>) {
-    super(internals.boolean(), options);
+const errorMap: z.ZodErrorMap = (issue, ctx) => {
+  if (issue.code === z.ZodIssueCode.invalid_literal) {
+    return { message: `expected value to equal [${issue.expected}]` };
   }
-}
+  return { message: ctx.defaultError };
+};
+
+export const literal: typeof z.literal = (value, options) =>
+  z.literal(value, { errorMap, ...options });

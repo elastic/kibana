@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Type } from '@kbn/schema';
+import type { ZodTypes } from '@kbn/zod';
 import type { ApiVersion } from '@kbn/core-http-common';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
@@ -154,7 +154,7 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
   delete: VersionedRouteRegistrar<'delete', Ctx>;
 }
 
-type VersionedSpecValidation = RouteValidationFunction<unknown> | Type<unknown>;
+export type VersionedSpecValidation = RouteValidationFunction<unknown> | ZodTypes.ZodTypeAny;
 
 /** @experimental */
 export type VersionedRouteRequestValidation<P, Q, B> = Omit<

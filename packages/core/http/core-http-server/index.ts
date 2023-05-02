@@ -139,4 +139,5 @@ export type {
   VersionedRouteConfig,
   VersionedRouteRegistrar,
   VersionedRouter,
+  VersionedSpecValidation,
 } from './src/versioning';

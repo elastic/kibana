@@ -1078,8 +1078,6 @@
       "@kbn/saved-objects-tagging-plugin/*": ["x-pack/plugins/saved_objects_tagging/*"],
       "@kbn/saved-search-plugin": ["src/plugins/saved_search"],
       "@kbn/saved-search-plugin/*": ["src/plugins/saved_search/*"],
-      "@kbn/schema": ["packages/kbn-schema"],
-      "@kbn/schema/*": ["packages/kbn-schema/*"],
       "@kbn/screenshot-mode-example-plugin": ["examples/screenshot_mode_example"],
       "@kbn/screenshot-mode-example-plugin/*": ["examples/screenshot_mode_example/*"],
       "@kbn/screenshot-mode-plugin": ["src/plugins/screenshot_mode"],
@@ -1454,6 +1452,8 @@
       "@kbn/whereis-pkg-cli/*": ["packages/kbn-whereis-pkg-cli/*"],
       "@kbn/yarn-lock-validator": ["packages/kbn-yarn-lock-validator"],
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
+      "@kbn/zod": ["packages/kbn-zod"],
+      "@kbn/zod/*": ["packages/kbn-zod/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
       "@emotion/core": ["typings/@emotion"],
