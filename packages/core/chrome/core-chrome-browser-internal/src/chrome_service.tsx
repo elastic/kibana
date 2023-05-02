@@ -176,8 +176,8 @@ export class ChromeService {
       chromeStyle$.next(style);
     };
 
-    const setProjectNavigationComponent = (getter: () => CustomNavigationComponent) => {
-      projectNavigation.setProjectNavigationComponent(getter);
+    const setProjectSideNavComponent = (getter: () => CustomNavigationComponent) => {
+      projectNavigation.setProjectSideNavComponent(getter);
     };
 
     const setProjectNavigation = (config: ChromeProjectNavigation) => {
@@ -375,7 +375,7 @@ export class ChromeService {
       getChromeStyle$: () => chromeStyle$.pipe(takeUntil(this.stop$)),
       project: {
         setNavigation: setProjectNavigation,
-        setNavigationComponent: setProjectNavigationComponent,
+        setSideNavComponent: setProjectSideNavComponent,
       },
     };
   }

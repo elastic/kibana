@@ -20,7 +20,7 @@ interface StartDeps {
 }
 
 export class ProjectNavigationService {
-  private customProjectNavigationComponent$ = new BehaviorSubject<{
+  private customProjectSideNavComponent$ = new BehaviorSubject<{
     get: () => CustomNavigationComponent | null;
   }>({ get: () => null });
   private projectNavigation$ = new BehaviorSubject<ChromeProjectNavigation | undefined>(undefined);
@@ -38,11 +38,11 @@ export class ProjectNavigationService {
       getProjectNavigation$: () => {
         return this.projectNavigation$.asObservable();
       },
-      setProjectNavigationComponent: (get: () => CustomNavigationComponent) => {
-        this.customProjectNavigationComponent$.next({ get });
+      setProjectSideNavComponent: (get: () => CustomNavigationComponent) => {
+        this.customProjectSideNavComponent$.next({ get });
       },
-      getProjectNavigationComponent$: () => {
-        return this.customProjectNavigationComponent$.asObservable();
+      getProjectSideNavComponent$: () => {
+        return this.customProjectSideNavComponent$.asObservable();
       },
     };
   }

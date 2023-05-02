@@ -65,7 +65,7 @@ const createStartContractMock = () => {
     setChromeStyle: jest.fn(),
     project: {
       setNavigation: jest.fn(),
-      setNavigationComponent: jest.fn(),
+      setSideNavComponent: jest.fn(),
     },
   };
   startContract.navLinks.getAll.mockReturnValue([]);
