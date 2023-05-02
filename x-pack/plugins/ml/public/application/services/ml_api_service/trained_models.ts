@@ -9,6 +9,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { useMemo } from 'react';
 import { HttpFetchQuery } from '@kbn/core/public';
+import { ErrorType } from '@kbn/ml-error-utils';
 import { MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { HttpService } from '../http_service';
 import { basePath } from '.';
@@ -149,7 +150,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     ) {
       const force = options?.force;
 
-      return httpService.http<{ acknowledge: boolean }>({
+      return httpService.http<Record<string, { acknowledge: boolean; error?: ErrorType }>>({
         path: `${apiBasePath}/trained_models/${modelId}/${deploymentsIds.join(
           ','
         )}/deployment/_stop`,
