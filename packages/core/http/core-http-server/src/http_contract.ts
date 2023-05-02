@@ -10,6 +10,7 @@ import type {
   IContextContainer,
   IContextProvider,
   IRouter,
+  IRouterWithVersion,
   RequestHandlerContextBase,
 } from './router';
 import type {
@@ -309,7 +310,7 @@ export interface HttpServiceSetup<
    */
   createRouter: <
     Context extends DefaultRequestHandlerType = DefaultRequestHandlerType
-  >() => IRouter<Context>;
+  >() => IRouterWithVersion<Context>;
 
   /**
    * Register a context provider for a route handler.
