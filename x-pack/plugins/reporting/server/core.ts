@@ -45,7 +45,7 @@ import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingConfig, ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { ReportingConfigType } from './config';
-import { checkLicense, ExportTypesRegistry } from './lib';
+import { checkLicense, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
@@ -89,7 +89,7 @@ export class ReportingCore {
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
   private deprecatedAllowedRoles: string[] | false = false; // DEPRECATED. If `false`, the deprecated features have been disableed
-  private exportTypesRegistry = new ExportTypesRegistry();
+  private exportTypesRegistry = getExportTypesRegistry();
   private executeTask: ExecuteReportTask;
   private monitorTask: MonitorReportsTask;
   private config?: ReportingConfig; // final config, includes dynamic values based on OS type

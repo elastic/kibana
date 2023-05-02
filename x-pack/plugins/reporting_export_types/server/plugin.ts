@@ -7,10 +7,21 @@
  */
 
 import { Plugin } from '@kbn/core/server';
-import type { ReportingSetup } from '@kbn/reporting-plugin/server/types';
-import { getExportType as getExportTypeCsv } from './export_types/csv_searchsource';
-import { getExportType as getExportTypePng } from './export_types/png_v2';
-import { getExportType as getExportTypePdf } from './export_types/printable_pdf_v2';
+import type {
+  CreateJobFn,
+  ExportTypeDefinition,
+  ReportingSetup,
+  RunTaskFn,
+} from '@kbn/reporting-plugin/server/types';
+import {
+  getTypeCsv,
+  getTypeCsvFromSavedObject,
+  getTypeCsvFromSavedObjectImmediate,
+  getTypePng,
+  getTypePngV2,
+  getTypePrintablePdf,
+  getTypePrintablePdfV2,
+} from '.';
 
 export interface ExportTypesPluginSetupDependencies {
   reporting: ReportingSetup;
@@ -19,11 +30,27 @@ export interface ExportTypesPluginSetupDependencies {
 /** This plugin creates the export types in export type definitions to be registered in the Reporting Export Type Registry */
 export class ExportTypesPlugin implements Plugin<void, void> {
   public setup({}, { reporting }: ExportTypesPluginSetupDependencies) {
-    reporting.registerExportType(getExportTypeCsv());
-    reporting.registerExportType(getExportTypePng());
-    reporting.registerExportType(getExportTypePdf());
+    type CreateFnType = CreateJobFn<any, any>; // can not specify params types because different type of params are not assignable to each other
+    type RunFnType = any; // can not specify because ImmediateExecuteFn is not assignable to RunTaskFn
+    const getTypeFns: Array<() => ExportTypeDefinition<CreateFnType | null, RunFnType>> = [
+      getTypeCsv,
+      getTypeCsvFromSavedObject,
+      getTypeCsvFromSavedObjectImmediate,
+      getTypePng,
+      getTypePngV2,
+      getTypePrintablePdf,
+      getTypePrintablePdfV2,
+    ];
+    getTypeFns.forEach((getType) => {
+      reporting.registerExportType(
+        getType() as unknown as ExportTypeDefinition<CreateJobFn<any, any>, RunTaskFn<any>>
+      );
+    });
+    // reporting.registerExportType(getExportTypeCsv());
+    // reporting.registerExportType(getExportTypePng());
+    // reporting.registerExportType(getExportTypePdf());
   }
 
-  // do nothing here
+  // do nothing
   public start() {}
 }
