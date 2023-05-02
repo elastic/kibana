@@ -17884,7 +17884,6 @@
     "xpack.infra.registerFeatures.logsTitle": "日志",
     "xpack.infra.sampleDataLinkLabel": "日志",
     "xpack.infra.savedView.defaultViewNameHosts": "默认视图",
-    "xpack.infra.savedView.errorOnCreate.duplicateViewName": "具有该名称的视图已存在。",
     "xpack.infra.savedView.errorOnCreate.title": "保存视图时出错。",
     "xpack.infra.savedView.findError.title": "加载视图时出错。",
     "xpack.infra.savedView.manageViews": "管理视图",
