@@ -86,11 +86,13 @@ export function createBackgroundTaskUtilizationAggregator(
   const taskManagerUtilizationEventToLoadStat = createTaskRunEventToLoadStat(
     workerUtilizationRunningAverageWindowSize
   );
+
   const taskManagerWorkerUtilizationEvent$: Observable<
     Pick<BackgroundTaskUtilizationStat, 'load'>
   > = taskPollingLifecycle.events.pipe(
     filter(isTaskManagerWorkerUtilizationStatEvent),
-    mapOk((num: number) => taskManagerUtilizationEventToLoadStat(num))
+    map((taskEvent: TaskLifecycleEvent) => taskEvent.event),
+    map(mapOk((num: number) => taskManagerUtilizationEventToLoadStat(num)))
   );
 
   return combineLatest([
