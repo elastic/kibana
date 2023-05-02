@@ -7,7 +7,7 @@
       "node"
     ]
   },
-  "include": [ "**/*.ts" ],
+  "include": [ "**/*.ts", "src/versioned_router/oas_poc/run.js", "src/versioned_router/oas_poc/generate.js" ],
   "kbn_references": [
     "@kbn/std",
     "@kbn/utility-types",

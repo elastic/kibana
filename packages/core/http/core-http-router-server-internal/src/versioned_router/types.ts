@@ -18,7 +18,7 @@ export type Method = Exclude<RouteMethod, 'options'>;
 /** @experimental */
 export interface VersionedRouterRoute {
   /** @experimental */
-  method: string;
+  method: Method;
   /** @experimental */
   path: string;
   /** @experimental */
