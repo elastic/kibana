@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Type } from '@kbn/config-schema';
+import type { Type } from '@kbn/schema';
 import type { ApiVersion } from '@kbn/core-http-common';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
@@ -154,12 +154,21 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
   delete: VersionedRouteRegistrar<'delete', Ctx>;
 }
 
+type VersionedSpecValidation = RouteValidationFunction<unknown> | Type<unknown>;
+
 /** @experimental */
-export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
+export type VersionedRouteRequestValidation<P, Q, B> = Omit<
+  RouteValidatorFullConfig<P, Q, B>,
+  'params' | 'query' | 'body'
+> & {
+  params?: VersionedSpecValidation;
+  query?: VersionedSpecValidation;
+  body?: VersionedSpecValidation;
+};
 
 /** @experimental */
 export interface VersionedRouteResponseValidation {
-  [statusCode: number]: { body: RouteValidationFunction<unknown> | Type<unknown> };
+  [statusCode: number]: { body: VersionedSpecValidation };
   unsafe?: { body?: boolean };
 }
 
