@@ -19,21 +19,8 @@ export function isValidColor(colorString?: string) {
   // chroma can handle also hex values with alpha channel/transparency
   // chroma accepts also hex without #, so test for it
   return (
-    colorString != null &&
-    colorString !== '' &&
-    /^#/.test(colorString) &&
-    isValidPonyfill(colorString)
+    colorString != null && colorString !== '' && /^#/.test(colorString) && chroma.valid(colorString)
   );
-}
-
-function isValidPonyfill(colorString: string) {
-  // we're using an old version of chroma without the valid function
-  try {
-    chroma(colorString);
-    return true;
-  } catch (e) {
-    return false;
-  }
 }
 
 export const getColorAlpha = (color?: string | null) =>

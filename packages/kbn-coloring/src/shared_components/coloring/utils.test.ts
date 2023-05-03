@@ -98,6 +98,7 @@ describe('isValidColor', () => {
     expect(isValidColor('#fff')).toBe(true);
     expect(isValidColor('#ffffff')).toBe(true);
     expect(isValidColor('#ffffffaa')).toBe(true);
+    expect(isValidColor('#fffa')).toBe(true);
   });
 
   it('should return false for non valid strings', () => {
@@ -109,8 +110,6 @@ describe('isValidColor', () => {
     expect(isValidColor('rgba(1, 1, 1, 0)')).toBe(false);
     expect(isValidColor('#ffffffgg')).toBe(false);
     expect(isValidColor('#fff00')).toBe(false);
-    // this version of chroma does not support hex4 format
-    expect(isValidColor('#fffa')).toBe(false);
   });
 });
 
