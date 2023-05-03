@@ -234,20 +234,21 @@ export const useActionsLogFilter = ({
       : isHostsFilter
       ? []
       : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
+          const featureFlags = ExperimentalFeaturesService.get();
+
           // `get-file` is currently behind FF
-          if (
-            commandName === 'get-file' &&
-            !ExperimentalFeaturesService.get().responseActionGetFileEnabled
-          ) {
+          if (commandName === 'get-file' && !featureFlags.responseActionGetFileEnabled) {
             return false;
           }
 
           // TODO: remove this when `execute` is no longer behind FF
           // planned for 8.8
-          if (
-            commandName === 'execute' &&
-            !ExperimentalFeaturesService.get().responseActionExecuteEnabled
-          ) {
+          if (commandName === 'execute' && !featureFlags.responseActionExecuteEnabled) {
+            return false;
+          }
+
+          // upload - v8.9
+          if (commandName === 'upload' && !featureFlags.responseActionUploadEnabled) {
             return false;
           }
 
