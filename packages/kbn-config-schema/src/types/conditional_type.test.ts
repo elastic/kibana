@@ -452,9 +452,8 @@ describe('#extendsDeep', () => {
     });
 
     test('objects with unknown attributes are kept when extending with unknowns=allow', () => {
-      const result = type
-        .extendsDeep({ unknowns: 'allow' })
-        .validate({ foo: 'not-test', test: { bar: 'test', baz: 'test' } });
+      const allowSchema = type.extendsDeep({ unknowns: 'allow' });
+      const result = allowSchema.validate({ foo: 'not-test', test: { bar: 'test', baz: 'test' } });
       expect(result).toEqual({
         foo: 'not-test',
         test: { bar: 'test', baz: 'test' },
@@ -462,19 +461,17 @@ describe('#extendsDeep', () => {
     });
 
     test('objects with unknown attributes are dropped when extending with unknowns=ignore', () => {
-      const result = type
-        .extendsDeep({ unknowns: 'ignore' })
-        .validate({ foo: 'not-test', test: { bar: 'test', baz: 'test' } });
+      const ignoreSchema = type.extendsDeep({ unknowns: 'ignore' });
+      const result = ignoreSchema.validate({ foo: 'not-test', test: { bar: 'test', baz: 'test' } });
       expect(result).toEqual({
         foo: 'not-test',
         test: { bar: 'test' },
       });
     });
     test('objects with unknown attributes fail validation when extending with unknowns=forbid', () => {
+      const forbidSchema = type.extendsDeep({ unknowns: 'forbid' });
       expect(() =>
-        type
-          .extendsDeep({ unknowns: 'forbid' })
-          .validate({ foo: 'not-test', test: { bar: 'test', baz: 'test' } })
+        forbidSchema.validate({ foo: 'not-test', test: { bar: 'test', baz: 'test' } })
       ).toThrowErrorMatchingInlineSnapshot(`"[test.baz]: definition for this key is missing"`);
     });
   });
