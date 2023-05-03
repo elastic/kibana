@@ -40,7 +40,6 @@
       "fleet",
       "kibanaReact",
       "kibanaUtils",
-      "ml",
       "observability",
       "spaces",
       "indexLifecycleManagement"

@@ -462,14 +462,11 @@ describe(' Filter Group Component ', () => {
 
       controlGroupMock.addOptionsListControl.mockClear();
       controlGroupMock.updateInput.mockClear();
-      controlGroupMock.reload.mockClear();
       fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.RESET));
 
       await waitFor(() => {
         // blanks the input
         expect(controlGroupMock.updateInput.mock.calls.length).toBe(2);
-        expect(controlGroupMock.reload.mock.calls.length).toBe(1);
-
         expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(4);
       });
     });
