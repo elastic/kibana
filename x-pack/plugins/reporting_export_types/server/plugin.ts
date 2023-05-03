@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreStart, PluginInitializerContext, Logger } from '@kbn/core/server';
-import { ReportingCore } from '@kbn/reporting-plugin/server';
+import { Plugin } from '@kbn/core/server';
 import type {
   CreateJobFn,
   ExportTypeDefinition,
   ReportingSetup,
-  ReportingStartDeps,
   RunTaskFn,
 } from '@kbn/reporting-plugin/server/types';
 import {
@@ -23,26 +21,16 @@ import {
   getTypePngV2,
   getTypePrintablePdf,
   getTypePrintablePdfV2,
-  registerRoutes,
 } from '.';
-import { setFieldFormats } from './services/services';
 
 export interface ExportTypesPluginSetupDependencies {
   reporting: ReportingSetup;
-  routes: ReportingCore['pluginSetup'];
 }
 
 /** This plugin creates the export types in export type definitions to be registered in the Reporting Export Type Registry */
 export class ExportTypesPlugin implements Plugin<void, void> {
-  private logger: Logger;
-
-  constructor(private initContext: PluginInitializerContext) {
-    this.logger = initContext.logger.get();
-  }
-
   public setup({}, { reporting }: ExportTypesPluginSetupDependencies) {
-    const reportingCore = new ReportingCore(this.logger, this.initContext);
-
+    // Export Type creation
     type CreateFnType = CreateJobFn<any, any>; // can not specify params types because different type of params are not assignable to each other
     type RunFnType = any; // can not specify because ImmediateExecuteFn is not assignable to RunTaskFn
     const getTypeFns: Array<() => ExportTypeDefinition<CreateFnType | null, RunFnType>> = [
@@ -59,13 +47,8 @@ export class ExportTypesPlugin implements Plugin<void, void> {
         getType() as unknown as ExportTypeDefinition<CreateJobFn<any, any>, RunTaskFn<any>>
       );
     });
-
-    // Routes
-    registerRoutes(reportingCore, this.logger);
   }
 
-  public start(core: CoreStart, plugins: ReportingStartDeps) {
-    setFieldFormats(plugins.fieldFormats);
-    return (core = core);
-  }
+  // do nothing
+  public start({}, {}) {}
 }

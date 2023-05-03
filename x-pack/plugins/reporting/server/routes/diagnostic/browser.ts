@@ -7,9 +7,9 @@
 
 import type { DocLinksServiceSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { API_DIAGNOSE_URL } from '@kbn/reporting-plugin/common/constants';
-import { ReportingCore } from '@kbn/reporting-plugin/server';
 import { lastValueFrom } from 'rxjs';
+import { API_DIAGNOSE_URL } from '../../../common/constants';
+import { ReportingCore } from '../..';
 import type { DiagnosticResponse } from '.';
 import { authorizedUserPreRouting, getCounters } from '../lib';
 

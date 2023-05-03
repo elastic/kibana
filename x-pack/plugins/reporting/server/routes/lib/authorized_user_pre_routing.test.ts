@@ -7,15 +7,15 @@
 
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import { ReportingCore } from '@kbn/reporting-plugin/server';
-import { ReportingInternalSetup, ReportingInternalStart } from '@kbn/reporting-plugin/server/core';
+import { ReportingCore } from '../..';
+import { ReportingInternalSetup, ReportingInternalStart } from '../../core';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
-} from '@kbn/reporting-plugin/server/test_helpers';
-import type { ReportingRequestHandlerContext } from '@kbn/reporting-plugin/server/types';
+} from '../../test_helpers';
+import type { ReportingRequestHandlerContext } from '../../types';
 import { authorizedUserPreRouting } from './authorized_user_pre_routing';
 
 let mockCore: ReportingCore;

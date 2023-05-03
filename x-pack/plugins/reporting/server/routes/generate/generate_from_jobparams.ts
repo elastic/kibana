@@ -8,9 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import rison from '@kbn/rison';
-import type { ReportingCore } from '@kbn/reporting-plugin/server';
-import type { BaseParams } from '@kbn/reporting-plugin/server/types';
-import { API_BASE_URL } from '@kbn/reporting-plugin/common/constants';
+import type { ReportingCore } from '../..';
+import type { BaseParams } from '../../types';
+import { API_BASE_URL } from '../../../common/constants';
 import { authorizedUserPreRouting, getCounters, RequestHandler } from '../lib';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../routes');
+jest.mock('@kbn/reporting-export-types/server/routes');
 jest.mock('../usage');
 
 import _ from 'lodash';
@@ -19,8 +19,6 @@ import {
 } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { DeepPartial } from 'utility-types';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -31,7 +29,6 @@ import { ReportingConfig, ReportingCore } from '..';
 import { buildConfig, ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
-import { setFieldFormats } from '../routes/generate/services';
 
 export const createMockPluginSetup = (
   setupMock: Partial<Record<keyof ReportingInternalSetup, any>>
@@ -45,6 +42,7 @@ export const createMockPluginSetup = (
     logger: loggingSystemMock.createLogger(),
     status: statusServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
+    routes: {},
     ...setupMock,
   };
 };
@@ -69,7 +67,7 @@ export const createMockPluginStart = async (
     uiSettings: { asScopedToClient: () => ({ get: jest.fn() }) },
     discover: discoverPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
-    fieldFormats: () => Promise.resolve(fieldFormatsMock),
+    // fieldFormats: () => Promise.resolve(fieldFormatsMock),
     store: await createMockReportingStore(config),
     taskManager: {
       schedule: jest.fn().mockImplementation(() => ({ id: 'taskId' })),
@@ -162,12 +160,12 @@ export const createMockReportingCore = async (
   await core.pluginStart(startDepsMock);
   await core.pluginStartsUp();
 
-  setFieldFormats({
-    fieldFormatServiceFactory() {
-      const fieldFormatsRegistry = new FieldFormatsRegistry();
-      return Promise.resolve(fieldFormatsRegistry);
-    },
-  });
+  // setFieldFormats({
+  //   fieldFormatServiceFactory() {
+  //     const fieldFormatsRegistry = new FieldFormatsRegistry();
+  //     return Promise.resolve(fieldFormatsRegistry);
+  //   },
+  // });
 
   return core;
 };

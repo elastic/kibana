@@ -7,11 +7,11 @@
 
 import { ResponseHeaders } from '@kbn/core-http-server';
 import { Stream } from 'stream';
-import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
-import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '@kbn/reporting-plugin/common/constants';
-import { ReportingCore } from '@kbn/reporting-plugin/server';
-import { getContentStream, statuses } from '@kbn/reporting-plugin/server/lib';
-import { ExportTypeDefinition } from '@kbn/reporting-plugin/server/types';
+import { ReportApiJSON } from '../../../common/types';
+import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
+import { ReportingCore } from '../..';
+import { getContentStream, statuses } from '../../lib';
+import { ExportTypeDefinition } from '../../types';
 import { jobsQueryFactory } from './jobs_query';
 
 export interface ErrorFromPayload {

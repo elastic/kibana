@@ -9,7 +9,7 @@
     "common/*.ts",
     "public/**/*.ts",
     "public/**/*.tsx",
-    "server/**/*",
+    "server/**/*", "../reporting/server/routes",
   ],
   "kbn_references": [
     "@kbn/reporting-common",

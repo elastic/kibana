@@ -8,16 +8,16 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import supertest from 'supertest';
-import { ReportingCore } from '@kbn/reporting-plugin/server';
+import { ReportingCore } from '../../..';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockReportingCore,
-} from '@kbn/reporting-plugin/server/test_helpers';
-import type { ReportingRequestHandlerContext } from '@kbn/reporting-plugin/server/types';
+} from '../../../test_helpers';
+import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerDiagnoseScreenshot } from '../screenshot';
 import { defer } from 'rxjs';
-import { generatePngObservable } from '../../..';
+import { generatePngObservable } from '../../../../../reporting_export_types/server';
 
 jest.mock('../../../export_types/common/generate_png');
 

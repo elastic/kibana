@@ -6,15 +6,15 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { Logger, RequestHandler } from '@kbn/core/server';
-import { IlmPolicyStatusResponse } from '@kbn/reporting-plugin/common/types';
+import { IlmPolicyStatusResponse } from '../../../common/types';
 import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,
   ILM_POLICY_NAME,
-} from '@kbn/reporting-plugin/common/constants';
-import { ReportingCore } from '@kbn/reporting-plugin/server';
-import { IlmPolicyManager } from '@kbn/reporting-plugin/server/lib';
-import { deprecations } from '@kbn/reporting-plugin/server/lib/deprecations';
+} from '../../../common/constants';
+import { ReportingCore } from '../..';
+import { IlmPolicyManager } from '../../lib';
+import { deprecations } from '../../lib/deprecations';
 import { getCounters } from '../lib';
 
 export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Logger) => {

@@ -17,6 +17,7 @@ import { PLUGIN_ID } from '../common/constants';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
 import { ReportingStore } from './lib';
+import { registerRoutes } from './routes';
 // import { setFieldFormats } from './routes/generate/services';
 import type {
   ReportingRequestHandlerContext,
@@ -65,7 +66,6 @@ export class ReportingPlugin
       router: http.createRouter<ReportingRequestHandlerContext>(),
       usageCounter,
       docLinks: core.docLinks,
-      routes: (this.reportingCore, this.logger),
       ...plugins,
     });
 
@@ -74,7 +74,7 @@ export class ReportingPlugin
     registerReportingUsageCollector(reportingCore, plugins.usageCollection);
 
     // Routes
-    // registerRoutes(reportingCore, this.logger);
+    registerRoutes(reportingCore, this.logger);
 
     // async background setup
     (async () => {

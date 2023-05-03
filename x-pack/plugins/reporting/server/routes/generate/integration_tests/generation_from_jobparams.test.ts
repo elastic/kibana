@@ -21,7 +21,7 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
-import type { ReportingRequestHandlerContext } from '../../../types';
+import type { ReportingRequestHandlerContext } from '../../../../../reporting_export_types/server/types';
 import { registerJobGenerationRoutes } from '../generate_from_jobparams';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;

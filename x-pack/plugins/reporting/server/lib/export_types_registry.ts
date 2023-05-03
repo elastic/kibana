@@ -6,15 +6,7 @@
  */
 
 import { isString } from 'lodash';
-// import {
-//   getTypeCsv,
-//   getTypeCsvFromSavedObject,
-//   getTypeCsvFromSavedObjectImmediate,
-//   getTypePng,
-//   getTypePngV2,
-//   getTypePrintablePdf,
-//   getTypePrintablePdfV2,
-// } from '@kbn/reporting-export-types/server';
+
 import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../types';
 
 type GetCallbackFn = (item: ExportTypeDefinition) => boolean;

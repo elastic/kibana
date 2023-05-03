@@ -14,11 +14,8 @@ export { getExportType as getTypePng } from './export_types/png';
 export { getExportType as getTypePngV2 } from './export_types/png_v2';
 export { getExportType as getTypePrintablePdf } from './export_types/printable_pdf';
 export { getExportType as getTypePrintablePdfV2 } from './export_types/printable_pdf_v2';
-export { registerRoutes } from './routes';
 
 export * from './export_types/common';
-export type { JobParamsDownloadCSV, JobAppParamsPDF } from './routes';
 export type { ExportTypesPluginSetupDependencies } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new ExportTypesPlugin(initializerContext);
+export const plugin = (initializerContext: PluginInitializerContext) => new ExportTypesPlugin();

@@ -10,16 +10,13 @@ import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { ReportSource, ReportApiJSON } from '@kbn/reporting-plugin/common/types';
-import { REPORTING_SYSTEM_INDEX } from '@kbn/reporting-plugin/common/constants';
-import type { ReportingCore } from '@kbn/reporting-plugin/server';
-import { statuses } from '@kbn/reporting-plugin/server/lib/statuses';
-import { Report } from '@kbn/reporting-plugin/server/lib/store';
-import {
-  runtimeFieldKeys,
-  runtimeFields,
-} from '@kbn/reporting-plugin/server/lib/store/runtime_fields';
-import type { ReportingUser } from '@kbn/reporting-plugin/server/types';
+import { ReportSource, ReportApiJSON } from '../../../common/types';
+import { REPORTING_SYSTEM_INDEX } from '../../../common/constants';
+import type { ReportingCore } from '../..';
+import { statuses } from '../../lib/statuses';
+import { Report } from '../../lib/store';
+import { runtimeFieldKeys, runtimeFields } from '../../lib/store/runtime_fields';
+import type { ReportingUser } from '../../types';
 import type { Payload } from './get_document_payload';
 import { getDocumentPayloadFactory } from './get_document_payload';
 

@@ -8,11 +8,8 @@
 import { set } from '@kbn/safer-lodash-set';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { statuses } from '@kbn/reporting-plugin/server/lib';
-import {
-  createMockConfigSchema,
-  createMockReportingCore,
-} from '@kbn/reporting-plugin/server/test_helpers';
+import { statuses } from '../../lib';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 
 import { jobsQueryFactory } from './jobs_query';
 

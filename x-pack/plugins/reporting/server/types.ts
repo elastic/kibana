@@ -9,7 +9,6 @@ import type { CustomRequestHandlerContext, IRouter, KibanaRequest, Logger } from
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type {
@@ -96,7 +95,7 @@ export interface ReportingSetupDeps {
 export interface ReportingStartDeps {
   data: DataPluginStart;
   discover: DiscoverServerPluginStart;
-  fieldFormats: FieldFormatsStart;
+  // fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   screenshotting: ScreenshottingStart;
   security?: SecurityPluginStart;

@@ -24,7 +24,6 @@ import { CoreKibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import {
   PdfScreenshotResult,
@@ -62,7 +61,6 @@ export interface ReportingInternalSetup {
   logger: Logger;
   status: StatusServiceSetup;
   docLinks: DocLinksServiceSetup;
-  routes: (reportingCore: ReportingCore, logger: Logger) => void;
 }
 
 export interface ReportingInternalStart {
@@ -72,7 +70,6 @@ export interface ReportingInternalStart {
   esClient: IClusterClient;
   data: DataPluginStart;
   discover: DiscoverServerPluginStart;
-  fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   logger: Logger;
   screenshotting: ScreenshottingStart;
