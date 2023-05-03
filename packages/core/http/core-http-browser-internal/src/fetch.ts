@@ -223,18 +223,26 @@ const validateFetchArguments = (
       `Invalid fetch arguments, must either be (string, object) or (object, undefined), received (${typeof pathOrOptions}, ${typeof options})`
     );
   }
-  // include `x-elastic-internal-origin`
-  const invalidHeaders = Object.keys(fullOptions.headers ?? {}).filter(
-    (headerName) => headerName.startsWith('kbn-') || headerName.includes(INTERNAL_ACCESS_REQUEST)
+
+  const invalidKbnHeaders = Object.keys(fullOptions.headers ?? {}).filter((headerName) =>
+    headerName.startsWith('kbn-')
   );
-  if (invalidHeaders.length) {
+  const invalidInternalOriginProducHeader = Object.keys(fullOptions.headers ?? {}).filter(
+    (headerName) => headerName.includes(INTERNAL_ACCESS_REQUEST)
+  );
+
+  if (invalidKbnHeaders.length) {
     throw new Error(
-      // `Invalid fetch headers, headers beginning with "kbn-" are not allowed: [${invalidHeaders.join(
-      //   ','
-      // )}]`
-      `Invalid fetch headers: beginning with "kbn-", including "x-elastic-internal-" are not allowed: [${invalidHeaders.join(
+      `Invalid fetch headers, headers beginning with "kbn-" are not allowed: [${invalidKbnHeaders.join(
         ','
-      )}]. Internal origin header`
+      )}]`
+    );
+  }
+  if (invalidInternalOriginProducHeader.length) {
+    throw new Error(
+      `Invalid fetch headers, headers beginning with "x-elastic-internal-" are not allowed: [${invalidInternalOriginProducHeader.join(
+        ','
+      )}]`
     );
   }
 

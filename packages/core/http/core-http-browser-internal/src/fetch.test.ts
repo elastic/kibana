@@ -172,11 +172,24 @@ describe('Fetch', () => {
           headers: {
             myHeader: 'foo',
             'kbn-version': 'CUSTOM!',
-            'x-elastic-internal-origin': 'Kibana',
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-version]"`
+      );
+    });
+
+    it('should not allow overwriting of x-elastic-internal-origin header', async () => {
+      fetchMock.get('*', {});
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: {
+            myHeader: 'foo',
+            'x-elastic-internal-origin': 'anything',
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"x-elastic-internal-\\" are not allowed: [x-elastic-internal-origin]"`
       );
     });
 
