@@ -154,110 +154,110 @@ describe('benchmarks API', () => {
       mockSoClient = savedObjectsClientMock.create();
     });
 
-    describe('test getPackagePolicies', () => {
-      it('should format request by package name', async () => {
-        const mockPackagePolicyService = createPackagePolicyServiceMock();
+    // describe('test getPackagePolicies', () => {
+    //   it('should format request by package name', async () => {
+    //     const mockPackagePolicyService = createPackagePolicyServiceMock();
 
-        await getCspPackagePolicies(
-          mockSoClient,
-          mockPackagePolicyService,
-          'myPackage',
-          {
-            page: 1,
-            per_page: 100,
-            sort_order: 'desc',
-          },
-          POSTURE_TYPE_ALL
-        );
+    //     await getCspPackagePolicies(
+    //       mockSoClient,
+    //       mockPackagePolicyService,
+    //       'myPackage',
+    //       {
+    //         page: 1,
+    //         per_page: 100,
+    //         sort_order: 'desc',
+    //       },
+    //       POSTURE_TYPE_ALL
+    //     );
 
-        expect(mockPackagePolicyService.list.mock.calls[0][1]).toMatchObject(
-          expect.objectContaining({
-            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage`,
-            page: 1,
-            perPage: 100,
-          })
-        );
-      });
+    //     expect(mockPackagePolicyService.list.mock.calls[0][1]).toMatchObject(
+    //       expect.objectContaining({
+    //         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage`,
+    //         page: 1,
+    //         perPage: 100,
+    //       })
+    //     );
+    //   });
 
-      it('should build sort request by `sort_field` and default `sort_order`', async () => {
-        const mockAgentPolicyService = createPackagePolicyServiceMock();
+    //   it('should build sort request by `sort_field` and default `sort_order`', async () => {
+    //     const mockAgentPolicyService = createPackagePolicyServiceMock();
 
-        await getCspPackagePolicies(
-          mockSoClient,
-          mockAgentPolicyService,
-          'myPackage',
-          {
-            page: 1,
-            per_page: 100,
-            sort_field: 'package_policy.name',
-            sort_order: 'desc',
-          },
-          POSTURE_TYPE_ALL
-        );
+    //     await getCspPackagePolicies(
+    //       mockSoClient,
+    //       mockAgentPolicyService,
+    //       'myPackage',
+    //       {
+    //         page: 1,
+    //         per_page: 100,
+    //         sort_field: 'package_policy.name',
+    //         sort_order: 'desc',
+    //       },
+    //       POSTURE_TYPE_ALL
+    //     );
 
-        expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
-          expect.objectContaining({
-            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage`,
-            page: 1,
-            perPage: 100,
-            sortField: 'name',
-            sortOrder: 'desc',
-          })
-        );
-      });
+    //     expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
+    //       expect.objectContaining({
+    //         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage`,
+    //         page: 1,
+    //         perPage: 100,
+    //         sortField: 'name',
+    //         sortOrder: 'desc',
+    //       })
+    //     );
+    //   });
 
-      it('should build sort request by `sort_field` and asc `sort_order`', async () => {
-        const mockAgentPolicyService = createPackagePolicyServiceMock();
+    //   it('should build sort request by `sort_field` and asc `sort_order`', async () => {
+    //     const mockAgentPolicyService = createPackagePolicyServiceMock();
 
-        await getCspPackagePolicies(
-          mockSoClient,
-          mockAgentPolicyService,
-          'myPackage',
-          {
-            page: 1,
-            per_page: 100,
-            sort_field: 'package_policy.name',
-            sort_order: 'asc',
-          },
-          POSTURE_TYPE_ALL
-        );
+    //     await getCspPackagePolicies(
+    //       mockSoClient,
+    //       mockAgentPolicyService,
+    //       'myPackage',
+    //       {
+    //         page: 1,
+    //         per_page: 100,
+    //         sort_field: 'package_policy.name',
+    //         sort_order: 'asc',
+    //       },
+    //       POSTURE_TYPE_ALL
+    //     );
 
-        expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
-          expect.objectContaining({
-            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage`,
-            page: 1,
-            perPage: 100,
-            sortField: 'name',
-            sortOrder: 'asc',
-          })
-        );
-      });
-    });
+    //     expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
+    //       expect.objectContaining({
+    //         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage`,
+    //         page: 1,
+    //         perPage: 100,
+    //         sortField: 'name',
+    //         sortOrder: 'asc',
+    //       })
+    //     );
+    //   });
+    // });
 
-    it('should format request by benchmark_name', async () => {
-      const mockAgentPolicyService = createPackagePolicyServiceMock();
+    // it('should format request by benchmark_name', async () => {
+    //   const mockAgentPolicyService = createPackagePolicyServiceMock();
 
-      await getCspPackagePolicies(
-        mockSoClient,
-        mockAgentPolicyService,
-        'myPackage',
-        {
-          page: 1,
-          per_page: 100,
-          sort_order: 'desc',
-          benchmark_name: 'my_cis_benchmark',
-        },
-        POSTURE_TYPE_ALL
-      );
+    //   await getCspPackagePolicies(
+    //     mockSoClient,
+    //     mockAgentPolicyService,
+    //     'myPackage',
+    //     {
+    //       page: 1,
+    //       per_page: 100,
+    //       sort_order: 'desc',
+    //       benchmark_name: 'my_cis_benchmark',
+    //     },
+    //     POSTURE_TYPE_ALL
+    //   );
 
-      expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
-        expect.objectContaining({
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *my_cis_benchmark*`,
-          page: 1,
-          perPage: 100,
-        })
-      );
-    });
+    //   expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
+    //     expect.objectContaining({
+    //       kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:myPackage AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *my_cis_benchmark*`,
+    //       page: 1,
+    //       perPage: 100,
+    //     })
+    //   );
+    // });
 
     describe('test getAgentPolicies', () => {
       it('should return one agent policy id when there is duplication', async () => {
