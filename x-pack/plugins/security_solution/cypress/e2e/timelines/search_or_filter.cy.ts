@@ -54,13 +54,13 @@ describe('Timeline search and filters', () => {
     });
   });
 
-  // flaky
-  describe.skip('Update kqlMode for timeline', () => {
+  describe('Update kqlMode for timeline', () => {
     beforeEach(() => {
       visitWithoutDateRange(TIMELINES_URL);
       waitForTimelinesPanelToBeLoaded();
       openTimelineUsingToggle();
       cy.intercept('PATCH', '/api/timeline').as('update');
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.get(TIMELINE_SEARCH_OR_FILTER)
         .pipe(($el) => $el.trigger('click'))
         .should('exist');
@@ -68,7 +68,7 @@ describe('Timeline search and filters', () => {
 
     it('should be able to update timeline kqlMode with filter', () => {
       cy.get(TIMELINE_KQLMODE_FILTER).click();
-      cy.wait('@update', { timeout: 15000 }).then(({ response }) => {
+      cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
         cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'filter');
         cy.get(ADD_FILTER).should('exist');
@@ -77,7 +77,7 @@ describe('Timeline search and filters', () => {
 
     it('should be able to update timeline kqlMode with search', () => {
       cy.get(TIMELINE_KQLMODE_SEARCH).click();
-      cy.wait('@update', { timeout: 15000 }).then(({ response }) => {
+      cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
         cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'search');
         cy.get(ADD_FILTER).should('not.exist');
