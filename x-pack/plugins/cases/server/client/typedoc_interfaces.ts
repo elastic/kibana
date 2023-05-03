@@ -14,7 +14,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import type {
-  AllCommentsResponse,
+  Comments,
   CasePostRequest,
   CaseResolveResponse,
   Case,
@@ -26,7 +26,7 @@ import type {
   CasesPatchRequest,
   Cases,
   UserActions,
-  CommentsResponse,
+  CommentsFindResponse,
   CasesBulkGetResponse,
 } from '../../common/api';
 
@@ -48,7 +48,7 @@ export interface ICasesConfigureResponse extends Configuration {}
 export interface ICasesConfigureRequest extends ConfigurationRequest {}
 export interface ICasesConfigurePatch extends ConfigurationPatchRequest {}
 
-export interface ICommentsResponse extends CommentsResponse {}
-export interface IAllCommentsResponse extends AllCommentsResponse {}
+export interface ICommentsResponse extends CommentsFindResponse {}
+export interface IAllCommentsResponse extends Comments {}
 
 export interface ICaseUserActionsResponse extends UserActions {}
