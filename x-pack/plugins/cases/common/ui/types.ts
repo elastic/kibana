@@ -17,9 +17,9 @@ import type {
   CaseStatuses,
   User,
   ActionConnector,
-  CaseUserActionResponse,
+  UserAction,
   SingleCaseMetricsResponse,
-  CommentResponse,
+  Comment,
   Case as CaseSnakeCase,
   UserActionFindResponse,
   FindTypeField as UserActionFindTypeField,
@@ -83,16 +83,16 @@ export type CaseViewRefreshPropInterface = null | {
   refreshCase: () => Promise<void>;
 };
 
-export type Comment = SnakeToCamelCase<CommentResponse>;
+export type CommentUI = SnakeToCamelCase<Comment>;
 export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type ExternalReferenceComment = SnakeToCamelCase<CommentResponseExternalReferenceType>;
 export type PersistableComment = SnakeToCamelCase<CommentResponseTypePersistableState>;
-export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
+export type UserActionUI = SnakeToCamelCase<UserAction>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
-  userActions: CaseUserActions[];
+  userActions: UserActionUI[];
 };
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
-export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & { comments: Comment[] };
+export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & { comments: CommentUI[] };
 export type CasesUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: CaseUI[] };
 export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;

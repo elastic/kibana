@@ -178,7 +178,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      describe('infrastructure landing page with data', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/156437
+      describe.skip('infrastructure landing page with data', () => {
         before(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         });
