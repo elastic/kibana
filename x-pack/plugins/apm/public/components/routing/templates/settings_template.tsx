@@ -10,11 +10,11 @@ import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableAgentExplorerView } from '@kbn/observability-plugin/public';
 import React from 'react';
-import { useDefaultEnvironment } from '../../../hooks/use_default_environment';
 import { Environment } from '../../../../common/environment_rt';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
+import { useDefaultEnvironment } from '../../../hooks/use_default_environment';
+import { BetaBadge } from '../../shared/beta_badge';
 import { ApmRouter } from '../apm_route_config';
 import { ApmMainTemplate } from './apm_main_template';
 
@@ -73,7 +73,7 @@ function getTabs({
 
   const agentExplorerEnabled = core.uiSettings.get<boolean>(
     enableAgentExplorerView,
-    false
+    true
   );
 
   const tabs: Tab[] = [
@@ -104,7 +104,7 @@ function getTabs({
           serviceName: '',
         },
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
+      append: <BetaBadge icon="beta" />,
       hidden: !agentExplorerEnabled,
     },
     {

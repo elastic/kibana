@@ -35,15 +35,13 @@ export interface PageTitleProps {
 }
 
 export function pageTitleContent(ruleCategory: string) {
-  return (
-    <FormattedMessage
-      id="xpack.observability.pages.alertDetails.pageTitle.title"
-      values={{
-        ruleCategory,
-      }}
-      defaultMessage="{ruleCategory} {ruleCategory, select, Anomaly {detected} Inventory {threshold breached} other {breached}}"
-    />
-  );
+  return i18n.translate('xpack.observability.pages.alertDetails.pageTitle.title', {
+    defaultMessage:
+      '{ruleCategory} {ruleCategory, select, Anomaly {detected} Inventory {threshold breached} other {breached}}',
+    values: {
+      ruleCategory,
+    },
+  });
 }
 
 export function PageTitle({ alert }: PageTitleProps) {

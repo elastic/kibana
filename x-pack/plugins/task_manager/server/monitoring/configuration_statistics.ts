@@ -14,7 +14,6 @@ import { ManagedConfiguration } from '../lib/create_managed_configuration';
 
 const CONFIG_FIELDS_TO_EXPOSE = [
   'request_capacity',
-  'max_poll_inactivity_cycles',
   'monitored_aggregated_stats_refresh_rate',
   'monitored_stats_running_average_window',
   'monitored_task_execution_thresholds',

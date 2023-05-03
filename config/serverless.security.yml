@@ -1,2 +1,16 @@
+# Security Project config
+
+## Disable plugins
+enterpriseSearch.enabled: false
+xpack.apm.enabled: false
+xpack.observability.enabled: false
+xpack.uptime.enabled: false
+
+## Enable the Serverless Security plugin
+xpack.serverless.security.enabled: true
+
+## Set the home route
 uiSettings.overrides.defaultRoute: /app/security/get_started
+
+## Set the dev project switcher current type
 xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'

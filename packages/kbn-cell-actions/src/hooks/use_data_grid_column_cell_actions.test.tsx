@@ -191,4 +191,32 @@ describe('useDataGridColumnsCellActions', () => {
       expect(mockCloseCellPopover).toHaveBeenCalled();
     });
   });
+
+  it('should return empty array of actions when list of fields is empty', async () => {
+    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
+      initialProps: {
+        ...useDataGridColumnsCellActionsProps,
+        fields: [],
+      },
+    });
+
+    await waitForNextUpdate();
+
+    expect(result.current).toBeInstanceOf(Array);
+    expect(result.current.length).toBe(0);
+  });
+
+  it('should return empty array of actions when list of fields is undefined', async () => {
+    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
+      initialProps: {
+        ...useDataGridColumnsCellActionsProps,
+        fields: undefined,
+      },
+    });
+
+    await waitForNextUpdate();
+
+    expect(result.current).toBeInstanceOf(Array);
+    expect(result.current.length).toBe(0);
+  });
 });
