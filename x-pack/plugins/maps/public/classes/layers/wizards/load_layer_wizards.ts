@@ -41,10 +41,10 @@ export function registerLayerWizards() {
   registerLayerWizardInternal(layerGroupWizardConfig);
 
   registerLayerWizardInternal(esDocumentsLayerWizardConfig);
-  registerLayerWizardInternal(point2PointLayerWizardConfig);
-
   registerLayerWizardInternal(choroplethLayerWizardConfig);
+
   registerLayerWizardInternal(spatialJoinWizardConfig);
+  registerLayerWizardInternal(point2PointLayerWizardConfig);
 
   registerLayerWizardInternal(clustersLayerWizardConfig);
   registerLayerWizardInternal(heatmapLayerWizardConfig);
