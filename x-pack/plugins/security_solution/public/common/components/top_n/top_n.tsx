@@ -26,14 +26,12 @@ const TopNContainer = styled.div`
 `;
 
 const CloseButton = styled(EuiButtonIcon)`
-  z-index: 999999;
   position: absolute;
   right: 4px;
   top: 4px;
 `;
 
 const ViewSelect = styled(EuiSuperSelect)`
-  z-index: 999999;
   width: 170px;
 `;
 
