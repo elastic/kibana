@@ -36,8 +36,10 @@ export function getPreferredBucketSizeAndDataSource({
 } {
   let preferred: ApmDataSourceWithSummary | undefined;
 
+  const sourcesWithDocs = sources.filter((source) => source.hasDocs);
+
   const sourcesInPreferredOrder = orderBy(
-    sources,
+    sourcesWithDocs,
     [
       (source) => EVENT_PREFERENCE.indexOf(source.documentType),
       (source) => intervalToSeconds(source.rollupInterval),

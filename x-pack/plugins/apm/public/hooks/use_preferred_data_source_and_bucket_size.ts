@@ -74,9 +74,7 @@ export function usePreferredDataSourceAndBucketSize<
           start: new Date(start).getTime(),
           end: new Date(end).getTime(),
         }).bucketSize,
-        sources: sources.filter(
-          (s) => s.hasDocs && suitableTypes.includes(s.documentType)
-        ),
+        sources: sources.filter((s) => suitableTypes.includes(s.documentType)),
       }
     );
 
