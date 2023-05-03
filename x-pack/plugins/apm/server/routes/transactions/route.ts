@@ -188,7 +188,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
         latencyAggregationType: latencyAggregationTypeRt,
         bucketSizeInSeconds: toNumberRt,
       }),
-      t.partial({ transactionName: t.string }),
+      t.partial({ transactionName: t.string, useDurationSummary: toBooleanRt }),
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
       serviceTransactionDataSourceRt,
     ]),
@@ -211,6 +211,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       documentType,
       rollupInterval,
       bucketSizeInSeconds,
+      useDurationSummary,
     } = params.query;
 
     const options = {
@@ -226,6 +227,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       documentType,
       rollupInterval,
       bucketSizeInSeconds,
+      useDurationSummary,
     };
 
     return getLatencyPeriods({
