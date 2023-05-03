@@ -59,7 +59,8 @@
     "@kbn/ml-route-utils",
     "@kbn/core-lifecycle-server",
     "@kbn/security-plugin",
-    "@kbn/ml-error-utils"
+    "@kbn/ml-error-utils",
+    "@kbn/ml-data-frame-analytics"
   ],
   "exclude": [
     "target/**/*",
