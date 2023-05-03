@@ -18,8 +18,12 @@ import type {
   PostConnectorMappingsArgs,
   UpdateConnectorMappingsArgs,
 } from './types';
-import type { ConnectorMappingsPersistedAttributes } from '../../common/types/connector_mappings';
-import type { ConnectorMappings } from '../../../common/api';
+import type {
+  ConnectorMappingsPersistedAttributes,
+  ConnectorMappingsSavedObjectTransformed,
+  ConnectorMappingsTransformed,
+} from '../../common/types/connector_mappings';
+import type { ConnectorMappings, ConnectorMappingsAttributes } from '../../../common/api';
 
 export class ConnectorMappingsService {
   constructor(private readonly log: Logger) {}
@@ -36,7 +40,7 @@ export class ConnectorMappingsService {
           type: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
         });
 
-      return connectorMappings as SavedObjectsFindResponse<ConnectorMappings>;
+      return transformFindResponseToExternalModel(connectorMappings);
     } catch (error) {
       this.log.error(`Attempting to find all connector mappings: ${error}`);
       throw error;
@@ -48,7 +52,7 @@ export class ConnectorMappingsService {
     attributes,
     references,
     refresh,
-  }: PostConnectorMappingsArgs): Promise<SavedObject<ConnectorMappings>> {
+  }: PostConnectorMappingsArgs): Promise<ConnectorMappingsSavedObjectTransformed> {
     try {
       this.log.debug(`Attempting to POST a new connector mappings`);
       const connectorMappings =
@@ -61,7 +65,7 @@ export class ConnectorMappingsService {
           }
         );
 
-      return connectorMappings as SavedObject<ConnectorMappings>;
+      return transformToExternalModel(connectorMappings);
     } catch (error) {
       this.log.error(`Error on POST a new connector mappings: ${error}`);
       throw error;
@@ -74,7 +78,9 @@ export class ConnectorMappingsService {
     attributes,
     references,
     refresh,
-  }: UpdateConnectorMappingsArgs): Promise<SavedObjectsUpdateResponse<ConnectorMappings>> {
+  }: UpdateConnectorMappingsArgs): Promise<
+    SavedObjectsUpdateResponse<ConnectorMappingsTransformed>
+  > {
     try {
       this.log.debug(`Attempting to UPDATE connector mappings ${mappingId}`);
       const updatedMappings =
@@ -88,10 +94,58 @@ export class ConnectorMappingsService {
           }
         );
 
-      return updatedMappings as SavedObjectsUpdateResponse<ConnectorMappings>;
+      return transformUpdateResponseToExternalModel(updatedMappings);
     } catch (error) {
       this.log.error(`Error on UPDATE connector mappings ${mappingId}: ${error}`);
       throw error;
     }
   }
 }
+
+const transformToExternalModel = (
+  so: SavedObject<ConnectorMappingsPersistedAttributes>
+): ConnectorMappingsSavedObjectTransformed => {
+  const attributes = so.attributes as ConnectorMappings;
+
+  return {
+    ...so,
+    attributes: {
+      mappings: getMappings(attributes.mappings),
+      owner: attributes.owner,
+    },
+  };
+};
+
+const getMappings = (mappings: ConnectorMappingsAttributes[]) => {
+  return mappings.map((mapping) => ({
+    action_type: mapping.action_type,
+    source: mapping.source,
+    target: mapping.target,
+  }));
+};
+
+const transformFindResponseToExternalModel = (
+  response: SavedObjectsFindResponse<ConnectorMappingsPersistedAttributes>
+): SavedObjectsFindResponse<ConnectorMappings> => {
+  return {
+    ...response,
+    saved_objects: response.saved_objects.map((so) => ({
+      ...so,
+      ...transformToExternalModel(so),
+    })),
+  };
+};
+
+const transformUpdateResponseToExternalModel = (
+  response: SavedObjectsUpdateResponse<ConnectorMappingsPersistedAttributes>
+): SavedObjectsUpdateResponse<ConnectorMappingsTransformed> => {
+  const attributes = response.attributes as Partial<ConnectorMappingsTransformed>;
+
+  return {
+    ...response,
+    attributes: {
+      ...(attributes.mappings !== undefined && { mappings: attributes.mappings }),
+      ...(attributes.owner !== undefined && { owner: attributes.owner }),
+    },
+  };
+};
