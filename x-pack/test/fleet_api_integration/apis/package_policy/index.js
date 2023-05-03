@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-export default function loadTests({ loadTestFile }) {
+import { setupTestUsers } from '../test_users';
+
+export default function loadTests({ loadTestFile, getService }) {
   describe('Package policies', () => {
+    before(async () => {
+      await setupTestUsers(getService('security'));
+    });
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./get'));
