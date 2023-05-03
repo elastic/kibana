@@ -19,7 +19,7 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
 // Skipping these for now as the feature is protected behind a feature flag set to false by default
 // To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
-describe(
+describe.skip(
   'Alert details expandable flyout left panel session view',
   { testIsolation: false },
   () => {
