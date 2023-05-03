@@ -55,6 +55,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--home.disableWelcomeScreen=true`,
         // Specify which version of the detection-rules package to install
         // `--xpack.securitySolution.prebuiltRulesPackageVersion=8.3.1`,
+        `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
       ],
     },
   };
