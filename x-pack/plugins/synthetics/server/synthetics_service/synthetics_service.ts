@@ -300,10 +300,11 @@ export class SyntheticsService {
   }
 
   async addConfigs(configs: ConfigData[]) {
-    if (configs.length === 0) {
-      return;
-    }
     try {
+      if (configs.length === 0) {
+        return;
+      }
+
       const monitors = this.formatConfigs(configs);
       const license = await this.getLicense();
 
@@ -324,10 +325,10 @@ export class SyntheticsService {
   }
 
   async editConfig(monitorConfig: ConfigData[], isEdit = true) {
-    if (monitorConfig.length === 0) {
-      return;
-    }
     try {
+      if (monitorConfig.length === 0) {
+        return;
+      }
       const license = await this.getLicense();
       const monitors = this.formatConfigs(monitorConfig);
 
@@ -423,26 +424,30 @@ export class SyntheticsService {
   }
 
   async deleteConfigs(configs: ConfigData[]) {
-    if (configs.length === 0) {
-      return;
-    }
-    const license = await this.getLicense();
-    const hasPublicLocations = configs.some((config) =>
-      config.monitor.locations.some(({ isServiceManaged }) => isServiceManaged)
-    );
-
-    if (hasPublicLocations) {
-      const output = await this.getOutput();
-      if (!output) {
+    try {
+      if (configs.length === 0) {
         return;
       }
+      const license = await this.getLicense();
+      const hasPublicLocations = configs.some((config) =>
+        config.monitor.locations.some(({ isServiceManaged }) => isServiceManaged)
+      );
 
-      const data = {
-        output,
-        monitors: this.formatConfigs(configs),
-        license,
-      };
-      return await this.apiClient.delete(data);
+      if (hasPublicLocations) {
+        const output = await this.getOutput();
+        if (!output) {
+          return;
+        }
+
+        const data = {
+          output,
+          monitors: this.formatConfigs(configs),
+          license,
+        };
+        return await this.apiClient.delete(data);
+      }
+    } catch (e) {
+      this.server.logger.error(e);
     }
   }
 
