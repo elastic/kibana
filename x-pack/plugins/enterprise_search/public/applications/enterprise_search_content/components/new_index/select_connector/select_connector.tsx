@@ -55,7 +55,7 @@ export const SelectConnector: React.FC = () => {
         description: i18n.translate(
           'xpack.enterpriseSearch.content.indices.selectConnector.description',
           {
-            defaultMessage: 'A search connector syncs data from a third party source.',
+            defaultMessage: 'A connector will sync data from a data source.',
           }
         ),
         pageTitle: i18n.translate('xpack.enterpriseSearch.content.indices.selectConnector.title', {
@@ -118,7 +118,7 @@ export const SelectConnector: React.FC = () => {
               <span>
                 <EuiButton
                   data-telemetry-id="entSearchContent-connector-selectConnector-selectAndConfigure"
-                  disabled={!selectedConnector}
+                  disabled={selectedConnector === null}
                   fill
                   color="primary"
                   type="submit"
