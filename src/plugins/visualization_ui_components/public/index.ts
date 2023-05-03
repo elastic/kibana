@@ -31,6 +31,8 @@ export {
   isQueryValid,
   DimensionEditorSection,
   DimensionButton,
+  DimensionTrigger,
+  EmptyDimensionButton,
   LineStyleSettings,
   TextDecorationSetting,
 } from './components';

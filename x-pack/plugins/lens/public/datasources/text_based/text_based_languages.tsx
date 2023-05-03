@@ -19,6 +19,7 @@ import type { ExpressionsStart, DatatableColumnType } from '@kbn/expressions-plu
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { DimensionTrigger } from '@kbn/visualization-ui-components/public';
 import {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
@@ -42,7 +43,6 @@ import type {
 import { FieldSelect } from './field_select';
 import type { Datasource, IndexPatternMap } from '../../types';
 import { LayerPanel } from './layerpanel';
-import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;

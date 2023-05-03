@@ -25,7 +25,7 @@ import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { isEqual } from 'lodash';
-import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
+import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { generateId } from '../../id_generator';
 import {
@@ -108,7 +108,6 @@ import { groupAxesByType } from './axes_configuration';
 import type { XYState } from './types';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
-import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import { createAnnotationActions } from './annotations/actions';

@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo, useState, useEffect, useContext } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -16,9 +15,7 @@ import {
   DropType,
   DropTargetSwapDuplicateCombine,
 } from '@kbn/dom-drag-drop';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { DimensionTrigger } from '../../../../shared_components/dimension_trigger';
+import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualization-ui-components/public';
 import { isDraggedField } from '../../../../utils';
 import { generateId } from '../../../../id_generator';
 
@@ -54,55 +51,6 @@ const defaultButtonLabels = {
       defaultMessage="Add or drag-and-drop a field"
     />
   ),
-};
-
-const EmptyDimensionButtonInner = ({
-  label,
-  ariaLabel,
-  onClick,
-  dataTestSubj,
-  iconType,
-}: {
-  label: React.ReactNode;
-  ariaLabel: string;
-  onClick: () => void;
-  dataTestSubj?: string;
-  iconType?: string;
-}) => {
-  return (
-    <EuiButtonEmpty
-      css={css`
-        width: 100%;
-        border-radius: ${euiThemeVars.euiBorderRadius};
-        border: ${euiThemeVars.euiBorderWidthThin} dashed ${euiThemeVars.euiBorderColor} !important;
-      `}
-      color="text" // as far as I can tell all this currently adds is the correct active background color
-      size="s"
-      iconType={iconType ?? 'plus'}
-      contentProps={{
-        css: css`
-          justify-content: flex-start;
-          padding: 0 !important;
-          color: ${euiThemeVars.euiTextSubduedColor};
-
-          .euiButtonEmpty__text {
-            margin-left: 0;
-          }
-
-          .euiIcon {
-            margin-left: ${euiThemeVars.euiSizeS};
-          }
-        `,
-      }}
-      aria-label={ariaLabel}
-      data-test-subj={dataTestSubj}
-      onClick={() => {
-        onClick();
-      }}
-    >
-      <DimensionTrigger label={label} />
-    </EuiButtonEmpty>
-  );
 };
 
 const DefaultEmptyButton = ({ columnId, group, onClick }: EmptyButtonProps) => {
