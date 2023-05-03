@@ -32,6 +32,10 @@ const navItems: NavItemProps[] = [
 ];
 
 export const createServerlessSearchSideNavComponent = (core: CoreStart) => () => {
+  // Currently, this allows the "Search" section of the side nav to render as pre-expanded.
+  // This will soon be powered from state received from core.chrome
+  const activeNavItemId = 'search_project_nav.root';
+
   return (
     <NavigationKibanaProvider core={core}>
       <Navigation
@@ -43,6 +47,7 @@ export const createServerlessSearchSideNavComponent = (core: CoreStart) => () =>
             icon: 'logoEnterpriseSearch',
           },
         ]}
+        activeNavItemId={activeNavItemId}
         homeHref="/app/enterprise_search/content/setup_guide"
         linkToCloud="projects"
       />
