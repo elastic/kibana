@@ -38,13 +38,8 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     }),
     body: schema.any(),
   },
-  handler: async ({
-    request,
-    response,
-    savedObjectsClient,
-    server,
-    syntheticsMonitorClient,
-  }): Promise<any> => {
+  handler: async (routeContext): Promise<any> => {
+    const { request, response, savedObjectsClient, server } = routeContext;
     const { encryptedSavedObjects, logger } = server;
     const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
     const monitor = request.body as SyntheticsMonitor;
@@ -90,12 +85,9 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       };
 
       const { errors, editedMonitor: editedMonitorSavedObject } = await syncEditedMonitor({
-        server,
+        routeContext,
         previousMonitor,
         decryptedPreviousMonitor,
-        syntheticsMonitorClient,
-        savedObjectsClient,
-        request,
         normalizedMonitor: monitorWithRevision,
         spaceId,
       });
@@ -124,6 +116,7 @@ export const syncEditedMonitor = async ({
   previousMonitor,
   decryptedPreviousMonitor,
   spaceId,
+  routeContext,
 }: {
   normalizedMonitor: SyntheticsMonitor;
   previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
@@ -131,7 +124,7 @@ export const syncEditedMonitor = async ({
   routeContext: RouteContext;
   spaceId: string;
 }) => {
-  const { server, request, savedObjectsClient, syntheticsMonitorClient } = routeContext;
+  const { server, savedObjectsClient, syntheticsMonitorClient } = routeContext;
   try {
     const monitorWithId = {
       ...normalizedMonitor,
@@ -158,8 +151,7 @@ export const syncEditedMonitor = async ({
           decryptedPreviousMonitor,
         },
       ],
-      request,
-      savedObjectsClient,
+      routeContext,
       allPrivateLocations,
       spaceId
     );

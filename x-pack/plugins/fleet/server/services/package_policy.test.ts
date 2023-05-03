@@ -1725,22 +1725,30 @@ describe('Package policy service', () => {
         ],
       });
 
-      savedObjectsClient.update.mockImplementation(
+      savedObjectsClient.bulkUpdate.mockImplementation(
         async (
-          type: string,
-          id: string,
-          attrs: any
-        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          savedObjectsClient.get.mockResolvedValue({
+          objs: Array<{
+            type: string;
+            id: string;
+            attributes: any;
+          }>
+        ) => {
+          const newObjs = objs.map((obj) => ({
             id: 'test',
             type: 'abcd',
             references: [],
             version: 'test',
-            attributes: attrs,
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: newObjs,
           });
-          return attrs;
+          return {
+            saved_objects: newObjs,
+          };
         }
       );
+
       const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       const res = packagePolicyService.bulkUpdate(
