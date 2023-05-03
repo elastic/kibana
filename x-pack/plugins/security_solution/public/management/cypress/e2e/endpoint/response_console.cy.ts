@@ -61,23 +61,25 @@ describe('Response console', () => {
     });
 
     it('should isolate host from response console', () => {
+      const command = 'isolate';
       waitForEndpointListPageToBeLoaded(endpointHostname);
       checkEndpointListForOnlyUnIsolatedHosts();
       openResponseConsoleFromEndpointList();
-      performCommandInputChecks('isolate');
+      performCommandInputChecks(command);
       submitCommand();
-      waitForCommandToBeExecuted();
+      waitForCommandToBeExecuted(command);
       waitForEndpointListPageToBeLoaded(endpointHostname);
       checkEndpointListForOnlyIsolatedHosts();
     });
 
     it('should release host from response console', () => {
+      const command = 'release';
       waitForEndpointListPageToBeLoaded(endpointHostname);
       checkEndpointListForOnlyIsolatedHosts();
       openResponseConsoleFromEndpointList();
-      performCommandInputChecks('release');
+      performCommandInputChecks(command);
       submitCommand();
-      waitForCommandToBeExecuted();
+      waitForCommandToBeExecuted(command);
       waitForEndpointListPageToBeLoaded(endpointHostname);
       checkEndpointListForOnlyUnIsolatedHosts();
     });
@@ -88,6 +90,7 @@ describe('Response console', () => {
     let initialAgentData: Agent;
     let cronPID: string;
     let newCronPID: string;
+    const filePath = `/home/ubuntu/32-mb-test-file`;
 
     before(() => {
       getAgentByHostName(endpointHostname).then((agentData) => {
@@ -140,7 +143,7 @@ describe('Response console', () => {
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`kill-process --pid ${cronPID}`);
       submitCommand();
-      waitForCommandToBeExecuted();
+      waitForCommandToBeExecuted('kill-process');
 
       performCommandInputChecks('processes');
       submitCommand();
@@ -164,7 +167,25 @@ describe('Response console', () => {
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`suspend-process --pid ${newCronPID}`);
       submitCommand();
-      waitForCommandToBeExecuted();
+      waitForCommandToBeExecuted('suspend-process');
+    });
+
+    it('"get-file --path" - should retrieve a file', () => {
+      waitForEndpointListPageToBeLoaded(endpointHostname);
+      openResponseConsoleFromEndpointList();
+      inputConsoleCommand(`get-file --path ${filePath}`);
+      submitCommand();
+      waitForCommandToBeExecuted('get-file');
+    });
+
+    it('"execute --command" - should execute a command', () => {
+      waitForEndpointListPageToBeLoaded(endpointHostname);
+      openResponseConsoleFromEndpointList();
+      inputConsoleCommand(
+        `execute --command "echo write something > ${filePath}; cat ${filePath};"`
+      );
+      submitCommand();
+      waitForCommandToBeExecuted('execute');
     });
   });
 });
