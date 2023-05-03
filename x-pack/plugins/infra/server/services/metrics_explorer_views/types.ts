@@ -11,7 +11,6 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type {
-  CreateMetricsExplorerViewAttributesRequestPayload,
   MetricsExplorerViewRequestQuery,
   UpdateMetricsExplorerViewAttributesRequestPayload,
 } from '../../../common/http_api/latest';
@@ -37,11 +36,8 @@ export interface IMetricsExplorerViewsClient {
     metricsExplorerViewId: string,
     query: MetricsExplorerViewRequestQuery
   ): Promise<MetricsExplorerView>;
-  create(
-    metricsExplorerViewAttributes: CreateMetricsExplorerViewAttributesRequestPayload
-  ): Promise<MetricsExplorerView>;
   update(
-    metricsExplorerViewId: string,
+    metricsExplorerViewId: string | null,
     metricsExplorerViewAttributes: UpdateMetricsExplorerViewAttributesRequestPayload,
     query: MetricsExplorerViewRequestQuery
   ): Promise<MetricsExplorerView>;
