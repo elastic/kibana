@@ -17,7 +17,7 @@ import type {
   CaseStatuses,
   User,
   ActionConnector,
-  CaseUserActionResponse,
+  UserAction,
   SingleCaseMetricsResponse,
   CommentResponse,
   Case as CaseSnakeCase,
@@ -87,9 +87,9 @@ export type Comment = SnakeToCamelCase<CommentResponse>;
 export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type ExternalReferenceComment = SnakeToCamelCase<CommentResponseExternalReferenceType>;
 export type PersistableComment = SnakeToCamelCase<CommentResponseTypePersistableState>;
-export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
+export type UserActionUI = SnakeToCamelCase<UserAction>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
-  userActions: CaseUserActions[];
+  userActions: UserActionUI[];
 };
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
 export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & { comments: Comment[] };

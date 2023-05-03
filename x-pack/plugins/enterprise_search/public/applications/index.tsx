@@ -114,7 +114,7 @@ export const renderApp = (
           <CloudContext>
             <Provider store={store}>
               <Router history={params.history}>
-                <App {...initialData} />
+                <App access={productAccess} {...initialData} />
                 <Toasts />
               </Router>
             </Provider>

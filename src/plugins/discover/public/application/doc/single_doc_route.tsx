@@ -93,9 +93,5 @@ export const SingleDocRoute = () => {
     );
   }
 
-  return (
-    <div className="app-container">
-      <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />
-    </div>
-  );
+  return <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />;
 };
