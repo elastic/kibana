@@ -92,7 +92,7 @@ describe('DashboardView', () => {
     expect(queryByTestId(`dashboard-view-error-prompt-wrapper`)).toBeInTheDocument();
   });
 
-  test('render dashbard view with height', () => {
+  test('render dashboard view with height', () => {
     const { queryByTestId } = render(
       <Router history={mockHistory}>
         <DashboardView />
