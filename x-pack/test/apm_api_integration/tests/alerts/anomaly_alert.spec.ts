@@ -12,17 +12,18 @@ import { range } from 'lodash';
 import { ANOMALY_SEVERITY } from '@kbn/apm-plugin/common/ml_constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
-import { createApmRule } from './alerting_api_helper';
-import { waitForRuleStatus } from './wait_for_rule_status';
+import { AlertTestHelper } from './helpers/alert_test_helper';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
 
   const supertest = getService('supertest');
   const ml = getService('ml');
-  const es = getService('es');
+  const esClient = getService('es');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
+
+  const alertTestHelper = new AlertTestHelper({ esClient, supertest });
 
   // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/155930
   registry.when.skip(
@@ -75,7 +76,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with ml jobs', () => {
         before(async () => {
-          await createAndRunApmMlJobs({ es, ml, environments: ['production'] });
+          await createAndRunApmMlJobs({ es: esClient, ml, environments: ['production'] });
         });
 
         after(async () => {
@@ -83,8 +84,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('checks if alert is active', async () => {
-          const createdRule = await createApmRule({
-            supertest,
+          const createdRule = await alertTestHelper.createApmRule({
             name: 'Latency anomaly | service-a',
             params: {
               environment: 'production',
@@ -99,10 +99,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           if (!ruleId) {
             expect(ruleId).to.not.eql(undefined);
           } else {
-            const executionStatus = await waitForRuleStatus({
+            const executionStatus = await alertTestHelper.waitForRuleStatus({
               id: ruleId,
               expectedStatus: 'active',
-              supertest,
             });
             expect(executionStatus.status).to.be('active');
           }

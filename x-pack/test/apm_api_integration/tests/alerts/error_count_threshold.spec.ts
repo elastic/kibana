@@ -12,33 +12,26 @@ import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/inst
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
-  createApmRule,
-  createIndexConnector,
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
-} from './alerting_api_helper';
-import {
-  waitForRuleStatus,
-  waitForDocumentInIndex,
-  waitForAlertInIndex,
-} from './wait_for_rule_status';
+} from './fetch_service_alert_counts';
+
+import { AlertTestHelper } from './helpers/alert_test_helper';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
 
   const supertest = getService('supertest');
-  const es = getService('es');
+  const esClient = getService('es');
   const apmApiClient = getService('apmApiClient');
-  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
+
+  const alertTestHelper = new AlertTestHelper({ esClient, supertest });
 
   registry.when('error count threshold alert', { config: 'basic', archives: [] }, () => {
     let ruleId: string;
     let actionId: string | undefined;
-
-    const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
-    const ALERT_ACTION_INDEX_NAME = 'alert-action-error-count';
 
     const errorMessage = '[ResponseError] index_not_found_exception';
     const errorGroupingKey = getErrorGroupingKey(errorMessage);
@@ -74,26 +67,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await synthtraceEsClient.clean();
       await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
       await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
-      await esDeleteAllIndices(ALERT_ACTION_INDEX_NAME);
-      await es.deleteByQuery({
-        index: APM_ALERTS_INDEX,
-        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
-      });
-      await es.deleteByQuery({
-        index: '.kibana-event-log-*',
-        query: { term: { 'kibana.alert.rule.consumer': 'apm' } },
-      });
+      await alertTestHelper.cleanAll();
     });
 
     describe('create alert', () => {
       before(async () => {
-        actionId = await createIndexConnector({
-          supertest,
+        actionId = await alertTestHelper.createIndexConnector({
           name: 'Error count API test',
-          indexName: ALERT_ACTION_INDEX_NAME,
         });
-        const createdRule = await createApmRule({
-          supertest,
+        const createdRule = await alertTestHelper.createApmRule({
           ruleTypeId: ApmRuleType.ErrorCount,
           name: 'Apm error count',
           params: {
@@ -118,12 +100,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                     message: `${errorCountMessage}
 - Transaction name: {{context.transactionName}}
 - Error grouping key: {{context.errorGroupingKey}}`,
+                    id: actionId,
                   },
                 ],
               },
               frequency: {
                 notify_when: 'onActionGroupChange',
-                throttle: null,
                 summary: false,
               },
             },
@@ -134,21 +116,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('checks if rule is active', async () => {
-        const executionStatus = await waitForRuleStatus({
+        const executionStatus = await alertTestHelper.waitForRuleStatus({
           id: ruleId,
           expectedStatus: 'active',
-          supertest,
         });
         expect(executionStatus.status).to.be('active');
       });
 
       it('returns correct message', async () => {
-        const resp = await waitForDocumentInIndex<{ message: string }>({
-          es,
-          indexName: ALERT_ACTION_INDEX_NAME,
+        const message = await alertTestHelper.waitForConnectorActionMessage({
+          messageId: actionId,
         });
 
-        expect(resp.hits.hits[0]._source?.message).eql(
+        expect(message).eql(
           `Apm error count alert is firing because of the following conditions:
 
 - Service name: opbeans-java
@@ -161,16 +141,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('indexes alert document with all group-by fields', async () => {
-        const resp = await waitForAlertInIndex({
-          es,
-          indexName: APM_ALERTS_INDEX,
+        const resp = await alertTestHelper.waitForActiveAlert({
           ruleId,
         });
 
-        expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-java');
-        expect(resp.hits.hits[0]._source).property('service.environment', 'production');
-        expect(resp.hits.hits[0]._source).property('transaction.name', 'tx-java');
-        expect(resp.hits.hits[0]._source).property('error.grouping_key', errorGroupingKey);
+        expect(resp._source).property('service.name', 'opbeans-java');
+        expect(resp._source).property('service.environment', 'production');
+        expect(resp._source).property('transaction.name', 'tx-java');
+        expect(resp._source).property('error.grouping_key', errorGroupingKey);
       });
 
       it('shows the correct alert count for each service on service inventory', async () => {

@@ -9,7 +9,10 @@ import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_r
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { fetchServiceInventoryAlertCounts, fetchServiceTabAlertCount } from './alerting_api_helper';
+import {
+  fetchServiceInventoryAlertCounts,
+  fetchServiceTabAlertCount,
+} from './fetch_service_alert_counts';
 import { AlertTestHelper } from './helpers/alert_test_helper';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
