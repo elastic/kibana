@@ -84,7 +84,19 @@ export function transformUpdateResponseToExternalModel(
   return {
     ...updatedCase,
     attributes: {
-      ...restUpdateAttributes,
+      description: restUpdateAttributes.description,
+      title: restUpdateAttributes.title,
+      tags: restUpdateAttributes.tags,
+      settings: restUpdateAttributes.settings,
+      owner: restUpdateAttributes.owner,
+      assignees: restUpdateAttributes.assignees,
+      duration: restUpdateAttributes.duration,
+      closed_at: restUpdateAttributes.closed_at,
+      closed_by: restUpdateAttributes.closed_by,
+      created_at: restUpdateAttributes.created_at,
+      created_by: restUpdateAttributes.created_by,
+      updated_at: restUpdateAttributes.updated_at,
+      updated_by: restUpdateAttributes.updated_by,
       ...((severity || severity === 0) && { severity: SEVERITY_ESMODEL_TO_EXTERNAL[severity] }),
       ...((status || status === 0) && { status: STATUS_ESMODEL_TO_EXTERNAL[status] }),
       ...(transformedConnector && { connector: transformedConnector }),
@@ -129,7 +141,19 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
 
   return {
     attributes: {
-      ...restAttributes,
+      ...(restAttributes.description && { description: restAttributes.description }),
+      ...(restAttributes.title && { title: restAttributes.title }),
+      ...(restAttributes.tags && { tags: restAttributes.tags }),
+      ...(restAttributes.settings && { settings: restAttributes.settings }),
+      ...(restAttributes.owner && { owner: restAttributes.owner }),
+      ...(restAttributes.assignees && { assignees: restAttributes.assignees }),
+      ...(restAttributes.duration && { duration: restAttributes.duration }),
+      ...(restAttributes.closed_at && { closed_at: restAttributes.closed_at }),
+      ...(restAttributes.closed_by && { closed_by: restAttributes.closed_by }),
+      ...(restAttributes.created_at && { created_at: restAttributes.created_at }),
+      ...(restAttributes.created_by && { created_by: restAttributes.created_by }),
+      ...(restAttributes.updated_at && { updated_at: restAttributes.updated_at }),
+      ...(restAttributes.updated_by && { updated_by: restAttributes.updated_by }),
       ...transformedConnector,
       ...transformedExternalService,
       ...(severity && { severity: SEVERITY_EXTERNAL_TO_ESMODEL[severity] }),
@@ -214,7 +238,19 @@ export function transformSavedObjectToExternalModel(
   return {
     ...caseSavedObject,
     attributes: {
-      ...caseSavedObjectAttributes,
+      description: caseSavedObjectAttributes.description,
+      title: caseSavedObjectAttributes.title,
+      tags: caseSavedObjectAttributes.tags,
+      settings: caseSavedObjectAttributes.settings,
+      owner: caseSavedObjectAttributes.owner,
+      assignees: caseSavedObjectAttributes.assignees,
+      duration: caseSavedObjectAttributes.duration,
+      closed_at: caseSavedObjectAttributes.closed_at,
+      closed_by: caseSavedObjectAttributes.closed_by,
+      created_at: caseSavedObjectAttributes.created_at,
+      created_by: caseSavedObjectAttributes.created_by,
+      updated_at: caseSavedObjectAttributes.updated_at,
+      updated_by: caseSavedObjectAttributes.updated_by,
       severity,
       status,
       connector,
@@ -236,7 +272,12 @@ function transformESExternalService(
   }
 
   return {
-    ...externalService,
+    connector_name: externalService.connector_name,
+    external_id: externalService.external_id,
+    external_title: externalService.external_title,
+    external_url: externalService.external_url,
+    pushed_at: externalService.pushed_at,
+    pushed_by: externalService.pushed_by,
     connector_id: connectorIdRef?.id ?? NONE_CONNECTOR_ID,
   };
 }
