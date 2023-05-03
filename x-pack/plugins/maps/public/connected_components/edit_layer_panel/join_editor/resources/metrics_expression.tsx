@@ -122,13 +122,13 @@ export class MetricsExpression extends Component<Props, State> {
           <EuiPopoverTitle>
             <FormattedMessage
               id="xpack.maps.layerPanel.metricsExpression.metricsPopoverTitle"
-              defaultMessage="Metrics"
+              defaultMessage="Configure join metrics"
             />
           </EuiPopoverTitle>
           <EuiFormHelpText className="mapJoinExpressionHelpText">
             <FormattedMessage
               id="xpack.maps.layerPanel.metricsExpression.helpText"
-              defaultMessage="Configure join metrics. These values are added to layer features and used for data driven styling and tooltip content."
+              defaultMessage="Metrics are added to layer features and used for data driven styling and tooltip content."
             />
           </EuiFormHelpText>
           {this._renderMetricsEditor()}
