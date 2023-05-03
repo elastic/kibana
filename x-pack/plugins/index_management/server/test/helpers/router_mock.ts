@@ -6,9 +6,11 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { createVersionedRouterMock } from '@kbn/core-http-router-server-mocks';
 import { get } from 'lodash';
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { VersionedRouter } from '@kbn/core-http-server';
 
 type RequestHandler = (...params: any[]) => any;
 
@@ -104,4 +106,6 @@ export class RouterMock implements IRouter {
 
     return handler(this.contextMock, mockRequest, responseMock);
   }
+
+  versioned = createVersionedRouterMock();
 }
