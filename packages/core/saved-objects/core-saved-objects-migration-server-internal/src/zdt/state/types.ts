@@ -28,8 +28,8 @@ export interface BaseState extends ControlState {
    * after the INDEX_STATE_UPDATE_DONE stage.
    *
    * This flag is set to `true` in the following scenarios:
-   * - on nodes without the `migrator` role, the flag will always be `true`
-   * - if the migrator create the index, the workflow will set the flag to `true` given there is no docs.
+   * - on nodes without the `migrator` role, the flag will always be `true`.
+   * - if the migrator create the index, the workflow will set the flag to `true` given there is nothing to migrate.
    */
   readonly skipDocumentMigration: boolean;
 }
