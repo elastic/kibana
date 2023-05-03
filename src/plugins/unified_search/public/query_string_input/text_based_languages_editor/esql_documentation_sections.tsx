@@ -482,6 +482,26 @@ These comparison operators are supported:
   * larger than: \`>\`
   * larger than or equal: \`>=\`
 
+For string comparison using wildcards or regular expressions, use \`LIKE\` or \`RLIKE\`:
+
+* Use \`LIKE\` to match strings using wildcards. The following wildcard characters are supported:
+  * \`*\` matches zero or more characters. 
+  * \`?\` matches one character. 
+
+  \`\`\`
+  FROM employees 
+  | WHERE first_name LIKE "?b*" 
+  | PROJECT first_name, last_name
+  \`\`\`
+
+* Use \`RLIKE\` to match strings using [regular expressions](https://www.elastic.co/guide/en/elasticsearch/reference/current/regexp-syntax.html):
+
+  \`\`\`
+  FROM employees 
+  | WHERE first_name RLIKE ".leja.*" 
+  | PROJECT first_name, last_name
+  \`\`\`
+
 You can use the following boolean operators:
 
 * \`AND\`
@@ -537,6 +557,66 @@ Returns the absolute value.
 FROM employees
 | PROJECT first_name, last_name, height
 | EVAL abs_height = ABS(0.0 - height)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.caseFunction',
+        {
+          defaultMessage: 'CASE',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.caseFunction.markdown',
+            {
+              defaultMessage: `### CASE
+Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to \`true\`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.
+
+\`\`\`
+FROM employees
+| EVAL type = CASE(
+    languages <= 1, "monolingual",
+    languages <= 2, "bilingual",
+     "polyglot")
+| PROJECT first_name, last_name, type
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.cidrMatchFunction',
+        {
+          defaultMessage: 'CIDR_MATCH',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.cidrMatchFunction.markdown',
+            {
+              defaultMessage: `### CIDR_MATCH
+Returns \`true\` if the provided IP is contained in one of the provided CIDR blocks. 
+
+\`CIDR_MATCH\` accepts two or more arguments. The first argument is the IP address of type \`ip\` (both IPv4 and IPv6 are supported). Subsequent arguments are the CIDR blocks to test the IP against.
+
+\`\`\`
+FROM hosts
+| WHERE CIDR_MATCH(ip, "127.0.0.2/32", "127.0.0.3/32")
 \`\`\`
               `,
               description:
@@ -650,6 +730,87 @@ Timespan literals are not whitespace sensitive. These expressions are all valid:
     },
     {
       label: i18n.translate(
+        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.isFiniteFunction',
+        {
+          defaultMessage: 'IS_FINITE',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.isFiniteFunction.markdown',
+            {
+              defaultMessage: `### IS_FINITE
+Returns a boolean that indicates whether its input is a finite number.
+
+\`\`\`
+ROW d = 1.0 
+| EVAL s = IS_FINITE(d/0)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.isInfiniteFunction',
+        {
+          defaultMessage: 'IS_INFINITE',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'unifiedSearch.query.textBasedLanguagesEditor.documentationESQL.isInfiniteFunction.markdown',
+            {
+              defaultMessage: `### IS_INFINITE
+Returns a boolean that indicates whether its input is infinite.
+
+\`\`\`
+ROW d = 1.0 
+| EVAL s = IS_INFINITE(d/0)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'unifiedSearch.query.textBasedLanguagesEditor.documentation.isNanFunction',
+        {
+          defaultMessage: 'IS_NAN',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'unifiedSearch.query.textBasedLanguagesEditor.documentation.isNanFunction.markdown',
+            {
+              defaultMessage: `### IS_NAN
+Returns a boolean that indicates whether its input is not a number.
+
+\`\`\`
+ROW d = 1.0 
+| EVAL s = IS_NAN(d)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'unifiedSearch.query.textBasedLanguagesEditor.documentation.isNullFunction',
         {
           defaultMessage: 'IS_NULL',
@@ -665,14 +826,41 @@ Returns a boolean than indicates whether its input is \`null\`.
 
 \`\`\`
 FROM employees
-| WHERE is_null(first_name)
+| WHERE IS_NULL(first_name)
 \`\`\`
 
 Combine this function with \`NOT\` to filter out any \`null\` data:
 
 \`\`\`
 FROM employees
-| WHERE NOT is_null(first_name)
+| WHERE NOT IS_NULL(first_name)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'unifiedSearch.query.textBasedLanguagesEditor.documentation.powFunction',
+        {
+          defaultMessage: 'POW',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'unifiedSearch.query.textBasedLanguagesEditor.documentation.powFunction.markdown',
+            {
+              defaultMessage: `### POW
+Returns the the value of a base (first argument) raised to a power (second argument).
+
+\`\`\`
+ROW base = 2.0, exponent = 2.0 
+| EVAL s = POW(base, exponent)
 \`\`\`
               `,
               description:
