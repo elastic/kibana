@@ -44,7 +44,7 @@ export interface FilterItemsProps {
 const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps) {
   const groupRef = useRef<HTMLDivElement>(null);
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { appName, usageCollection, uiSettings } = kibana.services;
+  const { appName, usageCollection, uiSettings, docLinks } = kibana.services;
   const { readOnly = false } = props;
 
   if (!uiSettings) return null;
@@ -74,6 +74,7 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps)
           onRemove={() => onRemove(i)}
           indexPatterns={props.indexPatterns}
           uiSettings={uiSettings!}
+          docLinks={docLinks}
           hiddenPanelOptions={props.hiddenPanelOptions}
           timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
           filtersForSuggestions={props.filtersForSuggestions}
