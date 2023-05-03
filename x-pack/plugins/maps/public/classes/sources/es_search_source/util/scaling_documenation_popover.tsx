@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { EuiButtonIcon, EuiLink, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDocLinks } from '../../../../kibana_services';
@@ -17,39 +17,43 @@ interface Props {
   mvtOptionLabel: string;
 }
 
-interface State {
-  isPopoverOpen: boolean;
-}
+export function ScalingDocumenationPopover(props: Props) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-export class ScalingDocumenationPopover extends Component<Props, State> {
-  state: State = {
-    isPopoverOpen: false,
-  };
-
-  _togglePopover = () => {
-    this.setState((prevState) => ({
-      isPopoverOpen: !prevState.isPopoverOpen,
-    }));
-  };
-
-  _closePopover = () => {
-    this.setState({
-      isPopoverOpen: false,
-    });
-  };
-
-  _renderContent() {
-    return (
+  return (
+    <EuiPopover
+      id="scalingHelpPopover"
+      anchorPosition="leftCenter"
+      button={
+        <EuiButtonIcon
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+          }}
+          iconType="documentation"
+          aria-label="Scaling documentation"
+        />
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => {
+        setIsPopoverOpen(false);
+      }}
+      repositionOnScroll
+      ownFocus
+    >
+      <EuiPopoverTitle>
+        <FormattedMessage id="xpack.maps.scalingDocs.title" defaultMessage="Scaling" />
+      </EuiPopoverTitle>
+      
       <div>
         <EuiText size="s" style={{ maxWidth: '36em' }}>
           <dl>
-            <dt>{this.props.mvtOptionLabel} (Default)</dt>
+            <dt>{props.mvtOptionLabel} (Default)</dt>
             <dd>
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.mvtDetails"
                   defaultMessage="Vector tiles partition your map into tiles, with each tile displaying features from the first {maxResultWindow} documents. Results exceeding {maxResultWindow} are not displayed in a tile. A bounding box indicates the area where data is incomplete."
-                  values={{ maxResultWindow: this.props.maxResultWindow }}
+                  values={{ maxResultWindow: props.maxResultWindow }}
                 />
               </p>
               <p>
@@ -60,13 +64,13 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
               </p>
             </dd>
 
-            <dt>{this.props.clustersOptionLabel}</dt>
+            <dt>{props.clustersOptionLabel}</dt>
             <dd>
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.clustersDetails"
                   defaultMessage="Display clusters when results exceed {maxResultWindow} documents. Display documents when results are less then {maxResultWindow}."
-                  values={{ maxResultWindow: this.props.maxResultWindow }}
+                  values={{ maxResultWindow: props.maxResultWindow }}
                 />
               </p>
               <p>
@@ -83,13 +87,13 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
               </p>
             </dd>
 
-            <dt>{this.props.limitOptionLabel}</dt>
+            <dt>{props.limitOptionLabel}</dt>
             <dd>
               <p>
                 <FormattedMessage
                   id="xpack.maps.scalingDocs.limitDetails"
                   defaultMessage="Display features from the first {maxResultWindow} documents."
-                  values={{ maxResultWindow: this.props.maxResultWindow }}
+                  values={{ maxResultWindow: props.maxResultWindow }}
                 />
               </p>
               <FormattedMessage
@@ -136,7 +140,7 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
               id="xpack.maps.scalingDocs.maxResultWindow"
               defaultMessage="{maxResultWindow} constraint provided by {link} index setting."
               values={{
-                maxResultWindow: this.props.maxResultWindow,
+                maxResultWindow: props.maxResultWindow,
                 link: (
                   <EuiLink
                     href={getDocLinks().links.elasticsearch.dynamicIndexSettings}
@@ -151,31 +155,7 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
           </p>
         </EuiText>
       </div>
-    );
-  }
 
-  render() {
-    return (
-      <EuiPopover
-        id="scalingHelpPopover"
-        anchorPosition="leftCenter"
-        button={
-          <EuiButtonIcon
-            onClick={this._togglePopover}
-            iconType="documentation"
-            aria-label="Scaling documentation"
-          />
-        }
-        isOpen={this.state.isPopoverOpen}
-        closePopover={this._closePopover}
-        repositionOnScroll
-        ownFocus
-      >
-        <EuiPopoverTitle>
-          <FormattedMessage id="xpack.maps.scalingDocs.title" defaultMessage="Scaling" />
-        </EuiPopoverTitle>
-        {this._renderContent()}
-      </EuiPopover>
-    );
-  }
+    </EuiPopover>
+  );
 }
