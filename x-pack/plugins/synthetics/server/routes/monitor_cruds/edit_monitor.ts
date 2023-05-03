@@ -195,7 +195,10 @@ export const syncEditedMonitor = async ({
 
     const [editedMonitorSavedObject, { publicSyncErrors, failedPolicyUpdates }] = await Promise.all(
       [editedSOPromise, editSyncPromise]
-    );
+    ).catch((e) => {
+      server.logger.error(e);
+      throw e;
+    });
 
     sendTelemetryEvents(
       server.logger,

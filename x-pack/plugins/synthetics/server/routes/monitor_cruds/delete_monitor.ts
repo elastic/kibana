@@ -107,7 +107,10 @@ export const deleteMonitor = async ({
     );
     const deletePromise = savedObjectsClient.delete(syntheticsMonitorType, monitorId);
 
-    const [errors] = await Promise.all([deleteSyncPromise, deletePromise]);
+    const [errors] = await Promise.all([deleteSyncPromise, deletePromise]).catch((e) => {
+      server.logger.error(e);
+      throw e;
+    });
 
     sendTelemetryEvents(
       logger,
@@ -123,6 +126,10 @@ export const deleteMonitor = async ({
 
     return errors;
   } catch (e) {
+    server.logger.error(
+      `Unable to delete Synthetics monitor ${monitor.attributes[ConfigKey.NAME]}`
+    );
+
     if (monitorWithSecret) {
       await restoreDeletedMonitor({
         monitorId,

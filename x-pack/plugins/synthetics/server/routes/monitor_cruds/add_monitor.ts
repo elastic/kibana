@@ -197,7 +197,10 @@ export const syncNewMonitor = async ({
     const [monitorSavedObjectN, [packagePolicyResult, syncErrors]] = await Promise.all([
       newMonitorPromise,
       syncErrorsPromise,
-    ]);
+    ]).catch((e) => {
+      server.logger.error(e);
+      throw e;
+    });
 
     if (packagePolicyResult && (packagePolicyResult?.failed?.length ?? []) > 0) {
       const failed = packagePolicyResult.failed.map((f) => f.error);
@@ -219,6 +222,9 @@ export const syncNewMonitor = async ({
 
     return { errors: syncErrors, newMonitor: monitorSavedObject };
   } catch (e) {
+    server.logger.error(
+      `Unable to create Synthetics monitor ${monitorWithNamespace[ConfigKey.NAME]}`
+    );
     await deleteMonitorIfCreated({
       newMonitorId,
       routeContext,
