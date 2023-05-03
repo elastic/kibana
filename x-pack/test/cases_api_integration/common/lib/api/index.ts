@@ -26,7 +26,7 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
 import {
-  CasesConfigureResponse,
+  Configuration,
   Case,
   CaseStatuses,
   Cases,
@@ -34,7 +34,7 @@ import {
   CasesPatchRequest,
   ConfigurationPatchRequest,
   CasesStatusResponse,
-  CasesConfigurationsResponse,
+  Configurations,
   AlertResponse,
   ConnectorMappings,
   CasesByAlertId,
@@ -446,7 +446,7 @@ export const getConfiguration = async ({
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<CasesConfigurationsResponse> => {
+}): Promise<Configurations> => {
   const { body: configuration } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_URL}`)
     .auth(auth.user.username, auth.user.password)
@@ -468,7 +468,7 @@ export const updateConfiguration = async (
   expectedHttpCode: number = 200,
   auth: { user: User; space: string | null } | null = { user: superUser, space: null },
   headers: Record<string, unknown> = {}
-): Promise<CasesConfigureResponse> => {
+): Promise<Configuration> => {
   const apiCall = supertest.patch(`${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}/${id}`);
 
   setupAuth({ apiCall, headers, auth });
