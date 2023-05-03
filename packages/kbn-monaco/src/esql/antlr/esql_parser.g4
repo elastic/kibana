@@ -23,6 +23,7 @@ sourceCommand
     : explainCommand
     | fromCommand
     | rowCommand
+    | showCommand
     ;
 
 processingCommand
@@ -243,4 +244,9 @@ explainCommand
 
 subqueryExpression
     : OPENING_BRACKET query CLOSING_BRACKET
+    ;
+
+showCommand
+    : SHOW INFO
+    | SHOW FUNCTIONS
     ;

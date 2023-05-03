@@ -22,6 +22,7 @@ LIMIT : L I M I T -> pushMode(EXPRESSION);
 PROJECT : P R O J E C T -> pushMode(EXPRESSION);
 DROP : D R O P -> pushMode(EXPRESSION);
 RENAME : R E N A M E -> pushMode(EXPRESSION);
+SHOW : S H O W -> pushMode(EXPRESSION);
 
 LINE_COMMENT
     : '//' ~[\r\n]* '\r'? '\n'? -> channel(HIDDEN)
@@ -100,6 +101,8 @@ NULL : 'null';
 OR : 'or';
 RP : ')';
 UNDERSCORE: '_';
+INFO : 'info';
+FUNCTIONS : 'functions';
 
 BOOLEAN_VALUE
    : 'true'

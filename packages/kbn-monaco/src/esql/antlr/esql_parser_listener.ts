@@ -60,6 +60,7 @@ import { StringContext } from "./esql_parser";
 import { ComparisonOperatorContext } from "./esql_parser";
 import { ExplainCommandContext } from "./esql_parser";
 import { SubqueryExpressionContext } from "./esql_parser";
+import { ShowCommandContext } from "./esql_parser";
 
 
 /**
@@ -698,5 +699,16 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitSubqueryExpression?: (ctx: SubqueryExpressionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.showCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterShowCommand?: (ctx: ShowCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.showCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitShowCommand?: (ctx: ShowCommandContext) => void;
 }
 

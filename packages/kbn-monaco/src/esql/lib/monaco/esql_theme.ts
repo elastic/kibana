@@ -69,6 +69,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'rlike',
         'expr_ws',
         'row',
+        'show',
         'limit',
         'cidr_match',
         'nulls_ordering_direction',
