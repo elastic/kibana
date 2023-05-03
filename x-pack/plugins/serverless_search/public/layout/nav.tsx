@@ -7,24 +7,24 @@
 
 import { CoreStart } from '@kbn/core/public';
 import {
+  ChromeNavigationNodeViewModel,
   Navigation,
   NavigationKibanaProvider,
-  NavItemProps,
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
 
-const navItems: NavItemProps[] = [
+const navItems: ChromeNavigationNodeViewModel[] = [
   {
-    name: '',
+    title: '',
     id: 'root',
     items: [
-      { id: 'overview', name: 'Overview', href: '/app/enterprise_search/overview' },
-      { id: 'indices', name: 'Indices', href: '/app/enterprise_search/content/search_indices' },
-      { id: 'engines', name: 'Engines', href: '/app/enterprise_search/content/engines' },
-      { id: 'api_keys', name: 'API keys', href: '/app/management/security/api_keys' },
+      { id: 'overview', title: 'Overview', href: '/app/enterprise_search/overview' },
+      { id: 'indices', title: 'Indices', href: '/app/enterprise_search/content/search_indices' },
+      { id: 'engines', title: 'Engines', href: '/app/enterprise_search/content/engines' },
+      { id: 'api_keys', title: 'API keys', href: '/app/management/security/api_keys' },
       {
         id: 'ingest_pipelines',
-        name: 'Ingest pipelines',
+        title: 'Ingest pipelines',
         href: '/app/management/ingest/ingest_pipelines',
       },
     ],
@@ -39,11 +39,11 @@ export const createServerlessSearchSideNavComponent = (core: CoreStart) => () =>
   return (
     <NavigationKibanaProvider core={core}>
       <Navigation
-        solutions={[
+        navigationTree={[
           {
             id: 'search_project_nav',
             items: navItems,
-            name: 'Search',
+            title: 'Search',
             icon: 'logoEnterpriseSearch',
           },
         ]}
