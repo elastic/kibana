@@ -69,14 +69,14 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
 
   useEffect(() => {
     services.chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(referrer),
+      ...getRootBreadcrumbs({ breadcrumb: referrer, services }),
       {
         text: i18n.translate('discover.context.breadcrumb', {
           defaultMessage: 'Surrounding documents',
         }),
       },
     ]);
-  }, [locator, referrer, services.chrome]);
+  }, [locator, referrer, services]);
 
   useExecutionContext(core.executionContext, {
     type: 'application',

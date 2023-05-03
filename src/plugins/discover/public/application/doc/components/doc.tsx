@@ -43,15 +43,16 @@ export interface DocProps {
 export function Doc(props: DocProps) {
   const { dataView } = props;
   const [reqState, hit] = useEsDocSearch(props);
-  const { locator, chrome, docLinks } = useDiscoverServices();
+  const services = useDiscoverServices();
+  const { locator, chrome, docLinks } = services;
   const indexExistsLink = docLinks.links.apis.indexExists;
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(props.referrer),
+      ...getRootBreadcrumbs({ breadcrumb: props.referrer, services }),
       { text: `${props.index}#${props.id}` },
     ]);
-  }, [chrome, props.referrer, props.index, props.id, dataView, locator]);
+  }, [chrome, props.referrer, props.index, props.id, dataView, locator, services]);
 
   return (
     <EuiPage>
