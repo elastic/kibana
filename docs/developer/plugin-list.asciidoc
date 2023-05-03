@@ -583,6 +583,10 @@ Index Management by running this series of requests in Console:
 the infrastructure monitoring use-case within Kibana.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_logs/README.md[infra]
+|This plugin exposes and registers Logs+ features.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]
 |The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
