@@ -31,16 +31,16 @@ interface Props {
   onDistanceChange: (distance: number) => void;
 }
 
+function getDistanceAsNumber(distance: string | number): number {
+  return typeof distance === 'string' ? parseFloat(distance as string) : distance;
+}
+
 export function DistanceForm(props: Props) {
   const [distance, setDistance] = useState<number | string>(props.initialDistance);
   const [isDistanceInvalid, setIsDistanceInvalid] = useState(false);
 
-  function getDistanceAsNumber(): number {
-    return typeof distance === 'string' ? parseFloat(distance as string) : distance;
-  }
-
   useEffect(() => {
-    const distanceAsNumber = getDistanceAsNumber();
+    const distanceAsNumber = getDistanceAsNumber(distance);
     if (isNaN(distanceAsNumber)) {
       setIsDistanceInvalid(true);
       return;
@@ -52,7 +52,7 @@ export function DistanceForm(props: Props) {
     }
 
     setIsDistanceInvalid(false);
-  }, [distance, setIsDistanceInvalid, getDistanceAsNumber]);
+  }, [distance, setIsDistanceInvalid]);
 
   return (
     <>
@@ -98,7 +98,7 @@ export function DistanceForm(props: Props) {
                 isDistanceInvalid || props.initialDistance.toString() === distance.toString()
               }
               onClick={() => {
-                props.onDistanceChange(getDistanceAsNumber());
+                props.onDistanceChange(getDistanceAsNumber(distance));
                 props.onClose();
               }}
               size="s"

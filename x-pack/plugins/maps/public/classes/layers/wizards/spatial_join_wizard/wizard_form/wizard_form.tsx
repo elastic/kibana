@@ -15,6 +15,14 @@ import { RightSourcePanel } from './right_source_panel';
 import { createDistanceJoinLayerDescriptor } from './create_spatial_join_layer_descriptor';
 import { DEFAULT_WITHIN_DISTANCE } from '../../../../sources/join_sources';
 
+function isLeftConfigComplete(leftDataView: DataView | undefined, leftGeoField: string | undefined) {
+  return leftDataView !== undefined && leftDataView.id && leftGeoField !== undefined;
+}
+
+function isRightConfigComplete(rightDataView: DataView | undefined, rightGeoField: string | undefined) {
+  return rightDataView !== undefined && rightDataView.id && rightGeoField !== undefined;
+}
+
 export function WizardForm({ previewLayers }: RenderWizardArguments) {
   const [distance, setDistance] = useState<number>(DEFAULT_WITHIN_DISTANCE);
   const [leftDataView, setLeftDataView] = useState<DataView | undefined>();
@@ -24,16 +32,10 @@ export function WizardForm({ previewLayers }: RenderWizardArguments) {
   const [rightGeoFields, setRightGeoFields] = useState<DataViewField[]>([]);
   const [rightGeoField, setRightGeoField] = useState<string | undefined>();
 
-  function isLeftConfigComplete() {
-    return leftDataView !== undefined && leftDataView.id && leftGeoField !== undefined;
-  }
-
-  function isRightConfigComplete() {
-    return rightDataView !== undefined && rightDataView.id && rightGeoField !== undefined;
-  }
+  
 
   useEffect(() => {
-    if (!isLeftConfigComplete() || !isRightConfigComplete()) {
+    if (!isLeftConfigComplete(leftDataView, leftGeoField) || !isRightConfigComplete(rightDataView, rightGeoField)) {
       previewLayers([]);
       return;
     }
@@ -47,9 +49,9 @@ export function WizardForm({ previewLayers }: RenderWizardArguments) {
     });
 
     previewLayers([layerDescriptor]);
-  }, [distance, leftDataView, leftGeoField, rightDataView, rightGeoField, isLeftConfigComplete, isRightConfigComplete, previewLayers]);
+  }, [distance, leftDataView, leftGeoField, rightDataView, rightGeoField, previewLayers]);
 
-  const rightSourcePanel = isLeftConfigComplete() ? (
+  const rightSourcePanel = isLeftConfigComplete(leftDataView, leftGeoField) ? (
     <RightSourcePanel
       dataView={rightDataView}
       distance={distance}
