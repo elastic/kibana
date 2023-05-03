@@ -29,7 +29,8 @@ import { docLinks } from '../../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../../shared/kibana';
 
 import { useTextExpansionCallOutData } from './text_expansion_callout_data';
-import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
+import { getTextExpansionError, TextExpansionCalloutLogic } from './text_expansion_callout_logic';
+import { TextExpansionErrors } from './text_expansion_errors';
 
 export interface TextExpansionCallOutState {
   dismiss: () => void;
@@ -327,12 +328,23 @@ export const ModelStarted = ({
 export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props) => {
   const { dismiss, isDismissable, show } = useTextExpansionCallOutData(props);
   const {
+    createTextExpansionModelError,
+    fetchTextExpansionModelError,
     isCreateButtonDisabled,
     isModelDownloadInProgress,
     isModelDownloaded,
     isModelStarted,
     isStartButtonDisabled,
+    startTextExpansionModelError,
   } = useValues(TextExpansionCalloutLogic);
+
+  // In case of an error, show the error callout only
+  const error = getTextExpansionError(
+    createTextExpansionModelError,
+    fetchTextExpansionModelError,
+    startTextExpansionModelError
+  );
+  if (error) return <TextExpansionErrors error={error} />;
 
   if (!show) return null;
 
