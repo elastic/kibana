@@ -43,7 +43,7 @@ export function ScalingDocumenationPopover(props: Props) {
       <EuiPopoverTitle>
         <FormattedMessage id="xpack.maps.scalingDocs.title" defaultMessage="Scaling" />
       </EuiPopoverTitle>
-      
+
       <div>
         <EuiText size="s" style={{ maxWidth: '36em' }}>
           <dl>
@@ -155,7 +155,6 @@ export function ScalingDocumenationPopover(props: Props) {
           </p>
         </EuiText>
       </div>
-
     </EuiPopover>
   );
 }
