@@ -389,7 +389,6 @@ export async function saveVisualization(
             ...(extractedRefs.attributes as VisualizationSavedObjectAttributes),
           },
           options: {
-            overwrite: true,
             references: extractedRefs.references,
           },
         })

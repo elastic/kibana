@@ -100,7 +100,6 @@ export type VisualizationCreateOut = CreateResult<VisualizationSavedObject>;
 export interface UpdateOptions {
   /** Array of referenced saved objects. */
   references?: Reference[];
-  overwrite?: boolean;
 }
 
 export type VisualizationUpdateIn = UpdateIn<

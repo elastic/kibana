@@ -84,6 +84,10 @@ const createOptionsSchema = schema.object({
   references: schema.maybe(referencesSchema),
 });
 
+const updateOptionsSchema = schema.object({
+  references: schema.maybe(referencesSchema),
+});
+
 // Content management service definition.
 // We need it for BWC support between different versions of the content
 export const serviceDefinition: ServicesDefinition = {
@@ -117,7 +121,7 @@ export const serviceDefinition: ServicesDefinition = {
   update: {
     in: {
       options: {
-        schema: createOptionsSchema, // same schema as "create"
+        schema: updateOptionsSchema, // same schema as "create"
       },
       data: {
         schema: visualizeAttributesSchema,

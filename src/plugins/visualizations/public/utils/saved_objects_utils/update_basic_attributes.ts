@@ -54,7 +54,6 @@ export const updateBasicSoAttributes = async (
       ...attributes,
     },
     options: {
-      overwrite: true,
       references,
     },
   });
