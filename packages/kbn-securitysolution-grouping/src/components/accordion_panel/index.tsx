@@ -86,13 +86,13 @@ const GroupPanelComponent = <T,>({
     [groupBucket.key, groupBucket.selectedGroup, selectedGroup]
   );
 
-  const groupFilters = useMemo(() => {
-    if (groupFieldValue === null) return [];
-
-    return isNullGroup
-      ? getNullGroupFilter(selectedGroup)
-      : createGroupFilter(selectedGroup, groupFieldValue);
-  }, [groupFieldValue, isNullGroup, selectedGroup]);
+  const groupFilters = useMemo(
+    () =>
+      isNullGroup
+        ? getNullGroupFilter(selectedGroup)
+        : createGroupFilter(selectedGroup, groupFieldValue),
+    [groupFieldValue, isNullGroup, selectedGroup]
+  );
 
   const onToggle = useCallback(
     (isOpen) => {
