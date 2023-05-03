@@ -2218,7 +2218,7 @@
                 "section": "def-common.AppUpdater",
                 "text": "AppUpdater"
               },
-              ">; }) => void; }"
+              ">; }) => void; setIsSidebarEnabled: (isEnabled: boolean) => void; }"
             ],
             "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
             "deprecated": false,

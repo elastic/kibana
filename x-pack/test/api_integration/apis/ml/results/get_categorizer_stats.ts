@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { AnomalyCategorizerStatsDoc } from '@kbn/ml-plugin/common/types/anomalies';
+import type { MlAnomalyCategorizerStatsDoc } from '@kbn/ml-anomaly-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(200, status, body);
 
-      body.forEach((doc: AnomalyCategorizerStatsDoc) => {
+      body.forEach((doc: MlAnomalyCategorizerStatsDoc) => {
         expect(doc.job_id).to.eql(jobId);
         expect(doc.result_type).to.eql('categorizer_stats');
         expect(doc.partition_field_name).to.be(PARTITION_FIELD_NAME);
@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(200, status, body);
 
-      body.forEach((doc: AnomalyCategorizerStatsDoc) => {
+      body.forEach((doc: MlAnomalyCategorizerStatsDoc) => {
         expect(doc.job_id).to.eql(jobId);
         expect(doc.result_type).to.eql('categorizer_stats');
         expect(doc.partition_field_name).to.be(PARTITION_FIELD_NAME);
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(200, status, body);
 
-      body.forEach((doc: AnomalyCategorizerStatsDoc) => {
+      body.forEach((doc: MlAnomalyCategorizerStatsDoc) => {
         expect(doc.job_id).to.eql(jobId);
         expect(doc.result_type).to.eql('categorizer_stats');
         expect(doc.partition_field_name).to.be(PARTITION_FIELD_NAME);
@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
         .set(COMMON_REQUEST_HEADERS);
       ml.api.assertResponseStatusCode(200, status, body);
 
-      body.forEach((doc: AnomalyCategorizerStatsDoc) => {
+      body.forEach((doc: MlAnomalyCategorizerStatsDoc) => {
         expect(doc.job_id).to.eql(jobId);
         expect(doc.result_type).to.eql('categorizer_stats');
         expect(doc.partition_field_name).to.be(PARTITION_FIELD_NAME);

@@ -8,7 +8,8 @@
 import type { History } from 'history';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { Observable } from 'rxjs';
-import { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import type {
   ApplicationStart,
   AppMountParameters,
@@ -41,8 +42,8 @@ import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embedd
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   DatasourceMap,
@@ -55,9 +56,9 @@ import type {
 import type { LensAttributeService } from '../lens_attribute_service';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
 import type { LensInspector } from '../lens_inspector_service';
-import { IndexPatternServiceAPI } from '../data_views_service/service';
-import { Document, SavedObjectIndexStore } from '../persistence/saved_object_store';
-import { type LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
+import type { IndexPatternServiceAPI } from '../data_views_service/service';
+import type { Document, SavedObjectIndexStore } from '../persistence/saved_object_store';
+import type { LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
 
 export interface RedirectToOriginProps {
   input?: LensEmbeddableInput;
@@ -94,6 +95,7 @@ export type RunSave = (
     onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
     newDescription?: string;
     newTags?: string[];
+    panelTimeRange?: TimeRange;
   },
   options: {
     saveToLibrary: boolean;

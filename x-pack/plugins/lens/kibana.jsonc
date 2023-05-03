@@ -54,7 +54,8 @@
       "kibanaReact",
       "embeddable",
       "fieldFormats",
-      "charts"
+      "charts",
+      "visualizationUiComponents"
     ],
     "extraPublicDirs": [
       "common/constants"

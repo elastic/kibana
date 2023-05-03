@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { type FrozenTierPreference } from '@kbn/ml-date-picker';
-
-import { EntityFieldType } from './anomalies';
+import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
+import type { FrozenTierPreference } from '@kbn/ml-date-picker';
 
 export const ML_ENTITY_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields' as const;
 export const ML_APPLY_TIME_RANGE_CONFIG = 'ml.jobSelectorFlyout.applyTimeRange';
@@ -38,7 +37,7 @@ export type PartitionFieldConfig =
   | undefined;
 
 export type PartitionFieldsConfig =
-  | Partial<Record<EntityFieldType, PartitionFieldConfig>>
+  | Partial<Record<MlEntityFieldType, PartitionFieldConfig>>
   | undefined;
 
 export type ApplyTimeRangeConfig = boolean | undefined;
