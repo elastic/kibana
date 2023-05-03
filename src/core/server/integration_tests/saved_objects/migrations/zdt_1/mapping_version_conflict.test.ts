@@ -117,7 +117,7 @@ describe('ZDT upgrades - mapping model version conflict', () => {
 
     const records = await parseLogFile(logFilePath);
 
-    expect(records).toContainLogEntry('Mappings model version check result: conflict');
+    expect(records).toContainLogEntry('INIT: mapping version check result: conflict');
     expect(records).toContainLogEntry('INIT -> FATAL');
   });
 });
