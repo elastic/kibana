@@ -8,38 +8,10 @@
 import expect from '@kbn/expect';
 import url from 'url';
 import supertest from 'supertest';
+import { MonitoredUtilization } from '@kbn/task-manager-plugin/server/routes/background_task_utilization';
+import { MonitoredStat } from '@kbn/task-manager-plugin/server/monitoring/monitoring_stats_stream';
+import { BackgroundTaskUtilizationStat } from '@kbn/task-manager-plugin/server/monitoring/background_task_utilization_statistics';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-interface MonitoringStats {
-  last_update: string;
-  status: string;
-  stats: {
-    timestamp: string;
-    value: {
-      adhoc: {
-        created: {
-          counter: number;
-        };
-        ran: {
-          service_time: {
-            actual: number;
-            adjusted: number;
-            task_counter: number;
-          };
-        };
-      };
-      recurring: {
-        ran: {
-          service_time: {
-            actual: number;
-            adjusted: number;
-            task_counter: number;
-          };
-        };
-      };
-    };
-  };
-}
 
 export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
@@ -48,21 +20,21 @@ export default function ({ getService }: FtrProviderContext) {
 
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  function getUtilizationRequest() {
+  function getUtilizationRequest(isInternal: boolean = true) {
     return request
-      .get('/internal/task_manager/_background_task_utilization')
+      .get(`/${isInternal ? 'internal' : 'api'}/task_manager/_background_task_utilization`)
       .set('kbn-xsrf', 'foo');
   }
 
-  function getUtilization(): Promise<MonitoringStats> {
-    return getUtilizationRequest()
+  function getUtilization(isInternal: boolean = true): Promise<MonitoredUtilization> {
+    return getUtilizationRequest(isInternal)
       .expect(200)
       .then((response) => response.body);
   }
 
-  function getBackgroundTaskUtilization(): Promise<MonitoringStats> {
+  function getBackgroundTaskUtilization(isInternal: boolean = true): Promise<MonitoredUtilization> {
     return retry.try(async () => {
-      const utilization = await getUtilization();
+      const utilization = await getUtilization(isInternal);
 
       if (utilization.stats) {
         return utilization;
@@ -79,7 +51,8 @@ export default function ({ getService }: FtrProviderContext) {
         value: {
           recurring: { ran },
         },
-      } = (await getBackgroundTaskUtilization()).stats;
+      } = (await getBackgroundTaskUtilization(true))
+        .stats as MonitoredStat<BackgroundTaskUtilizationStat>;
       const serviceTime = ran.service_time;
       expect(typeof serviceTime.actual).to.eql('number');
       expect(typeof serviceTime.adjusted).to.eql('number');
@@ -91,13 +64,40 @@ export default function ({ getService }: FtrProviderContext) {
         value: {
           adhoc: { created, ran },
         },
-      } = (await getBackgroundTaskUtilization()).stats;
+      } = (await getBackgroundTaskUtilization(true))
+        .stats as MonitoredStat<BackgroundTaskUtilizationStat>;
       const serviceTime = ran.service_time;
       expect(typeof created.counter).to.eql('number');
 
       expect(typeof serviceTime.actual).to.eql('number');
       expect(typeof serviceTime.adjusted).to.eql('number');
       expect(typeof serviceTime.task_counter).to.eql('number');
+    });
+
+    it('should include load stat', async () => {
+      const {
+        value: { load },
+      } = (await getBackgroundTaskUtilization(true))
+        .stats as MonitoredStat<BackgroundTaskUtilizationStat>;
+      expect(typeof load).to.eql('number');
+    });
+
+    it('should return expected fields for internal route', async () => {
+      const monitoredStat = (await getBackgroundTaskUtilization(true)).stats;
+      expect(monitoredStat?.timestamp).not.to.be(undefined);
+      expect(monitoredStat?.value).not.to.be(undefined);
+      expect(monitoredStat?.value?.adhoc).not.to.be(undefined);
+      expect(monitoredStat?.value?.recurring).not.to.be(undefined);
+      expect(monitoredStat?.value?.load).not.to.be(undefined);
+    });
+
+    it('should return expected fields for public route', async () => {
+      const monitoredStat = (await getBackgroundTaskUtilization(false)).stats;
+      expect(monitoredStat?.timestamp).not.to.be(undefined);
+      expect(monitoredStat?.value).not.to.be(undefined);
+      expect(monitoredStat?.value?.adhoc).to.be(undefined);
+      expect(monitoredStat?.value?.recurring).to.be(undefined);
+      expect(monitoredStat?.value?.load).not.to.be(undefined);
     });
   });
 }

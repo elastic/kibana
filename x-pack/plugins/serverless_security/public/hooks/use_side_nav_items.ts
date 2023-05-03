@@ -107,13 +107,15 @@ const useAddExternalSideNavItems = (securitySideNavItems: SolutionSideNavItem[])
   const sideNavItemsWithExternals = useMemo(
     () => [
       ...securitySideNavItems,
-      {
-        id: 'ml',
-        label: 'Machine Learning',
-        ...getLinkProps({ appId: 'ml' }),
-      },
+      // TODO: add external links. e.g.:
+      // {
+      //   id: 'ml',
+      //   label: 'Machine Learning',
+      //   ...getLinkProps({ appId: 'ml', path: '/jobs' }),
+      //   links: [...]
+      // },
     ],
-    [securitySideNavItems, getLinkProps]
+    [securitySideNavItems]
   );
 
   return sideNavItemsWithExternals;

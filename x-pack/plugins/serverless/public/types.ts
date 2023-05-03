@@ -6,12 +6,13 @@
  */
 
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import { SideNavComponent } from '@kbn/core-chrome-browser/src/project_navigation';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessPluginSetup {}
 
 export interface ServerlessPluginStart {
-  setNavigation: (navigation: JSX.Element) => void;
+  setSideNavComponent: (navigation: SideNavComponent) => void;
 }
 
 export interface ServerlessPluginSetupDependencies {

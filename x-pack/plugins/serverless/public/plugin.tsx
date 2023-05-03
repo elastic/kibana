@@ -63,7 +63,8 @@ export class ServerlessPlugin
     management.setIsSidebarEnabled(false);
 
     return {
-      setNavigation: (navigation: JSX.Element) => core.chrome.setProjectNavigation(navigation),
+      setSideNavComponent: (sideNavigationComponent) =>
+        core.chrome.project.setSideNavComponent(sideNavigationComponent),
     };
   }
 
