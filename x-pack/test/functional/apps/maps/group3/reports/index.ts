@@ -59,8 +59,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('PNG file matches the baseline image, using sample geo data', async function () {
-      log.info(`window size:` + JSON.stringify(await browser.getWindowSize()));
-
       await reporting.initEcommerce();
 
       await PageObjects.common.navigateToApp('dashboard');
