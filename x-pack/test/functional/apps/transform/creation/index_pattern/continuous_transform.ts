@@ -20,55 +20,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const canvasElement = getService('canvasElement');
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
+  const sampleData = getService('sampleData');
+  const security = getService('security');
   const pageObjects = getPageObjects(['discover']);
 
-  describe('creation_index_pattern', function () {
+  describe('creation_continuous_transform', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
-      await transform.testResources.setKibanaTimeZoneToUTC();
-
+      // installing the sample data with test user with super user role and then switching roles with limited privileges
+      await security.testUser.setRoles(['superuser'], { skipBrowserRefresh: true });
+      await esArchiver.emptyKibanaIndex();
+      await sampleData.testResources.installKibanaSampleData('ecommerce');
       await transform.securityUI.loginAsTransformPowerUser();
     });
 
     after(async () => {
       await transform.api.cleanTransformIndices();
       await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
-      await transform.securityUI.logout();
     });
 
-    const fieldStatsEntries = [
-      {
-        identifier: 'terms(customer_gender)',
-        fieldName: 'customer_gender',
-        type: 'keyword',
-        isGroupByInput: true,
-      },
-      {
-        fieldName: 'category.keyword',
-        type: 'keyword',
-        isAggInput: true,
-        isUniqueKeyInput: true,
-      },
-      {
-        fieldName: 'currency',
-        type: 'keyword',
-        isAggInput: true,
-        isUniqueKeyInput: true,
-      },
-      {
-        fieldName: 'order_date',
-        type: 'date',
-        isSortFieldInput: true,
-      },
-    ];
     const DEFAULT_NUM_FAILURE_RETRIES = '5';
     const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
       {
         type: 'pivot',
-        suiteTitle: 'batch transform with terms+date_histogram groups and avg agg',
-        source: 'ft_ecommerce',
-        fieldStatsEntries,
+        suiteTitle: 'continuous with terms+date_histogram groups and avg agg',
+        source: 'kibana_sample_data_ecommerce',
         groupByEntries: [
           {
             identifier: 'terms(category)',
@@ -114,19 +89,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             ],
           },
         ],
-        transformId: `ec_1_${Date.now()}`,
-        transformDescription:
-          'ecommerce batch transform with groups terms(category) + date_histogram(order_date) 1m and aggregation avg(products.base_price)',
+        transformId: `ec_pivot_${Date.now()}`,
+        transformDescription: 'kibana_ecommerce continuous pivot transform',
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
-        discoverAdjustSuperDatePicker: true,
+        continuousModeDateField: 'order_date',
         numFailureRetries: '7',
+        discoverAdjustSuperDatePicker: true,
         expected: {
-          fullTimeRange: {
-            start: 'Jun 12, 2019 @ 00:04:19.000',
-            end: 'Jul 12, 2019 @ 23:45:36.000',
-          },
+          continuousModeDateField: 'order_date',
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category": {'],
           pivotAdvancedEditorValue: {
             group_by: {
@@ -183,273 +155,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             values: [`Men's Accessories`],
           },
           row: {
-            status: TRANSFORM_STATE.STOPPED,
-            mode: 'batch',
-            progress: '100',
+            status: TRANSFORM_STATE.STARTED,
+            mode: 'continuous',
+            progress: '0',
             health: 'Healthy',
           },
           indexPreview: {
             columns: 10,
             rows: 5,
           },
-          histogramCharts: [
-            {
-              chartAvailable: true,
-              id: 'category',
-              legend: '6 categories',
-              colorStats: [
-                { color: '#000000', percentage: 45 },
-                { color: '#54B399', percentage: 55 },
-              ],
-            },
-            {
-              chartAvailable: true,
-              id: 'currency',
-              legend: '1 category',
-              colorStats: [
-                { color: '#000000', percentage: 10 },
-                { color: '#54B399', percentage: 90 },
-              ],
-            },
-            {
-              chartAvailable: true,
-              id: 'customer_first_name',
-              legend: 'top 20 of 46 categories',
-              colorStats: [
-                { color: '#000000', percentage: 60 },
-                { color: '#54B399', percentage: 37 },
-              ],
-            },
-            {
-              chartAvailable: true,
-              id: 'customer_full_name',
-              legend: 'top 20 of 3321 categories',
-              colorStats: [
-                { color: '#000000', percentage: 25 },
-                { color: '#54B399', percentage: 75 },
-              ],
-            },
-            {
-              chartAvailable: true,
-              id: 'customer_gender',
-              legend: '2 categories',
-              colorStats: [
-                { color: '#000000', percentage: 15 },
-                { color: '#54B399', percentage: 85 },
-              ],
-            },
-            {
-              chartAvailable: true,
-              id: 'customer_id',
-              legend: 'top 20 of 46 categories',
-              colorStats: [
-                { color: '#54B399', percentage: 37 },
-                { color: '#000000', percentage: 60 },
-              ],
-            },
-            {
-              chartAvailable: true,
-              id: 'customer_last_name',
-              legend: 'top 20 of 183 categories',
-              colorStats: [
-                { color: '#000000', percentage: 23 },
-                { color: '#54B399', percentage: 77 },
-              ],
-            },
-            {
-              chartAvailable: true,
-              id: 'customer_phone',
-              legend: '1 category',
-              colorStats: [
-                { color: '#000000', percentage: 10 },
-                { color: '#54B399', percentage: 90 },
-              ],
-            },
-            {
-              chartAvailable: true,
-              id: 'day_of_week',
-              legend: '7 categories',
-              colorStats: [
-                { color: '#000000', percentage: 20 },
-                { color: '#54B399', percentage: 75 },
-              ],
-            },
-            {
-              chartAvailable: true,
-              id: 'day_of_week_i',
-              legend: '0 - 6',
-              colorStats: [
-                { color: '#000000', percentage: 20 },
-                { color: '#54B399', percentage: 75 },
-              ],
-            },
-          ],
-          discoverQueryHits: '7,270',
+          discoverQueryHits: '3,418',
           numFailureRetries: '7',
         },
       } as PivotTransformTestData,
       {
-        type: 'pivot',
-        suiteTitle: 'batch transform with terms group and percentiles agg',
-        source: 'ft_ecommerce',
-        groupByEntries: [
-          {
-            identifier: 'terms(geoip.country_iso_code)',
-            label: 'geoip.country_iso_code',
-          } as GroupByEntry,
-        ],
-        aggregationEntries: [
-          {
-            identifier: 'percentiles(products.base_price)',
-            label: 'products.base_price.percentiles',
-          },
-          {
-            identifier: 'filter(customer_phone)',
-            label: 'customer_phone.filter',
-            form: {
-              transformFilterAggTypeSelector: 'exists',
-            },
-            subAggs: [
-              {
-                identifier: 'max(products.discount_amount)',
-                label: 'products.discount_amount.max',
-              },
-            ],
-          },
-        ],
-        transformId: `ec_2_${Date.now()}`,
-        transformDescription:
-          'ecommerce batch transform with group by terms(geoip.country_iso_code) and aggregation percentiles(products.base_price)',
-        get destinationIndex(): string {
-          return `user-${this.transformId}`;
-        },
-        discoverAdjustSuperDatePicker: false,
-        numFailureRetries: '-1',
-        expected: {
-          fullTimeRange: {
-            start: 'Jun 12, 2019 @ 00:04:19.000',
-            end: 'Jul 12, 2019 @ 23:45:36.000',
-          },
-          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "geoip.country_iso_code": {'],
-          pivotAdvancedEditorValue: {
-            group_by: {
-              'geoip.country_iso_code': {
-                terms: {
-                  field: 'geoip.country_iso_code',
-                },
-              },
-            },
-            aggregations: {
-              'products.base_price.percentiles': {
-                percentiles: {
-                  field: 'products.base_price',
-                  percents: [1, 5, 25, 50, 75, 95, 99],
-                },
-              },
-              'customer_phone.filter': {
-                filter: {
-                  exists: {
-                    field: 'customer_phone',
-                  },
-                },
-                aggs: {
-                  'products.discount_amount.max': {
-                    max: {
-                      field: 'products.discount_amount',
-                    },
-                  },
-                },
-              },
-            },
-          },
-          transformPreview: {
-            column: 0,
-            values: ['AE', 'CO', 'EG', 'FR', 'GB'],
-          },
-          row: {
-            status: TRANSFORM_STATE.STOPPED,
-            mode: 'batch',
-            progress: '100',
-            health: 'Healthy',
-          },
-          indexPreview: {
-            columns: 10,
-            rows: 5,
-          },
-          discoverQueryHits: '10',
-          numFailureRetries: '-1',
-        },
-      } as PivotTransformTestData,
-      {
-        type: 'pivot',
-        suiteTitle: 'batch transform with terms group and terms agg',
-        source: 'ft_ecommerce',
-        groupByEntries: [
-          {
-            identifier: 'terms(customer_gender)',
-            label: 'customer_gender',
-          } as GroupByEntry,
-        ],
-        aggregationEntries: [
-          {
-            identifier: 'terms(geoip.city_name)',
-            label: 'geoip.city_name.terms',
-          },
-        ],
-        transformId: `ec_3_${Date.now()}`,
-        transformDescription:
-          'ecommerce batch transform with group by terms(customer_gender) and aggregation terms(geoip.city_name)',
-        get destinationIndex(): string {
-          return `user-${this.transformId}`;
-        },
-        discoverAdjustSuperDatePicker: false,
-        numFailureRetries: '0',
-        expected: {
-          fullTimeRange: {
-            start: 'Jun 12, 2019 @ 00:04:19.000',
-            end: 'Jul 12, 2019 @ 23:45:36.000',
-          },
-          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "customer_gender": {'],
-          pivotAdvancedEditorValue: {
-            group_by: {
-              customer_gender: {
-                terms: {
-                  field: 'customer_gender',
-                },
-              },
-            },
-            aggregations: {
-              'geoip.city_name': {
-                terms: {
-                  field: 'geoip.city_name',
-                  size: 3,
-                },
-              },
-            },
-          },
-          transformPreview: {
-            column: 0,
-            values: ['FEMALE', 'MALE'],
-          },
-          row: {
-            status: TRANSFORM_STATE.STOPPED,
-            mode: 'batch',
-            progress: '100',
-            health: 'Healthy',
-          },
-          indexPreview: {
-            columns: 10,
-            rows: 5,
-          },
-          discoverQueryHits: '2',
-          numFailureRetries: '0',
-        },
-      } as PivotTransformTestData,
-      {
         type: 'latest',
-        suiteTitle: 'batch transform with the latest function',
-        source: 'ft_ecommerce',
-        fieldStatsEntries,
+        suiteTitle: 'continuous with the latest function',
+        source: 'kibana_sample_data_ecommerce',
         uniqueKeys: [
           {
             identifier: 'geoip.country_iso_code',
@@ -460,29 +182,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           identifier: 'order_date',
           label: 'order_date',
         },
-        transformId: `ec_4_${Date.now()}`,
+        transformId: `ec_latest_${Date.now()}`,
+        transformDescription: 'kibana_ecommerce continuous with the latest function',
+        continuousModeDateField: 'order_date',
 
-        transformDescription:
-          'ecommerce batch transform with the latest function config, sort by order_data, country code as unique key',
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
         destinationDataViewTimeField: 'order_date',
-        discoverAdjustSuperDatePicker: true,
         numFailureRetries: '101',
+        discoverAdjustSuperDatePicker: false,
         expected: {
-          fullTimeRange: {
-            start: 'Jun 12, 2019 @ 00:04:19.000',
-            end: 'Jul 12, 2019 @ 23:45:36.000',
-          },
           latestPreview: {
             column: 0,
             values: [],
           },
           row: {
-            status: TRANSFORM_STATE.STOPPED,
-            mode: 'batch',
-            progress: '100',
+            status: TRANSFORM_STATE.STARTED,
+            type: 'latest',
+            mode: 'continuous',
             health: 'Healthy',
           },
           indexPreview: {
@@ -534,18 +252,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.testExecution.logTestStep('has correct transform function selected');
           await transform.wizard.assertSelectedTransformFunction('pivot');
 
-          await transform.testExecution.logTestStep(
-            `sets the date picker to the default '15 minutes ago'`
-          );
-          await transform.datePicker.quickSelect(15, 'm');
-
-          await transform.testExecution.logTestStep('displays an empty index preview');
-          await transform.wizard.assertIndexPreviewEmpty();
-
-          await transform.testExecution.logTestStep(`sets the date picker to '15 Years ago'`);
-          await transform.datePicker.quickSelect();
-
-          await transform.testExecution.logTestStep('loads the index preview');
+          await transform.testExecution.logTestStep(`sets the date picker to '15 days ago to now'`);
+          await transform.datePicker.quickSelect(15, 'y');
           await transform.wizard.assertIndexPreviewLoaded();
 
           await transform.testExecution.logTestStep('shows the index preview');
@@ -553,28 +261,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             testData.expected.indexPreview.columns,
             testData.expected.indexPreview.rows
           );
-
-          await transform.testExecution.logTestStep(
-            `sets the date picker back to the default '15 minutes ago'`
-          );
-          await transform.datePicker.quickSelect(15, 'm');
-
-          await transform.testExecution.logTestStep('again displays an empty index preview');
-          await transform.wizard.assertIndexPreviewEmpty();
-
-          await transform.testExecution.logTestStep(
-            `clicks the 'Use full data' button to auto-select time range`
-          );
-          await transform.datePicker.clickUseFullDataButton(testData.expected.fullTimeRange);
-
-          await transform.testExecution.logTestStep('again shows the index preview');
-          await transform.wizard.assertIndexPreview(
-            testData.expected.indexPreview.columns,
-            testData.expected.indexPreview.rows
-          );
-
-          await transform.testExecution.logTestStep('displays an empty transform preview');
-          await transform.wizard.assertTransformPreviewEmpty();
 
           await transform.testExecution.logTestStep('displays the query input');
           await transform.wizard.assertQueryInputExists();
@@ -590,33 +276,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.testExecution.logTestStep('enables the index preview histogram charts');
           await transform.wizard.enableIndexPreviewHistogramCharts(true);
 
-          if (Array.isArray(testData.expected.histogramCharts)) {
-            await transform.testExecution.logTestStep(
-              'displays the index preview histogram charts'
-            );
-            await transform.wizard.assertIndexPreviewHistogramCharts(
-              testData.expected.histogramCharts
-            );
-          }
-
-          await canvasElement.resetAntiAliasing();
-
           if (isPivotTransformTestData(testData)) {
-            await transform.testExecution.logTestStep(
-              'opens field stats flyout from group by input'
-            );
-
-            const groupByFieldStatsEntries = testData.fieldStatsEntries
-              ? testData.fieldStatsEntries.filter((e) => e.isGroupByInput)
-              : [];
-
-            for (const { fieldName, type } of groupByFieldStatsEntries) {
-              await transform.wizard.assertFieldStatFlyoutContentFromGroupByInputTrigger(
-                fieldName,
-                type
-              );
-            }
-
             for (const [index, entry] of testData.groupByEntries.entries()) {
               await transform.wizard.assertGroupByInputExists();
               await transform.wizard.assertGroupByInputValue([]);
@@ -625,18 +285,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 entry.identifier,
                 entry.label,
                 entry.intervalLabel
-              );
-            }
-
-            await transform.testExecution.logTestStep('opens field stats flyout from agg input');
-            const aggInputFieldStatsEntries = testData.fieldStatsEntries
-              ? testData.fieldStatsEntries.filter((e) => e.isAggInput)
-              : [];
-
-            for (const { fieldName, type } of aggInputFieldStatsEntries) {
-              await transform.wizard.assertFieldStatFlyoutContentFromAggInputTrigger(
-                fieldName,
-                type
               );
             }
 
@@ -658,39 +306,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await transform.testExecution.logTestStep('sets latest transform method');
             await transform.wizard.selectTransformFunction('latest');
 
-            await transform.testExecution.logTestStep(
-              'opens field stats flyout from unique keys input'
-            );
-            const uniqueKeyInputFieldStatsEntries = testData.fieldStatsEntries
-              ? testData.fieldStatsEntries.filter((e) => e.isUniqueKeyInput)
-              : [];
-
-            for (const { fieldName, type } of uniqueKeyInputFieldStatsEntries) {
-              await transform.wizard.assertFieldStatsFlyoutContentFromUniqueKeysInputTrigger(
-                fieldName,
-                type
-              );
-            }
-
             await transform.testExecution.logTestStep('adds unique keys');
             for (const { identifier, label } of testData.uniqueKeys) {
               await transform.wizard.assertUniqueKeysInputExists();
               await transform.wizard.assertUniqueKeysInputValue([]);
               await transform.wizard.addUniqueKeyEntry(identifier, label);
-            }
-
-            await transform.testExecution.logTestStep(
-              'opens field stats flyout from sort by input'
-            );
-            const sortFieldInputFieldStatsEntries = testData.fieldStatsEntries
-              ? testData.fieldStatsEntries.filter((e) => e.isSortFieldInput)
-              : [];
-
-            for (const { fieldName, type } of sortFieldInputFieldStatsEntries) {
-              await transform.wizard.assertFieldStatFlyoutContentFromSortFieldInputTrigger(
-                fieldName,
-                type
-              );
             }
 
             await transform.testExecution.logTestStep('sets the sort field');
@@ -707,12 +327,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('shows the transform preview');
           await transform.wizard.assertPivotPreviewChartHistogramButtonMissing();
-          // cell virtualization means the last column is cutoff in the functional tests
-          // https://github.com/elastic/eui/issues/4470
-          // await transform.wizard.assertPivotPreviewColumnValues(
-          //   testData.expected.transformPreview.column,
-          //   testData.expected.transformPreview.values
-          // );
 
           await transform.testExecution.logTestStep('loads the details step');
           await transform.wizard.advanceToDetailsStep();
@@ -742,9 +356,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await transform.wizard.setDataViewTimeField(testData.destinationDataViewTimeField);
           }
 
-          await transform.testExecution.logTestStep('displays the continuous mode switch');
+          await transform.testExecution.logTestStep(
+            'displays the continuous mode switch and enables it'
+          );
           await transform.wizard.assertContinuousModeSwitchExists();
-          await transform.wizard.assertContinuousModeSwitchCheckState(false);
+          await transform.wizard.setContinuousModeSwitchCheckState(true);
+          await transform.wizard.assertContinuousModeDateFieldSelectExists();
+
+          if (testData.continuousModeDateField) {
+            await transform.testExecution.logTestStep('sets the date field');
+            await transform.wizard.selectContinuousModeDateField(testData.continuousModeDateField);
+          }
 
           await transform.testExecution.logTestStep(
             'should display the advanced settings and show pre-filled configuration'
@@ -798,9 +420,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.wizard.createTransform();
 
           await transform.testExecution.logTestStep('starts the transform and finishes processing');
-          await transform.wizard.startTransform();
+          await transform.wizard.startTransform({ expectProgressbarExists: false });
           await transform.wizard.assertErrorToastsNotExist();
-          await transform.wizard.waitForProgressBarComplete();
 
           await transform.testExecution.logTestStep('returns to the management page');
           await transform.wizard.returnToManagement();
@@ -823,32 +444,66 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             type: testData.type,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
-            progress: testData.expected.row.progress,
             health: testData.expected.row.health,
           });
         });
 
-        it('navigates to discover and displays results of the destination index', async () => {
+        it('stops transform', async () => {
           await transform.testExecution.logTestStep('should show the actions popover');
-          await transform.table.assertTransformRowActions(testData.transformId, false);
+          await transform.table.assertTransformRowActions(testData.transformId, true);
+          await transform.table.assertTransformRowActionEnabled(
+            testData.transformId,
+            'Reset',
+            false
+          );
+          await transform.table.assertTransformRowActionEnabled(
+            testData.transformId,
+            'Delete',
+            false
+          );
 
+          await transform.testExecution.logTestStep('should stop transform');
+          await transform.table.stopTransform(testData.transformId);
+        });
+
+        it('navigates to discover and displays results of the destination index', async () => {
           await transform.testExecution.logTestStep('should navigate to discover');
           await transform.table.clickTransformRowAction(testData.transformId, 'Discover');
           await pageObjects.discover.waitUntilSearchingHasFinished();
 
           if (testData.discoverAdjustSuperDatePicker) {
-            await transform.testExecution.logTestStep(
-              `sets the date picker to the default '15 minutes ago'`
-            );
-            await transform.datePicker.quickSelect(15, 'm');
-            await transform.discover.assertNoResults(testData.destinationIndex);
-            await transform.testExecution.logTestStep(
-              'should switch quick select lookback to years'
-            );
-            await transform.datePicker.quickSelect();
+            await transform.datePicker.quickSelect(15, 'y');
           }
+          await transform.discover.assertDiscoverQueryHitsMoreThanZero();
+        });
 
-          await transform.discover.assertDiscoverQueryHits(testData.expected.discoverQueryHits);
+        it('resets and starts previously stopped transform', async () => {
+          await transform.testExecution.logTestStep(
+            'should navigate to transform management list page'
+          );
+          await transform.navigation.navigateTo();
+          await transform.management.assertTransformListPageExists();
+
+          await transform.testExecution.logTestStep(
+            'should show the actions popover for continuous transform'
+          );
+          await transform.table.assertTransformRowActions(testData.transformId, false);
+          await transform.table.assertTransformRowActionEnabled(
+            testData.transformId,
+            'Reset',
+            true
+          );
+          await transform.table.assertTransformRowActionEnabled(
+            testData.transformId,
+            'Start',
+            true
+          );
+
+          await transform.testExecution.logTestStep('should reset transform');
+          await transform.table.resetTransform(testData.transformId);
+
+          await transform.testExecution.logTestStep('should start previously stopped transform');
+          await transform.table.startTransform(testData.transformId);
         });
       });
     }
