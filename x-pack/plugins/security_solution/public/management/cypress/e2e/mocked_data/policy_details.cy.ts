@@ -9,7 +9,6 @@ import {
   checkMalwareUserNotificationInOpenedPolicy,
   visitPolicyDetailsPage,
 } from '../../screens/policy_details';
-import { removeAllArtifacts } from '../../tasks/artifacts';
 import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
 import { login } from '../../tasks/login';
 import { expectAndCloseSuccessToast } from '../../tasks/toasts';
@@ -20,17 +19,12 @@ describe('Policy Details', () => {
     loadEndpointDataForEventFiltersIfNeeded();
   });
 
-  after(() => {
+  beforeEach(() => {
     login();
-    removeAllArtifacts();
+    visitPolicyDetailsPage();
   });
 
   describe('Malware Protection card', () => {
-    beforeEach(() => {
-      login();
-      visitPolicyDetailsPage();
-    });
-
     it('user should be able to see related rules', () => {
       cy.getByTestSubj('malwareProtectionsForm').contains('related detection rules').click();
 
@@ -72,6 +66,14 @@ describe('Policy Details', () => {
       expectAndCloseSuccessToast();
 
       checkMalwareUserNotificationInOpenedPolicy({ isEnabled: false });
+    });
+  });
+
+  describe('Ransomware Protection card', () => {
+    it('user should be able to see related rules', () => {
+      cy.getByTestSubj('ransomwareProtectionsForm').contains('related detection rules').click();
+
+      cy.url().should('contain', 'app/security/rules/management');
     });
   });
 });
