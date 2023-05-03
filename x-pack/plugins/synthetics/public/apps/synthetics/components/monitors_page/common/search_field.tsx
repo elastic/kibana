@@ -56,5 +56,5 @@ export function SearchField() {
 }
 
 const PLACEHOLDER_TEXT = i18n.translate('xpack.synthetics.monitorManagement.filter.placeholder', {
-  defaultMessage: `Search by name, url, host, tag, project or location`,
+  defaultMessage: `Search by name, URL, host, tag, project or location`,
 });
