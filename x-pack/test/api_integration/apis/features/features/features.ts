@@ -105,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
             'advancedSettings',
             'indexPatterns',
             'graph',
+            'guidedOnboardingFeature',
             'monitoring',
             'observabilityCases',
             'savedObjectsManagement',

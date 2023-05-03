@@ -69,6 +69,7 @@ export interface ActionAccordionFormProps {
   ) => void;
   featureId: string;
   messageVariables?: ActionVariables;
+  summaryMessageVariables?: ActionVariables;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -100,6 +101,7 @@ export const ActionForm = ({
   setActionAlertsFilterProperty,
   featureId,
   messageVariables,
+  summaryMessageVariables,
   actionGroups,
   defaultActionMessage,
   setHasActionsDisabled,
@@ -433,6 +435,7 @@ export const ActionForm = ({
               connectors={connectors}
               defaultActionGroupId={defaultActionGroupId}
               messageVariables={messageVariables}
+              summaryMessageVariables={summaryMessageVariables}
               actionGroups={actionGroups}
               defaultActionMessage={defaultActionMessage}
               recoveryActionGroup={recoveryActionGroup}
@@ -559,6 +562,10 @@ export const ActionForm = ({
           actionType={actionTypesIndex[activeActionItem.actionTypeId]}
           onClose={closeAddConnectorModal}
           postSaveEventHandler={(savedAction: ActionConnector) => {
+            // TODO: fix in https://github.com/elastic/kibana/issues/155993
+            // actionTypes with subtypes need to be updated in case they switched to a
+            // subtype that is not the default one
+            actions[0].actionTypeId = savedAction.actionTypeId;
             connectors.push(savedAction);
             const indicesToUpdate = activeActionItem.indices || [];
             indicesToUpdate.forEach((index: number) => setActionIdByIndex(savedAction.id, index));

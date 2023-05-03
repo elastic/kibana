@@ -12,7 +12,7 @@ import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
-import { toggleErrorPopoverOpen } from '../../../../state';
+import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
 import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import { formatDuration } from '../../../../utils/formatting';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
@@ -63,6 +63,7 @@ export const MetricItem = ({
 }) => {
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
   const locationName =
     useLocationName({ locationId: monitor.location?.id })?.label || monitor.location?.id;
   const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview(
@@ -86,6 +87,9 @@ export const MetricItem = ({
           }
         }}
         onMouseLeave={() => {
+          if (isErrorPopoverOpen) {
+            dispatch(toggleErrorPopoverOpen(null));
+          }
           if (isMouseOver) {
             setIsMouseOver(false);
           }

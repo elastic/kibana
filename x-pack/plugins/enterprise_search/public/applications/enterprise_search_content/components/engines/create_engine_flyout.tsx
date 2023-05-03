@@ -90,7 +90,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.content.engines.createEngine.headerSubTitle"
-              defaultMessage="A Search Application allows your users to query data in your indices. Explore our {enginesDocsLink} to learn more!"
+              defaultMessage="Explore our {enginesDocsLink} to learn more!"
               values={{
                 enginesDocsLink: (
                   <EuiLink
@@ -127,44 +127,56 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
         )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiSteps
-          steps={[
-            {
-              children: (
-                <IndicesSelectComboBox
-                  fullWidth
-                  isDisabled={formDisabled}
-                  onChange={onIndicesChange}
-                  selectedOptions={selectedIndices.map((index: string) => indexToOption(index))}
-                />
-              ),
-              status: indicesStatus,
-              title: i18n.translate(
-                'xpack.enterpriseSearch.content.engines.createEngine.selectIndices.title',
-                { defaultMessage: 'Select indices' }
-              ),
-            },
-            {
-              children: (
-                <EuiFieldText
-                  fullWidth
-                  disabled={formDisabled}
-                  placeholder={i18n.translate(
-                    'xpack.enterpriseSearch.content.engines.createEngine.nameEngine.placeholder',
-                    { defaultMessage: 'Search Application name' }
-                  )}
-                  value={engineName}
-                  onChange={(e) => setEngineName(e.target.value)}
-                />
-              ),
-              status: engineNameStatus,
-              title: i18n.translate(
-                'xpack.enterpriseSearch.content.engines.createEngine.nameEngine.title',
-                { defaultMessage: 'Name your Search Application' }
-              ),
-            },
-          ]}
-        />
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow>
+            <EuiCallOut title="Technical Preview feature" color="warning" iconType="beaker">
+              <FormattedMessage
+                id="xpack.enterpriseSearch.content.engines.createEngine.technicalPreviewCallOut.title"
+                defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+              />
+            </EuiCallOut>
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <EuiSteps
+              steps={[
+                {
+                  children: (
+                    <IndicesSelectComboBox
+                      fullWidth
+                      isDisabled={formDisabled}
+                      onChange={onIndicesChange}
+                      selectedOptions={selectedIndices.map((index: string) => indexToOption(index))}
+                    />
+                  ),
+                  status: indicesStatus,
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.content.engines.createEngine.selectIndices.title',
+                    { defaultMessage: 'Select indices' }
+                  ),
+                },
+                {
+                  children: (
+                    <EuiFieldText
+                      fullWidth
+                      disabled={formDisabled}
+                      placeholder={i18n.translate(
+                        'xpack.enterpriseSearch.content.engines.createEngine.nameEngine.placeholder',
+                        { defaultMessage: 'Search application name' }
+                      )}
+                      value={engineName}
+                      onChange={(e) => setEngineName(e.target.value)}
+                    />
+                  ),
+                  status: engineNameStatus,
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.content.engines.createEngine.nameEngine.title',
+                    { defaultMessage: 'Name your search application' }
+                  ),
+                },
+              ]}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup>
@@ -189,7 +201,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
               }}
             >
               {i18n.translate('xpack.enterpriseSearch.content.engines.createEngine.submit', {
-                defaultMessage: 'Create this Search Application',
+                defaultMessage: 'Create',
               })}
             </EuiButton>
           </EuiFlexItem>
