@@ -124,5 +124,6 @@
     "@kbn/assetManager-plugin",
     "@kbn/guided-onboarding-plugin",
     "@kbn/field-formats-plugin",
+    "@kbn/ml-anomaly-utils",
   ]
 }
