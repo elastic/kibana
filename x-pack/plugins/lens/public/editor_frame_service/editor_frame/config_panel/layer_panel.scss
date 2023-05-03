@@ -41,19 +41,19 @@
   }
 
   // Add border to the top of the next same panel
-  & + & {
+  &+& {
     border-top: $euiBorderThin;
     margin-top: 0;
   }
 
-  & > * {
+  &>* {
     margin-bottom: 0;
   }
 
   // Targeting EUI class as we are unable to apply a class to this element in component
   &,
   .euiFormRow__fieldWrapper {
-    & > * + * {
+    &>*+* {
       margin-top: $euiSizeS;
     }
   }
@@ -80,7 +80,7 @@
   position: relative;
 
   // NativeRenderer is messing this up
-  > div {
+  >div {
     flex-grow: 1;
   }
 
@@ -106,16 +106,9 @@
 .lnsLayerPanel__dimensionContainer {
   position: relative;
 
-  & + & {
+  &+& {
     margin-top: $euiSizeS;
   }
-}
-
-.lnsLayerPanel__triggerText {
-  width: 100%;
-  padding: $euiSizeXS $euiSizeS;
-  word-break: break-word;
-  font-weight: $euiFontWeightRegular;
 }
 
 .lnsLayerPanel__dimensionLink {
@@ -124,16 +117,8 @@
   }
 }
 
-.lnsLayerPanel__triggerTextLabel {
-  transition: background-color $euiAnimSpeedFast ease-in-out;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
 .domDragDrop-isReplacing {
-  .lnsLayerPanel__triggerText {
+  .dimensionTrigger__textLabel {
     text-decoration: line-through;
   }
 }
