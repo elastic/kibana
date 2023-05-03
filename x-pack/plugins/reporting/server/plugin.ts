@@ -17,8 +17,7 @@ import { PLUGIN_ID } from '../common/constants';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
 import { ReportingStore } from './lib';
-import { registerRoutes } from './routes';
-import { setFieldFormats } from './routes/generate/services';
+// import { setFieldFormats } from './routes/generate/services';
 import type {
   ReportingRequestHandlerContext,
   ReportingSetup,
@@ -74,7 +73,7 @@ export class ReportingPlugin
     registerReportingUsageCollector(reportingCore, plugins.usageCollection);
 
     // Routes
-    registerRoutes(reportingCore, this.logger);
+    // registerRoutes(reportingCore, this.logger);
 
     // async background setup
     (async () => {
@@ -96,7 +95,7 @@ export class ReportingPlugin
     const { elasticsearch, savedObjects, uiSettings } = core;
 
     // use fieldFormats plugin for csv formats
-    setFieldFormats(plugins.fieldFormats);
+    // setFieldFormats(plugins.fieldFormats);
     const reportingCore = this.reportingCore!;
 
     // async background start

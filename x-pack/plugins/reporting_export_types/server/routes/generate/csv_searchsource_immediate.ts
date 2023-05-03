@@ -10,10 +10,10 @@ import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import moment from 'moment';
-import type { ReportingCore } from '../..';
+import type { ReportingCore } from '..';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { PassThroughStream } from '../../lib';
-import { authorizedUserPreRouting, getCounters } from '../lib';
+import { authorizedUserPreRouting, getCounters } from '../routes/lib';
 import { runTaskFnFactory } from './execute_job';
 
 export interface JobParamsDownloadCSV {

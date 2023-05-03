@@ -15,9 +15,9 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { Readable } from 'stream';
 import supertest from 'supertest';
-import { ReportingCore } from '../../..';
+import { ReportingCore } from '../..';
 import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
-import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../lib';
+import { ContentStream, ExportTypesRegistry, getContentStream } from '../../lib';
 import {
   createMockConfigSchema,
   createMockPluginSetup,

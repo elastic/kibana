@@ -45,6 +45,7 @@ export interface ReportingSetup {
    */
   usesUiCapabilities: () => boolean;
   registerExportType: ExportTypesRegistry['register'];
+  registerRoutes: (core: ReportingCore, logger: Logger) => void;
 }
 
 /**

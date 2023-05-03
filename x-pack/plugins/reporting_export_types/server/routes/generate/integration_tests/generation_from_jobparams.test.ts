@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import supertest from 'supertest';
-import { ReportingCore } from '../../..';
+import { ReportingCore } from '../..';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { ReportingStore } from '../../../lib';
 import { ExportTypesRegistry } from '../../../lib/export_types_registry';

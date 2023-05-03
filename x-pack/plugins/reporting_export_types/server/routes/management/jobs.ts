@@ -8,9 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
 import { promisify } from 'util';
-import { ReportingCore } from '../..';
+import { ReportingCore } from '..';
 import { ALLOWED_JOB_CONTENT_TYPES, API_BASE_URL } from '../../../common/constants';
-import { getContentStream } from '../../lib';
+import { getContentStream } from '../lib';
 import {
   authorizedUserPreRouting,
   getCounters,
