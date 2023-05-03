@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 
-export type ObservabilityLogsPluginSetup = void;
-export type ObservabilityLogsPluginStart = void;
-
-export interface ObservabilityLogsStartDeps {
-  discover: DiscoverStart;
-}
+export const parameters = {
+  docs: {
+    source: {
+      type: 'code', // without this, stories in mdx documents freeze the browser
+    },
+  },
+};
