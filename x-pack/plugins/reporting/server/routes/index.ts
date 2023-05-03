@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ReportingCore } from '@kbn/reporting-plugin/server';
+import type { ReportingCore } from '..';
 import { registerDeprecationsRoutes } from './deprecations/deprecations';
 import { registerDiagnosticRoutes } from './diagnostic';
 import { registerJobGenerationRoutes } from './generate';
