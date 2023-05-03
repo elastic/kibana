@@ -83,7 +83,6 @@ export { observabilityFeatureId, observabilityAppId } from '../common';
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
 export { useTheme } from './hooks/use_theme';
-export { useKibanaSpace } from './hooks/use_kibana_space';
 export { useTimeZone } from './hooks/use_time_zone';
 export { useQuickTimeRanges } from './hooks/use_quick_time_ranges';
 export { useTimeBuckets } from './hooks/use_time_buckets';
