@@ -15,11 +15,17 @@ import { RightSourcePanel } from './right_source_panel';
 import { createDistanceJoinLayerDescriptor } from './create_spatial_join_layer_descriptor';
 import { DEFAULT_WITHIN_DISTANCE } from '../../../../sources/join_sources';
 
-function isLeftConfigComplete(leftDataView: DataView | undefined, leftGeoField: string | undefined) {
+function isLeftConfigComplete(
+  leftDataView: DataView | undefined,
+  leftGeoField: string | undefined
+) {
   return leftDataView !== undefined && leftDataView.id && leftGeoField !== undefined;
 }
 
-function isRightConfigComplete(rightDataView: DataView | undefined, rightGeoField: string | undefined) {
+function isRightConfigComplete(
+  rightDataView: DataView | undefined,
+  rightGeoField: string | undefined
+) {
   return rightDataView !== undefined && rightDataView.id && rightGeoField !== undefined;
 }
 
@@ -33,7 +39,10 @@ export function WizardForm({ previewLayers }: RenderWizardArguments) {
   const [rightGeoField, setRightGeoField] = useState<string | undefined>();
 
   useEffect(() => {
-    if (!isLeftConfigComplete(leftDataView, leftGeoField) || !isRightConfigComplete(rightDataView, rightGeoField)) {
+    if (
+      !isLeftConfigComplete(leftDataView, leftGeoField) ||
+      !isRightConfigComplete(rightDataView, rightGeoField)
+    ) {
       previewLayers([]);
       return;
     }
