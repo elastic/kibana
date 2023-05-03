@@ -10,18 +10,16 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { riskScore } from '.';
 import type { IEsSearchResponse } from '@kbn/data-plugin/public';
-import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
 import type {
   HostRiskScore,
   RiskScoreRequestOptions,
 } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../../common/search_strategy';
-import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
-import type { EndpointAppContext } from '../../../../../endpoint/types';
 import * as buildQuery from './query.risk_score.dsl';
 import { get } from 'lodash/fp';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
 
 export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
   rawResponse: {
@@ -73,18 +71,7 @@ const mockDeps = {
     })),
   },
   savedObjectsClient: {} as SavedObjectsClientContract,
-  endpointContext: {
-    logFactory: {
-      get: jest.fn().mockReturnValue({
-        warn: jest.fn(),
-      }),
-    },
-    config: jest.fn().mockResolvedValue({}),
-    experimentalFeatures: {
-      ...allowedExperimentalValues,
-    },
-    service: {} as EndpointAppContextService,
-  } as EndpointAppContext,
+  endpointContext: createMockEndpointAppContext(),
   request: {} as KibanaRequest,
 };
 

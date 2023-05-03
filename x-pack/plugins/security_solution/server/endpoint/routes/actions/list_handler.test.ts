@@ -13,15 +13,13 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
@@ -54,12 +52,7 @@ describe('Action List Handler', () => {
     endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
     mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(true);
 
-    registerActionListRoutes(routerMock, {
-      logFactory: loggingSystemMock.create(),
-      service: endpointAppContextService,
-      config: () => Promise.resolve(createMockConfig()),
-      experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
-    });
+    registerActionListRoutes(routerMock, createMockEndpointAppContext());
 
     actionListHandler = async (
       query?: EndpointActionListRequestQuery

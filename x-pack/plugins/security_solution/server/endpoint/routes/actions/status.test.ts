@@ -12,7 +12,6 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
-  loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { ActionStatusRequestSchema } from '../../../../common/endpoint/schema/actions';
@@ -21,10 +20,9 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
@@ -66,15 +64,10 @@ describe('Endpoint Pending Action Summary API', () => {
     endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
     endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
 
-    registerActionStatusRoutes(routerMock, {
-      logFactory: loggingSystemMock.create(),
-      service: endpointAppContextService,
-      config: () => Promise.resolve(createMockConfig()),
-      experimentalFeatures: {
-        ...parseExperimentalConfigValue(createMockConfig().enableExperimental),
-        pendingActionResponsesWithAck,
-      },
-    });
+    const endpointContextMock = createMockEndpointAppContext();
+    Object.assign(endpointContextMock.experimentalFeatures, pendingActionResponsesWithAck);
+
+    registerActionStatusRoutes(routerMock, endpointContextMock);
 
     getPendingStatus = async (reqParams?: any): Promise<jest.Mocked<KibanaResponseFactory>> => {
       const req = httpServerMock.createKibanaRequest(reqParams);

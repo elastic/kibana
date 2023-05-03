@@ -19,11 +19,11 @@ import type { HapiReadableStream } from '../../../../types';
  * @param filename String to declare file extension
  */
 export const buildHapiStream = (string: string, filename = 'file.ndjson'): HapiReadableStream => {
-  const HapiStream = class extends Readable {
-    public readonly hapi: { filename: string };
+  const HapiStream = class extends Readable implements HapiReadableStream {
+    public readonly hapi;
     constructor(fileName: string) {
       super();
-      this.hapi = { filename: fileName };
+      this.hapi = { filename: fileName, headers: {} };
     }
   };
 
