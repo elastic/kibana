@@ -30,9 +30,9 @@ import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/pub
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
+import { DiscoverGridCellPopover } from './discover_grid_cell_popover';
 import { DiscoverGridContext } from './discover_grid_context';
 import { getRenderCellValueFn } from './get_render_cell_value';
-import { getRenderCellPopoverFn } from './get_render_cell_popover';
 import { DiscoverGridSettings } from './types';
 import {
   getEuiGridColumns,
@@ -379,8 +379,6 @@ export const DiscoverGrid = ({
     [dataView, displayedRows, useNewFieldsApi, shouldShowFieldHandler, services.uiSettings]
   );
 
-  const renderCellPopover = useMemo(() => getRenderCellPopoverFn(), []);
-
   /**
    * Render variables
    */
@@ -602,7 +600,7 @@ export const DiscoverGrid = ({
             onColumnResize={onResize}
             pagination={paginationObj}
             renderCellValue={renderCellValue}
-            renderCellPopover={renderCellPopover}
+            renderCellPopover={DiscoverGridCellPopover}
             ref={dataGridRef}
             rowCount={rowCount}
             schemaDetectors={schemaDetectors}

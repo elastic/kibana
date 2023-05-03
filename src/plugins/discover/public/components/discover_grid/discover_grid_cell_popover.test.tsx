@@ -8,13 +8,9 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { getRenderCellPopoverFn } from './get_render_cell_popover';
-import { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
+import { DiscoverGridCellPopover } from './discover_grid_cell_popover';
 
 describe('Discover grid cell popover rendering', function () {
-  const DiscoverGridCellPopover = getRenderCellPopoverFn() as React.FC<
-    Pick<EuiDataGridCellPopoverElementProps, 'cellActions' | 'setCellPopoverProps'>
-  >;
   const CellValue = ({ schema }: { schema: string }) => {
     return <div>{schema}</div>;
   };
