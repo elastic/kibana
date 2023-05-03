@@ -36,17 +36,6 @@ export const AgentStatusBar: React.FC<{
     }, [] as Array<{ stop: number; color: string }>);
   }, [agentStatus]);
 
-  // const totalAgents = useMemo(() => {
-  //   return AGENT_STATUSES.reduce((acc, status) => {
-  //     const previousStop = acc.length > 0 ? acc[acc.length - 1].stop : 0;
-  //     acc.push({
-  //       stop: previousStop + (agentStatus[status] || 0),
-  //       color: getColorForAgentStatus(status),
-  //     });
-  //     return acc;
-  //   }, 0);
-  // }, [agentStatus]);
-
   const hasNoAgent = palette[palette.length - 1].stop === 0;
 
   if (hasNoAgent) {
