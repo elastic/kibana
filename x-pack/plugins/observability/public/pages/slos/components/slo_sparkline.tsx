@@ -50,7 +50,7 @@ export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
     ) : null;
 
   if (isLoading) {
-    return <EuiLoadingChart size="m" mono />;
+    return <EuiLoadingChart style={{ minWidth: 60, justifyContent: 'center' }} size="m" mono />;
   }
 
   return (

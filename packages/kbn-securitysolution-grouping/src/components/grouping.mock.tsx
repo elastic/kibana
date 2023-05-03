@@ -15,7 +15,7 @@ export const mockGroupingProps = {
   activePage: 0,
   data: {
     groupsCount: {
-      value: 2,
+      value: 3,
     },
     groupByFields: {
       doc_count_error_upper_bound: 0,
@@ -121,7 +121,10 @@ export const mockGroupingProps = {
       ],
     },
     unitsCount: {
-      value: 3,
+      value: 14,
+    },
+    unitsCountWithoutNull: {
+      value: 14,
     },
   },
   groupingId: 'test-grouping-id',
