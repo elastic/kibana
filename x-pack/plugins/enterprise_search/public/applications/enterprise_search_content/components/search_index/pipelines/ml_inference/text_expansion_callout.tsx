@@ -28,10 +28,11 @@ import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../../shared/kibana';
 
+import { IndexViewLogic } from '../../index_view_logic';
+
 import { useTextExpansionCallOutData } from './text_expansion_callout_data';
 import { getTextExpansionError, TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 import { TextExpansionErrors } from './text_expansion_errors';
-import { IndexViewLogic } from '../../index_view_logic';
 
 export interface TextExpansionCallOutState {
   dismiss: () => void;
@@ -66,7 +67,10 @@ export const DeployModel = ({
   ingestionMethod,
   isCreateButtonDisabled,
   isDismissable,
-}: Pick<TextExpansionCallOutState, 'dismiss' | 'ingestionMethod' | 'isCreateButtonDisabled' | 'isDismissable'>) => {
+}: Pick<
+  TextExpansionCallOutState,
+  'dismiss' | 'ingestionMethod' | 'isCreateButtonDisabled' | 'isDismissable'
+>) => {
   const { createTextExpansionModel } = useActions(TextExpansionCalloutLogic);
 
   return (
@@ -200,7 +204,10 @@ export const ModelDeployed = ({
   ingestionMethod,
   isDismissable,
   isStartButtonDisabled,
-}: Pick<TextExpansionCallOutState, 'dismiss' | 'ingestionMethod' | 'isDismissable' | 'isStartButtonDisabled'>) => {
+}: Pick<
+  TextExpansionCallOutState,
+  'dismiss' | 'ingestionMethod' | 'isDismissable' | 'isStartButtonDisabled'
+>) => {
   const { startTextExpansionModel } = useActions(TextExpansionCalloutLogic);
 
   return (
