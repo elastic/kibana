@@ -43,7 +43,7 @@ export function RightSourcePanel(props: Props) {
     <EuiPanel>
       <EuiTitle size="xs">
         <h5>
-          {i18n.translate('xxpack.maps.spatialJoin.wizardForm.rightSourceTitle', {
+          {i18n.translate('xpack.maps.spatialJoin.wizardForm.rightSourceTitle', {
             defaultMessage: 'Join source',
           })}
         </h5>

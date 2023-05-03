@@ -109,7 +109,7 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
                 </li>
                 <li>
                   <FormattedMessage
-                    id="xpack.maps.scalingDocs.limitUseCase.multipleJoins"
+                    id="xpack.maps.scalingDocs.limitUseCase.spatialJoins"
                     defaultMessage="Multiple term joins"
                   />
                 </li>
