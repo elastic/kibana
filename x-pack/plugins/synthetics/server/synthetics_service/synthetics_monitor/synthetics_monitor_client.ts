@@ -160,14 +160,14 @@ export class SyntheticsMonitorClient {
 
     const publicConfigsPromise = this.syntheticsService.editConfig(publicConfigs);
 
-    const [publicConfigsResponse, privateEditResponse] = await Promise.all([
+    const [publicSyncErrors, privateEditResponse] = await Promise.all([
       publicConfigsPromise,
       privateEditPromise,
     ]);
 
     const { failedUpdates: failedPolicyUpdates } = privateEditResponse;
 
-    return { failedPolicyUpdates, publicConfigsResponse };
+    return { failedPolicyUpdates, publicSyncErrors };
   }
   async deleteMonitors(
     monitors: SyntheticsMonitorWithId[],

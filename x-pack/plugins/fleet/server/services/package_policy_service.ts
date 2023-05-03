@@ -74,7 +74,7 @@ export interface PackagePolicyClient {
   bulkUpdate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    packagePolicyUpdates: Array<NewPackagePolicy & { version?: string; id: string }>,
+    packagePolicyUpdates: UpdatePackagePolicy[],
     options?: { user?: AuthenticatedUser; force?: boolean },
     currentVersion?: string
   ): Promise<{

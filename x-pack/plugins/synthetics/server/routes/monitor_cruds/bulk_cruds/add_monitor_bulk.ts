@@ -9,6 +9,7 @@ import pMap from 'p-map';
 import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { RouteContext } from '../../../legacy_uptime/routes';
 import { deleteMonitorIfCreated } from '../add_monitor';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
@@ -93,7 +94,7 @@ export const syncNewMonitorBulk = async ({
       ),
     ]);
 
-    let failedMonitors: Array<{ monitor: MonitorSavedObject; error?: Error }> = [];
+    let failedMonitors: FailedMonitorConfig[] = [];
 
     const { failed: failedPolicies } = policiesResult ?? {};
 
@@ -112,12 +113,17 @@ export const syncNewMonitorBulk = async ({
   }
 };
 
+interface FailedMonitorConfig {
+  monitor: MonitorSavedObject;
+  error?: Error | SavedObjectError;
+}
+
 const handlePrivateConfigErrors = async (
   routeContext: RouteContext,
   createdMonitors: CreatedMonitors,
-  failedPolicies: Array<{ packagePolicy: NewPackagePolicy; error?: Error }>
+  failedPolicies: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>
 ) => {
-  const failedMonitors: Array<{ monitor: MonitorSavedObject; error?: Error }> = [];
+  const failedMonitors: FailedMonitorConfig[] = [];
 
   await pMap(failedPolicies, async ({ packagePolicy, error }) => {
     const { inputs } = packagePolicy;

@@ -103,7 +103,7 @@ export const syncEditedMonitorBulk = async ({
       syncUpdatedMonitors({ monitorsToUpdate, routeContext, spaceId, privateLocations }),
     ]);
 
-    const { publicConfigsResponse, failedPolicyUpdates } = editSyncResponse;
+    const { failedPolicyUpdates, publicSyncErrors } = editSyncResponse;
 
     monitorsToUpdate.forEach(({ normalizedMonitor, previousMonitor }) => {
       const editedMonitorSavedObject = editedMonitorSavedObjects?.saved_objects.find(
@@ -118,7 +118,7 @@ export const syncEditedMonitorBulk = async ({
           previousMonitor,
           server.stackVersion,
           Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-          publicConfigsResponse
+          publicSyncErrors
         )
       );
     });
@@ -131,7 +131,7 @@ export const syncEditedMonitorBulk = async ({
 
     return {
       failedConfigs,
-      errors: publicConfigsResponse,
+      errors: publicSyncErrors,
       editedMonitors: editedMonitorSavedObjects?.saved_objects,
     };
   } catch (e) {

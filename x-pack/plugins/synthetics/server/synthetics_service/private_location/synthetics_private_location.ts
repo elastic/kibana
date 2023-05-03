@@ -61,7 +61,7 @@ export class SyntheticsPrivateLocation {
     newPolicyTemplate: NewPackagePolicy,
     spaceId: string,
     globalParams: Record<string, string>
-  ): NewPackagePolicy | null {
+  ): (NewPackagePolicy & { policy_id: string }) | null {
     if (!savedObjectsClient) {
       throw new Error('Could not find savedObjectsClient');
     }
@@ -208,7 +208,7 @@ export class SyntheticsPrivateLocation {
       throw new Error(`Unable to create Synthetics package policy for private location`);
     }
 
-    const policiesToUpdate: Array<NewPackagePolicy & { version?: string; id: string }> = [];
+    const policiesToUpdate: NewPackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
 
@@ -244,9 +244,9 @@ export class SyntheticsPrivateLocation {
             }
 
             if (hasPolicy) {
-              policiesToUpdate.push({ ...newPolicy, id: currId });
+              policiesToUpdate.push({ ...newPolicy, id: currId } as NewPackagePolicyWithId);
             } else {
-              policiesToCreate.push({ ...newPolicy, id: currId });
+              policiesToCreate.push({ ...newPolicy, id: currId } as NewPackagePolicyWithId);
             }
           } else if (hasPolicy) {
             policiesToDelete.push(currId);
@@ -322,7 +322,7 @@ export class SyntheticsPrivateLocation {
   }
 
   async updatePolicyBulk(
-    policiesToUpdate: Array<NewPackagePolicy & { version?: string; id: string }>,
+    policiesToUpdate: NewPackagePolicyWithId[],
     savedObjectsClient: SavedObjectsClientContract
   ) {
     const soClient = savedObjectsClient;

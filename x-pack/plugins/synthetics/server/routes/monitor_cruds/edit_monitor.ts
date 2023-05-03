@@ -84,7 +84,11 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
       };
 
-      const { errors, editedMonitor: editedMonitorSavedObject } = await syncEditedMonitor({
+      const {
+        publicSyncErrors,
+        failedPolicyUpdates,
+        editedMonitor: editedMonitorSavedObject,
+      } = await syncEditedMonitor({
         routeContext,
         previousMonitor,
         decryptedPreviousMonitor,
@@ -92,10 +96,23 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         spaceId,
       });
 
+      if (failedPolicyUpdates && failedPolicyUpdates.length > 0) {
+        const hasError = failedPolicyUpdates.find((update) => update.error);
+        await rollbackUpdate({
+          routeContext,
+          configId: monitorId,
+          attributes: decryptedPreviousMonitor.attributes,
+        });
+        throw hasError?.error;
+      }
+
       // Return service sync errors in OK response
-      if (errors && errors.length > 0) {
+      if (publicSyncErrors && publicSyncErrors.length > 0) {
         return response.ok({
-          body: { message: 'error pushing monitor to the service', attributes: { errors } },
+          body: {
+            message: 'error pushing monitor to the service',
+            attributes: { errors: publicSyncErrors },
+          },
         });
       }
 
@@ -106,10 +123,30 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       }
       logger.error(updateErr);
 
-      throw updateErr;
+      return response.customError({
+        body: { message: updateErr.message },
+        statusCode: 500,
+      });
     }
   },
 });
+
+const rollbackUpdate = async ({
+  routeContext,
+  configId,
+  attributes,
+}: {
+  attributes: SyntheticsMonitorWithSecrets;
+  configId: string;
+  routeContext: RouteContext;
+}) => {
+  const { savedObjectsClient, server } = routeContext;
+  try {
+    await savedObjectsClient.update<MonitorFields>(syntheticsMonitorType, configId, attributes);
+  } catch (e) {
+    server.logger.error(`Unable to rollback Synthetics monitors edit ${e.message} `);
+  }
+};
 
 export const syncEditedMonitor = async ({
   normalizedMonitor,
@@ -156,10 +193,9 @@ export const syncEditedMonitor = async ({
       spaceId
     );
 
-    const [editedMonitorSavedObject, errors] = await Promise.all([
-      editedSOPromise,
-      editSyncPromise,
-    ]);
+    const [editedMonitorSavedObject, { publicSyncErrors, failedPolicyUpdates }] = await Promise.all(
+      [editedSOPromise, editSyncPromise]
+    );
 
     sendTelemetryEvents(
       server.logger,
@@ -169,20 +205,24 @@ export const syncEditedMonitor = async ({
         previousMonitor,
         server.stackVersion,
         Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-        errors
+        publicSyncErrors
       )
     );
 
-    return { errors, editedMonitor: editedMonitorSavedObject };
+    return {
+      failedPolicyUpdates,
+      publicSyncErrors,
+      editedMonitor: editedMonitorSavedObject,
+    };
   } catch (e) {
     server.logger.error(
       `Unable to update Synthetics monitor ${decryptedPreviousMonitor.attributes[ConfigKey.NAME]}`
     );
-    await savedObjectsClient.update<MonitorFields>(
-      syntheticsMonitorType,
-      previousMonitor.id,
-      decryptedPreviousMonitor.attributes
-    );
+    await rollbackUpdate({
+      routeContext,
+      configId: previousMonitor.id,
+      attributes: decryptedPreviousMonitor.attributes,
+    });
 
     throw e;
   }
