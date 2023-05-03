@@ -135,6 +135,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
       </EuiTitle>
 
       {renderJoins()}
+      
       <EuiSkeletonText lines={1} isLoading={isLoading}>
         <EuiTextAlign textAlign="center">
           <AddJoinButton
