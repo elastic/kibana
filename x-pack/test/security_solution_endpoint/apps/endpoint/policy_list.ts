@@ -48,8 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.ensureIsOnListPage();
       });
     });
-    // FLAKY: https://github.com/elastic/kibana/issues/135558
-    describe.skip('with policies', () => {
+    describe('with policies', () => {
       let indexedData: IndexedHostsAndAlertsResponse;
       let policyInfo: PolicyTestResourceInfo;
       before(async () => {
@@ -77,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await backButton.click();
         await pageObjects.policy.ensureIsOnListPage();
       });
-      describe('when the endpoint count link is clicked', () => {
+      describe.skip('when the endpoint count link is clicked', () => {
         it('navigates to the endpoint list page filtered by policy', async () => {
           const endpointCount = (await testSubjects.findAll('policyEndpointCountLink'))[0];
           await endpointCount.click();
