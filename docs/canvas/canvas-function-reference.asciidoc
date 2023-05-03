@@ -1160,7 +1160,7 @@ Alias: `param`
 
 Alias: `timeField`
 |`string`
-|The time field to use in the time range filter set in the context.
+|The time field to use in the time range filter, which is set in the context.
 
 |`timezone`
 
@@ -1954,7 +1954,7 @@ Alias: `expression`
 
 |`castColumns` †
 |`string`
-|The ids of columns to cast to numbers before applying the formula
+|The column ids that are cast to numbers before the formula is applied.
 
 |`copyMetaFrom`
 |`string`, `null`
