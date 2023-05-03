@@ -555,7 +555,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
     const joinRequestMeta = buildVectorRequestMeta(
       joinSource,
-      [join.getLeftField().getName(), ...joinSource.getFieldNames()],
+      joinSource.getFieldNames(),
       dataFilters,
       joinSource.getWhereQuery(),
       isForceRefresh,
