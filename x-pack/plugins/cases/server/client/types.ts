@@ -14,6 +14,7 @@ import type { IBasePath } from '@kbn/core-http-browser';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type { FileServiceStart } from '@kbn/files-plugin/server';
 import type { CasesFindRequest, User } from '../../common/api';
 import type { Authorization } from '../authorization/authorization';
 import type {
@@ -57,6 +58,7 @@ export interface CasesClientArgs {
   readonly spaceId: string;
   readonly savedObjectsSerializer: ISavedObjectsSerializer;
   readonly publicBaseUrl?: IBasePath['publicBaseUrl'];
+  readonly fileService: FileServiceStart;
 }
 
 export type CasesFindQueryParams = Partial<

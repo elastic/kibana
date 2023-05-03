@@ -25,7 +25,8 @@ export const transactionDurationMessage = i18n.translate(
     defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
 
 - Service name: \\{\\{context.serviceName\\}\\}
-- Type: \\{\\{context.transactionType\\}\\}
+- Transaction type: \\{\\{context.transactionType\\}\\}
+- Transaction name: \\{\\{context.transactionName\\}\\}
 - Environment: \\{\\{context.environment\\}\\}
 - Latency threshold: \\{\\{context.threshold\\}\\}ms
 - Latency observed: \\{\\{context.triggerValue\\}\\} over the last \\{\\{context.interval\\}\\}`,

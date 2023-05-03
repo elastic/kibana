@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { BaseParamsV2, BasePayloadV2 } from '../base';
-
+import type { BaseParamsV2, BasePayloadV2 } from '..';
 interface CsvFromSavedObjectBase {
   objectType: 'search';
 }

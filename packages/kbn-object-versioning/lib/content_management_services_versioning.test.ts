@@ -179,7 +179,6 @@ describe('CM services getTransforms()', () => {
       ...getVersionnableObjectTests('delete.in.options'),
       ...getVersionnableObjectTests('delete.out.result'),
       ...getVersionnableObjectTests('search.in.options'),
-      ...getVersionnableObjectTests('search.in.query'),
       ...getVersionnableObjectTests('search.out.result'),
     ].forEach(({ definitions, expected, ref, error = 'Invalid services definition.' }: any) => {
       test(`validate: ${ref}`, () => {
@@ -239,9 +238,9 @@ describe('CM services getTransforms()', () => {
             'update.out.result',
             'delete.in.options',
             'delete.out.result',
-            'search.in.query',
             'search.in.options',
             'search.out.result',
+            'mSearch.out.result',
           ].sort()
         );
       });

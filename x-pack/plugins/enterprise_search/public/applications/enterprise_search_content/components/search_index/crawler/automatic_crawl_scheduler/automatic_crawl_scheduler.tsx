@@ -108,7 +108,8 @@ export const AutomaticCrawlScheduler: React.FC = () => {
                       {i18n.translate(
                         'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.cronSchedulingDescription',
                         {
-                          defaultMessage: 'Define the frequency and time for scheduled crawls',
+                          defaultMessage:
+                            'Define the frequency and time for scheduled crawls. The crawler uses UTC as its timezone.',
                         }
                       )}
                     </EuiText>

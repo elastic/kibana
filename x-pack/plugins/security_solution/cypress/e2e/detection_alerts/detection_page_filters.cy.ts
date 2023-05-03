@@ -11,7 +11,6 @@ import {
   CONTROL_FRAMES,
   CONTROL_FRAME_TITLE,
   FILTER_GROUP_CHANGED_BANNER,
-  FILTER_GROUP_DISCARD_CHANGES,
   FILTER_GROUP_SAVE_CHANGES_POPOVER,
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
@@ -40,6 +39,7 @@ import {
   addNewFilterGroupControlValues,
   deleteFilterGroupControl,
   discardFilterGroupControls,
+  editFilterGroupControl,
   editFilterGroupControls,
   saveFilterGroupControls,
 } from '../../tasks/common/filter_group';
@@ -98,7 +98,7 @@ const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_P
   });
 };
 
-describe.skip('Detections : Page Filters', { testIsolation: false }, () => {
+describe('Detections : Page Filters', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -117,47 +117,63 @@ describe.skip('Detections : Page Filters', { testIsolation: false }, () => {
   });
 
   context('Alert Page Filters Customization ', { testIsolation: false }, () => {
-    it('Add New Controls', () => {
-      const fieldName = 'event.module';
-      const label = 'EventModule';
-      editFilterGroupControls();
-      addNewFilterGroupControlValues({
-        fieldName,
-        label,
-      });
-      cy.get(CONTROL_FRAME_TITLE).should('contain.text', label);
-      cy.get(FILTER_GROUP_SAVE_CHANGES_POPOVER).should('be.visible');
-      cy.get(FILTER_GROUP_DISCARD_CHANGES).click();
-      cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
+    beforeEach(() => {
+      resetFilters();
     });
-    it('Delete Controls', () => {
+    it('should be able to delete Controls', () => {
       waitForPageFilters();
       editFilterGroupControls();
       deleteFilterGroupControl(3);
       cy.get(CONTROL_FRAMES).should((sub) => {
         expect(sub.length).lt(4);
       });
-      cy.get(FILTER_GROUP_DISCARD_CHANGES).trigger('click', { force: true });
+      discardFilterGroupControls();
+    });
+    it('should be able to add new Controls', () => {
+      const fieldName = 'event.module';
+      const label = 'EventModule';
+      editFilterGroupControls();
+      deleteFilterGroupControl(3);
+      addNewFilterGroupControlValues({
+        fieldName,
+        label,
+      });
+      cy.get(CONTROL_FRAME_TITLE).should('contain.text', label);
+      cy.get(FILTER_GROUP_SAVE_CHANGES_POPOVER).should('be.visible');
+      discardFilterGroupControls();
+      cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
+    });
+    it('should be able to edit Controls', () => {
+      const fieldName = 'event.module';
+      const label = 'EventModule';
+      editFilterGroupControls();
+      editFilterGroupControl({ idx: 3, fieldName, label });
+      cy.get(CONTROL_FRAME_TITLE).should('contain.text', label);
+      cy.get(FILTER_GROUP_SAVE_CHANGES_POPOVER).should('be.visible');
+      discardFilterGroupControls();
+      cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
     });
     it('should not sync to the URL in edit mode but only in view mode', () => {
       cy.url().then((urlString) => {
         editFilterGroupControls();
+        deleteFilterGroupControl(3);
         addNewFilterGroupControlValues({ fieldName: 'event.module', label: 'Event Module' });
         cy.url().should('eq', urlString);
         saveFilterGroupControls();
         cy.url().should('not.eq', urlString);
       });
     });
-    it('should not sync to the localstorage', () => {});
   });
 
   it('Page filters are loaded with custom values provided in the URL', () => {
-    const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
-      if (filter.title === 'Status') {
-        filter.selectedOptions = ['open', 'acknowledged'];
+    const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.filter((item) => item.persist).map(
+      (filter) => {
+        if (filter.title === 'Status') {
+          filter.selectedOptions = ['open', 'acknowledged'];
+        }
+        return filter;
       }
-      return filter;
-    });
+    );
 
     cy.url().then((url) => {
       const currURL = new URL(url);
@@ -188,7 +204,7 @@ describe.skip('Detections : Page Filters', { testIsolation: false }, () => {
 
       waitForAlerts();
       cy.get(OPTION_LIST_LABELS).should((sub) => {
-        DEFAULT_DETECTION_PAGE_FILTERS.forEach((filter, idx) => {
+        DEFAULT_DETECTION_PAGE_FILTERS.filter((item) => item.persist).forEach((filter, idx) => {
           if (idx === DEFAULT_DETECTION_PAGE_FILTERS.length - 1) {
             expect(sub.eq(idx).text()).eq(CUSTOM_URL_FILTER[0].title);
           } else {
@@ -198,7 +214,7 @@ describe.skip('Detections : Page Filters', { testIsolation: false }, () => {
       });
     });
 
-    cy.get(FILTER_GROUP_SAVE_CHANGES_POPOVER).should('be.visible');
+    cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
   });
 
   it(`Alert list is updated when the alerts are updated`, () => {

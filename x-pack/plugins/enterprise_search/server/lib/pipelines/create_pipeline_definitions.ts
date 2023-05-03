@@ -245,14 +245,18 @@ export const formatMlPipelineBody = async (
   inferenceConfig: InferencePipelineInferenceConfig | undefined,
   esClient: ElasticsearchClient
 ): Promise<MlInferencePipeline> => {
-  // this will raise a 404 if model doesn't exist
+  // This will raise a 404 if model doesn't exist
   const models = await esClient.ml.getTrainedModels({ model_id: modelId });
   const model = models.trained_model_configs[0];
   return generateMlInferencePipelineBody({
-    destinationField,
     inferenceConfig,
     model,
     pipelineName,
-    sourceField,
+    fieldMappings: [
+      {
+        sourceField,
+        targetField: destinationField,
+      },
+    ],
   });
 };

@@ -14,8 +14,6 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
   OWNERS,
 } from '../../../common/constants';
-import { ESCaseStatus } from '../../services/cases/types';
-import type { ESCaseAttributes } from '../../services/cases/types';
 import type {
   CollectTelemetryDataParams,
   CasesTelemetry,
@@ -23,7 +21,7 @@ import type {
   LatestDates,
   CaseAggregationResult,
   AttachmentAggregationResult,
-  FileAttachmentAggregationResult,
+  FileAttachmentAggregationResults,
 } from '../types';
 import {
   findValueInBuckets,
@@ -37,12 +35,14 @@ import {
   getReferencesAggregationQuery,
   getSolutionValues,
 } from './utils';
+import type { CasePersistedAttributes } from '../../common/types/case';
+import { CasePersistedStatus } from '../../common/types/case';
 
 export const getLatestCasesDates = async ({
   savedObjectsClient,
 }: CollectTelemetryDataParams): Promise<LatestDates> => {
   const find = async (sortField: string) =>
-    savedObjectsClient.find<ESCaseAttributes>({
+    savedObjectsClient.find<CasePersistedAttributes>({
       page: 1,
       perPage: 1,
       sortField,
@@ -94,9 +94,12 @@ export const getCasesTelemetryData = async ({
         total: casesRes.total,
         ...getCountsFromBuckets(aggregationsBuckets.counts),
         status: {
-          open: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.OPEN),
-          inProgress: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.IN_PROGRESS),
-          closed: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.CLOSED),
+          open: findValueInBuckets(aggregationsBuckets.status, CasePersistedStatus.OPEN),
+          inProgress: findValueInBuckets(
+            aggregationsBuckets.status,
+            CasePersistedStatus.IN_PROGRESS
+          ),
+          closed: findValueInBuckets(aggregationsBuckets.status, CasePersistedStatus.CLOSED),
         },
         syncAlertsOn: findValueInBuckets(aggregationsBuckets.syncAlerts, 1),
         syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),
@@ -234,6 +237,7 @@ const getCommentsSavedObjectTelemetry = async (
     externalReferenceTypes: {
       terms: {
         field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.externalReferenceAttachmentTypeId`,
+        size: 10,
       },
       aggs: {
         ...getMaxBucketOnCaseAggregationQuery(CASE_COMMENT_SAVED_OBJECT),
@@ -242,6 +246,7 @@ const getCommentsSavedObjectTelemetry = async (
     persistableReferenceTypes: {
       terms: {
         field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.persistableStateAttachmentTypeId`,
+        size: 10,
       },
       aggs: {
         ...getMaxBucketOnCaseAggregationQuery(CASE_COMMENT_SAVED_OBJECT),
@@ -284,11 +289,20 @@ const getCommentsSavedObjectTelemetry = async (
 
 const getFilesTelemetry = async (
   savedObjectsClient: ISavedObjectsRepository
-): Promise<SavedObjectsFindResponse<unknown, FileAttachmentAggregationResult>> => {
+): Promise<SavedObjectsFindResponse<unknown, FileAttachmentAggregationResults>> => {
   const averageSize = () => ({
     averageSize: {
       avg: {
         field: `${FILE_SO_TYPE}.attributes.size`,
+      },
+    },
+  });
+
+  const top20MimeTypes = () => ({
+    topMimeTypes: {
+      terms: {
+        field: `${FILE_SO_TYPE}.attributes.mime_type`,
+        size: 20,
       },
     },
   });
@@ -304,20 +318,21 @@ const getFilesTelemetry = async (
         },
         aggs: {
           ...averageSize(),
+          ...top20MimeTypes(),
         },
       },
     }),
     {}
   );
 
-  const filterCaseIdExists = fromKueryExpression(`${FILE_SO_TYPE}.attributes.Meta.caseId: *`);
+  const filterCaseIdExists = fromKueryExpression(`${FILE_SO_TYPE}.attributes.Meta.caseIds: *`);
 
-  return savedObjectsClient.find<unknown, FileAttachmentAggregationResult>({
+  return savedObjectsClient.find<unknown, FileAttachmentAggregationResults>({
     page: 0,
     perPage: 0,
     type: FILE_SO_TYPE,
     filter: filterCaseIdExists,
-    aggs: { ...filesByOwnerAggregationQuery, ...averageSize() },
+    aggs: { ...filesByOwnerAggregationQuery, ...averageSize(), ...top20MimeTypes() },
   });
 };
 

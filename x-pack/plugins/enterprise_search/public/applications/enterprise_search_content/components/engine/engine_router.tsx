@@ -40,7 +40,7 @@ export const EngineRouter: React.FC = () => {
         from={ENGINE_PATH}
         to={generateEncodedPath(ENGINE_TAB_PATH, {
           engineName,
-          tabId: EngineViewTabs.OVERVIEW,
+          tabId: EngineViewTabs.PREVIEW,
         })}
         exact
       />

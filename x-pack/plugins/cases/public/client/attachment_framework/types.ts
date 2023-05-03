@@ -6,22 +6,49 @@
  */
 
 import type React from 'react';
-import type { EuiCommentProps, IconType } from '@elastic/eui';
+import type { EuiCommentProps, IconType, EuiButtonProps } from '@elastic/eui';
 import type {
   CommentRequestExternalReferenceType,
   CommentRequestPersistableStateType,
 } from '../../../common/api';
-import type { Case } from '../../containers/types';
+import type { CaseUI } from '../../containers/types';
+
+export enum AttachmentActionType {
+  BUTTON = 'button',
+  CUSTOM = 'custom',
+}
+
+interface BaseAttachmentAction {
+  type: AttachmentActionType;
+  label: string;
+  isPrimary?: boolean;
+  disabled?: boolean;
+}
+
+interface ButtonAttachmentAction extends BaseAttachmentAction {
+  type: AttachmentActionType.BUTTON;
+  onClick: () => void;
+  iconType: string;
+  color?: EuiButtonProps['color'];
+}
+
+interface CustomAttachmentAction extends BaseAttachmentAction {
+  type: AttachmentActionType.CUSTOM;
+  render: () => JSX.Element;
+}
+
+export type AttachmentAction = ButtonAttachmentAction | CustomAttachmentAction;
 
 export interface AttachmentViewObject<Props = {}> {
   timelineAvatar?: EuiCommentProps['timelineAvatar'];
-  actions?: EuiCommentProps['actions'];
+  getActions?: (props: Props) => AttachmentAction[];
   event?: EuiCommentProps['event'];
   children?: React.LazyExoticComponent<React.FC<Props>>;
+  hideDefaultActions?: boolean;
 }
 
 export interface CommonAttachmentViewProps {
-  caseData: Pick<Case, 'id' | 'title'>;
+  caseData: Pick<CaseUI, 'id' | 'title'>;
 }
 
 export interface ExternalReferenceAttachmentViewProps extends CommonAttachmentViewProps {
@@ -38,7 +65,9 @@ export interface AttachmentType<Props> {
   id: string;
   icon: IconType;
   displayName: string;
-  getAttachmentViewObject: () => AttachmentViewObject<Props>;
+  getAttachmentViewObject: (props: Props) => AttachmentViewObject<Props>;
+  getAttachmentRemovalObject?: (props: Props) => Pick<AttachmentViewObject<Props>, 'event'>;
+  hideDefaultActions?: boolean;
 }
 
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;

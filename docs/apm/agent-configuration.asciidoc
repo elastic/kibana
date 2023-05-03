@@ -34,6 +34,7 @@ including descriptions and default values, will be displayed.
 Supported configurations are also tagged with the image:./images/dynamic-config.svg[] badge in each APM agent's configuration reference:
 
 [horizontal]
+Android agent:: {apm-android-ref}/configuration.html[Configuration reference]
 Go agent:: {apm-go-ref}/configuration.html[Configuration reference]
 iOS agent:: _Not yet supported_
 Java agent:: {apm-java-ref}/configuration.html[Configuration reference]

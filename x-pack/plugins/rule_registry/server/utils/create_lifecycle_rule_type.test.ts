@@ -77,10 +77,14 @@ function createRule(shouldWriteAlerts: boolean = true) {
 
   const scheduleActions = jest.fn();
 
+  let uuidCounter = 1;
+  const getUuid = jest.fn(() => `uuid-${uuidCounter++}`);
+
   const alertFactory = {
     create: () => {
       return {
         scheduleActions,
+        getUuid,
       } as any;
     },
     alertLimit: {

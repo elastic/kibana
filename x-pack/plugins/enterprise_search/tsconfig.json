@@ -30,6 +30,7 @@
     "@kbn/spaces-plugin",
     "@kbn/i18n",
     "@kbn/ml-plugin",
+    "@kbn/ml-trained-models-utils",
     "@kbn/guided-onboarding-plugin",
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
@@ -55,5 +56,9 @@
     "@kbn/datemath",
     "@kbn/expressions-plugin",
     "@kbn/react-field",
+    "@kbn/field-types",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/global-search-plugin",
   ]
 }

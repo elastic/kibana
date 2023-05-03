@@ -12,7 +12,7 @@ import { History, createBrowserHistory } from 'history';
 import { takeUntil, toArray } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { CoreScopedHistory } from '@kbn/core/public';
-import { withNotifyOnErrors } from '../../state_management/url';
+import { withNotifyOnErrors, flushNotifyOnErrors } from '../../state_management/url';
 import { coreMock } from '@kbn/core/public/mocks';
 
 describe('KbnUrlStateStorage', () => {
@@ -123,6 +123,7 @@ describe('KbnUrlStateStorage', () => {
         const key = '_s';
         history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
         expect(() => urlStateStorage.get(key)).not.toThrow();
+        flushNotifyOnErrors();
         expect(toasts.addError).toBeCalled();
       });
     });
@@ -304,6 +305,7 @@ describe('KbnUrlStateStorage', () => {
         const key = '_s';
         history.replace(`/?${key}=(ok:2,test:`); // malformed rison
         expect(() => urlStateStorage.get(key)).not.toThrow();
+        flushNotifyOnErrors();
         expect(toasts.addError).toBeCalled();
       });
     });

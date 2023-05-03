@@ -30,9 +30,15 @@ export interface NewPackagePolicyInputStream {
     dataset: string;
     type: string;
     elasticsearch?: {
+      // TODO: these don't really need to be defined in the package policy schema and could be pulled directly from
+      // the package where needed.
+      dynamic_dataset?: boolean;
+      dynamic_namespace?: boolean;
       privileges?: {
         indices?: string[];
       };
+
+      // Package policy specific values
       index_mode?: string;
       source_mode?: string;
     };

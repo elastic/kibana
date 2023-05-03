@@ -14,7 +14,8 @@
       "home",
       "licensing",
       "management",
-      "features"
+      "features",
+      "share"
     ],
     "optionalPlugins": [
       "telemetry"

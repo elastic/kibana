@@ -66,10 +66,10 @@ function cronToFrequency(cron: string): Frequency {
   if (fields[3] === '*') {
     return 'DAY';
   }
-  if (fields[4] === '?') {
+  if (fields[4] === '*') {
     return 'WEEK';
   }
-  if (fields[4] === '*') {
+  if (fields[4] === '?') {
     return 'MONTH';
   }
   return 'YEAR';

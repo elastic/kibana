@@ -37,6 +37,7 @@ import {
   BurnRateRuleParams,
   AlertStates,
 } from './types';
+import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/infra_metrics';
 
 const commonEsResponse = {
   took: 100,
@@ -254,6 +255,8 @@ describe('BurnRateRuleExecutor', () => {
           'The burn rate for the past 1h is 2 and for the past 5m is 2. Alert when above 2 for both windows',
         [ALERT_EVALUATION_THRESHOLD]: 2,
         [ALERT_EVALUATION_VALUE]: 2,
+        [SLO_ID_FIELD]: slo.id,
+        [SLO_REVISION_FIELD]: slo.revision,
       },
     });
     expect(alertMock.scheduleActions).toBeCalledWith(

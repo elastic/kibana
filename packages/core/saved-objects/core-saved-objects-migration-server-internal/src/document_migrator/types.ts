@@ -29,12 +29,14 @@ export interface TypeTransforms {
  * Internal representation of a document transformation
  */
 export interface Transform {
-  /** The version this transform is registered for */
-  version: string;
-  /** The transformation function */
-  transform: TransformFn;
   /** The type of this transform */
   transformType: TransformType;
+  /** The version this transform is registered for */
+  version: string;
+  /** The upward transformation function */
+  transform: TransformFn;
+  /** The (optional) downward transformation function */
+  transformDown?: TransformFn;
 }
 
 export enum TransformType {

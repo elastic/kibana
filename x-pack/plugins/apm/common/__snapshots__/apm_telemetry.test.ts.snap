@@ -76,6 +76,9 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         "opentelemetry/ruby": {
                           "type": "long"
                         },
+                        "opentelemetry/rust": {
+                          "type": "long"
+                        },
                         "opentelemetry/swift": {
                           "type": "long"
                         },

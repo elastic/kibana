@@ -6,7 +6,7 @@
  */
 
 import pMap from 'p-map';
-import { CasePostRequest, CaseResponse, CaseStatuses } from '@kbn/cases-plugin/common/api';
+import { CasePostRequest, Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/api';
 import {
   createCase as createCaseAPI,
   deleteAllCaseItems,
@@ -31,7 +31,7 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   return {
-    async createCase(overwrites: Partial<CasePostRequest> = {}): Promise<CaseResponse> {
+    async createCase(overwrites: Partial<CasePostRequest> = {}): Promise<Case> {
       const caseData = {
         ...generateRandomCaseWithoutConnector(),
         ...overwrites,
@@ -61,7 +61,7 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
     }: {
       caseId: Parameters<typeof createComment>[0]['caseId'];
       params: Parameters<typeof createComment>[0]['params'];
-    }): Promise<CaseResponse> {
+    }): Promise<Case> {
       return createComment({ supertest: kbnSupertest, params, caseId });
     },
 
@@ -95,8 +95,46 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
       return suggestUserProfiles({ supertest: kbnSupertest, req: options });
     },
 
-    async getCase({ caseId }: OmitSupertest<Parameters<typeof getCase>[0]>): Promise<CaseResponse> {
+    async getCase({ caseId }: OmitSupertest<Parameters<typeof getCase>[0]>): Promise<Case> {
       return getCase({ supertest: kbnSupertest, caseId });
+    },
+
+    async generateUserActions({
+      caseId,
+      caseVersion,
+      totalUpdates = 1,
+    }: {
+      caseId: string;
+      caseVersion: string;
+      totalUpdates: number;
+    }) {
+      let latestVersion = caseVersion;
+      const severities = Object.values(CaseSeverity);
+      const statuses = Object.values(CaseStatuses);
+
+      for (let index = 0; index < totalUpdates; index++) {
+        const severity = severities[index % severities.length];
+        const status = statuses[index % statuses.length];
+
+        const theCase = await updateCase({
+          supertest: kbnSupertest,
+          params: {
+            cases: [
+              {
+                id: caseId,
+                version: latestVersion,
+                title: `Title update ${index}`,
+                description: `Desc update ${index}`,
+                severity,
+                status,
+                tags: [`tag-${index}`],
+              },
+            ],
+          },
+        });
+
+        latestVersion = theCase[0].version;
+      }
     },
   };
 }

@@ -53,7 +53,7 @@ describe('syncEditedMonitor', () => {
         buildPackagePolicyFromPackage: jest.fn().mockReturnValue({}),
       },
     },
-    encryptedSavedObjects: mockEncryptedSO,
+    encryptedSavedObjects: mockEncryptedSO(),
   } as unknown as UptimeServerSetup;
 
   const editedMonitor = {

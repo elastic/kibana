@@ -226,6 +226,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
           <EuiButtonIcon
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
             onClick={toggle}
+            data-test-subj="expandRow"
             aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
               defaultMessage: 'Expand row.',
             })}
@@ -434,7 +435,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     }),
     fieldRequired: false,
     value: AGGREGATION_TYPES.CARDINALITY,
-    validNormalizedTypes: ['number'],
+    validNormalizedTypes: ['number', 'string', 'ip', 'date'],
   },
   rate: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.rate', {

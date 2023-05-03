@@ -38,6 +38,34 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
         type: 'date',
       },
     },
+    vulnerabilities: {
+      doc_count: {
+        type: 'long',
+      },
+      deleted: {
+        type: 'long',
+      },
+      size_in_bytes: {
+        type: 'long',
+      },
+      last_doc_timestamp: {
+        type: 'date',
+      },
+    },
+    latest_vulnerabilities: {
+      doc_count: {
+        type: 'long',
+      },
+      deleted: {
+        type: 'long',
+      },
+      size_in_bytes: {
+        type: 'long',
+      },
+      last_doc_timestamp: {
+        type: 'date',
+      },
+    },
     score: {
       doc_count: {
         type: 'long',
@@ -51,6 +79,22 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       last_doc_timestamp: {
         type: 'date',
       },
+    },
+    latestPackageVersion: { type: 'keyword' },
+    cspm: {
+      status: { type: 'keyword' },
+      installedPackagePolicies: { type: 'long' },
+      healthyAgents: { type: 'long' },
+    },
+    kspm: {
+      status: { type: 'keyword' },
+      installedPackagePolicies: { type: 'long' },
+      healthyAgents: { type: 'long' },
+    },
+    vuln_mgmt: {
+      status: { type: 'keyword' },
+      installedPackagePolicies: { type: 'long' },
+      healthyAgents: { type: 'long' },
     },
   },
   resources_stats: {

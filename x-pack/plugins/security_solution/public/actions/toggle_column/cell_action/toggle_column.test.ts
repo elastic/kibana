@@ -6,12 +6,11 @@
  */
 
 import type { SecurityAppStore } from '../../../common/store/types';
-import { TableId } from '../../../../common/types';
+import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
 import { createToggleColumnCellActionFactory } from './toggle_column';
 
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { mockGlobalState } from '../../../common/mock';
-import { dataTableActions } from '../../../common/store/data_table';
 
 const mockDispatch = jest.fn();
 const mockGetState = jest.fn().mockReturnValue(mockGlobalState);

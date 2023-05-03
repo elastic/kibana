@@ -6,15 +6,13 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { useFetcher } from '@kbn/observability-plugin/public';
-import moment from 'moment';
 import {
   ScreenshotImageBlob,
   ScreenshotRefImageData,
   isScreenshotRef,
 } from '../../../../../../common/runtime_types';
 import { useComposeImageFromRef } from '../../../hooks/use_composite_image';
-import { getJourneyScreenshot } from '../../../state';
+import { BackoffOptions, getJourneyScreenshot } from '../../../state';
 
 type ImageResponse = ScreenshotImageBlob | ScreenshotRefImageData | null;
 interface ImageDataResult {
@@ -34,6 +32,7 @@ export const useRetrieveStepImage = ({
   stepStatus,
   hasIntersected,
   imgPath,
+  testNowMode,
   retryFetchOnRevisit,
 }: {
   timestamp?: string;
@@ -41,6 +40,8 @@ export const useRetrieveStepImage = ({
   imgPath: string;
   stepStatus?: string;
   hasIntersected: boolean;
+
+  testNowMode?: boolean;
 
   /**
    * Whether to retry screenshot image fetch on revisit (when intersection change triggers).
@@ -53,39 +54,54 @@ export const useRetrieveStepImage = ({
   const [imgState, setImgState] = useState<ImageDataResult>({});
   const skippedStep = stepStatus === 'skipped';
 
-  const dataResult = useGetStepScreenshotUrls(checkGroup, imgPath, imgState);
-  const isImageUrlAvailable = dataResult?.[imgPath]?.url ?? false;
+  const imageResult = useGetStepScreenshotUrls(checkGroup, imgPath, imgState);
+  const isImageUrlAvailable = imageResult?.[imgPath]?.url ?? false;
 
-  useFetcher(() => {
-    const is5MinutesOld = timestamp
-      ? moment(timestamp).isBefore(moment().subtract(5, 'minutes'))
-      : false;
-    const retrieveAttemptedBefore = (imgState[imgPath]?.attempts ?? 0) > 0;
-    const shouldRetry = retryFetchOnRevisit || !retrieveAttemptedBefore;
+  const shouldFetch = useMemo(() => {
+    const shouldRetry = retryFetchOnRevisit || !(imgState[imgPath]?.attempts ?? 0 > 0);
+    return !skippedStep && hasIntersected && !isImageUrlAvailable && shouldRetry && checkGroup;
+  }, [
+    checkGroup,
+    hasIntersected,
+    imgPath,
+    imgState,
+    isImageUrlAvailable,
+    retryFetchOnRevisit,
+    skippedStep,
+  ]);
 
-    if (!skippedStep && hasIntersected && !isImageUrlAvailable && shouldRetry && checkGroup) {
-      setImgState((prevState) => {
-        return getUpdatedState({ prevState, imgPath, increment: true, loading: true });
-      });
-      return getJourneyScreenshot(imgPath, !is5MinutesOld)
-        .then((data) => {
-          setImgState((prevState) => {
-            return getUpdatedState({ prevState, imgPath, increment: false, data, loading: false });
-          });
-
-          return data;
-        })
-        .catch(() => {
+  useEffect(() => {
+    async function run() {
+      if (shouldFetch) {
+        setImgState((prevState) => {
+          return getUpdatedState({ prevState, imgPath, increment: true, loading: true });
+        });
+        const backoffOptions: Partial<BackoffOptions> | undefined = !testNowMode
+          ? { shouldBackoff: false }
+          : undefined;
+        try {
+          getJourneyScreenshot(imgPath, backoffOptions).then((data) =>
+            setImgState((prevState) =>
+              getUpdatedState({
+                prevState,
+                imgPath,
+                increment: false,
+                data,
+                loading: false,
+              })
+            )
+          );
+        } catch (e: unknown) {
           setImgState((prevState) => {
             return getUpdatedState({ prevState, imgPath, increment: false, loading: false });
           });
-        });
-    } else {
-      return new Promise<ImageResponse>((resolve) => resolve(null));
+        }
+      }
     }
-  }, [skippedStep, hasIntersected, imgPath, retryFetchOnRevisit, timestamp]);
+    run();
+  }, [imgPath, shouldFetch, testNowMode]);
 
-  return dataResult;
+  return imageResult;
 };
 
 /**

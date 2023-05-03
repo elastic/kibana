@@ -41,6 +41,8 @@ import { deletePackageCache } from '../archive';
 import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
 
+import { auditLoggingService } from '../../audit_logging';
+
 import { getInstallation, kibanaSavedObjectTypes } from '.';
 
 export async function removeInstallation(options: {
@@ -85,6 +87,11 @@ export async function removeInstallation(options: {
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'delete',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
   await savedObjectsClient.delete(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
 
   // delete the index patterns if no packages are installed
@@ -118,6 +125,14 @@ async function deleteKibanaAssets(
     { namespace }
   );
 
+  for (const { saved_object: savedObject } of resolvedObjects) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'get',
+      id: savedObject.id,
+      savedObjectType: savedObject.type,
+    });
+  }
+
   const foundObjects = resolvedObjects.filter(
     ({ saved_object: savedObject }) => savedObject?.error?.statusCode !== 404
   );
@@ -125,6 +140,14 @@ async function deleteKibanaAssets(
   // in the case of a partial install, it is expected that some assets will be not found
   // we filter these out before calling delete
   const assetsToDelete = foundObjects.map(({ saved_object: { id, type } }) => ({ id, type }));
+
+  for (const asset of assetsToDelete) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'delete',
+      id: asset.id,
+      savedObjectType: asset.type,
+    });
+  }
 
   return savedObjectsClient.bulkDelete(assetsToDelete, { namespace });
 }

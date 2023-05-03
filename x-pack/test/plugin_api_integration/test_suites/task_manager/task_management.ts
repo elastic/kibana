@@ -9,13 +9,11 @@ import moment from 'moment';
 import { random } from 'lodash';
 import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import TaskManagerMapping from '@kbn/task-manager-plugin/server/saved_objects/mappings.json';
+import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
 import { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const {
-  task: { properties: taskManagerIndexMapping },
-} = TaskManagerMapping;
+const { properties: taskManagerIndexMapping } = TaskManagerMapping;
 
 export interface RawDoc {
   _id: string;

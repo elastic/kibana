@@ -17,6 +17,7 @@ import type {
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { getUniqGeoOrStrExamples } from '../../../common/util/example_utils';
 import type {
   Field,
@@ -24,7 +25,6 @@ import type {
   FieldStatsCommonRequestParams,
 } from '../../../../../common/types/field_stats';
 import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
-import { extractErrorProperties } from '../../utils/error_utils';
 import { MAX_EXAMPLES_DEFAULT } from './constants';
 
 export const getFieldExamplesRequest = (params: FieldStatsCommonRequestParams, field: Field) => {

@@ -90,6 +90,7 @@ export const registerCreateRoute = (
         typeMigrationVersion,
         references,
         initialNamespaces,
+        migrationVersionCompatibility: 'compatible' as const,
       };
       const result = await savedObjects.client.create(type, attributes, options);
       return res.ok({ body: result });

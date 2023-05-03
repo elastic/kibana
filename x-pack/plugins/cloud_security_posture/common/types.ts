@@ -74,7 +74,7 @@ export interface IndexDetails {
   status: IndexStatus;
 }
 
-interface BaseCspSetupBothPolicy {
+export interface BaseCspSetupBothPolicy {
   status: CspStatusCode;
   installedPackagePolicies: number;
   healthyAgents: number;
@@ -87,6 +87,7 @@ export interface BaseCspSetupStatus {
   kspm: BaseCspSetupBothPolicy;
   vuln_mgmt: BaseCspSetupBothPolicy;
   isPluginInitialized: boolean;
+  installedPackageVersion?: string | undefined;
 }
 
 export type CspSetupStatus = BaseCspSetupStatus;
@@ -106,7 +107,3 @@ export type BenchmarkName = CspRuleTemplateMetadata['benchmark']['name'];
 export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
 export type CloudSecurityPolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
 export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' | 'cspm'>;
-
-// Vulnerability Integration Types
-export type CVSSVersion = '2.0' | '3.0';
-export type SeverityStatus = 'Low' | 'Medium' | 'High' | 'Critical';

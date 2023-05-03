@@ -28,6 +28,7 @@ interface SLOListParams {
 export interface UseFetchSloListResponse {
   isInitialLoading: boolean;
   isLoading: boolean;
+  isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
   sloList: FindSLOResponse | undefined;
@@ -42,7 +43,7 @@ const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 export function useFetchSloList({
   name = '',
   page = 1,
-  sortBy = 'name',
+  sortBy = 'creationTime',
   indicatorTypes = [],
   shouldRefetch,
 }: SLOListParams | undefined = {}): UseFetchSloListResponse {
@@ -83,7 +84,7 @@ export function useFetchSloList({
           return;
         }
 
-        if (results.find((slo) => slo.summary.status === 'NO_DATA')) {
+        if (results.find((slo) => slo.summary.status === 'NO_DATA' || !slo.summary)) {
           setStateRefetchInterval(SHORT_REFETCH_INTERVAL);
         } else {
           setStateRefetchInterval(LONG_REFETCH_INTERVAL);
@@ -96,14 +97,19 @@ export function useFetchSloList({
         queryClient.invalidateQueries(['fetchActiveAlerts'], {
           exact: false,
         });
+
+        queryClient.invalidateQueries(['fetchRulesForSlo'], {
+          exact: false,
+        });
       },
     }
   );
 
   return {
     sloList: data,
-    isLoading: isLoading || isRefetching,
     isInitialLoading,
+    isLoading,
+    isRefetching,
     isSuccess,
     isError,
     refetch,

@@ -113,6 +113,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       ...state,
       endpointDetails: {
         ...state.endpointDetails,
+        hostInfo: action.payload,
         hostDetails: {
           ...state.endpointDetails.hostDetails,
           details: action.payload.metadata,

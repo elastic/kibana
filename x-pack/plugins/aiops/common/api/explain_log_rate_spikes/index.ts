@@ -14,6 +14,7 @@ export {
   pingAction,
   resetAllAction,
   resetErrorsAction,
+  resetGroupsAction,
   updateLoadingStateAction,
   API_ACTION_NAME,
 } from './actions';

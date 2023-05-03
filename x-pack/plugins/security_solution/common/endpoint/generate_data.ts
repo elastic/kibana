@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import type seedrandom from 'seedrandom';
 import { assertNever } from '@kbn/std';
 import type {
@@ -349,6 +351,25 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   }
 
   /**
+   * Get a custom `EndpointDocGenerator` subclass that customizes certain fields based on input arguments
+   */
+  public static custom({
+    CustomMetadataGenerator,
+  }: Partial<{
+    CustomMetadataGenerator: typeof EndpointMetadataGenerator;
+  }> = {}): typeof EndpointDocGenerator {
+    return class extends EndpointDocGenerator {
+      constructor(...options: ConstructorParameters<typeof EndpointDocGenerator>) {
+        if (CustomMetadataGenerator) {
+          options[1] = CustomMetadataGenerator;
+        }
+
+        super(...options);
+      }
+    };
+  }
+
+  /**
    * Creates new random IP addresses for the host to simulate new DHCP assignment
    */
   public updateHostData() {
@@ -389,7 +410,9 @@ export class EndpointDocGenerator extends BaseDataGenerator {
 
   private createHostData(): CommonHostInfo {
     const { agent, elastic, host, Endpoint } = this.metadataGenerator.generate({
-      Endpoint: { policy: { applied: this.randomChoice(APPLIED_POLICIES) } },
+      Endpoint: {
+        policy: { applied: this.randomChoice(APPLIED_POLICIES) },
+      },
     });
 
     return { agent, elastic, host, Endpoint };
@@ -538,6 +561,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         },
       },
       dll: this.getAlertsDefaultDll(),
+      user: {
+        domain: this.randomString(10),
+        name: this.randomString(10),
+      },
     };
   }
 
@@ -640,6 +667,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         },
       },
       dll: this.getAlertsDefaultDll(),
+      user: {
+        domain: this.randomString(10),
+        name: this.randomString(10),
+      },
     };
 
     // shellcode_thread memory alert have an additional process field
@@ -842,6 +873,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         },
       },
       dll: this.getAlertsDefaultDll(),
+      user: {
+        domain: this.randomString(10),
+        name: this.randomString(10),
+      },
     };
     return newAlert;
   }
@@ -928,6 +963,9 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       ...detailRecordForEventType,
       event: {
         category: options.eventCategory ? options.eventCategory : ['process'],
+        outcome: options.eventCategory?.includes('authentication')
+          ? this.randomChoice(['success', 'failure'])
+          : '',
         kind: 'event',
         type: options.eventType ? options.eventType : ['start'],
         id: this.seededUUIDv4(),
@@ -1900,7 +1938,8 @@ export class EndpointDocGenerator extends BaseDataGenerator {
                   status: status(),
                 },
               },
-            },
+              // TODO:PT refactor to use EndpointPolicyResponse Generator
+            } as HostPolicyResponse['Endpoint']['policy']['applied']['response'],
             artifacts: {
               global: {
                 version: '1.4.0',

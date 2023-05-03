@@ -69,6 +69,7 @@ export const getSuggestions: Visualization<GaugeVisualizationState>['getSuggesti
       shape === GaugeShapes.VERTICAL_BULLET ? IconChartVerticalBullet : IconChartHorizontalBullet,
     score: 0.5,
     hide: !isGauge || state?.metricAccessor === undefined, // only display for gauges for beta
+    incomplete: state?.metricAccessor === undefined,
   };
 
   const suggestions = isGauge

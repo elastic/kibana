@@ -277,7 +277,7 @@ Object {
           "href": "securitySolutionUI/cloud_security_posture-benchmarks",
           "id": "cloud_security_posture-benchmarks",
           "isSelected": false,
-          "name": "CSP Benchmarks",
+          "name": "Cloud Posture Benchmarks",
           "onClick": [Function],
         },
       ],
