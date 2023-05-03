@@ -9,7 +9,6 @@ import type { KueryNode } from '@kbn/es-query';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Case } from '../../../common/api';
 import type { IndexRefresh } from '../types';
-import type { User } from '../../common/types/user';
 import type {
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
@@ -19,11 +18,6 @@ import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 export interface GetCaseIdsByAlertIdArgs {
   alertId: string;
   filter?: KueryNode;
-}
-
-export interface PushedArgs {
-  pushed_at: string;
-  pushed_by: User;
 }
 
 export interface GetCaseArgs {
@@ -54,7 +48,7 @@ export interface PostCaseArgs extends IndexRefresh {
 
 export interface PatchCase extends IndexRefresh {
   caseId: string;
-  updatedAttributes: Partial<CaseTransformedAttributes & PushedArgs>;
+  updatedAttributes: Partial<CaseTransformedAttributes>;
   originalCase: CaseSavedObjectTransformed;
   version?: string;
 }

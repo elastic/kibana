@@ -24,6 +24,7 @@ import {
 } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
+import { mockCases } from '../../mocks';
 
 describe('case transforms', () => {
   describe('transformUpdateResponseToExternalModel', () => {
@@ -241,6 +242,41 @@ describe('case transforms', () => {
         expect(transformedAttributes.attributes.status).toBe(expectedStatusValue);
       }
     );
+
+    it('returns the case attributes with null values correctly', () => {
+      const theCase = mockCases[0];
+
+      expect(
+        transformUpdateResponseToExternalModel({
+          type: 'a',
+          id: '1',
+          references: undefined,
+          attributes: {
+            ...theCase.attributes,
+            total_alerts: 0,
+            total_comments: 0,
+            connector: {
+              name: theCase.attributes.connector.name,
+              fields: [],
+              type: theCase.attributes.connector.type,
+            },
+            severity: 0,
+            status: 0,
+          },
+        }).attributes
+      ).toEqual(theCase.attributes);
+    });
+
+    it('does not return undefined values', () => {
+      expect(
+        transformUpdateResponseToExternalModel({
+          type: 'a',
+          id: '1',
+          references: undefined,
+          attributes: {},
+        }).attributes
+      ).toEqual({});
+    });
   });
 
   describe('transformAttributesToESModel', () => {
@@ -430,6 +466,25 @@ describe('case transforms', () => {
         'status'
       );
     });
+
+    it('returns the case attributes with null values correctly', () => {
+      const theCase = mockCases[0];
+
+      expect(transformAttributesToESModel(theCase.attributes).attributes).toEqual({
+        ...theCase.attributes,
+        connector: {
+          name: theCase.attributes.connector.name,
+          fields: [],
+          type: theCase.attributes.connector.type,
+        },
+        severity: 0,
+        status: 0,
+      });
+    });
+
+    it('does not return undefined values', () => {
+      expect(transformAttributesToESModel({}).attributes).toEqual({});
+    });
   });
 
   describe('transformSavedObjectToExternalModel', () => {
@@ -553,6 +608,30 @@ describe('case transforms', () => {
       expect(transformAttributesToESModel({ status: undefined }).attributes).not.toHaveProperty(
         'status'
       );
+    });
+
+    it('returns the case attributes with null values correctly', () => {
+      const theCase = mockCases[0];
+
+      expect(
+        transformSavedObjectToExternalModel({
+          type: 'a',
+          id: '1',
+          references: [],
+          attributes: {
+            ...theCase.attributes,
+            total_alerts: 0,
+            total_comments: 0,
+            connector: {
+              name: theCase.attributes.connector.name,
+              fields: [],
+              type: theCase.attributes.connector.type,
+            },
+            severity: 0,
+            status: 0,
+          },
+        }).attributes
+      ).toEqual(theCase.attributes);
     });
   });
 });
