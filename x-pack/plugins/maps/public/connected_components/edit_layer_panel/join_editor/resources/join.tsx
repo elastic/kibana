@@ -52,6 +52,7 @@ interface State {
 
 export class Join extends Component<Props, State> {
   private _isMounted = false;
+  private _nextIndexPatternId: string | undefined;
 
   state: State = {
     rightFields: [],
@@ -73,6 +74,7 @@ export class Join extends Component<Props, State> {
       return;
     }
 
+    this._nextIndexPatternId = indexPatternId;
     let indexPattern;
     try {
       indexPattern = await getIndexPatternService().get(indexPatternId);
@@ -85,7 +87,7 @@ export class Join extends Component<Props, State> {
       return;
     }
 
-    if (!this._isMounted) {
+    if (!this._isMounted || this._nextIndexPatternId !== indexPatternId) {
       return;
     }
 
@@ -257,7 +259,7 @@ export class Join extends Component<Props, State> {
         <EuiFlexItem grow={false}>
           <WhereExpression
             indexPattern={indexPattern}
-            whereQuery={(right as Partial<AbstractESJoinSourceDescriptor>).whereQuery}
+            whereQuery={right.whereQuery}
             onChange={this._onWhereQueryChange}
           />
         </EuiFlexItem>
