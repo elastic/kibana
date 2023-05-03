@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import pRetry from 'p-retry';
 import { Client } from '@elastic/elasticsearch';
-import { APM_ALERTS_INDEX } from './constants';
-async function getActiveAlert({
+
+export async function getActiveAlert({
   ruleId,
   esClient,
+  index,
 }: {
   ruleId: string;
   esClient: Client;
+  index: string;
 }): Promise<Record<string, any>> {
   const searchParams = {
-    index: APM_ALERTS_INDEX,
+    index,
     size: 1,
     query: {
       bool: {
@@ -45,17 +46,4 @@ async function getActiveAlert({
     throw new Error(`No active alert found for rule ${ruleId}`);
   }
   return firstHit;
-}
-
-export function waitForActiveAlert({
-  ruleId,
-  esClient,
-}: {
-  ruleId: string;
-  esClient: Client;
-}): Promise<Record<string, any>> {
-  return pRetry(() => getActiveAlert({ ruleId, esClient }), {
-    retries: 10,
-    factor: 1.5,
-  });
 }

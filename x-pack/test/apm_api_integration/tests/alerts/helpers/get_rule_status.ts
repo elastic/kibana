@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import pRetry from 'p-retry';
 import type SuperTest from 'supertest';
 import { RULE_ENDPOINT } from './constants';
 
-export async function waitForRuleStatus({
+export async function getRuleStatus({
   id,
   expectedStatus,
   supertest,
@@ -17,16 +16,11 @@ export async function waitForRuleStatus({
   expectedStatus: string;
   supertest: SuperTest.SuperTest<SuperTest.Test>;
 }): Promise<Record<string, any>> {
-  return pRetry(
-    async () => {
-      const response = await supertest.get(`${RULE_ENDPOINT}/${id}`);
-      const { execution_status: executionStatus } = response.body || {};
-      const { status } = executionStatus || {};
-      if (status !== expectedStatus) {
-        throw new Error(`waitForStatus(${expectedStatus}): got ${status}`);
-      }
-      return executionStatus;
-    },
-    { retries: 10 }
-  );
+  const response = await supertest.get(`${RULE_ENDPOINT}/${id}`);
+  const { execution_status: executionStatus } = response.body || {};
+  const { status } = executionStatus || {};
+  if (status !== expectedStatus) {
+    throw new Error(`waitForStatus(${expectedStatus}): got ${status}`);
+  }
+  return executionStatus;
 }

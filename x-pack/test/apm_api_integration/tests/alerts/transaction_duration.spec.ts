@@ -9,34 +9,23 @@ import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_r
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  createApmRule,
-  createIndexConnector,
-  fetchServiceInventoryAlertCounts,
-  fetchServiceTabAlertCount,
-} from './alerting_api_helper';
-import {
-  waitForRuleStatus,
-  waitForDocumentInIndex,
-  waitForAlertInIndex,
-} from './wait_for_rule_status';
+import { fetchServiceInventoryAlertCounts, fetchServiceTabAlertCount } from './alerting_api_helper';
+import { AlertTestHelper } from './helpers/alert_test_helper';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
 
   const supertest = getService('supertest');
-  const es = getService('es');
+  const esClient = getService('es');
   const apmApiClient = getService('apmApiClient');
-  const esDeleteAllIndices = getService('esDeleteAllIndices');
+
+  const alertTestHelper = new AlertTestHelper({ esClient, supertest });
 
   const synthtraceEsClient = getService('synthtraceEsClient');
 
   registry.when('transaction duration alert', { config: 'basic', archives: [] }, () => {
     let ruleId: string;
     let actionId: string | undefined;
-
-    const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
-    const ALERT_ACTION_INDEX_NAME = 'alert-action-transaction-duration';
 
     before(async () => {
       const opbeansJava = apm
@@ -68,26 +57,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await synthtraceEsClient.clean();
       await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
       await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
-      await esDeleteAllIndices([ALERT_ACTION_INDEX_NAME]);
-      await es.deleteByQuery({
-        index: APM_ALERTS_INDEX,
-        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
-      });
-      await es.deleteByQuery({
-        index: '.kibana-event-log-*',
-        query: { term: { 'kibana.alert.rule.consumer': 'apm' } },
-      });
+      await alertTestHelper.cleanAll();
     });
 
     describe('create alert with transaction.name group by', () => {
-      before(async () => {
-        actionId = await createIndexConnector({
-          supertest,
+      it('checks if rule is active', async () => {
+        actionId = await alertTestHelper.createIndexConnector({
           name: 'Transation duration API test',
-          indexName: ALERT_ACTION_INDEX_NAME,
         });
-        const createdRule = await createApmRule({
-          supertest,
+
+        const createdRule = await alertTestHelper.createApmRule({
           ruleTypeId: ApmRuleType.TransactionDuration,
           name: 'Apm transaction duration',
           params: {
@@ -110,49 +89,43 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               group: 'threshold_met',
               id: actionId,
               params: {
-                documents: [{ message: 'Transaction Name: {{context.transactionName}}' }],
+                documents: [
+                  { message: 'Transaction Name: {{context.transactionName}}', id: actionId },
+                ],
               },
               frequency: {
                 notify_when: 'onActionGroupChange',
-                throttle: null,
                 summary: false,
               },
             },
           ],
         });
-        expect(createdRule.id).to.not.eql(undefined);
-        ruleId = createdRule.id;
-      });
 
-      it('checks if rule is active', async () => {
-        const executionStatus = await waitForRuleStatus({
+        expect(createdRule.id).to.not.eql(undefined);
+
+        ruleId = createdRule.id;
+
+        const executionStatus = await alertTestHelper.waitForRuleStatus({
           id: ruleId,
           expectedStatus: 'active',
-          supertest,
         });
         expect(executionStatus.status).to.be('active');
       });
 
       it('returns correct message', async () => {
-        const resp = await waitForDocumentInIndex<{ message: string }>({
-          es,
-          indexName: ALERT_ACTION_INDEX_NAME,
+        const message = await alertTestHelper.waitForConnectorActionMessage({
+          messageId: actionId,
         });
-
-        expect(resp.hits.hits[0]._source?.message).eql(`Transaction Name: tx-java`);
+        expect(message).eql(`Transaction Name: tx-java`);
       });
 
       it('indexes alert document with all group-by fields', async () => {
-        const resp = await waitForAlertInIndex({
-          es,
-          indexName: APM_ALERTS_INDEX,
-          ruleId,
-        });
+        const resp = await alertTestHelper.waitForActiveAlert({ ruleId });
 
-        expect(resp.hits.hits[0]._source).property('service.name', 'opbeans-java');
-        expect(resp.hits.hits[0]._source).property('service.environment', 'production');
-        expect(resp.hits.hits[0]._source).property('transaction.type', 'request');
-        expect(resp.hits.hits[0]._source).property('transaction.name', 'tx-java');
+        expect(resp._source).property('service.name', 'opbeans-java');
+        expect(resp._source).property('service.environment', 'production');
+        expect(resp._source).property('transaction.type', 'request');
+        expect(resp._source).property('transaction.name', 'tx-java');
       });
 
       it('shows the correct alert count for each service on service inventory', async () => {

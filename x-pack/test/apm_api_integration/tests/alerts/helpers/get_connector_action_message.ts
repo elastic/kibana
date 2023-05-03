@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import pRetry from 'p-retry';
 import { Client } from '@elastic/elasticsearch';
-import { APM_RULE_CONNECTOR_INDEX } from './constants';
 
 interface ActionMessageAggResponse {
   message: {
@@ -18,15 +16,17 @@ interface ActionMessageAggResponse {
   };
 }
 
-async function getConnectorActionMessage({
+export async function getConnectorActionMessage({
   messageId,
   esClient,
+  index,
 }: {
   messageId?: string;
   esClient: Client;
+  index: string;
 }): Promise<string> {
   const searchParams = {
-    index: APM_RULE_CONNECTOR_INDEX,
+    index,
     body: {
       fields: ['id.keyword', 'message.keyword'],
       aggs: {
@@ -61,17 +61,4 @@ async function getConnectorActionMessage({
   } else {
     return action.message.buckets[0].key;
   }
-}
-
-export function waitForConnectorActionMessage({
-  messageId,
-  esClient,
-}: {
-  messageId?: string;
-  esClient: Client;
-}): Promise<string> {
-  return pRetry(() => getConnectorActionMessage({ messageId, esClient }), {
-    retries: 10,
-    factor: 1.5,
-  });
 }
