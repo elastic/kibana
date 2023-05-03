@@ -77,19 +77,38 @@ export const GroupEditorFlyout = ({
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="cancelGroupEdit" onClick={onClose}>
-              <FormattedMessage id="eventAnnotation.edit.cancel" defaultMessage="Cancel" />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton iconType="save" data-test-subj="saveAnnotationGroup" fill onClick={onSave}>
-              <FormattedMessage
-                id="eventAnnotation.edit.save"
-                defaultMessage="Save annotation group"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+          {selectedAnnotation ? (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="arrowLeft"
+                data-test-subj="backToGroupSettings"
+                onClick={() => setSelectedAnnotation(undefined)}
+              >
+                <FormattedMessage id="eventAnnotation.edit.back" defaultMessage="Back" />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          ) : (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty data-test-subj="cancelGroupEdit" onClick={onClose}>
+                  <FormattedMessage id="eventAnnotation.edit.cancel" defaultMessage="Cancel" />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="save"
+                  data-test-subj="saveAnnotationGroup"
+                  fill
+                  onClick={onSave}
+                >
+                  <FormattedMessage
+                    id="eventAnnotation.edit.save"
+                    defaultMessage="Save annotation group"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>

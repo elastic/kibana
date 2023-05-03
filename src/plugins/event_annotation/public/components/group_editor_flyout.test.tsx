@@ -7,7 +7,7 @@
  */
 
 import { EuiButton, EuiFlyout } from '@elastic/eui';
-import { EventAnnotationGroupConfig } from '../../common';
+import { EventAnnotationGroupConfig, getDefaultManualAnnotation } from '../../common';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/api.mock';
 import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
@@ -22,9 +22,17 @@ const simulateButtonClick = (component: ShallowWrapper, selector: string) => {
   );
 };
 
+const SELECTORS = {
+  SAVE_BUTTON: '[data-test-subj="saveAnnotationGroup"]',
+  CANCEL_BUTTON: '[data-test-subj="cancelGroupEdit"]',
+  BACK_BUTTON: '[data-test-subj="backToGroupSettings"]',
+};
+
 describe('group editor flyout', () => {
+  const annotation = getDefaultManualAnnotation('my-id', 'some-timestamp');
+
   const group: EventAnnotationGroupConfig = {
-    annotations: [],
+    annotations: [annotation],
     description: '',
     tags: [],
     indexPatternId: 'some-id',
@@ -67,12 +75,12 @@ describe('group editor flyout', () => {
   });
   it('signals close', () => {
     component.find(EuiFlyout).prop('onClose')({} as MouseEvent);
-    simulateButtonClick(component, '[data-test-subj="cancelGroupEdit"]');
+    simulateButtonClick(component, SELECTORS.CANCEL_BUTTON);
 
     expect(onClose).toHaveBeenCalledTimes(2);
   });
   it('signals save', () => {
-    simulateButtonClick(component, '[data-test-subj="saveAnnotationGroup"]');
+    simulateButtonClick(component, SELECTORS.SAVE_BUTTON);
 
     expect(onSave).toHaveBeenCalledTimes(1);
   });
@@ -81,5 +89,24 @@ describe('group editor flyout', () => {
     component.find(GroupEditorControls).prop('update')(newGroup);
 
     expect(updateGroup).toHaveBeenCalledWith(newGroup);
+  });
+  test('specific annotation editing', () => {
+    const assertGroupEditingState = () => {
+      expect(component.exists(SELECTORS.SAVE_BUTTON)).toBeTruthy();
+      expect(component.exists(SELECTORS.CANCEL_BUTTON)).toBeTruthy();
+      expect(component.exists(SELECTORS.BACK_BUTTON)).toBeFalsy();
+    };
+
+    assertGroupEditingState();
+
+    component.find(GroupEditorControls).prop('setSelectedAnnotation')(annotation);
+
+    expect(component.exists(SELECTORS.BACK_BUTTON)).toBeTruthy();
+    expect(component.exists(SELECTORS.SAVE_BUTTON)).toBeFalsy();
+    expect(component.exists(SELECTORS.CANCEL_BUTTON)).toBeFalsy();
+
+    component.find(SELECTORS.BACK_BUTTON).simulate('click');
+
+    assertGroupEditingState();
   });
 });

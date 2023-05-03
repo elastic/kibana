@@ -2,6 +2,7 @@
 
 exports[`group editor flyout renders controls 1`] = `
 Object {
+  "TagSelector": [MockFunction],
   "createDataView": [MockFunction],
   "dataViews": Array [
     Object {
@@ -10,43 +11,25 @@ Object {
     },
   ],
   "group": Object {
-    "annotations": Array [],
+    "annotations": Array [
+      Object {
+        "icon": "triangle",
+        "id": "my-id",
+        "key": Object {
+          "timestamp": "some-timestamp",
+          "type": "point_in_time",
+        },
+        "label": "Event",
+        "type": "manual",
+      },
+    ],
     "description": "",
     "ignoreGlobalFilters": false,
     "indexPatternId": "some-id",
     "tags": Array [],
     "title": "My group",
   },
-  "savedObjectsTagging": Object {
-    "cache": Object {
-      "getState": [MockFunction],
-      "getState$": [MockFunction],
-    },
-    "client": Object {
-      "create": [MockFunction],
-      "delete": [MockFunction],
-      "get": [MockFunction],
-      "getAll": [MockFunction],
-      "update": [MockFunction],
-    },
-    "ui": Object {
-      "components": Object {
-        "SavedObjectSaveModalTagSelector": [MockFunction],
-        "TagList": [MockFunction],
-        "TagSelector": [MockFunction],
-      },
-      "convertNameToReference": [MockFunction],
-      "getSearchBarFilter": [MockFunction],
-      "getTableColumnDefinition": [MockFunction],
-      "getTag": [MockFunction],
-      "getTagIdFromName": [MockFunction],
-      "getTagIdsFromReferences": [MockFunction],
-      "getTagList": [MockFunction],
-      "hasTagDecoration": [MockFunction],
-      "parseSearchQuery": [MockFunction],
-      "updateTagsReferences": [MockFunction],
-    },
-  },
+  "queryInputServices": Object {},
   "selectedAnnotation": undefined,
   "setSelectedAnnotation": [Function],
   "update": [MockFunction],
