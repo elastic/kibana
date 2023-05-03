@@ -73,6 +73,7 @@ const incrementUsageCounters = (
         viewId,
         timestamp: getTimestamp(dayId),
       },
+      refresh: false,
     }
   );
 };

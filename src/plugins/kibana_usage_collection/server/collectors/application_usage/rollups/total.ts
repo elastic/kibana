@@ -89,10 +89,10 @@ export async function rollTotals(logger: Logger, savedObjectsClient?: ISavedObje
             id,
             attributes: entry,
           })),
-          { overwrite: true }
+          { overwrite: true, refresh: false }
         ),
       ...rawApplicationUsageDaily.map(
-        ({ id }) => savedObjectsClient.delete(SAVED_OBJECTS_DAILY_TYPE, id) // There is no bulkDelete :(
+        ({ id }) => savedObjectsClient.delete(SAVED_OBJECTS_DAILY_TYPE, id, { refresh: false }) // There is no bulkDelete :(
       ),
     ]);
   } catch (err) {
