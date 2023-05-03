@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-zod'],
-};
+export * from 'zod';
+
+// Override zod namespace types with our own below, this file must be imported like `import * as z from './zod'`
+export { array, literal, never, number, object, string, union } from './types';

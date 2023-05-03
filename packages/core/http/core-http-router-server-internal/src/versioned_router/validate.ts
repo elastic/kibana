@@ -12,34 +12,17 @@ import {
   type RouteValidationFunction,
   RouteValidationError,
 } from '@kbn/core-http-server';
-import { ZodTypes } from '@kbn/zod';
+import { z, extractErrorMessage } from '@kbn/zod';
 import type { ApiVersion } from '@kbn/core-http-server';
 import { instanceofZodType } from '@kbn/zod';
 import { RouteValidator } from '../validator';
 
-function prefixPath(path: Array<string | number>, message: string): string {
-  return path.length ? `[${path.join('.')}]: ${message}` : message;
-}
-
-function makeValidationFunction(schema: ZodTypes.ZodTypeAny): RouteValidationFunction<unknown> {
+function makeValidationFunction(schema: z.ZodTypeAny): RouteValidationFunction<unknown> {
   return (data: unknown) => {
     const result = schema.safeParse(data);
     if (!result.success) {
-      const error = result.error;
-      let message: string = '';
-      if (error.issues.length > 1) {
-        error.issues.forEach((issue) => {
-          message = `${message ? message + '\n' : message} - ${prefixPath(
-            issue.path,
-            issue.message
-          )}`;
-        });
-      } else {
-        const [issue] = error.issues;
-        message = prefixPath(issue.path, issue.message);
-      }
       return {
-        error: new RouteValidationError(message),
+        error: new RouteValidationError(extractErrorMessage(result.error)),
         value: undefined,
       };
     }

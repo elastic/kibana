@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ZodTypes } from '@kbn/zod';
+import type { z } from '@kbn/zod';
+import type { Type } from '@kbn/config-schema';
 import type { ApiVersion } from '@kbn/core-http-common';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
@@ -154,7 +155,12 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
   delete: VersionedRouteRegistrar<'delete', Ctx>;
 }
 
-export type VersionedSpecValidation = RouteValidationFunction<unknown> | ZodTypes.ZodTypeAny;
+/**
+ * We accept three different types of validation for maximum flexibility and to enable
+ * teams to decide when or if they would like to opt into OAS spec generation for their
+ * public routes via zod.
+ */
+export type VersionedSpecValidation = z.ZodTypeAny | RouteValidationFunction<unknown> | Type<any>;
 
 /** @experimental */
 export type VersionedRouteRequestValidation<P, Q, B> = Omit<
