@@ -440,16 +440,17 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       requestId: this.getId(),
       requestName: i18n.translate('xpack.maps.esSearchSource.requestName', {
         defaultMessage: '{layerName} documents request',
-        values: { layerName }
+        values: { layerName },
       }),
       searchSource,
       registerCancelCallback,
       requestDescription: i18n.translate('xpack.maps.esSearchSource.requestDescription', {
-        defaultMessage: 'Get documents from data view: {dataViewName}, geospatial field: {geoFieldName}',
+        defaultMessage:
+          'Get documents from data view: {dataViewName}, geospatial field: {geoFieldName}',
         values: {
           dataViewName: indexPattern.getName(),
           geoFieldName: this._descriptor.geoField,
-        }
+        },
       }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
@@ -804,7 +805,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
   supportsJoins(): boolean {
     // can only join with features, not aggregated clusters
-    return this._descriptor.scalingType !== SCALING_TYPES.CLUSTERS
+    return this._descriptor.scalingType !== SCALING_TYPES.CLUSTERS;
   }
 
   async _getEditableIndex(): Promise<string> {

@@ -29,4 +29,3 @@ export function processDistanceResponse(response: any, countPropertyName: string
   }
   return propertiesMap;
 }
-

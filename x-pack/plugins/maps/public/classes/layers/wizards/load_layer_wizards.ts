@@ -51,13 +51,13 @@ export function registerLayerWizards() {
 
   registerLayerWizardInternal(esTopHitsLayerWizardConfig);
   registerLayerWizardInternal(geoLineLayerWizardConfig);
-  
+
   registerLayerWizardInternal(emsBoundariesLayerWizardConfig);
   registerLayerWizardInternal(emsBaseMapLayerWizardConfig);
 
   registerLayerWizardInternal(newVectorLayerWizardConfig);
   registerLayerWizardInternal(kibanaBasemapLayerWizardConfig);
-  
+
   registerLayerWizardInternal(tmsLayerWizardConfig);
   registerLayerWizardInternal(wmsLayerWizardConfig);
 

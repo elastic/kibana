@@ -59,14 +59,14 @@ export function TermJoinPopoverContent(props: Props) {
       ...rest,
       indexPatternId,
     });
-  };
+  }
 
   function onLeftFieldChange(selectedFields: Array<EuiComboBoxOptionOption<JoinField>>) {
-    const leftField = selectedFields?.[0]?.value?.name
+    const leftField = selectedFields?.[0]?.value?.name;
     if (leftField) {
       props.onLeftFieldChange(leftField);
     }
-  };
+  }
 
   function onRightFieldChange(term?: string) {
     if (!term || term.length === 0) {
@@ -77,7 +77,7 @@ export function TermJoinPopoverContent(props: Props) {
       ...props.sourceDescriptor,
       term,
     });
-  };
+  }
 
   function renderLeftFieldSelect() {
     const { leftValue, leftFields } = props;
@@ -178,7 +178,9 @@ export function TermJoinPopoverContent(props: Props) {
     return (
       <ValidatedNumberInput
         initialValue={
-          props.sourceDescriptor.size !== undefined ? props.sourceDescriptor.size : DEFAULT_MAX_BUCKETS_LIMIT
+          props.sourceDescriptor.size !== undefined
+            ? props.sourceDescriptor.size
+            : DEFAULT_MAX_BUCKETS_LIMIT
         }
         min={1}
         max={DEFAULT_MAX_BUCKETS_LIMIT}
@@ -219,9 +221,7 @@ export function TermJoinPopoverContent(props: Props) {
         })}
       >
         <EuiComboBox
-          selectedOptions={
-            leftSourceName ? [{ value: leftSourceName, label: leftSourceName }] : []
-          }
+          selectedOptions={leftSourceName ? [{ value: leftSourceName, label: leftSourceName }] : []}
           isDisabled
         />
       </EuiFormRow>

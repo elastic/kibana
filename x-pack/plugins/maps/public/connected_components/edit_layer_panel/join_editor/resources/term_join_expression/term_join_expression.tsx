@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { useState } from 'react';
-import {
-  EuiPopover,
-  EuiExpression,
-} from '@elastic/eui';
+import { EuiPopover, EuiExpression } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -39,24 +35,24 @@ export function TermJoinExpression(props: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { size, term } = props.sourceDescriptor;
-  const expressionValue = term !== undefined
-    ? i18n.translate('xpack.maps.termJoinExpression.value', {
-        defaultMessage:
-          '{topTerms} terms from {term}',
-        values: {
-          topTerms:
-            size !== undefined
-              ? i18n.translate('xpack.maps.termJoinExpression.topTerms', {
-                  defaultMessage: 'top {size}',
-                  values: { size },
-                })
-              : '',
-          term,
-        },
-      })
-    : i18n.translate('xpack.maps.termJoinExpression.placeholder', {
-        defaultMessage: '-- configure term join --',
-      });
+  const expressionValue =
+    term !== undefined
+      ? i18n.translate('xpack.maps.termJoinExpression.value', {
+          defaultMessage: '{topTerms} terms from {term}',
+          values: {
+            topTerms:
+              size !== undefined
+                ? i18n.translate('xpack.maps.termJoinExpression.topTerms', {
+                    defaultMessage: 'top {size}',
+                    values: { size },
+                  })
+                : '',
+            term,
+          },
+        })
+      : i18n.translate('xpack.maps.termJoinExpression.placeholder', {
+          defaultMessage: '-- configure term join --',
+        });
 
   return (
     <EuiPopover
@@ -82,7 +78,7 @@ export function TermJoinExpression(props: Props) {
       }
       repositionOnScroll={true}
     >
-      <TermJoinPopoverContent 
+      <TermJoinPopoverContent
         leftSourceName={props.leftSourceName}
         leftValue={props.leftValue}
         leftFields={props.leftFields}

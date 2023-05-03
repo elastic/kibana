@@ -29,11 +29,7 @@ export function AddJoinButton(props: Props) {
   );
 
   return props.isDisabled ? (
-    <EuiToolTip
-      content={props.disabledReason}
-    >
-      {button}
-    </EuiToolTip>
+    <EuiToolTip content={props.disabledReason}>{button}</EuiToolTip>
   ) : (
     button
   );

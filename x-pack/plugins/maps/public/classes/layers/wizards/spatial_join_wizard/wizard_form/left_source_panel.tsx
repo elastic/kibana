@@ -7,12 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFormRow,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { GeoIndexPatternSelect } from '../../../../../components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../../../../../components/single_field_select';
@@ -26,23 +21,23 @@ interface Props {
 }
 
 export function LeftSourcePanel(props: Props) {
-  const geoFieldSelect = props.geoFields.length 
-    ? <EuiFormRow
-        label={i18n.translate('xpack.maps.spatialJoin.wizard.geofieldLabel', {
-          defaultMessage: 'Geospatial field',
+  const geoFieldSelect = props.geoFields.length ? (
+    <EuiFormRow
+      label={i18n.translate('xpack.maps.spatialJoin.wizard.geofieldLabel', {
+        defaultMessage: 'Geospatial field',
+      })}
+    >
+      <SingleFieldSelect
+        placeholder={i18n.translate('xpack.maps.choropleth.geofieldPlaceholder', {
+          defaultMessage: 'Select geo field',
         })}
-      >
-        <SingleFieldSelect
-          placeholder={i18n.translate('xpack.maps.choropleth.geofieldPlaceholder', {
-            defaultMessage: 'Select geo field',
-          })}
-          value={props.geoField ? props.geoField : null}
-          onChange={props.onGeoFieldSelect}
-          fields={props.geoFields}
-          isClearable={false}
-        />
-      </EuiFormRow>
-    : null;
+        value={props.geoField ? props.geoField : null}
+        onChange={props.onGeoFieldSelect}
+        fields={props.geoFields}
+        isClearable={false}
+      />
+    </EuiFormRow>
+  ) : null;
 
   return (
     <EuiPanel>
@@ -64,5 +59,5 @@ export function LeftSourcePanel(props: Props) {
 
       {geoFieldSelect}
     </EuiPanel>
-  )
+  );
 }

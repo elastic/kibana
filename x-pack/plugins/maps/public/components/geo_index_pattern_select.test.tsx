@@ -34,7 +34,7 @@ import { GeoIndexPatternSelect } from './geo_index_pattern_select';
 const defaultProps = {
   dataView: { id: 'weblogs' } as unknown as DataView,
   onChange: () => {},
-}
+};
 
 test('should render', async () => {
   const component = shallow(<GeoIndexPatternSelect {...defaultProps} />);

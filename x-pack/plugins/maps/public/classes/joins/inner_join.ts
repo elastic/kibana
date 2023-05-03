@@ -40,15 +40,11 @@ export function createJoinSource(
     return;
   }
 
-  if (descriptor.type === SOURCE_TYPES.ES_DISTANCE_SOURCE &&
-    isSpatialSourceComplete(descriptor)) {
-    return new ESDistanceSource(descriptor as ESDistanceSourceDescriptor)
+  if (descriptor.type === SOURCE_TYPES.ES_DISTANCE_SOURCE && isSpatialSourceComplete(descriptor)) {
+    return new ESDistanceSource(descriptor as ESDistanceSourceDescriptor);
   }
 
-  if (
-    descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE &&
-    isTermSourceComplete(descriptor)
-  ) {
+  if (descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE && isTermSourceComplete(descriptor)) {
     return new ESTermSource(descriptor as ESTermSourceDescriptor);
   }
 

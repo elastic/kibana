@@ -240,7 +240,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
   supportsJoins(): boolean {
     return false;
   }
-  
+
   getFeatureActions(args: GetFeatureActionsArgs): TooltipFeatureAction[] {
     // Its not possible to filter by geometry for vector tile sources since there is no way to get original geometry
     return [];

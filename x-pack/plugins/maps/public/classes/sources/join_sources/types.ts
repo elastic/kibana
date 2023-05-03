@@ -24,7 +24,7 @@ export interface IJoinSource extends ISource {
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void,
     inspectorAdapters: Adapters,
-    featureCollection?: FeatureCollection,
+    featureCollection?: FeatureCollection
   ): Promise<PropertiesMap>;
 
   /*

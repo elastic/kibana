@@ -9,30 +9,30 @@ import { processDistanceResponse } from './process_distance_response';
 
 test('should convert elasticsearch response into table', () => {
   const response = {
-   aggregations: {
-    distance: {
-     buckets: {
-      '06-Fv4cB_nxKbZ5eWyyP': {
-        doc_count: 1,
-        __kbnjoin__avg_of_bytes__673ff994: {
-          value: 5794
-        }
+    aggregations: {
+      distance: {
+        buckets: {
+          '06-Fv4cB_nxKbZ5eWyyP': {
+            doc_count: 1,
+            __kbnjoin__avg_of_bytes__673ff994: {
+              value: 5794,
+            },
+          },
+          '0a-Fv4cB_nxKbZ5eWyyP': {
+            doc_count: 0,
+            __kbnjoin__avg_of_bytes__673ff994: {
+              value: 0,
+            },
+          },
+          '1q-Fv4cB_nxKbZ5eWyyP': {
+            doc_count: 2,
+            __kbnjoin__avg_of_bytes__673ff994: {
+              value: 5771,
+            },
+          },
+        },
       },
-      '0a-Fv4cB_nxKbZ5eWyyP': {
-        doc_count: 0,
-        __kbnjoin__avg_of_bytes__673ff994: {
-          value: 0
-        }
-      },
-      '1q-Fv4cB_nxKbZ5eWyyP': {
-        doc_count: 2,
-        __kbnjoin__avg_of_bytes__673ff994: {
-          value: 5771
-        }
-      },
-     }
-    }
-   }
+    },
   };
   const table = processDistanceResponse(response, '__kbnjoin__count__673ff994');
 

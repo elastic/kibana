@@ -13,5 +13,5 @@ export const inputStrings = {
   }),
   relationshipLabel: i18n.translate('xpack.maps.input.relationshipLabel', {
     defaultMessage: 'Relationship',
-  })
+  }),
 };

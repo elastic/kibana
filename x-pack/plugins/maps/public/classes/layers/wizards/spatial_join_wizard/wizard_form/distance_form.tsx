@@ -18,9 +18,12 @@ import {
 } from '@elastic/eui';
 import { panelStrings } from '../../../../../connected_components/panel_strings';
 
-export const KM_ABBREVIATION = i18n.translate('xpack.maps.spatialJoin.wizardForm.kilometersAbbreviation', {
-  defaultMessage: 'km',
-})
+export const KM_ABBREVIATION = i18n.translate(
+  'xpack.maps.spatialJoin.wizardForm.kilometersAbbreviation',
+  {
+    defaultMessage: 'km',
+  }
+);
 
 interface Props {
   initialDistance: number;
@@ -35,7 +38,7 @@ export function DistanceForm(props: Props) {
   function getDistanceAsNumber(): number {
     return typeof distance === 'string' ? parseFloat(distance as string) : distance;
   }
-  
+
   useEffect(() => {
     const distanceAsNumber = getDistanceAsNumber();
     if (isNaN(distanceAsNumber)) {
@@ -62,9 +65,15 @@ export function DistanceForm(props: Props) {
           defaultMessage: 'Distance',
         })}
         isInvalid={isDistanceInvalid}
-        error={isDistanceInvalid ? [i18n.translate('xpack.maps.spatialJoin.wizardForm.invalidDistanceMessage', {
-          defaultMessage: 'Value must be a number greater than 0',
-        })] : []}
+        error={
+          isDistanceInvalid
+            ? [
+                i18n.translate('xpack.maps.spatialJoin.wizardForm.invalidDistanceMessage', {
+                  defaultMessage: 'Value must be a number greater than 0',
+                }),
+              ]
+            : []
+        }
       >
         <EuiFieldNumber
           append={KM_ABBREVIATION}
@@ -89,7 +98,9 @@ export function DistanceForm(props: Props) {
           <EuiFlexItem>
             <EuiButton
               fill
-              isDisabled={isDistanceInvalid || props.initialDistance.toString() === distance.toString()}
+              isDisabled={
+                isDistanceInvalid || props.initialDistance.toString() === distance.toString()
+              }
               onClick={() => {
                 props.onDistanceChange(getDistanceAsNumber());
                 props.onClose();

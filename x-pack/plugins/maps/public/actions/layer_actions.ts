@@ -454,7 +454,7 @@ function updateSourcePropWithoutSync(
         });
         await dispatch(updateStyleProperties(layerId));
       } else if (value === SCALING_TYPES.MVT) {
-        const filteredJoins = joins.filter(joinDescriptor => {
+        const filteredJoins = joins.filter((joinDescriptor) => {
           return !isSpatialJoin(joinDescriptor);
         });
         // Maplibre feature-state join uses promoteId and there is a limit to one promoteId
@@ -766,7 +766,7 @@ export function updateLayerStyleForSelectedLayer(styleDescriptor: StyleDescripto
   };
 }
 
-export function setJoinsForLayer(layer: ILayer, joins: Partial<JoinDescriptor>[]) {
+export function setJoinsForLayer(layer: ILayer, joins: Array<Partial<JoinDescriptor>>) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     const previousFields = await (layer as IVectorLayer).getFields();
     dispatch({

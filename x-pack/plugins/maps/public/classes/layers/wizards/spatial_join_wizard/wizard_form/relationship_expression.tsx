@@ -7,10 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiExpression,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiExpression, EuiPopover } from '@elastic/eui';
 import { KM_ABBREVIATION, DistanceForm } from './distance_form';
 
 interface Props {
@@ -31,15 +28,18 @@ export function RelationshipExpression(props: Props) {
       button={
         <EuiExpression
           color="subdued"
-          description={i18n.translate('xpack.maps.spatialJoin.wizardForm.withinExpressionDescription', {
-            defaultMessage: 'within',
-          })}
+          description={i18n.translate(
+            'xpack.maps.spatialJoin.wizardForm.withinExpressionDescription',
+            {
+              defaultMessage: 'within',
+            }
+          )}
           value={i18n.translate('xpack.maps.spatialJoin.wizardForm.withinExpressionValue', {
             defaultMessage: '{distance} {units} of vector features',
             values: {
               distance: props.distance,
-              units: KM_ABBREVIATION
-            }
+              units: KM_ABBREVIATION,
+            },
           })}
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);
@@ -53,7 +53,7 @@ export function RelationshipExpression(props: Props) {
       anchorPosition="downCenter"
       repositionOnScroll={true}
     >
-      <DistanceForm 
+      <DistanceForm
         initialDistance={props.distance}
         onDistanceChange={props.onDistanceChange}
         onClose={closePopover}

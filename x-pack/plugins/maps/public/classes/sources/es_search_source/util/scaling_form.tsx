@@ -77,30 +77,33 @@ export class ScalingForm extends Component<Props, State> {
 
   _onScalingTypeSelect = (optionId: SCALING_TYPES): void => {
     if (this.props.numberOfJoins > 0 && optionId === SCALING_TYPES.CLUSTERS) {
-      this._openModal(
-        optionId,
-        [i18n.translate('xpack.maps.source.esSearch.clusterScalingJoinMsg', {
+      this._openModal(optionId, [
+        i18n.translate('xpack.maps.source.esSearch.clusterScalingJoinMsg', {
           defaultMessage: `Scaling with clusters does not support joins. Switching to clusters will remove all joins from your layer configuration.`,
-        })]
-      );
+        }),
+      ]);
       return;
     }
 
     if (optionId === SCALING_TYPES.MVT) {
       const messages: string[] = [];
       if (this.props.hasSpatialJoins) {
-        messages.push(i18n.translate('xpack.maps.source.esSearch.mvtNoSpatialJoinMsg', {
-          defaultMessage: `Vector tiles do not support spatial joins. Switching to vector tiles will remove all spatial joins from your layer configuration.`,
-        }));
+        messages.push(
+          i18n.translate('xpack.maps.source.esSearch.mvtNoSpatialJoinMsg', {
+            defaultMessage: `Vector tiles do not support spatial joins. Switching to vector tiles will remove all spatial joins from your layer configuration.`,
+          })
+        );
       }
 
       if (this.props.numberOfJoins > 1) {
-        messages.push(i18n.translate('xpack.maps.source.esSearch.mvtScalingJoinMsg', {
-          defaultMessage: `Vector tiles support one term join. Your layer has {numberOfJoins} joins. Switching to vector tiles will keep the first term join and remove all other joins from your layer configuration.`,
-          values: {
-            numberOfJoins: this.props.numberOfJoins,
-          },
-        }));
+        messages.push(
+          i18n.translate('xpack.maps.source.esSearch.mvtScalingJoinMsg', {
+            defaultMessage: `Vector tiles support one term join. Your layer has {numberOfJoins} joins. Switching to vector tiles will keep the first term join and remove all other joins from your layer configuration.`,
+            values: {
+              numberOfJoins: this.props.numberOfJoins,
+            },
+          })
+        );
       }
 
       if (messages.length) {
@@ -108,7 +111,7 @@ export class ScalingForm extends Component<Props, State> {
         return;
       }
     }
-    
+
     this._onScalingTypeChange(optionId);
   };
 
@@ -131,9 +134,9 @@ export class ScalingForm extends Component<Props, State> {
 
   _openModal = (optionId: SCALING_TYPES, messages: string[]) => {
     this.setState({
-      modalContent: messages.length 
+      modalContent: messages.length
         ? messages.map((message, index) => {
-            return (<p key={index}>{message}</p>);
+            return <p key={index}>{message}</p>;
           })
         : null,
       nextScalingType: optionId,
@@ -177,7 +180,11 @@ export class ScalingForm extends Component<Props, State> {
   }
 
   _renderModal() {
-    if (!this.state.showModal || !this.state.modalContent || this.state.nextScalingType === undefined) {
+    if (
+      !this.state.showModal ||
+      !this.state.modalContent ||
+      this.state.nextScalingType === undefined
+    ) {
       return null;
     }
 

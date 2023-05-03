@@ -10,11 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/es-query';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import {
-  AGG_TYPE,
-  FIELD_ORIGIN,
-  SOURCE_TYPES,
-} from '../../../../../common/constants';
+import { AGG_TYPE, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../../common/constants';
 import { getJoinAggKey } from '../../../../../common/get_agg_key';
 import { AbstractESAggSource } from '../../es_agg_source';
 import type { BucketProperties } from '../../../../../common/elasticsearch_util';
@@ -38,7 +34,9 @@ type ESDistanceSourceSyncMeta = Pick<ESDistanceSourceDescriptor, 'distance' | 'g
 export class ESDistanceSource extends AbstractESAggSource implements IJoinSource, IESAggSource {
   static type = SOURCE_TYPES.ES_DISTANCE_SOURCE;
 
-  static createDescriptor(descriptor: Partial<ESDistanceSourceDescriptor>): ESDistanceSourceDescriptor {
+  static createDescriptor(
+    descriptor: Partial<ESDistanceSourceDescriptor>
+  ): ESDistanceSourceDescriptor {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
     if (!isValidStringConfig(descriptor.geoField)) {
       throw new Error('Cannot create an ESDistanceSource without a geoField property');
@@ -46,7 +44,8 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
     return {
       ...normalizedDescriptor,
       geoField: descriptor.geoField!,
-      distance: typeof descriptor.distance === 'number' ? descriptor.distance : DEFAULT_WITHIN_DISTANCE,
+      distance:
+        typeof descriptor.distance === 'number' ? descriptor.distance : DEFAULT_WITHIN_DISTANCE,
       type: SOURCE_TYPES.ES_DISTANCE_SOURCE,
     };
   }
@@ -85,12 +84,14 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void,
     inspectorAdapters: Adapters,
-    featureCollection?: FeatureCollection,
+    featureCollection?: FeatureCollection
   ): Promise<PropertiesMap> {
     if (featureCollection === undefined) {
-      throw new Error(i18n.translate('xpack.maps.esDistanceSource.noFeatureCollectionMsg', {
-        defaultMessage: `Unable to perform distance join, features not provided. To enable distance join, select 'Limit results' in 'Scaling'`,
-      }));
+      throw new Error(
+        i18n.translate('xpack.maps.esDistanceSource.noFeatureCollectionMsg', {
+          defaultMessage: `Unable to perform distance join, features not provided. To enable distance join, select 'Limit results' in 'Scaling'`,
+        })
+      );
     }
 
     if (!this.hasCompleteConfig()) {
@@ -104,10 +105,10 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
       const feature = featureCollection.features[i];
       if (feature.geometry.type === 'Point' && feature?.properties?._id) {
         filters[feature.properties._id] = {
-          'geo_distance': {
+          geo_distance: {
             distance,
             [this._descriptor.geoField]: feature.geometry.coordinates,
-          }
+          },
         };
         if (!hasFilters) {
           hasFilters = true;
@@ -134,12 +135,13 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
       requestId: this.getId(),
       requestName: i18n.translate('xpack.maps.distanceSource.requestName', {
         defaultMessage: '{leftSourceName} within distance join request',
-        values: { leftSourceName }
+        values: { leftSourceName },
       }),
       searchSource,
       registerCancelCallback,
       requestDescription: i18n.translate('xpack.maps.distanceSource.requestDescription', {
-        defaultMessage: 'Get metrics from data view: {dataViewName}, geospatial field: {geoFieldName}',
+        defaultMessage:
+          'Get metrics from data view: {dataViewName}, geospatial field: {geoFieldName}',
         values: {
           dataViewName: indexPattern.getName(),
           geoFieldName: this._descriptor.geoField,
@@ -152,7 +154,7 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
       ),
       requestsAdapter: inspectorAdapters.requests,
     });
-    
+
     return processDistanceResponse(rawEsData, this.getAggKey(AGG_TYPE.COUNT));
   }
 

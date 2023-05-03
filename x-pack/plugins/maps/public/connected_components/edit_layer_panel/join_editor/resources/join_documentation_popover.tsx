@@ -12,7 +12,7 @@ import { getDocLinks } from '../../../../kibana_services';
 
 export function JoinDocumentationPopover() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  
+
   return (
     <EuiPopover
       id="joinHelpPopover"
@@ -34,10 +34,7 @@ export function JoinDocumentationPopover() {
       ownFocus
     >
       <EuiPopoverTitle>
-        <FormattedMessage
-          id="xpack.maps.layerPanel.joinEditor.title"
-          defaultMessage="Joins"
-        />
+        <FormattedMessage id="xpack.maps.layerPanel.joinEditor.title" defaultMessage="Joins" />
       </EuiPopoverTitle>
       <div>
         <EuiText size="s" style={{ maxWidth: '36em' }}>
@@ -45,19 +42,17 @@ export function JoinDocumentationPopover() {
             <FormattedMessage
               id="xpack.maps.joinDocs.intro"
               defaultMessage="Joins add metrics that are used for data driven styling and tooltip content."
-            />
-            {' '}
-            <i><FormattedMessage
-              id="xpack.maps.joinDocs.noMatches"
-              defaultMessage="Features that do have a matches are not visible on the map."
-            /></i>
+            />{' '}
+            <i>
+              <FormattedMessage
+                id="xpack.maps.joinDocs.noMatches"
+                defaultMessage="Features that do have a matches are not visible on the map."
+              />
+            </i>
           </p>
           <dl>
             <dt>
-              <FormattedMessage
-                id="xpack.maps.joinDocs.termJoinTitle"
-                defaultMessage="Term join"
-              />
+              <FormattedMessage id="xpack.maps.joinDocs.termJoinTitle" defaultMessage="Term join" />
             </dt>
             <dd>
               <p>
@@ -66,7 +61,11 @@ export function JoinDocumentationPopover() {
                   defaultMessage="A term join uses a shared key to combine vector features with metrics from an Elasticsearch terms aggregation."
                 />
               </p>
-              <EuiLink href={getDocLinks().links.maps.termJoinsExample} target="_blank" external={true}>
+              <EuiLink
+                href={getDocLinks().links.maps.termJoinsExample}
+                target="_blank"
+                external={true}
+              >
                 <FormattedMessage
                   id="xpack.maps.joinDocs.linkLabel"
                   defaultMessage="Term join example"
@@ -89,7 +88,6 @@ export function JoinDocumentationPopover() {
               </p>
             </dd>
           </dl>
-          
         </EuiText>
       </div>
     </EuiPopover>

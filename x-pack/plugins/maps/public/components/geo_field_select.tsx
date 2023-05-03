@@ -13,7 +13,7 @@ import { type Props as SingleFieldSelectProps, SingleFieldSelect } from './singl
 
 type Props = SingleFieldSelectProps & {
   geoFields: DataViewField[];
-}
+};
 
 export function GeoFieldSelect(props: Props) {
   const { geoFields, ...rest } = props;

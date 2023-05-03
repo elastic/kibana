@@ -96,9 +96,9 @@ const mockLayer = {
     return {
       supportsJoins: () => {
         return true;
-      }
+      },
     };
-  }
+  },
 } as unknown as ILayer;
 
 const defaultProps = {

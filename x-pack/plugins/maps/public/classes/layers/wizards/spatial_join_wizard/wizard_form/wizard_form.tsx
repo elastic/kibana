@@ -49,22 +49,22 @@ export function WizardForm({ previewLayers }: RenderWizardArguments) {
     previewLayers([layerDescriptor]);
   }, [distance, leftDataView, leftGeoField, rightDataView, rightGeoField]);
 
-  const rightSourcePanel = isLeftConfigComplete()
-    ? <RightSourcePanel
-        dataView={rightDataView}
-        distance={distance}
-        geoField={rightGeoField}
-        geoFields={rightGeoFields}
-        onDataViewSelect={(dataView: DataView) => {
-          setRightDataView(dataView);
-          const geoFields = getGeoFields(dataView.fields);
-          setRightGeoFields(geoFields);
-          setRightGeoField(geoFields.length ? geoFields[0].name : undefined);
-        }}
-        onDistanceChange={setDistance}
-        onGeoFieldSelect={setRightGeoField}
-      />
-    : null;
+  const rightSourcePanel = isLeftConfigComplete() ? (
+    <RightSourcePanel
+      dataView={rightDataView}
+      distance={distance}
+      geoField={rightGeoField}
+      geoFields={rightGeoFields}
+      onDataViewSelect={(dataView: DataView) => {
+        setRightDataView(dataView);
+        const geoFields = getGeoFields(dataView.fields);
+        setRightGeoFields(geoFields);
+        setRightGeoField(geoFields.length ? geoFields[0].name : undefined);
+      }}
+      onDistanceChange={setDistance}
+      onGeoFieldSelect={setRightGeoField}
+    />
+  ) : null;
 
   return (
     <>

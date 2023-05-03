@@ -34,7 +34,7 @@ import {
   createEmsChoroplethLayerDescriptor,
   createEsChoroplethLayerDescriptor,
 } from './create_choropleth_layer_descriptor';
-import { inputStrings  } from '../../../../connected_components/input_strings';
+import { inputStrings } from '../../../../connected_components/input_strings';
 
 export enum BOUNDARIES_SOURCE {
   ELASTICSEARCH = 'ELASTICSEARCH',

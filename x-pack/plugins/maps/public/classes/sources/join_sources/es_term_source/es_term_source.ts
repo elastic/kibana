@@ -152,7 +152,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
       requestId: this.getId(),
       requestName: i18n.translate('xpack.maps.termSource.requestName', {
         defaultMessage: '{leftSourceName} term join request',
-        values: { leftSourceName }
+        values: { leftSourceName },
       }),
       searchSource,
       registerCancelCallback,

@@ -192,4 +192,7 @@ export type TableSourceDescriptor = {
   term: string;
 };
 
-export type JoinSourceDescriptor = ESDistanceSourceDescriptor | ESTermSourceDescriptor | TableSourceDescriptor;
+export type JoinSourceDescriptor =
+  | ESDistanceSourceDescriptor
+  | ESTermSourceDescriptor
+  | TableSourceDescriptor;

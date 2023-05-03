@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { useState } from 'react';
-import {
-  EuiPopover,
-  EuiExpression,
-} from '@elastic/eui';
+import { EuiPopover, EuiExpression } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ESDistanceSourceDescriptor,
@@ -27,15 +23,15 @@ export function SpatialJoinExpression(props: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { geoField } = props.sourceDescriptor;
-  const expressionValue = geoField !== undefined
-    ? i18n.translate('xpack.maps.spatialJoinExpression.value', {
-        defaultMessage:
-          'features from {geoField}',
-        values: { geoField },
-      })
-    : i18n.translate('xpack.maps.spatialJoinExpression.emptyValue', {
-        defaultMessage: '-- configure spatial join --',
-      });
+  const expressionValue =
+    geoField !== undefined
+      ? i18n.translate('xpack.maps.spatialJoinExpression.value', {
+          defaultMessage: 'features from {geoField}',
+          values: { geoField },
+        })
+      : i18n.translate('xpack.maps.spatialJoinExpression.emptyValue', {
+          defaultMessage: '-- configure spatial join --',
+        });
 
   return (
     <EuiPopover

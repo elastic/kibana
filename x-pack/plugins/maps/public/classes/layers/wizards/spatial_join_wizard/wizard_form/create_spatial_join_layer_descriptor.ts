@@ -58,7 +58,7 @@ export function createDistanceJoinLayerDescriptor({
           origin: FIELD_ORIGIN.JOIN,
         },
       },
-    }
+    },
   };
 
   const joins = [

@@ -31,7 +31,10 @@ import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
 import { AGG_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
 import type { JoinField } from '../join_editor';
 import { isSpatialJoin } from '../../../../classes/joins/is_spatial_join';
-import { isSpatialSourceComplete, isTermSourceComplete } from '../../../../classes/sources/join_sources';
+import {
+  isSpatialSourceComplete,
+  isTermSourceComplete,
+} from '../../../../classes/sources/join_sources';
 
 interface Props {
   join: Partial<JoinDescriptor>;
@@ -100,7 +103,8 @@ export class Join extends Component<Props, State> {
   };
 
   _onRightSourceDescriptorChange = (sourceDescriptor: Partial<JoinSourceDescriptor>) => {
-    const indexPatternId = (sourceDescriptor as Partial<AbstractESJoinSourceDescriptor>).indexPatternId;
+    const indexPatternId = (sourceDescriptor as Partial<AbstractESJoinSourceDescriptor>)
+      .indexPatternId;
     if (this.state.indexPattern?.id !== indexPatternId) {
       this.setState({
         indexPattern: undefined,
@@ -118,7 +122,7 @@ export class Join extends Component<Props, State> {
         ...sourceDescriptor,
       },
     });
-  }
+  };
 
   _onMetricsChange = (metrics: AggDescriptor[]) => {
     this.props.onChange({
@@ -164,11 +168,13 @@ export class Join extends Component<Props, State> {
     const { join, onRemove, leftFields, leftSourceName } = this.props;
     const { rightFields, indexPattern } = this.state;
     const right = (join?.right ?? {}) as Partial<AbstractESJoinSourceDescriptor>;
-    
+
     let isJoinConfigComplete = false;
     let joinExpression;
     if (right.type === SOURCE_TYPES.ES_TERM_SOURCE) {
-      isJoinConfigComplete = join.leftField !== undefined && isTermSourceComplete(right as Partial<ESTermSourceDescriptor>);
+      isJoinConfigComplete =
+        join.leftField !== undefined &&
+        isTermSourceComplete(right as Partial<ESTermSourceDescriptor>);
       joinExpression = (
         <TermJoinExpression
           leftSourceName={leftSourceName}
@@ -179,15 +185,17 @@ export class Join extends Component<Props, State> {
           onSourceDescriptorChange={this._onRightSourceDescriptorChange}
           rightFields={rightFields}
         />
-      )
+      );
     } else if (isSpatialJoin(this.props.join)) {
-      isJoinConfigComplete = join.leftField !== undefined && isSpatialSourceComplete(right as Partial<ESDistanceSourceDescriptor>);
+      isJoinConfigComplete =
+        join.leftField !== undefined &&
+        isSpatialSourceComplete(right as Partial<ESDistanceSourceDescriptor>);
       joinExpression = (
         <SpatialJoinExpression
           sourceDescriptor={right as Partial<ESDistanceSourceDescriptor>}
           onSourceDescriptorChange={this._onRightSourceDescriptorChange}
         />
-      )
+      );
     } else {
       joinExpression = (
         <EuiText size="s">
@@ -206,7 +214,7 @@ export class Join extends Component<Props, State> {
     let metricsExpression;
     let globalFilterCheckbox;
     let globalTimeCheckbox;
-    
+
     if (isJoinConfigComplete) {
       metricsExpression = (
         <EuiFlexItem grow={false}>
@@ -259,9 +267,7 @@ export class Join extends Component<Props, State> {
     return (
       <div className="mapJoinItem">
         <EuiFlexGroup className="mapJoinItem__inner" responsive={false} wrap={true} gutterSize="s">
-          <EuiFlexItem grow={false}>
-            {joinExpression}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{joinExpression}</EuiFlexItem>
 
           {metricsExpression}
 

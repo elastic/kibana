@@ -65,8 +65,7 @@ export function GeoIndexPatternSelect(props: Props) {
     if (isMounted() && indexPattern.id === dataViewIdRef.current) {
       props.onChange(indexPattern);
     }
-  };
-
+  }
 
   function _renderNoIndexPatternWarning() {
     if (!noDataViews) {

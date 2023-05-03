@@ -180,7 +180,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         if (!joinDescriptor.right) {
           return;
         }
-        const joinSourceDescriptor = joinDescriptor.right as Partial<AbstractESJoinSourceDescriptor>;
+        const joinSourceDescriptor =
+          joinDescriptor.right as Partial<AbstractESJoinSourceDescriptor>;
         const originalJoinId = joinSourceDescriptor.id ?? '';
 
         // right.id is uuid used to track requests in inspector
@@ -189,8 +190,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
         // Update all data driven styling properties using join fields
         if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
-          const metrics = joinSourceDescriptor.metrics ??
-            [{ type: AGG_TYPE.COUNT }];
+          const metrics = joinSourceDescriptor.metrics ?? [{ type: AGG_TYPE.COUNT }];
           metrics.forEach((metricsDescriptor: AggDescriptor) => {
             const originalJoinKey = getJoinAggKey({
               aggType: metricsDescriptor.type,
@@ -545,7 +545,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     isForceRefresh,
     isFeatureEditorOpenForLayer,
     inspectorAdapters,
-  }: { join: InnerJoin, featureCollection?: FeatureCollection } & DataRequestContext): Promise<JoinState> {
+  }: {
+    join: InnerJoin;
+    featureCollection?: FeatureCollection;
+  } & DataRequestContext): Promise<JoinState> {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
@@ -587,7 +590,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         join.getLeftField().getName(),
         registerCancelCallback.bind(null, requestToken),
         inspectorAdapters,
-        featureCollection,
+        featureCollection
       );
       stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
@@ -603,7 +606,11 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     }
   }
 
-  async _syncJoins(syncContext: DataRequestContext, style: IVectorStyle, featureCollection?: FeatureCollection) {
+  async _syncJoins(
+    syncContext: DataRequestContext,
+    style: IVectorStyle,
+    featureCollection?: FeatureCollection
+  ) {
     const joinSyncs = this.getValidJoins().map(async (join) => {
       await this._syncJoinStyleMeta(syncContext, join, style);
       await this._syncJoinFormatters(syncContext, join, style);
