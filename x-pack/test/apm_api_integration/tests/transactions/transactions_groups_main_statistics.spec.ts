@@ -127,28 +127,36 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the correct data', async () => {
         const transactionsGroupsPrimaryStatistics = await callApi();
+        const transactionsGroupsPrimaryStatisticsWithDurationSummaryTrue = await callApi({
+          query: {
+            useDurationSummary: true,
+          },
+        });
 
-        expect(transactionsGroupsPrimaryStatistics.transactionGroups.length).to.be(3);
-        expect(transactionsGroupsPrimaryStatistics.maxTransactionGroupsExceeded).to.be(false);
-        expect(
-          transactionsGroupsPrimaryStatistics.transactionGroups.map(({ name }) => name)
-        ).to.eql(transactions.map(({ name }) => name));
+        [
+          transactionsGroupsPrimaryStatistics,
+          transactionsGroupsPrimaryStatisticsWithDurationSummaryTrue,
+        ].forEach((statistics) => {
+          expect(statistics.transactionGroups.length).to.be(3);
+          expect(statistics.maxTransactionGroupsExceeded).to.be(false);
+          expect(statistics.transactionGroups.map(({ name }) => name)).to.eql(
+            transactions.map(({ name }) => name)
+          );
 
-        const impacts = transactionsGroupsPrimaryStatistics.transactionGroups.map(
-          (group: any) => group.impact
-        );
+          const impacts = statistics.transactionGroups.map((group: any) => group.impact);
 
-        expect(Math.round(sum(impacts))).to.eql(100);
+          expect(Math.round(sum(impacts))).to.eql(100);
 
-        const firstItem = transactionsGroupsPrimaryStatistics.transactionGroups[0];
+          const firstItem = statistics.transactionGroups[0];
 
-        expect(firstItem).to.eql({
-          name: 'GET /api/product/list',
-          latency: 10000,
-          throughput: 100.00002777778549,
-          errorRate: 0.25,
-          impact: 0.9009009009009009,
-          transactionType: 'request',
+          expect(firstItem).to.eql({
+            name: 'GET /api/product/list',
+            latency: 10000,
+            throughput: 100.00002777778549,
+            errorRate: 0.25,
+            impact: 0.9009009009009009,
+            transactionType: 'request',
+          });
         });
       });
 
