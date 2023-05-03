@@ -46,7 +46,6 @@ import { mockApm } from '../apm/service.mock';
 import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { of } from 'rxjs';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
