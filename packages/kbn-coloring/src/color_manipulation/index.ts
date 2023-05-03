@@ -36,6 +36,8 @@ function isValidPonyfill(colorString: string) {
   }
 }
 
-export function getChromaInstance(color: string) {
-  return chroma(color);
-}
+export const getColorAlpha = (color?: string | null) =>
+  (color && isValidColor(color) && chroma(color)?.alpha()) || 1;
+
+export const makeColorWithAlpha = (color: string, newAlpha: number) =>
+  chroma(color).alpha(newAlpha);

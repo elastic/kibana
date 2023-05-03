@@ -16,7 +16,7 @@ import {
   EuiIcon,
   euiPaletteColorBlind,
 } from '@elastic/eui';
-import { isValidColor, getChromaInstance } from '@kbn/coloring';
+import { getColorAlpha, makeColorWithAlpha } from '@kbn/coloring';
 import { TooltipWrapper } from './tooltip_wrapper';
 
 const tooltipContent = {
@@ -31,9 +31,6 @@ const tooltipContent = {
       'You are unable to apply custom colors to individual series when the layer includes a "Break down by" field.',
   }),
 };
-
-const getColorAlpha = (color?: string | null) =>
-  (color && isValidColor(color) && getChromaInstance(color)?.alpha()) || 1;
 
 export const ColorPicker = ({
   label,
@@ -113,7 +110,7 @@ export const ColorPicker = ({
       swatches={
         currentColorAlpha === 1
           ? euiPaletteColorBlind()
-          : euiPaletteColorBlind().map((c) => getChromaInstance(c).alpha(currentColorAlpha).hex())
+          : euiPaletteColorBlind().map((c) => makeColorWithAlpha(c, currentColorAlpha).hex())
       }
     />
   );
