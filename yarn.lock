@@ -4634,6 +4634,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/navigation-embeddable-plugin@link:src/plugins/navigation_embeddable":
+  version "0.0.0"
+  uid ""
+
 "@kbn/navigation-plugin@link:src/plugins/navigation":
   version "0.0.0"
   uid ""
@@ -5025,7 +5029,7 @@
 "@kbn/server-route-repository@link:packages/kbn-server-route-repository":
   version "0.0.0"
   uid ""
-  
+
 "@kbn/serverless-observability@link:x-pack/plugins/serverless_observability":
   version "0.0.0"
   uid ""
@@ -5034,19 +5038,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-storybook-config@link:packages/serverless/storybook/config":
-  version "0.0.0"
-  uid ""
-
-"@kbn/serverless-types@link:packages/serverless/types":
-  version "0.0.0"
-  uid ""
-
 "@kbn/serverless-search@link:x-pack/plugins/serverless_search":
   version "0.0.0"
   uid ""
 
 "@kbn/serverless-security@link:x-pack/plugins/serverless_security":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-storybook-config@link:packages/serverless/storybook/config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-types@link:packages/serverless/types":
   version "0.0.0"
   uid ""
 
