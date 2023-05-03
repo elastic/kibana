@@ -87,7 +87,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
       status.flapping = true;
     }
 
-    if (event?.kibana?.alert?.maintenance_window_ids) {
+    if (event?.kibana?.alert?.maintenance_window_ids?.length) {
       status.maintenanceWindowIds = event.kibana.alert.maintenance_window_ids as string[];
     }
 
