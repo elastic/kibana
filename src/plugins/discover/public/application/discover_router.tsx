@@ -18,12 +18,12 @@ import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
-import type { RegisterExtensions } from '../extensions/types';
-import type { DiscoverProfileRegistry } from '../extensions/profile_registry';
+import type { CustomizationCallback } from '../customizations/types';
+import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
 
 interface DiscoverRoutesProps {
   prefix?: string;
-  registerExtensions: RegisterExtensions[];
+  customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
 }
 
@@ -70,14 +70,18 @@ interface CustomDiscoverRoutesProps {
 
 const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscoverRoutesProps) => {
   const { profile } = useParams<{ profile: string }>();
-  const registerExtensions = useMemo(
-    () => profileRegistry.get(profile)?.registerExtensions,
+  const customizationCallbacks = useMemo(
+    () => profileRegistry.get(profile)?.customizationCallbacks,
     [profile, profileRegistry]
   );
 
-  if (registerExtensions) {
+  if (customizationCallbacks) {
     return (
-      <DiscoverRoutes prefix={`/p/${profile}`} registerExtensions={registerExtensions} {...props} />
+      <DiscoverRoutes
+        prefix={`/p/${profile}`}
+        customizationCallbacks={customizationCallbacks}
+        {...props}
+      />
     );
   }
 
@@ -97,8 +101,8 @@ export const DiscoverRouter = ({
   profileRegistry,
   ...routeProps
 }: DiscoverRouterProps) => {
-  const registerDefaultExtensions = useMemo(
-    () => profileRegistry.get('default')?.registerExtensions ?? [],
+  const customizationCallbacks = useMemo(
+    () => profileRegistry.get('default')?.customizationCallbacks ?? [],
     [profileRegistry]
   );
 
@@ -111,7 +115,7 @@ export const DiscoverRouter = ({
               <CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />
             </Route>
             <Route path="/">
-              <DiscoverRoutes registerExtensions={registerDefaultExtensions} {...routeProps} />
+              <DiscoverRoutes customizationCallbacks={customizationCallbacks} {...routeProps} />
             </Route>
           </Switch>
         </Router>

@@ -71,9 +71,9 @@ import {
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
-import type { RegisterExtensions } from './extensions/types';
-import { createProfileRegistry } from './extensions/profile_registry';
-import { ProfileAwareLocator } from './extensions/profile_aware_locator';
+import type { CustomizationCallback } from './customizations/types';
+import { createProfileRegistry } from './customizations/profile_registry';
+import { ProfileAwareLocator } from './customizations/profile_aware_locator';
 
 const DocViewerLegacyTable = React.lazy(
   () => import('./services/doc_views/components/doc_viewer_table/legacy')
@@ -158,7 +158,7 @@ export interface DiscoverStart {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly registerExtensions: (profileName: string, register: RegisterExtensions) => void;
+  readonly customize: (profileName: string, callback: CustomizationCallback) => void;
 }
 
 /**
@@ -409,12 +409,12 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      registerExtensions: (profileName: string, register: RegisterExtensions) => {
+      customize: (profileName: string, callback: CustomizationCallback) => {
         const profile = this.profileRegistry.get(profileName) ?? {
           name: profileName,
-          registerExtensions: [],
+          customizationCallbacks: [],
         };
-        profile.registerExtensions.push(register);
+        profile.customizationCallbacks.push(callback);
         this.profileRegistry.set(profile);
       },
     };

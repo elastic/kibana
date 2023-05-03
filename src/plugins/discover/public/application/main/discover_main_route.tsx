@@ -29,10 +29,10 @@ import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
 import {
-  DiscoverExtensionProvider,
-  useDiscoverExtensionRegistry,
-} from '../../extensions/extension_provider';
-import type { RegisterExtensions } from '../../extensions/types';
+  DiscoverCustomizationProvider,
+  useDiscoverCustomizationService,
+} from '../../customizations/customization_provider';
+import type { CustomizationCallback } from '../../customizations/types';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -41,11 +41,11 @@ interface DiscoverLandingParams {
 }
 
 export interface MainRouteProps {
-  registerExtensions: RegisterExtensions[];
+  customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
 }
 
-export function DiscoverMainRoute({ registerExtensions, isDev }: MainRouteProps) {
+export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
   const {
@@ -63,7 +63,10 @@ export function DiscoverMainRoute({ registerExtensions, isDev }: MainRouteProps)
       services,
     })
   );
-  const extensionRegistry = useDiscoverExtensionRegistry({ registerExtensions, stateContainer });
+  const customizationService = useDiscoverCustomizationService({
+    customizationCallbacks,
+    stateContainer,
+  });
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(true);
   const [hasESData, setHasESData] = useState(false);
@@ -252,15 +255,15 @@ export function DiscoverMainRoute({ registerExtensions, isDev }: MainRouteProps)
     return <DiscoverError error={error} />;
   }
 
-  if (loading || !extensionRegistry) {
+  if (loading || !customizationService) {
     return <LoadingIndicator type={hasCustomBranding ? 'spinner' : 'elastic'} />;
   }
 
   return (
-    <DiscoverExtensionProvider value={extensionRegistry}>
+    <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
         <DiscoverMainAppMemoized stateContainer={stateContainer} />
       </DiscoverMainProvider>
-    </DiscoverExtensionProvider>
+    </DiscoverCustomizationProvider>
   );
 }

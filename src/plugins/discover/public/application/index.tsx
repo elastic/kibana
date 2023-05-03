@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { DiscoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
-import type { DiscoverProfileRegistry } from '../extensions/profile_registry';
+import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
 
 export interface RenderAppProps {
   element: HTMLElement;

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { RegisterExtensions } from './types';
+import type { CustomizationCallback } from './types';
 
 export interface DiscoverProfile {
   name: string;
-  registerExtensions: RegisterExtensions[];
+  customizationCallbacks: CustomizationCallback[];
 }
 
 export interface DiscoverProfileRegistry {
