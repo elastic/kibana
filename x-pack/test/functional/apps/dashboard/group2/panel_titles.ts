@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const LIBRARY_TITLE_FOR_CUSTOM_TESTS = 'Library Title for Custom Title Tests';
   const LIBRARY_TITLE_FOR_EMPTY_TESTS = 'Library Title for Empty Title Tests';
 
-  describe('panel titles', () => {
+  describe.only('panel titles', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -40,6 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME);
+
+      await PageObjects.common.sleep(6000);
     });
 
     describe('by value', () => {

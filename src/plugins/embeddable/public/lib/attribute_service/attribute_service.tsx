@@ -139,12 +139,11 @@ export class AttributeService<
     const { attributes } = await this.unwrapAttributes(input);
     const libraryTitle = attributes.title;
     const { savedObjectId, ...originalInputToPropagate } = input;
-
     return {
       ...originalInputToPropagate,
       // by value visualizations should not have default titles and/or descriptions
       ...{ attributes: omit(attributes, ['title', 'description']) },
-      title: libraryTitle,
+      title: input.title ?? libraryTitle,
     } as unknown as ValType;
   };
 
