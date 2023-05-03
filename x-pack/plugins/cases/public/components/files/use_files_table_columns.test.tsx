@@ -47,18 +47,18 @@ describe('useFilesTableColumns', () => {
           "data-test-subj": "cases-files-table-date-added",
           "dataType": "date",
           "field": "created",
-          "name": "Date Added",
+          "name": "Date added",
         },
         Object {
           "actions": Array [
             Object {
-              "description": "Download File",
+              "description": "Download file",
               "isPrimary": true,
               "name": "Download",
               "render": [Function],
             },
             Object {
-              "description": "Delete File",
+              "description": "Delete file",
               "isPrimary": true,
               "name": "Delete",
               "render": [Function],

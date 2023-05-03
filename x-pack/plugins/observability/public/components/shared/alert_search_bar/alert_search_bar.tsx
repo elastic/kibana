@@ -111,7 +111,7 @@ export function ObservabilityAlertSearchBar({
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
           query={kuery}
-          onQueryChange={onSearchBarParamsChange}
+          onQuerySubmit={onSearchBarParamsChange}
         />
       </EuiFlexItem>
 
