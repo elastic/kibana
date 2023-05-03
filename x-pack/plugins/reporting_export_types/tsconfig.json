@@ -30,7 +30,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/core-http-server",
     "@kbn/safer-lodash-set",
-    "@kbn/reporting-export-types",
   ],
   "exclude": [
     "target/**/*",
