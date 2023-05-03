@@ -8,8 +8,8 @@
 import { Client } from '@elastic/elasticsearch';
 import pRetry from 'p-retry';
 import { SuperTest, Test } from 'supertest';
-import { ApmRuleType } from '../../../../../plugins/apm/common/rules/apm_rule_types';
-import { ApmRuleParamsType } from '../../../../../plugins/apm/common/rules/schema';
+import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
 import {
   APM_ALERTS_INDEX,
   APM_RULE_CONNECTOR_INDEX,
@@ -21,7 +21,7 @@ import { getActiveAlert } from './get_active_alert';
 import { getConnectorActionMessage } from './get_connector_action_message';
 import { getRuleStatus } from './get_rule_status';
 
-type Action = {
+interface Action {
   group: string;
   id: string;
   params: {
@@ -31,7 +31,7 @@ type Action = {
     notify_when: string;
     summary: boolean;
   };
-};
+}
 
 export class AlertTestHelper {
   private readonly esClient: Client;
@@ -132,7 +132,7 @@ export class AlertTestHelper {
   async cleanAll() {
     for (const [, index] of Object.entries(this.indices)) {
       await this.esClient.deleteByQuery({
-        index: index,
+        index,
         query: {
           bool: {
             should: [
