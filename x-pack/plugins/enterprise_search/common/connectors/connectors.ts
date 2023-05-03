@@ -38,6 +38,26 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'mysql',
   },
   {
+    iconPath: 'mssql.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: ['mssql', 'microsoft', 'sql', 'database', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.microsoftSQL.name', {
+      defaultMessage: 'Microsoft SQL',
+    }),
+    serviceType: 'mssql',
+  },
+  {
+    iconPath: 'postgresql.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: ['postgresql', 'sql', 'database', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.postgresql.name', {
+      defaultMessage: 'Postgresql',
+    }),
+    serviceType: 'postgresql',
+  },
+  {
     iconPath: 'azure_blob_storage.svg',
     isBeta: true,
     isNative: false,
@@ -58,16 +78,6 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'google_cloud_storage',
   },
   {
-    iconPath: 'mssql.svg',
-    isBeta: true,
-    isNative: false,
-    keywords: ['mssql', 'microsoft', 'sql', 'database', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.microsoftSQL.name', {
-      defaultMessage: 'Microsoft SQL',
-    }),
-    serviceType: 'mssql',
-  },
-  {
     iconPath: 'network_drive.svg',
     isBeta: true,
     isNative: false,
@@ -86,16 +96,6 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       defaultMessage: 'Oracle',
     }),
     serviceType: 'oracle',
-  },
-  {
-    iconPath: 'postgresql.svg',
-    isBeta: true,
-    isNative: false,
-    keywords: ['postgresql', 'sql', 'database', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.postgresql.name', {
-      defaultMessage: 'Postgresql',
-    }),
-    serviceType: 'postgresql',
   },
   {
     iconPath: 's3.svg',
