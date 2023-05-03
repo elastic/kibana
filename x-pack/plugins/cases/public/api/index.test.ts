@@ -50,12 +50,25 @@ describe('api', () => {
 
   describe('bulkGetCases', () => {
     const http = httpServiceMock.createStartContract({ basePath: '' });
-    http.post.mockResolvedValue({ cases: [{ title: 'test' }], errors: [] });
+    const snakeCase = casesSnake[0];
+    const theCase = {
+      id: snakeCase.id,
+      description: snakeCase.description,
+      owner: snakeCase.owner,
+      title: snakeCase.title,
+      version: snakeCase.version,
+      status: snakeCase.status,
+      created_at: snakeCase.created_at,
+      created_by: snakeCase.created_by,
+      totalComments: snakeCase.totalComment,
+    };
+
+    http.post.mockResolvedValue({ cases: [theCase], errors: [] });
 
     it('should return the correct cases ', async () => {
-      http.post.mockResolvedValueOnce({ cases: casesSnake, errors: [] });
+      http.post.mockResolvedValueOnce({ cases: [theCase], errors: [] });
       expect(await bulkGetCases({ http, params: { ids: ['test'] } })).toEqual({
-        cases: casesSnake,
+        cases: [theCase],
         errors: [],
       });
     });
