@@ -9264,7 +9264,7 @@
         "label": "ENABLE_MAINTENANCE_WINDOWS",
         "description": [],
         "signature": [
-          "false"
+          "true"
         ],
         "path": "x-pack/plugins/alerting/common/index.ts",
         "deprecated": false,

@@ -10,6 +10,7 @@ import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../co
 import {
   SyncStatus,
   ConnectorStatus,
+  FieldType,
   FilteringPolicy,
   FilteringRuleRule,
   FilteringValidationState,
@@ -55,6 +56,7 @@ export const connectorIndex: ConnectorViewIndex = {
         required: false,
         sensitive: false,
         tooltip: '',
+        type: FieldType.STRING,
         ui_restrictions: [],
         value: 'barbar',
       },
@@ -170,6 +172,7 @@ export const crawlerIndex: CrawlerViewIndex = {
         required: false,
         sensitive: false,
         tooltip: '',
+        type: FieldType.STRING,
         ui_restrictions: [],
         value: 'barbar',
       },
