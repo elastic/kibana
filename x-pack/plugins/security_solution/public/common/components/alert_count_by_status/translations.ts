@@ -27,7 +27,7 @@ export const COLUMN_HEADER_RULE_NAME = i18n.translate(
 export const COLUMN_HEADER_COUNT = i18n.translate(
   'xpack.securitySolution.alertCountByRuleByStatus.count',
   {
-    defaultMessage: 'count',
+    defaultMessage: 'Count',
   }
 );
 
