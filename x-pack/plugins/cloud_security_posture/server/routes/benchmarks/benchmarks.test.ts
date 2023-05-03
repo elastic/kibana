@@ -9,19 +9,11 @@ import {
   benchmarksQueryParamsSchema,
   DEFAULT_BENCHMARKS_PER_PAGE,
 } from '../../../common/schemas/benchmark';
-import {
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  getCspPackagePolicies,
-  getCspAgentPolicies,
-} from '../../lib/fleet_util';
-import { POSTURE_TYPE_ALL } from '../../../common/constants';
+import { getCspAgentPolicies } from '../../lib/fleet_util';
 import { defineGetBenchmarksRoute, getRulesCountForPolicy } from './benchmarks';
 
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
-import {
-  createMockAgentPolicyService,
-  createPackagePolicyServiceMock,
-} from '@kbn/fleet-plugin/server/mocks';
+import { createMockAgentPolicyService } from '@kbn/fleet-plugin/server/mocks';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { createCspRequestHandlerContextMock } from '../../mocks';
 
