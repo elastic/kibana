@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './extension_types';
-export * from './extension_registry';
+export * from './customization_types';
+export * from './customization_service';

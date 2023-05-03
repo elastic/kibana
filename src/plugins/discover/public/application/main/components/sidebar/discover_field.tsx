@@ -25,7 +25,7 @@ import { DragDrop } from '@kbn/dom-drag-drop';
 import { DiscoverFieldStats } from './discover_field_stats';
 import { PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
-import { useDiscoverExtension } from '../../../../extensions/extension_provider';
+import { useDiscoverCustomization } from '../../../../customizations/customization_provider';
 
 interface GetCommonFieldItemButtonPropsParams {
   field: DataViewField;
@@ -253,7 +253,7 @@ function DiscoverFieldComponent({
     [field.name]
   );
 
-  const fieldPopoverExtension = useDiscoverExtension('field_popover');
+  const fieldPopoverCustomization = useDiscoverCustomization('field_popover');
 
   const renderPopover = () => {
     return (

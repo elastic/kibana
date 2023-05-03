@@ -16,7 +16,7 @@ import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { openAlertsPopover } from './open_alerts_popover';
-import type { TopNavExtension } from '../../../../extensions';
+import type { TopNavCustomization } from '../../../../customizations';
 
 /**
  * Helper function to build the top nav links
@@ -28,7 +28,7 @@ export const getTopNavLinks = ({
   onOpenInspector,
   isPlainRecord,
   adHocDataViews,
-  topNavExtension,
+  topNavCustomization,
 }: {
   dataView: DataView;
   services: DiscoverServices;
@@ -36,7 +36,7 @@ export const getTopNavLinks = ({
   onOpenInspector: () => void;
   isPlainRecord: boolean;
   adHocDataViews: DataView[];
-  topNavExtension: TopNavExtension | undefined;
+  topNavCustomization: TopNavCustomization | undefined;
 }): TopNavMenuData[] => {
   const alerts = {
     id: 'alerts',
@@ -205,8 +205,8 @@ export const getTopNavLinks = ({
     },
   };
 
-  const defaultMenu = topNavExtension?.defaultMenu;
-  const entries = topNavExtension?.getMenuItems?.() ?? [];
+  const defaultMenu = topNavCustomization?.defaultMenu;
+  const entries = topNavCustomization?.getMenuItems?.() ?? [];
 
   if (!defaultMenu?.new?.disabled) {
     entries.push({ data: newSearch, order: defaultMenu?.new?.order ?? 200 });

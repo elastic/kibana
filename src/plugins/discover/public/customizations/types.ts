@@ -7,13 +7,13 @@
  */
 
 import type { DiscoverStateContainer } from '../application/main/services/discover_state';
-import type { DiscoverExtensionRegistry } from './extension_registry';
+import type { DiscoverCustomizationService } from './customization_service';
 
-export interface RegisterExtensionsContext {
-  extensions: DiscoverExtensionRegistry;
+export interface CustomizationCallbackContext {
+  customizations: DiscoverCustomizationService;
   stateContainer: DiscoverStateContainer;
 }
 
-export type RegisterExtensions = (
-  options: RegisterExtensionsContext
+export type CustomizationCallback = (
+  options: CustomizationCallbackContext
 ) => void | (() => void) | Promise<void | (() => void)>;

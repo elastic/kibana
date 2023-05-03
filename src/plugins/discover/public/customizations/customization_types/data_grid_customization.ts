@@ -17,7 +17,7 @@ export interface DefaultLeadingControlColumns {
   select?: DefaultLeadingControlColumn;
 }
 
-export interface DataGridExtension {
+export interface DataGridCustomization {
   id: 'data_grid';
   defaultLeadingControlColumns?: DefaultLeadingControlColumns;
   getLeadingControlColumns?: () => EuiDataGridControlColumn[];
