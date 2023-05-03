@@ -118,7 +118,7 @@ export const SelectConnector: React.FC = () => {
               <span>
                 <EuiButton
                   data-telemetry-id="entSearchContent-connector-selectConnector-selectAndConfigure"
-                  disabled={!selectedConnector}
+                  disabled={selectedConnector === null}
                   fill
                   color="primary"
                   type="submit"
