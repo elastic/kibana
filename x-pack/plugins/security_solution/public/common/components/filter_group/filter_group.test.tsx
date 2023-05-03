@@ -552,10 +552,12 @@ describe(' Filter Group Component ', () => {
       render(<TestComponent filterGroupProps={invalidQuery} />);
 
       await waitFor(() => {
-        expect(controlGroupMock.updateInput).not.toHaveBeenCalledWith({
-          filters: [],
-          query: invalidQuery,
-        });
+        expect(controlGroupMock.updateInput).toHaveBeenCalledWith(
+          expect.objectContaining({
+            filters: [],
+            query: undefined,
+          })
+        );
       });
     });
   });
