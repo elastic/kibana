@@ -50,7 +50,9 @@ const navigationNodeToEuiItem = (
           }
         : undefined,
     href: item.href,
-    items: item.items?.map((_item) => navigationNodeToEuiItem(_item, { navigateToUrl, basePath })),
+    items: item.items?.map((_item) =>
+      navigationNodeToEuiItem(_item, { navigateToUrl, basePath, activeNavItemId })
+    ),
     ['data-test-subj']: `nav-item-${subjId}`,
   };
 };
@@ -77,7 +79,9 @@ export const NavigationBucket = (props: Props) => {
       >
         <EuiText color="default">
           <EuiSideNav
-            items={items?.map((item) => navigationNodeToEuiItem(item, { navigateToUrl, basePath }))}
+            items={items?.map((item) =>
+              navigationNodeToEuiItem(item, { navigateToUrl, basePath, activeNavItemId })
+            )}
             css={styles.euiSideNavItems}
           />
         </EuiText>
