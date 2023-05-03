@@ -45,10 +45,13 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
   const { selectedIndices, updateEngineStatus, updateEngineError } = useValues(AddIndicesLogic);
   const { setSelectedIndices, submitSelectedIndices } = useActions(AddIndicesLogic);
 
-  const selectedOptions = useMemo(() => selectedIndices.map(indexToOption), [selectedIndices]);
+  const selectedOptions = useMemo(
+    () => selectedIndices.map((index) => indexToOption(index)),
+    [selectedIndices]
+  );
   const onIndicesChange = useCallback(
     (options: IndicesSelectComboBoxOption[]) => {
-      setSelectedIndices(options.map(({ value }) => value).filter(isNotNullish));
+      setSelectedIndices(options.map(({ label }) => label).filter(isNotNullish));
     },
     [setSelectedIndices]
   );

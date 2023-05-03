@@ -232,6 +232,76 @@ describe('generateMlInferencePipelineBody lib function', () => {
     );
   });
 
+  it('should return something that safely removes redundant prefixes', () => {
+    const mockTextClassificationModel: MlTrainedModelConfig = {
+      ...mockModel,
+      ...{ inference_config: { text_classification: {} } },
+    };
+    const actual: MlInferencePipeline = generateMlInferencePipelineBody({
+      description: 'my-description',
+      model: mockTextClassificationModel,
+      pipelineName: 'my-pipeline',
+      fieldMappings: [
+        { sourceField: 'my-source-field_1', targetField: 'ml.inference.my-source-field_expanded' },
+        { sourceField: 'my-source-field_2', targetField: 'my-source-ml.inference-field_expanded' },
+        {
+          sourceField: 'my-source-field_3',
+          targetField: 'ml.inference.my-source-2-ml.inference-field_expanded',
+        },
+      ],
+    });
+
+    expect(actual).toEqual(
+      expect.objectContaining({
+        description: expect.any(String),
+        processors: expect.arrayContaining([
+          expect.objectContaining({
+            remove: {
+              field: 'ml.inference.my-source-field_expanded',
+              ignore_missing: true,
+            },
+          }),
+          expect.objectContaining({
+            remove: {
+              field: 'ml.inference.my-source-ml.inference-field_expanded',
+              ignore_missing: true,
+            },
+          }),
+          expect.objectContaining({
+            remove: {
+              field: 'ml.inference.my-source-2-ml.inference-field_expanded',
+              ignore_missing: true,
+            },
+          }),
+          expect.objectContaining({
+            inference: expect.objectContaining({
+              field_map: {
+                'my-source-field_1': 'MODEL_INPUT_FIELD',
+              },
+              target_field: 'ml.inference.my-source-field_expanded',
+            }),
+          }),
+          expect.objectContaining({
+            inference: expect.objectContaining({
+              field_map: {
+                'my-source-field_2': 'MODEL_INPUT_FIELD',
+              },
+              target_field: 'ml.inference.my-source-ml.inference-field_expanded',
+            }),
+          }),
+          expect.objectContaining({
+            inference: expect.objectContaining({
+              field_map: {
+                'my-source-field_3': 'MODEL_INPUT_FIELD',
+              },
+              target_field: 'ml.inference.my-source-2-ml.inference-field_expanded',
+            }),
+          }),
+        ]),
+      })
+    );
+  });
+
   it('should return something expected with multiple fields', () => {
     const actual: MlInferencePipeline = generateMlInferencePipelineBody({
       description: 'my-description',

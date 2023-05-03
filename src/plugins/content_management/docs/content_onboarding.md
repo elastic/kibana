@@ -2,16 +2,17 @@
 
 This documentation lays down the steps to migrate away from the saved object public client by using the content management registries (public and server) and its public client.
 
-## High level arquitecture
+## High level architecture
 
-* New content is registered both in the browser and the server CM registries. 
-* When registring on the server, a storage instance is required. This storage instance exposes CRUD and search functionalities for the content (by calling the saved object client apis).
-* In the browser, the `contentManagement` plugin exposes a client to call the storage instance methods on the server.
+- New content is registered both in the browser and the server CM registries.
+- When registering on the server, a storage instance is required. This storage instance exposes CRUD and search functionalities for the content (by calling the saved object client apis).
+- In the browser, the `contentManagement` plugin exposes a client to call the storage instance methods on the server.
 
 With the above step:
-  * All Requests are cached in the browser
-  * Events are emitted on the server (`'getItemStart'`, `'getItemSuccess'`...)
-  * Content version is added to all HTTP request (to allow BWC implementation on the server)
+
+- All Requests are cached in the browser
+- Events are emitted on the server (`'getItemStart'`, `'getItemSuccess'`...)
+- Content version is added to all HTTP request (to allow BWC implementation on the server)
 
 ## Steps
 
@@ -99,7 +100,7 @@ Once all the types have been defined we export them from the `latest.ts` file.
 export * from './v1';
 ```
 
-And from the barrel file we explicitely export the types from `latest.ts`
+And from the barrel file we explicitly export the types from `latest.ts`
 
 ```ts
 // common/content_management/index.ts
@@ -201,7 +202,7 @@ export const serviceDefinition: ServicesDefinition = {
 };
 ```
 
-#### 2.c. Delcare a map of CM services definition
+#### 2.c. Declare a map of CM services definition
 
 We expose a map of all the versioned supported. Initially we'll have a single version but as our content evolves we will be adding more versions in this map.
 
@@ -224,7 +225,7 @@ export const cmServicesDefinition: { [version: Version]: ServicesDefinition } = 
 
 ### 3. Create a Storage instance for the content
 
-Once we have all our TS types defined and our CM ServicesDetinition map, we can create a `ContentStorage` class and its CRUD + search methods.
+Once we have all our TS types defined and our CM ServicesDefinition map, we can create a `ContentStorage` class and its CRUD + search methods.
 
 ```ts
 /**
@@ -236,9 +237,9 @@ import { cmServicesDefinition } from '../../common/content_management/cm_service
  * It is a good practice to not directly exposes the SO document fields, specially the "attributes" object.
  * Having a serializer function to convert the SavedObject<T> to our own specific content (MapItem) guarantees
  * that we won't leak any additional fields in our Response, even when the SO client adds new fields to its responses.
- */ 
+ */
 function savedObjectToMapItem(
-  savedObject: SavedObject<MapSavedObjectAttributes>
+  savedObject: SavedObject<MapAttributes>
 ): MapItem {
   const {
     id,
@@ -292,7 +293,7 @@ export class MapsStorage implements ContentStorage<MapSavedObject, PartialMapSav
       alias_purpose: aliasPurpose,
       alias_target_id: aliasTargetId,
       outcome,
-    } = await soClient.resolve<MapSavedObjectAttributes>(SO_TYPE, id);
+    } = await soClient.resolve<MapAttributes>(SO_TYPE, id);
 
     const response: MapGetOut = {
       item: savedObjectToMapItem(savedObject),
@@ -326,8 +327,8 @@ export class MapsStorage implements ContentStorage<MapSavedObject, PartialMapSav
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.create.in.data.up<
-      MapSavedObjectAttributes,
-      MapSavedObjectAttributes
+      MapAttributes,
+      MapAttributes
     >(data);
     if (dataError) {
       throw Boom.badRequest(`Invalid payload. ${dataError.message}`);
@@ -344,7 +345,7 @@ export class MapsStorage implements ContentStorage<MapSavedObject, PartialMapSav
     //   - both are on the latest version
 
     // Save data in DB
-    const savedObject = await soClient.create<MapSavedObjectAttributes>(
+    const savedObject = await soClient.create<MapAttributes>(
       SO_TYPE,
       dataToLatest,
       optionsToLatest
@@ -384,7 +385,7 @@ Let's first create some constants...
  */
 export const LATEST_VERSION = 1;
 
-/** 
+/**
  * The contentType id. It does not have to be the same as the SO name but
  * it's probably a good idea if they match.
  */
@@ -413,7 +414,7 @@ export class MapsPlugin implements Plugin {
 
     ...
   }
-  
+
   ...
 }
 ```
@@ -452,7 +453,7 @@ export class MapsPlugin implements Plugin
 
 ### 6. Expose a public client
 
-This step is optional but it is recommended. Indeed we could access the CM public client and call its api directly in our React app but that means that we would have to also pass everywhere the generics to type our payloads and responses. To avoid that we will build a maps client where each method is correctly typed.
+This step is optional but it is recommended. Indeed, we could access the CM public client and call its api directly in our React app but that means that we would have to also pass everywhere the generics to type our payloads and responses. To avoid that we will build a maps client where each method is correctly typed.
 
 ```ts
 // public/content_management/maps_client.ts
@@ -497,7 +498,7 @@ const { id } = await (savedObjectId
   : mapsClient.create({ data: updatedAttributes, options: { references } }));
 ```
 
-## BWC compatibility and Zero down time
+## BWC compatibility and Zero downtime
 
 With serverless we need to support the case where the server is on a more recent version than the browser. On a newer version of our content a field might have been removed or renamed, the DB mapping updated and the server is now expecting object with a different contract than the previous version. The solution in CM to support this is to declare `up()` and `down()` transforms for our objects.
 
@@ -557,12 +558,9 @@ const { title, ...mapAttributesPropertiesNoTitle } = mapAttributesPropertiesV1;
 export const mapAttributesProperties = {
   ...mapAttributesPropertiesNoTitle,
   name: schema.string(), // "title" is now "name"
-}
+};
 
-const mapAttributesSchema = schema.object(
-  mapAttributesProperties,
-  { unknowns: 'forbid' }
-);
+const mapAttributesSchema = schema.object(mapAttributesProperties, { unknowns: 'forbid' });
 
 export const mapItemSchema = schema.object(
   {
@@ -602,9 +600,9 @@ export const serviceDefinition: ServicesDefinition = {
             item: {
               ...rest,
               title: name,
-            }
-          }
-        }
+            },
+          };
+        },
       },
     },
   },
@@ -677,4 +675,39 @@ export const serviceDefinition: ServicesDefinition = {
 };
 ```
 
-That is all that is required for BWC. As we have seen, once we have added inside our storage instance methods the logic to up/down transforms all the objects we don't need to change its logic when releasing a new version of the content. Everyting is handled inside the services definitions.
+That is all that is required for BWC. As we have seen, once we have added inside our storage instance methods the logic to up/down transforms all the objects we don't need to change its logic when releasing a new version of the content. Everything is handled inside the services definitions.
+
+## Multi content type search - `MSearch`
+
+Implementing search functionality in your `ContentStorage` class covers a use-case of a single content type search.
+But we also need to search across multiple content types. This is a common use-case in Kibana, for example, Visualize listing page searches across multiple types of objects.
+Until we have a dedicated search layer in CM services, we provide a separate temporary `MSearch` api to replace client-side and naive server proxy usages of `savedObjects.find()` that search across multiple types.
+
+### `MSearch` Summary
+
+- `MSearch` is a temporary API in the content management to do a cross-type search
+  - _Later we hope to unify this API and regular single type `search` api if/when we have a search layer inside content management_
+- Content management code internally is calling `savedObjects.find`. Only saved objects backed content types can be searched through this endpoint.
+- The search input is a minimal API that allows us to support use-cases like `SavedObjectFinder` or `TableListView`. It is a small subset of the `savedObjects.find` API input.
+- The search output is a list of results from `savedObjects.find` that are transformed by mappers provided by plugins to the same format that is returned from `get` and `search` endpoints of content type’s `ContentStorage`. Plugins should take care of transforming the objects to the correct version. They can use content management’s bwc transformation utils for this and apply the same approach as for other cm methods.
+- In addition to the output mapper, plugins also can specify `additionalSearchFields` to search across in addition to the default ones (`title`, `description`).
+
+### `MSearch` API example
+
+To opt in your saved object backed content type to be searchable through `MSearch` you need to add the following to your `ContentStorage` class:
+
+```ts
+export class MapsStorage implements ContentStorage<MapSavedObject, PartialMapSavedObject> {
+    // ...
+
+  mSearch: {
+    savedObjectType: 'maps',
+    additionalSearchFields: ['mapStateJSON'],
+    toItemResult: (ctx: StorageContext, result: MapSavedObject) => {
+       const mapItem = savedObjectToMapItem(result);
+       // Also use content management's bwc transformation utils to tranform the `mapItem` down to the correct version
+       return mapItem;
+    }
+  }
+}
+```

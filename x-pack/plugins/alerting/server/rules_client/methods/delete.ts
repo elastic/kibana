@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
+import { migrateLegacyActions } from '../lib';
 
 export async function deleteRule(context: RulesClientContext, { id }: { id: string }) {
   return await retryIfConflicts(
@@ -62,6 +64,11 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
       })
     );
     throw error;
+  }
+
+  // migrate legacy actions only for SIEM rules
+  if (attributes.consumer === AlertConsumers.SIEM) {
+    await migrateLegacyActions(context, { ruleId: id, attributes, skipActionsValidation: true });
   }
 
   context.auditLogger?.log(

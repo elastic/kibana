@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RawRule, SanitizedRule, RuleTypeParams, SanitizedRuleWithLegacyId } from '../../types';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getAlertFromRaw } from '../lib/get_alert_from_raw';
 import { RulesClientContext } from '../types';
+import { formatLegacyActions } from '../lib';
 
 export interface GetParams {
   id: string;
@@ -51,7 +53,7 @@ export async function get<Params extends RuleTypeParams = never>(
       savedObject: { type: 'alert', id },
     })
   );
-  return getAlertFromRaw<Params>(
+  const rule = getAlertFromRaw<Params>(
     context,
     result.id,
     result.attributes.alertTypeId,
@@ -61,4 +63,16 @@ export async function get<Params extends RuleTypeParams = never>(
     excludeFromPublicApi,
     includeSnoozeData
   );
+
+  // format legacy actions for SIEM rules
+  if (result.attributes.consumer === AlertConsumers.SIEM) {
+    const [migratedRule] = await formatLegacyActions([rule], {
+      savedObjectsClient: context.unsecuredSavedObjectsClient,
+      logger: context.logger,
+    });
+
+    return migratedRule;
+  }
+
+  return rule;
 }

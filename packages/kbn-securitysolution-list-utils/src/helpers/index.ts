@@ -35,6 +35,7 @@ import {
   getDataViewFieldSubtypeNested,
   isDataViewFieldSubtypeNested,
 } from '@kbn/es-query';
+import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import {
   ALL_OPERATORS,
@@ -676,8 +677,13 @@ export const getEntryOnOperatorChange = (
   }
 };
 
-const fieldSupportsMatches = (field: DataViewFieldBase) => {
-  return field.type === 'string';
+export const isKibanaStringType = (type: string) => {
+  const kbnFieldType = castEsToKbnFieldTypeName(type);
+  return kbnFieldType === KBN_FIELD_TYPES.STRING;
+};
+
+export const fieldSupportsMatches = (field: DataViewFieldBase) => {
+  return field.esTypes?.some(isKibanaStringType);
 };
 
 /**

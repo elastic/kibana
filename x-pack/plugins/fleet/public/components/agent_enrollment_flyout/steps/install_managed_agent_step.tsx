@@ -27,6 +27,7 @@ export const InstallManagedAgentStep = ({
   isComplete,
   fullCopyButton,
   onCopy,
+  cloudFormationTemplateUrl,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
@@ -36,6 +37,7 @@ export const InstallManagedAgentStep = ({
   isComplete?: boolean;
   fullCopyButton?: boolean;
   onCopy?: () => void;
+  cloudFormationTemplateUrl?: string | null;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
@@ -44,14 +46,18 @@ export const InstallManagedAgentStep = ({
     title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
       defaultMessage: 'Install Elastic Agent on your host',
     }),
-    children: selectedApiKeyId && apiKeyData && (
-      <InstallSection
-        installCommand={installCommand}
-        isK8s={isK8s}
-        enrollToken={enrollToken}
-        onCopy={onCopy}
-        fullCopyButton={fullCopyButton}
-      />
-    ),
+    children:
+      selectedApiKeyId && apiKeyData ? (
+        <InstallSection
+          installCommand={installCommand}
+          isK8s={isK8s}
+          enrollToken={enrollToken}
+          onCopy={onCopy}
+          fullCopyButton={fullCopyButton}
+          cloudFormationTemplateUrl={cloudFormationTemplateUrl}
+        />
+      ) : (
+        <React.Fragment />
+      ),
   };
 };

@@ -334,31 +334,33 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
           <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
         </Chart>
       </ChartContainer>
-      <div style={{ textAlign: 'center' }}>
-        {groupByLabel != null ? (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.infra.logs.alerts.dataTimeRangeLabelWithGrouping"
-              defaultMessage="Last {lookback} {timeLabel} of data, grouped by {groupByLabel} (showing {displayedGroups}/{totalGroups} groups)"
-              values={{
-                groupByLabel,
-                timeLabel,
-                lookback,
-                displayedGroups: filteredSeries.length,
-                totalGroups: series.length,
-              }}
-            />
-          </EuiText>
-        ) : (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.infra.logs.alerts.dataTimeRangeLabel"
-              defaultMessage="Last {lookback} {timeLabel} of data"
-              values={{ timeLabel, lookback }}
-            />
-          </EuiText>
-        )}
-      </div>
+      {!executionTimeRange && (
+        <div style={{ textAlign: 'center' }}>
+          {groupByLabel != null ? (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.infra.logs.alerts.dataTimeRangeLabelWithGrouping"
+                defaultMessage="Last {lookback} {timeLabel} of data, grouped by {groupByLabel} (showing {displayedGroups}/{totalGroups} groups)"
+                values={{
+                  groupByLabel,
+                  timeLabel,
+                  lookback,
+                  displayedGroups: filteredSeries.length,
+                  totalGroups: series.length,
+                }}
+              />
+            </EuiText>
+          ) : (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.infra.logs.alerts.dataTimeRangeLabel"
+                defaultMessage="Last {lookback} {timeLabel} of data"
+                values={{ timeLabel, lookback }}
+              />
+            </EuiText>
+          )}
+        </div>
+      )}
     </>
   );
 };

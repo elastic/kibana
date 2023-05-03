@@ -226,12 +226,13 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
           debugState={false}
-          flatLegend={false}
+          flatLegend={true}
           legendAction={[Function]}
           legendColorPicker={[Function]}
           legendMaxDepth={1}
           legendPosition="right"
           legendSize={130}
+          legendSort={[Function]}
           noResults={
             <VisualizationNoResults
               chartType="donut"
@@ -1063,12 +1064,13 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
           debugState={false}
-          flatLegend={false}
+          flatLegend={true}
           legendAction={[Function]}
           legendColorPicker={[Function]}
           legendMaxDepth={1}
           legendPosition="right"
           legendSize={130}
+          legendSort={[Function]}
           noResults={
             <VisualizationNoResults
               chartType="pie"
@@ -1513,12 +1515,13 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
           ariaUseDefaultSummary={true}
           baseTheme={Object {}}
           debugState={false}
-          flatLegend={false}
+          flatLegend={true}
           legendAction={[Function]}
           legendColorPicker={[Function]}
           legendMaxDepth={1}
           legendPosition="right"
           legendSize={130}
+          legendSort={[Function]}
           noResults={
             <VisualizationNoResults
               chartType="pie"
@@ -2251,6 +2254,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
           legendMaxDepth={1}
           legendPosition="right"
           legendSize={130}
+          legendSort={[Function]}
           noResults={
             <VisualizationNoResults
               chartType="waffle"

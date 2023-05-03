@@ -35,12 +35,28 @@ describe('useEnterpriseSearchContentNav', () => {
 
   it('returns an array of top-level Enterprise Search nav items', () => {
     const fullProductAccess: ProductAccess = DEFAULT_PRODUCT_ACCESS;
-    setMockValues({ productAccess: fullProductAccess, productFeatures: DEFAULT_PRODUCT_FEATURES });
+    setMockValues({
+      isSidebarEnabled: true,
+      productAccess: fullProductAccess,
+      productFeatures: DEFAULT_PRODUCT_FEATURES,
+    });
 
     expect(useEnterpriseSearchNav()).toEqual([
       {
         href: '/app/enterprise_search/overview',
         id: 'es_overview',
+        items: [
+          {
+            href: '/app/enterprise_search/elasticsearch',
+            id: 'elasticsearch',
+            name: 'Elasticsearch',
+          },
+          {
+            href: '/app/enterprise_search/search_experiences',
+            id: 'searchExperiences',
+            name: 'Search Experiences',
+          },
+        ],
         name: 'Overview',
       },
       {
@@ -61,36 +77,20 @@ describe('useEnterpriseSearchContentNav', () => {
         name: 'Content',
       },
       {
-        id: 'enginesSearch',
-        name: 'Search',
+        id: 'applications',
         items: [
           {
-            href: '/app/enterprise_search/elasticsearch',
-            id: 'elasticsearch',
-            name: 'Elasticsearch',
-          },
-          {
-            id: 'enterpriseSearchEngines',
-            name: 'Engines',
             href: '/app/enterprise_search/content/engines',
+            id: 'searchApplications',
+            name: 'Search Applications',
           },
-          {
-            id: 'searchExperiences',
-            name: 'Search Experiences',
-            href: '/app/enterprise_search/search_experiences',
-          },
-        ],
-      },
-      {
-        id: 'enterpriseSearchAnalytics',
-        items: [
           {
             href: '/app/enterprise_search/analytics',
-            id: 'analytics_collections',
-            name: 'Collections',
+            id: 'analyticsCollections',
+            name: 'Behavioral Analytics',
           },
         ],
-        name: 'Behavioral Analytics',
+        name: 'Applications',
       },
       {
         id: 'standaloneExperiences',
@@ -118,7 +118,11 @@ describe('useEnterpriseSearchContentNav', () => {
       hasWorkplaceSearchAccess: false,
     };
 
-    setMockValues({ productAccess: noProductAccess, productFeatures: DEFAULT_PRODUCT_FEATURES });
+    setMockValues({
+      isSidebarEnabled: true,
+      productAccess: noProductAccess,
+      productFeatures: DEFAULT_PRODUCT_FEATURES,
+    });
     mockKibanaValues.uiSettings.get.mockReturnValue(false);
 
     const esNav = useEnterpriseSearchNav();
@@ -134,6 +138,7 @@ describe('useEnterpriseSearchContentNav', () => {
     };
 
     setMockValues({
+      isSidebarEnabled: true,
       productAccess: workplaceSearchProductAccess,
       productFeatures: DEFAULT_PRODUCT_FEATURES,
     });
@@ -161,6 +166,7 @@ describe('useEnterpriseSearchContentNav', () => {
     };
 
     setMockValues({
+      isSidebarEnabled: true,
       productAccess: appSearchProductAccess,
       productFeatures: DEFAULT_PRODUCT_FEATURES,
     });
@@ -187,6 +193,7 @@ describe('useEnterpriseSearchEngineNav', () => {
     jest.clearAllMocks();
     mockKibanaValues.uiSettings.get.mockReturnValue(true);
     setMockValues({
+      isSidebarEnabled: true,
       productAccess: DEFAULT_PRODUCT_ACCESS,
       productFeatures: DEFAULT_PRODUCT_FEATURES,
     });
@@ -197,6 +204,18 @@ describe('useEnterpriseSearchEngineNav', () => {
       {
         href: '/app/enterprise_search/overview',
         id: 'es_overview',
+        items: [
+          {
+            href: '/app/enterprise_search/elasticsearch',
+            id: 'elasticsearch',
+            name: 'Elasticsearch',
+          },
+          {
+            href: '/app/enterprise_search/search_experiences',
+            id: 'searchExperiences',
+            name: 'Search Experiences',
+          },
+        ],
         name: 'Overview',
       },
       {
@@ -210,43 +229,26 @@ describe('useEnterpriseSearchEngineNav', () => {
           {
             href: '/app/enterprise_search/content/settings',
             id: 'settings',
-            items: undefined,
             name: 'Settings',
           },
         ],
         name: 'Content',
       },
       {
-        id: 'enginesSearch',
-        name: 'Search',
+        id: 'applications',
         items: [
           {
-            href: '/app/enterprise_search/elasticsearch',
-            id: 'elasticsearch',
-            name: 'Elasticsearch',
-          },
-          {
-            id: 'enterpriseSearchEngines',
-            name: 'Engines',
             href: '/app/enterprise_search/content/engines',
+            id: 'searchApplications',
+            name: 'Search Applications',
           },
-          {
-            id: 'searchExperiences',
-            name: 'Search Experiences',
-            href: '/app/enterprise_search/search_experiences',
-          },
-        ],
-      },
-      {
-        id: 'enterpriseSearchAnalytics',
-        items: [
           {
             href: '/app/enterprise_search/analytics',
-            id: 'analytics_collections',
-            name: 'Collections',
+            id: 'analyticsCollections',
+            name: 'Behavioral Analytics',
           },
         ],
-        name: 'Behavioral Analytics',
+        name: 'Applications',
       },
       {
         id: 'standaloneExperiences',
@@ -273,16 +275,15 @@ describe('useEnterpriseSearchEngineNav', () => {
     expect(navItems?.map((ni) => ni.name)).toEqual([
       'Overview',
       'Content',
-      'Search',
-      'Behavioral Analytics',
+      'Applications',
       'Standalone Experiences',
     ]);
-    const searchItem = navItems?.find((ni) => ni.id === 'enginesSearch');
+    const searchItem = navItems?.find((ni) => ni.id === 'applications');
     expect(searchItem).not.toBeUndefined();
     expect(searchItem!.items).not.toBeUndefined();
     // @ts-ignore
     const enginesItem: EuiSideNavItemType<unknown> = searchItem?.items?.find(
-      (si: EuiSideNavItemType<unknown>) => si.id === 'enterpriseSearchEngines'
+      (si: EuiSideNavItemType<unknown>) => si.id === 'searchApplications'
     );
     expect(enginesItem).not.toBeUndefined();
     expect(enginesItem!.items).not.toBeUndefined();
@@ -295,29 +296,19 @@ describe('useEnterpriseSearchEngineNav', () => {
       id: 'engineId',
       items: [
         {
-          href: `/app/enterprise_search/content/engines/${engineName}/overview`,
-          id: 'enterpriseSearchEngineOverview',
-          name: 'Overview',
-        },
-        {
-          href: `/app/enterprise_search/content/engines/${engineName}/indices`,
-          id: 'enterpriseSearchEngineIndices',
-          name: 'Indices',
-        },
-        {
-          href: `/app/enterprise_search/content/engines/${engineName}/schema`,
-          id: 'enterpriseSearchEngineSchema',
-          name: 'Schema',
-        },
-        {
           href: `/app/enterprise_search/content/engines/${engineName}/preview`,
           id: 'enterpriseSearchEnginePreview',
-          name: 'Preview',
+          name: 'Search Preview',
         },
         {
-          href: `/app/enterprise_search/content/engines/${engineName}/api`,
-          id: 'enterpriseSearchEngineAPI',
-          name: 'API',
+          href: `/app/enterprise_search/content/engines/${engineName}/content`,
+          id: 'enterpriseSearchApplicationsContent',
+          name: 'Content',
+        },
+        {
+          href: `/app/enterprise_search/content/engines/${engineName}/connect`,
+          id: 'enterpriseSearchApplicationConnect',
+          name: 'Connect',
         },
       ],
       name: engineName,
@@ -330,16 +321,15 @@ describe('useEnterpriseSearchEngineNav', () => {
     expect(navItems?.map((ni) => ni.name)).toEqual([
       'Overview',
       'Content',
-      'Search',
-      'Behavioral Analytics',
+      'Applications',
       'Standalone Experiences',
     ]);
-    const searchItem = navItems?.find((ni) => ni.id === 'enginesSearch');
+    const searchItem = navItems?.find((ni) => ni.id === 'applications');
     expect(searchItem).not.toBeUndefined();
     expect(searchItem!.items).not.toBeUndefined();
     // @ts-ignore
     const enginesItem: EuiSideNavItemType<unknown> = searchItem?.items?.find(
-      (si: EuiSideNavItemType<unknown>) => si.id === 'enterpriseSearchEngines'
+      (si: EuiSideNavItemType<unknown>) => si.id === 'searchApplications'
     );
     expect(enginesItem).not.toBeUndefined();
     expect(enginesItem!.items).not.toBeUndefined();
@@ -360,6 +350,18 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
     {
       href: '/app/enterprise_search/overview',
       id: 'es_overview',
+      items: [
+        {
+          href: '/app/enterprise_search/elasticsearch',
+          id: 'elasticsearch',
+          name: 'Elasticsearch',
+        },
+        {
+          href: '/app/enterprise_search/search_experiences',
+          id: 'searchExperiences',
+          name: 'Search Experiences',
+        },
+      ],
       name: 'Overview',
     },
     {
@@ -374,36 +376,20 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
       name: 'Content',
     },
     {
-      id: 'enginesSearch',
-      name: 'Search',
+      id: 'applications',
       items: [
         {
-          href: '/app/enterprise_search/elasticsearch',
-          id: 'elasticsearch',
-          name: 'Elasticsearch',
-        },
-        {
-          id: 'enterpriseSearchEngines',
-          name: 'Engines',
           href: '/app/enterprise_search/content/engines',
+          id: 'searchApplications',
+          name: 'Search Applications',
         },
-        {
-          id: 'searchExperiences',
-          name: 'Search Experiences',
-          href: '/app/enterprise_search/search_experiences',
-        },
-      ],
-    },
-    {
-      id: 'enterpriseSearchAnalytics',
-      items: [
         {
           href: '/app/enterprise_search/analytics',
-          id: 'analytics_collections',
-          name: 'Collections',
+          id: 'analyticsCollections',
+          name: 'Behavioral Analytics',
         },
       ],
-      name: 'Behavioral Analytics',
+      name: 'Applications',
     },
     {
       id: 'standaloneExperiences',
@@ -425,7 +411,9 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setMockValues({});
+    setMockValues({
+      isSidebarEnabled: true,
+    });
   });
 
   it('returns basic nav all params are empty', () => {
@@ -444,38 +432,34 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
       integration: '/integration-path',
       overview: '/overview-path',
     });
-    const analyticsNav = navItems?.find((item) => item.id === 'enterpriseSearchAnalytics');
+    const applicationsNav = navItems?.find((item) => item.id === 'applications');
+    expect(applicationsNav).not.toBeUndefined();
+    const analyticsNav = applicationsNav?.items?.[1];
     expect(analyticsNav).not.toBeUndefined();
     expect(analyticsNav).toEqual({
-      id: 'enterpriseSearchAnalytics',
+      href: '/app/enterprise_search/analytics',
+      id: 'analyticsCollections',
       items: [
         {
-          href: '/app/enterprise_search/analytics',
-          id: 'analytics_collections',
+          id: 'analyticsCollection',
           items: [
             {
-              id: 'analytics_collections',
-              items: [
-                {
-                  href: '/app/enterprise_search/analytics/overview-path',
-                  id: 'enterpriseSearchEngineOverview',
-                  name: 'Overview',
-                },
-                {
-                  href: '/app/enterprise_search/analytics/explorer-path',
-                  id: 'enterpriseSearchEngineIndices',
-                  name: 'Explorer',
-                },
-                {
-                  href: '/app/enterprise_search/analytics/integration-path',
-                  id: 'enterpriseSearchEngineSchema',
-                  name: 'Integration',
-                },
-              ],
-              name: 'my-test-collection',
+              href: '/app/enterprise_search/analytics/overview-path',
+              id: 'analyticsCollectionOverview',
+              name: 'Overview',
+            },
+            {
+              href: '/app/enterprise_search/analytics/explorer-path',
+              id: 'analyticsCollectionExplorer',
+              name: 'Explorer',
+            },
+            {
+              href: '/app/enterprise_search/analytics/integration-path',
+              id: 'analyticsCollectionIntegration',
+              name: 'Integration',
             },
           ],
-          name: 'Collections',
+          name: 'my-test-collection',
         },
       ],
       name: 'Behavioral Analytics',

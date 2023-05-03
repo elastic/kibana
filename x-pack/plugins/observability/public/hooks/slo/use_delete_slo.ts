@@ -6,21 +6,24 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
-
 import { useKibana } from '../../utils/kibana_react';
 
-export function useDeleteSlo(sloId: string) {
-  const { http } = useKibana().services;
+export function useDeleteSlo() {
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const queryClient = useQueryClient();
 
   const deleteSlo = useMutation<
     string,
     string,
-    { id: string },
+    { id: string; name: string },
     { previousSloList: FindSLOResponse | undefined }
   >(
-    ['deleteSlo', sloId],
+    ['deleteSlo'],
     ({ id }) => {
       try {
         return http.delete<string>(`/api/observability/slos/${id}`);
@@ -31,7 +34,7 @@ export function useDeleteSlo(sloId: string) {
     {
       onMutate: async (slo) => {
         // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries(['fetchSloList']);
+        await queryClient.cancelQueries(['fetchSloList'], { exact: false });
 
         const latestFetchSloListRequest = (
           queryClient.getQueriesData<FindSLOResponse>(['fetchSloList']) || []
@@ -50,17 +53,36 @@ export function useDeleteSlo(sloId: string) {
           queryClient.setQueryData(queryKey, optimisticUpdate);
         }
 
+        toasts.addSuccess(
+          i18n.translate('xpack.observability.slo.slo.delete.successNotification', {
+            defaultMessage: 'Deleted {name}',
+            values: { name: slo.name },
+          })
+        );
+
         // Return a context object with the snapshotted value
         return { previousSloList: data };
       },
       // If the mutation fails, use the context returned from onMutate to roll back
-      onError: (_err, _slo, context) => {
+      onError: (_err, slo, context) => {
         if (context?.previousSloList) {
           queryClient.setQueryData(['fetchSloList'], context.previousSloList);
         }
+
+        toasts.addDanger(
+          i18n.translate('xpack.observability.slo.slo.delete.errorNotification', {
+            defaultMessage: 'Failed to delete {name}',
+            values: { name: slo.name },
+          })
+        );
       },
       onSuccess: () => {
-        queryClient.invalidateQueries(['fetchSloList']);
+        if (
+          queryClient.getQueryCache().find(['fetchSloList'], { exact: false })?.options // @ts-ignore
+            .refetchInterval === undefined
+        ) {
+          queryClient.invalidateQueries(['fetchSloList'], { exact: false });
+        }
       },
     }
   );

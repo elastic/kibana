@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+
+export const assetTypeRT = schema.oneOf([
+  schema.literal('k8s.pod'),
+  schema.literal('k8s.cluster'),
+  schema.literal('k8s.node'),
+]);
+export type AssetType = typeof assetTypeRT.type;
+
 export type AssetKind = 'unknown' | 'node';
-export type AssetType = 'k8s.pod' | 'k8s.cluster' | 'k8s.node';
 export type AssetStatus =
   | 'CREATING'
   | 'ACTIVE'
@@ -52,6 +60,7 @@ export interface Asset extends ECSDocument {
   'asset.status'?: AssetStatus;
   'asset.parents'?: string | string[];
   'asset.children'?: string | string[];
+  'asset.references'?: string | string[];
   'asset.namespace'?: string;
 }
 
@@ -120,3 +129,15 @@ export interface AssetFilters {
   from?: string;
   to?: string;
 }
+
+export const relationRT = schema.oneOf([
+  schema.literal('ancestors'),
+  schema.literal('descendants'),
+  schema.literal('references'),
+]);
+
+export type Relation = typeof relationRT.type;
+export type RelationField = keyof Pick<
+  Asset,
+  'asset.children' | 'asset.parents' | 'asset.references'
+>;

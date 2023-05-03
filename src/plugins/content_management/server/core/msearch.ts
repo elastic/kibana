@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsFindOptionsReference,
+} from '@kbn/core-saved-objects-api-server';
 import type { MSearchResult, SearchQuery } from '../../common';
 import { ContentRegistry } from './registry';
 import { StorageContext } from './types';
@@ -16,6 +19,10 @@ export class MSearchService {
     private readonly deps: {
       getSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
       contentRegistry: ContentRegistry;
+      getConfig: {
+        listingLimit: () => Promise<number>;
+        perPage: () => Promise<number>;
+      };
     }
   ) {}
 
@@ -56,14 +63,36 @@ export class MSearchService {
     });
 
     const savedObjectsClient = await this.deps.getSavedObjectsClient();
+    const listingLimit = await this.deps.getConfig.listingLimit();
+    const defaultPerPage = await this.deps.getConfig.perPage();
+
+    const page = query.cursor ? Number(query.cursor) : 1;
+    const perPage = query.limit ? query.limit : defaultPerPage;
+
+    if (page * perPage > listingLimit) {
+      throw new Error(
+        `Requested page ${page} with ${perPage} items per page exceeds the maximum allowed limit of ${listingLimit} items`
+      );
+    }
+
+    const tagIdToSavedObjectReference = (tagId: string): SavedObjectsFindOptionsReference => ({
+      type: 'tag',
+      id: tagId,
+    });
+
     const soResult = await savedObjectsClient.find({
       type: soSearchTypes,
+
       search: query.text,
       searchFields: [`title^3`, `description`, ...additionalSearchFields],
       defaultSearchOperator: 'AND',
-      // TODO: tags
-      // TODO: pagination
-      // TODO: sort
+
+      page,
+      perPage,
+
+      // tags
+      hasReference: query.tags?.included?.map(tagIdToSavedObjectReference),
+      hasNoReference: query.tags?.excluded?.map(tagIdToSavedObjectReference),
     });
 
     const contentItemHits = soResult.saved_objects.map((savedObject) => {
@@ -78,6 +107,11 @@ export class MSearchService {
       hits: contentItemHits,
       pagination: {
         total: soResult.total,
+        cursor:
+          soResult.page * soResult.per_page < soResult.total &&
+          (soResult.page + 1) * soResult.per_page < listingLimit
+            ? String(soResult.page + 1)
+            : undefined,
       },
     };
   }

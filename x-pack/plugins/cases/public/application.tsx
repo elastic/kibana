@@ -9,19 +9,21 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 
-import { I18nProvider } from '@kbn/i18n-react';
 import { EuiErrorBoundary } from '@elastic/eui';
-
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
-import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
-import type { RenderAppProps } from './types';
-import { CasesApp } from './components/app';
+
+import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import type { RenderAppProps } from './types';
+
+import { CasesApp } from './components/app';
 
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
@@ -37,10 +39,15 @@ export const renderApp = (deps: RenderAppProps) => {
 interface CasesAppWithContextProps {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  getFilesClient: (scope: string) => ScopedFilesClient;
 }
 
 const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
-  ({ externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry }) => {
+  ({
+    externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
+    getFilesClient,
+  }) => {
     const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
     return (
@@ -48,6 +55,7 @@ const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
         <CasesApp
           externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
           persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
+          getFilesClient={getFilesClient}
         />
       </StyledComponentsThemeProvider>
     );
@@ -78,6 +86,7 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
                   deps.externalReferenceAttachmentTypeRegistry
                 }
                 persistableStateAttachmentTypeRegistry={deps.persistableStateAttachmentTypeRegistry}
+                getFilesClient={pluginsStart.files.filesClientFactory.asScoped}
               />
             </Router>
           </KibanaContextProvider>

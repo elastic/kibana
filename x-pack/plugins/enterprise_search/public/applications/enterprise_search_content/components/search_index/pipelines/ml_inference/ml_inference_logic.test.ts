@@ -314,6 +314,77 @@ describe('MlInferenceLogic', () => {
           },
         ]);
       });
+      it('filter text expansion model from existing pipelines list', () => {
+        MLModelsApiLogic.actions.apiSuccess([
+          {
+            inference_config: {
+              text_expansion: {},
+            },
+            input: {
+              field_names: ['text_field'],
+            },
+            model_id: 'text-expansion-mocked-model',
+            model_type: 'pytorch',
+            tags: [],
+            version: '1',
+          },
+          {
+            inference_config: {
+              classification: {},
+            },
+            input: {
+              field_names: ['text_field'],
+            },
+            model_id: 'classification-mocked-model',
+            model_type: 'lang_ident',
+            tags: [],
+            version: '1',
+          },
+        ]);
+
+        FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
+          'unit-test-1': {
+            processors: [
+              {
+                inference: {
+                  field_map: {
+                    body: 'text_field',
+                  },
+                  model_id: 'text-expansion-mocked-model',
+                  target_field: 'ml.inference.test-field',
+                },
+              },
+            ],
+            version: 1,
+          },
+          'unit-test-2': {
+            processors: [
+              {
+                inference: {
+                  field_map: {
+                    body: 'text_field',
+                  },
+                  model_id: 'classification-mocked-model',
+                  target_field: 'ml.inference.test-field',
+                },
+              },
+            ],
+            version: 1,
+          },
+        });
+
+        expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
+          {
+            destinationField: 'test-field',
+            disabled: false,
+            disabledReason: undefined,
+            pipelineName: 'unit-test-2',
+            modelType: 'lang_ident',
+            modelId: 'classification-mocked-model',
+            sourceField: 'body',
+          },
+        ]);
+      });
     });
     describe('mlInferencePipeline', () => {
       it('returns undefined when configuration is invalid', () => {
@@ -531,10 +602,16 @@ describe('MlInferenceLogic', () => {
 
         MLModelsApiLogic.actions.apiSuccess([textExpansionModel]);
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
-          destinationField: 'my-dest-field',
+          destinationField: mockModelConfiguration.configuration.destinationField,
+          fieldMappings: [
+            {
+              sourceField: 'source',
+              targetField: 'ml.inference.dest',
+            },
+          ],
           modelID: textExpansionModel.model_id,
           pipelineName: mockModelConfiguration.configuration.pipelineName,
-          sourceField: 'my-field',
+          sourceField: mockModelConfiguration.configuration.sourceField,
         });
         MLInferenceLogic.actions.createPipeline();
 
@@ -542,6 +619,12 @@ describe('MlInferenceLogic', () => {
           indexName: mockModelConfiguration.indexName,
           pipelineName: mockModelConfiguration.configuration.pipelineName,
           pipelineDefinition: expect.any(Object), // Generation logic is tested elsewhere
+          fieldMappings: [
+            {
+              sourceField: 'source',
+              targetField: 'ml.inference.dest',
+            },
+          ],
         });
       });
     });

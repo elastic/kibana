@@ -14,12 +14,10 @@ export default function ({ loadTestFile, getService }) {
     });
 
     // EPM
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/154739
-    // loadTestFile(require.resolve('./epm'));
+    loadTestFile(require.resolve('./epm'));
 
     // Fleet setup
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/154739
-    // loadTestFile(require.resolve('./fleet_setup'));
+    loadTestFile(require.resolve('./fleet_setup'));
 
     // Agents
     loadTestFile(require.resolve('./agents'));
@@ -28,12 +26,10 @@ export default function ({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./enrollment_api_keys/crud'));
 
     // Package policies
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/154739
-    //
-    // loadTestFile(require.resolve('./package_policy/create'));
-    // loadTestFile(require.resolve('./package_policy/update'));
-    // loadTestFile(require.resolve('./package_policy/get'));
-    //
+    loadTestFile(require.resolve('./package_policy/create'));
+    loadTestFile(require.resolve('./package_policy/update'));
+    loadTestFile(require.resolve('./package_policy/get'));
+
     loadTestFile(require.resolve('./package_policy/delete'));
     loadTestFile(require.resolve('./package_policy/upgrade'));
     loadTestFile(require.resolve('./package_policy/input_package_create_upgrade'));

@@ -7,6 +7,7 @@
 export enum SecurityCellActionsTrigger {
   DEFAULT = 'security-default-cellActions',
   DETAILS_FLYOUT = 'security-detailsFlyout-cellActions',
+  ALERTS_COUNT = 'security-alertsCount-cellActions',
 }
 
 export enum SecurityCellActionType {

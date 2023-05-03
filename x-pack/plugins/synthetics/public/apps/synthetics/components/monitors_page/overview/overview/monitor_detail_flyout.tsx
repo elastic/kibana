@@ -332,7 +332,7 @@ export function MonitorDetailFlyout(props: Props) {
               configId={configId}
               monitor={{
                 ...monitorSavedObject.attributes,
-                id: monitorSavedObject.id,
+                id,
                 updated_at: monitorSavedObject.updated_at!,
                 created_at: monitorSavedObject.created_at!,
               }}
@@ -391,7 +391,7 @@ const PREVIOUS_PERIOD_SERIES_NAME = i18n.translate(
 );
 
 const ENABLED_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.enabledItemText', {
-  defaultMessage: 'Enabled',
+  defaultMessage: 'Enabled (all locations)',
 });
 
 const CLOSE_FLYOUT_TEXT = i18n.translate('xpack.synthetics.monitorList.closeFlyoutText', {

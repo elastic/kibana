@@ -655,6 +655,10 @@
               },
               {
                 "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/visualizations/xy/visualization.tsx"
+              },
+              {
+                "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
               },
               {
@@ -680,10 +684,6 @@
               {
                 "plugin": "fileUpload",
                 "path": "x-pack/plugins/file_upload/public/kibana_services.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/kibana_services.ts"
               },
               {
                 "plugin": "ml",
@@ -816,10 +816,6 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/use_csp_rules.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/hooks/use_dashboard_button_href.ts"
               },
               {
                 "plugin": "securitySolution",

@@ -79,7 +79,7 @@ function createServerCallback() {
         }
 
         // store a payload that was posted to be remembered
-        const match = data.match(/^payload (.*)$/);
+        const match = data.match(/^payload ([\S\s]*)$/);
         if (match) {
           payloads.push(match[1]);
           response.statusCode = 200;
@@ -89,6 +89,8 @@ function createServerCallback() {
 
         response.statusCode = 400;
         response.end(`unexpected body ${data}`);
+        // eslint-disable-next-line no-console
+        console.log(`webhook simulator received unexpected body: ${data}`);
         return;
       });
     } else {

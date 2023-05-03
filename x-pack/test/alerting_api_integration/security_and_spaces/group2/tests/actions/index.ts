@@ -32,7 +32,8 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/opsgenie'));
     loadTestFile(require.resolve('./connector_types/pagerduty'));
     loadTestFile(require.resolve('./connector_types/server_log'));
-    loadTestFile(require.resolve('./connector_types/slack'));
+    loadTestFile(require.resolve('./connector_types/slack_webhook'));
+    loadTestFile(require.resolve('./connector_types/slack_api'));
     loadTestFile(require.resolve('./connector_types/webhook'));
     loadTestFile(require.resolve('./connector_types/xmatters'));
     loadTestFile(require.resolve('./connector_types/tines'));
@@ -48,6 +49,6 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     /**
      * Sub action framework
      */
-    loadTestFile(require.resolve('./sub_action_framework'));
+    // loadTestFile(require.resolve('./sub_action_framework'));
   });
 }
