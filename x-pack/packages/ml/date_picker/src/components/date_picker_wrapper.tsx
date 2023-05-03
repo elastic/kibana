@@ -162,11 +162,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
     timefilter.isTimeRangeSelectorEnabled()
   );
 
-  const refreshInterval = useMemo(
-    (): RefreshInterval => globalState?.refreshInterval ?? timeFilterRefreshInterval,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(globalState?.refreshInterval), timeFilterRefreshInterval]
-  );
+  const refreshInterval = timeFilterRefreshInterval;
 
   useEffect(
     function warnAboutShortRefreshInterval() {
