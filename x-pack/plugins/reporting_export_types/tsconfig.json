@@ -23,6 +23,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/config-schema",
+    "@kbn/core-test-helpers-test-utils",
   ],
   "exclude": [
     "target/**/*",
