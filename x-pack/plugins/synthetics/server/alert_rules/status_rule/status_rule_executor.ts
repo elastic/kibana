@@ -81,7 +81,7 @@ export class StatusRuleExecutor {
 
     privateLocations.forEach((loc) => {
       this.locationIdNameMap[loc.label] = loc.id;
-      this.locationIdNameMap[loc.id] = loc.label;
+      this.locationNameIdMap[loc.id] = loc.label;
     });
   }
 
