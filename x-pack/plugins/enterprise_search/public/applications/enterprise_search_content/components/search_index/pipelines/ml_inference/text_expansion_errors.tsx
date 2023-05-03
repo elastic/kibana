@@ -15,8 +15,8 @@ import { i18n } from '@kbn/i18n';
 
 import { HttpLogic } from '../../../../../shared/http';
 
-import { ML_NOTIFICATIONS_PATH } from '../../../../routes';
 import { SendEnterpriseSearchTelemetry } from '../../../../../shared/telemetry';
+import { ML_NOTIFICATIONS_PATH } from '../../../../routes';
 
 export const TextExpansionErrors = ({ error }: { error: { title: string; message: string } }) => {
   const { http } = useValues(HttpLogic);
