@@ -98,8 +98,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    // FAILING: https://github.com/elastic/kibana/issues/156218
-    describe.skip('when filters are applied', () => {
+    describe('when filters are applied', () => {
       it('returns empty state for filters', async () => {
         const response = await getMobileStats({
           serviceName: 'synth-android',
@@ -126,7 +125,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.currentPeriod.sessions.value).to.eql(3);
-        expect(response.currentPeriod.requests.value).to.eql(0);
+        expect(response.currentPeriod.requests.value).to.eql(3);
       });
 
       it('returns the correct values when multiple filters are applied', async () => {
@@ -136,7 +135,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.currentPeriod.sessions.value).to.eql(12);
-        expect(response.currentPeriod.requests.value).to.eql(0);
+        expect(response.currentPeriod.requests.value).to.eql(15);
       });
     });
   });
