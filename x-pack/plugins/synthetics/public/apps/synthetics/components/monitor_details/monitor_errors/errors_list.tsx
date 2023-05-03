@@ -65,7 +65,7 @@ export const ErrorsList = ({
       sortable: (a: PingState) => {
         return moment(a.state.started_at).valueOf();
       },
-      render: (value: string, item: PingState) => {
+      render: (_value: string, item: PingState) => {
         const link = (
           <ErrorDetailsLink
             configId={configId}
@@ -75,7 +75,7 @@ export const ErrorsList = ({
           />
         );
         const isActive = isActiveState(item);
-        if (!isActive || lastTestRun.state.id !== item.state.id) {
+        if (!isActive && lastTestRun.state.id !== item.state.id) {
           return link;
         }
 
