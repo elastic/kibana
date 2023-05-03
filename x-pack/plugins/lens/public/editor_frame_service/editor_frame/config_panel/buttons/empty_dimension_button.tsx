@@ -68,38 +68,42 @@ const EmptyDimensionButtonInner = ({
   onClick: () => void;
   dataTestSubj?: string;
   iconType?: string;
-}) => (
-  <EuiButtonEmpty
-    css={css`
-      width: 100%;
-    `}
-    color="text" // as far as I can tell all this currently adds is the correct active background color
-    size="s"
-    iconType={iconType ?? 'plus'}
-    contentProps={{
-      css: css`
-        justify-content: flex-start;
-        padding: 0 !important;
-        color: ${euiThemeVars.euiTextSubduedColor};
+}) => {
+  return (
+    <EuiButtonEmpty
+      css={css`
+        width: 100%;
+        border-radius: ${euiThemeVars.euiBorderRadius};
+        border: ${euiThemeVars.euiBorderWidthThin} dashed ${euiThemeVars.euiBorderColor} !important;
+      `}
+      color="text" // as far as I can tell all this currently adds is the correct active background color
+      size="s"
+      iconType={iconType ?? 'plus'}
+      contentProps={{
+        css: css`
+          justify-content: flex-start;
+          padding: 0 !important;
+          color: ${euiThemeVars.euiTextSubduedColor};
 
-        .euiButtonEmpty__text {
-          margin-left: 0;
-        }
+          .euiButtonEmpty__text {
+            margin-left: 0;
+          }
 
-        .euiIcon {
-          margin-left: ${euiThemeVars.euiSizeS};
-        }
-      `,
-    }}
-    aria-label={ariaLabel}
-    data-test-subj={dataTestSubj}
-    onClick={() => {
-      onClick();
-    }}
-  >
-    <DimensionTrigger label={label} />
-  </EuiButtonEmpty>
-);
+          .euiIcon {
+            margin-left: ${euiThemeVars.euiSizeS};
+          }
+        `,
+      }}
+      aria-label={ariaLabel}
+      data-test-subj={dataTestSubj}
+      onClick={() => {
+        onClick();
+      }}
+    >
+      <DimensionTrigger label={label} />
+    </EuiButtonEmpty>
+  );
+};
 
 const DefaultEmptyButton = ({ columnId, group, onClick }: EmptyButtonProps) => {
   const { buttonAriaLabel, buttonLabel } = group.labels || {};
@@ -236,13 +240,11 @@ export function EmptyDimensionButton({
         onDrop={handleOnDrop}
         dropTypes={dropTypes}
       >
-        <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
-          {typeof group.suggestedValue?.() === 'number' ? (
-            <SuggestedValueButton {...buttonProps} />
-          ) : (
-            <DefaultEmptyButton {...buttonProps} />
-          )}
-        </div>
+        {typeof group.suggestedValue?.() === 'number' ? (
+          <SuggestedValueButton {...buttonProps} />
+        ) : (
+          <DefaultEmptyButton {...buttonProps} />
+        )}
       </DragDrop>
     </div>
   );

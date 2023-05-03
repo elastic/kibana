@@ -94,15 +94,6 @@
   }
 }
 
-.lnsLayerPanel__dimension--empty {
-  border: $euiBorderWidthThin dashed $euiBorderColor !important;
-
-  &:focus,
-  &:focus-within {
-    @include euiFocusRing;
-  }
-}
-
 .lnsLayerPanel__dimensionContainer {
   position: relative;
 
