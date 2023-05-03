@@ -10,8 +10,8 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { API_DIAGNOSE_URL } from '@kbn/reporting-plugin/common/constants';
 import { ReportingCore } from '@kbn/reporting-plugin/server';
-import { authorizedUserPreRouting, getCounters } from '@kbn/reporting-plugin/server/routes/lib';
 import { lastValueFrom } from 'rxjs';
+import { authorizedUserPreRouting, getCounters } from '../lib';
 import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
 import { generatePngObservable } from '../..';
 

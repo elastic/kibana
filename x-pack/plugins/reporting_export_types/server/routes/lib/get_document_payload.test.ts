@@ -6,14 +6,17 @@
  */
 
 import { Readable } from 'stream';
-import { CSV_JOB_TYPE, PDF_JOB_TYPE } from '../../../common/constants';
-import { ContentStream, getContentStream, statuses } from '../../lib';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
+import { CSV_JOB_TYPE, PDF_JOB_TYPE } from '@kbn/reporting-plugin/common/constants';
+import { ContentStream, getContentStream, statuses } from '@kbn/reporting-plugin/server/lib';
+import {
+  createMockConfigSchema,
+  createMockReportingCore,
+} from '@kbn/reporting-plugin/server/test_helpers';
 import { jobsQueryFactory } from './jobs_query';
 import { getDocumentPayloadFactory } from './get_document_payload';
-import { ReportApiJSON } from '../../../common/types';
+import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
 
-jest.mock('../../lib/content_stream');
+jest.mock('@kbn/reporting-plugin/server/lib/content_stream');
 jest.mock('./jobs_query');
 
 describe('getDocumentPayload', () => {

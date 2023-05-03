@@ -9,9 +9,9 @@ import type { DocLinksServiceSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { API_DIAGNOSE_URL } from '@kbn/reporting-plugin/common/constants';
 import { ReportingCore } from '@kbn/reporting-plugin/server';
-import { authorizedUserPreRouting, getCounters } from '@kbn/reporting-plugin/server/routes/lib';
 import { lastValueFrom } from 'rxjs';
 import type { DiagnosticResponse } from '.';
+import { authorizedUserPreRouting, getCounters } from '../lib';
 
 const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
   'error while loading shared libraries': i18n.translate(

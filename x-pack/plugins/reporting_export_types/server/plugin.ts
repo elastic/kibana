@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, PluginInitializerContext, Logger, CoreStart, CoreSetup } from '@kbn/core/server';
+import { Plugin, PluginInitializerContext, Logger, CoreStart } from '@kbn/core/server';
 import { ReportingCore } from '@kbn/reporting-plugin/server';
 import { ReportingConfigType } from '@kbn/reporting-plugin/server/config';
 import type {
@@ -24,23 +24,25 @@ import {
   getTypePngV2,
   getTypePrintablePdf,
   getTypePrintablePdfV2,
+  registerRoutes,
 } from '.';
 import { setFieldFormats } from './services/services';
 
 export interface ExportTypesPluginSetupDependencies {
   reporting: ReportingSetup;
+  routes: ReportingCore['pluginSetup'];
 }
 
 /** This plugin creates the export types in export type definitions to be registered in the Reporting Export Type Registry */
 export class ExportTypesPlugin implements Plugin<void, void> {
   private logger: Logger;
-  private reportingCore?: ReportingCore;
+  private reportingCore!: ReportingCore;
 
   constructor(private initContext: PluginInitializerContext<ReportingConfigType>) {
     this.logger = initContext.logger.get();
   }
 
-  public setup(core: CoreSetup, { reporting }: ExportTypesPluginSetupDependencies) {
+  public setup({}, { reporting }: ExportTypesPluginSetupDependencies) {
     type CreateFnType = CreateJobFn<any, any>; // can not specify params types because different type of params are not assignable to each other
     type RunFnType = any; // can not specify because ImmediateExecuteFn is not assignable to RunTaskFn
     const getTypeFns: Array<() => ExportTypeDefinition<CreateFnType | null, RunFnType>> = [
@@ -59,7 +61,7 @@ export class ExportTypesPlugin implements Plugin<void, void> {
     });
 
     // Routes
-    reporting.registerRoutes(, this.logger);
+    registerRoutes(this.reportingCore, this.logger);
   }
 
   // do nothing

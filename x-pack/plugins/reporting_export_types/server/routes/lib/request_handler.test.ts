@@ -7,14 +7,17 @@
 
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { ReportingCore } from '../..';
-import { Report, ReportingStore } from '../../lib/store';
-import { ReportApiJSON } from '../../lib/store/report';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
-import { ReportingRequestHandlerContext, ReportingSetup } from '../../types';
+import { ReportingCore } from '@kbn/reporting-plugin/server';
+import { Report, ReportingStore } from '@kbn/reporting-plugin/server/lib/store';
+import { ReportApiJSON } from '@kbn/reporting-plugin/server/lib/store/report';
+import {
+  createMockConfigSchema,
+  createMockReportingCore,
+} from '@kbn/reporting-plugin/server/test_helpers';
+import { ReportingRequestHandlerContext, ReportingSetup } from '@kbn/reporting-plugin/server/types';
 import { JobParamsPDFDeprecated, RequestHandler, TaskPayloadPDF } from './request_handler';
 
-jest.mock('../../lib/crypto', () => ({
+jest.mock('@kbn/reporting-plugin/server/lib/crypto', () => ({
   cryptoFactory: () => ({
     encrypt: () => `hello mock cypher text`,
   }),
