@@ -44,6 +44,7 @@ const columns: Array<EuiBasicTableColumn<MaintenanceWindowFindResponse>> = [
   {
     field: 'status',
     name: i18n.TABLE_STATUS,
+    'data-test-subj': 'maintenance-windows-column-status',
     render: (status: MaintenanceWindowStatus) => {
       return (
         <EuiBadge color={STATUS_DISPLAY[status].color}>{STATUS_DISPLAY[status].label}</EuiBadge>
@@ -159,6 +160,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
 
     return (
       <EuiInMemoryTable
+        data-test-subj="maintenance-windows-list"
         css={tableCss}
         itemId="id"
         loading={loading || isLoadingFinish || isLoadingArchive || isLoadingFinishAndArchive}
