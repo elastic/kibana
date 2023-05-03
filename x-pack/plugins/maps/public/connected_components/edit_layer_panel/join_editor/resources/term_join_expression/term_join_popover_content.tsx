@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import {
-  EuiPopover,
   EuiPopoverTitle,
   EuiFormRow,
   EuiComboBox,
@@ -64,10 +62,10 @@ export function TermJoinPopoverContent(props: Props) {
   };
 
   function onLeftFieldChange(selectedFields: Array<EuiComboBoxOptionOption<JoinField>>) {
-    if (selectedFields.length === 0) {
-      return;
+    const leftField = selectedFields?.[0]?.value?.name
+    if (leftField) {
+      props.onLeftFieldChange(leftField);
     }
-    props.onLeftFieldChange(selectedFields[0].value.name);
   };
 
   function onRightFieldChange(term?: string) {
@@ -139,7 +137,7 @@ export function TermJoinPopoverContent(props: Props) {
       >
         <IndexPatternSelect
           placeholder={getDataViewSelectPlaceholder()}
-          indexPatternId={props.sourceDescriptor.indexPatternId}
+          indexPatternId={props.sourceDescriptor.indexPatternId ?? ''}
           onChange={onRightDataViewChange}
           isClearable={false}
         />
@@ -163,7 +161,7 @@ export function TermJoinPopoverContent(props: Props) {
       >
         <SingleFieldSelect
           placeholder={inputStrings.fieldSelectPlaceholder}
-          value={props.sourceDescriptor.term}
+          value={props.sourceDescriptor.term ?? null}
           onChange={onRightFieldChange}
           fields={getTermsFields(props.rightFields)}
           isClearable={false}

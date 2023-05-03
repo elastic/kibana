@@ -18,7 +18,9 @@ import { WhereExpression } from './where_expression';
 import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
 import { GlobalTimeCheckbox } from '../../../../components/global_time_checkbox';
 import {
+  AbstractESJoinSourceDescriptor,
   AggDescriptor,
+  ESDistanceSourceDescriptor,
   ESTermSourceDescriptor,
   JoinDescriptor,
   JoinSourceDescriptor,
@@ -98,14 +100,15 @@ export class Join extends Component<Props, State> {
   };
 
   _onRightSourceDescriptorChange = (sourceDescriptor: Partial<JoinSourceDescriptor>) => {
-    if (this.state.indexPattern?.id !== sourceDescriptor.indexPatternId) {
+    const indexPatternId = (sourceDescriptor as Partial<AbstractESJoinSourceDescriptor>).indexPatternId;
+    if (this.state.indexPattern?.id !== indexPatternId) {
       this.setState({
         indexPattern: undefined,
         rightFields: [],
         loadError: undefined,
       });
-      if (sourceDescriptor.indexPatternId) {
-        this._loadRightFields(sourceDescriptor.indexPatternId);
+      if (indexPatternId) {
+        this._loadRightFields(indexPatternId);
       }
     }
 
@@ -123,7 +126,7 @@ export class Join extends Component<Props, State> {
       right: {
         ...this.props.join.right,
         metrics,
-      } as ESTermSourceDescriptor,
+      } as Partial<JoinSourceDescriptor>,
     });
   };
 
@@ -133,7 +136,7 @@ export class Join extends Component<Props, State> {
       right: {
         ...this.props.join.right,
         whereQuery,
-      } as ESTermSourceDescriptor,
+      } as Partial<JoinSourceDescriptor>,
     });
   };
 
@@ -143,7 +146,7 @@ export class Join extends Component<Props, State> {
       right: {
         ...this.props.join.right,
         applyGlobalQuery,
-      } as ESTermSourceDescriptor,
+      } as Partial<JoinSourceDescriptor>,
     });
   };
 
@@ -153,19 +156,19 @@ export class Join extends Component<Props, State> {
       right: {
         ...this.props.join.right,
         applyGlobalTime,
-      } as ESTermSourceDescriptor,
+      } as Partial<JoinSourceDescriptor>,
     });
   };
 
   render() {
     const { join, onRemove, leftFields, leftSourceName } = this.props;
     const { rightFields, indexPattern } = this.state;
-    const right = join?.right ?? {} as Partial<JoinSourceDescriptor>;
+    const right = (join?.right ?? {}) as Partial<AbstractESJoinSourceDescriptor>;
     
     let isJoinConfigComplete = false;
     let joinExpression;
     if (right.type === SOURCE_TYPES.ES_TERM_SOURCE) {
-      isJoinConfigComplete = join.leftField && isTermSourceComplete(right as Partial<ESTermSourceDescriptor>);
+      isJoinConfigComplete = join.leftField !== undefined && isTermSourceComplete(right as Partial<ESTermSourceDescriptor>);
       joinExpression = (
         <TermJoinExpression
           leftSourceName={leftSourceName}
@@ -178,7 +181,7 @@ export class Join extends Component<Props, State> {
         />
       )
     } else if (isSpatialJoin(this.props.join)) {
-      isJoinConfigComplete = join.leftField && isSpatialSourceComplete(right as Partial<ESDistanceSourceDescriptor>);
+      isJoinConfigComplete = join.leftField !== undefined && isSpatialSourceComplete(right as Partial<ESDistanceSourceDescriptor>);
       joinExpression = (
         <SpatialJoinExpression
           sourceDescriptor={right as Partial<ESDistanceSourceDescriptor>}
@@ -187,7 +190,7 @@ export class Join extends Component<Props, State> {
       )
     } else {
       joinExpression = (
-        <EuiText size="small">
+        <EuiText size="s">
           <p>
             <EuiTextColor color="warning">
               {i18n.translate('xpack.maps.layerPanel.join.joinExpression.noEditorMsg', {
@@ -246,7 +249,7 @@ export class Join extends Component<Props, State> {
         <EuiFlexItem grow={false}>
           <WhereExpression
             indexPattern={indexPattern}
-            whereQuery={right.whereQuery}
+            whereQuery={(right as Partial<AbstractESJoinSourceDescriptor>).whereQuery}
             onChange={this._onWhereQueryChange}
           />
         </EuiFlexItem>
