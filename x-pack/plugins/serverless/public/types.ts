@@ -10,8 +10,9 @@ import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/pu
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ServerlessPluginStart {}
+export interface ServerlessPluginStart {
+  setNavigation: (navigation: JSX.Element) => void;
+}
 
 export interface ServerlessPluginSetupDependencies {
   management: ManagementSetup;

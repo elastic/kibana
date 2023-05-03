@@ -62,7 +62,9 @@ export class ServerlessPlugin
     core.chrome.setChromeStyle('project');
     management.setIsSidebarEnabled(false);
 
-    return {};
+    return {
+      setNavigation: (navigation: JSX.Element) => core.chrome.setProjectNavigation(navigation),
+    };
   }
 
   public stop() {}

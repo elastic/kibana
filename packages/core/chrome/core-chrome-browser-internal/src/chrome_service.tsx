@@ -121,6 +121,7 @@ export class ChromeService {
     const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
     const chromeStyle$ = new BehaviorSubject<ChromeStyle>('classic');
+    const projectNavigation$ = new BehaviorSubject<JSX.Element | undefined>(undefined);
 
     const getKbnVersionClass = () => {
       // we assume that the version is valid and has the form 'X.X.X'
@@ -170,6 +171,10 @@ export class ChromeService {
       chromeStyle$.next(style);
     };
 
+    const setProjectNavigation = (navigation: JSX.Element) => {
+      projectNavigation$.next(navigation);
+    };
+
     const isIE = () => {
       const ua = window.navigator.userAgent;
       const msie = ua.indexOf('MSIE '); // IE 10 or older
@@ -211,14 +216,22 @@ export class ChromeService {
     }
 
     const getHeaderComponent = () => {
-      const Component = ({ style$ }: { style$: typeof chromeStyle$ }) => {
+      const Component = ({
+        style$,
+        navigation$,
+      }: {
+        style$: typeof chromeStyle$;
+        navigation$: typeof projectNavigation$;
+      }) => {
         if (style$.getValue() === 'project') {
+          const navigation = navigation$.getValue();
           return (
             <ProjectHeader
               {...{
                 application,
                 globalHelpExtensionMenuLinks$,
               }}
+              navigation={navigation}
               actionMenu$={application.currentActionMenu$}
               breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
               helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
@@ -260,7 +273,7 @@ export class ChromeService {
           />
         );
       };
-      return <Component {...{ style$: chromeStyle$ }} />;
+      return <Component {...{ style$: chromeStyle$, navigation$: projectNavigation$ }} />;
     };
 
     return {
@@ -335,6 +348,7 @@ export class ChromeService {
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
       setChromeStyle,
       getChromeStyle$: () => chromeStyle$.pipe(takeUntil(this.stop$)),
+      setProjectNavigation,
     };
   }
 
