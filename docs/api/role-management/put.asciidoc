@@ -26,7 +26,7 @@ To use the create or update role API, you must have the `manage_security` cluste
 
 `elasticsearch`::
   (Optional, object) {es} cluster and index privileges. Valid keys include
-  `cluster`, `indices`, and `run_as`. For more information, see
+  `cluster`, `indices`, `remote_indices`, and `run_as`. For more information, see
   {ref}/defining-roles.html[Defining roles].
 
 `kibana`::
@@ -63,7 +63,7 @@ To use the create or update role API, you must have the `manage_security` cluste
 `204`::
   Indicates a successful call.
 
-'409'::
+`409`::
   When `createOnly` is true, indicates a conflict with an existing role.
 
 ==== Examples
@@ -74,60 +74,32 @@ Grant access to various features in all spaces:
 --------------------------------------------------
 $ curl -X PUT api/security/role/my_kibana_role
 {
-  "metadata" : {
-    "version" : 1
+  "metadata": {
+    "version": 1
   },
   "elasticsearch": {
-    "cluster" : [ ],
-    "indices" : [ ]
+    "cluster": [ ],
+    "indices": [ ]
   },
   "kibana": [
     {
-      "base": [],
+      "base": [ ],
       "feature": {
-       "discover": [
-          "all"
-        ],
-        "visualize": [
-          "all"
-        ],
-        "dashboard": [
-          "all"
-        ],
-        "dev_tools": [
-          "read"
-        ],
-        "advancedSettings": [
-          "read"
-        ],
-        "indexPatterns": [
-          "read"
-        ],
-        "graph": [
-          "all"
-        ],
-        "apm": [
-          "read"
-        ],
-        "maps": [
-          "read"
-        ],
-        "canvas": [
-          "read"
-        ],
-        "infrastructure": [
-          "all"
-        ],
-        "logs": [
-          "all"
-        ],
-        "uptime": [
-          "all"
-        ]
+       "discover": [ "all" ],
+        "visualize": [ "all" ],
+        "dashboard": [ "all" ],
+        "dev_tools": [ "read" ],
+        "advancedSettings": [ "read" ],
+        "indexPatterns": [ "read" ],
+        "graph": [ "all" ],
+        "apm": [ "read" ],
+        "maps": [ "read" ],
+        "canvas": [ "read" ],
+        "infrastructure": [ "all" ],
+        "logs": [ "all" ],
+        "uptime": [ "all"  ]
       },
-      "spaces": [
-        "*"
-      ]
+      "spaces": [ "*" ]
     }
   ]
 }
@@ -140,22 +112,20 @@ Grant dashboard-only access to only the Marketing space:
 --------------------------------------------------
 $ curl -X PUT api/security/role/my_kibana_role
 {
-  "metadata" : {
-    "version" : 1
+  "metadata": {
+    "version": 1
   },
   "elasticsearch": {
-    "cluster" : [ ],
-    "indices" : [ ]
+    "cluster": [ ],
+    "indices": [ ]
   },
   "kibana": [
     {
-      "base": [],
+      "base": [ ],
       "feature": {
-        "dashboard": ["read"]
+        "dashboard": [ "read" ]
       },
-      "spaces": [
-        "marketing"
-      ]
+      "spaces": [ "marketing" ]
     }
   ]
 }
@@ -168,21 +138,18 @@ Grant full access to all features in the Default space:
 --------------------------------------------------
 $ curl -X PUT api/security/role/my_kibana_role
 {
-  "metadata" : {
-    "version" : 1
+  "metadata": {
+    "version": 1
   },
   "elasticsearch": {
-    "cluster" : [ ],
-    "indices" : [ ]
+    "cluster": [ ],
+    "indices": [ ]
   },
   "kibana": [
     {
-      "base": ["all"],
-      "feature": {
-      },
-      "spaces": [
-        "default"
-      ]
+      "base": [ "all" ],
+      "feature": { },
+      "spaces": [ "default" ]
     }
   ]
 }
@@ -195,30 +162,25 @@ Grant different access to different spaces:
 --------------------------------------------------
 $ curl -X PUT api/security/role/my_kibana_role
 {
-  "metadata" : {
-    "version" : 1
+  "metadata": {
+    "version": 1
   },
   "elasticsearch": {
-    "cluster" : [ ],
-    "indices" : [ ]
+    "cluster": [ ],
+    "indices": [ ]
   },
   "kibana": [
     {
-      "base": [],
+      "base": [ ],
       "feature": {
-        "discover": ["all"],
-        "dashboard": ["all"]
+        "discover": [ "all" ],
+        "dashboard": [ "all" ]
       },
-      "spaces": [
-        "default"
-      ]
+      "spaces": [ "default" ]
     },
     {
-      "base": ["read"],
-      "spaces": [
-        "marketing",
-        "sales"
-      ]
+      "base": [ "read"] ,
+      "spaces": [ "marketing", "sales" ]
     }
   ]
 }
@@ -231,28 +193,30 @@ Grant access to {kib} and {es}:
 --------------------------------------------------
 $ curl -X PUT api/security/role/my_kibana_role
 {
-  "metadata" : {
-    "version" : 1
+  "metadata": {
+    "version": 1
   },
   "elasticsearch": {
-    "cluster" : [ "all" ],
-    "indices" : [ {
-      "names" : [ "index1", "index2" ],
-      "privileges" : [ "all" ],
-      "field_security" : {
-        "grant" : [ "title", "body" ]
-      },
-      "query" : "{\"match\": {\"title\": \"foo\"}}"
-    } ]
+    "cluster": [ "all" ],
+    "indices": [
+      {
+        "names": [ "index1", "index2" ],
+        "privileges": [ "all" ]
+      }
+    ],
+    "remote_indices": [
+      {
+        "clusters": [ "remote_cluster1" ],
+        "names": [ "remote_index1", "remote_index2" ],
+        "privileges": [ "all" ]
+      }
+    ]
   },
   "kibana": [
     {
-      "base": ["all"],
-      "feature": {
-      },
-      "spaces": [
-        "default"
-      ]
+      "base": [ "all" ],
+      "feature": { },
+      "spaces": [ "default" ]
     }
   ]
 }
