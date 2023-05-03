@@ -176,8 +176,13 @@ export class TaskPollingLifecycle {
               const capacity = this.pool.availableWorkers;
               if (!capacity) {
                 // if there isn't capacity, emit a load event so that we can expose how often
-                // high load causes the poller to skip work (work isn'tcalled when there is no capacity)
+                // high load causes the poller to skip work (work isn't called when there is no capacity)
                 this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
+
+                // Emit event indicating task manager utilization
+                this.emitEvent(
+                  asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad))
+                );
               }
               return capacity;
             },
@@ -187,7 +192,16 @@ export class TaskPollingLifecycle {
             // (such as polling for new work, marking tasks as running etc.) but does not
             // include the time of actually running the task
             workTimeout: pollInterval * maxPollInactivityCycles,
-          }),
+          }).pipe(
+            tap(
+              mapOk(() => {
+                // Emit event indicating task manager utilization % at the end of a polling cycle
+                this.emitEvent(
+                  asTaskManagerStatEvent('workerUtilization', asOk(this.pool.workerLoad))
+                );
+              })
+            )
+          ),
         {
           heartbeatInterval: pollInterval,
           // Time out the poller itself if it has failed to complete the entire stream for a certain amount of time.
