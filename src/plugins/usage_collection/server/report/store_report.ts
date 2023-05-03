@@ -37,6 +37,7 @@ export async function storeReport(
         {
           id: savedObjectId,
           overwrite: true,
+          refresh: false,
         }
       );
     }),
@@ -51,9 +52,12 @@ export async function storeReport(
         };
       })
       .map(async ({ savedObjectId, incrementBy }) => {
-        return await internalRepository.incrementCounter('ui-metric', savedObjectId, [
-          { fieldName: 'count', incrementBy },
-        ]);
+        return await internalRepository.incrementCounter(
+          'ui-metric',
+          savedObjectId,
+          [{ fieldName: 'count', incrementBy }],
+          { refresh: false }
+        );
       })
       .value(),
     // UI Counters

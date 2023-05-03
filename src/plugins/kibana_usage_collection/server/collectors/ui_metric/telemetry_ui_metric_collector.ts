@@ -31,10 +31,9 @@ export function registerUiMetricUsageCollector(
     hidden: false,
     namespaceType: 'agnostic',
     mappings: {
+      dynamic: false,
       properties: {
-        count: {
-          type: 'integer',
-        },
+        // count: { type: 'integer'},
       },
     },
   });
