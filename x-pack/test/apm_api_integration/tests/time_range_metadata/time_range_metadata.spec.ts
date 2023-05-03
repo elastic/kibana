@@ -15,8 +15,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   getTransactionEvents,
   subtractDateDifference,
-  overwriteSynthEsClientPipeline,
-  deleteSummaryFieldTransform,
+  overwriteSynthPipelineWithSummaryFieldDeleteTransform,
 } from './generate_data';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -90,22 +89,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const { previousStart, previousEnd } = subtractDateDifference(localStart, localEnd);
           const previousDataWithoutSummaryField = getTransactionEvents(previousStart, previousEnd);
           synthtraceEsClient.pipeline(
-            overwriteSynthEsClientPipeline({
+            overwriteSynthPipelineWithSummaryFieldDeleteTransform({
               synthtraceEsClient,
-              reset: false,
-              additionalTransform: deleteSummaryFieldTransform,
             })
           );
           await synthtraceEsClient.index([...previousDataWithoutSummaryField]);
         });
         after(() => {
           synthtraceEsClient.clean();
-          synthtraceEsClient.pipeline(
-            overwriteSynthEsClientPipeline({
-              synthtraceEsClient,
-              reset: true,
-            })
-          );
+          synthtraceEsClient.pipeline(synthtraceEsClient.getDefaultPipeline());
         });
         describe('Values for hasDurationSummaryField for transaction metrics', () => {
           it('returns true when summary field is available both inside and outside the range', async () => {

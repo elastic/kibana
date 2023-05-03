@@ -52,7 +52,7 @@ export function subtractDateDifference(start: Moment, end: Moment) {
   return { previousStart: moment(previousStart), previousEnd: moment(previousEnd) };
 }
 
-export function deleteSummaryFieldTransform() {
+function deleteSummaryFieldTransform() {
   return new Transform({
     objectMode: true,
     transform(chunk: any, encoding, callback) {
@@ -62,22 +62,15 @@ export function deleteSummaryFieldTransform() {
   });
 }
 
-export function overwriteSynthEsClientPipeline({
+export function overwriteSynthPipelineWithSummaryFieldDeleteTransform({
   synthtraceEsClient,
-  reset = false,
-  additionalTransform,
 }: {
   synthtraceEsClient: ApmSynthtraceEsClient;
-  reset: boolean;
-  additionalTransform?: () => Transform;
 }) {
   return (base: Readable) => {
     const defaultPipeline = synthtraceEsClient.getDefaultPipeline()(base);
-    if (reset) {
-      return defaultPipeline;
-    }
-    return additionalTransform
-      ? (defaultPipeline as unknown as NodeJS.ReadableStream).pipe(additionalTransform())
-      : defaultPipeline;
+    return (defaultPipeline as unknown as NodeJS.ReadableStream).pipe(
+      deleteSummaryFieldTransform()
+    );
   };
 }

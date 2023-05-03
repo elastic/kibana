@@ -13,7 +13,7 @@ import { getConfigForDocumentType } from './create_es_client/document_type';
 import { TRANSACTION_DURATION_SUMMARY } from '../../../common/es_fields/apm';
 import { TimeRangeMetadata } from '../../../common/time_range_metadata';
 
-const getRequestQuery = ({
+const getRequest = ({
   documentType,
   rollupInterval,
   filters,
@@ -89,12 +89,12 @@ export async function getDocumentSources({
         meta: {
           checkSummaryFieldExists: false,
         },
-        before: getRequestQuery({
+        before: getRequest({
           documentType,
           rollupInterval,
           filters: [...kql, ...beforeRange],
         }),
-        current: getRequestQuery({
+        current: getRequest({
           documentType,
           rollupInterval,
           filters: [...kql, ...currentRange],
@@ -131,12 +131,12 @@ export async function getDocumentSources({
         meta: {
           checkSummaryFieldExists: true,
         },
-        before: getRequestQuery({
+        before: getRequest({
           documentType,
           rollupInterval,
           filters: [...kql, ...beforeRange, summaryExistsFilter],
         }),
-        current: getRequestQuery({
+        current: getRequest({
           documentType,
           rollupInterval,
           filters: [...kql, ...currentRange, summaryExistsFilter],
@@ -177,16 +177,15 @@ export async function getDocumentSources({
     (source) => source.hasDocBefore
   );
 
-  const sources: TimeRangeMetadata['sources'] = [];
-
-  checkedSources.forEach((source) => {
+  const sourcesWithHasDocs = checkedSources.map((checkedSource) => {
     const {
       documentType,
       hasDocAfter,
       hasDocBefore,
       rollupInterval,
       checkSummaryFieldExists,
-    } = source;
+    } = checkedSource;
+
     const hasDocBeforeOrAfter = hasDocBefore || hasDocAfter;
     // If there is any data before, we require that data is available before
     // this time range to mark this source as available. If we don't do that,
@@ -195,34 +194,35 @@ export async function getDocumentSources({
     // If we only check before, users with a new deployment will use raw transaction
     // events.
     const hasDocs = hasAnySourceDocBefore ? hasDocBefore : hasDocBeforeOrAfter;
+    return {
+      documentType,
+      rollupInterval,
+      checkSummaryFieldExists,
+      hasDocs,
+    };
+  });
 
-    // Default this to true for ServiceTransactionMetric
-    let isSummaryDurationFieldAvailable = true;
-
-    if (!checkSummaryFieldExists) {
-      const equivalentSourceWithSummary = checkedSources.find(
-        (eSource) =>
-          eSource.documentType === documentType &&
-          eSource.rollupInterval === rollupInterval &&
-          eSource.checkSummaryFieldExists
-      );
-      if (equivalentSourceWithSummary) {
-        // This means the document is TransactionMetric
-        const hasSummaryDocBeforeOrAfter =
-          equivalentSourceWithSummary.hasDocBefore ||
-          equivalentSourceWithSummary.hasDocAfter;
-        isSummaryDurationFieldAvailable = hasAnySourceDocBefore
-          ? equivalentSourceWithSummary.hasDocBefore
-          : hasSummaryDocBeforeOrAfter;
-      }
-      sources.push({
+  const sources: TimeRangeMetadata['sources'] = sourcesWithHasDocs
+    .filter((source) => !source.checkSummaryFieldExists)
+    .map((checkedSource) => {
+      const { documentType, hasDocs, rollupInterval } = checkedSource;
+      return {
         documentType,
         rollupInterval,
         hasDocs,
-        hasDurationSummaryField: isSummaryDurationFieldAvailable,
-      });
-    }
-  });
+        hasDurationSummaryField:
+          documentType === ApmDocumentType.ServiceTransactionMetric ||
+          Boolean(
+            sourcesWithHasDocs.find((eSource) => {
+              return (
+                eSource.documentType === documentType &&
+                eSource.rollupInterval === rollupInterval &&
+                eSource.checkSummaryFieldExists
+              );
+            })?.hasDocs
+          ),
+      };
+    });
 
   return sources.concat({
     documentType: ApmDocumentType.TransactionEvent,
