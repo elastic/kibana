@@ -35,6 +35,10 @@
     "@kbn/safer-lodash-set",
     "@kbn/generate-csv",
     "@kbn/reporting-common",
+    "@kbn/core-test-helpers-test-utils",
+    "@kbn/reporting-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",
