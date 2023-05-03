@@ -344,17 +344,9 @@ describe('Matrix Histogram Component', () => {
       );
     });
 
-    test('it should render visualization count as subtitle when buckets are not empty', () => {
+    test('it should render 0 as subtitle when buckets are empty', () => {
       mockUseVisualizationResponse.mockReturnValue([
         { aggregations: [{ buckets: [] }], hits: { total: 999 } },
-      ]);
-      mockUseMatrix.mockReturnValue([
-        false,
-        {
-          data: [],
-          inspect: false,
-          totalCount: 0,
-        },
       ]);
       wrapper.setProps({ endDate: 100 });
       wrapper.update();
