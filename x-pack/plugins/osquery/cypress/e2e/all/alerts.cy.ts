@@ -36,7 +36,12 @@ import {
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { preparePack } from '../../tasks/packs';
-import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
+import {
+  closeModalIfVisible,
+  closeToastIfVisible,
+  generateRandomStringName,
+  interceptCaseId,
+} from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { OSQUERY_POLICY } from '../../screens/fleet';
@@ -367,6 +372,59 @@ describe('Alert Event Details', () => {
     });
   });
 
+  describe('Case creation', () => {
+    let ruleId: string;
+    let ruleName: string;
+    let packId: string;
+    let packName: string;
+    let caseId: string;
+    const packData = packFixture();
+
+    before(() => {
+      loadPack(packData).then((data) => {
+        packId = data.id;
+        packName = data.attributes.name;
+      });
+      loadRule(true).then((data) => {
+        ruleId = data.id;
+        ruleName = data.name;
+      });
+      interceptCaseId((id) => {
+        caseId = id;
+      });
+    });
+
+    after(() => {
+      cleanupPack(packId);
+      cleanupRule(ruleId);
+      cleanupCase(caseId);
+    });
+
+    it('runs osquery against alert and creates a new case', () => {
+      const [caseName, caseDescription] = generateRandomStringName(2);
+      loadRuleAlerts(ruleName);
+      cy.getBySel('expand-event').first().click({ force: true });
+      cy.getBySel('take-action-dropdown-btn').click();
+      cy.getBySel('osquery-action-item').click();
+      cy.contains('Run a set of queries in a pack').wait(500).click();
+      cy.getBySel('select-live-pack').within(() => {
+        cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
+      });
+      submitQuery();
+      cy.get('[aria-label="Add to Case"]').first().click();
+      cy.getBySel('cases-table-add-case-filter-bar').click();
+      cy.getBySel('create-case-flyout').should('be.visible');
+      cy.getBySel('caseTitle').within(() => {
+        cy.getBySel('input').type(caseName);
+      });
+      cy.getBySel('caseDescription').within(() => {
+        cy.getBySel('euiMarkdownEditorTextArea').type(caseDescription);
+      });
+      cy.getBySel('create-case-submit').click();
+      cy.contains(`An alert was added to "${caseName}"`);
+    });
+  });
+
   describe('Case', () => {
     let ruleId: string;
     let ruleName: string;
@@ -549,7 +607,7 @@ describe('Alert Event Details', () => {
             });
         });
       cy.contains(timelineRegex);
-      cy.contains('Untitled timeline').click();
+      cy.getBySel('flyoutBottomBar').contains('Untitled timeline').click();
       cy.contains(filterRegex);
     });
   });
