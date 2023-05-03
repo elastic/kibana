@@ -41,12 +41,12 @@ export function JoinDocumentationPopover() {
           <p>
             <FormattedMessage
               id="xpack.maps.joinDocs.intro"
-              defaultMessage="Joins add metrics that are used for data driven styling and tooltip content."
+              defaultMessage="Joins add metrics to layer features for data driven styling and tooltip content."
             />{' '}
             <i>
               <FormattedMessage
                 id="xpack.maps.joinDocs.noMatches"
-                defaultMessage="Features that do have a matches are not visible on the map."
+                defaultMessage="Layer features that do have a matches are not visible on the map."
               />
             </i>
           </p>
