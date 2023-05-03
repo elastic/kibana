@@ -160,6 +160,14 @@ export const errorActionRequired = i18n.translate('xpack.cloudDefend.errorAction
   defaultMessage: 'At least one action is required.',
 });
 
+export const errorBlockActionRequiresTargetFilePath = i18n.translate(
+  'xpack.cloudDefend.errorBlockActionRequiresTargetFilePath',
+  {
+    defaultMessage:
+      'The "block" action requires targetFilePath be included in all "match" selectors using FIM operations (createFile, modifyFile or deleteFile) or in at least one "exclude" selector.',
+  }
+);
+
 export const getSelectorIconTooltip = (type: SelectorType) => {
   switch (type) {
     case 'process':

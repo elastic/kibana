@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState, useCallback, ChangeEvent } from 'react';
+import React, { useMemo, useState, useCallback, ChangeEvent, useEffect } from 'react';
 import {
   EuiIcon,
   EuiToolTip,
@@ -36,7 +36,7 @@ import {
   ControlFormErrorMap,
 } from '../../types';
 import * as i18n from '../control_general_view/translations';
-import { getSelectorTypeIcon } from '../../common/utils';
+import { getSelectorTypeIcon, validateBlockRestrictions } from '../../common/utils';
 
 // max number of names to show in title (in collapsed state)
 // selectorA, selectorB, selectorC, selectorD [+5]
@@ -64,21 +64,53 @@ export const ControlGeneralViewResponse = ({
   const [accordionState, setAccordionState] = useState<'open' | 'closed'>(
     responses.length - 1 === index ? 'open' : 'closed'
   );
+
+  const logSelected = response.actions.includes('log');
+  const alertSelected = response.actions.includes('alert');
+  const blockSelected = response.actions.includes('block');
+
+  const errors = useMemo(() => {
+    const errs: ControlFormErrorMap = {};
+
+    if (response.match.length === 0) {
+      errs.match = [i18n.errorValueRequired];
+    }
+
+    if (response.actions.length === 0) {
+      errs.actions = [i18n.errorActionRequired];
+    }
+
+    if (blockSelected) {
+      const blockErrors = validateBlockRestrictions(selectors, [response]);
+      if (blockErrors.length > 0) {
+        errs.response = blockErrors;
+      }
+    }
+
+    return errs;
+  }, [response, selectors, blockSelected]);
+
+  const errorList = useMemo(() => Object.values(errors), [errors]);
+
   const onResponseChange = useCallback(
     (resp: Response, i: number) => {
-      const hasMatch = resp.match.length > 0;
-      const hasActions = resp.actions.length > 0;
-
-      if (!hasMatch || !hasActions) {
+      if (errorList.length) {
         resp.hasErrors = true;
-      } else {
-        delete resp.hasErrors;
       }
 
       onChange(resp, i);
     },
-    [onChange]
+    [errorList.length, onChange]
   );
+
+  useEffect(() => {
+    const hasErrors = errorList.length > 0;
+    const changed = (hasErrors && !response.hasErrors) || (!hasErrors && response.hasErrors);
+    if (changed) {
+      response.hasErrors = hasErrors;
+      onChange(response, index);
+    }
+  }, [errorList.length, index, onChange, response]);
 
   const onTogglePopover = useCallback(() => {
     setPopoverOpen(!isPopoverOpen);
@@ -160,10 +192,6 @@ export const ControlGeneralViewResponse = ({
     onResponseChange(updatedResponse, index);
   }, [index, onResponseChange, response]);
 
-  const logSelected = response.actions.includes('log');
-  const alertSelected = response.actions.includes('alert');
-  const blockSelected = response.actions.includes('block');
-
   const onToggleAction = useCallback(
     (e: ChangeEvent) => {
       const action = e.currentTarget?.id?.match(ACTION_ID_REGEX)?.[1] as ResponseAction;
@@ -190,20 +218,6 @@ export const ControlGeneralViewResponse = ({
     [index, onResponseChange, response]
   );
 
-  const errors = useMemo(() => {
-    const errs: ControlFormErrorMap = {};
-
-    if (response.match.length === 0) {
-      errs.match = [i18n.errorValueRequired];
-    }
-
-    if (response.actions.length === 0) {
-      errs.actions = [i18n.errorActionRequired];
-    }
-
-    return errs;
-  }, [response.actions.length, response.match.length]);
-
   const onToggleAccordion = useCallback((isOpen: boolean) => {
     setAccordionState(isOpen ? 'open' : 'closed');
   }, []);
@@ -223,8 +237,6 @@ export const ControlGeneralViewResponse = ({
       remainingNames: response.match.slice(titleThresholdCollapsed).join(','),
     };
   }, [accordionState, response.match]);
-
-  const errorList = useMemo(() => Object.values(errors), [errors]);
 
   return (
     <EuiAccordion

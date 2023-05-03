@@ -7,6 +7,7 @@
 import yaml from 'js-yaml';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { errorBlockActionRequiresTargetFilePath } from '../components/control_general_view/translations';
 import {
   Selector,
   Response,
@@ -21,6 +22,7 @@ import {
 import {
   MAX_CONDITION_VALUE_LENGTH_BYTES,
   MAX_SELECTORS_AND_RESPONSES_PER_TYPE,
+  FIM_OPERATIONS,
 } from './constants';
 
 export function getInputFromPolicy(policy: NewPackagePolicy, inputId: string) {
@@ -70,6 +72,69 @@ export function getTotalsByType(selectors: Selector[], responses: Response[]) {
   });
 
   return totalsByType;
+}
+
+function selectorsIncludeConditionsForFIMOperations(
+  selectors: Selector[],
+  conditions: SelectorCondition[],
+  selectorNames?: string[],
+  requireForAll?: boolean
+) {
+  const result =
+    selectorNames &&
+    selectorNames.reduce((prev, cur, index) => {
+      const selector = selectors.find((s) => s.name === cur);
+      const usesFIM = selector?.operation?.some((r) => FIM_OPERATIONS.indexOf(r) >= 0);
+      const hasAllConditions =
+        !usesFIM ||
+        !!(
+          selector &&
+          conditions.reduce((p, c) => {
+            return p && selector.hasOwnProperty(c);
+          }, true)
+        );
+
+      if (requireForAll) {
+        if (index === 0) {
+          return hasAllConditions;
+        }
+
+        return prev && hasAllConditions;
+      } else {
+        return prev || hasAllConditions;
+      }
+    }, false);
+
+  return !!result;
+}
+
+export function validateBlockRestrictions(selectors: Selector[], responses: Response[]) {
+  const errors: string[] = [];
+
+  responses.forEach((response) => {
+    if (response.actions.includes('block')) {
+      // check if any selectors are using FIM operations
+      // and verify that targetFilePath is specfied in all 'match' selectors
+      // or at least one 'exclude' selector
+      const excludeUsesTargetFilePath = selectorsIncludeConditionsForFIMOperations(
+        selectors,
+        ['targetFilePath'],
+        response.exclude
+      );
+      const matchSelectorsAllUsingTargetFilePath = selectorsIncludeConditionsForFIMOperations(
+        selectors,
+        ['targetFilePath'],
+        response.match,
+        true
+      );
+
+      if (!(matchSelectorsAllUsingTargetFilePath || excludeUsesTargetFilePath)) {
+        errors.push(errorBlockActionRequiresTargetFilePath);
+      }
+    }
+  });
+
+  return errors;
 }
 
 export function validateMaxSelectorsAndResponses(selectors: Selector[], responses: Response[]) {
@@ -223,12 +288,15 @@ export function getYamlFromSelectorsAndResponses(selectors: Selector[], response
   }, schema);
 
   responses.reduce((current, response: any) => {
-    if (current && response && response.type) {
+    if (current && response) {
       if (current[response.type]) {
-        current[response.type]?.responses.push(response);
+        current[response.type].responses.push(response);
+      } else {
+        current[response.type] = { selectors: [], responses: [response] };
       }
     }
 
+    // the 'any' cast is used so we can keep 'response.type' type safe
     delete response.type;
 
     return current;

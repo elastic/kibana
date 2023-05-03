@@ -11,8 +11,11 @@ import {
   getSelectorConditions,
   conditionCombinationInvalid,
   getRestrictedValuesForCondition,
+  validateBlockRestrictions,
 } from './utils';
 import { MOCK_YAML_CONFIGURATION, MOCK_YAML_INVALID_CONFIGURATION } from '../test/mocks';
+
+import { Selector, Response } from '../types';
 
 describe('getSelectorsAndResponsesFromYaml', () => {
   it('converts yaml into arrays of selectors and responses', () => {
@@ -101,5 +104,151 @@ describe('getRestrictedValuesForCondition', () => {
 
     values = getRestrictedValuesForCondition('process', 'operation');
     expect(values).toEqual(['fork', 'exec']);
+  });
+});
+
+describe('validateBlockRestrictions', () => {
+  it('reports an error when some of the FIM selectors arent using targetFilePath', () => {
+    const selectors: Selector[] = [
+      {
+        type: 'file',
+        name: 'sel1',
+        operation: ['createFile'],
+      },
+      {
+        type: 'file',
+        name: 'sel2',
+        operation: ['modifyFile'],
+      },
+    ];
+
+    const responses: Response[] = [
+      {
+        type: 'file',
+        match: ['sel1', 'sel2'],
+        actions: ['block', 'alert'],
+      },
+    ];
+
+    const errors = validateBlockRestrictions(selectors, responses);
+
+    expect(errors).toHaveLength(1);
+  });
+
+  it('reports an error none of the FIM selectors use targetFilePath', () => {
+    const selectors: Selector[] = [
+      {
+        type: 'file',
+        name: 'sel1',
+        operation: ['createFile'],
+      },
+      {
+        type: 'file',
+        name: 'sel2',
+        operation: ['modifyFile'],
+      },
+    ];
+
+    const responses: Response[] = [
+      {
+        type: 'file',
+        match: ['sel1', 'sel2'],
+        actions: ['block', 'alert'],
+      },
+    ];
+
+    const errors = validateBlockRestrictions(selectors, responses);
+
+    expect(errors).toHaveLength(1);
+  });
+
+  it('passes validation when all FIM selectors (match) use targetFilePath', () => {
+    const selectors: Selector[] = [
+      {
+        type: 'file',
+        name: 'sel1',
+        operation: ['createFile'],
+        targetFilePath: ['/usr/bin/**', '/etc/**'],
+      },
+      {
+        type: 'file',
+        name: 'sel2',
+        operation: ['modifyFile'],
+        targetFilePath: ['/usr/bin/**', '/etc/**'],
+      },
+      {
+        type: 'file',
+        name: 'sel2',
+        operation: ['modifyExecutable'],
+      },
+    ];
+
+    const responses: Response[] = [
+      {
+        type: 'file',
+        match: ['sel1', 'sel2'],
+        actions: ['block', 'alert'],
+      },
+    ];
+
+    const errors = validateBlockRestrictions(selectors, responses);
+
+    expect(errors).toHaveLength(0);
+  });
+
+  it('passes validation w non fim selectors mixed in', () => {
+    const selectors: Selector[] = [
+      {
+        type: 'file',
+        name: 'sel1',
+        operation: ['createFile'],
+        targetFilePath: ['/usr/bin/**', '/etc/**'],
+      },
+      {
+        type: 'file',
+        name: 'sel2',
+        operation: ['createExecutable'],
+      },
+    ];
+
+    const responses: Response[] = [
+      {
+        type: 'file',
+        match: ['sel1', 'sel2'],
+        actions: ['block', 'alert'],
+      },
+    ];
+
+    const errors = validateBlockRestrictions(selectors, responses);
+
+    expect(errors).toHaveLength(0);
+  });
+
+  it('passes validation if at least 1 exclude uses targetFilePath', () => {
+    const selectors: Selector[] = [
+      {
+        type: 'file',
+        name: 'sel1',
+        operation: ['createFile'],
+      },
+      {
+        type: 'file',
+        name: 'excludePaths',
+        targetFilePath: ['/etc/**'],
+      },
+    ];
+
+    const responses: Response[] = [
+      {
+        type: 'file',
+        match: ['sel1'],
+        exclude: ['excludePaths'],
+        actions: ['block', 'alert'],
+      },
+    ];
+
+    const errors = validateBlockRestrictions(selectors, responses);
+
+    expect(errors).toHaveLength(0);
   });
 });
