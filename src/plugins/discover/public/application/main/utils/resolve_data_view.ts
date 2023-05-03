@@ -111,7 +111,8 @@ export async function loadDataView({
 export function resolveDataView(
   ip: DataViewData,
   savedSearch: SavedSearch | undefined,
-  toastNotifications: ToastsStart
+  toastNotifications: ToastsStart,
+  isTextBasedQuery?: boolean
 ) {
   const { loaded: loadedDataView, stateVal, stateValFound } = ip;
 
@@ -145,19 +146,20 @@ export function resolveDataView(
       });
       return ownDataView;
     }
-
-    toastNotifications.addWarning({
-      title: warningTitle,
-      text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
-        defaultMessage:
-          'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
-        values: {
-          loadedDataViewTitle: loadedDataView.getIndexPattern(),
-          loadedDataViewId: loadedDataView.id,
-        },
-      }),
-      'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
-    });
+    if (!Boolean(isTextBasedQuery)) {
+      toastNotifications.addWarning({
+        title: warningTitle,
+        text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
+          defaultMessage:
+            'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
+          values: {
+            loadedDataViewTitle: loadedDataView.getIndexPattern(),
+            loadedDataViewId: loadedDataView.id,
+          },
+        }),
+        'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
+      });
+    }
   }
 
   return loadedDataView;
@@ -168,7 +170,13 @@ export const loadAndResolveDataView = async (
     id,
     dataViewSpec,
     savedSearch,
-  }: { id?: string; dataViewSpec?: DataViewSpec; savedSearch?: SavedSearch },
+    isTextBasedQuery,
+  }: {
+    id?: string;
+    dataViewSpec?: DataViewSpec;
+    savedSearch?: SavedSearch;
+    isTextBasedQuery?: boolean;
+  },
   {
     internalStateContainer,
     services,
@@ -184,6 +192,11 @@ export const loadAndResolveDataView = async (
     dataViewSpec,
     dataViewList: savedDataViews,
   });
-  const nextDataView = resolveDataView(nextDataViewData, savedSearch, services.toastNotifications);
+  const nextDataView = resolveDataView(
+    nextDataViewData,
+    savedSearch,
+    services.toastNotifications,
+    isTextBasedQuery
+  );
   return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
 };

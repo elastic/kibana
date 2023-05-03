@@ -416,6 +416,13 @@ describe('actions', () => {
     );
   });
 
+  test('loadSavedSearch without id containing sql, adding no warning toast with an invalid index', async () => {
+    const url = "/#?_a=(index:abc,query:(sql:'Select * from test'))&_g=()";
+    const { state } = await getState(url, savedSearchMock);
+    await state.actions.loadSavedSearch({ useAppState: true });
+    expect(discoverServiceMock.toastNotifications.addWarning).not.toHaveBeenCalled();
+  });
+
   test('loadSavedSearch with id ignoring invalid index in URL, adding a warning toast', async () => {
     const url = '/#?_a=(index:abc)&_g=()';
     const { state } = await getState(url, savedSearchMock);
