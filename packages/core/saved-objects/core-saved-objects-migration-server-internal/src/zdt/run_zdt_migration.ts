@@ -41,7 +41,7 @@ export interface RunZeroDowntimeMigrationOpts {
   serializer: ISavedObjectsSerializer;
   /** The client to use for communications with ES */
   elasticsearchClient: ElasticsearchClient;
-  /** The node roles of the Kibana instance*/
+  /** The node roles of the Kibana instance */
   nodeRoles: NodeRoles;
 }
 
