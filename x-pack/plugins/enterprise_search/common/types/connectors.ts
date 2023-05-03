@@ -25,6 +25,13 @@ export enum DisplayType {
   DROPDOWN = 'dropdown',
 }
 
+export enum FieldType {
+  STRING = 'str',
+  INTEGER = 'int',
+  LIST = 'list',
+  BOOLEAN = 'bool',
+}
+
 export interface ConnectorConfigProperties {
   default_value: string | number | boolean | null;
   depends_on: Dependency[];
@@ -35,6 +42,7 @@ export interface ConnectorConfigProperties {
   required: boolean;
   sensitive: boolean;
   tooltip: string;
+  type: FieldType;
   ui_restrictions: string[];
   value: string | number | boolean | null;
 }
