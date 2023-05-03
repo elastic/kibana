@@ -32,6 +32,9 @@ export type {
   JobStat,
   MlCapabilitiesResponse,
   MlSummaryJob,
+  UseIndexDataReturnType,
+  EsSorting,
+  RenderCellValue,
 } from './shared';
 
 export type { AnomalySwimlaneEmbeddableInput } from './embeddables';

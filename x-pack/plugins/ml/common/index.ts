@@ -6,6 +6,7 @@
  */
 
 export { ES_CLIENT_TOTAL_HITS_RELATION } from './types/es_client';
+export type { ChartData } from './types/field_histograms';
 export { composeValidators, patternValidator } from './util/validators';
 export { isRuntimeMappings, isRuntimeField } from './util/runtime_field_utils';
 export type { RuntimeMappings } from './types/fields';
