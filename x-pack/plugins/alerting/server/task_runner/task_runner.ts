@@ -337,7 +337,11 @@ export class TaskRunner<
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
       async () => {
-        this.legacyAlertsClient.initialize(alertRawInstances, alertRecoveredRawInstances);
+        this.legacyAlertsClient.initialize(
+          alertRawInstances,
+          alertRecoveredRawInstances,
+          maintenanceWindowIds
+        );
 
         const checkHasReachedAlertLimit = () => {
           const reachedLimit = this.legacyAlertsClient.hasReachedAlertLimit();
@@ -490,10 +494,6 @@ export class TaskRunner<
 
       if (isRuleSnoozed(rule)) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
-      } else if (maintenanceWindowIds.length) {
-        this.logger.debug(
-          `no scheduling of actions for rule ${ruleLabel}: has active maintenance windows ${maintenanceWindowIds}.`
-        );
       } else if (!this.shouldLogAndScheduleActionsForAlerts()) {
         this.logger.debug(
           `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
