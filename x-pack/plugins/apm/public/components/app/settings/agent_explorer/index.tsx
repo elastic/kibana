@@ -146,7 +146,7 @@ export function AgentExplorer() {
         <EuiText color="subdued">
           {i18n.translate('xpack.apm.settings.agentExplorer.descriptionText', {
             defaultMessage:
-              'Agent Explorer Technical Preview provides an inventory and details of deployed Agents.',
+              'Agent Explorer provides an inventory and details of deployed Agents.',
           })}
         </EuiText>
       </EuiFlexItem>
@@ -243,7 +243,7 @@ export function AgentExplorer() {
         <EuiCallOut
           size="s"
           title={i18n.translate('xpack.apm.agentExplorer.callout.24hoursData', {
-            defaultMessage: 'Information based on the lastest 24h',
+            defaultMessage: 'Information based on the last 24h',
           })}
           iconType="clock"
         />
