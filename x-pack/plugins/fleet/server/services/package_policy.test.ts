@@ -45,7 +45,11 @@ import type {
 } from '../../common/types';
 import { packageToPackagePolicy } from '../../common/services';
 
-import { FleetError, PackagePolicyIneligibleForUpgradeError } from '../errors';
+import {
+  FleetError,
+  PackagePolicyIneligibleForUpgradeError,
+  PackagePolicyValidationError,
+} from '../errors';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
@@ -1751,14 +1755,21 @@ describe('Package policy service', () => {
 
       const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      const res = packagePolicyService.bulkUpdate(
+      const toUpdate = { ...mockPackagePolicy, inputs: inputsUpdate };
+
+      const res = await packagePolicyService.bulkUpdate(
         savedObjectsClient,
         elasticsearchClient,
 
-        [{ ...mockPackagePolicy, inputs: inputsUpdate }]
+        [toUpdate]
       );
 
-      await expect(res).rejects.toThrow('cat is a frozen variable and cannot be modified');
+      expect(res.failedPolicies).toHaveLength(1);
+      expect(res.updatedPolicies).toHaveLength(0);
+      expect(res.failedPolicies[0].packagePolicy).toEqual(toUpdate);
+      expect(res.failedPolicies[0].error).toEqual(
+        new PackagePolicyValidationError(`cat is a frozen variable and cannot be modified`)
+      );
     });
 
     it('should allow to update input vars that are frozen with the force flag', async () => {
