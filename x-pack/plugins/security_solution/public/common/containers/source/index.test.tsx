@@ -82,7 +82,13 @@ describe('source/index.tsx', () => {
                     : ['hello', 'world'],
                   fields: mocksSource.indexFields,
                   getIndexPattern: () => 'hello*,world*,refreshed*',
+                  getRuntimeMappings: () => ({
+                    myfield: {
+                      type: 'keyword',
+                    },
+                  }),
                 }),
+              getFieldsForWildcard: async () => Promise.resolve(),
             },
             search: {
               search: jest.fn().mockReturnValue({
