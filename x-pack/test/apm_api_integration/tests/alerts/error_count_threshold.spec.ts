@@ -97,9 +97,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               params: {
                 documents: [
                   {
-                    message: `${errorCountMessage}
-- Transaction name: {{context.transactionName}}
-- Error grouping key: {{context.errorGroupingKey}}`,
+                    message: errorCountMessage,
                     id: actionId,
                   },
                 ],
@@ -134,9 +132,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 - Service name: opbeans-java
 - Environment: production
 - Threshold: 1
-- Triggered value: 15 errors over the last 1 hr
-- Transaction name: tx-java
-- Error grouping key: ${errorGroupingKey}`
+- Triggered value: 15 errors over the last 1 hr`
         );
       });
 
