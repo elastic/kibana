@@ -63,4 +63,23 @@ describe('find', () => {
       expect(call.caseOptions).not.toHaveProperty('rootSearchFields');
     });
   });
+
+  describe('throwErrorIfSearchFieldsAreInvalid', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('invalid searchFields', async () => {
+      const searchFields = ['foobar'];
+
+      // @ts-expect-error
+      const findRequest = createCasesClientMockFindRequest({ searchFields });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrow(
+        'Error: Invalid value "foobar" supplied to "searchFields"'
+      );
+    });
+  });
 });

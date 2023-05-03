@@ -164,6 +164,42 @@ export const CasePostRequestRt = rt.intersection([
   }),
 ]);
 
+const CasesFindRequestSearchFieldsRt = rt.union([
+  rt.literal('closed_at'),
+  rt.literal('closed_by.username'),
+  rt.literal('closed_by.full_name'),
+  rt.literal('closed_by.email'),
+  rt.literal('closed_by.profile_uid'),
+  rt.literal('created_at'),
+  rt.literal('created_by.username'),
+  rt.literal('created_by.full_name'),
+  rt.literal('created_by.email'),
+  rt.literal('created_by.profile_uid'),
+  rt.literal('duration'),
+  rt.literal('description'),
+  rt.literal('connector.id'),
+  rt.literal('connector.name'),
+  rt.literal('connector.type'),
+  rt.literal('connector.fields.key'),
+  rt.literal('connector.fields.value'),
+  rt.literal('external_service.pushed_at'),
+  rt.literal('external_service.pushed_by.username'),
+  rt.literal('external_service.pushed_by.full_name'),
+  rt.literal('external_service.pushed_by.email'),
+  rt.literal('external_service.pushed_by.profile_uid'),
+  rt.literal('external_service.connector_name'),
+  rt.literal('external_service.external_id'),
+  rt.literal('external_service.external_title'),
+  rt.literal('external_service.external_url'),
+  rt.literal('title'),
+  rt.literal('updated_at'),
+  rt.literal('updated_by.username'),
+  rt.literal('updated_by.full_name'),
+  rt.literal('updated_by.email'),
+  rt.literal('updated_by.profile_uid'),
+  rt.literal('settings.syncAlerts'),
+]);
+
 export const CasesFindRequestRt = rt.partial({
   /**
    * Tags to filter by
@@ -190,10 +226,6 @@ export const CasesFindRequestRt = rt.partial({
    */
   defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
   /**
-   * The fields in the entity to return in the response
-   */
-  fields: rt.union([rt.array(rt.string), rt.string]),
-  /**
    * A KQL date. If used all cases created after (gte) the from date will be returned
    */
   from: rt.string,
@@ -212,7 +244,10 @@ export const CasesFindRequestRt = rt.partial({
   /**
    * The fields to perform the simple_query_string parsed query against
    */
-  searchFields: rt.union([rt.array(rt.string), rt.string]),
+  searchFields: rt.union([
+    rt.array(CasesFindRequestSearchFieldsRt),
+    CasesFindRequestSearchFieldsRt,
+  ]),
   /**
    * The root fields to perform the simple_query_string parsed query against
    */
