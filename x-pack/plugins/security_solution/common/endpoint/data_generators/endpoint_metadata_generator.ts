@@ -131,7 +131,7 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
 
     // v8.9 introduced `upload` capability
     if (gte(agentVersion, '8.9.0')) {
-      capabilities.push('upload');
+      capabilities.push('upload_file');
     }
 
     const hostMetadataDoc: HostMetadataInterface = {

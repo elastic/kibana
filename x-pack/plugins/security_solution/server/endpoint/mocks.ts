@@ -40,6 +40,8 @@ import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
+import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
+import { createActionCreateServiceMock } from './services/actions/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { xpackMocks } from '../fixtures';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
@@ -87,6 +89,8 @@ export const createMockEndpointAppContextService = (
   mockManifestManager?: ManifestManager
 ): jest.Mocked<EndpointAppContextService> => {
   const mockEndpointMetadataContext = createEndpointMetadataServiceTestContextMock();
+  const casesClientMock = createCasesClientMock();
+
   return {
     start: jest.fn(),
     stop: jest.fn(),
@@ -95,6 +99,8 @@ export const createMockEndpointAppContextService = (
     getEndpointMetadataService: jest.fn(() => mockEndpointMetadataContext.endpointMetadataService),
     getInternalFleetServices: jest.fn(() => mockEndpointMetadataContext.fleetServices),
     getEndpointAuthz: jest.fn(getEndpointAuthzInitialStateMock),
+    getCasesClient: jest.fn().mockReturnValue(casesClientMock),
+    getActionCreateService: jest.fn().mockReturnValue(createActionCreateServiceMock()),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 

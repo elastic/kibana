@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { Readable } from 'stream';
+import type { ActionCreateService } from '..';
 import type { HapiReadableStream } from '../../../types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
@@ -228,4 +229,12 @@ export const createHapiReadableStreamMock = (): HapiReadableStream => {
   };
 
   return readable;
+};
+
+export const createActionCreateServiceMock = (): jest.Mocked<ActionCreateService> => {
+  const createdActionMock = new EndpointActionGenerator().generateActionDetails();
+
+  return {
+    createAction: jest.fn().mockResolvedValue(createdActionMock),
+  } as unknown as jest.Mocked<ActionCreateService>;
 };
