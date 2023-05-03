@@ -19,6 +19,7 @@ const ruleDesc = 'Rule description';
 const testProps = {
   isLoading: false,
   groupBucket: {
+    selectedGroup: 'kibana.alert.rule.name',
     key: [ruleName, ruleDesc],
     key_as_string: `${ruleName}|${ruleDesc}`,
     doc_count: 98,
