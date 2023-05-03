@@ -45,7 +45,6 @@ The API returns the following:
       "timestamp": "2021-02-16T11:29:05.055Z",
       "value": {
         "request_capacity": 1000,
-        "max_poll_inactivity_cycles": 10,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_running_average_window": 50,
         "monitored_task_execution_thresholds": {
