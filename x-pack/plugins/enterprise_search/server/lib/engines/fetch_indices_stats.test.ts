@@ -12,13 +12,14 @@ describe('fetchIndicesStats lib function', () => {
   const mockClient = {
     asCurrentUser: {
       indices: {
+        exists: jest.fn(),
         stats: jest.fn(),
       },
     },
     asInternalUser: {},
   };
   const indices = ['test-index-name-1', 'test-index-name-2', 'test-index-name-3'];
-  const indexStats1 = {
+  const indexStats = {
     indices: {
       'test-index-name-1': {
         health: 'GREEN',
@@ -37,10 +38,6 @@ describe('fetchIndicesStats lib function', () => {
         },
         uuid: 'YOLLiZ_mSRiDYDk0DJ-p8B',
       },
-    },
-  };
-  const indexStats2 = {
-    indices: {
       'test-index-name-2': {
         health: 'YELLOW',
         primaries: {
@@ -58,10 +55,6 @@ describe('fetchIndicesStats lib function', () => {
         },
         uuid: 'QOLLiZ_mGRiDYD30D2-p8B',
       },
-    },
-  };
-  const indexStats3 = {
-    indices: {
       'test-index-name-3': {
         health: 'RED',
         primaries: {
@@ -104,10 +97,8 @@ describe('fetchIndicesStats lib function', () => {
   });
 
   it('should return hydrated indices', async () => {
-    mockClient.asCurrentUser.indices.stats
-      .mockImplementationOnce(() => indexStats1)
-      .mockImplementationOnce(() => indexStats2)
-      .mockImplementationOnce(() => indexStats3);
+    mockClient.asCurrentUser.indices.exists.mockImplementationOnce(() => true);
+    mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indexStats);
 
     await expect(
       fetchIndicesStats(mockClient as unknown as IScopedClusterClient, indices)
