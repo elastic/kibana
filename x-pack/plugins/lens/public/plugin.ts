@@ -59,6 +59,7 @@ import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -374,7 +375,9 @@ export class LensPlugin {
       version: {
         latest: LATEST_VERSION,
       },
-      name: 'Lens Visualization',
+      name: i18n.translate('xpack.lens.content.name', {
+        defaultMessage: 'Lens Visualization',
+      }),
     });
 
     setupExpressions(
