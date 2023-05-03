@@ -61,7 +61,10 @@ export function transformToExternalModel(
   return {
     ...userAction,
     attributes: {
-      ...userAction.attributes,
+      type: userAction.attributes.type,
+      action: userAction.attributes.action,
+      created_at: userAction.attributes.created_at,
+      created_by: userAction.attributes.created_by,
       comment_id: commentId,
       payload,
     } as UserActionTransformedAttributes,
@@ -104,7 +107,10 @@ function legacyTransformToExternalModel(
   return {
     ...userAction,
     attributes: {
-      ...userAction.attributes,
+      type: userAction.attributes.type,
+      action: userAction.attributes.action,
+      created_at: userAction.attributes.created_at,
+      created_by: userAction.attributes.created_by,
       action_id: userAction.id,
       case_id: caseId,
       comment_id: commentId,
@@ -122,17 +128,22 @@ const addReferenceIdToPayload = (
 
   if (isConnectorUserAction(userActionAttributes) || isCreateCaseUserAction(userActionAttributes)) {
     return {
-      ...userActionAttributes.payload,
       connector: {
-        ...userActionAttributes.payload.connector,
+        name: userActionAttributes.payload.connector.name,
+        type: userActionAttributes.payload.connector.type,
+        fields: userActionAttributes.payload.connector.fields,
         id: connectorId ?? NONE_CONNECTOR_ID,
       },
     };
   } else if (isPushedUserAction(userActionAttributes)) {
     return {
-      ...userAction.attributes.payload,
       externalService: {
-        ...userActionAttributes.payload.externalService,
+        connector_name: userActionAttributes.payload.externalService.connector_name,
+        external_id: userActionAttributes.payload.externalService.external_id,
+        external_title: userActionAttributes.payload.externalService.external_title,
+        external_url: userActionAttributes.payload.externalService.external_url,
+        pushed_at: userActionAttributes.payload.externalService.pushed_at,
+        pushed_by: userActionAttributes.payload.externalService.pushed_by,
         connector_id: connectorId ?? NONE_CONNECTOR_ID,
       },
     };
@@ -145,9 +156,13 @@ const addReferenceIdToPayload = (
       );
 
       return {
-        ...userAction.attributes.payload,
         comment: {
-          ...userActionAttributes.payload.comment,
+          externalReferenceAttachmentTypeId:
+            userActionAttributes.payload.comment.externalReferenceAttachmentTypeId,
+          externalReferenceMetadata: userActionAttributes.payload.comment.externalReferenceMetadata,
+          externalReferenceStorage: userActionAttributes.payload.comment.externalReferenceStorage,
+          owner: userActionAttributes.payload.comment.owner,
+          type: userActionAttributes.payload.comment.type,
           externalReferenceId: externalReferenceId ?? '',
         },
       };
@@ -163,10 +178,11 @@ const addReferenceIdToPayload = (
       );
 
       return {
-        ...userAction.attributes.payload,
         comment: {
-          ...userActionAttributes.payload.comment,
-          ...injectedAttributes,
+          persistableStateAttachmentState: injectedAttributes.persistableStateAttachmentState,
+          persistableStateAttachmentTypeId: injectedAttributes.persistableStateAttachmentTypeId,
+          owner: injectedAttributes.owner,
+          type: injectedAttributes.type,
         },
       };
     }
