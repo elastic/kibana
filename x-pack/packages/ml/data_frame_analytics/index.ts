@@ -58,7 +58,9 @@ export {
 
 export {
   sortExplorationResultsFields,
+  BASIC_NUMERICAL_TYPES,
   DEFAULT_REGRESSION_COLUMNS,
+  EXTENDED_NUMERICAL_TYPES,
   ML__ID_COPY,
   ML__INCREMENTAL_ID,
 } from './src/fields';

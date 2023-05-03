@@ -30,6 +30,7 @@ import {
   isClassificationAnalysis,
   isRegressionAnalysis,
   type DataFrameAnalyticsConfig,
+  INDEX_STATUS,
 } from '@kbn/ml-data-frame-analytics';
 
 import type { DataGridItem } from '../../../../../components/data_grid';
@@ -46,7 +47,7 @@ import {
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
-import { defaultSearchQuery, INDEX_STATUS, SEARCH_SIZE } from '../../../../common';
+import { defaultSearchQuery, SEARCH_SIZE } from '../../../../common';
 
 import {
   replaceTokensInDFAUrlValue,

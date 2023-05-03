@@ -36,6 +36,7 @@ import {
 import { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../../../../contexts/ml';
+import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
 
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
 import { RuntimeMappings as RuntimeMappingsType } from '../../../../../../../common/types/fields';

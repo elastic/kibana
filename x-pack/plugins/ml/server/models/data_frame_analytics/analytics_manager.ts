@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
 import {
+  getAnalysisType,
   INDEX_CREATED_BY,
   JOB_MAP_NODE_TYPES,
   type JobMapNodeTypes,
@@ -17,7 +18,6 @@ import {
   type AnalyticsMapNodeElement,
   type MapElements,
 } from '@kbn/ml-data-frame-analytics';
-import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
   ExtendAnalyticsMapArgs,
   GetAnalyticsMapArgs,
