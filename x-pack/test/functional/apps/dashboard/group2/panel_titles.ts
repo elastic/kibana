@@ -40,8 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME);
-
-      await PageObjects.common.sleep(6000);
     });
 
     describe('by value', () => {
