@@ -273,6 +273,10 @@ describe('actions', () => {
     });
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('setDataView', async () => {
     const { state } = await getState('');
     state.actions.setDataView(dataViewMock);
@@ -417,7 +421,7 @@ describe('actions', () => {
   });
 
   test('loadSavedSearch without id containing sql, adding no warning toast with an invalid index', async () => {
-    const url = "/#?_a=(index:abc,query:(sql:'Select * from test'))&_g=()";
+    const url = "/#?_a=(index:abcde,query:(sql:'Select * from test'))&_g=()";
     const { state } = await getState(url, savedSearchMock);
     await state.actions.loadSavedSearch({ useAppState: true });
     expect(discoverServiceMock.toastNotifications.addWarning).not.toHaveBeenCalled();
