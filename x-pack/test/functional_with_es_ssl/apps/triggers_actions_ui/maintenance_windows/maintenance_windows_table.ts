@@ -188,9 +188,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         getService,
       });
       objectRemover.add(finished.id, 'rules/maintenance_window', 'alerting', true);
+
+      const date = new Date();
+      date.setDate(date.getDate() + 1);
       const upcoming = await createMaintenanceWindow({
         name: 'upcoming-mw',
-        startDate: new Date('05-03-2023'),
+        startDate: date,
         getService,
       });
       objectRemover.add(upcoming.id, 'rules/maintenance_window', 'alerting', true);
