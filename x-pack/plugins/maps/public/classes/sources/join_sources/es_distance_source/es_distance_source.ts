@@ -12,19 +12,12 @@ import { ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   AGG_TYPE,
-  DEFAULT_MAX_BUCKETS_LIMIT,
   FIELD_ORIGIN,
   SOURCE_TYPES,
 } from '../../../../../common/constants';
 import { getJoinAggKey } from '../../../../../common/get_agg_key';
-import { ESDocField } from '../../../fields/es_doc_field';
 import { AbstractESAggSource } from '../../es_agg_source';
-import {
-  getField,
-  addFieldToDSL,
-  extractPropertiesFromBucket,
-  BucketProperties,
-} from '../../../../../common/elasticsearch_util';
+import type { BucketProperties } from '../../../../../common/elasticsearch_util';
 import {
   ESDistanceSourceDescriptor,
   VectorSourceRequestMeta,
@@ -109,7 +102,7 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
     const filters: Record<string, unknown> = {};
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
-      if (feature.geometry.type === 'Point' && feature?.properties._id) {
+      if (feature.geometry.type === 'Point' && feature?.properties?._id) {
         filters[feature.properties._id] = {
           'geo_distance': {
             distance,

@@ -26,10 +26,6 @@ interface Props {
   isGeoPointsOnly?: boolean;
 }
 
-interface State {
-  noIndexPatternsExist: boolean;
-}
-
 export function GeoIndexPatternSelect(props: Props) {
   const [isDataViewInvalid, setIsDataViewInvalid] = useState(false);
   const [noDataViews, setNoDataViews] = useState(false);
@@ -130,7 +126,7 @@ export function GeoIndexPatternSelect(props: Props) {
         <IndexPatternSelect
           isInvalid={isDataViewInvalid}
           isDisabled={noDataViews}
-          indexPatternId={props.dataView ? props.dataView.id : ''}
+          indexPatternId={props.dataView?.id ? props.dataView.id : ''}
           onChange={_onIndexPatternSelect}
           placeholder={getDataViewSelectPlaceholder()}
           onNoIndexPatterns={() => {
