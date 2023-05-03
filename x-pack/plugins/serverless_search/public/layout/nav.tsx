@@ -43,8 +43,6 @@ export const serverlessSearchSideNavComponentProvider = (core: CoreStart) => () 
             icon: 'logoEnterpriseSearch',
           },
         ]}
-        activeNavItemId="search_project_nav.root.overview"
-        platformConfig={{}}
         homeHref="/app/enterprise_search/content/setup_guide"
         linkToCloud="projects"
       />
