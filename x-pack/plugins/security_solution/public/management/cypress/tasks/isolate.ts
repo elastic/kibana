@@ -143,3 +143,18 @@ export const checkEndpointListForOnlyUnIsolatedHosts = (): void =>
   checkEndpointListForIsolatedHosts(false);
 export const checkEndpointListForOnlyIsolatedHosts = (): void =>
   checkEndpointListForIsolatedHosts(true);
+
+export const checkEndpointIsolationStatus = (
+  endpointHostname: string,
+  expectIsolated: boolean
+): void => {
+  const chainer = expectIsolated ? 'contain.text' : 'not.contain.text';
+
+  cy.contains(endpointHostname).parents('td').siblings('td').eq(0).should(chainer, 'Isolated');
+};
+
+export const checkEndpointIsIsolated = (endpointHostname: string): void =>
+  checkEndpointIsolationStatus(endpointHostname, true);
+
+export const checkEndpointIsNotIsolated = (endpointHostname: string): void =>
+  checkEndpointIsolationStatus(endpointHostname, false);
