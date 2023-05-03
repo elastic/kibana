@@ -32,12 +32,9 @@
     "@kbn/task-manager-plugin",
     "@kbn/config",
     "@kbn/logging-mocks",
-    "@kbn/core-http-server",
-    "@kbn/core-test-helpers-test-utils",
     "@kbn/safer-lodash-set",
     "@kbn/generate-csv",
     "@kbn/reporting-common",
-    "@kbn/kibana-utils-plugin",
   ],
   "exclude": [
     "target/**/*",
