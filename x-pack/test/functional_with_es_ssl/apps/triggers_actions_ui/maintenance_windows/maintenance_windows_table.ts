@@ -196,15 +196,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.maintenanceWindows.searchMaintenanceWindows('mw');
 
-      let list = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
+      const list = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
       expect(list.length).to.eql(3);
 
       await testSubjects.click('status-filter-button');
       await testSubjects.click('status-filter-upcoming'); // select Upcoming status filter
       await retry.try(async () => {
-        const list = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
-        expect(list.length).to.equal(1);
-        expect(list[0].status).to.equal('Upcoming');
+        const upcomingList = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
+        expect(upcomingList.length).to.equal(1);
+        expect(upcomingList[0].status).to.equal('Upcoming');
       });
     });
   });
