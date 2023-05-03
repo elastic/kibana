@@ -11,17 +11,18 @@ import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { RecordForInfluencer } from './results_service/results_service';
-import type { EntityField } from '../../../common/util/anomaly_utils';
+import type { MlEntityField, MlRecordForInfluencer } from '@kbn/ml-anomaly-utils';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { MlApiServices } from './ml_api_service';
-import type { MlResultsService } from './results_service';
+import type { InfluencersFilterQuery } from '../../../common/types/es_client';
+import type { SeriesConfigWithMetadata } from '../../../common/types/results';
+
 import { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 import type { TimeRangeBounds } from '../util/time_buckets';
 import type { AppStateSelectedCells } from '../explorer/explorer_utils';
-import type { InfluencersFilterQuery } from '../../../common/types/es_client';
-import type { SeriesConfigWithMetadata } from '../../../common/types/results';
 import { SWIM_LANE_LABEL_WIDTH } from '../explorer/swimlane_container';
+
+import type { MlApiServices } from './ml_api_service';
+import type { MlResultsService } from './results_service';
 
 const MAX_CHARTS_PER_ROW = 4;
 const OPTIMAL_CHART_WIDTH = 550;
@@ -71,10 +72,10 @@ export class AnomalyExplorerChartsService {
     jobIds: string[],
     earliestMs: number,
     latestMs: number,
-    influencers: EntityField[] = [],
+    influencers: MlEntityField[] = [],
     selectedCells: AppStateSelectedCells | undefined | null,
     influencersFilterQuery: InfluencersFilterQuery
-  ): Observable<RecordForInfluencer[]> {
+  ): Observable<MlRecordForInfluencer[]> {
     if (!selectedCells && influencers.length === 0 && influencersFilterQuery === undefined) {
       of([]);
     }
@@ -90,12 +91,12 @@ export class AnomalyExplorerChartsService {
         influencersFilterQuery
       )
       .pipe(
-        mapObservable((resp): RecordForInfluencer[] => {
+        mapObservable((resp): MlRecordForInfluencer[] => {
           if (isPopulatedObject(selectedCells) || influencersFilterQuery !== undefined) {
             return resp.records;
           }
 
-          return [] as RecordForInfluencer[];
+          return [] as MlRecordForInfluencer[];
         })
       );
   }
@@ -106,7 +107,7 @@ export class AnomalyExplorerChartsService {
     selectedEarliestMs: number,
     selectedLatestMs: number,
     influencerFilterQuery?: InfluencersFilterQuery,
-    influencers?: EntityField[],
+    influencers?: MlEntityField[],
     severity = 0,
     maxSeries?: number
   ): Observable<ExplorerChartsData> {
