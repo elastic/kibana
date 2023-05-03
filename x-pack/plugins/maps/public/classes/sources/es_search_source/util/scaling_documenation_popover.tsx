@@ -74,10 +74,12 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
                   id="xpack.maps.scalingDocs.clustersUseCase"
                   defaultMessage="Use this option to display large data sets. "
                 />
-                <i><FormattedMessage
-                  id="xpack.maps.scalingDocs.doesNotSupportJoins"
-                  defaultMessage="Does not support joins."
-                /></i>
+                <i>
+                  <FormattedMessage
+                    id="xpack.maps.scalingDocs.doesNotSupportJoins"
+                    defaultMessage="Does not support joins."
+                  />
+                </i>
               </p>
             </dd>
 
@@ -170,10 +172,7 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
         ownFocus
       >
         <EuiPopoverTitle>
-          <FormattedMessage
-            id="xpack.maps.scalingDocs.title"
-            defaultMessage="Scaling"
-          />
+          <FormattedMessage id="xpack.maps.scalingDocs.title" defaultMessage="Scaling" />
         </EuiPopoverTitle>
         {this._renderContent()}
       </EuiPopover>

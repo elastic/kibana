@@ -7,12 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFormRow,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { GeoIndexPatternSelect } from '../../../../../components/geo_index_pattern_select';
 import { GeoFieldSelect } from '../../../../../components/geo_field_select';
@@ -30,14 +25,14 @@ interface Props {
 }
 
 export function RightSourcePanel(props: Props) {
-  const geoFieldSelect = props.dataView 
-    ? <GeoFieldSelect
-        value={props.geoField ? props.geoField : ''}
-        onChange={props.onGeoFieldSelect}
-        geoFields={props.geoFields}
-        isClearable={false}
-      />
-    : null;
+  const geoFieldSelect = props.dataView ? (
+    <GeoFieldSelect
+      value={props.geoField ? props.geoField : ''}
+      onChange={props.onGeoFieldSelect}
+      geoFields={props.geoFields}
+      isClearable={false}
+    />
+  ) : null;
 
   return (
     <EuiPanel>
@@ -51,18 +46,16 @@ export function RightSourcePanel(props: Props) {
 
       <EuiSpacer size="m" />
 
-      <EuiFormRow
-        label={inputStrings.relationshipLabel}
-      >
-        <RelationshipExpression distance={props.distance} onDistanceChange={props.onDistanceChange} />
+      <EuiFormRow label={inputStrings.relationshipLabel}>
+        <RelationshipExpression
+          distance={props.distance}
+          onDistanceChange={props.onDistanceChange}
+        />
       </EuiFormRow>
 
-      <GeoIndexPatternSelect
-        dataView={props.dataView}
-        onChange={props.onDataViewSelect}
-      />
+      <GeoIndexPatternSelect dataView={props.dataView} onChange={props.onDataViewSelect} />
 
       {geoFieldSelect}
     </EuiPanel>
-  )
+  );
 }
