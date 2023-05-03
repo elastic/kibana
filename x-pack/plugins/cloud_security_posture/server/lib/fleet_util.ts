@@ -97,10 +97,14 @@ export const getCspPackagePolicies = async (
     sortField,
     sortOrder: queryParams.sort_order,
   });
+
   const filteredItems = allCSPPackages.items.filter(
     (pkg) =>
-      pkg.inputs.filter((input) => input.enabled && input.policy_template === postureType).length >
-        0 &&
+      pkg.inputs.filter((input) =>
+        postureType === 'all'
+          ? input.enabled
+          : input.enabled && input.policy_template === postureType
+      ).length > 0 &&
       (!queryParams.benchmark_name ||
         pkg.name.toLowerCase().includes(queryParams.benchmark_name.toLowerCase()))
   );
