@@ -18,8 +18,6 @@ import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
-
 import { registerActionStateRoutes } from './state';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
 import { ACTION_STATE_ROUTE } from '../../../../common/endpoint/constants';
@@ -75,7 +73,6 @@ describe('when calling the Action state route handler', () => {
       'when can encrypt is set to %s it returns proper value',
       async (canEncrypt) => {
         const routerMock: RouterMock = httpServiceMock.createRouter();
-        const endpointAppContextService = new EndpointAppContextService();
         registerActionStateRoutes(routerMock, createMockEndpointAppContext(), canEncrypt);
 
         await callRoute(routerMock, ACTION_STATE_ROUTE, {
@@ -89,7 +86,6 @@ describe('when calling the Action state route handler', () => {
   describe('without having right privileges', () => {
     it('it returns unauthorized error', async () => {
       const routerMock: RouterMock = httpServiceMock.createRouter();
-      const endpointAppContextService = new EndpointAppContextService();
       registerActionStateRoutes(routerMock, createMockEndpointAppContext(), true);
 
       await callRoute(routerMock, ACTION_STATE_ROUTE, {
