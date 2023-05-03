@@ -12,7 +12,7 @@ import type { ActionTypes, UserActionWithResponse } from '../../../common/api';
 import type {
   CaseUI,
   CaseConnectors,
-  CaseUserActions,
+  UserActionUI,
   Comment,
   UseFetchAlertData,
   CaseUserActionsStats,
@@ -54,7 +54,7 @@ export interface UserActionBuilderArgs {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   caseConnectors: CaseConnectors;
-  userAction: CaseUserActions;
+  userAction: UserActionUI;
   comments: Comment[];
   index: number;
   commentRefs: React.MutableRefObject<
