@@ -348,6 +348,14 @@ describe('Matrix Histogram Component', () => {
       mockUseVisualizationResponse.mockReturnValue([
         { aggregations: [{ buckets: [] }], hits: { total: 999 } },
       ]);
+      mockUseMatrix.mockReturnValue([
+        false,
+        {
+          data: [],
+          inspect: false,
+          totalCount: 0,
+        },
+      ]);
       wrapper.setProps({ endDate: 100 });
       wrapper.update();
 
