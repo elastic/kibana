@@ -19,7 +19,7 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useCapabilities } from '../../../common/lib/kibana';
 import { DashboardViewPromptState } from '../../hooks/use_dashboard_view_prompt_state';
 import { DashboardRenderer } from '../../../common/components/dashboards/dashboard_renderer';
-import { StatusPropmpt } from '../../components/status_prompt';
+import { StatusPrompt } from '../../components/status_prompt';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -111,7 +111,7 @@ const DashboardViewComponent: React.FC = () => {
           )}
           {errorState && (
             <EuiFlexItem data-test-subj="dashboard-view-error-prompt-wrapper" grow>
-              <StatusPropmpt currentState={errorState} />
+              <StatusPrompt currentState={errorState} />
             </EuiFlexItem>
           )}
           <SpyRoute
