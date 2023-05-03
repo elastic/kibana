@@ -13,6 +13,8 @@ import { shallow } from 'enzyme';
 
 import { EuiButton } from '@elastic/eui';
 
+import { HttpError } from '../../../../../../../common/types/api';
+
 import {
   TextExpansionCallOut,
   DeployModel,
@@ -21,6 +23,8 @@ import {
   TextExpansionDismissButton,
   ModelStarted,
 } from './text_expansion_callout';
+
+import { TextExpansionErrors } from './text_expansion_errors';
 
 jest.mock('./text_expansion_callout_data', () => ({
   useTextExpansionCallOutData: jest.fn(() => ({
@@ -33,6 +37,7 @@ jest.mock('./text_expansion_callout_data', () => ({
 }));
 
 const DEFAULT_VALUES = {
+  startTextExpansionModelError: undefined,
   isCreateButtonDisabled: false,
   isModelDownloadInProgress: false,
   isModelDownloaded: false,
@@ -44,6 +49,21 @@ describe('TextExpansionCallOut', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues(DEFAULT_VALUES);
+  });
+  it('renders error panel instead of normal panel if there are some errors', () => {
+    setMockValues({
+      ...DEFAULT_VALUES,
+      startTextExpansionModelError: {
+        body: {
+          error: 'some-error',
+          message: 'some-error-message',
+          statusCode: 500,
+        },
+      } as HttpError,
+    });
+
+    const wrapper = shallow(<TextExpansionCallOut />);
+    expect(wrapper.find(TextExpansionErrors).length).toBe(1);
   });
   it('renders panel with deployment instructions if the model is not deployed', () => {
     const wrapper = shallow(<TextExpansionCallOut />);
