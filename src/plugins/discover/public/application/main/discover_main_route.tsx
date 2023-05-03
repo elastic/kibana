@@ -151,8 +151,8 @@ export function DiscoverMainRoute({ registerExtensions, isDev }: MainRouteProps)
 
         chrome.setBreadcrumbs(
           currentSavedSearch && currentSavedSearch.title
-            ? getSavedSearchBreadcrumbs(currentSavedSearch.title)
-            : getRootBreadcrumbs()
+            ? getSavedSearchBreadcrumbs({ id: currentSavedSearch.title, services })
+            : getRootBreadcrumbs({ services })
         );
 
         setLoading(false);
@@ -186,6 +186,7 @@ export function DiscoverMainRoute({ registerExtensions, isDev }: MainRouteProps)
       savedSearchId,
       historyLocationState?.dataViewSpec,
       chrome,
+      services,
       history,
       core.application.navigateToApp,
       core.theme,
