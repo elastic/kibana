@@ -232,7 +232,7 @@ export interface ConnectorSyncJob {
   metadata: Record<string, unknown>;
   started_at: string | null;
   status: SyncStatus;
-  total_document_count: number;
+  total_document_count: number | null;
   trigger_method: TriggerMethod;
   worker_hostname: string | null;
 }
