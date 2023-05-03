@@ -75,5 +75,22 @@ describe('Policy Details', () => {
 
       cy.url().should('contain', 'app/security/rules/management');
     });
+
+    it('changing protection level should enable or disable user notification', () => {
+      cy.getByTestSubj('ransomwareProtectionSwitch').click();
+      cy.getByTestSubj('ransomwareProtectionSwitch').should('have.attr', 'aria-checked', 'true');
+
+      // Default: Prevent + Notify user enabled
+      cy.getByTestSubj('ransomwareProtectionMode_prevent').find('input').should('be.checked');
+      cy.getByTestSubj('ransomwareUserNotificationCheckbox').should('be.checked');
+
+      // Changing to Detect -> Notify user disabled
+      cy.getByTestSubj('ransomwareProtectionMode_detect').find('label').click();
+      cy.getByTestSubj('ransomwareUserNotificationCheckbox').should('not.be.checked');
+
+      // Changing back to Prevent -> Notify user enabled
+      cy.getByTestSubj('ransomwareProtectionMode_prevent').find('label').click();
+      cy.getByTestSubj('ransomwareUserNotificationCheckbox').should('be.checked');
+    });
   });
 });
