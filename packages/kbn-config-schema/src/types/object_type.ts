@@ -9,7 +9,7 @@
 import type { AnySchema } from 'joi';
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions, ExtendsDeepOptions } from './type';
+import { Type, TypeOptions, ExtendsDeepOptions, OptionsForUnknowns } from './type';
 import { ValidationError } from '../errors';
 
 export type Props = Record<string, Type<any>>;
@@ -60,13 +60,7 @@ type ExtendedObjectTypeOptions<P extends Props, NP extends NullableProps> = Obje
 >;
 
 interface UnknownOptions {
-  /**
-   * Options for dealing with unknown keys:
-   * - allow: unknown keys will be permitted
-   * - ignore: unknown keys will not fail validation, but will be stripped out
-   * - forbid (default): unknown keys will fail validation
-   */
-  unknowns?: 'allow' | 'ignore' | 'forbid';
+  unknowns?: OptionsForUnknowns;
 }
 
 export type ObjectTypeOptions<P extends Props = any> = TypeOptions<ObjectResultType<P>> &

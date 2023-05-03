@@ -20,14 +20,16 @@ export interface SchemaStructureEntry {
   type: string;
 }
 
+/**
+ * Options for dealing with unknown keys:
+ * - allow: unknown keys will be permitted
+ * - ignore: unknown keys will not fail validation, but will be stripped out
+ * - forbid (default): unknown keys will fail validation
+ */
+export type OptionsForUnknowns = 'allow' | 'ignore' | 'forbid';
+
 export interface ExtendsDeepOptions {
-  /**
-   * Options for dealing with unknown keys:
-   * - allow: unknown keys will be permitted
-   * - ignore: unknown keys will not fail validation, but will be stripped out
-   * - forbid (default): unknown keys will fail validation
-   */
-  unknowns?: 'allow' | 'ignore' | 'forbid';
+  unknowns?: OptionsForUnknowns;
 }
 
 export const convertValidationFunction = <T = unknown>(
