@@ -8,12 +8,12 @@
 import type { Logger } from '@kbn/core/server';
 import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { API_DIAGNOSE_URL } from '@kbn/reporting-plugin/common/constants';
+import { ReportingCore } from '@kbn/reporting-plugin/server';
 import { lastValueFrom } from 'rxjs';
-import { getAbsoluteUrlFactory } from '@kbn/reporting-export-types/server/export_types/common/get_absolute_url';
 import { generatePngObservable } from '@kbn/reporting-export-types/server';
-import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { ReportingCore } from '../..';
-import { authorizedUserPreRouting, getCounters } from '../lib';
+import { getAbsoluteUrlFactory } from '@kbn/reporting-plugin/common/get_absolute_url';
+import { authorizedUserPreRouting, getCounters } from '@kbn/reporting-plugin/server/routes/lib';
 
 const path = `${API_DIAGNOSE_URL}/screenshot`;
 

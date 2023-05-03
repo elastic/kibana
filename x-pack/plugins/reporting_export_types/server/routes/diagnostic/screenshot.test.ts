@@ -8,14 +8,14 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import supertest from 'supertest';
-import { ReportingCore } from '../../..';
+import { ReportingCore } from '@kbn/reporting-plugin/server';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockReportingCore,
-} from '../../../test_helpers';
-import type { ReportingRequestHandlerContext } from '../../../types';
-import { registerDiagnoseScreenshot } from '../screenshot';
+} from '@kbn/reporting-plugin/server/test_helpers';
+import type { ReportingRequestHandlerContext } from '@kbn/reporting-plugin/server/types';
+import { registerDiagnoseScreenshot } from './screenshot';
 import { defer } from 'rxjs';
 import { generatePngObservable } from '@kbn/reporting-export-types/server';
 

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", ],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", "../reporting_export_types/server/routes/diagnostic/integration_tests", ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -38,7 +38,6 @@
     "@kbn/core-test-helpers-test-utils",
     "@kbn/kibana-utils-plugin",
     "@kbn/core-http-server",
-    "@kbn/reporting-export-types"
   ],
   "exclude": [
     "target/**/*",

@@ -10,7 +10,6 @@ import { BehaviorSubject } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import supertest from 'supertest';
-import { ReportingCore } from '../..';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { ReportingStore } from '../../../lib';
 import { ExportTypesRegistry } from '../../../lib/export_types_registry';
@@ -21,8 +20,9 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
-import type { ReportingRequestHandlerContext } from '@kbn/reporting-export-types/server/types';
 import { registerJobGenerationRoutes } from '../generate_from_jobparams';
+import { ReportingRequestHandlerContext } from '../../../types';
+import { ReportingCore } from '../../..';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
