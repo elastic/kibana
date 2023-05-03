@@ -6,7 +6,11 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { InventoryView, InventoryViewAttributes } from '../../../common/inventory_views';
+import {
+  CreateInventoryViewAttributesRequestPayload,
+  UpdateInventoryViewAttributesRequestPayload,
+} from '../../../common/http_api/latest';
+import type { InventoryView } from '../../../common/inventory_views';
 
 export type InventoryViewsServiceSetup = void;
 
@@ -22,11 +26,11 @@ export interface IInventoryViewsClient {
   findInventoryViews(): Promise<InventoryView[]>;
   getInventoryView(inventoryViewId: string): Promise<InventoryView>;
   createInventoryView(
-    inventoryViewAttributes: Partial<InventoryViewAttributes>
+    inventoryViewAttributes: CreateInventoryViewAttributesRequestPayload
   ): Promise<InventoryView>;
   updateInventoryView(
     inventoryViewId: string,
-    inventoryViewAttributes: Partial<InventoryViewAttributes>
+    inventoryViewAttributes: UpdateInventoryViewAttributesRequestPayload
   ): Promise<InventoryView>;
   deleteInventoryView(inventoryViewId: string): Promise<null>;
 }

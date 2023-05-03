@@ -14,7 +14,7 @@ import {
 import type {
   CasesFindResponse,
   Case,
-  CaseUserActionsResponse,
+  UserActions,
   CommentRequest,
   CommentResponse,
   CaseResolveResponse,
@@ -81,7 +81,7 @@ export const convertAttachmentToCamelCase = (attachment: CommentRequest): Commen
   return convertToCamelCase<CommentRequest, Comment>(attachment);
 };
 
-export const convertUserActionsToCamelCase = (userActions: CaseUserActionsResponse) => {
+export const convertUserActionsToCamelCase = (userActions: UserActions) => {
   return userActions.map((userAction) => {
     if (isCommentUserAction(userAction)) {
       const userActionWithoutPayload = omit(userAction, 'payload.comment');

@@ -655,6 +655,10 @@
               },
               {
                 "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/visualizations/xy/visualization.tsx"
+              },
+              {
+                "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
               },
               {

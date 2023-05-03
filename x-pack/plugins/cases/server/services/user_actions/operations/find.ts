@@ -8,14 +8,9 @@
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
-import type {
-  ActionTypeValues,
-  FindTypeField,
-  CaseUserActionInjectedAttributes,
-} from '../../../../common/api';
+import type { ActionTypeValues, FindTypeField } from '../../../../common/api';
 import { Actions, ActionTypes, CommentType } from '../../../../common/api';
 import {
   CASE_SAVED_OBJECT,
@@ -26,7 +21,11 @@ import {
 import type { FindOptions, ServiceContext } from '../types';
 import { transformFindResponseToExternalModel, transformToExternalModel } from '../transform';
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../../../client/utils';
-import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
+import type {
+  UserActionPersistedAttributes,
+  UserActionSavedObjectTransformed,
+  UserActionTransformedAttributes,
+} from '../../../common/types/user_actions';
 
 export class UserActionFinder {
   constructor(private readonly context: ServiceContext) {}
@@ -38,7 +37,7 @@ export class UserActionFinder {
     page,
     perPage,
     filter,
-  }: FindOptions): Promise<SavedObjectsFindResponse<CaseUserActionInjectedAttributes>> {
+  }: FindOptions): Promise<SavedObjectsFindResponse<UserActionTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to find user actions for case id: ${caseId}`);
 
@@ -168,7 +167,7 @@ export class UserActionFinder {
   }: {
     caseId: string;
     filter?: KueryNode;
-  }): Promise<Array<SavedObject<CaseUserActionInjectedAttributes>>> {
+  }): Promise<UserActionSavedObjectTransformed[]> {
     try {
       this.context.log.debug('Attempting to find status changes');
 
@@ -200,7 +199,7 @@ export class UserActionFinder {
           }
         );
 
-      let userActions: Array<SavedObject<CaseUserActionInjectedAttributes>> = [];
+      let userActions: UserActionSavedObjectTransformed[] = [];
       for await (const findResults of finder.find()) {
         userActions = userActions.concat(
           findResults.saved_objects.map((so) =>
