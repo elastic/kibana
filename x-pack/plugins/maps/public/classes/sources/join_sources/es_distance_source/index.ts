@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ESDistanceSource } from './es_distance_source';
+export { DEFAULT_WITHIN_DISTANCE, ESDistanceSource } from './es_distance_source';

@@ -6,12 +6,15 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiCallOut, EuiPopoverTitle, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFormRow, EuiPopoverTitle, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternService } from '../../../../../kibana_services';
 import { getGeoFields } from '../../../../../index_pattern_util';
 import { GeoIndexPatternSelect } from '../../../../../components/geo_index_pattern_select';
 import { GeoFieldSelect } from '../../../../../components/geo_field_select';
+import { inputStrings } from '../../../../input_strings';
+import { RelationshipExpression } from '../../../../../classes/layers/wizards/spatial_join_wizard';
+import { DEFAULT_WITHIN_DISTANCE } from '../../../../../classes/sources/join_sources';
 
 interface Props {
   sourceDescriptor: Partial<ESDistanceSourceDescriptor>;
@@ -53,22 +56,6 @@ export function SpatialJoinPopoverContent(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function onDataViewSelect(dataView: DataView) {
-    setUnableToLoadDataView(false);
-    setRightDataView(dataView);
-    const geoFields = getGeoFields(dataView.fields);
-    setRightGeoFields(geoFields);
-    props.onSourceDescriptorChange({
-      ...props.sourceDescriptor,
-      indexPatternId: dataView.id,
-      geoField: geoFields.length ? geoFields[0].name : undefined,
-    });
-  }
-
-  function onGeoFieldSelect() {
-
-  }
-
   const dataViewCallout = unableToLoadDataView
     ? <>
         <EuiCallOut
@@ -88,7 +75,15 @@ export function SpatialJoinPopoverContent(props: Props) {
   const geoFieldSelect = rightDataView 
     ? <GeoFieldSelect
         value={props.sourceDescriptor.geoField ? props.sourceDescriptor.geoField : ''}
-        onChange={onGeoFieldSelect}
+        onChange={(geoField?: string) => {
+          if (!geoField) {
+            return;
+          }
+          props.onSourceDescriptorChange({
+            ...props.sourceDescriptor,
+            geoField,
+          });
+        }}
         geoFields={rightGeoFields}
         isClearable={false}
       />
@@ -106,11 +101,35 @@ export function SpatialJoinPopoverContent(props: Props) {
         lines={3}
         isLoading={isLoading}
       >
+        <EuiFormRow
+          label={inputStrings.relationshipLabel}
+        >
+          <RelationshipExpression
+            distance={typeof props.sourceDescriptor.distance === 'number' ? props.sourceDescriptor.distance : DEFAULT_WITHIN_DISTANCE}
+            onDistanceChange={((distance: number) => {
+              props.onSourceDescriptorChange({
+                ...props.sourceDescriptor,
+                distance,
+              });
+            })}
+          />
+        </EuiFormRow>
+
         {dataViewCallout}
 
         <GeoIndexPatternSelect
           dataView={rightDataView}
-          onChange={onDataViewSelect}
+          onChange={(dataView: DataView) => {
+            setUnableToLoadDataView(false);
+            setRightDataView(dataView);
+            const geoFields = getGeoFields(dataView.fields);
+            setRightGeoFields(geoFields);
+            props.onSourceDescriptorChange({
+              ...props.sourceDescriptor,
+              indexPatternId: dataView.id,
+              geoField: geoFields.length ? geoFields[0].name : undefined,
+            });
+          }}
         />
 
         {geoFieldSelect}

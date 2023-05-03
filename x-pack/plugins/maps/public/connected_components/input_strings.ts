@@ -10,5 +10,8 @@ import { i18n } from '@kbn/i18n';
 export const inputStrings = {
   fieldSelectPlaceholder: i18n.translate('xpack.maps.input.fieldSelectPlaceholder', {
     defaultMessage: 'Select field',
+  }),
+  relationshipLabel: i18n.translate('xpack.maps.input.relationshipLabel', {
+    defaultMessage: 'Relationship',
   })
 };

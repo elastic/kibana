@@ -38,8 +38,7 @@ import { mergeExecutionContext } from '../../execution_context_utils';
 import { processDistanceResponse } from './process_distance_response';
 import { isSpatialSourceComplete } from '../is_spatial_source_complete';
 
-const TERMS_AGG_NAME = 'join';
-const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
+export const DEFAULT_WITHIN_DISTANCE = 5;
 
 type ESDistanceSourceSyncMeta = Pick<ESDistanceSourceDescriptor, 'distance' | 'geoField'>;
 
@@ -54,7 +53,7 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
     return {
       ...normalizedDescriptor,
       geoField: descriptor.geoField!,
-      distance: typeof descriptor.distance === 'number' ? descriptor.distance : 5,
+      distance: typeof descriptor.distance === 'number' ? descriptor.distance : DEFAULT_WITHIN_DISTANCE,
       type: SOURCE_TYPES.ES_DISTANCE_SOURCE,
     };
   }
