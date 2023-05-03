@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiSkeletonText, EuiTextAlign, EuiTitle } from '@elastic/eui';
+import { EuiSkeletonText, EuiTextAlign, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Join } from './resources/join';
 import { JoinDocumentationPopover } from './resources/join_documentation_popover';
@@ -23,11 +23,11 @@ export interface JoinField {
 }
 
 export interface Props {
-  joins: JoinDescriptor[];
+  joins: Partial<JoinDescriptor>[];
   layer: IVectorLayer;
   layerDisplayName: string;
   leftJoinFields: JoinField[];
-  onChange: (layer: IVectorLayer, joins: JoinDescriptor[]) => void;
+  onChange: (layer: IVectorLayer, joins: Partial<JoinDescriptor>[]) => void;
 }
 
 export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDisplayName }: Props) {
@@ -85,8 +85,8 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
   }, [layer, setSupportsSpatialJoin, setSpatialJoinDisableReason, setIsLoading]);
 
   const renderJoins = () => {
-    return joins.map((joinDescriptor: JoinDescriptor, index: number) => {
-      const handleOnChange = (updatedDescriptor: JoinDescriptor) => {
+    return joins.map((joinDescriptor: Partial<JoinDescriptor>, index: number) => {
+      const handleOnChange = (updatedDescriptor: Partial<JoinDescriptor>) => {
         onChange(layer, [...joins.slice(0, index), updatedDescriptor, ...joins.slice(index + 1)]);
       };
 
@@ -113,9 +113,6 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
       {
         ...joinDescriptor,
         right: {
-          id: uuidv4(),
-          applyGlobalQuery: true,
-          applyGlobalTime: true,
           ...(joinDescriptor?.right ?? {})
         }
       },
@@ -149,8 +146,11 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
                 leftField: '_id',
                 right: {
                   type: SOURCE_TYPES.ES_DISTANCE_SOURCE,
+                  id: uuidv4(),
+                  applyGlobalQuery: true,
+                  applyGlobalTime: true,
                 }
-              })
+              } as Partial<JoinDescriptor>)
             }}
           />
           <AddJoinButton
@@ -165,8 +165,11 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
               addJoin({
                 right: {
                   type: SOURCE_TYPES.ES_TERM_SOURCE,
+                  id: uuidv4(),
+                  applyGlobalQuery: true,
+                  applyGlobalTime: true,
                 }
-              })
+              } as Partial<JoinDescriptor>)
             }}
           />
         </EuiTextAlign>

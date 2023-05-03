@@ -58,7 +58,7 @@ export function createJoinSource(
 }
 
 export class InnerJoin {
-  private readonly _descriptor: JoinDescriptor;
+  private readonly _descriptor: Partial<JoinDescriptor>;
   private readonly _rightSource?: IJoinSource;
   private readonly _leftField?: IField;
 
@@ -146,7 +146,7 @@ export class InnerJoin {
     return this._rightSource;
   }
 
-  toDescriptor(): JoinDescriptor {
+  toDescriptor(): Partial<JoinDescriptor> {
     return this._descriptor;
   }
 

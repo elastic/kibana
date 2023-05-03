@@ -32,8 +32,8 @@ import { isSpatialJoin } from '../../../../classes/joins/is_spatial_join';
 import { isSpatialSourceComplete, isTermSourceComplete } from '../../../../classes/sources/join_sources';
 
 interface Props {
-  join: JoinDescriptor;
-  onChange: (joinDescriptor: JoinDescriptor) => void;
+  join: Partial<JoinDescriptor>;
+  onChange: (joinDescriptor: Partial<JoinDescriptor>) => void;
   onRemove: () => void;
   leftFields: JoinField[];
   leftSourceName: string;

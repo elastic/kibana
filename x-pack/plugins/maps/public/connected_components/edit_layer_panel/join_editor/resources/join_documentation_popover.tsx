@@ -10,10 +10,6 @@ import { EuiButtonIcon, EuiLink, EuiPopover, EuiPopoverTitle, EuiText } from '@e
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDocLinks } from '../../../../kibana_services';
 
-interface State {
-  isPopoverOpen: boolean;
-}
-
 export function JoinDocumentationPopover() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   

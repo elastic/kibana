@@ -23,7 +23,7 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    onChange: (layer: ILayer, joins: JoinDescriptor[]) => {
+    onChange: (layer: ILayer, joins: Partial<JoinDescriptor>[]) => {
       dispatch(setJoinsForLayer(layer, joins));
     },
   };

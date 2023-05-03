@@ -766,7 +766,7 @@ export function updateLayerStyleForSelectedLayer(styleDescriptor: StyleDescripto
   };
 }
 
-export function setJoinsForLayer(layer: ILayer, joins: JoinDescriptor[]) {
+export function setJoinsForLayer(layer: ILayer, joins: Partial<JoinDescriptor>[]) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     const previousFields = await (layer as IVectorLayer).getFields();
     dispatch({

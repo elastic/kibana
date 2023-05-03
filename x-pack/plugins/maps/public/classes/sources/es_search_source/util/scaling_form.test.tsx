@@ -27,6 +27,7 @@ const defaultProps = {
   supportsClustering: true,
   termFields: [],
   numberOfJoins: 0,
+  hasSpatialJoins: false,
 };
 
 describe('scaling form', () => {
