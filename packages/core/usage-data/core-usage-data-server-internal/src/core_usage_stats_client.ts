@@ -91,7 +91,7 @@ export class CoreUsageStatsClient implements ICoreUsageStatsClient {
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         ALL_COUNTER_FIELDS,
-        { initialize: true } // set all counter fields to 0 if they don't exist
+        { initialize: true, refresh: false } // set all counter fields to 0 if they don't exist
       );
       coreUsageStats = result.attributes;
     } catch (err) {
