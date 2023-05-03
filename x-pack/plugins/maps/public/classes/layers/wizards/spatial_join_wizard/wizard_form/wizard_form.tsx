@@ -47,7 +47,7 @@ export function WizardForm({ previewLayers }: RenderWizardArguments) {
     });
 
     previewLayers([layerDescriptor]);
-  }, [distance, leftDataView, leftGeoField, rightDataView, rightGeoField]);
+  }, [distance, leftDataView, leftGeoField, rightDataView, rightGeoField, isLeftConfigComplete, isRightConfigComplete, previewLayers]);
 
   const rightSourcePanel = isLeftConfigComplete() ? (
     <RightSourcePanel

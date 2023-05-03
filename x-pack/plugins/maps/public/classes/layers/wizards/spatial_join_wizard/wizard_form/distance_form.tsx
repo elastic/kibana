@@ -52,11 +52,7 @@ export function DistanceForm(props: Props) {
     }
 
     setIsDistanceInvalid(false);
-  }, [distance, setIsDistanceInvalid]);
-
-  useEffect(() => {
-    console.log('onMount', props.initialDistance);
-  }, []);
+  }, [distance, setIsDistanceInvalid, getDistanceAsNumber]);
 
   return (
     <>
