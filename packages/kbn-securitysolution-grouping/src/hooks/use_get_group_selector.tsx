@@ -7,13 +7,13 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { useCallback, useEffect } from 'react';
-
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { getGroupSelector, isNoneGroup } from '../..';
+import React, { useCallback, useEffect } from 'react';
+
 import { groupActions, groupByIdSelector } from './state';
 import type { GroupOption } from './types';
 import { Action, defaultGroup, GroupMap } from './types';
+import { GroupSelector, isNoneGroup } from '..';
 import { getTelemetryEvent } from '../telemetry/const';
 
 export interface UseGetGroupSelectorArgs {
@@ -22,8 +22,9 @@ export interface UseGetGroupSelectorArgs {
   fields: FieldSpec[];
   groupingId: string;
   groupingState: GroupMap;
-  onGroupChangeCallback?: (param: { groupByField: string; tableId: string }) => void;
-  tracker: (
+  maxGroupingLevels?: number;
+  onGroupChange?: (param: { groupByField: string; tableId: string }) => void;
+  tracker?: (
     type: UiCounterMetricType,
     event: string | string[],
     count?: number | undefined
@@ -36,22 +37,21 @@ export const useGetGroupSelector = ({
   fields,
   groupingId,
   groupingState,
-  onGroupChangeCallback,
+  maxGroupingLevels = 1,
+  onGroupChange,
   tracker,
 }: UseGetGroupSelectorArgs) => {
-  const { activeGroup: selectedGroup, options } =
+  const { activeGroups: selectedGroups, options } =
     groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
 
-  const setGroupsActivePage = useCallback(
-    (activePage: number) => {
-      dispatch(groupActions.updateGroupActivePage({ id: groupingId, activePage }));
-    },
-    [dispatch, groupingId]
-  );
-
-  const setSelectedGroup = useCallback(
-    (activeGroup: string) => {
-      dispatch(groupActions.updateActiveGroup({ id: groupingId, activeGroup }));
+  const setSelectedGroups = useCallback(
+    (activeGroups: string[]) => {
+      dispatch(
+        groupActions.updateActiveGroups({
+          id: groupingId,
+          activeGroups,
+        })
+      );
     },
     [dispatch, groupingId]
   );
@@ -63,13 +63,22 @@ export const useGetGroupSelector = ({
     [dispatch, groupingId]
   );
 
-  const onGroupChange = useCallback(
+  const onChange = useCallback(
     (groupSelection: string) => {
-      if (groupSelection === selectedGroup) {
+      if (selectedGroups.find((selected) => selected === groupSelection)) {
+        const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
+        if (groups.length === 0) {
+          setSelectedGroups(['none']);
+        } else {
+          setSelectedGroups(groups);
+        }
         return;
       }
-      setGroupsActivePage(0);
-      setSelectedGroup(groupSelection);
+
+      const newSelectedGroups = isNoneGroup([groupSelection])
+        ? [groupSelection]
+        : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection];
+      setSelectedGroups(newSelectedGroups);
 
       // built-in telemetry: UI-counter
       tracker?.(
@@ -77,61 +86,60 @@ export const useGetGroupSelector = ({
         getTelemetryEvent.groupChanged({ groupingId, selected: groupSelection })
       );
 
-      onGroupChangeCallback?.({ tableId: groupingId, groupByField: groupSelection });
-
-      // only update options if the new selection is a custom field
-      if (
-        !isNoneGroup(groupSelection) &&
-        !options.find((o: GroupOption) => o.key === groupSelection)
-      ) {
-        setOptions([
-          ...defaultGroupingOptions,
-          {
-            label: groupSelection,
-            key: groupSelection,
-          },
-        ]);
-      }
+      onGroupChange?.({ tableId: groupingId, groupByField: groupSelection });
     },
-    [
-      defaultGroupingOptions,
-      groupingId,
-      onGroupChangeCallback,
-      options,
-      selectedGroup,
-      setGroupsActivePage,
-      setOptions,
-      setSelectedGroup,
-      tracker,
-    ]
+    [groupingId, onGroupChange, selectedGroups, setSelectedGroups, tracker]
   );
 
   useEffect(() => {
-    // only set options the first time, all other updates will be taken care of by onGroupChange
-    if (options.length > 0) return;
-    setOptions(
-      defaultGroupingOptions.find((o) => o.key === selectedGroup)
-        ? defaultGroupingOptions
-        : [
-            ...defaultGroupingOptions,
-            ...(!isNoneGroup(selectedGroup)
-              ? [
-                  {
+    if (options.length === 0) {
+      return setOptions(
+        defaultGroupingOptions.find((o) => selectedGroups.find((selected) => selected === o.key))
+          ? defaultGroupingOptions
+          : [
+              ...defaultGroupingOptions,
+              ...(!isNoneGroup(selectedGroups)
+                ? selectedGroups.map((selectedGroup) => ({
                     key: selectedGroup,
                     label: selectedGroup,
-                  },
-                ]
-              : []),
-          ]
-    );
-  }, [defaultGroupingOptions, options.length, selectedGroup, setOptions]);
+                  }))
+                : []),
+            ]
+      );
+    }
+    if (isNoneGroup(selectedGroups)) {
+      return;
+    }
 
-  return getGroupSelector({
-    groupingId,
-    groupSelected: selectedGroup,
-    'data-test-subj': 'alerts-table-group-selector',
-    onGroupChange,
-    fields,
-    options,
-  });
+    const currentOptionKeys = options.map((o) => o.key);
+    const newOptions = [...options];
+    selectedGroups.forEach((groupSelection) => {
+      if (currentOptionKeys.includes(groupSelection)) {
+        return;
+      }
+      // these are custom fields
+      newOptions.push({
+        label: groupSelection,
+        key: groupSelection,
+      });
+    });
+
+    if (newOptions.length !== options.length) {
+      setOptions(newOptions);
+    }
+  }, [defaultGroupingOptions, options, selectedGroups, setOptions]);
+
+  return (
+    <GroupSelector
+      {...{
+        groupingId,
+        groupsSelected: selectedGroups,
+        'data-test-subj': 'alerts-table-group-selector',
+        onGroupChange: onChange,
+        fields,
+        maxGroupingLevels,
+        options,
+      }}
+    />
+  );
 };

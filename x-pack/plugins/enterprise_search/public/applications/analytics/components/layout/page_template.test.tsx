@@ -8,13 +8,14 @@
 import React from 'react';
 
 jest.mock('../../../shared/layout/nav', () => ({
-  useEnterpriseSearchNav: () => [],
+  useEnterpriseSearchAnalyticsNav: jest.fn().mockReturnValue([]),
 }));
 
 import { shallow } from 'enzyme';
 
 import { SetAnalyticsChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper } from '../../../shared/layout';
+import { useEnterpriseSearchAnalyticsNav } from '../../../shared/layout/nav';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from './page_template';
@@ -70,6 +71,24 @@ describe('EnterpriseSearchAnalyticsPageTemplate', () => {
       ).toEqual('hello world');
       expect(wrapper.find(EnterpriseSearchPageTemplateWrapper).prop('isLoading')).toEqual(false);
       expect(wrapper.find(EnterpriseSearchPageTemplateWrapper).prop('emptyState')).toEqual(<div />);
+    });
+
+    it('passes down analytics name and paths to useEnterpriseSearchAnalyticsNav', () => {
+      const mockAnalyticsName = 'some_analytics_name';
+      shallow(
+        <EnterpriseSearchAnalyticsPageTemplate
+          analyticsName={mockAnalyticsName}
+          pageHeader={{ pageTitle: 'hello world' }}
+          isLoading={false}
+          emptyState={<div />}
+        />
+      );
+
+      expect(useEnterpriseSearchAnalyticsNav).toHaveBeenCalledWith(mockAnalyticsName, {
+        explorer: '/collections/some_analytics_name/explorer',
+        integration: '/collections/some_analytics_name/integrate',
+        overview: '/collections/some_analytics_name/overview',
+      });
     });
   });
 });

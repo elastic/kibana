@@ -60,7 +60,8 @@ const SeverityWrapper = styled(EuiFlexItem)`
 const StyledEuiText = styled(EuiText)`
   border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   padding-left: ${({ theme }) => theme.eui.euiSizeL};
-  white-space: nowrap;
+  // allows text to truncate
+  max-width: 250px;
 `;
 interface Props {
   groupBySelection: GroupBySelection;
@@ -124,22 +125,36 @@ export const ChartCollapse: React.FC<Props> = ({
             </EuiFlexGroup>
           </SeverityWrapper>
           <EuiFlexItem grow={false}>
-            <StyledEuiText size="xs" data-test-subj="chart-collapse-top-rule">
+            <StyledEuiText
+              size="xs"
+              className="eui-textTruncate"
+              data-test-subj="chart-collapse-top-rule"
+            >
               <strong>{i18n.TOP_RULE_TITLE}</strong>
               {topRule}
             </StyledEuiText>
           </EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <StyledEuiText size="xs" data-test-subj="chart-collapse-top-group">
-                <strong>{`${i18n.TOP_GROUP_TITLE} ${groupBy}: `}</strong>
-                {topGroup}
-              </StyledEuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <InspectButton isDisabled={false} queryId={uniqueQueryId} title={'chart collapse'} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <StyledEuiText
+                  size="xs"
+                  className="eui-textTruncate"
+                  data-test-subj="chart-collapse-top-group"
+                >
+                  <strong>{`${i18n.TOP_GROUP_TITLE} ${groupBy}: `}</strong>
+                  {topGroup}
+                </StyledEuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <InspectButton
+                  isDisabled={false}
+                  queryId={uniqueQueryId}
+                  title={'chart collapse'}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </StyledEuiFlexGroup>
       )}
     </InspectButtonContainer>

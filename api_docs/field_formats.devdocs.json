@@ -352,7 +352,7 @@
       "label": "FieldFormatsSetup",
       "description": [],
       "signature": [
-        "{ has: (id: string) => boolean; register: (fieldFormats: ",
+        "{ register: (fieldFormats: ",
         {
           "pluginId": "fieldFormats",
           "scope": "common",
@@ -360,7 +360,7 @@
           "section": "def-common.FieldFormatInstanceType",
           "text": "FieldFormatInstanceType"
         },
-        "[]) => void; }"
+        "[]) => void; has: (id: string) => boolean; }"
       ],
       "path": "src/plugins/field_formats/public/plugin.ts",
       "deprecated": false,
@@ -384,7 +384,7 @@
           "section": "def-common.FieldFormatsRegistry",
           "text": "FieldFormatsRegistry"
         },
-        ", \"register\" | \"init\"> & { deserialize: ",
+        ", \"init\" | \"register\"> & { deserialize: ",
         {
           "pluginId": "fieldFormats",
           "scope": "common",
@@ -5748,7 +5748,7 @@
         "label": "FieldFormatsStartCommon",
         "description": [],
         "signature": [
-          "{ has: (id: string) => boolean; deserialize: ",
+          "{ deserialize: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -5988,7 +5988,7 @@
             "section": "def-common.FieldFormatConfig",
             "text": "FieldFormatConfig"
           },
-          ">) => void; }"
+          ">) => void; has: (id: string) => boolean; }"
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
@@ -6172,15 +6172,7 @@
         "label": "IFieldFormatsRegistry",
         "description": [],
         "signature": [
-          "{ has: (id: string) => boolean; register: (fieldFormats: ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatInstanceType",
-            "text": "FieldFormatInstanceType"
-          },
-          "[]) => void; init: (getConfig: ",
+          "{ init: (getConfig: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -6205,6 +6197,14 @@
             "text": "FieldFormatMetaParams"
           },
           ", defaultFieldConverters?: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.FieldFormatInstanceType",
+            "text": "FieldFormatInstanceType"
+          },
+          "[]) => void; register: (fieldFormats: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -6452,7 +6452,7 @@
             "section": "def-common.FieldFormatConfig",
             "text": "FieldFormatConfig"
           },
-          ">) => void; }"
+          ">) => void; has: (id: string) => boolean; }"
         ],
         "path": "src/plugins/field_formats/common/index.ts",
         "deprecated": false,

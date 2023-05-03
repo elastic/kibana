@@ -99,9 +99,12 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
   }
 
   if (headlessBrowser === '1') {
+    // Using the new headless mode (instead of `options.headless()`)
+    // See: https://www.selenium.dev/blog/2023/headless-is-going-away/
+    options.addArguments('headless=new');
+
     // Use --disable-gpu to avoid an error from a missing Mesa library, as per
     // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
-    options.headless();
     options.addArguments('disable-gpu');
   }
 
@@ -111,7 +114,11 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
 
   if (remoteDebug === '1') {
     // Visit chrome://inspect in chrome to remotely view/debug
-    options.headless();
+
+    // Using the new headless mode (instead of `options.headless()`)
+    // See: https://www.selenium.dev/blog/2023/headless-is-going-away/
+    options.addArguments('headless=new');
+
     options.addArguments('disable-gpu', 'remote-debugging-port=9222');
   }
 

@@ -43,6 +43,7 @@ export const registerBulkCreateRoute = (
             version: schema.maybe(schema.string()),
             migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
             coreMigrationVersion: schema.maybe(schema.string()),
+            typeMigrationVersion: schema.maybe(schema.string()),
             references: schema.maybe(
               schema.arrayOf(
                 schema.object({
@@ -75,7 +76,11 @@ export const registerBulkCreateRoute = (
       if (!allowHttpApiAccess) {
         throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
       }
-      const result = await savedObjects.client.bulkCreate(req.body, { overwrite });
+
+      const result = await savedObjects.client.bulkCreate(req.body, {
+        overwrite,
+        migrationVersionCompatibility: 'compatible',
+      });
       return res.ok({ body: result });
     })
   );

@@ -30,9 +30,6 @@ const configSchema = schema.object({
   }),
   unsafe: schema.object({
     alertDetails: schema.object({
-      apm: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-      }),
       metrics: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
@@ -44,6 +41,7 @@ const configSchema = schema.object({
       }),
     }),
   }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 export const config: PluginConfigDescriptor = {

@@ -30,6 +30,8 @@ import { AlertActiveRect } from './alert_active_rect';
 import { AlertAnnotation } from './alert_annotation';
 import { AlertThresholdAnnotation } from './alert_threshold_annotation';
 import { AlertThresholdRect } from './alert_threshold_rect';
+import { ApmDocumentType } from '../../../../../../common/document_type';
+import { usePreferredDataSourceAndBucketSize } from '../../../../../hooks/use_preferred_data_source_and_bucket_size';
 
 function LatencyChart({
   alert,
@@ -43,7 +45,6 @@ function LatencyChart({
   comparisonEnabled,
   offset,
   timeZone,
-  setLatencyMaxY,
 }: {
   alert: TopAlert;
   transactionType: string;
@@ -56,8 +57,15 @@ function LatencyChart({
   comparisonEnabled: boolean;
   offset: string;
   timeZone: string;
-  setLatencyMaxY: React.Dispatch<React.SetStateAction<number>>;
 }) {
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery: '',
+    numBuckets: 100,
+    type: ApmDocumentType.ServiceTransactionMetric,
+  });
+
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (
@@ -65,7 +73,8 @@ function LatencyChart({
         start &&
         end &&
         transactionType &&
-        latencyAggregationType
+        latencyAggregationType &&
+        preferred
       ) {
         return callApmApi(
           `GET /internal/apm/services/{serviceName}/transactions/charts/latency`,
@@ -80,6 +89,9 @@ function LatencyChart({
                 transactionType,
                 transactionName: undefined,
                 latencyAggregationType,
+                documentType: preferred.source.documentType,
+                rollupInterval: preferred.source.rollupInterval,
+                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
               },
             },
           }
@@ -93,6 +105,7 @@ function LatencyChart({
       serviceName,
       start,
       transactionType,
+      preferred,
     ]
   );
 
@@ -135,7 +148,6 @@ function LatencyChart({
     comparisonEnabled && isTimeComparison(offset) ? previousPeriod : undefined,
   ].filter(filterNil);
   const latencyMaxY = getMaxY(timeseriesLatency);
-  setLatencyMaxY(latencyMaxY);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
   return (
     <EuiFlexItem>

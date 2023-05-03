@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { Logger } from '@kbn/core/server';
 import { IRuleTypeAlerts } from '../types';
 
@@ -13,8 +14,8 @@ export interface InitializationPromise {
   error?: string;
 }
 export interface ResourceInstallationHelper {
-  add: (context: IRuleTypeAlerts, timeoutMs?: number) => void;
-  getInitializedContext: (context: string, delayMs?: number) => Promise<InitializationPromise>;
+  add: (context: IRuleTypeAlerts, namespace?: string, timeoutMs?: number) => void;
+  getInitializedContext: (context: string, namespace: string) => Promise<InitializationPromise>;
 }
 
 /**
@@ -31,18 +32,19 @@ export interface ResourceInstallationHelper {
 export function createResourceInstallationHelper(
   logger: Logger,
   commonResourcesInitPromise: Promise<InitializationPromise>,
-  installFn: (context: IRuleTypeAlerts, timeoutMs?: number) => Promise<void>
+  installFn: (context: IRuleTypeAlerts, namespace: string, timeoutMs?: number) => Promise<void>
 ): ResourceInstallationHelper {
   const initializedContexts: Map<string, Promise<InitializationPromise>> = new Map();
 
   const waitUntilContextResourcesInstalled = async (
     context: IRuleTypeAlerts,
+    namespace: string = DEFAULT_NAMESPACE_STRING,
     timeoutMs?: number
   ): Promise<InitializationPromise> => {
     try {
       const { result: commonInitResult, error: commonInitError } = await commonResourcesInitPromise;
       if (commonInitResult) {
-        await installFn(context, timeoutMs);
+        await installFn(context, namespace, timeoutMs);
         return successResult();
       } else {
         logger.warn(
@@ -57,18 +59,26 @@ export function createResourceInstallationHelper(
   };
 
   return {
-    add: (context: IRuleTypeAlerts, timeoutMs?: number) => {
+    add: (
+      context: IRuleTypeAlerts,
+      namespace: string = DEFAULT_NAMESPACE_STRING,
+      timeoutMs?: number
+    ) => {
       initializedContexts.set(
-        context.context,
+        `${context.context}_${namespace}`,
 
         // Return a promise than can be checked when needed
-        waitUntilContextResourcesInstalled(context, timeoutMs)
+        waitUntilContextResourcesInstalled(context, namespace, timeoutMs)
       );
     },
-    getInitializedContext: async (context: string): Promise<InitializationPromise> => {
-      return initializedContexts.has(context)
-        ? initializedContexts.get(context)!
-        : errorResult(`Unrecognized context ${context}`);
+    getInitializedContext: async (
+      context: string,
+      namespace: string
+    ): Promise<InitializationPromise> => {
+      const key = `${context}_${namespace}`;
+      return initializedContexts.has(key)
+        ? initializedContexts.get(key)!
+        : errorResult(`Unrecognized context ${key}`);
     },
   };
 }

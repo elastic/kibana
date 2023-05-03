@@ -14,6 +14,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW,
 } from '../../../screens/document_expandable_flyout';
 import {
   collapseDocumentDetailsExpandableFlyoutLeftSection,
@@ -34,17 +35,19 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 // Skipping these for now as the feature is protected behind a feature flag set to false by default
 // To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
 describe.skip('Alert details expandable flyout right panel', { testIsolation: false }, () => {
+  const rule = getNewRule();
+
   before(() => {
     cleanKibana();
     login();
-    createRule(getNewRule());
+    createRule(rule);
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
     expandFirstAlertExpandableFlyout();
   });
 
   it('should display title in the header', () => {
-    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', 'Title');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('be.visible').and('have.text', rule.name);
   });
 
   it('should toggle expand detail button in the header', () => {
@@ -70,7 +73,13 @@ describe.skip('Alert details expandable flyout right panel', { testIsolation: fa
     // we shouldn't need to test anything here as it's covered with the new overview_tab file
 
     openTableTab();
+    // the table component is rendered within a dom element with overflow, so Cypress isn't finding it
+    // this next line is a hack that scrolls to a specific element in the table to ensure Cypress finds it
+    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW).scrollIntoView();
     cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT).should('be.visible');
+
+    // scroll back up to the top to open the json tab
+    cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).scrollIntoView();
 
     openJsonTab();
     // the json component is rendered within a dom element with overflow, so Cypress isn't finding it

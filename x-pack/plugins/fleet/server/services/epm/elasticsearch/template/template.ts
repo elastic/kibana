@@ -326,6 +326,14 @@ function _generateMappings(
             const dateMappings = generateDateMapping(field);
             fieldProps = { ...fieldProps, ...dateMappings, type: 'date' };
             break;
+          case 'aggregate_metric_double':
+            fieldProps = {
+              ...fieldProps,
+              metrics: field.metrics,
+              default_metric: field.default_metric,
+              type: 'aggregate_metric_double',
+            };
+            break;
           default:
             fieldProps.type = type;
         }
@@ -346,6 +354,9 @@ function _generateMappings(
 
         if (options?.isIndexModeTimeSeries && 'metric_type' in field) {
           fieldProps.time_series_metric = field.metric_type;
+        }
+        if (options?.isIndexModeTimeSeries && field.dimension) {
+          fieldProps.time_series_dimension = field.dimension;
         }
 
         props[field.name] = fieldProps;

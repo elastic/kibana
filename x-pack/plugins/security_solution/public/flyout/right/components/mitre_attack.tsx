@@ -17,7 +17,7 @@ export const MitreAttack: FC = () => {
   const threatDetails = useMemo(() => getMitreComponentParts(searchHit), [searchHit]);
 
   if (!threatDetails || !threatDetails[0]) {
-    return <></>;
+    return null;
   }
 
   return (

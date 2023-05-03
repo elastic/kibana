@@ -41,7 +41,7 @@ import {
 } from '../../mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
-import { DragDrop } from '../../drag_drop';
+import { DragDrop } from '@kbn/dom-drag-drop';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';

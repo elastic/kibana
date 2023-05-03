@@ -11,7 +11,6 @@ import {
   Settings,
   Partition,
   PartitionLayout,
-  ShapeTreeNode,
   LIGHT_THEME,
   DARK_THEME,
 } from '@elastic/charts';
@@ -158,7 +157,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
                     valueFormatter: (size: number) => bytesFormatter(size),
                   },
                   shape: {
-                    fillColor: (d: ShapeTreeNode) => getMemoryItemColor(d.dataName as JobType),
+                    fillColor: (dataName) => getMemoryItemColor(dataName as JobType),
                   },
                 },
                 {
@@ -170,7 +169,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
                     },
                   },
                   shape: {
-                    fillColor: (d: ShapeTreeNode) => {
+                    fillColor: (dataName, index, d) => {
                       // color the shape the same as its parent.
                       const parentId = d.parent.path[d.parent.path.length - 1].value as JobType;
                       return getMemoryItemColor(parentId);

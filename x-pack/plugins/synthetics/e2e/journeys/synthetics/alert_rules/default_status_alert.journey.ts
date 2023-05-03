@@ -9,7 +9,7 @@ import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { v4 as uuidv4 } from 'uuid';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { recordVideo } from '../../../helpers/record_video';
 import { getReasonMessage } from '../../../../server/legacy_uptime/lib/alerts/status_check';
 import { syntheticsAppPageProvider } from '../../../page_objects/synthetics/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
@@ -58,8 +58,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.isDisabled(byTestId('xpack.synthetics.toggleAlertFlyout'));
     await page.click(byTestId('xpack.synthetics.toggleAlertFlyout'));
     await page.waitForSelector('text=Edit rule');
-    await page.selectOption(byTestId('intervalInputUnit'), { label: 'second' });
-    await page.fill(byTestId('intervalInput'), '20');
+    expect(await page.locator(`[data-test-subj="intervalFormRow"]`).count()).toEqual(0);
     await page.click(byTestId('saveEditedRuleButton'));
     await page.waitForSelector("text=Updated 'Synthetics internal alert'");
   });
@@ -93,6 +92,8 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
     await page.click(byTestId('syntheticsMonitorManagementTab'));
     await page.click(byTestId('syntheticsMonitorOverviewTab'));
+
+    await page.waitForTimeout(5 * 1000);
 
     const totalDown = await page.textContent(
       byTestId('xpack.uptime.synthetics.overview.status.down')

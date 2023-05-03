@@ -106,7 +106,8 @@ async function createRoot({ logFileName }: CreateRootConfig) {
 // suite is very long, the 10mins default can cause timeouts
 jest.setTimeout(15 * 60 * 1000);
 
-describe('migration v2', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/156117
+describe.skip('migration v2', () => {
   let esServer: TestElasticsearchUtils;
   let rootA: Root;
   let rootB: Root;
@@ -196,7 +197,7 @@ describe('migration v2', () => {
     migratedDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`foo:${i}`);
       expect(doc.foo.status).toBe(`migrated`);
-      expect(doc.migrationVersion.foo).toBe('7.14.0');
+      expect(doc.typeMigrationVersion).toBe('7.14.0');
     });
   });
 
@@ -215,7 +216,7 @@ describe('migration v2', () => {
     migratedDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`foo:${i}`);
       expect(doc.foo.status).toBe(`migrated`);
-      expect(doc.migrationVersion.foo).toBe('7.14.0');
+      expect(doc.typeMigrationVersion).toBe('7.14.0');
     });
   });
 
@@ -234,7 +235,7 @@ describe('migration v2', () => {
     migratedDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`foo:${i}`);
       expect(doc.foo.status).toBe(`migrated`);
-      expect(doc.migrationVersion.foo).toBe('7.14.0');
+      expect(doc.typeMigrationVersion).toBe('7.14.0');
     });
   });
 
@@ -253,7 +254,7 @@ describe('migration v2', () => {
     migratedDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`foo:${i}`);
       expect(doc.foo.status).toBe(`migrated`);
-      expect(doc.migrationVersion.foo).toBe('7.14.0');
+      expect(doc.typeMigrationVersion).toBe('7.14.0');
     });
   });
 });

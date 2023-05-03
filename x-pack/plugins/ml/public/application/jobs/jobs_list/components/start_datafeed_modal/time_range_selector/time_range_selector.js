@@ -27,6 +27,7 @@ export class TimeRangeSelector extends Component {
     };
     this.latestTimestamp = this.props.startTime;
     this.now = this.props.now;
+    this.twoWeeksAgo = moment(this.now).subtract(2, 'weeks').startOf('day');
   }
 
   setStartTab = (tab) => {
@@ -37,6 +38,9 @@ export class TimeRangeSelector extends Component {
         break;
       case 1:
         this.setStartTime(this.now);
+        break;
+      case 2:
+        this.setStartTime(this.twoWeeksAgo);
         break;
       default:
         break;

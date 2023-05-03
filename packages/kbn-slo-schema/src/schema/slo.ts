@@ -26,7 +26,6 @@ const objectiveSchema = t.intersection([
 ]);
 
 const settingsSchema = t.type({
-  timestampField: t.string,
   syncDelay: durationType,
   frequency: durationType,
 });

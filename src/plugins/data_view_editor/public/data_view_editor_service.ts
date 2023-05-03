@@ -334,6 +334,7 @@ export class DataViewEditorService {
     if (this.type === INDEX_PATTERN_TYPE.ROLLUP) {
       getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
       getFieldsOptions.rollupIndex = currentState.rollupIndexName || '';
+      getFieldsOptions.allowNoIndex = true;
     }
 
     let timestampFieldOptions: TimestampOption[] = [];

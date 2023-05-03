@@ -29,7 +29,7 @@
           "\nWraps the supplied aggregations in a sampler aggregation.\nA supplied samplerShardSize (the shard_size parameter of the sampler aggregation)\nof less than 1 indicates no sampling, and the aggs are returned as-is."
         ],
         "signature": [
-          "(aggs: any, samplerShardSize: number) => Record<string, ",
+          "(aggs: any, shardSize: number) => Record<string, ",
           "AggregationsAggregationContainer",
           ">"
         ],
@@ -57,7 +57,7 @@
             "id": "def-common.buildSamplerAggregation.$2",
             "type": "number",
             "tags": [],
-            "label": "samplerShardSize",
+            "label": "shardSize",
             "description": [],
             "signature": [
               "number"
@@ -101,7 +101,7 @@
           },
           "[], samplerShardSize: number, runtimeMappings?: ",
           "MappingRuntimeFields",
-          " | undefined, abortSignal?: AbortSignal | undefined, randomSamplerProbability?: number | undefined) => Promise<",
+          " | undefined, abortSignal?: AbortSignal | undefined, randomSamplerProbability?: number | undefined, randomSamplerSeed?: number | undefined) => Promise<",
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
@@ -248,6 +248,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.fetchAggIntervals.$9",
+            "type": "number",
+            "tags": [],
+            "label": "randomSamplerSeed",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -281,7 +296,7 @@
           },
           ", samplerShardSize: number, runtimeMappings?: ",
           "MappingRuntimeFields",
-          " | undefined, abortSignal?: AbortSignal | undefined, randomSamplerProbability?: number | undefined) => Promise<(",
+          " | undefined, abortSignal?: AbortSignal | undefined, randomSamplerProbability?: number | undefined, randomSamplerSeed?: number | undefined) => Promise<(",
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
@@ -441,44 +456,28 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.fetchHistogramsForFields.$9",
+            "type": "number",
+            "tags": [],
+            "label": "randomSamplerSeed",
+            "description": [
+              "optional random sampler seed"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [
           "an array of histogram data for each supplied field"
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.getSampleProbability",
-        "type": "Function",
-        "tags": [],
-        "label": "getSampleProbability",
-        "description": [],
-        "signature": [
-          "(totalDocCount: number) => number"
-        ],
-        "path": "x-pack/packages/ml/agg_utils/src/get_sample_probability.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.getSampleProbability.$1",
-            "type": "number",
-            "tags": [],
-            "label": "totalDocCount",
-            "description": [],
-            "signature": [
-              "number"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/get_sample_probability.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -512,6 +511,153 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.isCounterTimeSeriesMetric",
+        "type": "Function",
+        "tags": [],
+        "label": "isCounterTimeSeriesMetric",
+        "description": [
+          "\nCheck if DataViewField is a 'counter' time series metric field"
+        ],
+        "signature": [
+          "(field?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          " | undefined) => boolean"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.isCounterTimeSeriesMetric.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "optional DataViewField"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "a boolean"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.isGaugeTimeSeriesMetric",
+        "type": "Function",
+        "tags": [],
+        "label": "isGaugeTimeSeriesMetric",
+        "description": [
+          "\nCheck if DataViewField is a 'gauge' time series metric field"
+        ],
+        "signature": [
+          "(field?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          " | undefined) => boolean"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.isGaugeTimeSeriesMetric.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "optional DataViewField"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "a boolean"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.isSignificantTerm",
+        "type": "Function",
+        "tags": [],
+        "label": "isSignificantTerm",
+        "description": [
+          "\nType guard for a significant term.\nNote this is used as a custom type within Explain Log Rate Spikes\nfor a p-value based variant, not a generic significant terms\naggregation type."
+        ],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/type_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.isSignificantTerm.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "The unknown type to be evaluated"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "whether arg is of type SignificantTerm"
+        ],
         "initialIsOpen": false
       },
       {
@@ -962,7 +1108,7 @@
         "tags": [],
         "label": "SignificantTerm",
         "description": [
-          "\nSignificant term meta data for a field/value pair."
+          "\nSignificant term meta data for a field/value pair.\nNote this is used as a custom type within Explain Log Rate Spikes\nfor a p-value based variant, not a generic significant terms\naggregation type."
         ],
         "signature": [
           {
@@ -1135,7 +1281,14 @@
             "label": "group",
             "description": [],
             "signature": [
-              "SignificantTermGroupItem[]"
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-common.SignificantTermGroupItem",
+                "text": "SignificantTermGroupItem"
+              },
+              "[]"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
@@ -1230,6 +1383,76 @@
                 "text": "SignificantTermHistogramItem"
               },
               "[]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.SignificantTermGroupItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "SignificantTermGroupItem",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-common.SignificantTermGroupItem",
+            "text": "SignificantTermGroupItem"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-common.FieldValuePair",
+            "text": "FieldValuePair"
+          }
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermGroupItem.docCount",
+            "type": "number",
+            "tags": [],
+            "label": "docCount",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermGroupItem.pValue",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pValue",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermGroupItem.duplicate",
+            "type": "number",
+            "tags": [],
+            "label": "duplicate",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
@@ -1353,7 +1576,22 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.TIME_SERIES_METRIC_TYPES",
+        "type": "Enum",
+        "tags": [],
+        "label": "TIME_SERIES_METRIC_TYPES",
+        "description": [
+          "\nAll available types for time series metric fields"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/ml-agg-utils",
@@ -1401,21 +1639,6 @@
           "; }"
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.RANDOM_SAMPLER_SEED",
-        "type": "number",
-        "tags": [],
-        "label": "RANDOM_SAMPLER_SEED",
-        "description": [],
-        "signature": [
-          "3867412"
-        ],
-        "path": "x-pack/packages/ml/agg_utils/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

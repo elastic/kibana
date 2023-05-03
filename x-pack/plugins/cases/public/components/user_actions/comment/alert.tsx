@@ -21,6 +21,7 @@ import { ShowAlertTableLink } from './show_alert_table_link';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 import { UserActionContentToolbar } from '../content_toolbar';
 import { AlertPropertyActions } from '../property_actions/alert_property_actions';
+import { DELETE_ALERTS_SUCCESS_TITLE } from './translations';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -88,7 +89,7 @@ const getSingleAlertUserAction = ({
             />
           </EuiFlexItem>
           <AlertPropertyActions
-            onDelete={() => handleDeleteComment(comment.id)}
+            onDelete={() => handleDeleteComment(comment.id, DELETE_ALERTS_SUCCESS_TITLE(1))}
             isLoading={loadingCommentIds.includes(comment.id)}
             totalAlerts={1}
           />
@@ -142,7 +143,9 @@ const getMultipleAlertsUserAction = ({
             <ShowAlertTableLink />
           </EuiFlexItem>
           <AlertPropertyActions
-            onDelete={() => handleDeleteComment(comment.id)}
+            onDelete={() =>
+              handleDeleteComment(comment.id, DELETE_ALERTS_SUCCESS_TITLE(totalAlerts))
+            }
             isLoading={loadingCommentIds.includes(comment.id)}
             totalAlerts={totalAlerts}
           />

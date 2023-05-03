@@ -12,6 +12,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { FleetStartContract, MessageSigningServiceInterface } from '@kbn/fleet-plugin/server';
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
@@ -37,6 +38,7 @@ import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import { doesArtifactHaveData } from './services';
+import type { ActionCreateService } from './services/actions';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -59,6 +61,8 @@ export interface EndpointAppContextServiceStartContract {
   featureUsageService: FeatureUsageService;
   experimentalFeatures: ExperimentalFeatures;
   messageSigningService: MessageSigningServiceInterface | undefined;
+  actionCreateService: ActionCreateService | undefined;
+  cloud: CloudSetup;
 }
 
 /**
@@ -90,6 +94,7 @@ export class EndpointAppContextService {
         logger,
         manifestManager,
         alerting,
+        cloud,
         licenseService,
         exceptionListsClient,
         featureUsageService,
@@ -104,7 +109,8 @@ export class EndpointAppContextService {
           this.setupDependencies.securitySolutionRequestContextFactory,
           alerting,
           licenseService,
-          exceptionListsClient
+          exceptionListsClient,
+          cloud
         )
       );
 
@@ -119,7 +125,8 @@ export class EndpointAppContextService {
           logger,
           licenseService,
           featureUsageService,
-          endpointMetadataService
+          endpointMetadataService,
+          cloud
         )
       );
 
@@ -228,5 +235,13 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.messageSigningService;
+  }
+
+  public getActionCreateService(): ActionCreateService {
+    if (!this.startDependencies?.actionCreateService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.actionCreateService;
   }
 }

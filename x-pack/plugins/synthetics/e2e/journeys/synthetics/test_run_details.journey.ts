@@ -6,8 +6,8 @@
  */
 
 import { journey, step, before, after } from '@elastic/synthetics';
-import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { byTestId } from '../../helpers/utils';
+import { recordVideo } from '../../helpers/record_video';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 import { SyntheticsServices } from './services/synthetics_services';
 
@@ -65,6 +65,6 @@ journey(`TestRunDetailsPage`, async ({ page, params }) => {
 
     await page.waitForSelector('text=Test run details');
     await page.waitForSelector('text=Go to https://www.google.com');
-    await page.waitForSelector('text=After 2.12 s');
+    await page.waitForSelector('div:has-text("After 2.12 s")');
   });
 });

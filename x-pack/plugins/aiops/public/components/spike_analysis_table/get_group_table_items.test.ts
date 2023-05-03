@@ -15,38 +15,96 @@ describe('getGroupTableItems', () => {
 
     expect(groupTableItems).toEqual([
       {
-        docCount: 792,
-        group: [
+        docCount: 632,
+        groupItemsSortedByUniqueness: [
           {
-            fieldName: 'response_code',
-            fieldValue: '500',
-          },
-          {
-            fieldName: 'url',
-            fieldValue: 'home.php',
-          },
-          {
-            fieldName: 'url',
-            fieldValue: 'login.php',
-          },
-        ],
-        histogram: undefined,
-        id: '2038579476',
-        pValue: 0.010770456205312423,
-        repeatedValues: [],
-      },
-      {
-        docCount: 1981,
-        group: [
-          {
+            docCount: 632,
+            duplicate: 2,
             fieldName: 'user',
             fieldValue: 'Peter',
+            pValue: 0.012783309213417932,
+          },
+          {
+            docCount: 790,
+            duplicate: 2,
+            fieldName: 'url',
+            fieldValue: 'login.php',
+            pValue: 0.012783309213417932,
           },
         ],
         histogram: undefined,
-        id: '817080373',
-        pValue: 2.7454255728359757e-21,
-        repeatedValues: [],
+        id: '1982924514',
+        pValue: 0.012783309213417932,
+        uniqueItemsCount: 0,
+      },
+      {
+        docCount: 792,
+        groupItemsSortedByUniqueness: [
+          {
+            docCount: 792,
+            duplicate: 2,
+            fieldName: 'response_code',
+            fieldValue: '500',
+            pValue: 0.012783309213417932,
+          },
+          {
+            docCount: 792,
+            duplicate: 2,
+            fieldName: 'url',
+            fieldValue: 'home.php',
+            pValue: 0.00974308761016614,
+          },
+        ],
+        histogram: undefined,
+        id: '2052830342',
+        pValue: 0.00974308761016614,
+        uniqueItemsCount: 0,
+      },
+      {
+        docCount: 790,
+        groupItemsSortedByUniqueness: [
+          {
+            docCount: 790,
+            duplicate: 2,
+            fieldName: 'url',
+            fieldValue: 'login.php',
+            pValue: 0.012783309213417932,
+          },
+          {
+            docCount: 792,
+            duplicate: 2,
+            fieldName: 'response_code',
+            fieldValue: '500',
+            pValue: 0.012783309213417932,
+          },
+        ],
+        histogram: undefined,
+        id: '3851735068',
+        pValue: 0.012783309213417932,
+        uniqueItemsCount: 0,
+      },
+      {
+        docCount: 636,
+        groupItemsSortedByUniqueness: [
+          {
+            docCount: 636,
+            duplicate: 2,
+            fieldName: 'user',
+            fieldValue: 'Peter',
+            pValue: 0.00974308761016614,
+          },
+          {
+            docCount: 792,
+            duplicate: 2,
+            fieldName: 'url',
+            fieldValue: 'home.php',
+            pValue: 0.00974308761016614,
+          },
+        ],
+        histogram: undefined,
+        id: '92732022',
+        pValue: 0.00974308761016614,
+        uniqueItemsCount: 0,
       },
     ]);
   });

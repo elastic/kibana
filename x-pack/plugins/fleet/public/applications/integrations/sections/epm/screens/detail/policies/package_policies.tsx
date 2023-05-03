@@ -322,7 +322,8 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
 
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
-  if (packageInstallStatus.status !== InstallStatus.installed) {
+  // Check flyoutOpenForPolicyId otherwise right after installing a new integration the flyout won't open
+  if (packageInstallStatus.status !== InstallStatus.installed && !flyoutOpenForPolicyId) {
     return (
       <Redirect to={getPath('integration_details_overview', { pkgkey: `${name}-${version}` })} />
     );

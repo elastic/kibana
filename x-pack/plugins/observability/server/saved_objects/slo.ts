@@ -20,7 +20,7 @@ export const slo: SavedObjectsType = {
     dynamic: false,
     properties: {
       id: { type: 'keyword' },
-      name: { type: 'keyword' },
+      name: { type: 'text' },
       description: { type: 'text' },
       indicator: {
         properties: {
@@ -28,37 +28,9 @@ export const slo: SavedObjectsType = {
           params: { type: 'flattened' },
         },
       },
-      timeWindow: {
-        properties: {
-          duration: { type: 'keyword' },
-          isRolling: { type: 'boolean' },
-          calendar: {
-            properties: {
-              startTime: { type: 'date' },
-            },
-          },
-        },
-      },
       budgetingMethod: { type: 'keyword' },
-      objective: {
-        properties: {
-          target: { type: 'float' },
-          timesliceTarget: { type: 'float' },
-          timesliceWindow: { type: 'keyword' },
-        },
-      },
-      settings: {
-        properties: {
-          timestampField: { type: 'keyword' },
-          syncDelay: { type: 'keyword' },
-          frequency: { type: 'keyword' },
-        },
-      },
-      revision: { type: 'short' },
       enabled: { type: 'boolean' },
       tags: { type: 'keyword' },
-      createdAt: { type: 'date' },
-      updatedAt: { type: 'date' },
     },
   },
   management: {

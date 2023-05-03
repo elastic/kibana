@@ -5,29 +5,34 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import moment from 'moment';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { EuiText } from '@elastic/eui';
 import {
   AnnotationDomainType,
   LineAnnotation,
   Position,
 } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
-import { EuiBadge } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { convertTo } from '@kbn/observability-plugin/public';
-import { useFetchTriggeredAlertsHistory } from '../../../../hooks/use_fetch_triggered_alert_history';
-import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
+import moment from 'moment';
+import React, { useMemo } from 'react';
+import { ApmDocumentType } from '../../../../../common/document_type';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
+import { useFetchTriggeredAlertsHistory } from '../../../../hooks/use_fetch_triggered_alert_history';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { filterNil } from '../../../shared/charts/latency_chart';
+import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
@@ -54,6 +59,14 @@ export function LatencyAlertsHistoryChart({
   timeZone,
   ruleId,
 }: LatencyAlertsHistoryChartProps) {
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery: '',
+    numBuckets: 100,
+    type: ApmDocumentType.ServiceTransactionMetric,
+  });
+
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (
@@ -61,7 +74,8 @@ export function LatencyAlertsHistoryChart({
         start &&
         end &&
         transactionType &&
-        latencyAggregationType
+        latencyAggregationType &&
+        preferred
       ) {
         return callApmApi(
           `GET /internal/apm/services/{serviceName}/transactions/charts/latency`,
@@ -71,11 +85,14 @@ export function LatencyAlertsHistoryChart({
               query: {
                 environment,
                 kuery: '',
-                start: moment().subtract(30, 'days').toISOString(),
-                end: moment().toISOString(),
+                start,
+                end,
                 transactionType,
                 transactionName: undefined,
                 latencyAggregationType,
+                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
+                documentType: preferred.source.documentType,
+                rollupInterval: preferred.source.rollupInterval,
               },
             },
           }
@@ -89,6 +106,7 @@ export function LatencyAlertsHistoryChart({
       serviceName,
       start,
       transactionType,
+      preferred,
     ]
   );
   const memoizedData = useMemo(

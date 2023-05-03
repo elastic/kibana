@@ -7,9 +7,10 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { Version } from '@kbn/object-versioning';
+import { itemResultSchema } from './common';
 import { versionSchema } from './constants';
 
-import type { ProcedureSchemas } from './types';
+import type { ItemResult, ProcedureSchemas } from './types';
 
 export const updateSchemas: ProcedureSchemas = {
   in: schema.object(
@@ -23,13 +24,19 @@ export const updateSchemas: ProcedureSchemas = {
     },
     { unknowns: 'forbid' }
   ),
-  out: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  out: schema.object(
+    {
+      contentTypeId: schema.string(),
+      result: itemResultSchema,
+    },
+    { unknowns: 'forbid' }
+  ),
 };
 
 export interface UpdateIn<
   T extends string = string,
   Data extends object = object,
-  Options extends object = object
+  Options extends void | object = object
 > {
   contentTypeId: T;
   id: string;
@@ -37,3 +44,5 @@ export interface UpdateIn<
   version?: Version;
   options?: Options;
 }
+
+export type UpdateResult<T = unknown, M = void> = ItemResult<T, M>;

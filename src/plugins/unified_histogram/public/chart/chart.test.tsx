@@ -10,6 +10,7 @@ import React, { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { UnifiedHistogramFetchStatus } from '../types';
 import { Chart } from './chart';
 import type { ReactWrapper } from 'enzyme';
@@ -20,6 +21,9 @@ import { HitsCounter } from '../hits_counter';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../__mocks__/data_view';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
+import { SuggestionSelector } from './suggestion_selector';
+
+import { currentSuggestionMock, allSuggestionsMock } from '../__mocks__/suggestions';
 
 let mockUseEditVisualization: jest.Mock | undefined = jest.fn();
 
@@ -34,6 +38,8 @@ async function mountComponent({
   chartHidden = false,
   appendHistogram,
   dataView = dataViewWithTimefieldMock,
+  currentSuggestion,
+  allSuggestions,
 }: {
   noChart?: boolean;
   noHits?: boolean;
@@ -41,6 +47,8 @@ async function mountComponent({
   chartHidden?: boolean;
   appendHistogram?: ReactElement;
   dataView?: DataView;
+  currentSuggestion?: Suggestion;
+  allSuggestions?: Suggestion[];
 } = {}) {
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: noHits ? 0 : 2 } } }))
@@ -74,6 +82,8 @@ async function mountComponent({
           },
         },
     breakdown: noBreakdown ? undefined : { field: undefined },
+    currentSuggestion,
+    allSuggestions,
     appendHistogram,
     onResetChartHeight: jest.fn(),
     onChartHiddenChange: jest.fn(),
@@ -190,5 +200,27 @@ describe('Chart', () => {
   it('should not render BreakdownFieldSelector when chart is visible and breakdown is undefined', async () => {
     const component = await mountComponent({ noBreakdown: true });
     expect(component.find(BreakdownFieldSelector).exists()).toBeFalsy();
+  });
+
+  it('should render the Lens SuggestionsSelector when chart is visible and suggestions exist', async () => {
+    const component = await mountComponent({
+      currentSuggestion: currentSuggestionMock,
+      allSuggestions: allSuggestionsMock,
+    });
+    expect(component.find(SuggestionSelector).exists()).toBeTruthy();
+  });
+
+  it('should not render the Lens SuggestionsSelector when chart is hidden', async () => {
+    const component = await mountComponent({
+      chartHidden: true,
+      currentSuggestion: currentSuggestionMock,
+      allSuggestions: allSuggestionsMock,
+    });
+    expect(component.find(SuggestionSelector).exists()).toBeFalsy();
+  });
+
+  it('should not render the Lens SuggestionsSelector when chart is visible and suggestions are undefined', async () => {
+    const component = await mountComponent({ currentSuggestion: currentSuggestionMock });
+    expect(component.find(SuggestionSelector).exists()).toBeFalsy();
   });
 });

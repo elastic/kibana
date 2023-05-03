@@ -12,16 +12,19 @@ export interface GenericBuckets {
   key_as_string?: string; // contains, for example, formatted dates
   doc_count: number;
 }
-
 export const NONE_GROUP_KEY = 'none';
 
 export type RawBucket<T> = GenericBuckets & T;
 
+export interface GroupingBucket {
+  isNullGroup?: boolean;
+}
+
 /** Defines the shape of the aggregation returned by Elasticsearch */
 // TODO: write developer docs for these fields
-export interface GroupingAggregation<T> {
+export interface RootAggregation<T> {
   groupByFields?: {
-    buckets?: Array<RawBucket<T>>;
+    buckets?: Array<RawBucket<T> & GroupingBucket>;
   };
   groupsCount?: {
     value?: number | null;
@@ -29,9 +32,49 @@ export interface GroupingAggregation<T> {
   unitsCount?: {
     value?: number | null;
   };
+  unitsCountWithoutNull?: {
+    value?: number | null;
+  };
 }
 
-export type GroupingFieldTotalAggregation = Record<
+export type GroupingFieldTotalAggregation<T> = Record<
   string,
-  { value?: number | null; buckets?: Array<{ doc_count?: number | null }> }
+  {
+    value?: number | null;
+    buckets?: Array<RawBucket<T>>;
+  }
 >;
+
+export type GroupingAggregation<T> = RootAggregation<T> & GroupingFieldTotalAggregation<T>;
+
+export interface BadgeMetric {
+  value: number;
+  color?: string;
+  width?: number;
+}
+
+export interface StatRenderer {
+  title: string;
+  renderer?: JSX.Element;
+  badge?: BadgeMetric;
+}
+
+export type GroupStatsRenderer<T> = (
+  selectedGroup: string,
+  fieldBucket: RawBucket<T>
+) => StatRenderer[];
+
+export type GroupPanelRenderer<T> = (
+  selectedGroup: string,
+  fieldBucket: RawBucket<T>,
+  nullGroupMessage?: string
+) => JSX.Element | undefined;
+
+export type OnGroupToggle = (params: {
+  isOpen: boolean;
+  groupName?: string | undefined;
+  groupNumber: number;
+  groupingId: string;
+}) => void;
+
+export type { GroupingProps } from './grouping';

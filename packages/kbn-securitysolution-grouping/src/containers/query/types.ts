@@ -23,21 +23,22 @@ export type NamedAggregation = Record<string, estypes.AggregationsAggregationCon
 export interface GroupingQueryArgs {
   additionalFilters: BoolAgg[];
   from: string;
-  groupByFields: string[];
-  metricsAggregations?: NamedAggregation[];
-  pageNumber?: number;
+  groupByField: string;
   rootAggregations?: NamedAggregation[];
   runtimeMappings?: MappingRuntimeFields;
+  additionalAggregationsRoot?: NamedAggregation[];
+  pageNumber?: number;
+  selectedGroupEsTypes: string[];
   size?: number;
   sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
+  statsAggregations?: NamedAggregation[];
   to: string;
 }
 
 export interface MainAggregation extends NamedAggregation {
   groupByFields: {
     aggs: NamedAggregation;
-    multi_terms?: estypes.AggregationsAggregationContainer['multi_terms'];
-    terms?: estypes.AggregationsAggregationContainer['terms'];
+    multi_terms: estypes.AggregationsAggregationContainer['multi_terms'];
   };
 }
 

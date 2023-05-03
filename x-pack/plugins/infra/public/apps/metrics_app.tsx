@@ -20,6 +20,9 @@ import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
+import { SourceProvider } from '../containers/metrics_source';
+
+export const METRICS_APP_DATA_TEST_SUBJ = 'infraMetricsPage';
 
 export const renderApp = (
   core: CoreStart,
@@ -29,7 +32,7 @@ export const renderApp = (
 ) => {
   const storage = new Storage(window.localStorage);
 
-  prepareMountElement(element, 'infraMetricsPage');
+  prepareMountElement(element, METRICS_APP_DATA_TEST_SUBJ);
 
   ReactDOM.render(
     <MetricsApp
@@ -70,23 +73,25 @@ const MetricsApp: React.FC<{
         theme$={theme$}
         triggersActionsUI={plugins.triggersActionsUi}
       >
-        <Router history={history}>
-          <Switch>
-            <Route path="/link-to" component={LinkToMetricsPage} />
-            {uiCapabilities?.infrastructure?.show && (
-              <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
-            )}
-            {uiCapabilities?.infrastructure?.show && (
-              <RedirectWithQueryParams from="/snapshot" exact={true} to="/inventory" />
-            )}
-            {uiCapabilities?.infrastructure?.show && (
-              <RedirectWithQueryParams from="/metrics-explorer" exact={true} to="/explorer" />
-            )}
-            {uiCapabilities?.infrastructure?.show && (
-              <Route path="/" component={InfrastructurePage} />
-            )}
-          </Switch>
-        </Router>
+        <SourceProvider sourceId="default">
+          <Router history={history}>
+            <Switch>
+              <Route path="/link-to" component={LinkToMetricsPage} />
+              {uiCapabilities?.infrastructure?.show && (
+                <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
+              )}
+              {uiCapabilities?.infrastructure?.show && (
+                <RedirectWithQueryParams from="/snapshot" exact={true} to="/inventory" />
+              )}
+              {uiCapabilities?.infrastructure?.show && (
+                <RedirectWithQueryParams from="/metrics-explorer" exact={true} to="/explorer" />
+              )}
+              {uiCapabilities?.infrastructure?.show && (
+                <Route path="/" component={InfrastructurePage} />
+              )}
+            </Switch>
+          </Router>
+        </SourceProvider>
       </CommonInfraProviders>
     </CoreProviders>
   );

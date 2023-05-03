@@ -67,6 +67,7 @@ import { registerResponseActionRoutes } from './response_actions';
 import * as ActionDetailsService from '../../services/actions/action_details_by_id';
 import { CaseStatuses } from '@kbn/cases-components';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import { ActionCreateService } from '../../services/actions';
 
 interface CallRouteInterface {
   body?: ResponseActionRequestBody;
@@ -121,19 +122,25 @@ describe('Response actions', () => {
       licenseService = new LicenseService();
       licenseService.start(licenseEmitter);
 
-      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-      endpointAppContextService.start({
-        ...startContract,
-        licenseService,
-      });
-
-      // add the host isolation route handlers to routerMock
-      registerResponseActionRoutes(routerMock, {
+      const endpointContext = {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
         experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
+      };
+
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
+      endpointAppContextService.start({
+        ...startContract,
+        actionCreateService: new ActionCreateService(
+          mockScopedClient.asInternalUser,
+          endpointContext
+        ),
+        licenseService,
       });
+
+      // add the host isolation route handlers to routerMock
+      registerResponseActionRoutes(routerMock, endpointContext);
 
       getActionDetailsByIdSpy = jest
         .spyOn(ActionDetailsService, 'getActionDetailsById')
@@ -635,7 +642,7 @@ describe('Response actions', () => {
         expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('execute');
         const parameters = actionDocs[1].body!.data.parameters as ResponseActionsExecuteParameters;
         expect(parameters.command).toEqual('ls -al');
-        expect(parameters.timeout).toEqual(14400000); // 4hrs
+        expect(parameters.timeout).toEqual(14400); // 4hrs in seconds
         expect(actionDocs[1].body!.data.command).toEqual('execute');
 
         expect(mockResponse.ok).toBeCalled();

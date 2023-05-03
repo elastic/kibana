@@ -76,7 +76,7 @@ interface Props {
   position: PopoverPosition;
   iconHasPanel?: boolean;
   iconSize?: 's' | 'xs';
-  locationId?: string;
+  locationId: string;
 }
 
 const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
@@ -112,7 +112,7 @@ export function ActionsPopover({
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
-  const location = useLocationName({ locationId: monitor.location.id });
+  const location = useLocationName({ locationId });
   const locationName = location?.label || monitor.location.id;
 
   const isPrivateLocation = !Boolean(location?.isServiceManaged);
@@ -235,7 +235,12 @@ export function ActionsPopover({
       },
     },
     {
-      name: monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel,
+      name: (
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+          {monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel}
+        </NoPermissionsTooltip>
+      ),
+      disabled: !canEditSynthetics,
       icon: alertLoading ? (
         <EuiLoadingSpinner size="s" />
       ) : monitor.isStatusAlertEnabled ? (
@@ -345,28 +350,28 @@ const loadingLabel = (isEnabled: boolean) =>
 const enableMonitorLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelEnableMonitor',
   {
-    defaultMessage: 'Enable monitor',
+    defaultMessage: 'Enable monitor (all locations)',
   }
 );
 
 const disableMonitorLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelDisableMonitor',
   {
-    defaultMessage: 'Disable monitor',
+    defaultMessage: 'Disable monitor (all locations)',
   }
 );
 
 const disableAlertLabel = i18n.translate(
   'xpack.synthetics.overview.actions.disableLabelDisableAlert',
   {
-    defaultMessage: 'Disable status alerts',
+    defaultMessage: 'Disable status alerts (all locations)',
   }
 );
 
 const enableMonitorAlertLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelDisableAlert',
   {
-    defaultMessage: 'Enable status alerts',
+    defaultMessage: 'Enable status alerts (all locations)',
   }
 );
 

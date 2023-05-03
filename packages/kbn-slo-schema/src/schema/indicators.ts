@@ -55,6 +55,7 @@ const kqlCustomIndicatorSchema = t.type({
     filter: t.string,
     good: t.string,
     total: t.string,
+    timestampField: t.string,
   }),
 });
 

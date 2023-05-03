@@ -36,6 +36,7 @@ export interface ImageViewerProps {
   onLoad?: () => void;
   onClick?: () => void;
   containerCSS?: SerializedStyles;
+  isScreenshotMode?: boolean;
 }
 
 export function ImageViewer({
@@ -47,6 +48,7 @@ export function ImageViewer({
   onClick,
   className,
   containerCSS,
+  isScreenshotMode,
 }: ImageViewerProps) {
   const { euiTheme } = useEuiTheme();
   const { getImageDownloadHref, validateUrl } = useImageViewerContext();
@@ -96,6 +98,7 @@ export function ImageViewer({
                 })
               : undefined
           }
+          loading={isScreenshotMode ? 'eager' : 'lazy'}
           style={{
             width: '100%',
             height: '100%',

@@ -39,6 +39,12 @@ export const DETAILS_TITLE = '.euiDescriptionList__title';
 
 export const EXCEPTIONS_TAB = 'a[data-test-subj="navigation-rule_exceptions"]';
 
+export const EXCEPTIONS_TAB_EXPIRED_FILTER = '[data-test-subj="expired"]';
+
+export const EXCEPTIONS_TAB_ACTIVE_FILTER = '[data-test-subj="active"]';
+
+export const EXCEPTIONS_ITEM_CONTAINER = '[data-test-subj="exceptionsContainer"]';
+
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
@@ -135,3 +141,6 @@ export const THREAT_TECHNIQUE = '[data-test-subj="threatTechniqueLink"]';
 export const THREAT_SUBTECHNIQUE = '[data-test-subj="threatSubtechniqueLink"]';
 
 export const BACK_TO_RULES_TABLE = '[data-test-subj="breadcrumb"][title="Rules"]';
+
+export const HIGHLIGHTED_ROWS_IN_TABLE =
+  '[data-test-subj="euiDataGridBody"] .alertsTableHighlightedRow';

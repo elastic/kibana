@@ -18,7 +18,9 @@ import {
   ScopedHistory,
   IUiSettingsClient,
 } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
@@ -31,28 +33,31 @@ type RequiredFieldsOnly<T> = {
 };
 interface KibanaLogicProps {
   application: ApplicationStart;
+  capabilities: Capabilities;
+  charts: ChartsPluginStart;
+  cloud?: CloudSetup;
   config: ClientConfigType;
+  data: DataPublicPluginStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
+  history: ScopedHistory;
+  isSidebarEnabled: boolean;
+  lens: LensPublicStart;
+  navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
-  // Kibana core
-  capabilities: Capabilities;
-  history: ScopedHistory;
-  navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
+  renderHeaderActions(HeaderActions: FC): void;
+  security: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
-  renderHeaderActions(HeaderActions: FC): void;
-  // Required plugins
-  charts: ChartsPluginStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
-  security: SecurityPluginStart;
   uiSettings: IUiSettingsClient;
-  // Optional plugins
-  cloud?: CloudSetup;
 }
+
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
   cloud: Partial<CloudSetup>;
+  data: DataPublicPluginStart;
   isCloud: boolean;
+  lens: LensPublicStart;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
 }
 
@@ -61,11 +66,14 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
   reducers: ({ props }) => ({
     application: [props.application || {}, {}],
     capabilities: [props.capabilities || {}, {}],
-    config: [props.config || {}, {}],
     charts: [props.charts, {}],
     cloud: [props.cloud || {}, {}],
+    config: [props.config || {}, {}],
+    data: [props.data, {}],
     guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],
+    isSidebarEnabled: [props.isSidebarEnabled, {}],
+    lens: [props.lens, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {
         const deps = { history: props.history, http: HttpLogic.values.http };

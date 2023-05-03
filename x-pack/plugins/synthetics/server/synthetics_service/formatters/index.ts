@@ -10,23 +10,8 @@ import { tcpFormatters, TCPFormatMap } from './tcp';
 import { icmpFormatters, ICMPFormatMap } from './icmp';
 import { browserFormatters, BrowserFormatMap } from './browser';
 import { commonFormatters, CommonFormatMap } from './common';
-import { DataStream } from '../../../common/runtime_types';
 
 type Formatters = HTTPFormatMap & TCPFormatMap & ICMPFormatMap & BrowserFormatMap & CommonFormatMap;
-
-interface FormatterMap {
-  [DataStream.HTTP]: HTTPFormatMap;
-  [DataStream.ICMP]: ICMPFormatMap;
-  [DataStream.TCP]: TCPFormatMap;
-  [DataStream.BROWSER]: BrowserFormatMap;
-}
-
-export const formattersMap: FormatterMap = {
-  [DataStream.HTTP]: httpFormatters,
-  [DataStream.ICMP]: icmpFormatters,
-  [DataStream.TCP]: tcpFormatters,
-  [DataStream.BROWSER]: browserFormatters,
-};
 
 export const formatters: Formatters = {
   ...httpFormatters,

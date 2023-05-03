@@ -18,6 +18,7 @@ import {
   REASON_ID_TYPES,
   validateAbsoluteTimeShift,
 } from '@kbn/data-plugin/common';
+import { nonNullable } from '../../../../../utils';
 import { DateRange } from '../../../../../../common/types';
 import {
   findMathNodes,
@@ -27,7 +28,6 @@ import {
   getValueOrName,
   groupArgsByType,
   isMathNode,
-  nonNullable,
   tinymathFunctions,
 } from './util';
 
@@ -132,7 +132,7 @@ function getNodeLocation(node: TinymathFunction): TinymathLocation[] {
 
 function getArgumentType(arg: TinymathAST, operations: Record<string, GenericOperationDefinition>) {
   if (!isObject(arg)) {
-    return typeof arg;
+    return getTypeI18n(typeof arg);
   }
   if (arg.type === 'function') {
     if (tinymathFunctions[arg.name]) {

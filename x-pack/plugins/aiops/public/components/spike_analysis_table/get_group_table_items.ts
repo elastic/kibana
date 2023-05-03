@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import type { SignificantTermGroup, FieldValuePair } from '@kbn/ml-agg-utils';
+import { sortBy } from 'lodash';
 
-import type { GroupTableItem } from './types';
+import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
+
+import type { GroupTableItem, GroupTableItemGroup } from './types';
 
 export function getGroupTableItems(
   significantTermsGroups: SignificantTermGroup[]
 ): GroupTableItem[] {
   const tableItems = significantTermsGroups.map(({ id, group, docCount, histogram, pValue }) => {
-    const sortedGroup = group.sort((a, b) =>
-      a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
-    );
-    const dedupedGroup: FieldValuePair[] = [];
-    const repeatedValues: FieldValuePair[] = [];
+    const sortedGroup = sortBy(group, [(d) => d.fieldName]);
+    const dedupedGroup: GroupTableItemGroup[] = [];
 
     sortedGroup.forEach((pair) => {
-      const { fieldName, fieldValue } = pair;
-      if (pair.duplicate === false) {
-        dedupedGroup.push({ fieldName, fieldValue });
-      } else {
-        repeatedValues.push({ fieldName, fieldValue });
+      const { fieldName, fieldValue, docCount: pairDocCount, pValue: pairPValue, duplicate } = pair;
+      if ((duplicate ?? 0) <= 1) {
+        dedupedGroup.push({ fieldName, fieldValue, docCount: pairDocCount, pValue: pairPValue });
       }
     });
+
+    const groupItemsSortedByUniqueness = sortBy(group, ['duplicate', 'docCount']);
+    const sortedDedupedGroup = sortBy(dedupedGroup, (d) => [-1 * (d.pValue ?? 0), d.docCount]);
 
     return {
       id,
       docCount,
       pValue,
-      group: dedupedGroup,
-      repeatedValues,
+      uniqueItemsCount: sortedDedupedGroup.length,
+      groupItemsSortedByUniqueness,
       histogram,
     };
   });

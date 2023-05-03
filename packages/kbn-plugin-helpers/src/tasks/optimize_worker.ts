@@ -26,26 +26,33 @@ process.on('message', (msg: any) => {
   const webpackConfig = getWebpackConfig(bundle, remotes, workerConfig);
   const compiler = webpack(webpackConfig);
 
-  compiler.run((error, stats) => {
-    if (error) {
-      send.call(process, {
-        success: false,
-        error: error.message,
-      });
-      return;
-    }
+  compiler.watch(
+    {
+      // Example
+      aggregateTimeout: 300,
+      poll: undefined,
+    },
+    (error, stats) => {
+      if (error) {
+        send.call(process, {
+          success: false,
+          error: error.message,
+        });
+        return;
+      }
 
-    if (stats.hasErrors()) {
-      send.call(process, {
-        success: false,
-        error: `Failed to compile with webpack:\n${stats.toString()}`,
-      });
-      return;
-    }
+      if (stats.hasErrors()) {
+        send.call(process, {
+          success: false,
+          error: `Failed to compile with webpack:\n${stats.toString()}`,
+        });
+        return;
+      }
 
-    send.call(process, {
-      success: true,
-      warnings: stats.hasWarnings() ? stats.toString() : '',
-    });
-  });
+      send.call(process, {
+        success: true,
+        warnings: stats.hasWarnings() ? stats.toString() : '',
+      });
+    }
+  );
 });

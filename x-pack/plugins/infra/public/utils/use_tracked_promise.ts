@@ -112,6 +112,12 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
     state: 'uninitialized',
   });
 
+  const reset = useCallback(() => {
+    setPromiseState({
+      state: 'uninitialized',
+    });
+  }, []);
+
   const execute = useMemo(
     () =>
       (...args: Arguments) => {
@@ -149,17 +155,6 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
           },
           promise: newCancelablePromise.then(
             (value) => {
-              setPromiseState((previousPromiseState) =>
-                previousPromiseState.state === 'pending' &&
-                previousPromiseState.promise === newCancelablePromise
-                  ? {
-                      state: 'resolved',
-                      promise: newPendingPromise.promise,
-                      value,
-                    }
-                  : previousPromiseState
-              );
-
               if (['settlement', 'resolution'].includes(cancelPreviousOn)) {
                 cancelPreviousPendingPromises();
               }
@@ -173,10 +168,38 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
                 onResolve(value);
               }
 
+              setPromiseState((previousPromiseState) =>
+                previousPromiseState.state === 'pending' &&
+                previousPromiseState.promise === newCancelablePromise
+                  ? {
+                      state: 'resolved',
+                      promise: newPendingPromise.promise,
+                      value,
+                    }
+                  : previousPromiseState
+              );
+
               return value;
             },
             (value) => {
               if (!(value instanceof SilentCanceledPromiseError)) {
+                if (['settlement', 'rejection'].includes(cancelPreviousOn)) {
+                  cancelPreviousPendingPromises();
+                }
+
+                // remove itself from the list of pending promises
+                pendingPromises.current = pendingPromises.current.filter(
+                  (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
+                );
+
+                if (shouldTriggerOrThrow()) {
+                  if (onReject) {
+                    onReject(value);
+                  } else {
+                    throw value;
+                  }
+                }
+
                 setPromiseState((previousPromiseState) =>
                   previousPromiseState.state === 'pending' &&
                   previousPromiseState.promise === newCancelablePromise
@@ -187,23 +210,6 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
                       }
                     : previousPromiseState
                 );
-              }
-
-              if (['settlement', 'rejection'].includes(cancelPreviousOn)) {
-                cancelPreviousPendingPromises();
-              }
-
-              // remove itself from the list of pending promises
-              pendingPromises.current = pendingPromises.current.filter(
-                (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
-              );
-
-              if (shouldTriggerOrThrow()) {
-                if (onReject) {
-                  onReject(value);
-                } else {
-                  throw value;
-                }
               }
             }
           ),
@@ -233,7 +239,7 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
     []
   );
 
-  return [promiseState, execute] as [typeof promiseState, typeof execute];
+  return [promiseState, execute, reset] as [typeof promiseState, typeof execute, typeof reset];
 };
 
 export interface UninitializedPromiseState {

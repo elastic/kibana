@@ -14,10 +14,6 @@ describe('CertificatesPage', () => {
     const { findByText } = render(<CertificatesPage />);
 
     expect(await findByText('This table contains 0 rows; Page 1 of 0.')).toBeInTheDocument();
-    expect(
-      await findByText(
-        'No Certificates found. Note: Certificates are only visible for Heartbeat 7.8+'
-      )
-    ).toBeInTheDocument();
+    expect(await findByText('No Certificates found.')).toBeInTheDocument();
   });
 });

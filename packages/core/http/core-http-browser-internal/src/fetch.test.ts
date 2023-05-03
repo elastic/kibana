@@ -16,6 +16,7 @@ import type { HttpResponse, HttpFetchOptionsWithPath } from '@kbn/core-http-brow
 
 import { Fetch } from './fetch';
 import { BasePath } from './base_path';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 function delay<T>(duration: number) {
   return new Promise<T>((r) => setTimeout(r, duration));
@@ -478,6 +479,14 @@ describe('Fetch', () => {
       const ndjson = await new Response(data).text();
 
       expect(ndjson).toEqual(content);
+    });
+
+    it('should pass through version as a header', async () => {
+      fetchMock.get('*', { body: {} });
+      await fetchInstance.fetch('/my/path', { asResponse: true, version: '99' });
+      expect(fetchMock.lastOptions()!.headers).toEqual(
+        expect.objectContaining({ [ELASTIC_HTTP_VERSION_HEADER.toLowerCase()]: '99' })
+      );
     });
   });
 

@@ -214,13 +214,10 @@ export class ProcessImpl implements Process {
     return !!(sessionIsInteractive && parentIsASessionLeader && processIsAGroupLeader);
   }
 
-  getMaxAlertLevel() {
-    // TODO: as part of alerts details work + tie in with the new alert flyout
-    return null;
-  }
-
   findEventByAction = memoizeOne((events: ProcessEvent[], action: EventAction) => {
-    return events.find(({ event }) => event?.action === action);
+    return events.find(({ event }) => {
+      return event?.action?.includes(action);
+    });
   });
 
   findEventByKind = memoizeOne((events: ProcessEvent[], kind: EventKind) => {
@@ -228,7 +225,9 @@ export class ProcessImpl implements Process {
   });
 
   filterEventsByAction = memoizeOne((events: ProcessEvent[], action: EventAction) => {
-    return events.filter(({ event }) => event?.action === action);
+    return events.filter(({ event }) => {
+      return event?.action?.includes(action);
+    });
   });
 
   filterEventsByKind = memoizeOne((events: ProcessEvent[], kind: EventKind) => {
@@ -239,14 +238,14 @@ export class ProcessImpl implements Process {
   // to be used as a source for the most up to date details
   // on the processes lifecycle.
   getDetailsMemo = memoizeOne((events: ProcessEvent[]) => {
-    // TODO: add these to generator
-    const actionsToFind: Array<EventAction | undefined> = [
-      EventAction.fork,
-      EventAction.exec,
-      EventAction.end,
-    ];
     const filtered = events.filter((processEvent) => {
-      return actionsToFind.includes(processEvent.event?.action);
+      const action = processEvent?.event?.action;
+
+      return (
+        action?.includes(EventAction.fork) ||
+        action?.includes(EventAction.exec) ||
+        action?.includes(EventAction.end)
+      );
     });
 
     // there are some anomalous processes which are omitting event.action

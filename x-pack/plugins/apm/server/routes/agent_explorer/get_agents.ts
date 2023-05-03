@@ -9,8 +9,8 @@ import { isOpenTelemetryAgentName } from '../../../common/agent_name';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-import { getAgentsItems } from './get_agents_items';
 import { getAgentDocsPageUrl } from './get_agent_url_repository';
+import { getAgentsItems } from './get_agents_items';
 
 const getOtelAgentVersion = (item: {
   agentTelemetryAutoVersion: string[];
@@ -29,7 +29,9 @@ export interface AgentExplorerAgentsResponse {
     environments: string[];
     agentName: AgentName;
     agentVersion: string[];
+    agentTelemetryAutoVersion: string[];
     instances: number;
+    latestVersion?: string;
   }>;
 }
 
@@ -65,16 +67,19 @@ export async function getAgents({
 
   return {
     items: items.map((item) => {
-      const agentVersion = isOpenTelemetryAgentName(item.agentName)
-        ? getOtelAgentVersion(item)
-        : item.agentVersion;
+      const agentDocsPageUrl = getAgentDocsPageUrl(item.agentName);
 
-      const { agentTelemetryAutoVersion, ...rest } = item;
+      if (isOpenTelemetryAgentName(item.agentName)) {
+        return {
+          ...item,
+          agentVersion: getOtelAgentVersion(item),
+          agentDocsPageUrl,
+        };
+      }
 
       return {
-        ...rest,
-        agentVersion,
-        agentDocsPageUrl: getAgentDocsPageUrl(item.agentName as AgentName),
+        ...item,
+        agentDocsPageUrl,
       };
     }),
   };

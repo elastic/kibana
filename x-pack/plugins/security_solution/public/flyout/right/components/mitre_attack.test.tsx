@@ -10,36 +10,11 @@ import { render } from '@testing-library/react';
 import { MitreAttack } from './mitre_attack';
 import { RightPanelContext } from '../context';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
+import { mockSearchHit } from '../mocks/mock_context';
 
 describe('<MitreAttack />', () => {
   it('should render mitre attack information', () => {
-    const contextValue = {
-      searchHit: {
-        fields: {
-          'kibana.alert.rule.parameters': [
-            {
-              threat: [
-                {
-                  framework: 'MITRE ATT&CK',
-                  tactic: {
-                    id: '123',
-                    reference: 'https://attack.mitre.org/tactics/123',
-                    name: 'Tactic',
-                  },
-                  technique: [
-                    {
-                      id: '456',
-                      reference: 'https://attack.mitre.org/techniques/456',
-                      name: 'Technique',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      },
-    } as unknown as RightPanelContext;
+    const contextValue = { searchHit: mockSearchHit } as unknown as RightPanelContext;
 
     const { getByTestId } = render(
       <RightPanelContext.Provider value={contextValue}>
@@ -58,16 +33,12 @@ describe('<MitreAttack />', () => {
       },
     } as unknown as RightPanelContext;
 
-    const { baseElement } = render(
+    const { container } = render(
       <RightPanelContext.Provider value={contextValue}>
         <MitreAttack />
       </RightPanelContext.Provider>
     );
 
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
+    expect(container).toBeEmptyDOMElement();
   });
 });

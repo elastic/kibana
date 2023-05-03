@@ -6,6 +6,7 @@
  */
 import yaml from 'js-yaml';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { i18n } from '@kbn/i18n';
 import {
   Selector,
   Response,
@@ -17,6 +18,10 @@ import {
   SelectorConditionsMap,
   SelectorCondition,
 } from '../types';
+import {
+  MAX_CONDITION_VALUE_LENGTH_BYTES,
+  MAX_SELECTORS_AND_RESPONSES_PER_TYPE,
+} from './constants';
 
 export function getInputFromPolicy(policy: NewPackagePolicy, inputId: string) {
   return policy.inputs.find((input) => input.type === inputId);
@@ -49,6 +54,79 @@ export function conditionCombinationInvalid(
   return !!invalid;
 }
 
+type TotalByType = {
+  [key in SelectorType]: number;
+};
+
+export function getTotalsByType(selectors: Selector[], responses: Response[]) {
+  const totalsByType: TotalByType = { process: 0, file: 0 };
+
+  selectors.forEach((selector) => {
+    totalsByType[selector.type]++;
+  });
+
+  responses.forEach((response) => {
+    totalsByType[response.type]++;
+  });
+
+  return totalsByType;
+}
+
+export function validateMaxSelectorsAndResponses(selectors: Selector[], responses: Response[]) {
+  const errors: string[] = [];
+  const totalsByType = getTotalsByType(selectors, responses);
+
+  // check selectors + responses doesn't exceed MAX_SELECTORS_AND_RESPONSES_PER_TYPE
+  Object.values(totalsByType).forEach((count) => {
+    if (count > MAX_SELECTORS_AND_RESPONSES_PER_TYPE) {
+      errors.push(
+        i18n.translate('xpack.cloudDefend.errorMaxSelectorsResponsesExceeded', {
+          defaultMessage:
+            'You cannot exceed {max} selectors + responses for a given type e.g file, process',
+          values: { max: MAX_SELECTORS_AND_RESPONSES_PER_TYPE },
+        })
+      );
+    }
+  });
+
+  return errors;
+}
+
+export function validateStringValuesForCondition(condition: SelectorCondition, values: string[]) {
+  const errors: string[] = [];
+  const maxValueBytes =
+    SelectorConditionsMap[condition].maxValueBytes || MAX_CONDITION_VALUE_LENGTH_BYTES;
+
+  const { pattern, patternError } = SelectorConditionsMap[condition];
+
+  values.forEach((value) => {
+    if (pattern && !new RegExp(pattern).test(value)) {
+      if (patternError) {
+        errors.push(patternError);
+      } else {
+        errors.push(
+          i18n.translate('xpack.cloudDefend.errorGenericRegexFailure', {
+            defaultMessage: '"{condition}" values must match the pattern: /{pattern}/',
+            values: { condition, pattern },
+          })
+        );
+      }
+    }
+
+    const bytes = new Blob([value]).size;
+    if (bytes > maxValueBytes) {
+      errors.push(
+        i18n.translate('xpack.cloudDefend.errorMaxValueBytesExceeded', {
+          defaultMessage: '"{condition}" values cannot exceed {maxValueBytes} bytes',
+          values: { condition, maxValueBytes },
+        })
+      );
+    }
+  });
+
+  return errors;
+}
+
 export function getRestrictedValuesForCondition(
   type: SelectorType,
   condition: SelectorCondition
@@ -75,10 +153,10 @@ export function getSelectorConditions(type: SelectorType): SelectorCondition[] {
 export function getDefaultSelectorByType(type: SelectorType): Selector {
   switch (type) {
     case 'process':
-      return { ...DefaultProcessSelector };
+      return JSON.parse(JSON.stringify(DefaultProcessSelector));
     case 'file':
     default:
-      return { ...DefaultFileSelector };
+      return JSON.parse(JSON.stringify(DefaultFileSelector));
   }
 }
 

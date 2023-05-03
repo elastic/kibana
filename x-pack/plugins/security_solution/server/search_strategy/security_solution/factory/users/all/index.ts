@@ -42,7 +42,6 @@ export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
     deps?: {
       esClient: IScopedClusterClient;
       spaceId?: string;
-      // endpointContext: EndpointAppContext;
     }
   ): Promise<UsersStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;

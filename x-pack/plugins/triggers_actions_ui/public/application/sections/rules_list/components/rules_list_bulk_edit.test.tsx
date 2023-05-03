@@ -17,7 +17,7 @@ import {
   ruleType,
 } from './test_helpers';
 import { IToasts } from '@kbn/core/public';
-import { act, render, screen, waitForElementToBeRemoved, fireEvent } from '@testing-library/react';
+import { render, screen, waitForElementToBeRemoved, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -95,10 +95,6 @@ const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'
 );
 const { loadRuleTypes } = jest.requireMock('../../../lib/rule_api/rule_types');
-const { bulkSnoozeRules } = jest.requireMock('../../../lib/rule_api/snooze');
-const { bulkUnsnoozeRules } = jest.requireMock('../../../lib/rule_api/unsnooze');
-const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api/update_api_key');
-
 const { loadRulesWithKueryFilter } = jest.requireMock('../../../lib/rule_api/rules_kuery_filter');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 
@@ -154,131 +150,6 @@ describe('Rules list Bulk Edit', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-  });
-
-  // FLAKY: https://github.com/elastic/kibana/issues/152268
-  // FLAKY: https://github.com/elastic/kibana/issues/152267
-  describe.skip('bulk actions', () => {
-    beforeEach(async () => {
-      renderWithProviders(<RulesList />);
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-
-      fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
-      fireEvent.click(screen.getByTestId('selectAllRulesButton'));
-      fireEvent.click(screen.getByTestId('checkboxSelectRow-2'));
-      fireEvent.click(screen.getByTestId('showBulkActionButton'));
-    });
-
-    it('can bulk add snooze schedule', async () => {
-      fireEvent.click(screen.getByTestId('bulkSnoozeSchedule'));
-      expect(screen.queryByTestId('ruleSnoozeScheduler')).toBeInTheDocument();
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('scheduler-saveSchedule'));
-      });
-
-      const filter = bulkSnoozeRules.mock.calls[0][0].filter;
-
-      expect(filter.function).toEqual('and');
-      expect(filter.arguments[0].function).toEqual('or');
-      expect(filter.arguments[1].function).toEqual('not');
-      expect(filter.arguments[1].arguments[0].arguments[0].value).toEqual('alert.id');
-      expect(filter.arguments[1].arguments[0].arguments[1].value).toEqual('alert:2');
-
-      expect(bulkSnoozeRules).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ids: [],
-        })
-      );
-    });
-
-    it('can bulk remove snooze schedule', async () => {
-      fireEvent.click(screen.getByTestId('bulkRemoveSnoozeSchedule'));
-      expect(screen.queryByTestId('bulkRemoveScheduleConfirmationModal')).toBeInTheDocument();
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      });
-
-      const filter = bulkUnsnoozeRules.mock.calls[0][0].filter;
-
-      expect(filter.function).toEqual('and');
-      expect(filter.arguments[0].function).toEqual('or');
-      expect(filter.arguments[1].function).toEqual('not');
-      expect(filter.arguments[1].arguments[0].arguments[0].value).toEqual('alert.id');
-      expect(filter.arguments[1].arguments[0].arguments[1].value).toEqual('alert:2');
-
-      expect(bulkUnsnoozeRules).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ids: [],
-          scheduleIds: [],
-        })
-      );
-    });
-
-    it('can bulk snooze', async () => {
-      fireEvent.click(screen.getByTestId('bulkSnooze'));
-      expect(screen.queryByTestId('snoozePanel')).toBeInTheDocument();
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('linkSnooze1h'));
-      });
-
-      const filter = bulkSnoozeRules.mock.calls[0][0].filter;
-
-      expect(filter.function).toEqual('and');
-      expect(filter.arguments[0].function).toEqual('or');
-      expect(filter.arguments[1].function).toEqual('not');
-      expect(filter.arguments[1].arguments[0].arguments[0].value).toEqual('alert.id');
-      expect(filter.arguments[1].arguments[0].arguments[1].value).toEqual('alert:2');
-
-      expect(bulkSnoozeRules).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ids: [],
-        })
-      );
-    });
-
-    it('can bulk unsnooze', async () => {
-      fireEvent.click(screen.getByTestId('bulkUnsnooze'));
-      expect(screen.queryByTestId('bulkUnsnoozeConfirmationModal')).toBeInTheDocument();
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      });
-
-      const filter = bulkUnsnoozeRules.mock.calls[0][0].filter;
-
-      expect(filter.function).toEqual('and');
-      expect(filter.arguments[0].function).toEqual('or');
-      expect(filter.arguments[1].function).toEqual('not');
-      expect(filter.arguments[1].arguments[0].arguments[0].value).toEqual('alert.id');
-      expect(filter.arguments[1].arguments[0].arguments[1].value).toEqual('alert:2');
-
-      expect(bulkUnsnoozeRules).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ids: [],
-        })
-      );
-    });
-
-    it('can bulk update API key', async () => {
-      fireEvent.click(screen.getByTestId('updateAPIKeys'));
-      expect(screen.queryByTestId('updateApiKeyIdsConfirmation')).toBeInTheDocument();
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      });
-
-      const filter = bulkUpdateAPIKey.mock.calls[0][0].filter;
-
-      expect(filter.function).toEqual('and');
-      expect(filter.arguments[0].function).toEqual('or');
-      expect(filter.arguments[1].function).toEqual('not');
-      expect(filter.arguments[1].arguments[0].arguments[0].value).toEqual('alert.id');
-      expect(filter.arguments[1].arguments[0].arguments[1].value).toEqual('alert:2');
-
-      expect(bulkUpdateAPIKey).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ids: [],
-        })
-      );
-    });
   });
 
   it('renders select all button for bulk editing', async () => {

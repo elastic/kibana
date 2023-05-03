@@ -27,6 +27,7 @@ import {
   useExistingFieldsFetcher,
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
+import { ChildDragDropProvider, DragContextState } from '@kbn/dom-drag-drop';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {
   DatasourceDataPanelProps,
@@ -34,10 +35,9 @@ import type {
   IndexPattern,
   IndexPatternField,
 } from '../../types';
-import { ChildDragDropProvider, DragContextState } from '../../drag_drop';
 import type { FormBasedPrivateState } from './types';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
-import { FieldItem } from './field_item';
+import { FieldItem } from '../common/field_item';
 
 export type Props = Omit<
   DatasourceDataPanelProps<FormBasedPrivateState>,
@@ -175,9 +175,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   core,
   data,
   dataViews,
-  fieldFormats,
   indexPatternFieldEditor,
-  charts,
   dropOntoWorkspace,
   hasSuggestionForField,
   uiActions,
@@ -380,30 +378,22 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         hasSuggestionForField={hasSuggestionForField}
         editField={editField}
         removeField={removeField}
-        uiActions={uiActions}
-        core={core}
-        fieldFormats={fieldFormats}
         indexPattern={currentIndexPattern}
         highlight={fieldSearchHighlight}
         dateRange={dateRange}
         query={query}
         filters={filters}
-        chartsThemeService={charts.theme}
       />
     ),
     [
-      core,
-      fieldFormats,
       currentIndexPattern,
       dateRange,
       query,
       filters,
-      charts.theme,
       dropOntoWorkspace,
       hasSuggestionForField,
       editField,
       removeField,
-      uiActions,
     ]
   );
 

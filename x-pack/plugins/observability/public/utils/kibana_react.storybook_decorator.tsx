@@ -11,6 +11,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { CoreTheme } from '@kbn/core-theme-browser';
+import { MemoryRouter } from 'react-router-dom';
 import { casesFeatureId, sloFeatureId } from '../../common';
 import { PluginContext } from '../context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
@@ -19,20 +20,20 @@ import { ConfigSchema } from '../plugin';
 export function KibanaReactStorybookDecorator(Story: ComponentType) {
   const queryClient = new QueryClient();
 
-  const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
+  const appMountParameters = {
+    setHeaderActionMenu: () => {},
+  } as unknown as AppMountParameters;
   const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 
   const config: ConfigSchema = {
     unsafe: {
       alertDetails: {
-        apm: { enabled: false },
         logs: { enabled: false },
         metrics: { enabled: false },
         uptime: { enabled: false },
       },
     },
   };
-
   const mockTheme: CoreTheme = {
     darkMode: false,
   };
@@ -66,6 +67,7 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
             useChartsBaseTheme: () => {},
             useChartsTheme: () => {},
           },
+          activeCursor: () => {},
         },
         data: {},
         dataViews: {
@@ -86,12 +88,16 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
             addDanger: () => {},
           },
         },
+        share: {
+          url: { locators: { get: () => {} } },
+        },
         storage: {
           get: () => {},
         },
         theme: {
           theme$: createTheme$Mock(),
         },
+        triggersActionsUi: { getAddRuleFlyout: {} },
         uiSettings: {
           get: (setting: string) => {
             if (setting === 'dateFormat') {
@@ -113,9 +119,11 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
           ObservabilityPageTemplate: KibanaPageTemplate,
         }}
       >
-        <QueryClientProvider client={queryClient}>
-          <Story />
-        </QueryClientProvider>
+        <MemoryRouter>
+          <QueryClientProvider client={queryClient}>
+            <Story />
+          </QueryClientProvider>
+        </MemoryRouter>
       </PluginContext.Provider>
     </KibanaContextProvider>
   );

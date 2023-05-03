@@ -6,7 +6,7 @@
  */
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { ColumnHeaderType, DataTableCellAction } from '../../../../common/types';
-import { TableId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import type {
   BrowserFields,
   TimelineNonEcsData,

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
+import { mockSearchHit } from '../mocks/mock_context';
 import { RightPanelContext } from '../context';
 import { MitreAttack } from './mitre_attack';
 
@@ -16,33 +17,7 @@ export default {
 };
 
 export const Default: Story<void> = () => {
-  const contextValue = {
-    searchHit: {
-      fields: {
-        'kibana.alert.rule.parameters': [
-          {
-            threat: [
-              {
-                framework: 'MITRE ATT&CK',
-                tactic: {
-                  id: '123',
-                  reference: 'https://attack.mitre.org/tactics/123',
-                  name: 'Tactic',
-                },
-                technique: [
-                  {
-                    id: '456',
-                    reference: 'https://attack.mitre.org/techniques/456',
-                    name: 'Technique',
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    },
-  } as unknown as RightPanelContext;
+  const contextValue = { searchHit: mockSearchHit } as unknown as RightPanelContext;
 
   return (
     <RightPanelContext.Provider value={contextValue}>

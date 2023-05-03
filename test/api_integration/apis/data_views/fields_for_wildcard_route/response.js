@@ -201,6 +201,14 @@ export default function ({ getService }) {
           indices: ['basic_index'],
         });
     });
+
+    it('returns 404 when neither exists', async () => {
+      await supertest
+        .get('/api/index_patterns/_fields_for_wildcard')
+        .query({ pattern: 'bad_index,bad_index_2' })
+        .expect(404);
+    });
+
     it('returns 404 when no patterns exist', async () => {
       await supertest
         .get('/api/index_patterns/_fields_for_wildcard')

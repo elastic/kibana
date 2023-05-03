@@ -6,8 +6,8 @@
  */
 
 import { before, expect, journey, step } from '@elastic/synthetics';
-import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+import { recordVideo } from '../../helpers/record_video';
 import {
   addTestMonitor,
   cleanTestMonitors,
@@ -68,32 +68,38 @@ journey('Overview Search', async ({ page, params }) => {
     await page.waitForSelector(`text=${elasticJourney}`);
     await page.waitForSelector(`text=${cnnJourney}`);
     await page.waitForSelector(`text=${googleJourney}`);
-    await page.focus('[data-test-subj="syntheticsOverviewSearchInput"]');
-    await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'Elastic', { delay: 300 });
-    await page.waitForSelector(`text=${elasticJourney}`);
-    expect(await elastic.count()).toBe(1);
-    expect(await cnn.count()).toBe(0);
-    expect(await google.count()).toBe(0);
-    await page.click('[aria-label="Clear input"]');
-    await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'cnn', { delay: 300 });
-    await page.waitForSelector(`text=${cnnJourney}`);
-    expect(await elastic.count()).toBe(0);
-    expect(await cnn.count()).toBe(1);
-    expect(await google.count()).toBe(0);
-    await page.click('[aria-label="Clear input"]');
-    await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'GOOGLE', { delay: 300 });
-    await page.waitForSelector(`text=${googleJourney}`);
-    expect(await elastic.count()).toBe(0);
-    expect(await cnn.count()).toBe(0);
-    expect(await google.count()).toBe(1);
-    await page.click('[aria-label="Clear input"]');
-    await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'Journey', { delay: 300 });
-    await page.waitForSelector(`text=${elasticJourney}`);
-    await page.waitForSelector(`text=${cnnJourney}`);
-    await page.waitForSelector(`text=${googleJourney}`);
-    expect(await elastic.count()).toBe(1);
-    expect(await cnn.count()).toBe(1);
-    expect(await google.count()).toBe(1);
+    await retry.tryForTime(60 * 1000, async () => {
+      await page.focus('[data-test-subj="syntheticsOverviewSearchInput"]');
+      await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'Elastic', {
+        delay: 300,
+      });
+      await page.waitForSelector(`text=${elasticJourney}`);
+      expect(await elastic.count()).toBe(1);
+      expect(await cnn.count()).toBe(0);
+      expect(await google.count()).toBe(0);
+      await page.click('[aria-label="Clear input"]');
+      await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'cnn', { delay: 300 });
+      await page.waitForSelector(`text=${cnnJourney}`);
+      expect(await elastic.count()).toBe(0);
+      expect(await cnn.count()).toBe(1);
+      expect(await google.count()).toBe(0);
+      await page.click('[aria-label="Clear input"]');
+      await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'GOOGLE', { delay: 300 });
+      await page.waitForSelector(`text=${googleJourney}`);
+      expect(await elastic.count()).toBe(0);
+      expect(await cnn.count()).toBe(0);
+      expect(await google.count()).toBe(1);
+      await page.click('[aria-label="Clear input"]');
+      await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'Journey', {
+        delay: 300,
+      });
+      await page.waitForSelector(`text=${elasticJourney}`);
+      await page.waitForSelector(`text=${cnnJourney}`);
+      await page.waitForSelector(`text=${googleJourney}`);
+      expect(await elastic.count()).toBe(1);
+      expect(await cnn.count()).toBe(1);
+      expect(await google.count()).toBe(1);
+    });
   });
 
   step('searches by tags', async () => {

@@ -219,7 +219,8 @@ export function StorageDetailsPerService({
                       {
                         groupByRollup: (d: Datum) => d.processorEventLabel,
                         shape: {
-                          fillColor: (d) => groupedPalette[d.sortIndex],
+                          fillColor: (dataName, sortIndex) =>
+                            groupedPalette[sortIndex],
                         },
                       },
                     ]}

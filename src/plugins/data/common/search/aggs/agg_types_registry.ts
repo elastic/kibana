@@ -16,6 +16,7 @@ export type AggTypesRegistryStart = ReturnType<AggTypesRegistry['start']>;
 export class AggTypesRegistry {
   private readonly bucketAggs = new Map();
   private readonly metricAggs = new Map();
+  private readonly legacyAggs = new Map();
 
   setup = () => {
     return {
@@ -44,13 +45,28 @@ export class AggTypesRegistry {
         }
         this.metricAggs.set(name, type);
       },
+      registerLegacy: <
+        N extends string,
+        T extends (deps: AggTypesDependencies) => BucketAggType<any> | MetricAggType<any>
+      >(
+        name: N,
+        type: T
+      ): void => {
+        if (this.legacyAggs.get(name) || this.legacyAggs.get(name)) {
+          throw new Error(`Agg has already been registered with name: ${name}`);
+        }
+        this.legacyAggs.set(name, type);
+      },
     };
   };
 
   start = (aggTypesDependencies: AggTypesDependencies) => {
     const initializedAggTypes = new Map();
 
-    const getInitializedFromCache = <T = unknown>(key: string, agg: any): T => {
+    const getInitializedFromCache = <T = unknown>(
+      key: string,
+      agg: (aggTypesDependencies: AggTypesDependencies) => T
+    ): T => {
       if (initializedAggTypes.has(key)) {
         return initializedAggTypes.get(key);
       }
@@ -60,11 +76,13 @@ export class AggTypesRegistry {
     };
 
     return {
-      get: (name: string) =>
-        getInitializedFromCache<BucketAggType<any> | MetricAggType<any>>(
-          name,
-          this.bucketAggs.get(name) || this.metricAggs.get(name)
-        ),
+      get: (name: string) => {
+        const agg =
+          this.bucketAggs.get(name) || this.metricAggs.get(name) || this.legacyAggs.get(name);
+        return agg
+          ? getInitializedFromCache<BucketAggType<any> | MetricAggType<any>>(name, agg)
+          : undefined;
+      },
       getAll: () => ({
         buckets: Array.from(this.bucketAggs.entries()).map(([key, value]) =>
           getInitializedFromCache<BucketAggType<any>>(key, value)

@@ -8,6 +8,7 @@
 import type { DiffableRule } from '../../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule';
 import type { FullRuleDiff } from '../../../../../../common/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
 import type { ThreeWayDiff } from '../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
+import { MissingVersion } from '../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
 import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 
@@ -16,7 +17,7 @@ import { convertRuleToDiffable } from './normalization/convert_rule_to_diffable'
 
 export interface CalculateRuleDiffArgs {
   currentVersion: RuleResponse;
-  baseVersion: PrebuiltRuleAsset;
+  baseVersion?: PrebuiltRuleAsset;
   targetVersion: PrebuiltRuleAsset;
 }
 
@@ -25,12 +26,12 @@ export interface CalculateRuleDiffResult {
   ruleVersions: {
     input: {
       current: RuleResponse;
-      base: PrebuiltRuleAsset;
+      base?: PrebuiltRuleAsset;
       target: PrebuiltRuleAsset;
     };
     output: {
       current: DiffableRule;
-      base: DiffableRule;
+      base?: DiffableRule;
       target: DiffableRule;
     };
   };
@@ -60,12 +61,12 @@ export const calculateRuleDiff = (args: CalculateRuleDiffArgs): CalculateRuleDif
 
   const { baseVersion, currentVersion, targetVersion } = args;
 
-  const diffableBaseVersion = convertRuleToDiffable(baseVersion);
+  const diffableBaseVersion = baseVersion ? convertRuleToDiffable(baseVersion) : undefined;
   const diffableCurrentVersion = convertRuleToDiffable(currentVersion);
   const diffableTargetVersion = convertRuleToDiffable(targetVersion);
 
   const fieldsDiff = calculateRuleFieldsDiff({
-    base_version: diffableBaseVersion,
+    base_version: diffableBaseVersion || MissingVersion,
     current_version: diffableCurrentVersion,
     target_version: diffableTargetVersion,
   });

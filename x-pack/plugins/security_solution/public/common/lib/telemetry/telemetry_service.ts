@@ -17,7 +17,7 @@ import { TelemetryClient } from './telemetry_client';
 
 /**
  * Service that interacts with the Core's analytics module
- * to trigger custom event for the Infra plugin features
+ * to trigger custom event for Security Solution plugin features
  */
 export class TelemetryService {
   constructor(private analytics: AnalyticsServiceSetup | null = null) {}

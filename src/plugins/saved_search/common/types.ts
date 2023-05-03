@@ -37,7 +37,7 @@ export interface SavedSearchAttributes {
   rowHeight?: number;
 
   timeRestore?: boolean;
-  timeRange?: TimeRange;
+  timeRange?: Pick<TimeRange, 'from' | 'to'>;
   refreshInterval?: RefreshInterval;
 
   rowsPerPage?: number;

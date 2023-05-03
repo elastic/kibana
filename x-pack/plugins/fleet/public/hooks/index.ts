@@ -31,3 +31,4 @@ export * from './use_flyout_context';
 export * from './use_is_guided_onboarding_active';
 export * from './use_fleet_server_hosts_for_policy';
 export * from './use_fleet_server_standalone';
+export * from './use_locator';

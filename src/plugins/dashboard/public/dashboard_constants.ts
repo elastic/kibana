@@ -7,7 +7,7 @@
  */
 
 import { ViewMode } from '@kbn/embeddable-plugin/common';
-import type { DashboardContainerByValueInput } from '../common';
+import type { DashboardContainerInput } from '../common';
 
 // ------------------------------------------------------------------
 // URL Constants
@@ -59,6 +59,7 @@ export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 // Grid
 // ------------------------------------------------------------------
 export const DEFAULT_PANEL_HEIGHT = 15;
+export const DASHBOARD_MARGIN_SIZE = 8;
 export const DASHBOARD_GRID_HEIGHT = 20;
 export const DASHBOARD_GRID_COLUMN_COUNT = 48;
 export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
@@ -68,7 +69,7 @@ export const CHANGE_CHECK_DEBOUNCE = 100;
 // ------------------------------------------------------------------
 // Default State
 // ------------------------------------------------------------------
-export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerByValueInput, 'id'> = {
+export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerInput, 'id'> = {
   viewMode: ViewMode.EDIT, // new dashboards start in  edit mode.
   timeRestore: false,
   query: { query: '', language: 'kuery' },

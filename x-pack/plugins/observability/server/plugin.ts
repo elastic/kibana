@@ -14,7 +14,7 @@ import {
   Logger,
 } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
-import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
 import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
@@ -23,7 +23,6 @@ import {
   getApiTags as getCasesApiTags,
 } from '@kbn/cases-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
@@ -47,6 +46,7 @@ import { SLO_RULE_REGISTRATION_CONTEXT } from './common/constants';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { SLO_BURN_RATE_RULE_ID } from '../common/constants';
 import { registerSloUsageCollector } from './lib/collectors/register';
+import { sloRuleFieldMap } from './lib/rules/slo_burn_rate/field_map';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -59,6 +59,10 @@ interface PluginSetup {
   usageCollection?: UsageCollectionSetup;
 }
 
+interface PluginStart {
+  alerting: PluginStartContract;
+}
+
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   private logger: Logger;
 
@@ -67,7 +71,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     this.logger = initContext.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: PluginSetup) {
+  public setup(core: CoreSetup<PluginStart>, plugins: PluginSetup) {
     const casesCapabilities = createCasesUICapabilities();
     const casesApiTags = getCasesApiTags(observabilityFeatureId);
 
@@ -134,8 +138,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                   ),
                   includeIn: 'all',
                   savedObject: {
-                    all: [],
-                    read: [],
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
                   },
                   cases: {
                     delete: [observabilityFeatureId],
@@ -223,24 +227,30 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       feature: sloFeatureId,
       registrationContext: SLO_RULE_REGISTRATION_CONTEXT,
       dataset: Dataset.alerts,
-      componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+      componentTemplateRefs: [],
       componentTemplates: [
         {
           name: 'mappings',
-          mappings: mappingFromFieldMap(legacyExperimentalFieldMap, 'strict'),
+          mappings: mappingFromFieldMap(
+            { ...legacyExperimentalFieldMap, ...sloRuleFieldMap },
+            'strict'
+          ),
         },
       ],
     });
-    registerRuleTypes(plugins.alerting, this.logger, ruleDataClient);
+    registerRuleTypes(plugins.alerting, this.logger, ruleDataClient, core.http.basePath);
     registerSloUsageCollector(plugins.usageCollection);
 
-    registerRoutes({
-      core,
-      dependencies: {
-        ruleDataService,
-      },
-      logger: this.logger,
-      repository: getObservabilityServerRouteRepository(),
+    core.getStartServices().then(([coreStart, pluginStart]) => {
+      registerRoutes({
+        core,
+        dependencies: {
+          ruleDataService,
+          getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
+        },
+        logger: this.logger,
+        repository: getObservabilityServerRouteRepository(),
+      });
     });
 
     /**

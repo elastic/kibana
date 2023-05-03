@@ -5,32 +5,28 @@
  * 2.0.
  */
 
-import {
-  EuiFormRow,
-  EuiRange,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBetaBadge,
-  EuiText,
-  EuiLink,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFormRow, EuiBetaBadge, EuiLink, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RandomSamplingSlider } from '@kbn/random-sampling';
 import type { DatasourceLayerSettingsProps } from '../../types';
 import type { FormBasedPrivateState } from './types';
+import { isSamplingValueEnabled } from './utils';
 
-const samplingValue = [0.0001, 0.001, 0.01, 0.1, 1];
+const samplingValues = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1];
 
 export function LayerSettingsPanel({
   state,
   setState,
   layerId,
 }: DatasourceLayerSettingsProps<FormBasedPrivateState>) {
-  const samplingIndex = samplingValue.findIndex((v) => v === state.layers[layerId].sampling);
-  const currentSamplingIndex = samplingIndex > -1 ? samplingIndex : samplingValue.length - 1;
+  const isSamplingValueDisabled = !isSamplingValueEnabled(state.layers[layerId]);
+  const currentValue = isSamplingValueDisabled
+    ? samplingValues[samplingValues.length - 1]
+    : state.layers[layerId].sampling;
+
   return (
     <EuiFormRow
       display="rowCompressed"
@@ -41,8 +37,8 @@ export function LayerSettingsPanel({
           <EuiSpacer size="s" />
           <p>
             <FormattedMessage
-              id="xpack.lens.xyChart.randomSampling.help"
-              defaultMessage="Lower sampling percentages increase speed, but decrease accuracy. As a best practice, use lower sampling only for large datasets. {link}"
+              id="xpack.lens.indexPattern.randomSampling.help"
+              defaultMessage="Lower sampling percentages increases the performance, but lowers the accuracy. Lower sampling percentages are best for large datasets. {link}"
               values={{
                 link: (
                   <EuiLink
@@ -51,7 +47,7 @@ export function LayerSettingsPanel({
                     external
                   >
                     <FormattedMessage
-                      id="xpack.lens.xyChart.randomSampling.learnMore"
+                      id="xpack.lens.indexPattern.randomSampling.learnMore"
                       defaultMessage="View documentation"
                     />
                   </EuiLink>
@@ -63,65 +59,50 @@ export function LayerSettingsPanel({
       }
       label={
         <>
-          {i18n.translate('xpack.lens.xyChart.randomSampling.label', {
-            defaultMessage: 'Random sampling',
+          {i18n.translate('xpack.lens.indexPattern.randomSampling.label', {
+            defaultMessage: 'Sampling',
           })}{' '}
-          <EuiBetaBadge
-            css={css`
-              vertical-align: middle;
-            `}
-            iconType="beaker"
-            label={i18n.translate('xpack.lens.randomSampling.experimentalLabel', {
+          <EuiToolTip
+            content={i18n.translate('xpack.lens.indexPattern.randomSampling.experimentalLabel', {
               defaultMessage: 'Technical preview',
             })}
-            size="s"
-          />
+          >
+            <EuiBetaBadge
+              css={css`
+                vertical-align: middle;
+              `}
+              iconType="beaker"
+              label={i18n.translate('xpack.lens.indexPattern.randomSampling.experimentalLabel', {
+                defaultMessage: 'Technical preview',
+              })}
+              size="s"
+            />
+          </EuiToolTip>
         </>
       }
     >
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.lens.xyChart.randomSampling.speedLabel"
-              defaultMessage="Speed"
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiRange
-            data-test-subj="lns-indexPattern-random-sampling"
-            value={currentSamplingIndex}
-            onChange={(e) => {
-              setState({
-                ...state,
-                layers: {
-                  ...state.layers,
-                  [layerId]: {
-                    ...state.layers[layerId],
-                    sampling: samplingValue[Number(e.currentTarget.value)],
-                  },
-                },
-              });
-            }}
-            showInput={false}
-            showRange={false}
-            showTicks
-            step={1}
-            min={0}
-            max={samplingValue.length - 1}
-            ticks={samplingValue.map((v, i) => ({ label: `${v * 100}%`, value: i }))}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.lens.xyChart.randomSampling.accuracyLabel"
-              defaultMessage="Accuracy"
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <RandomSamplingSlider
+        disabled={isSamplingValueDisabled}
+        disabledReason={i18n.translate('xpack.lens.indexPattern.randomSampling.disabledMessage', {
+          defaultMessage:
+            'In order to select a reduced sampling percentage, you must remove any maximum or minimum functions applied on this layer.',
+        })}
+        values={samplingValues}
+        currentValue={currentValue}
+        data-test-subj="lns-indexPattern-random-sampling-slider"
+        onChange={(newSamplingValue) => {
+          setState({
+            ...state,
+            layers: {
+              ...state.layers,
+              [layerId]: {
+                ...state.layers[layerId],
+                sampling: newSamplingValue,
+              },
+            },
+          });
+        }}
+      />
     </EuiFormRow>
   );
 }

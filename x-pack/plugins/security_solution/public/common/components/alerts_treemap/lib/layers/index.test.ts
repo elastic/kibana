@@ -7,8 +7,8 @@
 
 import { getRiskScorePalette, RISK_SCORE_STEPS } from '../chart_palette';
 import { maxRiskSubAggregations } from '../flatten/mocks/mock_buckets';
-import type { DataName, FillColorDatum, Path } from '.';
 import { getGroupFromPath, getLayersOneDimension, getLayersMultiDimensional } from '.';
+import type { Key, ArrayNode } from '@elastic/charts';
 
 describe('layers', () => {
   const colorPalette = getRiskScorePalette(RISK_SCORE_STEPS);
@@ -16,36 +16,22 @@ describe('layers', () => {
   describe('getGroupFromPath', () => {
     it('returns the expected group from the path', () => {
       expect(
-        getGroupFromPath({
-          path: [
-            { index: 0, value: '__null_small_multiples_key__' },
-            { index: 0, value: '__root_key__' },
-            { index: 0, value: 'matches everything' },
-            { index: 0, value: 'Host-k8iyfzraq9' },
-          ],
-        })
+        getGroupFromPath([
+          { index: 0, value: '__null_small_multiples_key__' },
+          { index: 0, value: '__root_key__' },
+          { index: 0, value: 'matches everything' },
+          { index: 0, value: 'Host-k8iyfzraq9' },
+        ])
       ).toEqual('matches everything');
     });
 
-    it('returns undefined when path is undefined', () => {
-      const datumWithUndefinedPath: FillColorDatum = {};
-
-      expect(getGroupFromPath(datumWithUndefinedPath)).toBeUndefined();
-    });
-
     it('returns undefined when path is an empty array', () => {
-      expect(
-        getGroupFromPath({
-          path: [],
-        })
-      ).toBeUndefined();
+      expect(getGroupFromPath([])).toBeUndefined();
     });
 
     it('returns undefined when path is an array with only one value', () => {
       expect(
-        getGroupFromPath({
-          path: [{ index: 0, value: '__null_small_multiples_key__' }],
-        })
+        getGroupFromPath([{ index: 0, value: '__null_small_multiples_key__' }])
       ).toBeUndefined();
     });
   });
@@ -80,14 +66,14 @@ describe('layers', () => {
     });
 
     it('returns the expected shape fillColor function', () => {
-      const dataName: DataName = { dataName: 'mimikatz process started' };
+      const dataName = 'mimikatz process started';
       expect(
         getLayersOneDimension({ colorPalette, maxRiskSubAggregations })[0].shape.fillColor(dataName)
       ).toEqual('#e7664c');
     });
 
     it('return the default fill color when dataName is not found in the maxRiskSubAggregations', () => {
-      const dataName: DataName = { dataName: 'this does not exist' };
+      const dataName = 'this does not exist';
       expect(
         getLayersOneDimension({ colorPalette, maxRiskSubAggregations })[0].shape.fillColor(dataName)
       ).toEqual('#54b399');
@@ -164,11 +150,14 @@ describe('layers', () => {
         colorPalette,
         layer0FillColor,
         maxRiskSubAggregations,
-      })[1].shape.fillColor as ({ dataName, path }: { dataName: string; path: Path[] }) => string;
+      })[1].shape.fillColor as (
+        dataName: Key,
+        sortIndex: number,
+        node: Pick<ArrayNode, 'path'>
+      ) => string;
 
       expect(
-        fillColorFn({
-          dataName: 'Host-k8iyfzraq9',
+        fillColorFn('Host-k8iyfzraq9', 0, {
           path: [
             { index: 0, value: '__null_small_multiples_key__' },
             { index: 0, value: '__root_key__' },
@@ -184,11 +173,14 @@ describe('layers', () => {
         colorPalette,
         layer0FillColor,
         maxRiskSubAggregations,
-      })[1].shape.fillColor as ({ dataName, path }: { dataName: string; path: Path[] }) => string;
+      })[1].shape.fillColor as (
+        dataName: Key,
+        sortIndex: number,
+        node: Pick<ArrayNode, 'path'>
+      ) => string;
 
       expect(
-        fillColorFn({
-          dataName: 'nope',
+        fillColorFn('nope', 0, {
           path: [
             { index: 0, value: '__null_small_multiples_key__' },
             { index: 0, value: '__root_key__' },

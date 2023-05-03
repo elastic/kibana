@@ -24,6 +24,8 @@ import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { yLabelFormat } from './helpers';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import { ApmDocumentType } from '../../../../../common/document_type';
 
 type ErrorRate =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
@@ -59,9 +61,17 @@ function FailedTransactionChart({
   const { currentPeriodColor: currentPeriodColorErrorRate } =
     get_timeseries_color.getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
 
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery: '',
+    numBuckets: 100,
+    type: ApmDocumentType.ServiceTransactionMetric,
+  });
+
   const { data: dataErrorRate = INITIAL_STATE_ERROR_RATE, status } = useFetcher(
     (callApmApi) => {
-      if (transactionType && serviceName && start && end) {
+      if (transactionType && serviceName && start && end && preferred) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
           {
@@ -76,13 +86,16 @@ function FailedTransactionChart({
                 end,
                 transactionType,
                 transactionName: undefined,
+                documentType: preferred.source.documentType,
+                rollupInterval: preferred.source.rollupInterval,
+                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
               },
             },
           }
         );
       }
     },
-    [environment, serviceName, start, end, transactionType]
+    [environment, serviceName, start, end, transactionType, preferred]
   );
   const timeseriesErrorRate = [
     {

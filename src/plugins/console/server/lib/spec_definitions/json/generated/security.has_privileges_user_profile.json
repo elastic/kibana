@@ -1,0 +1,12 @@
+{
+  "security.has_privileges_user_profile": {
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_security/profile/_has_privileges"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-has-privileges-user-profile.html"
+  }
+}

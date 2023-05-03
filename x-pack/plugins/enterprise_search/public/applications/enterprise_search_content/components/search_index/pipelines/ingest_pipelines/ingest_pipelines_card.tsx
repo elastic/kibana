@@ -17,7 +17,6 @@ import { IndexViewLogic } from '../../index_view_logic';
 import { PipelinesLogic } from '../pipelines_logic';
 
 import { CustomPipelineItem } from './custom_pipeline_item';
-import { CustomizeIngestPipelineItem } from './customize_pipeline_item';
 import { DefaultPipelineItem } from './default_pipeline_item';
 import { IngestPipelineFlyout } from './ingest_pipeline_flyout';
 
@@ -38,46 +37,43 @@ export const IngestPipelinesCard: React.FC = () => {
   }, [indexName]);
 
   return (
-    <>
-      <CustomizeIngestPipelineItem />
-      <EuiFlexGroup direction="column" gutterSize="s">
-        {showPipelineSettings && (
-          <IngestPipelineFlyout
-            closeFlyout={closePipelineSettings}
-            displayOnly={!canSetPipeline}
-            indexName={indexName}
+    <EuiFlexGroup direction="column" gutterSize="s">
+      {showPipelineSettings && (
+        <IngestPipelineFlyout
+          closeFlyout={closePipelineSettings}
+          displayOnly={!canSetPipeline}
+          indexName={indexName}
+          ingestionMethod={ingestionMethod}
+          isLoading={false}
+          pipeline={{ ...pipelineState, name: pipelineName }}
+          savePipeline={savePipeline}
+          setPipeline={setPipelineState}
+        />
+      )}
+      <EuiFlexItem>
+        <EuiPanel color="subdued">
+          <DefaultPipelineItem
+            index={index}
+            openPipelineSettings={openPipelineSettings}
+            pipelineName={pipelineName}
             ingestionMethod={ingestionMethod}
-            isLoading={false}
-            pipeline={{ ...pipelineState, name: pipelineName }}
-            savePipeline={savePipeline}
-            setPipeline={setPipelineState}
+            indexName={indexName}
+            pipelineState={pipelineState}
           />
-        )}
+        </EuiPanel>
+      </EuiFlexItem>
+      {customPipeline && (
         <EuiFlexItem>
-          <EuiPanel color="subdued">
-            <DefaultPipelineItem
-              index={index}
-              openPipelineSettings={openPipelineSettings}
-              pipelineName={pipelineName}
-              ingestionMethod={ingestionMethod}
+          <EuiPanel color="primary">
+            <CustomPipelineItem
               indexName={indexName}
-              pipelineState={pipelineState}
+              ingestionMethod={ingestionMethod}
+              pipelineSuffix="custom"
+              processorsCount={customPipeline.processors?.length ?? 0}
             />
           </EuiPanel>
         </EuiFlexItem>
-        {customPipeline && (
-          <EuiFlexItem>
-            <EuiPanel color="primary">
-              <CustomPipelineItem
-                indexName={indexName}
-                ingestionMethod={ingestionMethod}
-                pipelineSuffix="custom"
-                processorsCount={customPipeline.processors?.length ?? 0}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </>
+      )}
+    </EuiFlexGroup>
   );
 };

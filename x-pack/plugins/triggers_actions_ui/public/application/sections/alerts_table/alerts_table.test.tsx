@@ -33,11 +33,31 @@ import { bulkActionsReducer } from './bulk_actions/reducer';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getCasesMockMap } from './cases/index.mock';
 import { createAppMockRenderer } from '../test_utils';
+import { createCasesServiceMock } from './index.mock';
+import { useCaseViewNavigation } from './cases/use_case_view_navigation';
+import { act } from 'react-dom/test-utils';
+
+const mockCaseService = createCasesServiceMock();
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting$: jest.fn((value: string) => ['0,0']),
 }));
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        cases: mockCaseService,
+      },
+    }),
+  };
+});
+
+jest.mock('./cases/use_case_view_navigation');
 
 const columns = [
   {
@@ -175,8 +195,44 @@ const mockedUseCellActions: UseCellActions = () => {
   };
 };
 
-// FAILING: https://github.com/elastic/kibana/issues/151688
-describe.skip('AlertsTable', () => {
+const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+
+beforeAll(() => {
+  // The JSDOM implementation is too slow
+  // Especially for dropdowns that try to position themselves
+  // perf issue - https://github.com/jsdom/jsdom/issues/3234
+  Object.defineProperty(window, 'getComputedStyle', {
+    value: (el: HTMLElement) => {
+      /**
+       * This is based on the jsdom implementation of getComputedStyle
+       * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+       *
+       * It is missing global style parsing and will only return styles applied directly to an element.
+       * Will not return styles that are global or from emotion
+       */
+      const declaration = new CSSStyleDeclaration();
+      const { style } = el;
+
+      Array.prototype.forEach.call(style, (property: string) => {
+        declaration.setProperty(
+          property,
+          style.getPropertyValue(property),
+          style.getPropertyPriority(property)
+        );
+      });
+
+      return declaration;
+    },
+    configurable: true,
+    writable: true,
+  });
+});
+
+afterAll(() => {
+  Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+});
+
+describe('AlertsTable', () => {
   const fetchAlertsData = {
     activePage: 0,
     alerts,
@@ -198,7 +254,6 @@ describe.skip('AlertsTable', () => {
 
   const alertsTableConfiguration: AlertsTableConfigurationRegistry = {
     id: '',
-    casesFeatureId: '',
     columns,
     sort: [],
     useInternalFlyout: jest.fn().mockImplementation(() => ({
@@ -251,7 +306,7 @@ describe.skip('AlertsTable', () => {
 
   const tableProps: AlertsTableProps = {
     alertsTableConfiguration,
-    casesData: { cases: casesMap, isLoading: false },
+    cases: { data: casesMap, isLoading: false },
     columns,
     deletedEventIds: [],
     disabledCellActions: [],
@@ -279,6 +334,9 @@ describe.skip('AlertsTable', () => {
     rowCount: 4,
   };
 
+  const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
+  useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView: jest.fn() });
+
   const AlertsTableWithProviders: React.FunctionComponent<
     AlertsTableProps & { initialBulkActionsState?: BulkActionsState }
   > = (props) => {
@@ -299,13 +357,35 @@ describe.skip('AlertsTable', () => {
     );
   };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('Alerts table UI', () => {
     it('should support sorting', async () => {
       const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
-      userEvent.click(renderResult.container.querySelector('.euiDataGridHeaderCell__button')!);
+      userEvent.click(
+        renderResult.container.querySelector('.euiDataGridHeaderCell__button')!,
+        undefined,
+        {
+          skipPointerEventsCheck: true,
+        }
+      );
+
       await waitForEuiPopoverOpen();
-      userEvent.click(renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`));
-      userEvent.click(renderResult.getByTitle('Sort A-Z'));
+
+      userEvent.click(
+        renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`),
+        undefined,
+        {
+          skipPointerEventsCheck: true,
+        }
+      );
+
+      userEvent.click(renderResult.getByTitle('Sort A-Z'), undefined, {
+        skipPointerEventsCheck: true,
+      });
+
       expect(fetchAlertsData.onSortChange).toHaveBeenCalledWith([
         { direction: 'asc', id: 'kibana.alert.rule.name' },
       ]);
@@ -313,7 +393,11 @@ describe.skip('AlertsTable', () => {
 
     it('should support pagination', async () => {
       const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
-      userEvent.click(renderResult.getByTestId('pagination-button-1'));
+
+      userEvent.click(renderResult.getByTestId('pagination-button-1'), undefined, {
+        skipPointerEventsCheck: true,
+      });
+
       expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
     });
 
@@ -509,18 +593,22 @@ describe.skip('AlertsTable', () => {
           fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
 
           // the callback given to our clients to run when they want to update the loading state
-          mockedFn.mock.calls[0][0].setIsActionLoading(true);
+          act(() => {
+            mockedFn.mock.calls[0][0].setIsActionLoading(true);
+          });
 
           expect(await screen.findAllByTestId('row-loader')).toHaveLength(1);
           const selectedOptions = await screen.findAllByTestId('dataGridRowCell');
 
           // first row, first column
           expect(within(selectedOptions[0]).getByLabelText('Loading')).toBeDefined();
-          expect(within(selectedOptions[0]).queryByRole('checkbox')).not.toBeInTheDocument();
+          expect(
+            within(selectedOptions[0]).queryByTestId('bulk-actions-row-cell')
+          ).not.toBeInTheDocument();
 
           // second row, first column
           expect(within(selectedOptions[6]).queryByLabelText('Loading')).not.toBeInTheDocument();
-          expect(within(selectedOptions[6]).getByRole('checkbox')).toBeDefined();
+          expect(within(selectedOptions[6]).getByTestId('bulk-actions-row-cell')).toBeDefined();
         });
 
         it('should show the row loader when callback triggered with false', async () => {
@@ -538,7 +626,9 @@ describe.skip('AlertsTable', () => {
           fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
 
           // the callback given to our clients to run when they want to update the loading state
-          mockedFn.mock.calls[0][0].setIsActionLoading(false);
+          act(() => {
+            mockedFn.mock.calls[0][0].setIsActionLoading(false);
+          });
 
           expect(screen.queryByTestId('row-loader')).not.toBeInTheDocument();
         });
@@ -626,14 +716,9 @@ describe.skip('AlertsTable', () => {
       });
 
       it('show loading skeleton if it loads cases', async () => {
-        render(
-          <AlertsTableWithProviders
-            {...props}
-            casesData={{ ...props.casesData, isLoading: true }}
-          />
-        );
+        render(<AlertsTableWithProviders {...props} cases={{ ...props.cases, isLoading: true }} />);
 
-        expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(2);
+        expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(4);
       });
 
       it('shows the cases tooltip', async () => {

@@ -11,6 +11,12 @@ import type {
   ReportAlertsGroupingChangedParams,
   ReportAlertsGroupingToggledParams,
   ReportAlertsTakeActionParams,
+  ReportEntityDetailsClickedParams,
+  ReportEntityAlertsClickedParams,
+  ReportEntityRiskFilteredParams,
+  ReportMLJobUpdateParams,
+  ReportCellActionClickedParams,
+  ReportAnomaliesCountClickedParams,
 } from './types';
 import { TelemetryEventTypes } from './types';
 
@@ -57,5 +63,39 @@ export class TelemetryClient implements TelemetryClientStart {
       status,
       groupByField,
     });
+  };
+
+  public reportEntityDetailsClicked = ({ entity }: ReportEntityDetailsClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.EntityDetailsClicked, {
+      entity,
+    });
+  };
+
+  public reportEntityAlertsClicked = ({ entity }: ReportEntityAlertsClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.EntityAlertsClicked, {
+      entity,
+    });
+  };
+
+  public reportEntityRiskFiltered = ({
+    entity,
+    selectedSeverity,
+  }: ReportEntityRiskFilteredParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.EntityRiskFiltered, {
+      entity,
+      selectedSeverity,
+    });
+  };
+
+  public reportMLJobUpdate = (params: ReportMLJobUpdateParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.MLJobUpdate, params);
+  };
+
+  public reportCellActionClicked = (params: ReportCellActionClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.CellActionClicked, params);
+  };
+
+  public reportAnomaliesCountClicked = (params: ReportAnomaliesCountClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AnomaliesCountClicked, params);
   };
 }

@@ -18,7 +18,7 @@ import type {
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import { errors } from '@elastic/elasticsearch';
-import type { CloudSecurityPolicyTemplate } from '../../common/types';
+import { CloudSecurityPolicyTemplate, PostureTypes } from '../../common/types';
 import { SUPPORTED_POLICY_TEMPLATES } from '../../common/constants';
 import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
 import {
@@ -34,13 +34,25 @@ const isFleetMissingAgentHttpError = (error: unknown) =>
 const isPolicyTemplate = (input: any): input is CloudSecurityPolicyTemplate =>
   SUPPORTED_POLICY_TEMPLATES.includes(input);
 
-const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): string => {
+const getPackageNameQuery = (
+  // ADD 3rd case both cspm and kspm, for findings posture type empty =>  kspm
+  postureType: string,
+  packageName: string,
+  benchmarkFilter?: string
+): string => {
   const integrationNameQuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`;
-  const kquery = benchmarkFilter
-    ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}*`
-    : integrationNameQuery;
-
-  return kquery;
+  const integrationPostureType = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.vars.posture.value:${postureType}`;
+  if (postureType === 'all') {
+    const kquery = benchmarkFilter
+      ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}*`
+      : `${integrationNameQuery}`;
+    return kquery;
+  } else {
+    const kquery = benchmarkFilter
+      ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}* AND ${integrationPostureType}`
+      : `${integrationNameQuery} AND ${integrationPostureType}`;
+    return kquery;
+  }
 };
 
 export type AgentStatusByAgentPolicyMap = Record<string, GetAgentStatusResponse['results']>;
@@ -86,12 +98,13 @@ export const getCspPackagePolicies = (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyClient,
   packageName: string,
-  queryParams: Partial<BenchmarksQueryParams>
+  queryParams: Partial<BenchmarksQueryParams>,
+  postureType: PostureTypes
 ): Promise<ListResult<PackagePolicy>> => {
   const sortField = queryParams.sort_field?.replaceAll(BENCHMARK_PACKAGE_POLICY_PREFIX, '');
 
   return packagePolicyService.list(soClient, {
-    kuery: getPackageNameQuery(packageName, queryParams.benchmark_name),
+    kuery: getPackageNameQuery(postureType, packageName, queryParams.benchmark_name),
     page: queryParams.page,
     perPage: queryParams.per_page,
     sortField,
@@ -116,7 +129,6 @@ export const getInstalledPolicyTemplates = async (
         return policy.inputs.find((input) => input.enabled)?.policy_template;
       })
       .filter(isPolicyTemplate);
-
     // removing duplicates
     return [...new Set(enabledPolicyTemplates)];
   } catch (e) {

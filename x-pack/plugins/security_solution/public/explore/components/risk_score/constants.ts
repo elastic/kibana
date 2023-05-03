@@ -7,3 +7,7 @@
 
 export const RISKY_HOSTS_DASHBOARD_TITLE = 'Current Risk Score for Hosts';
 export const RISKY_USERS_DASHBOARD_TITLE = 'Current Risk Score for Users';
+
+export const CELL_ACTIONS_TELEMETRY = {
+  component: 'RiskScoreTable',
+};

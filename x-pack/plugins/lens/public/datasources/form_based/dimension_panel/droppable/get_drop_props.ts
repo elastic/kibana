@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { DragContextState, DropType } from '@kbn/dom-drag-drop';
 import {
   isOperation,
-  DropType,
   DragDropOperation,
   IndexPattern,
   IndexPatternMap,
@@ -20,7 +20,6 @@ import {
 } from '../../operations';
 import { isDraggedDataViewField, isOperationFromTheSameGroup } from '../../../../utils';
 import { hasField } from '../../pure_utils';
-import { DragContextState } from '../../../../drag_drop/providers';
 import { OperationMetadata, DraggedField } from '../../../../types';
 import { getOperationTypesForField } from '../../operations';
 import { GenericIndexPatternColumn } from '../../form_based';

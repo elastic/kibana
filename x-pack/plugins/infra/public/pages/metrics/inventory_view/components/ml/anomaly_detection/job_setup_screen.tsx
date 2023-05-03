@@ -18,7 +18,7 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { useUiTracker } from '@kbn/observability-plugin/public';
-import { useSourceViaHttp } from '../../../../../../containers/metrics_source/use_source_via_http';
+import { useSourceContext } from '../../../../../../containers/metrics_source';
 import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
 import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
 import { FixedDatePicker } from '../../../../../../components/fixed_datepicker';
@@ -42,9 +42,7 @@ export const JobSetupScreen = (props: Props) => {
   const [filter, setFilter] = useState<string>('');
   const [filterQuery, setFilterQuery] = useState<string>('');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
-  const { createDerivedIndexPattern } = useSourceViaHttp({
-    sourceId: 'default',
-  });
+  const { createDerivedIndexPattern } = useSourceContext();
 
   const indicies = h.sourceConfiguration.indices;
 

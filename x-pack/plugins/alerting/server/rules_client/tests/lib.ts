@@ -68,7 +68,7 @@ export function getBeforeSetup(
     ownerId: null,
     enabled: false,
   });
-  taskManager.bulkRemoveIfExist.mockResolvedValue({
+  taskManager.bulkRemove.mockResolvedValue({
     statuses: [{ id: 'taskId', type: 'alert', success: true }],
   });
   const actionsClient = actionsClientMock.create();
@@ -116,6 +116,9 @@ export function getBeforeSetup(
       return { state: {} };
     },
     producer: 'alerts',
+    validate: {
+      params: { validate: (params) => params },
+    },
   }));
   rulesClientParams.getEventLogClient.mockResolvedValue(
     eventLogClient ?? eventLogClientMock.create()
