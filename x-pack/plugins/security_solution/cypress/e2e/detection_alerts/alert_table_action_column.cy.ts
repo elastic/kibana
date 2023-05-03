@@ -22,7 +22,7 @@ import { ALERTS_URL } from '../../urls/navigation';
 describe('Alerts Table Action column', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
-    esArchiverLoad('process_ancestory');
+    esArchiverLoad('process_ancestry');
     login();
     createRule(getNewRule());
     visit(ALERTS_URL);
