@@ -63,8 +63,9 @@ function transformConnectorFieldsToExternalModel(
   return {
     id: connectorId,
     name: connector.name,
-    ...connectorTypeField,
-  };
+    fields: connectorTypeField.fields,
+    type: connectorTypeField.type,
+  } as CaseConnector;
 }
 
 export function transformESConnectorOrUseDefault({

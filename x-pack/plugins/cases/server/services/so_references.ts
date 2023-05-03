@@ -27,8 +27,8 @@ import type {
   AttachmentRequestAttributes,
 } from '../common/types/attachments';
 import { isCommentRequestTypeExternalReferenceSO } from './type_guards';
-import type { PartialField } from '../types';
 import { SOReferenceExtractor } from './so_reference_extractor';
+import type { OptionalAttributes } from './types';
 
 export const getAttachmentSOExtractor = (
   attachment: Partial<AttachmentRequestAttributes>
@@ -45,8 +45,6 @@ export const getAttachmentSOExtractor = (
 
   return new SOReferenceExtractor(fieldsToExtract);
 };
-
-type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'>;
 
 /**
  * This function should be used when the attributes field could be undefined. Specifically when

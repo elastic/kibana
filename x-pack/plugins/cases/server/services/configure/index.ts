@@ -13,9 +13,8 @@ import type {
 } from '@kbn/core/server';
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { set } from '@kbn/safer-lodash-set';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
-import type { ConfigurationAttributes, ConfigurationPatchRequest } from '../../../common/api';
+import type { ConfigurationAttributes, User } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import {
   transformFieldsToESModel,
@@ -155,7 +154,7 @@ export class CaseConfigureService {
 
 function transformUpdateResponseToExternalModel(
   updatedConfiguration: SavedObjectsUpdateResponse<ConfigurePersistedAttributes>
-): SavedObjectsUpdateResponse<ConfigurationPatchRequest> {
+): SavedObjectsUpdateResponse<ConfigurationTransformedAttributes> {
   const { connector, ...restUpdatedAttributes } = updatedConfiguration.attributes ?? {};
 
   const transformedConnector = transformESConnectorToExternalModel({
@@ -164,28 +163,46 @@ function transformUpdateResponseToExternalModel(
     referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
 
-  const castedAttributesWithoutConnector = restUpdatedAttributes as ConfigurationPatchRequest;
+  const attributes = restUpdatedAttributes as Omit<ConfigurationTransformedAttributes, 'connector'>;
 
   const response = {
     ...updatedConfiguration,
     attributes: {
-      closure_type: castedAttributesWithoutConnector.closure_type,
+      ...(attributes.closure_type !== undefined && { closure_type: attributes.closure_type }),
+      ...(attributes.created_at !== undefined && { created_at: attributes.created_at }),
+      ...(attributes.created_by !== undefined && {
+        created_by: getUserFields(attributes.created_by),
+      }),
+      ...(attributes.owner !== undefined && { owner: attributes.owner }),
+      ...(attributes.updated_at !== undefined && { updated_at: attributes.updated_at }),
+      ...(attributes.updated_by !== undefined && {
+        updated_by: getUserFields(attributes.updated_by),
+      }),
+      ...(transformedConnector !== undefined && { connector: transformedConnector }),
     },
   };
 
-  if (transformedConnector) {
-    set(response, 'attributes.connector', transformedConnector);
-  }
-
   return response;
 }
+
+const getUserFields = (user?: User | null): User | undefined => {
+  if (!user) {
+    return;
+  }
+
+  return {
+    email: user.email,
+    full_name: user.full_name,
+    profile_uid: user.profile_uid,
+    username: user.username,
+  };
+};
 
 function transformToExternalModel(
   configuration: SavedObject<ConfigurePersistedAttributes>
 ): ConfigurationSavedObjectTransformed {
   const connector = transformESConnectorOrUseDefault({
-    // if the saved object had an error the attributes field will not exist
-    connector: configuration.attributes?.connector,
+    connector: configuration.attributes.connector,
     references: configuration.references,
     referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
