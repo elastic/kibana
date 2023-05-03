@@ -11,8 +11,7 @@ import {
   UrlWithParsedQuery,
   UrlWithStringQuery,
 } from 'url';
-import { ReportingConfig } from '@kbn/reporting-plugin/server';
-import { TaskPayloadPDF } from '@kbn/reporting-plugin/server/routes/lib/request_handler';
+import { ReportingConfig, TaskPayloadPDF } from '@kbn/reporting-plugin/server';
 import { TaskPayloadPNG } from '../../../common/png';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 import { validateUrls } from './validate_urls';

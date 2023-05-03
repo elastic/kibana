@@ -211,6 +211,7 @@ export interface TaskPayloadPDF extends BasePayload {
   forceNow?: string;
   objects: Array<{ relativeUrl: string }>;
 }
+
 /**
  * @deprecated
  */

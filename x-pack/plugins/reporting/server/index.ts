@@ -23,3 +23,5 @@ export const plugin = (initContext: PluginInitializerContext<ReportingConfigType
 // @internal
 export type { ReportingConfig } from './config/config';
 export { ReportingCore } from './core';
+
+export type { TaskPayloadPDF } from './routes/lib/request_handler';
