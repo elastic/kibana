@@ -113,8 +113,9 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           body: { data: osqueryAction },
         });
       } catch (error) {
-        // TODO validate for 400 (when agents are not found for selection)
-        // return response.badRequest({ body: new Error('No agents found for selection') });
+        if (error.statusCode === 400) {
+          return response.badRequest({ body: error });
+        }
 
         return response.customError({
           statusCode: 500,

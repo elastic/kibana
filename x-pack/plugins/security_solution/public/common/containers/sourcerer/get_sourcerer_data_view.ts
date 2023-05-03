@@ -10,9 +10,10 @@ import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
 
 export const getSourcererDataView = async (
   dataViewId: string,
-  dataViewsService: DataViewsContract
+  dataViewsService: DataViewsContract,
+  refreshFields = false
 ) => {
-  const dataViewData = await dataViewsService.get(dataViewId);
+  const dataViewData = await dataViewsService.get(dataViewId, true, refreshFields);
   const defaultPatternsList = ensurePatternFormat(dataViewData.getIndexPattern().split(','));
   const patternList = defaultPatternsList.reduce((res: string[], pattern) => {
     if (dataViewData.matchedIndices.find((q) => q.includes(pattern.replaceAll('*', '')))) {
@@ -24,6 +25,9 @@ export const getSourcererDataView = async (
   return {
     id: dataViewData.id ?? '',
     title: dataViewData.getIndexPattern(),
+    indexFields: dataViewData.fields,
+    fields: dataViewData.fields,
     patternList,
+    dataView: dataViewData,
   };
 };
