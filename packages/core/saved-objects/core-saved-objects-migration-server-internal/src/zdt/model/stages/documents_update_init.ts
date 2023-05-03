@@ -41,7 +41,7 @@ export const documentsUpdateInit: ModelStage<
 
   switch (versionCheck.status) {
     // app version is greater than the index mapping version.
-    // scenario of an upgrade: we need to update the mappings
+    // scenario of an upgrade: we need to run the document migration.
     case 'greater':
       const excludeFilterHooks = Object.fromEntries(
         context.types
@@ -65,7 +65,7 @@ export const documentsUpdateInit: ModelStage<
       };
     // app version and index mapping version are the same.
     // either application upgrade without model change, or a simple reboot on the same version.
-    // There's nothing to do here, as documents are already migrated.
+    // There's nothing to do here, as documents are already at the same version.
     case 'equal':
       return {
         ...state,
@@ -73,8 +73,8 @@ export const documentsUpdateInit: ModelStage<
         controlState: 'DONE',
       };
     // app version is lower than the index mapping version.
-    // should only occur in case of rollback.
-    // For now, we don't do anything
+    // Should only occur in case of rollback.
+    // For now, we don't do anything.
     case 'lesser':
       return {
         ...state,

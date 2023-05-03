@@ -43,7 +43,7 @@ export interface MigrateIndexOptions {
   serializer: ISavedObjectsSerializer;
   /** The client to use for communications with ES */
   elasticsearchClient: ElasticsearchClient;
-  /** The node roles of the Kibana instance*/
+  /** The node roles of the Kibana instance */
   readonly nodeRoles: NodeRoles;
 }
 

@@ -49,6 +49,6 @@ export interface MigratorContext {
   readonly deletedTypes: string[];
   /** If true, corrupted objects will be discarded instead of failing the migration */
   readonly discardCorruptObjects: boolean;
-  /** The node roles of the Kibana instance*/
+  /** The node roles of the Kibana instance */
   readonly nodeRoles: NodeRoles;
 }
