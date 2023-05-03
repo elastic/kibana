@@ -32,8 +32,6 @@ export function WizardForm({ previewLayers }: RenderWizardArguments) {
   const [rightGeoFields, setRightGeoFields] = useState<DataViewField[]>([]);
   const [rightGeoField, setRightGeoField] = useState<string | undefined>();
 
-  
-
   useEffect(() => {
     if (!isLeftConfigComplete(leftDataView, leftGeoField) || !isRightConfigComplete(rightDataView, rightGeoField)) {
       previewLayers([]);
