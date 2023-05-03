@@ -14,7 +14,7 @@ import { DataQualityProvider } from '../data_quality_panel/data_quality_context'
 import { mockUnallowedValuesResponse } from '../mock/unallowed_values/mock_unallowed_values';
 import { ERROR_LOADING_UNALLOWED_VALUES } from '../translations';
 import { EcsMetadata, UnallowedValueRequestItem } from '../types';
-import { useUnallowedValues } from '.';
+import { useUnallowedValues, UseUnallowedValues } from '.';
 
 const mockHttpFetch = jest.fn();
 const ContextWrapper: React.FC = ({ children }) => (
@@ -52,12 +52,12 @@ describe('useUnallowedValues', () => {
     });
   });
 
-  describe('happy path', () => {
-    beforeEach(() => {
-      mockHttpFetch.mockResolvedValue(mockUnallowedValuesResponse);
-    });
+  describe('successful response from the unallowed values api', () => {
+    let unallowedValuesResult: UseUnallowedValues | undefined;
 
-    test('it returns the expected unallowed values', async () => {
+    beforeEach(async () => {
+      mockHttpFetch.mockResolvedValue(mockUnallowedValuesResponse);
+
       const { result, waitForNextUpdate } = renderHook(
         () => useUnallowedValues({ indexName, requestItems }),
         {
@@ -65,9 +65,11 @@ describe('useUnallowedValues', () => {
         }
       );
       await waitForNextUpdate();
-      const { unallowedValues } = await result.current;
+      unallowedValuesResult = await result.current;
+    });
 
-      expect(unallowedValues).toEqual({
+    test('it returns the expected unallowed values', async () => {
+      expect(unallowedValuesResult?.unallowedValues).toEqual({
         'event.category': [
           { count: 2, fieldName: 'an_invalid_category' },
           { count: 1, fieldName: 'theory' },
@@ -79,76 +81,43 @@ describe('useUnallowedValues', () => {
     });
 
     test('it returns loading: false, because the data has loaded', async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useUnallowedValues({ indexName, requestItems }),
-        {
-          wrapper: ContextWrapper,
-        }
-      );
-      await waitForNextUpdate();
-      const { loading } = await result.current;
-
-      expect(loading).toBe(false);
+      expect(unallowedValuesResult?.loading).toBe(false);
     });
 
     test('it returns a null error, because no errors occurred', async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useUnallowedValues({ indexName, requestItems }),
-        {
-          wrapper: ContextWrapper,
-        }
-      );
-      await waitForNextUpdate();
-      const { error } = await result.current;
-
-      expect(error).toBeNull();
+      expect(unallowedValuesResult?.error).toBeNull();
     });
   });
 
   describe('fetch rejects with an error', () => {
+    let unallowedValuesResult: UseUnallowedValues | undefined;
     const errorMessage = 'simulated error';
 
-    beforeEach(() => {
+    beforeEach(async () => {
       mockHttpFetch.mockRejectedValue(new Error(errorMessage));
+
+      const { result, waitForNextUpdate } = renderHook(
+        () => useUnallowedValues({ indexName, requestItems }),
+        {
+          wrapper: ContextWrapper,
+        }
+      );
+      await waitForNextUpdate();
+      unallowedValuesResult = await result.current;
     });
 
     test('it returns null unallowed values, because an error occurred', async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useUnallowedValues({ indexName, requestItems }),
-        {
-          wrapper: ContextWrapper,
-        }
-      );
-      await waitForNextUpdate();
-      const { unallowedValues } = await result.current;
-
-      expect(unallowedValues).toBeNull();
+      expect(unallowedValuesResult?.unallowedValues).toBeNull();
     });
 
     test('it returns loading: false, because data loading reached a terminal state', async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useUnallowedValues({ indexName, requestItems }),
-        {
-          wrapper: ContextWrapper,
-        }
-      );
-      await waitForNextUpdate();
-      const { loading } = await result.current;
-
-      expect(loading).toBe(false);
+      expect(unallowedValuesResult?.loading).toBe(false);
     });
 
     test('it returns the expected error', async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useUnallowedValues({ indexName, requestItems }),
-        {
-          wrapper: ContextWrapper,
-        }
+      expect(unallowedValuesResult?.error).toEqual(
+        ERROR_LOADING_UNALLOWED_VALUES({ details: errorMessage, indexName })
       );
-      await waitForNextUpdate();
-      const { error } = await result.current;
-
-      expect(error).toEqual(ERROR_LOADING_UNALLOWED_VALUES({ details: errorMessage, indexName }));
     });
   });
 });

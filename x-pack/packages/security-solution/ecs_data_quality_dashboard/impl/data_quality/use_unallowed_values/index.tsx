@@ -11,7 +11,7 @@ import { useDataQualityContext } from '../data_quality_panel/data_quality_contex
 import { fetchUnallowedValues, getUnallowedValues } from './helpers';
 import type { UnallowedValueCount, UnallowedValueRequestItem } from '../types';
 
-interface UseUnallowedValues {
+export interface UseUnallowedValues {
   unallowedValues: Record<string, UnallowedValueCount[]> | null;
   error: string | null;
   loading: boolean;

@@ -11,7 +11,7 @@ import React from 'react';
 import { DataQualityProvider } from '../data_quality_panel/data_quality_context';
 import { mockMappingsResponse } from '../mock/mappings_response/mock_mappings_response';
 import { ERROR_LOADING_MAPPINGS } from '../translations';
-import { useMappings } from '.';
+import { useMappings, UseMappings } from '.';
 
 const mockHttpFetch = jest.fn();
 const ContextWrapper: React.FC = ({ children }) => (
@@ -25,77 +25,56 @@ describe('useMappings', () => {
     jest.clearAllMocks();
   });
 
-  describe('happy path', () => {
-    beforeEach(() => {
+  describe('successful response from the mappings api', () => {
+    let mappingsResult: UseMappings | undefined;
+
+    beforeEach(async () => {
       mockHttpFetch.mockResolvedValue(mockMappingsResponse);
+
+      const { result, waitForNextUpdate } = renderHook(() => useMappings(pattern), {
+        wrapper: ContextWrapper,
+      });
+      await waitForNextUpdate();
+      mappingsResult = await result.current;
     });
 
     test('it returns the expected mappings', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useMappings(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { indexes } = await result.current;
-
-      expect(indexes).toEqual(mockMappingsResponse);
+      expect(mappingsResult?.indexes).toEqual(mockMappingsResponse);
     });
 
     test('it returns loading: false, because the data has loaded', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useMappings(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { loading } = await result.current;
-
-      expect(loading).toBe(false);
+      expect(mappingsResult?.loading).toBe(false);
     });
 
     test('it returns a null error, because no errors occurred', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useMappings(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { error } = await result.current;
-
-      expect(error).toBeNull();
+      expect(mappingsResult?.error).toBeNull();
     });
   });
 
   describe('fetch rejects with an error', () => {
+    let mappingsResult: UseMappings | undefined;
     const errorMessage = 'simulated error';
 
-    beforeEach(() => {
+    beforeEach(async () => {
       mockHttpFetch.mockRejectedValue(new Error(errorMessage));
+
+      const { result, waitForNextUpdate } = renderHook(() => useMappings(pattern), {
+        wrapper: ContextWrapper,
+      });
+      await waitForNextUpdate();
+      mappingsResult = await result.current;
     });
 
     test('it returns null mappings, because an error occurred', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useMappings(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { indexes } = await result.current;
-
-      expect(indexes).toBeNull();
+      expect(mappingsResult?.indexes).toBeNull();
     });
 
     test('it returns loading: false, because data loading reached a terminal state', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useMappings(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { loading } = await result.current;
-
-      expect(loading).toBe(false);
+      expect(mappingsResult?.loading).toBe(false);
     });
 
     test('it returns the expected error', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useMappings(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { error } = await result.current;
-
-      expect(error).toEqual(
+      expect(mappingsResult?.error).toEqual(
         ERROR_LOADING_MAPPINGS({ details: errorMessage, patternOrIndexName: pattern })
       );
     });

@@ -11,7 +11,7 @@ import React from 'react';
 import { DataQualityProvider } from '../data_quality_panel/data_quality_context';
 import { mockStatsGreenIndex } from '../mock/stats/mock_stats_green_index';
 import { ERROR_LOADING_STATS } from '../translations';
-import { useStats } from '.';
+import { useStats, UseStats } from '.';
 
 const mockHttpFetch = jest.fn();
 const ContextWrapper: React.FC = ({ children }) => (
@@ -25,77 +25,56 @@ describe('useStats', () => {
     jest.clearAllMocks();
   });
 
-  describe('happy path', () => {
-    beforeEach(() => {
+  describe('successful response from the stats api', () => {
+    let statsResult: UseStats | undefined;
+
+    beforeEach(async () => {
       mockHttpFetch.mockResolvedValue(mockStatsGreenIndex);
+
+      const { result, waitForNextUpdate } = renderHook(() => useStats(pattern), {
+        wrapper: ContextWrapper,
+      });
+      await waitForNextUpdate();
+      statsResult = await result.current;
     });
 
     test('it returns the expected stats', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useStats(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { stats } = await result.current;
-
-      expect(stats).toEqual(mockStatsGreenIndex);
+      expect(statsResult?.stats).toEqual(mockStatsGreenIndex);
     });
 
     test('it returns loading: false, because the data has loaded', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useStats(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { loading } = await result.current;
-
-      expect(loading).toBe(false);
+      expect(statsResult?.loading).toBe(false);
     });
 
     test('it returns a null error, because no errors occurred', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useStats(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { error } = await result.current;
-
-      expect(error).toBeNull();
+      expect(statsResult?.error).toBeNull();
     });
   });
 
   describe('fetch rejects with an error', () => {
+    let statsResult: UseStats | undefined;
     const errorMessage = 'simulated error';
 
-    beforeEach(() => {
+    beforeEach(async () => {
       mockHttpFetch.mockRejectedValue(new Error(errorMessage));
+
+      const { result, waitForNextUpdate } = renderHook(() => useStats(pattern), {
+        wrapper: ContextWrapper,
+      });
+      await waitForNextUpdate();
+      statsResult = await result.current;
     });
 
     test('it returns null stats, because an error occurred', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useStats(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { stats } = await result.current;
-
-      expect(stats).toBeNull();
+      expect(statsResult?.stats).toBeNull();
     });
 
     test('it returns loading: false, because data loading reached a terminal state', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useStats(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { loading } = await result.current;
-
-      expect(loading).toBe(false);
+      expect(statsResult?.loading).toBe(false);
     });
 
     test('it returns the expected error', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useStats(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { error } = await result.current;
-
-      expect(error).toEqual(ERROR_LOADING_STATS(errorMessage));
+      expect(statsResult?.error).toEqual(ERROR_LOADING_STATS(errorMessage));
     });
   });
 });

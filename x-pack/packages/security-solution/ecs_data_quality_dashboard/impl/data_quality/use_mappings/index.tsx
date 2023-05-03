@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import { fetchMappings } from './helpers';
 
-interface UseMappings {
+export interface UseMappings {
   indexes: Record<string, IndicesGetMappingIndexMappingRecord> | null;
   error: string | null;
   loading: boolean;

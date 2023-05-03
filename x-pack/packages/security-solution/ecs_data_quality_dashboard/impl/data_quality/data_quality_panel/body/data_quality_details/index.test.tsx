@@ -75,7 +75,7 @@ describe('DataQualityDetails', () => {
         </TestProviders>
       );
 
-      await waitFor(() => {});
+      await waitFor(() => {}); // wait for PatternComponent state updates
     });
 
     test('it renders the storage details', () => {

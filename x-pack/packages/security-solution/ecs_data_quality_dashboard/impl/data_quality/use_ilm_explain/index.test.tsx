@@ -11,7 +11,7 @@ import React from 'react';
 import { DataQualityProvider } from '../data_quality_panel/data_quality_context';
 import { mockIlmExplain } from '../mock/ilm_explain/mock_ilm_explain';
 import { ERROR_LOADING_ILM_EXPLAIN } from '../translations';
-import { useIlmExplain } from '.';
+import { useIlmExplain, UseIlmExplain } from '.';
 
 const mockHttpFetch = jest.fn();
 const ContextWrapper: React.FC = ({ children }) => (
@@ -25,77 +25,56 @@ describe('useIlmExplain', () => {
     jest.clearAllMocks();
   });
 
-  describe('happy path', () => {
-    beforeEach(() => {
+  describe('successful response from the ilm api', () => {
+    let ilmExplainResult: UseIlmExplain | undefined;
+
+    beforeEach(async () => {
       mockHttpFetch.mockResolvedValue(mockIlmExplain);
+
+      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
+        wrapper: ContextWrapper,
+      });
+      await waitForNextUpdate();
+      ilmExplainResult = await result.current;
     });
 
     test('it returns the expected ilmExplain map', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { ilmExplain } = await result.current;
-
-      expect(ilmExplain).toEqual(mockIlmExplain);
+      expect(ilmExplainResult?.ilmExplain).toEqual(mockIlmExplain);
     });
 
     test('it returns loading: false, because the data has loaded', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { loading } = await result.current;
-
-      expect(loading).toBe(false);
+      expect(ilmExplainResult?.loading).toBe(false);
     });
 
     test('it returns a null error, because no errors occurred', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { error } = await result.current;
-
-      expect(error).toBeNull();
+      expect(ilmExplainResult?.error).toBeNull();
     });
   });
 
   describe('fetch rejects with an error', () => {
+    let ilmExplainResult: UseIlmExplain | undefined;
     const errorMessage = 'simulated error';
 
-    beforeEach(() => {
+    beforeEach(async () => {
       mockHttpFetch.mockRejectedValue(new Error(errorMessage));
+
+      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
+        wrapper: ContextWrapper,
+      });
+      await waitForNextUpdate();
+      ilmExplainResult = await result.current;
     });
 
     test('it returns a null ilmExplain, because an error occurred', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { ilmExplain } = await result.current;
-
-      expect(ilmExplain).toBeNull();
+      expect(ilmExplainResult?.ilmExplain).toBeNull();
     });
 
     test('it returns loading: false, because data loading reached a terminal state', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { loading } = await result.current;
-
-      expect(loading).toBe(false);
+      expect(ilmExplainResult?.loading).toBe(false);
     });
 
     test('it returns the expected error', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
-        wrapper: ContextWrapper,
-      });
-      await waitForNextUpdate();
-      const { error } = await result.current;
-
-      expect(error).toEqual(ERROR_LOADING_ILM_EXPLAIN(errorMessage));
+      expect(ilmExplainResult?.error).toEqual(ERROR_LOADING_ILM_EXPLAIN(errorMessage));
     });
   });
 });

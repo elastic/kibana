@@ -13,7 +13,7 @@ import * as i18n from '../translations';
 
 const STATS_ENDPOINT = '/internal/ecs_data_quality_dashboard/stats';
 
-interface UseStats {
+export interface UseStats {
   stats: Record<string, IndicesStatsIndicesStats> | null;
   error: string | null;
   loading: boolean;

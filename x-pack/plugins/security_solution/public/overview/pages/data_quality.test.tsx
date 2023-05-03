@@ -160,8 +160,8 @@ describe('DataQuality', () => {
       await waitFor(() => {});
     });
 
-    test('it renders the expected default ILM phases', () => {
-      expect(screen.getByTestId('selectIlmPhases')).toHaveTextContent(defaultIlmPhases);
+    test('it does NOT render the ILM phases selection', () => {
+      expect(screen.queryByTestId('selectIlmPhases')).not.toBeInTheDocument();
     });
 
     test('it renders the loading spinner', () => {
@@ -275,16 +275,16 @@ describe('DataQuality', () => {
       expect(screen.queryByTestId('selectIlmPhases')).not.toBeInTheDocument();
     });
 
-    test('it does NOT render the loading spinner', () => {
-      expect(screen.queryByTestId('ecsDataQualityDashboardLoader')).not.toBeInTheDocument();
+    test('it renders the loading spinner', () => {
+      expect(screen.getByTestId('ecsDataQualityDashboardLoader')).toBeInTheDocument();
     });
 
     test('it does NOT render the data quality panel content', () => {
       expect(screen.queryByTestId('dataQualitySummary')).not.toBeInTheDocument();
     });
 
-    test('it renders the landing page', () => {
-      expect(screen.getByTestId('siem-landing-page')).toBeInTheDocument();
+    test('it does NOT render the landing page', () => {
+      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
     });
   });
 });

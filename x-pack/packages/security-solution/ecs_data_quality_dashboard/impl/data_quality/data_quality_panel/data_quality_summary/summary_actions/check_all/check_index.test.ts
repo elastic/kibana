@@ -89,7 +89,7 @@ describe('checkIndex', () => {
   const pattern = 'auditbeat-*';
   const httpFetch = jest.fn();
 
-  describe('happy path', () => {
+  describe('when `checkIndex` successfully completes the check', () => {
     const onCheckCompleted = jest.fn();
 
     beforeEach(async () => {

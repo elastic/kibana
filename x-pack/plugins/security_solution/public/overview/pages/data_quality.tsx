@@ -202,7 +202,7 @@ const DataQualityComponent: React.FC = () => {
     [createCaseFlyout]
   );
 
-  if (isSourcererLoading) {
+  if (isSourcererLoading || isSignalIndexNameLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />;
   }
 
@@ -227,24 +227,20 @@ const DataQualityComponent: React.FC = () => {
             </EuiToolTip>
           </HeaderPage>
 
-          {isSignalIndexNameLoading ? (
-            <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />
-          ) : (
-            <DataQualityPanel
-              addSuccessToast={addSuccessToast}
-              canUserCreateAndReadCases={canUserCreateAndReadCases}
-              defaultBytesFormat={defaultBytesFormat}
-              defaultNumberFormat={defaultNumberFormat}
-              getGroupByFieldsOnClick={getGroupByFieldsOnClick}
-              httpFetch={httpFetch}
-              ilmPhases={ilmPhases}
-              lastChecked={lastChecked}
-              openCreateCaseFlyout={openCreateCaseFlyout}
-              patterns={alertsAndSelectedPatterns}
-              setLastChecked={setLastChecked}
-              theme={theme}
-            />
-          )}
+          <DataQualityPanel
+            addSuccessToast={addSuccessToast}
+            canUserCreateAndReadCases={canUserCreateAndReadCases}
+            defaultBytesFormat={defaultBytesFormat}
+            defaultNumberFormat={defaultNumberFormat}
+            getGroupByFieldsOnClick={getGroupByFieldsOnClick}
+            httpFetch={httpFetch}
+            ilmPhases={ilmPhases}
+            lastChecked={lastChecked}
+            openCreateCaseFlyout={openCreateCaseFlyout}
+            patterns={alertsAndSelectedPatterns}
+            setLastChecked={setLastChecked}
+            theme={theme}
+          />
         </SecuritySolutionPageWrapper>
       ) : (
         <LandingPageComponent />

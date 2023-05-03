@@ -13,7 +13,7 @@ import * as i18n from '../translations';
 
 const ILM_EXPLAIN_ENDPOINT = '/internal/ecs_data_quality_dashboard/ilm_explain';
 
-interface UseIlmExplain {
+export interface UseIlmExplain {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   error: string | null;
   loading: boolean;
