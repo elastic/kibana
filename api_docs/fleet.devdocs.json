@@ -17930,7 +17930,8 @@
               "\nComponents array"
             ],
             "signature": [
-              "FleetServerAgentComponent[] | undefined"
+              "FleetServerAgentComponent",
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false,

@@ -14,7 +14,7 @@ export function MaintenanceWindowsPageProvider({ getService }: FtrProviderContex
 
   return {
     async getMaintenanceWindowsList() {
-      const table = await find.byCssSelector('[data-test-subj="maintenance-windows-list"] table');
+      const table = await find.byCssSelector('[data-test-subj="maintenance-windows-table"] table');
       const $ = await table.parseDomContent();
       return $.findTestSubjects('list-item')
         .toArray()
@@ -36,7 +36,7 @@ export function MaintenanceWindowsPageProvider({ getService }: FtrProviderContex
       await searchBox.type(searchText);
       await searchBox.pressKeys(ENTER_KEY);
       await find.byCssSelector(
-        '.euiBasicTable[data-test-subj="maintenance-windows-list"]:not(.euiBasicTable-loading)'
+        '.euiBasicTable[data-test-subj="maintenance-windows-table"]:not(.euiBasicTable-loading)'
       );
     },
   };
