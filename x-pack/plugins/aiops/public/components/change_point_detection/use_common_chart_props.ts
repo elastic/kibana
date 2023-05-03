@@ -146,7 +146,7 @@ export const useCommonChartProps = ({
                   color: '#F04E98',
                   lineStyle: 'solid',
                   lineWidth: 1,
-                  outside: false,
+                  outside: true,
                 },
               ],
               ignoreGlobalFilters: true,
