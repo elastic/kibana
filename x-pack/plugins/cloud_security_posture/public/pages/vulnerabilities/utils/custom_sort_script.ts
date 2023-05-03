@@ -14,10 +14,10 @@ export const severitySchemaConfig = {
     return 0; // this schema is always explicitly defined
   },
   sortTextAsc: i18n.translate('xpack.csp.vulnerabilityTable.column.sortAscending', {
-    defaultMessage: 'Severity Low -> Critical',
+    defaultMessage: 'Low -> Critical',
   }),
   sortTextDesc: i18n.translate('xpack.csp.vulnerabilityTable.column.sortDescending', {
-    defaultMessage: 'Severity Critical -> Low',
+    defaultMessage: 'Critical -> Low',
   }),
   icon: 'dot',
   color: '',
