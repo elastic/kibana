@@ -35,7 +35,7 @@ export function RelationshipExpression(props: Props) {
             }
           )}
           value={i18n.translate('xpack.maps.spatialJoin.wizardForm.withinExpressionValue', {
-            defaultMessage: '{distance} {units} of vector features',
+            defaultMessage: '{distance} {units} of layer features',
             values: {
               distance: props.distance,
               units: KM_ABBREVIATION,

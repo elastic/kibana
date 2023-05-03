@@ -212,7 +212,7 @@ export function TermJoinPopoverContent(props: Props) {
       <EuiFormHelpText className="mapJoinExpressionHelpText">
         <FormattedMessage
           id="xpack.maps.termJoinExpression.helpText"
-          defaultMessage="Configure the shared key that combines vector features, the left source, with the results of an Elasticsearch aggregation, the right source."
+          defaultMessage="Configure the shared key that combines layer features, the left source, with the results of an Elasticsearch aggregation, the right source."
         />
       </EuiFormHelpText>
       <EuiFormRow

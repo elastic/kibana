@@ -58,7 +58,7 @@ export function JoinDocumentationPopover() {
               <p>
                 <FormattedMessage
                   id="xpack.maps.joinDocs.termsJoinIntro"
-                  defaultMessage="A term join uses a shared key to combine vector features with metrics from an Elasticsearch terms aggregation."
+                  defaultMessage="A term join uses a shared key to combine layer features with metrics from an Elasticsearch terms aggregation."
                 />
               </p>
               <EuiLink
@@ -83,7 +83,7 @@ export function JoinDocumentationPopover() {
               <p>
                 <FormattedMessage
                   id="xpack.maps.joinDocs.spatialJoinIntro"
-                  defaultMessage="A spatial join uses a geospatial relationship to combine vector features with metrics from an Elasticsearch geo query filters aggregation."
+                  defaultMessage="A spatial join uses a geospatial relationship to combine layer features with metrics from an Elasticsearch geo query filters aggregation."
                 />
               </p>
             </dd>
