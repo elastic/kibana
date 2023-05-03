@@ -109,6 +109,6 @@ export const getUseActionColumnHook =
 
     return {
       renderCustomActionsRow,
-      width: 124,
+      width: 150,
     };
   };
