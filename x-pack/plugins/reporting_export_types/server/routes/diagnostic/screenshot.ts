@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { API_DIAGNOSE_URL } from '@kbn/reporting-plugin/common/constants';
 import { ReportingCore } from '@kbn/reporting-plugin/server';
 import { lastValueFrom } from 'rxjs';
-import { generatePngObservable } from '@kbn/reporting-export-types/server';
 import { getAbsoluteUrlFactory } from '@kbn/reporting-plugin/common/get_absolute_url';
 import { authorizedUserPreRouting, getCounters } from '@kbn/reporting-plugin/server/routes/lib';
+import { generatePngObservable } from '../..';
 
 const path = `${API_DIAGNOSE_URL}/screenshot`;
 
