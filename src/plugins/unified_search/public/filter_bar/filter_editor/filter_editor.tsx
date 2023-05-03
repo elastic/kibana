@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiFormRowProps,
   EuiIcon,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -382,14 +383,22 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   }
 
   private renderCustomEditor() {
-    const helpText =
-      this.props.filter?.meta.type === FILTERS.SPATIAL_FILTER ? (
-        <EuiTextColor color="warning">{strings.getSpatialFilterQueryDslHelpText()}</EuiTextColor>
-      ) : (
+    let helpText: EuiFormRowProps['helpText'] = '';
+
+    if (this.props.docLinks) {
+      helpText = (
         <EuiLink href={this.props.docLinks.links.query.queryDsl} target="_blank">
           {strings.getQueryDslDocsLinkLabel()}
         </EuiLink>
       );
+    }
+
+    if (this.props.filter?.meta.type === FILTERS.SPATIAL_FILTER) {
+      helpText = (
+        <EuiTextColor color="warning">{strings.getSpatialFilterQueryDslHelpText()}</EuiTextColor>
+      );
+    }
+
     return (
       <EuiFormRow fullWidth label={strings.getQueryDslLabel()} helpText={helpText}>
         <CodeEditor

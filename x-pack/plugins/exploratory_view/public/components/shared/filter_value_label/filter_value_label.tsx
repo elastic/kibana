@@ -76,7 +76,7 @@ export function FilterValueLabel({
   const filter = buildFilterLabel({ field, value, label, dataView, negate });
 
   const {
-    services: { uiSettings },
+    services: { uiSettings, docLinks },
   } = useKibana();
 
   return dataView ? (
@@ -93,6 +93,7 @@ export function FilterValueLabel({
         }
       }}
       uiSettings={uiSettings!}
+      docLinks={docLinks!}
       hiddenPanelOptions={[
         ...(allowExclusion ? [] : ['negateFilter' as const]),
         'pinFilter',
