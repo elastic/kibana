@@ -67,6 +67,10 @@
     "@kbn/shared-ux-router",
     "@kbn/dom-drag-drop",
     "@kbn/visualization-ui-components",
+    "@kbn/content-management-plugin",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/object-versioning",
+    "@kbn/config-schema",
   ],
   "exclude": [
     "target/**/*",
