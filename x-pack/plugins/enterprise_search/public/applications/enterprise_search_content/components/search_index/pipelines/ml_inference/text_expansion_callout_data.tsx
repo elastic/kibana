@@ -9,9 +9,10 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { useValues } from 'kea';
 
+import { IndexViewLogic } from '../../index_view_logic';
+
 import { TextExpansionCallOutProps, TextExpansionCallOutState } from './text_expansion_callout';
 import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
-import { IndexViewLogic } from '../../index_view_logic';
 
 export const TEXT_EXPANSION_CALL_OUT_DISMISSED_KEY =
   'enterprise-search-text-expansion-callout-dismissed';
