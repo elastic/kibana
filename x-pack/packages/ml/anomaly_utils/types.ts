@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { PARTITION_FIELDS, ANOMALY_RESULT_TYPE } from '../constants/anomalies';
-import type { KibanaUrlConfig } from './custom_urls';
+import { ML_PARTITION_FIELDS, ML_ANOMALY_RESULT_TYPE } from './constants';
+import type { MlKibanaUrlConfig } from './custom_urls';
 
 /**
  * Influencers are the entities that have contributed to, or are to blame for, the anomalies.
  * Influencer results are available only if an influencer_field_name is specified in the job configuration.
  */
-export interface Influencer {
+export interface MlInfluencer {
   /**
    * The field name of the influencer.
    */
@@ -24,15 +24,26 @@ export interface Influencer {
   influencer_field_values: string[];
 }
 
-export type MLAnomalyDoc = AnomalyRecordDoc;
+/**
+ * Alias of MlAnomalyRecordDoc
+ * @export
+ * @typedef {MLAnomalyDoc}
+ */
+export type MLAnomalyDoc = MlAnomalyRecordDoc;
 
-export type RecordForInfluencer = AnomalyRecordDoc;
+/**
+ * MlRecordForInfluencer, an alias based on MlAnomalyRecordDoc.
+ *
+ * @export
+ * @typedef {MlRecordForInfluencer}
+ */
+export type MlRecordForInfluencer = MlAnomalyRecordDoc;
 
 /**
  * Anomaly record document. Records contain the detailed analytical results.
  * They describe the anomalous activity that has been identified in the input data based on the detector configuration.
  */
-export interface AnomalyRecordDoc {
+export interface MlAnomalyRecordDoc {
   /**
    * Index signature to cover dynamic attributes added to the record depending on the fields being analyzed.
    * For example, if the job is analyzing hostname as a by field, then a field hostname is added to the result document.
@@ -130,7 +141,7 @@ export interface AnomalyRecordDoc {
    * If influencers was specified in the detector configuration, this array contains influencers
    * that contributed to or were to blame for an anomaly.
    */
-  influencers?: Influencer[];
+  influencers?: MlInfluencer[];
 
   /**
    * The field used to split the data. In particular, this property is used for analyzing the splits
@@ -238,7 +249,7 @@ export interface AnomalyRecordDoc {
 /**
  * Anomaly table record, representing the fields shown in the ML UI anomalies table.
  */
-export interface AnomaliesTableRecord {
+export interface MlAnomaliesTableRecord {
   /**
    * The start time of the interval for which the anomaly data in the table is being aggregated.
    * Anomalies in the table are commonly aggregated by day, hour, or at the bucket span of the job.
@@ -248,7 +259,7 @@ export interface AnomaliesTableRecord {
   /**
    * The source anomaly record document, containing the full source anomaly record fields.
    */
-  source: AnomalyRecordDoc;
+  source: MlAnomalyRecordDoc;
 
   /**
    * Unique identifier for the table row.
@@ -321,7 +332,7 @@ export interface AnomaliesTableRecord {
    * List of custom URL drilldowns from the table row to other pages such as
    * Discover, Dashboard or other web pages.
    */
-  customUrls?: KibanaUrlConfig[];
+  customUrls?: MlKibanaUrlConfig[];
 
   /**
    * Returns true if the anomaly record represented by the table row is for a time series
@@ -345,33 +356,131 @@ export interface AnomaliesTableRecord {
  * and rules length.
  * Used by the AnomaliesTable component
  */
-export interface AnomaliesTableRecordExtended extends AnomaliesTableRecord {
+export interface MlAnomaliesTableRecordExtended extends MlAnomaliesTableRecord {
+  /**
+   * The detector name.
+   * @type {string}
+   */
   detector: string;
+  /**
+   * The length of the rule.
+   * @type {?number}
+   */
   rulesLength?: number;
 }
 
-export type PartitionFieldsType = typeof PARTITION_FIELDS[number];
+/**
+ * Union type for partitiion field types.
+ *
+ * @export
+ * @typedef {MlPartitionFieldsType}
+ */
+export type MlPartitionFieldsType = typeof ML_PARTITION_FIELDS[number];
 
-export interface AnomalyCategorizerStatsDoc {
+/**
+ * Anomaly record document for categorizer stats.
+ *
+ * @export
+ * @interface MlAnomalyCategorizerStatsDoc
+ * @typedef {MlAnomalyCategorizerStatsDoc}
+ */
+export interface MlAnomalyCategorizerStatsDoc {
+  /**
+   * Index signature to cover dynamic attributes added to the record depending on the fields being analyzed.
+   * For example, if the job is analyzing hostname as a by field, then a field hostname is added to the result document.
+   */
   [key: string]: any;
+
+  /**
+   * The identifier for the anomaly detection job.
+   * @type {string}
+   */
   job_id: string;
+
+  /**
+   * The type of the result document.
+   * @type {'categorizer_stats'}
+   */
   result_type: 'categorizer_stats';
+
+  /**
+   * The field used to segment the analysis.
+   * When you use this property, you have completely independent baselines for each value of this field.
+   * @type {?string}
+   */
   partition_field_name?: string;
+
+  /**
+   * The value of the partition field.
+   * @type {?string}
+   */
   partition_field_value?: string;
+
+  /**
+   * The number of documents.
+   * @type {number}
+   */
   categorized_doc_count: number;
+
+  /**
+   * The total number of categories.
+   * @type {number}
+   */
   total_category_count: number;
+
+  /**
+   * The number of frequent categories.
+   * @type {number}
+   */
   frequent_category_count: number;
+
+  /**
+   * The number of rare categories.
+   * @type {number}
+   */
   rare_category_count: number;
+
+  /**
+   * The number of dead categories.
+   * @type {number}
+   */
   dead_category_count: number;
+
+  /**
+   * The number of failed categories.
+   * @type {number}
+   */
   failed_category_count: number;
+
+  /**
+   * The categorization status.
+   * @type {('ok' | 'warn')}
+   */
   categorization_status: 'ok' | 'warn';
+
+  /**
+   * The log time.
+   * @type {number}
+   */
   log_time: number;
+
+  /**
+   * The start time of the bucket for which these results were calculated.
+   * @type {number}
+   */
   timestamp: number;
 }
 
-export type EntityFieldType = 'partition_field' | 'over_field' | 'by_field';
+/**
+ * Union type for entity field types.
+ *
+ * @export
+ * @typedef {MlEntityFieldType}
+ */
+export type MlEntityFieldType = 'partition_field' | 'over_field' | 'by_field';
 
 /**
  * The type of the anomaly result, such as bucket, influencer or record.
  */
-export type AnomalyResultType = typeof ANOMALY_RESULT_TYPE[keyof typeof ANOMALY_RESULT_TYPE];
+export type MlAnomalyResultType =
+  typeof ML_ANOMALY_RESULT_TYPE[keyof typeof ML_ANOMALY_RESULT_TYPE];
