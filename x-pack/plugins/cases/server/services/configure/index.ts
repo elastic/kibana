@@ -163,7 +163,9 @@ function transformUpdateResponseToExternalModel(
     referenceName: CONNECTOR_ID_REFERENCE_NAME,
   });
 
-  const attributes = restUpdatedAttributes as Omit<ConfigurationTransformedAttributes, 'connector'>;
+  const attributes = restUpdatedAttributes as Partial<
+    Omit<ConfigurationTransformedAttributes, 'connector'>
+  >;
 
   const response = {
     ...updatedConfiguration,
