@@ -168,6 +168,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(toastTitle).to.eql(`Unarchived maintenance window '${name}'`);
       });
 
+      await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
+
       list = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
       expect(list.length).to.eql(1);
       expect(list[0].status).to.eql('Finished');
