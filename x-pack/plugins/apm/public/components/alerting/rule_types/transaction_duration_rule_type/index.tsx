@@ -121,6 +121,7 @@ export function TransactionDurationRuleType(props: Props) {
                 interval,
                 start,
                 end,
+                groupBy: params.groupBy,
               },
             },
           }
@@ -135,6 +136,7 @@ export function TransactionDurationRuleType(props: Props) {
       params.transactionName,
       params.windowSize,
       params.windowUnit,
+      params.groupBy,
     ]
   );
 
@@ -168,7 +170,7 @@ export function TransactionDurationRuleType(props: Props) {
       allowAll={false}
       currentValue={params.serviceName}
       onChange={(value) => {
-        if (value !== params.serviceName) {
+        if (value !== params.serviceName && value !== '') {
           setRuleParams('serviceName', value);
           setRuleParams('transactionType', undefined);
           setRuleParams('transactionName', undefined);
@@ -178,17 +180,26 @@ export function TransactionDurationRuleType(props: Props) {
     />,
     <TransactionTypeField
       currentValue={params.transactionType}
-      onChange={(value) => setRuleParams('transactionType', value)}
+      onChange={(value) =>
+        setRuleParams('transactionType', value !== '' ? value : undefined)
+      }
       serviceName={params.serviceName}
     />,
     <EnvironmentField
       currentValue={params.environment}
-      onChange={(value) => setRuleParams('environment', value)}
+      onChange={(value) =>
+        setRuleParams(
+          'environment',
+          value !== '' ? value : ENVIRONMENT_ALL.value
+        )
+      }
       serviceName={params.serviceName}
     />,
     <TransactionNameField
       currentValue={params.transactionName}
-      onChange={(value) => setRuleParams('transactionName', value)}
+      onChange={(value) =>
+        setRuleParams('transactionName', value !== '' ? value : undefined)
+      }
       serviceName={params.serviceName}
     />,
     <PopoverExpression

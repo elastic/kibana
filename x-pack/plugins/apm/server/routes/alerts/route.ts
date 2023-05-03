@@ -37,6 +37,9 @@ const alertParamsRt = t.intersection([
   t.type({
     interval: t.string,
   }),
+  t.partial({
+    groupBy: t.array(t.string),
+  }),
 ]);
 
 export type AlertParams = t.TypeOf<typeof alertParamsRt>;

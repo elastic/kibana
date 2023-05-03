@@ -20,7 +20,7 @@ import {
   TickFormatter,
 } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
-import React, { useState } from 'react';
+import React from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -39,20 +39,12 @@ export function ChartPreview({
   uiSettings,
   series,
 }: ChartPreviewProps) {
-  const [yMax, setYMax] = useState(threshold);
-
   const theme = useTheme();
   const thresholdOpacity = 0.3;
   const timestamps = series.flatMap(({ data }) => data.map(({ x }) => x));
   const xMin = Math.min(...timestamps);
   const xMax = Math.max(...timestamps);
   const xFormatter = niceTimeFormatter([xMin, xMax]);
-
-  function updateYMax() {
-    // Make the maximum Y value either the actual max or 20% more than the threshold
-    const values = series.flatMap(({ data }) => data.map((d) => d.y ?? 0));
-    setYMax(Math.max(...values, threshold * 1.2));
-  }
 
   const style = {
     fill: theme.eui.euiColorVis2,
@@ -76,24 +68,35 @@ export function ChartPreview({
   ];
 
   const timeZone = getTimeZone(uiSettings);
-  const legendSize = Math.ceil(series.length / 2) * 30;
+  const legendSize =
+    series.length > 1 ? Math.ceil(series.length / 2) * 30 : series.length * 35;
   const chartSize = 150;
+
+  const domainYMax = () => {
+    // Make the maximum Y value either the actual max or 20% more than the threshold
+    const values = series.flatMap(({ data }) => data.map((d) => d.y ?? 0));
+    return Math.max(...values, threshold * 1.2);
+  };
+
+  const domain = {
+    max: domainYMax(),
+    min: 0,
+  };
 
   return (
     <>
       <EuiSpacer size="m" />
       <Chart
         size={{
-          height: series.length > 1 ? chartSize + legendSize : chartSize,
+          height: chartSize + legendSize,
         }}
         data-test-subj="ChartPreview"
       >
         <Settings
           tooltip="none"
-          showLegend={series.length > 1}
+          showLegend={true}
           legendPosition={'bottom'}
           legendSize={legendSize}
-          onLegendItemClick={updateYMax}
         />
         <LineAnnotation
           dataValues={[{ dataValue: threshold }]}
@@ -119,7 +122,7 @@ export function ChartPreview({
           position={Position.Left}
           tickFormat={yTickFormat}
           ticks={5}
-          domain={{ max: yMax, min: 0 }}
+          domain={domain}
         />
         {series.map(({ name, data }, index) => (
           <BarSeries

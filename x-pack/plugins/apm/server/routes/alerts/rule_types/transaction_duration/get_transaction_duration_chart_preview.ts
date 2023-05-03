@@ -10,7 +10,6 @@ import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
@@ -23,12 +22,13 @@ import {
   getProcessorEventForTransactions,
 } from '../../../../lib/helpers/transactions';
 import {
-  ENVIRONMENT_NOT_DEFINED,
-  getEnvironmentLabel,
-} from '../../../../../common/environment_filter_values';
-import { averageOrPercentileAgg } from './average_or_percentile_agg';
+  averageOrPercentileAgg,
+  getMultiTermsSortOrder,
+} from './average_or_percentile_agg';
 import { APMConfig } from '../../../..';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getGroupByTerms } from '../utils/get_groupby_terms';
+import { getAllGroupByFields } from './get_all_groupby_fields';
 
 export type TransactionDurationChartPreviewResponse = Array<{
   name: string;
@@ -53,6 +53,7 @@ export async function getTransactionDurationChartPreview({
     interval,
     start,
     end,
+    groupBy,
   } = alertParams;
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
     config,
@@ -77,6 +78,8 @@ export async function getTransactionDurationChartPreview({
     searchAggregatedTransactions
   );
 
+  const allGroupByFields = getAllGroupByFields(groupBy);
+
   const aggs = {
     timeseries: {
       date_histogram: {
@@ -89,23 +92,18 @@ export async function getTransactionDurationChartPreview({
         },
       },
       aggs: {
-        environment: {
-          terms: {
-            field: SERVICE_ENVIRONMENT,
-            missing: ENVIRONMENT_NOT_DEFINED.value,
-            size: 10,
-            order: {
-              [aggregationType === AggregationType.Avg
-                ? 'avgLatency'
-                : `pctLatency.${
-                    aggregationType === AggregationType.P95 ? 95 : 99
-                  }`]: 'desc',
-            } as Record<string, 'desc'>,
+        series: {
+          multi_terms: {
+            terms: [...getGroupByTerms(allGroupByFields)],
+            size: 3,
+            ...getMultiTermsSortOrder(aggregationType),
           },
-          aggs: averageOrPercentileAgg({
-            aggregationType,
-            transactionDurationField,
-          }),
+          aggs: {
+            ...averageOrPercentileAgg({
+              aggregationType,
+              transactionDurationField,
+            }),
+          },
         },
       },
     },
@@ -125,19 +123,19 @@ export async function getTransactionDurationChartPreview({
     return [];
   }
 
-  const environmentDataMap = resp.aggregations.timeseries.buckets.reduce(
+  const seriesDataMap = resp.aggregations.timeseries.buckets.reduce(
     (acc, bucket) => {
       const x = bucket.key;
-      bucket.environment.buckets.forEach((environmentBucket) => {
-        const env = environmentBucket.key as string;
+      bucket.series.buckets.forEach((seriesBucket) => {
+        const bucketKey = seriesBucket.key.join('_');
         const y =
-          'avgLatency' in environmentBucket
-            ? environmentBucket.avgLatency.value
-            : environmentBucket.pctLatency.values[0].value;
-        if (acc[env]) {
-          acc[env].push({ x, y });
+          'avgLatency' in seriesBucket
+            ? seriesBucket.avgLatency.value
+            : seriesBucket.pctLatency.values[0].value;
+        if (acc[bucketKey]) {
+          acc[bucketKey].push({ x, y });
         } else {
-          acc[env] = [{ x, y }];
+          acc[bucketKey] = [{ x, y }];
         }
       });
 
@@ -146,8 +144,8 @@ export async function getTransactionDurationChartPreview({
     {} as Record<string, Array<{ x: number; y: number | null }>>
   );
 
-  return Object.keys(environmentDataMap).map((env) => ({
-    name: getEnvironmentLabel(env),
-    data: environmentDataMap[env],
+  return Object.keys(seriesDataMap).map((key) => ({
+    name: key,
+    data: seriesDataMap[key],
   }));
 }
