@@ -119,6 +119,7 @@ describe('validateBlockRestrictions', () => {
         type: 'file',
         name: 'sel2',
         operation: ['modifyFile'],
+        targetFilePath: ['/**'],
       },
     ];
 
@@ -135,7 +136,7 @@ describe('validateBlockRestrictions', () => {
     expect(errors).toHaveLength(1);
   });
 
-  it('reports an error none of the FIM selectors use targetFilePath', () => {
+  it('reports an error when none of the FIM selectors use targetFilePath', () => {
     const selectors: Selector[] = [
       {
         type: 'file',
@@ -162,7 +163,7 @@ describe('validateBlockRestrictions', () => {
     expect(errors).toHaveLength(1);
   });
 
-  it('passes validation when all FIM selectors (match) use targetFilePath', () => {
+  it('passes validation when all FIM selectors (response.match) use targetFilePath', () => {
     const selectors: Selector[] = [
       {
         type: 'file',
@@ -175,11 +176,6 @@ describe('validateBlockRestrictions', () => {
         name: 'sel2',
         operation: ['modifyFile'],
         targetFilePath: ['/usr/bin/**', '/etc/**'],
-      },
-      {
-        type: 'file',
-        name: 'sel2',
-        operation: ['modifyExecutable'],
       },
     ];
 
@@ -196,7 +192,7 @@ describe('validateBlockRestrictions', () => {
     expect(errors).toHaveLength(0);
   });
 
-  it('passes validation w non fim selectors mixed in', () => {
+  it('passes validation with non fim selectors mixed in', () => {
     const selectors: Selector[] = [
       {
         type: 'file',
@@ -207,7 +203,7 @@ describe('validateBlockRestrictions', () => {
       {
         type: 'file',
         name: 'sel2',
-        operation: ['createExecutable'],
+        operation: ['createExecutable', 'modifyExecutable'], // this should be allowed. FIM = createFile, modifyFile, deleteFile
       },
     ];
 
@@ -244,6 +240,29 @@ describe('validateBlockRestrictions', () => {
         match: ['sel1'],
         exclude: ['excludePaths'],
         actions: ['block', 'alert'],
+      },
+    ];
+
+    const errors = validateBlockRestrictions(selectors, responses);
+
+    expect(errors).toHaveLength(0);
+  });
+
+  it('passes validation if block isnt used', () => {
+    const selectors: Selector[] = [
+      {
+        type: 'file',
+        name: 'sel1',
+        operation: ['createFile'],
+      },
+    ];
+
+    const responses: Response[] = [
+      {
+        type: 'file',
+        match: ['sel1'],
+        exclude: ['excludePaths'],
+        actions: ['alert'],
       },
     ];
 
