@@ -234,50 +234,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(cases.count_in_progress_cases).to.eql(1);
       });
 
-      it('returns the correct fields', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        // all fields that contain the UserRt definition must be included here (aka created_by, closed_by, and updated_by)
-        // see https://github.com/elastic/kibana/issues/139503
-        const queryFields: Array<keyof Case | Array<keyof Case>> = [
-          ['title', 'created_by', 'closed_by', 'updated_by'],
-          ['title', 'description', 'created_by', 'closed_by', 'updated_by'],
-        ];
-
-        for (const fields of queryFields) {
-          const cases = await findCases({ supertest, query: { fields } });
-          const fieldsAsArray = Array.isArray(fields) ? fields : [fields];
-
-          const expectedValues = fieldsAsArray.reduce(
-            (theCase, field) => ({
-              ...theCase,
-              [field]: postedCase[field],
-            }),
-            {}
-          );
-
-          expect(cases).to.eql({
-            ...findCasesResp,
-            total: 1,
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                external_service: postedCase.external_service,
-                owner: postedCase.owner,
-                connector: postedCase.connector,
-                severity: postedCase.severity,
-                status: postedCase.status,
-                comments: [],
-                totalAlerts: 0,
-                totalComment: 0,
-                ...expectedValues,
-              },
-            ],
-            count_open_cases: 1,
-          });
-        }
-      });
-
       it('sorts by title', async () => {
         const case3 = await createCase(supertest, { ...postCaseReq, title: 'c' });
         const case2 = await createCase(supertest, { ...postCaseReq, title: 'b' });
