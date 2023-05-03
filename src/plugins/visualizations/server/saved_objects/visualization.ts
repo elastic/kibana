@@ -7,6 +7,7 @@
  */
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { schema } from '@kbn/config-schema';
 import { SavedObjectsType } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
@@ -37,12 +38,23 @@ export const getVisualizationSavedObjectType = (
     dynamic: false, // declared here to prevent indexing root level attribute fields
     properties: {
       description: { type: 'text' },
+      title: { type: 'text' },
+      version: { type: 'integer' },
       kibanaSavedObjectMeta: {
         properties: {},
       },
-      title: { type: 'text' },
-      version: { type: 'integer' },
     },
+  },
+  schemas: {
+    '8.8.0': schema.object({
+      title: schema.string(),
+      description: schema.maybe(schema.string()),
+      version: schema.maybe(schema.number()),
+      kibanaSavedObjectMeta: schema.maybe(schema.object({ searchSourceJSON: schema.string() })),
+      uiStateJSON: schema.maybe(schema.string()),
+      visState: schema.maybe(schema.string()),
+      savedSearchRefName: schema.maybe(schema.string()),
+    }),
   },
   migrations: () => getAllMigrations(getSearchSourceMigrations()),
 });
