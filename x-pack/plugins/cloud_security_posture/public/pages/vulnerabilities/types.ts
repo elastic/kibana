@@ -106,7 +106,7 @@ export interface Vulnerability {
   package: {
     version: string;
     name: string;
-    fixed_version: string;
+    fixed_version?: string;
   };
 }
 

@@ -74,6 +74,8 @@ export {
   FLEET_PROXY_SAVED_OBJECT_TYPE,
   // Authz
   ENDPOINT_PRIVILEGES,
+  // Message signing service
+  MESSAGE_SIGNING_SERVICE_API_ROUTES,
 } from '../../common/constants';
 
 export {
