@@ -388,6 +388,7 @@ export async function pickTestGroupRunOrder() {
   bk.uploadArtifacts('jest_run_order.json');
 
   if (ftrConfigsIncluded) {
+    console.log(`\n### ftrRunOrder: \n${JSON.stringify(ftrRunOrder, null, 2)}`);
     // write the config for functional steps to an artifact that can be used by the individual functional jobs
     Fs.writeFileSync('ftr_run_order.json', JSON.stringify(ftrRunOrder, null, 2));
     bk.uploadArtifacts('ftr_run_order.json');
