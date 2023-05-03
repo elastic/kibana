@@ -77,6 +77,7 @@ describe('EphemeralTaskLifecycle', () => {
           monitor: true,
           warn_threshold: 5000,
         },
+        worker_utilization_running_average_window: 5,
         ...config,
       },
       elasticsearchAndSOAvailability$,

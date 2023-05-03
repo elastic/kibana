@@ -17,15 +17,15 @@ import type {
   AllCommentsResponse,
   CasePostRequest,
   CaseResolveResponse,
-  CaseResponse,
+  Case,
   CasesConfigurePatch,
   CasesConfigureRequest,
   CasesConfigureResponse,
   CasesFindRequest,
   CasesFindResponse,
   CasesPatchRequest,
-  CasesResponse,
-  CaseUserActionsResponse,
+  Cases,
+  UserActions,
   CommentsResponse,
   CasesBulkGetResponse,
 } from '../../common/api';
@@ -38,9 +38,9 @@ import type {
 export interface ICasePostRequest extends CasePostRequest {}
 export interface ICasesFindRequest extends CasesFindRequest {}
 export interface ICasesPatchRequest extends CasesPatchRequest {}
-export interface ICaseResponse extends CaseResponse {}
+export interface ICaseResponse extends Case {}
 export interface ICaseResolveResponse extends CaseResolveResponse {}
-export interface ICasesResponse extends CasesResponse {}
+export interface ICasesResponse extends Cases {}
 export interface ICasesFindResponse extends CasesFindResponse {}
 export interface ICasesBulkGetResponse extends CasesBulkGetResponse {}
 
@@ -51,4 +51,4 @@ export interface ICasesConfigurePatch extends CasesConfigurePatch {}
 export interface ICommentsResponse extends CommentsResponse {}
 export interface IAllCommentsResponse extends AllCommentsResponse {}
 
-export interface ICaseUserActionsResponse extends CaseUserActionsResponse {}
+export interface ICaseUserActionsResponse extends UserActions {}
