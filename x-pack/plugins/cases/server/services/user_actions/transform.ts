@@ -65,6 +65,7 @@ export function transformToExternalModel(
       action: userAction.attributes.action,
       created_at: userAction.attributes.created_at,
       created_by: userAction.attributes.created_by,
+      owner: userAction.attributes.owner,
       comment_id: commentId,
       payload,
     } as UserActionTransformedAttributes,
@@ -111,6 +112,7 @@ function legacyTransformToExternalModel(
       action: userAction.attributes.action,
       created_at: userAction.attributes.created_at,
       created_by: userAction.attributes.created_by,
+      owner: userAction.attributes.owner,
       action_id: userAction.id,
       case_id: caseId,
       comment_id: commentId,
@@ -126,7 +128,24 @@ const addReferenceIdToPayload = (
   const connectorId = getConnectorIdFromReferences(userAction);
   const userActionAttributes = userAction.attributes;
 
-  if (isConnectorUserAction(userActionAttributes) || isCreateCaseUserAction(userActionAttributes)) {
+  if (isCreateCaseUserAction(userActionAttributes)) {
+    return {
+      assignees: userActionAttributes.payload.assignees,
+      description: userActionAttributes.payload.description,
+      owner: userActionAttributes.payload.owner,
+      settings: userActionAttributes.payload.settings,
+      severity: userActionAttributes.payload.severity,
+      status: userActionAttributes.payload.status,
+      tags: userActionAttributes.payload.tags,
+      title: userActionAttributes.payload.title,
+      connector: {
+        name: userActionAttributes.payload.connector.name,
+        type: userActionAttributes.payload.connector.type,
+        fields: userActionAttributes.payload.connector.fields,
+        id: connectorId ?? NONE_CONNECTOR_ID,
+      },
+    };
+  } else if (isConnectorUserAction(userActionAttributes)) {
     return {
       connector: {
         name: userActionAttributes.payload.connector.name,
