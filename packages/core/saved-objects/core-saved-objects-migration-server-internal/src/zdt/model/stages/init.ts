@@ -69,7 +69,7 @@ export const init: ModelStage<
 
   logs.push({
     level: 'info',
-    message: `Mappings model version check result: ${versionCheck.status}`,
+    message: `INIT: mapping version check result: ${versionCheck.status}`,
   });
 
   const aliases = Object.keys(indices[currentIndex].aliases);
@@ -116,13 +116,13 @@ export const init: ModelStage<
         ...commonState,
       };
     // app version is lower than the index mapping version.
-    // likely a rollback scenario - unsupported for the initial implementation
+    // either a rollback scenario, or an old node rebooting during the cohabitation period
+    // in that case, we simply no-op the expand phase.
     case 'lesser':
       return {
         ...state,
-        controlState: 'FATAL',
-        reason: 'Downgrading model version is currently unsupported',
-        logs,
+        controlState: 'INDEX_STATE_UPDATE_DONE',
+        ...commonState,
       };
     // conflicts: version for some types are greater, some are lower
     // shouldn't occur in any normal scenario - cannot recover

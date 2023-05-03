@@ -201,7 +201,7 @@ describe('Stage: init', () => {
       const newState = init(state, res, context);
 
       expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `Mappings model version check result: greater`,
+        `INIT: mapping version check result: greater`,
       ]);
     });
   });
@@ -262,13 +262,13 @@ describe('Stage: init', () => {
       const newState = init(state, res, context);
 
       expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `Mappings model version check result: equal`,
+        `INIT: mapping version check result: equal`,
       ]);
     });
   });
 
   describe('when checkVersionCompatibility returns `lesser`', () => {
-    it('INIT -> FATAL', () => {
+    it('INIT -> INDEX_STATE_UPDATE_DONE', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
@@ -281,8 +281,7 @@ describe('Stage: init', () => {
 
       expect(newState).toEqual(
         expect.objectContaining({
-          controlState: 'FATAL',
-          reason: 'Downgrading model version is currently unsupported',
+          controlState: 'INDEX_STATE_UPDATE_DONE',
         })
       );
     });
@@ -298,7 +297,7 @@ describe('Stage: init', () => {
       const newState = init(state, res, context);
 
       expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `Mappings model version check result: lesser`,
+        `INIT: mapping version check result: lesser`,
       ]);
     });
   });
@@ -334,7 +333,7 @@ describe('Stage: init', () => {
       const newState = init(state, res, context);
 
       expect(newState.logs.map((entry) => entry.message)).toEqual([
-        `Mappings model version check result: conflict`,
+        `INIT: mapping version check result: conflict`,
       ]);
     });
   });
