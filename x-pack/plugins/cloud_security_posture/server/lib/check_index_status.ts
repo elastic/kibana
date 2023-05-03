@@ -15,17 +15,18 @@ export const checkIndexStatus = async (
   logger: Logger,
   postureType?: PostureTypes
 ): Promise<IndexStatus> => {
-  const query = !postureType
-    ? undefined
-    : {
-        bool: {
-          filter: {
-            term: {
-              safe_posture_type: postureType,
+  const query =
+    !postureType || postureType === 'all' || postureType === 'vuln_mgmt'
+      ? undefined
+      : {
+          bool: {
+            filter: {
+              term: {
+                safe_posture_type: postureType,
+              },
             },
           },
-        },
-      };
+        };
 
   try {
     const queryResult = await esClient.search({
