@@ -31,8 +31,8 @@ const navItems: NavItemProps[] = [
   },
 ];
 
-export const serverlessSearchSideNavComponentProvider = (core: CoreStart) => () =>
-  (
+export const createServerlessSearchSideNavComponent = (core: CoreStart) => () => {
+  return (
     <NavigationKibanaProvider core={core}>
       <Navigation
         solutions={[
@@ -48,3 +48,4 @@ export const serverlessSearchSideNavComponentProvider = (core: CoreStart) => () 
       />
     </NavigationKibanaProvider>
   );
+};
