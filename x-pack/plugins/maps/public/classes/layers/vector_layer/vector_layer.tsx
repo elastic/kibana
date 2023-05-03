@@ -23,7 +23,6 @@ import {
   LAYER_TYPE,
   FIELD_ORIGIN,
   FieldFormatter,
-  SOURCE_TYPES,
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
@@ -38,11 +37,11 @@ import {
   TimesliceMaskConfig,
 } from '../../util/mb_filter_expressions';
 import {
+  AbstractESJoinSourceDescriptor,
   AggDescriptor,
   CustomIcon,
   DynamicStylePropertyOptions,
   DataFilters,
-  ESTermSourceDescriptor,
   JoinDescriptor,
   StyleMetaDescriptor,
   VectorLayerDescriptor,
@@ -177,27 +176,21 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
     const clonedDescriptor = clones[0] as VectorLayerDescriptor;
     if (clonedDescriptor.joins) {
-      clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
-        if (joinDescriptor.right && joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
-          throw new Error(
-            'Cannot clone table-source. Should only be used in MapEmbeddable, not in UX'
-          );
+      clonedDescriptor.joins.forEach((joinDescriptor: Partial<JoinDescriptor>) => {
+        if (!joinDescriptor.right) {
+          return;
         }
-        const termSourceDescriptor: ESTermSourceDescriptor =
-          joinDescriptor.right as ESTermSourceDescriptor;
-
-        // todo: must tie this to generic thing
-        const originalJoinId = joinDescriptor.right.id!;
+        const joinSourceDescriptor = joinDescriptor.right as Partial<AbstractESJoinSourceDescriptor>;
+        const originalJoinId = joinSourceDescriptor.id ?? '';
 
         // right.id is uuid used to track requests in inspector
-        joinDescriptor.right.id = uuidv4();
+        const clonedJoinId = uuidv4();
+        joinDescriptor.right.id = clonedJoinId;
 
         // Update all data driven styling properties using join fields
         if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
-          const metrics =
-            termSourceDescriptor.metrics && termSourceDescriptor.metrics.length
-              ? termSourceDescriptor.metrics
-              : [{ type: AGG_TYPE.COUNT }];
+          const metrics = joinSourceDescriptor.metrics ??
+            [{ type: AGG_TYPE.COUNT }];
           metrics.forEach((metricsDescriptor: AggDescriptor) => {
             const originalJoinKey = getJoinAggKey({
               aggType: metricsDescriptor.type,
@@ -207,7 +200,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
             const newJoinKey = getJoinAggKey({
               aggType: metricsDescriptor.type,
               aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
-              rightSourceId: joinDescriptor.right.id!,
+              rightSourceId: clonedJoinId,
             });
 
             Object.keys(clonedDescriptor.style.properties).forEach((key) => {
@@ -559,7 +552,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
     const joinRequestMeta = buildVectorRequestMeta(
       joinSource,
-      [join.getLeftField(), ...joinSource.getFieldNames()],
+      [join.getLeftField().getName(), ...joinSource.getFieldNames()],
       dataFilters,
       joinSource.getWhereQuery(),
       isForceRefresh,
@@ -571,7 +564,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       source: joinSource,
       prevDataRequest,
       nextRequestMeta: joinRequestMeta,
-      extentAware: false, // join-sources are term-aggs that are spatially unaware (e.g. ESTermSource/TableSource).
+      extentAware: false, // join-sources are spatially unaware. For spatial joins, spatial constraints are from vector source feature geometry and not map extent geometry
       getUpdateDueToTimeslice: () => {
         return true;
       },

@@ -25,11 +25,11 @@ export function WizardForm({ previewLayers }: RenderWizardArguments) {
   const [rightGeoField, setRightGeoField] = useState<string | undefined>();
 
   function isLeftConfigComplete() {
-    return leftDataView !== undefined && leftGeoField !== undefined;
+    return leftDataView !== undefined && leftDataView.id && leftGeoField !== undefined;
   }
 
   function isRightConfigComplete() {
-    return rightDataView !== undefined && rightGeoField !== undefined;
+    return rightDataView !== undefined && rightDataView.id && rightGeoField !== undefined;
   }
 
   useEffect(() => {
@@ -40,10 +40,10 @@ export function WizardForm({ previewLayers }: RenderWizardArguments) {
 
     const layerDescriptor = createDistanceJoinLayerDescriptor({
       distance,
-      leftDataViewId: leftDataView!.id,
-      leftGeoField: leftGeoField!,
-      rightDataViewId: rightDataView!.id,
-      rightGeoField: rightGeoField!,
+      leftDataViewId: leftDataView!.id!, // leftDataView.id verified in isLeftConfigComplete
+      leftGeoField: leftGeoField!, // leftGeoField verified in isLeftConfigComplete
+      rightDataViewId: rightDataView!.id!, // rightDataView.id verified in isRightConfigComplete
+      rightGeoField: rightGeoField!, // rightGeoField verified in isRightConfigComplete
     });
 
     previewLayers([layerDescriptor]);

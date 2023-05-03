@@ -8,6 +8,8 @@
 import React, { useEffect, useState } from 'react';
 import { EuiCallOut, EuiFormRow, EuiPopoverTitle, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { DataView, DataViewField } from '@kbn/data-plugin/common';
+import type { ESDistanceSourceDescriptor, JoinSourceDescriptor } from '../../../../../../common/descriptor_types';
 import { getIndexPatternService } from '../../../../../kibana_services';
 import { getGeoFields } from '../../../../../index_pattern_util';
 import { GeoIndexPatternSelect } from '../../../../../components/geo_index_pattern_select';

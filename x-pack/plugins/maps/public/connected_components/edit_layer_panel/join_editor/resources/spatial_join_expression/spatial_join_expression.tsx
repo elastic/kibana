@@ -12,12 +12,10 @@ import {
   EuiExpression,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
 import {
   ESDistanceSourceDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';
-import type { JoinField } from '../../join_editor';
 import { SpatialJoinPopoverContent } from './spatial_join_popover_content';
 
 interface Props {

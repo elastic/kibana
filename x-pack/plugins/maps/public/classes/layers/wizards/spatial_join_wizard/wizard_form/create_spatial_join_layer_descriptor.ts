@@ -8,9 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import {
   AGG_TYPE,
-  COLOR_MAP_TYPE,
   FIELD_ORIGIN,
-  LAYER_TYPE,
   SCALING_TYPES,
   SOURCE_TYPES,
   STYLE_TYPE,
@@ -18,16 +16,12 @@ import {
 } from '../../../../../../common/constants';
 import { getJoinAggKey } from '../../../../../../common/get_agg_key';
 import {
-  ColorDynamicOptions,
   CountAggDescriptor,
-  EMSFileSourceDescriptor,
-  ESSearchSourceDescriptor,
   JoinDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../../../common/descriptor_types';
 import { VectorStyle } from '../../../../styles/vector/vector_style';
-import { GeoJsonVectorLayer, MvtVectorLayer } from '../../../vector_layer';
-import { EMSFileSource } from '../../../../sources/ems_file_source';
+import { GeoJsonVectorLayer } from '../../../vector_layer';
 // @ts-ignore
 import { ESSearchSource } from '../../../../sources/es_search_source';
 import { getDefaultDynamicProperties } from '../../../../styles/vector/vector_style_defaults';

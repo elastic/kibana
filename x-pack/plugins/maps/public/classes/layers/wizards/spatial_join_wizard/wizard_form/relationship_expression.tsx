@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,

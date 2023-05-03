@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { GeoIndexPatternSelect } from '../../../../../components/geo_index_pattern_select';
 import { GeoFieldSelect } from '../../../../../components/geo_field_select';
 import { inputStrings } from '../../../../../connected_components/input_strings';
