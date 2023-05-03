@@ -7,8 +7,7 @@
 import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { createApmRule } from '../../alerts/alerting_api_helper';
-import { waitForActiveAlert } from '../../alerts/helpers/wait_for_active_alert';
+import { AlertTestHelper } from '../../alerts/helpers/alert_test_helper';
 import {
   createServiceGroupApi,
   deleteAllServiceGroups,
@@ -22,13 +21,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const synthtraceEsClient = getService('synthtraceEsClient');
   const esClient = getService('es');
-  const log = getService('log');
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
 
+  const alertTestHelper = new AlertTestHelper({ esClient, supertest });
+
   function createRule() {
-    return createApmRule({
-      supertest,
+    return alertTestHelper.createApmRule({
       name: 'Latency threshold | synth-go',
       params: {
         serviceName: 'synth-go',
@@ -84,7 +83,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         const createdRule = await createRule();
         ruleId = createdRule.id;
-        await waitForActiveAlert({ ruleId, esClient, log });
+        await alertTestHelper.waitForActiveAlert({ ruleId });
       });
 
       after(async () => {
