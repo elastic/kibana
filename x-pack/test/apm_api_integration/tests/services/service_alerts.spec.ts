@@ -8,8 +8,7 @@ import expect from '@kbn/expect';
 import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { waitForActiveAlert } from '../../common/utils/wait_for_active_alert';
-import { createApmRule } from '../alerts/alerting_api_helper';
+import { AlertTestHelper } from '../alerts/helpers/alert_test_helper';
 
 export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -17,10 +16,11 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const synthtraceEsClient = getService('synthtraceEsClient');
   const esClient = getService('es');
-  const log = getService('log');
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
   const goService = 'synth-go';
+
+  const alertTestHelper = new AlertTestHelper({ esClient, supertest });
 
   async function getServiceAlerts({
     serviceName,
@@ -43,8 +43,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
   }
 
   function createRule() {
-    return createApmRule({
-      supertest,
+    return alertTestHelper.createApmRule({
       name: `Latency threshold | ${goService}`,
       params: {
         serviceName: goService,
@@ -116,12 +115,12 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
       before(async () => {
         const createdRule = await createRule();
         ruleId = createdRule.id;
-        await waitForActiveAlert({ ruleId, esClient, log });
+        await alertTestHelper.waitForActiveAlert({ ruleId });
       });
 
       after(async () => {
         await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
-        await esClient.deleteByQuery({ index: '.alerts*', query: { match_all: {} } });
+        await alertTestHelper.cleanAll();
       });
 
       it('returns the correct number of alerts', async () => {
