@@ -8,8 +8,9 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { useMemo } from 'react';
-import { HttpFetchQuery } from '@kbn/core/public';
-import { MlSavedObjectType } from '../../../../common/types/saved_objects';
+import type { HttpFetchQuery } from '@kbn/core/public';
+import type { ErrorType } from '@kbn/ml-error-utils';
+import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { HttpService } from '../http_service';
 import { basePath } from '.';
 import { useMlKibana } from '../../contexts/kibana';
@@ -142,19 +143,29 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    stopModelAllocation(deploymentsIds: string[], options: { force: boolean } = { force: false }) {
+    stopModelAllocation(
+      modelId: string,
+      deploymentsIds: string[],
+      options: { force: boolean } = { force: false }
+    ) {
       const force = options?.force;
 
-      return httpService.http<{ acknowledge: boolean }>({
-        path: `${apiBasePath}/trained_models/${deploymentsIds.join(',')}/deployment/_stop`,
+      return httpService.http<Record<string, { acknowledge: boolean; error?: ErrorType }>>({
+        path: `${apiBasePath}/trained_models/${modelId}/${deploymentsIds.join(
+          ','
+        )}/deployment/_stop`,
         method: 'POST',
         query: { force },
       });
     },
 
-    updateModelDeployment(modelId: string, params: { number_of_allocations: number }) {
+    updateModelDeployment(
+      modelId: string,
+      deploymentId: string,
+      params: { number_of_allocations: number }
+    ) {
       return httpService.http<{ acknowledge: boolean }>({
-        path: `${apiBasePath}/trained_models/${modelId}/deployment/_update`,
+        path: `${apiBasePath}/trained_models/${modelId}/${deploymentId}/deployment/_update`,
         method: 'POST',
         body: JSON.stringify(params),
       });
@@ -162,12 +173,13 @@ export function trainedModelsApiProvider(httpService: HttpService) {
 
     inferTrainedModel(
       modelId: string,
+      deploymentsId: string,
       payload: estypes.MlInferTrainedModelRequest['body'],
       timeout?: string
     ) {
       const body = JSON.stringify(payload);
       return httpService.http<estypes.MlInferTrainedModelResponse>({
-        path: `${apiBasePath}/trained_models/infer/${modelId}`,
+        path: `${apiBasePath}/trained_models/infer/${modelId}/${deploymentsId}`,
         method: 'POST',
         body,
         ...(timeout ? { query: { timeout } as HttpFetchQuery } : {}),
