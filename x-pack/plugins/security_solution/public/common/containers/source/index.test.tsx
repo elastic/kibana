@@ -81,7 +81,8 @@ describe('source/index.tsx', () => {
                     ? ['hello', 'world', 'refreshed']
                     : ['hello', 'world'],
                   fields: mocksSource.indexFields,
-                  getIndexPattern: () => 'hello*,world*,refreshed*',
+                  getIndexPattern: () =>
+                    refreshFields ? 'hello*,world*,refreshed*' : 'hello*,world*',
                   getRuntimeMappings: () => ({
                     myfield: {
                       type: 'keyword',

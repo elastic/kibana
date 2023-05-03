@@ -8,6 +8,7 @@
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
 import type { SourcererDataView } from '../../store/sourcerer/model';
+import { getDataViewStateFromIndexFields } from '../source/use_data_view';
 
 export const getSourcererDataView = async (
   dataViewId: string,
@@ -48,7 +49,9 @@ export const getSourcererDataView = async (
     fields: dataViewData.fields,
     patternList,
     dataView: dataViewData,
-    browserFields: {},
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    browserFields: getDataViewStateFromIndexFields(dataViewData.id!, dataViewData.fields)
+      .browserFields,
     runtimeMappings: dataViewData.getRuntimeMappings(),
   };
 };
