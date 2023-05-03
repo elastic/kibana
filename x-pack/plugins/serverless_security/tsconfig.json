@@ -23,5 +23,6 @@
     "@kbn/shared-ux-page-solution-nav",
     "@kbn/security-solution-side-nav",
     "@kbn/kibana-react-plugin",
+    "@kbn/core-chrome-browser",
   ]
 }
