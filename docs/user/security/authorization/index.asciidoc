@@ -80,7 +80,7 @@ image::security/images/create-role-dls-example.png[Create role with DLS index pr
 
 If you have at least a platinum license, you can manage access to indices in remote clusters. 
 
-You can assign the same privileges, document-level, and field-level as for {ref}#adding_index_privileges[local index privileges]. 
+You can assign the same privileges, document-level, and field-level as for <<adding_index_privileges,local index privileges>>. 
 
 [[remote_index_privilege_example_1]]
 ===== Example: Grant access to indices in remote clusters
