@@ -72,7 +72,7 @@ import type {
   CaseUI,
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
-  CaseUserActions,
+  UserActionUI,
 } from './types';
 
 import {
@@ -186,7 +186,7 @@ export const findCaseUserActions = async (
     ...response,
     userActions: convertUserActionsToCamelCase(
       decodeCaseUserActionsResponse(response.userActions)
-    ) as CaseUserActions[],
+    ) as UserActionUI[],
   };
 };
 
