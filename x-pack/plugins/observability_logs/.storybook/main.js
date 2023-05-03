@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { ObservabilityLogsPlugin } from './plugin';
+const defaultConfig = require('@kbn/storybook').defaultConfig;
 
-export function plugin() {
-  return new ObservabilityLogsPlugin();
-}
-
-export type { ObservabilityLogsPluginSetup, ObservabilityLogsPluginStart } from './types';
+module.exports = {
+  ...defaultConfig,
+  stories: ['../**/*.stories.mdx', ...defaultConfig.stories],
+};

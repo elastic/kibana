@@ -4,11 +4,11 @@
   "owner": "@elastic/infra-monitoring-ui",
   "description": "This plugin exposes and registers Logs+ features.",
   "plugin": {
-    "id": "infra",
+    "id": "observabilityLogs",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "obeservability_logs"],
-    "requiredPlugins": [],
+    "configPath": ["xpack", "observability_logs"],
+    "requiredPlugins": ["discover"],
     "optionalPlugins": [],
     "requiredBundles": []
   }

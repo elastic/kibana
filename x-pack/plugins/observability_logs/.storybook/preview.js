@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ObservabilityLogsPlugin } from './plugin';
-
-export function plugin() {
-  return new ObservabilityLogsPlugin();
-}
-
-export type { ObservabilityLogsPluginSetup, ObservabilityLogsPluginStart } from './types';
+export const parameters = {
+  docs: {
+    source: {
+      type: 'code', // without this, stories in mdx documents freeze the browser
+    },
+  },
+};

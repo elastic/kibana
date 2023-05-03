@@ -4,5 +4,9 @@
     "outDir": "target/types"
   },
   "include": ["../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/discover-plugin",
+  ],
   "exclude": ["target/**/*"]
 }
