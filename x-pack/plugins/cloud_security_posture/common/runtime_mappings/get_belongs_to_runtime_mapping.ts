@@ -23,7 +23,7 @@ export const getBelongsToRuntimeMapping = (): MappingRuntimeFields => ({
 
         if (!postureTypeAvailable) {
           def belongs_to = orchestratorIdAvailable ?
-            doc["orchestrator.cluster.id"].empty : doc["cluster_id"].value;
+            doc["orchestrator.cluster.id"].value : doc["cluster_id"].value;
           emit(belongs_to);
         } else {
           def policy_template_type = doc["rule.benchmark.posture_type"].value;
@@ -33,12 +33,12 @@ export const getBelongsToRuntimeMapping = (): MappingRuntimeFields => ({
             emit(belongs_to);
           } else if (policy_template_type == "kspm") {
             def belongs_to = orchestratorIdAvailable ?
-              doc["orchestrator.cluster.id"].empty : doc["cluster_id"].value;
+              doc["orchestrator.cluster.id"].value : doc["cluster_id"].value;
             emit(belongs_to);
           } else {
             // Default behaviour when policy_template_type is unknown
             def belongs_to = orchestratorIdAvailable ?
-              doc["orchestrator.cluster.id"].empty : doc["cluster_id"].value;
+              doc["orchestrator.cluster.id"].value : doc["cluster_id"].value;
             emit(belongs_to);
           }
         }

@@ -23,7 +23,7 @@ export const getIdentifierRuntimeMapping = (): MappingRuntimeFields => ({
 
         if (!postureTypeAvailable) {
           def identifier = orchestratorIdAvailable ?
-            doc["orchestrator.cluster.id"].empty : doc["cluster_id"].value;
+            doc["orchestrator.cluster.id"].value : doc["cluster_id"].value;
           emit(identifier);
         } else {
           def policy_template_type = doc["rule.benchmark.posture_type"].value;
@@ -32,12 +32,12 @@ export const getIdentifierRuntimeMapping = (): MappingRuntimeFields => ({
             emit(doc["cloud.account.id"].value);
           } else if (policy_template_type == "kspm") {
             def identifier = orchestratorIdAvailable ?
-              doc["orchestrator.cluster.id"].empty : doc["cluster_id"].value;
+              doc["orchestrator.cluster.id"].value : doc["cluster_id"].value;
             emit(identifier);
           } else {
             // Default behaviour when policy_template_type is unknown
             def identifier = orchestratorIdAvailable ?
-              doc["orchestrator.cluster.id"].empty : doc["cluster_id"].value;
+              doc["orchestrator.cluster.id"].value : doc["cluster_id"].value;
             emit(identifier);
           }
         }
