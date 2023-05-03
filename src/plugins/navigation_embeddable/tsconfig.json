@@ -7,11 +7,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/embeddable-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/i18n-react",
     "@kbn/i18n",
-    "@kbn/core-http-browser",
   ],
   "exclude": [
     "target/**/*",
