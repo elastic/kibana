@@ -4637,6 +4637,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-logs-plugin@link:x-pack/plugins/observability_logs":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-plugin@link:x-pack/plugins/observability":
   version "0.0.0"
   uid ""
