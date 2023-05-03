@@ -87,7 +87,6 @@ kibana_vars=(
     i18n.locale
     interactiveSetup.enabled
     interactiveSetup.connectionCheck.interval
-    interpreter.enableInVisualize
     kibana.autocompleteTerminateAfter
     kibana.autocompleteTimeout
     kibana.index
