@@ -28,7 +28,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { PLUGIN_ID, SHOW_LEGACY_FIELD_TOP_VALUES } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
 import { type DataDocuments$ } from '../../services/discover_data_state_container';
-import { useDiscoverExtension } from '../../../../extensions/extension_provider';
+import { useDiscoverCustomization } from '../../../../customizations/customization_provider';
 
 interface GetCommonFieldItemButtonPropsParams {
   field: DataViewField;
@@ -272,7 +272,7 @@ function DiscoverFieldComponent({
     [field.name]
   );
 
-  const fieldPopoverExtension = useDiscoverExtension('field_popover');
+  const fieldPopoverCustomization = useDiscoverCustomization('field_popover');
 
   const renderPopover = () => {
     const showLegacyFieldStats = services.uiSettings.get(SHOW_LEGACY_FIELD_TOP_VALUES);
@@ -310,11 +310,11 @@ function DiscoverFieldComponent({
           </>
         )}
 
-        {(!fieldPopoverExtension?.disableDefaultBottomButton ||
-          fieldPopoverExtension.CustomBottomButton) && (
+        {(!fieldPopoverCustomization?.disableDefaultBottomButton ||
+          fieldPopoverCustomization.CustomBottomButton) && (
           <EuiPopoverFooter>
             <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
-              {!fieldPopoverExtension?.disableDefaultBottomButton && (
+              {!fieldPopoverCustomization?.disableDefaultBottomButton && (
                 <EuiFlexItem>
                   <FieldVisualizeButton
                     field={field}
@@ -328,9 +328,9 @@ function DiscoverFieldComponent({
                 </EuiFlexItem>
               )}
 
-              {fieldPopoverExtension?.CustomBottomButton && (
+              {fieldPopoverCustomization?.CustomBottomButton && (
                 <EuiFlexItem>
-                  <fieldPopoverExtension.CustomBottomButton />
+                  <fieldPopoverCustomization.CustomBottomButton />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

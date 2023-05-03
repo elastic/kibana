@@ -29,8 +29,8 @@ export class DiscoverExtenderPlugin implements Plugin {
   start(core: CoreStart, plugins: DiscoverExtenderStartPlugins) {
     const { discover } = plugins;
 
-    discover.registerExtensions('default', ({ extensions }) => {
-      extensions.set({
+    discover.customize('default', ({ customizations }) => {
+      customizations.set({
         id: 'top_nav',
         defaultMenu: {
           options: { order: 100 },
@@ -58,7 +58,7 @@ export class DiscoverExtenderPlugin implements Plugin {
 
       return () => {
         // eslint-disable-next-line no-console
-        console.log('Cleaning up Document explorer extensions');
+        console.log('Cleaning up Document explorer customizations');
       };
     });
 
@@ -70,8 +70,8 @@ export class DiscoverExtenderPlugin implements Plugin {
       isOptionsOpen = false;
     };
 
-    discover.registerExtensions('extender', async ({ extensions, stateContainer }) => {
-      extensions.set({
+    discover.customize('extender', async ({ customizations, stateContainer }) => {
+      customizations.set({
         id: 'top_nav',
         defaultMenu: {
           options: { disabled: true },
@@ -154,7 +154,7 @@ export class DiscoverExtenderPlugin implements Plugin {
         ],
       });
 
-      extensions.set({
+      customizations.set({
         id: 'search_bar',
         CustomDataViewPicker: () => {
           const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -204,7 +204,7 @@ export class DiscoverExtenderPlugin implements Plugin {
         },
       });
 
-      extensions.set({
+      customizations.set({
         id: 'field_popover',
         CustomBottomButton: () => (
           <EuiButton
@@ -220,7 +220,7 @@ export class DiscoverExtenderPlugin implements Plugin {
 
       const { MoreMenuCell } = await import('./more_menu_cell');
 
-      extensions.set({
+      customizations.set({
         id: 'data_grid',
         defaultLeadingControlColumns: {
           select: { disabled: true },
@@ -241,7 +241,7 @@ export class DiscoverExtenderPlugin implements Plugin {
 
       return () => {
         // eslint-disable-next-line no-console
-        console.log('Cleaning up Logs explorer extensions');
+        console.log('Cleaning up Logs explorer customizations');
       };
     });
   }

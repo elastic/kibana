@@ -8,7 +8,7 @@
 
 import type { ComponentType } from 'react';
 
-export interface SearchBarExtension {
+export interface SearchBarCustomization {
   id: 'search_bar';
   CustomDataViewPicker?: ComponentType;
 }

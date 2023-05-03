@@ -41,7 +41,7 @@ import { DataTableRecord } from '../../../../types';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
 import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
-import { useDiscoverExtension } from '../../../../extensions/extension_provider';
+import { useDiscoverCustomization } from '../../../../customizations/customization_provider';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -168,8 +168,8 @@ function DiscoverDocumentsComponent({
     [isPlainRecord, uiSettings, dataView.timeFieldName]
   );
 
-  const dataGridExtension = useDiscoverExtension('data_grid');
-  const defaultControlColumns = dataGridExtension?.defaultLeadingControlColumns;
+  const dataGridCustomization = useDiscoverCustomization('data_grid');
+  const defaultControlColumns = dataGridCustomization?.defaultLeadingControlColumns;
 
   const controlColumnIds = useMemo(() => {
     const ids: string[] = [];
@@ -179,8 +179,8 @@ function DiscoverDocumentsComponent({
   }, [defaultControlColumns?.expand?.disabled, defaultControlColumns?.select?.disabled]);
 
   const customControlColumns = useMemo(
-    () => dataGridExtension?.getLeadingControlColumns?.(),
-    [dataGridExtension]
+    () => dataGridCustomization?.getLeadingControlColumns?.(),
+    [dataGridCustomization]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {

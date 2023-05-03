@@ -28,7 +28,7 @@ export interface TopNavMenuItem {
   order: number;
 }
 
-export interface TopNavExtension {
+export interface TopNavCustomization {
   id: 'top_nav';
   defaultMenu?: TopNavDefaultMenu;
   getMenuItems?: () => TopNavMenuItem[];
