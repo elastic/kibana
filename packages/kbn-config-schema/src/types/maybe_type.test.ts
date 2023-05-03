@@ -100,7 +100,7 @@ describe('#extendsDeep', () => {
   const type = schema.maybe(schema.object({ foo: schema.string() }));
 
   test('objects with unknown attributes are kept when extending with unknowns=allow', () => {
-    const allowSchema = type.extendsDeep({ unknowns: 'allow' })
+    const allowSchema = type.extendsDeep({ unknowns: 'allow' });
     const result = allowSchema.validate({ foo: 'test', bar: 'test' });
     expect(result).toEqual({ foo: 'test', bar: 'test' });
   });
