@@ -50,10 +50,10 @@ type BuilderArgs<C, R> = Pick<
 /**
  * Provides a render function for attachment type
  */
-const getAttachmentRenderer = memoize((attachmentViewObject: AttachmentViewObject) => {
+const getAttachmentRenderer = memoize(() => {
   let AttachmentElement: React.ReactElement;
 
-  const renderCallback = (props: object) => {
+  const renderCallback = (attachmentViewObject: AttachmentViewObject, props: object) => {
     if (!attachmentViewObject.children) return;
 
     if (!AttachmentElement) {
@@ -120,7 +120,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
 
     const attachmentViewObject = attachmentType.getAttachmentViewObject(props);
 
-    const renderer = getAttachmentRenderer(attachmentViewObject);
+    const renderer = getAttachmentRenderer();
     const actions = attachmentViewObject.getActions?.(props) ?? [];
     const [primaryActions, nonPrimaryActions] = partition(actions, 'isPrimary');
     const visiblePrimaryActions = primaryActions.slice(0, 2);
@@ -164,7 +164,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
             />
           </UserActionContentToolbar>
         ),
-        children: renderer(props),
+        children: renderer(attachmentViewObject, props),
       },
     ];
   },
