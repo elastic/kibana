@@ -19,7 +19,7 @@ import { registerDiagnoseScreenshot } from '../screenshot';
 import { defer } from 'rxjs';
 import { generatePngObservable } from '../../../../../reporting_export_types/server';
 
-jest.mock('../../../export_types/common/generate_png');
+jest.mock('@kbn/reporting-export-types/server/export_types/common/generate_png');
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
