@@ -155,6 +155,7 @@ export const BrowserStepsList = ({
           allStepsLoaded={!loading}
           retryFetchOnRevisit={true}
           size={screenshotImageSize}
+          testNowMode={testNowMode}
           timestamp={timestamp}
         />
       ),
@@ -305,6 +306,7 @@ const StyleForStepStatus = ({
     <EuiText
       css={{
         fontWeight: euiTheme.font.weight.bold,
+        whiteSpace: 'nowrap',
       }}
       size={textSize}
       color={euiTheme.colors[getTextColorForMonitorStatus(status)] as CSSProperties['color']}

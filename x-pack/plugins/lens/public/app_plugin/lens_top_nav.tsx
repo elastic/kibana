@@ -37,7 +37,7 @@ import {
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
 import { LensByReferenceInput } from '../embeddable';
-import { getShareURL } from './share_action';
+import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getShareURL } from './share_action';
 
 function getSaveButtonMeta({
   contextFromEmbeddable,
@@ -578,6 +578,10 @@ export const LensTopNavMenu = ({
               return;
             }
 
+            if (visualization.activeId == null || !visualizationMap[visualization.activeId]) {
+              return;
+            }
+
             const {
               shareableUrl,
               savedObjectURL,
@@ -607,6 +611,12 @@ export const LensTopNavMenu = ({
               locatorParams: {
                 id: LENS_APP_LOCATOR,
                 params: locatorParams,
+              },
+              layout: {
+                dimensions:
+                  visualizationMap[visualization.activeId].getReportingLayout?.(
+                    visualization.state
+                  ) ?? DEFAULT_LENS_LAYOUT_DIMENSIONS,
               },
             };
 
@@ -660,6 +670,7 @@ export const LensTopNavMenu = ({
                   isTitleDuplicateConfirmed: false,
                   returnToOrigin: true,
                   newDescription: contextFromEmbeddable ? initialContext.description : '',
+                  panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
                 },
                 {
                   saveToLibrary:

@@ -9,6 +9,8 @@ import { kea, MakeLogicType } from 'kea';
 
 import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
+
 import {
   FieldMapping,
   formatPipelineName,
@@ -64,6 +66,7 @@ import {
   sortModels,
   sortSourceFields,
 } from '../../../shared/ml_inference/utils';
+import { PipelinesLogic } from '../pipelines_logic';
 
 import {
   AddInferencePipelineFormErrors,
@@ -82,6 +85,10 @@ export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
   modelID: '',
   pipelineName: '',
   sourceField: '',
+};
+
+const isNotTextExpansionModel = (model: MLInferencePipelineOption): boolean => {
+  return model.modelType !== SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
 };
 
 const API_REQUEST_COMPLETE_STATUSES = [Status.SUCCESS, Status.ERROR];
@@ -221,6 +228,8 @@ export const MLInferenceLogic = kea<
         'apiSuccess as attachApiSuccess',
         'makeRequest as makeAttachPipelineRequest',
       ],
+      PipelinesLogic,
+      ['closeAddMlInferencePipelineModal as closeAddMlInferencePipelineModal'],
     ],
     values: [
       CachedFetchIndexApiLogic,
@@ -257,11 +266,12 @@ export const MLInferenceLogic = kea<
         mlInferencePipeline, // Full pipeline definition
       } = values;
       actions.makeCreatePipelineRequest(
-        isTextExpansionModelSelected && mlInferencePipeline
+        isTextExpansionModelSelected && mlInferencePipeline && configuration.fieldMappings
           ? {
               indexName,
-              pipelineName: configuration.pipelineName,
+              fieldMappings: configuration.fieldMappings,
               pipelineDefinition: mlInferencePipeline,
+              pipelineName: configuration.pipelineName,
             }
           : {
               destinationField:
@@ -341,6 +351,20 @@ export const MLInferenceLogic = kea<
             selectedSourceFields: [],
           };
         },
+        closeAddMlInferencePipelineModal: () => ({
+          configuration: {
+            ...EMPTY_PIPELINE_CONFIGURATION,
+          },
+          indexName: '',
+          step: AddInferencePipelineSteps.Configuration,
+        }),
+        createApiSuccess: () => ({
+          configuration: {
+            ...EMPTY_PIPELINE_CONFIGURATION,
+          },
+          indexName: '',
+          step: AddInferencePipelineSteps.Configuration,
+        }),
         removeFieldFromMapping: (modal, { fieldName }) => {
           const {
             configuration: { fieldMappings },
@@ -536,7 +560,9 @@ export const MLInferenceLogic = kea<
               sourceField,
             };
           })
-          .filter((p): p is MLInferencePipelineOption => p !== undefined);
+          .filter(
+            (p): p is MLInferencePipelineOption => p !== undefined && isNotTextExpansionModel(p)
+          );
 
         return existingPipelines;
       },

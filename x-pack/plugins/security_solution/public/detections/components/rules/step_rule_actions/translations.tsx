@@ -29,18 +29,17 @@ export const NO_ACTIONS_READ_PERMISSIONS = i18n.translate(
   }
 );
 
-export const THROTTLE_FIELD_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.fieldThrottleHelpText',
+export const RULE_SNOOZE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.snoozeDescription',
   {
     defaultMessage:
       'Select when automated actions should be performed if a rule evaluates as true.',
   }
 );
 
-export const THROTTLE_FIELD_HELP_TEXT_WHEN_QUERY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.fieldThrottleHelpTextWhenQuery',
+export const SNOOZED_ACTIONS_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.snoozedActionsWarning',
   {
-    defaultMessage:
-      'Select when automated actions should be performed if a rule evaluates as true. This frequency does not apply to Response Actions.',
+    defaultMessage: 'Actions will not be performed until it is unsnoozed.',
   }
 );

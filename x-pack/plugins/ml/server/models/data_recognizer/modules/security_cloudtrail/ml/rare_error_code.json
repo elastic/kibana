@@ -1,23 +1,17 @@
 {
   "description": "Security: Cloudtrail - Looks for unusual errors. Rare and unusual errors may simply indicate an impending service failure but they can also be byproducts of attempted or successful persistence, privilege escalation, defense evasion, discovery, lateral movement, or collection activity by a threat actor.",
-  "groups": [
-    "security",
-    "cloudtrail"
-  ],
+  "groups": ["security", "cloudtrail"],
   "analysis_config": {
     "bucket_span": "60m",
     "detectors": [
       {
-        "detector_description": "rare by \"aws.cloudtrail.error_code\"",
+        "detector_description": "Detects rare Cloudtrail error codes.",
         "function": "rare",
-        "by_field_name": "aws.cloudtrail.error_code"
+        "by_field_name": "aws.cloudtrail.error_code",
+        "detector_index": 0
       }
     ],
-    "influencers": [
-      "aws.cloudtrail.user_identity.arn",
-      "source.ip",
-      "source.geo.city_name"
-    ]
+    "influencers": ["aws.cloudtrail.user_identity.arn", "source.ip", "source.geo.city_name"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -28,6 +22,8 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-cloudtrail",
-    "security_app_display_name": "Rare AWS Error Code"
+    "security_app_display_name": "Rare AWS Error Code",
+    "managed": true,
+    "job_revision": 4
   }
 }

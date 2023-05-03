@@ -20,6 +20,7 @@ export const NO_FINDINGS_STATUS_TEST_SUBJ = {
   NO_FINDINGS: 'no-findings-found',
 };
 
+export const EMPTY_STATE_TEST_SUBJ = 'csp:empty-state';
 export const NO_VULNERABILITIES_STATUS_TEST_SUBJ = {
   SCANNING_VULNERABILITIES: 'scanning-vulnerabilities-empty-prompt',
   UNPRIVILEGED: 'status-api-vuln-mgmt-unprivileged',

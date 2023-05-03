@@ -25,10 +25,6 @@ describe('delete', () => {
       it('delete alerts correctly', async () => {
         await deleteComment({ caseID: 'mock-id-4', attachmentID: 'mock-comment-4' }, clientArgs);
 
-        expect(clientArgs.services.alertsService.ensureAlertsAuthorized).toHaveBeenCalledWith({
-          alerts: [{ id: 'test-id', index: 'test-index' }],
-        });
-
         expect(clientArgs.services.alertsService.removeCaseIdFromAlerts).toHaveBeenCalledWith({
           alerts: [{ id: 'test-id', index: 'test-index' }],
           caseId: 'mock-id-4',
@@ -39,7 +35,6 @@ describe('delete', () => {
         clientArgs.services.attachmentService.getter.get.mockResolvedValue(commentSO);
         await deleteComment({ caseID: 'mock-id-1', attachmentID: 'mock-comment-1' }, clientArgs);
 
-        expect(clientArgs.services.alertsService.ensureAlertsAuthorized).not.toHaveBeenCalledWith();
         expect(clientArgs.services.alertsService.removeCaseIdFromAlerts).not.toHaveBeenCalledWith();
       });
     });
@@ -65,14 +60,6 @@ describe('delete', () => {
 
       it('delete alerts correctly', async () => {
         await deleteAll({ caseID: 'mock-id-4' }, clientArgs);
-
-        expect(clientArgs.services.alertsService.ensureAlertsAuthorized).toHaveBeenCalledWith({
-          alerts: [
-            { id: 'test-id', index: 'test-index' },
-            { id: 'test-id-2', index: 'test-index-2' },
-            { id: 'test-id-3', index: 'test-index-3' },
-          ],
-        });
 
         expect(clientArgs.services.alertsService.removeCaseIdFromAlerts).toHaveBeenCalledWith({
           alerts: [

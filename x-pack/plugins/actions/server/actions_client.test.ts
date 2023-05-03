@@ -92,7 +92,7 @@ jest.mock('uuid', () => ({
   v4: () => 'uuidv4',
 }));
 
-const defaultKibanaIndex = '.kibana';
+const kibanaIndices = ['.kibana'];
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
@@ -141,7 +141,7 @@ beforeEach(() => {
     actionTypeRegistry,
     unsecuredSavedObjectsClient,
     scopedClusterClient,
-    defaultKibanaIndex,
+    kibanaIndices,
     preconfiguredActions: [],
     actionExecutor,
     executionEnqueuer,
@@ -580,6 +580,7 @@ describe('create()', () => {
         verificationMode: 'full',
         proxyVerificationMode: 'full',
       },
+      enableFooterInEmail: true,
     });
 
     const localActionTypeRegistryParams = {
@@ -600,7 +601,7 @@ describe('create()', () => {
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
-      defaultKibanaIndex,
+      kibanaIndices,
       preconfiguredActions: [],
       actionExecutor,
       executionEnqueuer,
@@ -690,6 +691,70 @@ describe('create()', () => {
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });
+
+  test('throws error when predefined id match a pre-configure action id', async () => {
+    const preDefinedId = 'mySuperRadTestPreconfiguredId';
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      validate: {
+        config: { schema: schema.object({}) },
+        secrets: { schema: schema.object({}) },
+        params: { schema: schema.object({}) },
+      },
+      executor,
+    });
+
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      preconfiguredActions: [
+        {
+          id: preDefinedId,
+          actionTypeId: 'my-action-type',
+          secrets: {
+            test: 'test1',
+          },
+          isPreconfigured: true,
+          isDeprecated: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    await expect(
+      actionsClient.create({
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-action-type',
+          config: {},
+          secrets: {},
+        },
+        options: {
+          id: preDefinedId,
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"This mySuperRadTestPreconfiguredId already exist in preconfigured action."`
+    );
+  });
 });
 
 describe('get()', () => {
@@ -718,7 +783,7 @@ describe('get()', () => {
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
-        defaultKibanaIndex,
+        kibanaIndices,
         actionExecutor,
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
@@ -779,7 +844,7 @@ describe('get()', () => {
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
-        defaultKibanaIndex,
+        kibanaIndices,
         actionExecutor,
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
@@ -902,7 +967,7 @@ describe('get()', () => {
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
-      defaultKibanaIndex,
+      kibanaIndices,
       actionExecutor,
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
@@ -978,7 +1043,7 @@ describe('getAll()', () => {
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
-        defaultKibanaIndex,
+        kibanaIndices,
         actionExecutor,
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
@@ -1121,7 +1186,7 @@ describe('getAll()', () => {
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
-      defaultKibanaIndex,
+      kibanaIndices,
       actionExecutor,
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
@@ -1204,7 +1269,7 @@ describe('getBulk()', () => {
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
-        defaultKibanaIndex,
+        kibanaIndices,
         actionExecutor,
         executionEnqueuer,
         ephemeralExecutionEnqueuer,
@@ -1341,7 +1406,7 @@ describe('getBulk()', () => {
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
-      defaultKibanaIndex,
+      kibanaIndices,
       actionExecutor,
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
@@ -1401,7 +1466,7 @@ describe('getOAuthAccessToken()', () => {
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
-      defaultKibanaIndex,
+      kibanaIndices,
       actionExecutor,
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
@@ -2622,7 +2687,7 @@ describe('isPreconfigured()', () => {
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
-      defaultKibanaIndex,
+      kibanaIndices,
       actionExecutor,
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
@@ -2661,7 +2726,7 @@ describe('isPreconfigured()', () => {
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
-      defaultKibanaIndex,
+      kibanaIndices,
       actionExecutor,
       executionEnqueuer,
       ephemeralExecutionEnqueuer,

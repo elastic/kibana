@@ -62,7 +62,7 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
 );
 
 const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
-  const { queryError, query, pageSize, setTableOptions, urlQuery, setUrlQuery } =
+  const { queryError, query, pageSize, setTableOptions, urlQuery, setUrlQuery, onResetFilters } =
     useCloudPostureTable({
       dataView,
       defaultQuery: getDefaultQuery,
@@ -141,6 +141,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
           <FindingsByResourceTable
             loading={findingsGroupByResource.isFetching}
             items={slicedPage}
+            onResetFilters={onResetFilters}
             pagination={getPaginationTableParams({
               pageSize,
               pageIndex: urlQuery.pageIndex,

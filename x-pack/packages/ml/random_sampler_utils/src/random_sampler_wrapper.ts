@@ -40,7 +40,7 @@ type RandomSamplerOptions = RandomSamplerOptionProbability | RandomSamplerOption
  * @returns {boolean}
  */
 export function isValidProbability(p: unknown): p is number {
-  return typeof p === 'number' && p > 0 && p < 0.5;
+  return typeof p === 'number' && p > 0 && p <= 0.5;
 }
 
 /**

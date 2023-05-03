@@ -51,6 +51,8 @@
     "@kbn/core-doc-links-server-mocks",
     "@kbn/doc-links",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-ui-settings-common",
+    "@kbn/core-capabilities-common",
   ],
   "exclude": [
     "target/**/*",

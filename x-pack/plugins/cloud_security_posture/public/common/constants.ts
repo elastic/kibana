@@ -213,3 +213,4 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
     ],
   },
 };
+export const FINDINGS_DOCS_URL = 'https://ela.st/findings';

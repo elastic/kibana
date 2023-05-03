@@ -8,7 +8,10 @@
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../../lib';
 import { verifyAccessAndContext, rewriteMaintenanceWindowRes } from '../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../types';
+import {
+  AlertingRequestHandlerContext,
+  INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
+} from '../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../common';
 
 export const findMaintenanceWindowsRoute = (
@@ -17,7 +20,7 @@ export const findMaintenanceWindowsRoute = (
 ) => {
   router.get(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/_find`,
+      path: `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/_find`,
       validate: {},
       options: {
         tags: [`access:${MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW}`],
@@ -25,6 +28,8 @@ export const findMaintenanceWindowsRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
+        licenseState.ensureLicenseForMaintenanceWindow();
+
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
         const result = await maintenanceWindowClient.find();
 

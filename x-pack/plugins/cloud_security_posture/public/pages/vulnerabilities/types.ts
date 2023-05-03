@@ -20,48 +20,7 @@ export interface VulnerabilityRecord {
     sequence: number;
     outcome: string;
   };
-  vulnerability: {
-    score: {
-      version: string;
-      impact: number;
-      base: number;
-    };
-    cwe: string[];
-    id: string;
-    title: string;
-    reference: string;
-    severity: string;
-    cvss: {
-      nvd: {
-        V3Vector: string;
-        V3Score: number;
-      };
-      redhat?: {
-        V3Vector: string;
-        V3Score: number;
-      };
-      ghsa?: {
-        V3Vector: string;
-        V3Score: number;
-      };
-    };
-    data_source: {
-      ID: string;
-      Name: string;
-      URL: string;
-    };
-    enumeration: string;
-    description: string;
-    classification: string;
-    scanner: {
-      vendor: string;
-    };
-    package: {
-      version: string;
-      name: string;
-      fixed_version: string;
-    };
-  };
+  vulnerability: Vulnerability;
   ecs: {
     version: string;
   };
@@ -115,4 +74,58 @@ export interface VulnerabilityRecord {
     commit_sha: string;
     commit_time: string;
   };
+}
+
+export interface Vulnerability {
+  published_date: string;
+  score: {
+    version: string;
+    base: number;
+  };
+  cwe: string[];
+  id: string;
+  title: string;
+  reference: string;
+  severity: string;
+  cvss: {
+    nvd: VectorScoreBase;
+    redhat?: VectorScoreBase;
+    ghsa?: VectorScoreBase;
+  };
+  data_source: {
+    ID: string;
+    Name: string;
+    URL: string;
+  };
+  enumeration: string;
+  description: string;
+  classification: string;
+  scanner: {
+    vendor: string;
+  };
+  package: {
+    version: string;
+    name: string;
+    fixed_version?: string;
+  };
+}
+
+export interface VectorScoreBase {
+  V3Score?: number;
+  V3Vector?: string;
+  V2Score?: number;
+  V2Vector?: string;
+}
+
+export type Vendor = 'NVD' | 'Red Hat' | 'GHSA';
+
+export interface CVSScoreProps {
+  vectorBaseScore: VectorScoreBase;
+  vendor: string;
+}
+
+export interface Vector {
+  version: string;
+  vector: string;
+  score: number | undefined;
 }

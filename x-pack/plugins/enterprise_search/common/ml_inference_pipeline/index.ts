@@ -29,6 +29,8 @@ import {
 
 export const TEXT_EXPANSION_TYPE = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
 export const TEXT_EXPANSION_FRIENDLY_TYPE = 'ELSER';
+export const ML_INFERENCE_PREFIX = 'ml.inference.';
+export const ELSER_MODEL_ID = '.elser_model_1_SNAPSHOT';
 
 export interface MlInferencePipelineParams {
   description?: string;
@@ -224,7 +226,9 @@ export const parseMlInferenceParametersFromPipeline = (
     return null;
   }
   return {
-    destination_field: inferenceProcessor.target_field?.replace('ml.inference.', ''),
+    destination_field: inferenceProcessor.target_field
+      ? stripMlInferencePrefix(inferenceProcessor.target_field)
+      : inferenceProcessor.target_field,
     model_id: inferenceProcessor.model_id,
     pipeline_name: name,
     source_field: sourceField,
@@ -258,4 +262,10 @@ export const parseModelStateFromStats = (
 export const parseModelStateReasonFromStats = (trainedModelStats?: Partial<MlTrainedModelStats>) =>
   trainedModelStats?.deployment_stats?.reason;
 
-export const getMlInferencePrefixedFieldName = (fieldName: string) => `ml.inference.${fieldName}`;
+export const getMlInferencePrefixedFieldName = (fieldName: string) =>
+  fieldName.startsWith(ML_INFERENCE_PREFIX) ? fieldName : `${ML_INFERENCE_PREFIX}${fieldName}`;
+
+const stripMlInferencePrefix = (fieldName: string) =>
+  fieldName.startsWith(ML_INFERENCE_PREFIX)
+    ? fieldName.replace(ML_INFERENCE_PREFIX, '')
+    : fieldName;

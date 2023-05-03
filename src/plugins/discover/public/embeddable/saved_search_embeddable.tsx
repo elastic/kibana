@@ -37,7 +37,6 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { VIEW_MODE } from '../../common/constants';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
-import { RecordRawType } from '../application/main/services/discover_data_state_container';
 import { buildDataTableRecord } from '../utils/build_data_record';
 import { DataTableRecord, EsHitRecord } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
@@ -59,7 +58,8 @@ import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DocTableProps } from '../components/doc_table/doc_table_wrapper';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
-import { getRawRecordType } from '../application/main/utils/get_raw_record_type';
+import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
+import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { fetchSql } from '../application/main/utils/fetch_sql';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 
@@ -169,6 +169,11 @@ export class SavedSearchEmbeddable
     return true;
   }
 
+  private isTextBasedSearch = (savedSearch: SavedSearch): boolean => {
+    const query = savedSearch.searchSource.getField('query');
+    return isTextBasedQuery(query);
+  };
+
   private fetch = async () => {
     const searchSessionId = this.input.searchSessionId;
     const useNewFieldsApi = !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
@@ -198,12 +203,19 @@ export class SavedSearchEmbeddable
 
     this.searchProps!.isLoading = true;
 
+    const wasAlreadyRendered = this.getOutput().rendered;
+
     this.updateOutput({
       ...this.getOutput(),
       loading: true,
       rendered: false,
       error: undefined,
     });
+
+    if (wasAlreadyRendered && this.node) {
+      // to show a loading indicator during a refetch, we need to rerender here
+      this.render(this.node);
+    }
 
     const parentContext = this.input.executionContext;
     const child: KibanaExecutionContext = {
@@ -222,8 +234,7 @@ export class SavedSearchEmbeddable
 
     const query = this.savedSearch.searchSource.getField('query');
     const dataView = this.savedSearch.searchSource.getField('index')!;
-    const recordRawType = getRawRecordType(query);
-    const useSql = recordRawType === RecordRawType.PLAIN;
+    const useSql = this.isTextBasedSearch(this.savedSearch);
 
     try {
       // Request SQL data
@@ -508,9 +519,14 @@ export class SavedSearchEmbeddable
       return;
     }
 
+    const viewMode = getValidViewMode({
+      viewMode: this.savedSearch.viewMode,
+      isTextBasedQueryMode: this.isTextBasedSearch(this.savedSearch),
+    });
+
     if (
       this.services.uiSettings.get(SHOW_FIELD_STATISTICS) === true &&
-      this.savedSearch.viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
+      viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
       searchProps.services &&
       searchProps.dataView &&
       Array.isArray(searchProps.columns)

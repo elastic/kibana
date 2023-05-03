@@ -36,6 +36,17 @@ export const useCloudPostureTable = ({
     [setUrlQuery, setPageSize]
   );
 
+  const onResetFilters = useCallback(() => {
+    setUrlQuery({
+      pageIndex: 0,
+      filters: [],
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+    });
+  }, [setUrlQuery]);
+
   const onChangePage = useCallback(
     (newPageIndex) => {
       setUrlQuery({
@@ -96,5 +107,6 @@ export const useCloudPostureTable = ({
     onChangeItemsPerPage,
     onChangePage,
     onSort,
+    onResetFilters,
   };
 };

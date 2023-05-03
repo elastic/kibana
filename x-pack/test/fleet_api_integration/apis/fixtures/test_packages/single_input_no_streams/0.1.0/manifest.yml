@@ -1,0 +1,24 @@
+format_version: 1.1.0
+name: single_input_no_streams
+title: Single input, no stream
+description: Test package with a single input and no streams
+version: 0.1.0
+categories: []
+conditions:
+  kibana.version: ^8.8.0
+  elastic.subscription: basic
+policy_templates:
+  - name: Single Input
+    title: Single Input
+    description: Single Input
+    inputs:
+      - title: Single Input
+        description: Single input
+        type: single_input
+type: integration
+owner:
+  github: elastic/fleet
+icons:
+  - src: '/img/logo_overrides_64_color.svg'
+    size: '16x16'
+    type: 'image/svg+xml'
