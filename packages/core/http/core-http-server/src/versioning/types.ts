@@ -155,9 +155,19 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 /** @experimental */
 export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
 
+export type VersionedSpecValidation = RouteValidationFunction<unknown> | Type<unknown>;
+
+interface VersionedRouteResponseValidationEntry {
+  /** @default application/json */
+  contentType?: string;
+  body: VersionedSpecValidation;
+}
+
 /** @experimental */
 export interface VersionedRouteResponseValidation {
-  [statusCode: number]: { body: RouteValidationFunction<unknown> | Type<unknown> };
+  [statusCode: number]:
+    | VersionedRouteResponseValidationEntry
+    | VersionedRouteResponseValidationEntry[];
   unsafe?: { body?: boolean };
 }
 
