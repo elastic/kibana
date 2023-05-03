@@ -72,8 +72,8 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   useEffect(() => {
     const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-    setBreadcrumbsTitle(savedSearch.title, chrome);
-  }, [savedSearch.id, savedSearch.title, chrome, data]);
+    setBreadcrumbsTitle({ title: savedSearch.title, services });
+  }, [savedSearch.id, savedSearch.title, chrome, data, services]);
 
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);

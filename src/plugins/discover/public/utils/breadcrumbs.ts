@@ -6,23 +6,44 @@
  * Side Public License, v 1.
  */
 
-import { ChromeStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { matchPath } from 'react-router-dom';
+import type { DiscoverServices } from '../build_services';
 
-export function getRootBreadcrumbs(breadcrumb?: string) {
+const getRootPath = ({ history }: DiscoverServices) => {
+  const match = matchPath<{ profile?: string }>(history().location.pathname, {
+    path: '/p/:profile',
+  });
+
+  return match ? `#/p/${match.params.profile}/` : '#/';
+};
+
+export function getRootBreadcrumbs({
+  breadcrumb,
+  services,
+}: {
+  breadcrumb?: string;
+  services: DiscoverServices;
+}) {
   return [
     {
       text: i18n.translate('discover.rootBreadcrumb', {
         defaultMessage: 'Discover',
       }),
-      href: breadcrumb || '#/',
+      href: breadcrumb || getRootPath(services),
     },
   ];
 }
 
-export function getSavedSearchBreadcrumbs(id: string) {
+export function getSavedSearchBreadcrumbs({
+  id,
+  services,
+}: {
+  id: string;
+  services: DiscoverServices;
+}) {
   return [
-    ...getRootBreadcrumbs(),
+    ...getRootBreadcrumbs({ services }),
     {
       text: id,
     },
@@ -33,21 +54,27 @@ export function getSavedSearchBreadcrumbs(id: string) {
  * Helper function to set the Discover's breadcrumb
  * if there's an active savedSearch, its title is appended
  */
-export function setBreadcrumbsTitle(title: string | undefined, chrome: ChromeStart) {
+export function setBreadcrumbsTitle({
+  title,
+  services,
+}: {
+  title: string | undefined;
+  services: DiscoverServices;
+}) {
   const discoverBreadcrumbsTitle = i18n.translate('discover.discoverBreadcrumbTitle', {
     defaultMessage: 'Discover',
   });
 
   if (title) {
-    chrome.setBreadcrumbs([
+    services.chrome.setBreadcrumbs([
       {
         text: discoverBreadcrumbsTitle,
-        href: '#/',
+        href: getRootPath(services),
       },
       { text: title },
     ]);
   } else {
-    chrome.setBreadcrumbs([
+    services.chrome.setBreadcrumbs([
       {
         text: discoverBreadcrumbsTitle,
       },
