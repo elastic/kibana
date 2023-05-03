@@ -77,22 +77,18 @@ export const Tile = ({
     visualizationType: 'metricChart',
   });
 
-  const hostsFilterQuery = useMemo(() => {
-    return createHostsFilter(
-      hostNodes.map((p) => p.name),
-      dataView
-    );
+  const filters = useMemo(() => {
+    return [
+      createHostsFilter(
+        hostNodes.map((p) => p.name),
+        dataView
+      ),
+    ];
   }, [hostNodes, dataView]);
-
-  const filters = useMemo(
-    () => [...searchCriteria.filters, ...searchCriteria.panelFilters, ...[hostsFilterQuery]],
-    [hostsFilterQuery, searchCriteria.filters, searchCriteria.panelFilters]
-  );
 
   const extraActionOptions = getExtraActions({
     timeRange: searchCriteria.dateRange,
     filters,
-    query: searchCriteria.query,
   });
 
   const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
@@ -156,7 +152,6 @@ export const Tile = ({
             lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
             dateRange={afterLoadedState.dateRange}
             filters={afterLoadedState.filters}
-            query={afterLoadedState.query}
             onBrushEnd={handleBrushEnd}
             loading={loading}
           />
