@@ -121,7 +121,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
   const time = useTimeRangeUpdates();
 
   useEffect(
-    function syncTimRangeFromUrlState() {
+    function syncTimeRangeFromUrlState() {
       if (globalState?.time !== undefined) {
         timefilter.setTime({
           from: globalState.time.from,
