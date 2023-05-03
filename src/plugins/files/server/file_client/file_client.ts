@@ -208,7 +208,7 @@ export class FileClientImpl implements FileClient {
 
   /**
    * Upload a blob
-   * @param id - The ID of the file content is associated with
+   * @param file - The file Record that the content is associated with
    * @param rs - The readable stream of the file content
    * @param options - Options for the upload
    */

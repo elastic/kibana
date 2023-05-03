@@ -125,7 +125,12 @@ export function ErrorCountRuleType(props: Props) {
     />,
     <EnvironmentField
       currentValue={params.environment}
-      onChange={(value) => setRuleParams('environment', value)}
+      onChange={(value) =>
+        setRuleParams(
+          'environment',
+          value !== '' ? value : ENVIRONMENT_ALL.value
+        )
+      }
       serviceName={params.serviceName}
     />,
     <ErrorGroupingKeyField
