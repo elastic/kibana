@@ -62,6 +62,7 @@ export interface ReportingInternalSetup {
   logger: Logger;
   status: StatusServiceSetup;
   docLinks: DocLinksServiceSetup;
+  routes: (reportingCore: ReportingCore, logger: Logger) => void;
 }
 
 export interface ReportingInternalStart {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../../lib/content_stream', () => ({
+jest.mock('@kbn/reporting-plugin/server/lib/content_stream', () => ({
   getContentStream: jest.fn(),
 }));
 import { estypes } from '@elastic/elasticsearch';
@@ -15,16 +15,24 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { Readable } from 'stream';
 import supertest from 'supertest';
-import { ReportingCore } from '../..';
-import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
-import { ContentStream, ExportTypesRegistry, getContentStream } from '../../lib';
+import type { ReportingCore } from '@kbn/reporting-plugin/server';
+import { ReportingInternalSetup, ReportingInternalStart } from '@kbn/reporting-plugin/server/core';
+import {
+  ContentStream,
+  ExportTypesRegistry,
+  getContentStream,
+} from '@kbn/reporting-plugin/server/lib';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
-} from '../../../test_helpers';
-import { CreateJobFn, ExportTypeDefinition, ReportingRequestHandlerContext } from '../../../types';
+} from '@kbn/reporting-plugin/server/test_helpers';
+import {
+  CreateJobFn,
+  ExportTypeDefinition,
+  ReportingRequestHandlerContext,
+} from '@kbn/reporting-plugin/server/types';
 import { registerJobInfoRoutes } from '../jobs';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;

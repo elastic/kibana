@@ -18,6 +18,7 @@ export { registerRoutes } from './routes';
 
 export * from './export_types/common';
 export type { JobParamsDownloadCSV, JobAppParamsPDF } from './routes';
+export type { ExportTypesPluginSetupDependencies } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new ExportTypesPlugin(initializerContext);
