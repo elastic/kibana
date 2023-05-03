@@ -19,7 +19,7 @@ export const severitySchemaConfig = {
   sortTextDesc: i18n.translate('xpack.csp.vulnerabilityTable.column.sortDescending', {
     defaultMessage: 'Severity Critical -> Low',
   }),
-  icon: '',
+  icon: 'dot',
   color: '',
 };
 
