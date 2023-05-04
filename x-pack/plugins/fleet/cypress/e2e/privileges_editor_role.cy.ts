@@ -58,7 +58,7 @@ describe('When the user has Editor built-in role', () => {
     it('are visible and can be added', () => {
       loginWithUserAndWaitForPage(INTEGRATIONS, BuiltInEditorUser);
       cy.getBySel(getIntegrationCard('apache')).click();
-      cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('be.enabled');
+      cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('not.be.disabled');
     });
   });
 });
