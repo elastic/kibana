@@ -107,7 +107,7 @@ const Unprivileged = () => {
       body={
         <p>
           <FormattedMessage
-            id="xpack.synthetics.noFindingsStates.unprivileged.unprivilegedDescription"
+            id="xpack.synthetics.params.unprivileged.unprivilegedDescription"
             defaultMessage="To view Synthetics monitors data usage and retention, you must update privileges. For more information, contact your Kibana administrator."
           />
         </p>
