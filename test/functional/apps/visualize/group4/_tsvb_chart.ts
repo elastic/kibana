@@ -551,7 +551,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await visualBuilder.resetPage();
+        await visualBuilder.setTime();
         await visualBuilder.selectAggType('Average');
         await visualBuilder.setFieldForAggregation('bytes');
         await visualBuilder.setMetricsGroupByTerms('machine.os.raw');
