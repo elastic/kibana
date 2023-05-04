@@ -1229,6 +1229,9 @@ describe('getAll()', () => {
         isDeprecated: false,
         name: 'test',
         referencedByCount: 2,
+        config: {
+          foo: 'bar',
+        },
       },
     ]);
   });
