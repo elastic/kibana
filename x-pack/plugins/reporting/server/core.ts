@@ -24,6 +24,7 @@ import { CoreKibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import {
   PdfScreenshotResult,
@@ -75,6 +76,7 @@ export interface ReportingInternalStart {
   screenshotting: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
+  fieldFormats: FieldFormatsStart;
 }
 
 /**

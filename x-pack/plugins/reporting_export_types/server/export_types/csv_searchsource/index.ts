@@ -12,7 +12,7 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
   LICENSE_TYPE_BASIC,
-  PDF_JOB_TYPE_V2 as jobType,
+  CSV_JOB_TYPE as jobType,
 } from '@kbn/reporting-plugin/common/constants';
 import type { ExportTypeDefinition } from '@kbn/reporting-plugin/server/types';
 import { JobParamsCSV } from '../../../common';

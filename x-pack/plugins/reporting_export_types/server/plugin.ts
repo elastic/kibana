@@ -27,6 +27,10 @@ export interface ExportTypesPluginSetupDependencies {
   reporting: ReportingSetup;
 }
 
+// export interface ReportingExportTypesStartDependencies {
+//   fieldFormats: FieldFormatsStart;
+// }
+
 /** This plugin creates the export types in export type definitions to be registered in the Reporting Export Type Registry */
 export class ExportTypesPlugin implements Plugin<void, void> {
   public setup({}, { reporting }: ExportTypesPluginSetupDependencies) {
@@ -49,6 +53,8 @@ export class ExportTypesPlugin implements Plugin<void, void> {
     });
   }
 
-  // do nothing
-  public start({}, {}) {}
+  public start({}, {}) {
+    // needed for csv reports
+    // setFieldFormats(fieldFormats);
+  }
 }
