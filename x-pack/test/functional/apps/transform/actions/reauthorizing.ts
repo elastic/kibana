@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import {
-  TRANSFORM_HEALTH,
-  TRANSFORM_HEALTH_LABEL,
-  TRANSFORM_HEALTH_DESCRIPTION,
-} from '@kbn/transform-plugin/common/constants';
-import {
+import { TRANSFORM_HEALTH_LABEL, TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
+import type {
   TransformLatestConfig,
   TransformPivotConfig,
 } from '@kbn/transform-plugin/common/types/transform';
-import { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getLatestTransformConfig, getPivotTransformConfig } from '../helpers';
 import { USER } from '../../../services/transform/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../services/ml/common_api';
@@ -26,11 +22,9 @@ interface TestDataPivot {
   mode: 'batch' | 'continuous';
   type: 'pivot';
   expected: {
-    healthDescription: string;
-    healthLabel: string;
-    healthStatus: string;
+    originalState: object;
     reauthorizeEnabled: boolean;
-    originalStatus: string;
+    reauthorizedState: object;
   };
   created_by_user: USER;
   current_user: USER;
@@ -42,11 +36,9 @@ interface TestDataLatest {
   mode: 'batch' | 'continuous';
   type: 'latest';
   expected: {
-    healthDescription: string;
-    healthLabel: string;
-    healthStatus: string;
+    originalState: object;
     reauthorizeEnabled: boolean;
-    originalStatus: string;
+    reauthorizedState: object;
   };
   created_by_user: USER;
   current_user: USER;
@@ -76,14 +68,32 @@ export default function ({ getService }: FtrProviderContext) {
         mode: 'continuous',
         type: 'pivot',
         expected: {
-          healthDescription: TRANSFORM_HEALTH_DESCRIPTION.green,
-          healthLabel: TRANSFORM_HEALTH_LABEL.green,
-          healthStatus: TRANSFORM_HEALTH.green,
-          originalStatus: 'stopped',
+          originalState: { status: TRANSFORM_STATE.STOPPED, health: TRANSFORM_HEALTH_LABEL.red },
           reauthorizeEnabled: false,
+          reauthorizedState: {
+            status: TRANSFORM_STATE.STARTED,
+            health: TRANSFORM_HEALTH_LABEL.green,
+          },
         },
         created_by_user: USER.TRANSFORM_VIEWER,
         current_user: USER.TRANSFORM_VIEWER,
+      },
+      {
+        suiteTitle: 'batch pivot transform (created by viewer, viewed by poweruser)',
+        originalConfig: getPivotTransformConfig(PREFIX, false),
+        mode: 'batch',
+        type: 'pivot',
+        expected: {
+          originalState: { status: TRANSFORM_STATE.STOPPED, health: TRANSFORM_HEALTH_LABEL.red },
+          reauthorizeEnabled: true,
+          reauthorizedState: {
+            status: TRANSFORM_STATE.STOPPED,
+            progress: '100',
+            health: TRANSFORM_HEALTH_LABEL.green,
+          },
+        },
+        created_by_user: USER.TRANSFORM_VIEWER,
+        current_user: USER.TRANSFORM_POWERUSER,
       },
       {
         suiteTitle: 'continuous pivot transform (created by viewer, authorized by poweruser)',
@@ -91,11 +101,12 @@ export default function ({ getService }: FtrProviderContext) {
         mode: 'continuous',
         type: 'pivot',
         expected: {
-          healthDescription: TRANSFORM_HEALTH_DESCRIPTION.green,
-          healthLabel: TRANSFORM_HEALTH_LABEL.green,
-          healthStatus: TRANSFORM_HEALTH.green,
-          originalStatus: 'stopped',
+          originalState: { status: TRANSFORM_STATE.STOPPED, health: TRANSFORM_HEALTH_LABEL.red },
           reauthorizeEnabled: true,
+          reauthorizedState: {
+            status: TRANSFORM_STATE.STARTED,
+            health: TRANSFORM_HEALTH_LABEL.green,
+          },
         },
         created_by_user: USER.TRANSFORM_VIEWER,
         current_user: USER.TRANSFORM_POWERUSER,
@@ -106,12 +117,12 @@ export default function ({ getService }: FtrProviderContext) {
         mode: 'continuous',
         type: 'latest',
         expected: {
-          healthDescription: TRANSFORM_HEALTH_DESCRIPTION.green,
-          healthLabel: TRANSFORM_HEALTH_LABEL.green,
-          healthStatus: TRANSFORM_HEALTH.green,
-          originalStatus: 'started',
-
+          originalState: { status: TRANSFORM_STATE.STARTED, health: TRANSFORM_HEALTH_LABEL.green },
           reauthorizeEnabled: false,
+          reauthorizedState: {
+            status: TRANSFORM_STATE.STARTED,
+            health: TRANSFORM_HEALTH_LABEL.green,
+          },
         },
         created_by_user: USER.TRANSFORM_POWERUSER,
         current_user: USER.TRANSFORM_VIEWER,
@@ -130,22 +141,13 @@ export default function ({ getService }: FtrProviderContext) {
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
 
       for (const testData of testDataList) {
-        if (
-          testData.expected.healthStatus === TRANSFORM_HEALTH.yellow &&
-          testData.type === 'pivot'
-        ) {
-          testData.originalConfig.pivot.aggregations['products.base_price.fail'] = {
-            avg: {
-              script: {
-                source: "def a = doc['non_existing'].value",
-              },
-            },
-          };
-        }
         await transform.api.createTransform(testData.originalConfig.id, testData.originalConfig, {
           deferValidation: true,
+          // Create transforms with secondary authorization headers
           headers: generateHeaders(apiKeysForTransformUsers.get(testData.created_by_user)!),
         });
+        // For transforms created insufficient permissions, they can be created but not started
+        // so we should not assert that the api call is successful here
         await transform.api.startTransform(testData.originalConfig.id, false);
       }
       await transform.testResources.setKibanaTimeZoneToUTC();
@@ -184,9 +186,10 @@ export default function ({ getService }: FtrProviderContext) {
             'should display the original transform in the transform list'
           );
           await transform.table.filterWithSearchString(transformId, 1);
-          await transform.table.assertTransformRowFields(transformId, {
-            status: testData.expected.originalStatus,
-          });
+          await transform.table.assertTransformRowFields(
+            transformId,
+            testData.expected.originalState
+          );
 
           if (testData.expected.reauthorizeEnabled) {
             await transform.testExecution.logTestStep('should reauthorize the transform');
@@ -198,15 +201,11 @@ export default function ({ getService }: FtrProviderContext) {
             await transform.table.clickTransformRowAction(transformId, 'Reauthorize');
             await transform.table.confirmReauthorizeTransform();
 
-            await transform.table.assertTransformExpandedRowHealth(
-              testData.expected.healthDescription,
-              testData.expected.healthStatus !== TRANSFORM_HEALTH.green
+            await transform.table.assertTransformRowFields(
+              transformId,
+              testData.expected.reauthorizedState
             );
-            await transform.table.assertTransformRowFields(transformId, {
-              status: 'started',
-            });
           }
-
           await transform.table.clearSearchString(testDataList.length);
         });
       });
