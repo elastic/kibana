@@ -39,6 +39,7 @@ import {
   addNewFilterGroupControlValues,
   deleteFilterGroupControl,
   discardFilterGroupControls,
+  editFilterGroupControl,
   editFilterGroupControls,
   saveFilterGroupControls,
 } from '../../tasks/common/filter_group';
@@ -97,7 +98,7 @@ const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_P
   });
 };
 
-describe.skip('Detections : Page Filters', { testIsolation: false }, () => {
+describe('Detections : Page Filters', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -116,10 +117,23 @@ describe.skip('Detections : Page Filters', { testIsolation: false }, () => {
   });
 
   context('Alert Page Filters Customization ', { testIsolation: false }, () => {
-    it('Add New Controls', () => {
+    beforeEach(() => {
+      resetFilters();
+    });
+    it('should be able to delete Controls', () => {
+      waitForPageFilters();
+      editFilterGroupControls();
+      deleteFilterGroupControl(3);
+      cy.get(CONTROL_FRAMES).should((sub) => {
+        expect(sub.length).lt(4);
+      });
+      discardFilterGroupControls();
+    });
+    it('should be able to add new Controls', () => {
       const fieldName = 'event.module';
       const label = 'EventModule';
       editFilterGroupControls();
+      deleteFilterGroupControl(3);
       addNewFilterGroupControlValues({
         fieldName,
         label,
@@ -129,18 +143,20 @@ describe.skip('Detections : Page Filters', { testIsolation: false }, () => {
       discardFilterGroupControls();
       cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
     });
-    it('Delete Controls', () => {
-      waitForPageFilters();
+    it('should be able to edit Controls', () => {
+      const fieldName = 'event.module';
+      const label = 'EventModule';
       editFilterGroupControls();
-      deleteFilterGroupControl(3);
-      cy.get(CONTROL_FRAMES).should((sub) => {
-        expect(sub.length).lt(4);
-      });
+      editFilterGroupControl({ idx: 3, fieldName, label });
+      cy.get(CONTROL_FRAME_TITLE).should('contain.text', label);
+      cy.get(FILTER_GROUP_SAVE_CHANGES_POPOVER).should('be.visible');
       discardFilterGroupControls();
+      cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
     });
     it('should not sync to the URL in edit mode but only in view mode', () => {
       cy.url().then((urlString) => {
         editFilterGroupControls();
+        deleteFilterGroupControl(3);
         addNewFilterGroupControlValues({ fieldName: 'event.module', label: 'Event Module' });
         cy.url().should('eq', urlString);
         saveFilterGroupControls();
