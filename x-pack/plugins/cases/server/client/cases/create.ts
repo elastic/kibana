@@ -18,7 +18,6 @@ import {
   CaseRt,
   ActionTypes,
   CasePostRequestRt,
-  excess,
   CaseSeverity,
 } from '../../../common/api';
 import { MAX_ASSIGNEES_PER_CASE, MAX_TITLE_LENGTH } from '../../../common/constants';
@@ -44,7 +43,7 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
   } = clientArgs;
 
   const query = pipe(
-    excess(CasePostRequestRt).decode({
+    CasePostRequestRt.decode({
       ...data,
     }),
     fold(throwErrors(Boom.badRequest), identity)

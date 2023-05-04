@@ -12,7 +12,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import type { CasesFindResponse, CasesFindRequest } from '../../../common/api';
-import { CasesFindRequestRt, throwErrors, CasesFindResponseRt, excess } from '../../../common/api';
+import { CasesFindRequestRt, throwErrors, CasesFindResponseRt } from '../../../common/api';
 
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
@@ -44,7 +44,7 @@ export const find = async (
     const fields = asArray(params.fields);
 
     const queryParams = pipe(
-      excess(CasesFindRequestRt).decode({ ...params, fields }),
+      CasesFindRequestRt.decode({ ...params, fields }),
       fold(throwErrors(Boom.badRequest), identity)
     );
 

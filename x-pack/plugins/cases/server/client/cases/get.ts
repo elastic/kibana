@@ -25,7 +25,6 @@ import {
   CaseRt,
   CaseResolveResponseRt,
   AllTagsFindRequestRt,
-  excess,
   throwErrors,
   AllReportersFindRequestRt,
   CasesByAlertIDRequestRt,
@@ -71,7 +70,7 @@ export const getCasesByAlertID = async (
 
   try {
     const queryParams = pipe(
-      excess(CasesByAlertIDRequestRt).decode(options),
+      CasesByAlertIDRequestRt.decode(options),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
@@ -300,7 +299,7 @@ export async function getTags(
 
   try {
     const queryParams = pipe(
-      excess(AllTagsFindRequestRt).decode(params),
+      AllTagsFindRequestRt.decode(params),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
@@ -337,7 +336,7 @@ export async function getReporters(
 
   try {
     const queryParams = pipe(
-      excess(AllReportersFindRequestRt).decode(params),
+      AllReportersFindRequestRt.decode(params),
       fold(throwErrors(Boom.badRequest), identity)
     );
 

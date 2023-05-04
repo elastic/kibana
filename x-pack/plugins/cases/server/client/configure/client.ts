@@ -30,7 +30,6 @@ import {
   CaseConfigurationsResponseRt,
   CaseConfigureResponseRt,
   CasesConfigurePatchRt,
-  excess,
   GetConfigureFindRequestRt,
   throwErrors,
 } from '../../../common/api';
@@ -143,7 +142,7 @@ async function get(
   } = clientArgs;
   try {
     const queryParams = pipe(
-      excess(GetConfigureFindRequestRt).decode(params),
+      GetConfigureFindRequestRt.decode(params),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
@@ -266,7 +265,7 @@ async function update(
      * The owner attribute should not be allowed.
      */
     pipe(
-      excess(CasesConfigurePatchRt.types[0]).decode(queryWithoutVersion),
+      CasesConfigurePatchRt.types[0].decode(queryWithoutVersion),
       fold(throwErrors(Boom.badRequest), identity)
     );
 

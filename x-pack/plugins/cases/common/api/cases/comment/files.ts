@@ -26,7 +26,7 @@ export const FILE_ATTACHMENT_TYPE = '.files';
 
 const MIN_DELETE_IDS = 1;
 
-export const BulkDeleteFileAttachmentsRequestRt = rt.type({
+export const BulkDeleteFileAttachmentsRequestRt = rt.strict({
   ids: limitedArraySchema(NonEmptyString, MIN_DELETE_IDS, MAX_DELETE_FILES),
 });
 

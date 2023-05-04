@@ -11,12 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import type { CasesStatusRequest, CasesStatusResponse } from '../../../common/api';
-import {
-  excess,
-  CasesStatusRequestRt,
-  throwErrors,
-  CasesStatusResponseRt,
-} from '../../../common/api';
+import { CasesStatusRequestRt, throwErrors, CasesStatusResponseRt } from '../../../common/api';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import { constructQueryOptions } from '../utils';
@@ -34,7 +29,7 @@ export async function getStatusTotalsByType(
 
   try {
     const queryParams = pipe(
-      excess(CasesStatusRequestRt).decode(params),
+      CasesStatusRequestRt.decode(params),
       fold(throwErrors(Boom.badRequest), identity)
     );
 

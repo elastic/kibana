@@ -14,7 +14,6 @@ import { partition } from 'lodash';
 import { MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
 import type { BulkGetAttachmentsResponse, CommentAttributes } from '../../../common/api';
 import {
-  excess,
   throwErrors,
   BulkGetAttachmentsResponseRt,
   BulkGetAttachmentsRequestRt,
@@ -47,7 +46,7 @@ export async function bulkGet(
 
   try {
     const request = pipe(
-      excess(BulkGetAttachmentsRequestRt).decode({ ids: attachmentIDs }),
+      BulkGetAttachmentsRequestRt.decode({ ids: attachmentIDs }),
       fold(throwErrors(Boom.badRequest), identity)
     );
 

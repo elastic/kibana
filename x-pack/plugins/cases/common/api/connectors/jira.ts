@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-export const JiraFieldsRT = rt.type({
+export const JiraFieldsRT = rt.strict({
   issueType: rt.union([rt.string, rt.null]),
   priority: rt.union([rt.string, rt.null]),
   parent: rt.union([rt.string, rt.null]),

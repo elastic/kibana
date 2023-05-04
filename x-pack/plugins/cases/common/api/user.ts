@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-const UserWithoutProfileUidRt = rt.type({
+const UserWithoutProfileUidRt = rt.strict({
   email: rt.union([rt.undefined, rt.null, rt.string]),
   full_name: rt.union([rt.undefined, rt.null, rt.string]),
   username: rt.union([rt.undefined, rt.null, rt.string]),
@@ -15,7 +15,7 @@ const UserWithoutProfileUidRt = rt.type({
 
 export const UserRt = rt.intersection([
   UserWithoutProfileUidRt,
-  rt.partial({ profile_uid: rt.string }),
+  rt.exact(rt.partial({ profile_uid: rt.string })),
 ]);
 
 export const UserWithProfileInfoRt = rt.intersection([

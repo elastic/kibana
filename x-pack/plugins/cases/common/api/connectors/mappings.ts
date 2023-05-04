@@ -24,13 +24,13 @@ export type ActionType = rt.TypeOf<typeof ActionTypeRT>;
 export type CaseField = rt.TypeOf<typeof CaseFieldRT>;
 export type ThirdPartyField = rt.TypeOf<typeof ThirdPartyFieldRT>;
 
-export const ConnectorMappingsAttributesRT = rt.type({
+export const ConnectorMappingsAttributesRT = rt.strict({
   action_type: ActionTypeRT,
   source: CaseFieldRT,
   target: ThirdPartyFieldRT,
 });
 
-export const ConnectorMappingsRt = rt.type({
+export const ConnectorMappingsRt = rt.strict({
   mappings: rt.array(ConnectorMappingsAttributesRT),
   owner: rt.string,
 });

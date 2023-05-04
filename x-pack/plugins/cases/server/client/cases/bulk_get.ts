@@ -22,7 +22,6 @@ import type {
 import {
   CasesBulkGetRequestRt,
   CasesRt,
-  excess,
   throwErrors,
   getTypeForCertainFieldsFromArray,
   CaseRt,
@@ -54,7 +53,7 @@ export const bulkGet = async <Field extends keyof Case = keyof Case>(
     const fields = includeFieldsRequiredForAuthentication(asArray(params.fields));
 
     const request = pipe(
-      excess(CasesBulkGetRequestRt).decode({ ...params, fields }),
+      CasesBulkGetRequestRt.decode({ ...params, fields }),
       fold(throwErrors(Boom.badRequest), identity)
     );
 

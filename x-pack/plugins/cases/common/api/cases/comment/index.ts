@@ -187,7 +187,7 @@ export const CommentRequestRt = rt.union([
 
 export const CommentRt = rt.intersection([
   CommentAttributesRt,
-  rt.type({
+  rt.strict({
     id: rt.string,
     version: rt.string,
   }),
@@ -279,7 +279,7 @@ export const FindQueryParamsRt = rt.partial({
 
 export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
 
-export const BulkGetAttachmentsRequestRt = rt.type({
+export const BulkGetAttachmentsRequestRt = rt.strict({
   ids: rt.array(rt.string),
 });
 

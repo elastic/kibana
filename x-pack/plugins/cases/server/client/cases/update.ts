@@ -36,7 +36,6 @@ import {
   CasesRt,
   CaseStatuses,
   CommentType,
-  excess,
   throwErrors,
 } from '../../../common/api';
 import {
@@ -318,7 +317,7 @@ export const update = async (
   } = clientArgs;
 
   const query = pipe(
-    excess(CasesPatchRequestRt).decode(cases),
+    CasesPatchRequestRt.decode(cases),
     fold(throwErrors(Boom.badRequest), identity)
   );
 

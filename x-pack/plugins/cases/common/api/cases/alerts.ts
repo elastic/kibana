@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-const AlertRt = rt.type({
+const AlertRt = rt.strict({
   id: rt.string,
   index: rt.string,
   attached_at: rt.string,
