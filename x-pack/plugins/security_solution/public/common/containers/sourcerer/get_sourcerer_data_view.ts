@@ -17,11 +17,13 @@ export const getSourcererDataView = async (
 ): Promise<SourcererDataView> => {
   const dataViewData = await dataViewsService.get(dataViewId, true, refreshFields);
   const defaultPatternsList = ensurePatternFormat(dataViewData.getIndexPattern().split(','));
-  let patternList = [];
 
-  try {
-    for (const pattern of defaultPatternsList) {
-      let indexExist = false;
+  // typeguard used to assert that pattern is a string, otherwise
+  // typescript expects patternList to be (string | null)[]
+  // but we want it to always be string[]
+  const filterTypeGuard = (str: unknown): str is string => str != null;
+  const patternList = await Promise.all(
+    defaultPatternsList.map(async (pattern) => {
       try {
         await dataViewsService.getFieldsForWildcard({
           type: dataViewData.type,
@@ -29,17 +31,16 @@ export const getSourcererDataView = async (
           allowNoIndex: false,
           pattern,
         });
-        indexExist = true;
+        return pattern;
       } catch {
-        indexExist = false;
+        return null;
       }
-      if (indexExist) {
-        patternList.push(pattern);
-      }
-    }
-  } catch (exc) {
-    patternList = defaultPatternsList;
-  }
+    })
+  )
+    .then((allPatterns) =>
+      allPatterns.filter((pattern): pattern is string => filterTypeGuard(pattern))
+    )
+    .catch(() => defaultPatternsList);
 
   return {
     loading: false,
@@ -49,9 +50,10 @@ export const getSourcererDataView = async (
     fields: dataViewData.fields,
     patternList,
     dataView: dataViewData,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    browserFields: getDataViewStateFromIndexFields(dataViewData.id!, dataViewData.fields)
-      .browserFields,
+    browserFields: getDataViewStateFromIndexFields(
+      dataViewData.id ?? '',
+      dataViewData.fields != null ? dataViewData.fields : []
+    ).browserFields,
     runtimeMappings: dataViewData.getRuntimeMappings(),
   };
 };
