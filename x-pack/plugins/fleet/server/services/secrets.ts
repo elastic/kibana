@@ -17,6 +17,7 @@ import type {
   NewPackagePolicy,
   PackagePolicyConfigRecordEntry,
   RegistryStream,
+  UpdatePackagePolicy,
 } from '../../common';
 
 import {
@@ -137,12 +138,12 @@ export async function extractAndWriteSecrets(opts: {
   packagePolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
   esClient: ElasticsearchClient;
-}): Promise<{ packagePolicy: NewPackagePolicy; secret_references: PolicySecretReference[] }> {
+}): Promise<{ packagePolicy: NewPackagePolicy; secretReferences: PolicySecretReference[] }> {
   const { packagePolicy, packageInfo, esClient } = opts;
   const secretPaths = getPolicySecretPaths(packagePolicy, packageInfo);
 
   if (!secretPaths.length) {
-    return { packagePolicy, secret_references: [] };
+    return { packagePolicy, secretReferences: [] };
   }
 
   const secrets = await createSecrets({
@@ -157,7 +158,49 @@ export async function extractAndWriteSecrets(opts: {
 
   return {
     packagePolicy: policyWithSecretRefs,
-    secret_references: secrets.map(({ id }) => ({ id })),
+    secretReferences: secrets.map(({ id }) => ({ id })),
+  };
+}
+
+export async function extractAndUpdateSecrets(opts: {
+  oldPackagePolicy: PackagePolicy;
+  packagePolicyUpdate: UpdatePackagePolicy;
+  packageInfo: PackageInfo;
+  esClient: ElasticsearchClient;
+}): Promise<{
+  packagePolicyUpdate: UpdatePackagePolicy;
+  secretReferences: PolicySecretReference[];
+  secretsToDelete: PolicySecretReference[];
+}> {
+  const { oldPackagePolicy, packagePolicyUpdate, packageInfo, esClient } = opts;
+  const oldSecretPaths = getPolicySecretPaths(oldPackagePolicy, packageInfo);
+  const updatedSecretPaths = getPolicySecretPaths(packagePolicyUpdate, packageInfo);
+
+  if (!oldSecretPaths.length && !updatedSecretPaths.length) {
+    return { packagePolicyUpdate, secretReferences: [], secretsToDelete: [] };
+  }
+
+  const { toCreate, toDelete, noChange } = diffSecretPaths(oldSecretPaths, updatedSecretPaths);
+
+  const createdSecrets = await createSecrets({
+    esClient,
+    values: toCreate.map((secretPath) => secretPath.value.value),
+  });
+
+  const policyWithSecretRefs = JSON.parse(JSON.stringify(packagePolicyUpdate));
+  toCreate.forEach((secretPath, i) => {
+    set(policyWithSecretRefs, secretPath.path + '.value', toVarSecretRef(createdSecrets[i].id));
+  });
+
+  const secretReferences = [
+    ...noChange.map((secretPath) => ({ id: secretPath.value.value.id })),
+    ...createdSecrets.map(({ id }) => ({ id })),
+  ];
+
+  return {
+    packagePolicyUpdate: policyWithSecretRefs,
+    secretReferences,
+    secretsToDelete: toDelete.map((secretPath) => ({ id: secretPath.value.value.id })),
   };
 }
 
@@ -179,10 +222,42 @@ export function toCompiledSecretRef(id: string) {
   return `$co.elastic.secret{${id}}`;
 }
 
+export function diffSecretPaths(
+  oldPaths: SecretPath[],
+  newPaths: SecretPath[]
+): { toCreate: SecretPath[]; toDelete: SecretPath[]; noChange: SecretPath[] } {
+  const toCreate: SecretPath[] = [];
+  const toDelete: SecretPath[] = [];
+  const noChange: SecretPath[] = [];
+  const newPathsByPath = keyBy(newPaths, 'path');
+
+  for (const oldPath of oldPaths) {
+    if (!newPathsByPath[oldPath.path]) {
+      toDelete.push(oldPath);
+    }
+
+    const newPath = newPathsByPath[oldPath.path];
+    if (newPath && newPath.value.value) {
+      const newValue = newPath.value?.value;
+      if (!newValue?.isSecretRef) {
+        toCreate.push(newPath);
+        toDelete.push(oldPath);
+      } else {
+        noChange.push(newPath);
+      }
+      delete newPathsByPath[oldPath.path];
+    }
+  }
+
+  const remainingNewPaths = Object.values(newPathsByPath);
+
+  return { toCreate: [...toCreate, ...remainingNewPaths], toDelete, noChange };
+}
+
 // Given a package policy and a package,
 // returns an array of lodash style paths to all secrets and their current values
 export function getPolicySecretPaths(
-  packagePolicy: PackagePolicy | NewPackagePolicy,
+  packagePolicy: PackagePolicy | NewPackagePolicy | UpdatePackagePolicy,
   packageInfo: PackageInfo
 ): SecretPath[] {
   const packageLevelVarPaths = _getPackageLevelSecretPaths(packagePolicy, packageInfo);

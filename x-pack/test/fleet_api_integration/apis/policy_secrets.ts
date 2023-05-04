@@ -21,6 +21,22 @@ const arrayIdsEqual = (a: Array<{ id: string }>, b: Array<{ id: string }>) => {
   return a.every(({ id }) => b.find(({ id: bid }) => bid === id));
 };
 
+function createdPolicyToUpdatePolicy(policy: any) {
+  const updatedPolicy = JSON.parse(JSON.stringify(policy));
+  delete updatedPolicy.id;
+  delete updatedPolicy.revision;
+  delete updatedPolicy.secret_references;
+  delete updatedPolicy.created_at;
+  delete updatedPolicy.created_by;
+  delete updatedPolicy.updated_at;
+  delete updatedPolicy.updated_by;
+  delete updatedPolicy.inputs[0].compiled_input;
+  delete updatedPolicy.inputs[0].streams[0].compiled_stream;
+  delete updatedPolicy.package.title;
+
+  return updatedPolicy;
+}
+
 export default function (providerContext: FtrProviderContext) {
   describe('fleet policy secrets', () => {
     const { getService } = providerContext;
@@ -85,6 +101,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       return res.hits.hits[0]._source as any as { data: FullAgentPolicy };
     };
+    let createdPackagePolicy: any;
     let createdPackagePolicyId: string;
     let packageVarId: string;
     let inputVarId: string;
@@ -173,7 +190,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      const createdPackagePolicy = createResBody.item;
+      createdPackagePolicy = createResBody.item;
       createdPackagePolicyId = createdPackagePolicy.id;
       packageVarId = createdPackagePolicy.vars.package_var_secret.value.id;
       expect(packageVarId).to.be.an('string');
@@ -266,6 +283,48 @@ export default function (providerContext: FtrProviderContext) {
       const agentPolicy = await getFullAgentPolicyById(agentPolicyId);
 
       expectCompiledPolicyVars(agentPolicy);
+    });
+
+    it('should allow secret values to be updated', async () => {
+      const updatedPolicy = createdPolicyToUpdatePolicy(createdPackagePolicy);
+      updatedPolicy.vars.package_var_secret.value = 'new_package_secret_val';
+      const updateRes = await supertest
+        .put(`/api/fleet/package_policies/${createdPackagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send(updatedPolicy)
+        .expect(200);
+
+      const updatedPackagePolicy = updateRes.body.item;
+
+      const updatedPackageVarId = updatedPackagePolicy.vars.package_var_secret.value.id;
+      expect(updatedPackageVarId).to.be.an('string');
+      expect(
+        arrayIdsEqual(updatedPackagePolicy.secret_references, [
+          { id: updatedPackageVarId },
+          { id: streamVarId },
+          { id: inputVarId },
+        ])
+      ).to.eql(true);
+      expect(updatedPackagePolicy.inputs[0].streams[0].compiled_stream).to.eql({
+        'config.version': 2,
+        package_var_secret: secretVar(updatedPackageVarId),
+        input_var_secret: secretVar(inputVarId),
+        stream_var_secret: secretVar(streamVarId),
+      });
+      expect(updatedPackagePolicy.inputs[0].compiled_input).to.eql({
+        package_var_secret: secretVar(updatedPackageVarId),
+        input_var_secret: secretVar(inputVarId),
+      });
+      expect(updatedPackagePolicy.vars.package_var_secret.value.isSecretRef).to.eql(true);
+      expect(updatedPackagePolicy.vars.package_var_secret.value.id).eql(updatedPackageVarId);
+      expect(updatedPackagePolicy.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(true);
+      expect(updatedPackagePolicy.inputs[0].vars.input_var_secret.value.id).eql(inputVarId);
+      expect(
+        updatedPackagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef
+      ).to.eql(true);
+      expect(updatedPackagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.id).eql(
+        streamVarId
+      );
     });
   });
 }

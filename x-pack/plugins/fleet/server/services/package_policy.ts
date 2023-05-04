@@ -113,7 +113,7 @@ import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
 import type { PackagePolicyClient, PackagePolicyService } from './package_policy_service';
 import { installAssetsForInputPackagePolicy } from './epm/packages/install';
 import { auditLoggingService } from './audit_logging';
-import { extractAndWriteSecrets } from './secrets';
+import { extractAndUpdateSecrets, extractAndWriteSecrets } from './secrets';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -242,15 +242,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
       if (secretsStorageEnabled) {
         const secretsRes = await extractAndWriteSecrets({
-          packagePolicy: enrichedPackagePolicy,
+          packagePolicy: { ...enrichedPackagePolicy, inputs },
           packageInfo: pkgInfo,
           esClient,
         });
 
         enrichedPackagePolicy = secretsRes.packagePolicy;
-        secretReferences = secretsRes.secret_references;
+        secretReferences = secretsRes.secretReferences;
 
-        inputs = getInputsWithStreamIds(enrichedPackagePolicy, packagePolicyId);
+        inputs = enrichedPackagePolicy.inputs as PackagePolicyInput[];
       }
       inputs = await _compilePackagePolicyInputs(pkgInfo, enrichedPackagePolicy.vars || {}, inputs);
 
@@ -644,6 +644,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     let enrichedPackagePolicy: UpdatePackagePolicy;
+    let secretReferences: PolicySecretReference[] | undefined;
 
     try {
       enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
@@ -661,7 +662,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const packagePolicy = { ...enrichedPackagePolicy, name: enrichedPackagePolicy.name.trim() };
     const oldPackagePolicy = await this.get(soClient, id);
-    const { version, ...restOfPackagePolicy } = packagePolicy;
 
     if (packagePolicyUpdate.is_managed && !options?.force) {
       throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
@@ -678,6 +678,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await requireUniqueName(soClient, enrichedPackagePolicy, id);
     }
 
+    // eslint-disable-next-line prefer-const
+    let { version, ...restOfPackagePolicy } = packagePolicy;
     let inputs = getInputsWithStreamIds(restOfPackagePolicy, oldPackagePolicy.id);
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
@@ -697,12 +699,31 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-      inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
+      const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
+      if (secretsStorageEnabled) {
+        const secretsRes = await extractAndUpdateSecrets({
+          oldPackagePolicy,
+          packagePolicyUpdate: { ...restOfPackagePolicy, inputs },
+          packageInfo: pkgInfo,
+          esClient,
+        });
+
+        restOfPackagePolicy = secretsRes.packagePolicyUpdate;
+        secretReferences = secretsRes.secretReferences;
+
+        inputs = restOfPackagePolicy.inputs as PackagePolicyInput[];
+      }
+
+      inputs = await _compilePackagePolicyInputs(pkgInfo, restOfPackagePolicy.vars || {}, inputs);
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
     }
 
     // Handle component template/mappings updates for experimental features, e.g. synthetic source
-    await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+    await handleExperimentalDatastreamFeatureOptIn({
+      soClient,
+      esClient,
+      packagePolicy: restOfPackagePolicy,
+    });
 
     await soClient.update<PackagePolicySOAttributes>(
       SAVED_OBJECT_TYPE,
@@ -714,6 +735,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           : {}),
         inputs,
         ...(elasticsearchPrivileges && { elasticsearch: { privileges: elasticsearchPrivileges } }),
+        ...(secretReferences?.length && { secret_references: secretReferences }),
         revision: oldPackagePolicy.revision + 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username ?? 'system',
