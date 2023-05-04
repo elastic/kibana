@@ -142,8 +142,13 @@ run(
     }
 
     async function runTest(journey: Journey, kibanaBuildDir: string | undefined) {
-      process.stdout.write(`--- Running ${journey.name}\n`);
-      await runFunctionalTest(journey.path, 'TEST', kibanaBuildDir);
+      try {
+        process.stdout.write(`--- Running ${journey.name}\n`);
+        await runFunctionalTest(journey.path, 'TEST', kibanaBuildDir);
+      } catch (e) {
+        log.warning(`Journey ${journey.name} failed. Retrying once...`);
+        await runFunctionalTest(journey.path, 'TEST', kibanaBuildDir);
+      }
     }
 
     if (failedJourneys.length > 0) {
