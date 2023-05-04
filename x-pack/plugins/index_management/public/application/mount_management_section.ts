@@ -63,6 +63,7 @@ export async function mountManagementSection(
     chrome: { docTitle },
     uiSettings,
     executionContext,
+    settings,
   } = core;
 
   const { url } = startDependencies.share;
@@ -96,6 +97,7 @@ export async function mountManagementSection(
     history,
     setBreadcrumbs,
     uiSettings,
+    settings,
     url,
     docLinks,
     kibanaVersion,
