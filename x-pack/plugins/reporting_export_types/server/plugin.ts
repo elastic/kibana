@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin } from '@kbn/core/server';
+import { Plugin, PluginInitializerContext, Logger } from '@kbn/core/server';
 import { FieldFormatsSetup } from '@kbn/field-formats-plugin/server';
 import type {
   CreateJobFn,
@@ -14,6 +14,7 @@ import type {
   ReportingSetup,
   RunTaskFn,
 } from '@kbn/reporting-plugin/server/types';
+import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import {
   getTypeCsv,
   getTypeCsvFromSavedObject,
@@ -23,6 +24,8 @@ import {
   getTypePrintablePdf,
   getTypePrintablePdfV2,
 } from '.';
+import { ReportingExportTypesCore } from './core';
+import { registerRoutes } from './routes';
 import { setFieldFormats } from './services/services';
 
 export interface ExportTypesPluginSetupDependencies {
@@ -30,14 +33,23 @@ export interface ExportTypesPluginSetupDependencies {
   fieldFormats: FieldFormatsSetup;
 }
 
-// export interface ReportingExportTypesStartDependencies {
-//   fieldFormats: FieldFormatsStart;
-// }
+export interface ExportTypesPluginStartDependencies {
+  screenshotting: ScreenshottingStart;
+}
 
 /** This plugin creates the export types in export type definitions to be registered in the Reporting Export Type Registry */
 export class ExportTypesPlugin implements Plugin<void, void> {
+  private reportingExportTypesCore = new ReportingExportTypesCore();
+  private logger: Logger;
+
+  constructor(private initContext: PluginInitializerContext) {
+    this.logger = initContext.logger.get();
+  }
+
   public setup({}, { reporting, fieldFormats }: ExportTypesPluginSetupDependencies) {
-    // Export Type creation
+    /**
+     * Export types to the central reporting plugin
+     */
     type CreateFnType = CreateJobFn<any, any>; // can not specify params types because different type of params are not assignable to each other
     type RunFnType = any; // can not specify because ImmediateExecuteFn is not assignable to RunTaskFn
     const getTypeFns: Array<() => ExportTypeDefinition<CreateFnType | null, RunFnType>> = [
@@ -67,10 +79,13 @@ export class ExportTypesPlugin implements Plugin<void, void> {
         );
       }
     });
+
+    /**
+     * Export Types Plugin Routes
+     */
+    registerRoutes(this.reportingExportTypesCore, this.logger);
   }
 
-  public start({}, {}) {
-    // needed for csv reports
-    // setFieldFormats(fieldFormats);
-  }
+  // do nothing
+  public start({}, {}) {}
 }

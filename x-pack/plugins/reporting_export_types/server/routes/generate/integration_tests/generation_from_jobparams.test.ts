@@ -11,18 +11,18 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import supertest from 'supertest';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { ReportingStore } from '../../../lib';
-import { ExportTypesRegistry } from '../../../lib/export_types_registry';
-import { Report } from '../../../lib/store';
+import { ReportingStore } from '@kbn/reporting-plugin/server/lib';
+import { ExportTypesRegistry } from '@kbn/reporting-plugin/server/lib/export_types_registry';
+import { Report } from '@kbn/reporting-plugin/server/lib/store';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
-} from '../../../test_helpers';
-import { registerJobGenerationRoutes } from '../generate_from_jobparams';
-import { ReportingRequestHandlerContext } from '../../../types';
-import { ReportingCore } from '../../..';
+} from '@kbn/reporting-plugin/server/test_helpers';
+import { registerJobGenerationRoutes } from '@kbn/reporting-plugin/server/routes/generate/generate_from_jobparams';
+import { ReportingRequestHandlerContext } from '@kbn/reporting-plugin/server/types';
+import { ReportingCore } from '@kbn/reporting-plugin/server';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

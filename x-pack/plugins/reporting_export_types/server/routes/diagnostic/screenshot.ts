@@ -9,17 +9,16 @@ import type { Logger } from '@kbn/core/server';
 import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { API_DIAGNOSE_URL } from '@kbn/reporting-plugin/common/constants';
-import { ReportingCore } from '@kbn/reporting-plugin/server';
 import { lastValueFrom } from 'rxjs';
 import { getAbsoluteUrlFactory } from '@kbn/reporting-plugin/common/get_absolute_url';
 import { authorizedUserPreRouting, getCounters } from '@kbn/reporting-plugin/server/routes/lib';
 import { generatePngObservable } from '../..';
+import { ReportingExportTypesCore } from '../../core';
 
 const path = `${API_DIAGNOSE_URL}/screenshot`;
 
-export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Logger) => {
-  const setupDeps = reporting.getPluginSetupDeps();
-  const { router } = setupDeps;
+export const registerDiagnoseScreenshot = (reporting: ReportingExportTypesCore, logger: Logger) => {
+  const { router } = reporting;
 
   router.post(
     { path, validate: {} },

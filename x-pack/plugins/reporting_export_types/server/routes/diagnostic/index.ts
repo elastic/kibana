@@ -6,11 +6,11 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { ReportingCore } from '@kbn/reporting-plugin/server';
+import { ReportingExportTypesCore } from '..';
 import { registerDiagnoseBrowser } from './browser';
 import { registerDiagnoseScreenshot } from './screenshot';
 
-export const registerDiagnosticRoutes = (reporting: ReportingCore, logger: Logger) => {
+export const registerDiagnosticRoutes = (reporting: ReportingExportTypesCore, logger: Logger) => {
   registerDiagnoseBrowser(reporting, logger);
   registerDiagnoseScreenshot(reporting, logger);
 };

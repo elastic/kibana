@@ -18,4 +18,4 @@ export { getExportType as getTypePrintablePdfV2 } from './export_types/printable
 export * from './export_types/common';
 export type { ExportTypesPluginSetupDependencies } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) => new ExportTypesPlugin();
+export const plugin = (initCtx: PluginInitializerContext) => new ExportTypesPlugin(initCtx);

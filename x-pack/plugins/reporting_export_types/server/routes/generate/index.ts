@@ -6,3 +6,6 @@
  */
 
 export { registerJobGenerationRoutes } from './generate_from_jobparams';
+export type { JobParamsDownloadCSV } from './csv_searchsource_immediate';
+
+export { registerGenerateCsvFromSavedObjectImmediate } from './csv_searchsource_immediate';

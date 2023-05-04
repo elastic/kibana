@@ -12,4 +12,5 @@ export { ConfigSchema };
 
 export const config: PluginConfigDescriptor<ReportingExportTypesConfigType> = {
   schema: ConfigSchema,
+  exposeToUsage: {},
 };
