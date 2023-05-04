@@ -183,15 +183,11 @@ describe('ALL - Add Integration', () => {
       cy.get(`[title="${policyName}"]`).click();
       cy.getBySel('PackagePoliciesTableUpgradeButton').click();
       cy.contains(/^Advanced$/).click();
-      cy.getBySel('codeEditorContainer').within(() => {
-        cy.contains(`"${packName}":`);
-      });
+      cy.get('.kibanaCodeEditor').should('contain', `"${packName}":`);
       cy.getBySel('saveIntegration').click();
       cy.get(`a[title="${integrationName}"]`).click();
       cy.contains(/^Advanced$/).click();
-      cy.getBySel('codeEditorContainer').within(() => {
-        cy.contains(`"${packName}":`);
-      });
+      cy.get('.kibanaCodeEditor').should('contain', `"${packName}":`);
       cy.contains('Cancel').click();
       closeModalIfVisible();
       cy.get(`[title="${integrationName}"]`)
