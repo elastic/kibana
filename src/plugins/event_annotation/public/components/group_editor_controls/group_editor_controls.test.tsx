@@ -7,7 +7,7 @@
  */
 
 import React, { ChangeEvent, FormEvent } from 'react';
-import { EventAnnotationGroupConfig } from '../../../common';
+import { EventAnnotationGroupConfig, getDefaultManualAnnotation } from '../../../common';
 import { ReactWrapper } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { GroupEditorControls } from './group_editor_controls';
@@ -16,6 +16,13 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { act } from 'react-dom/test-utils';
 import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
 import { AnnotationEditorControls } from '..';
+
+jest.mock('@elastic/eui', () => {
+  return {
+    ...jest.requireActual('@elastic/eui'),
+    EuiDatePicker: () => <></>, // for some reason this component caused an infinite loop when the props updated
+  };
+});
 
 describe('event annotation group editor', () => {
   const dataViewId = 'my-index-pattern';
@@ -37,11 +44,13 @@ describe('event annotation group editor', () => {
 
   let wrapper: ReactWrapper;
   let updateMock: jest.Mock;
+  let setSelectedAnnotationMock: jest.Mock;
 
   const TagSelector = (_props: { onTagsSelected: (tags: string[]) => void }) => <div />;
 
   beforeEach(async () => {
     updateMock = jest.fn();
+    setSelectedAnnotationMock = jest.fn();
 
     wrapper = mountWithIntl(
       <GroupEditorControls
@@ -57,7 +66,7 @@ describe('event annotation group editor', () => {
           ] as DataView[]
         }
         selectedAnnotation={undefined}
-        setSelectedAnnotation={jest.fn()}
+        setSelectedAnnotation={setSelectedAnnotationMock}
         createDataView={(spec) =>
           Promise.resolve({
             id: spec.id,
@@ -190,9 +199,29 @@ describe('event annotation group editor', () => {
       wrapper.find('button[data-test-subj="addAnnotation"]').simulate('click');
     });
 
-    expect(updateMock).toHaveBeenCalledTimes(1);
+    expect(updateMock).toHaveBeenCalledTimes(2);
     const newAnnotations = (updateMock.mock.calls[0][0] as EventAnnotationGroupConfig).annotations;
     expect(newAnnotations.length).toBe(group.annotations.length + 1);
     expect(wrapper.exists(AnnotationEditorControls)); // annotation controls opened
+  });
+
+  it('incorporates annotation updates into group', () => {
+    const annotations = [getDefaultManualAnnotation('1', ''), getDefaultManualAnnotation('2', '')];
+
+    act(() => {
+      wrapper.setProps({
+        selectedAnnotation: annotations[0],
+        // group: { ...group, annotations },
+      });
+    });
+
+    wrapper.find(AnnotationEditorControls).prop('onAnnotationChange')({
+      ...annotations[0],
+      color: 'newColor',
+    });
+
+    expect(updateMock).toHaveBeenCalledTimes(1);
+    expect(updateMock.mock.calls[0][0].annotations[0]).toMatchInlineSnapshot(`undefined`);
+    expect(setSelectedAnnotationMock).toHaveBeenCalledTimes(1);
   });
 });

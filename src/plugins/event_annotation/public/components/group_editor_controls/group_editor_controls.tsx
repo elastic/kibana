@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiSelect,
-  EuiText,
-  EuiTextArea,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFieldText, EuiForm, EuiFormRow, EuiSelect, EuiText, EuiTextArea } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { DragContext, DragDrop, ReorderProvider } from '@kbn/dom-drag-drop';
@@ -28,7 +20,7 @@ import {
   EmptyDimensionButton,
   QueryInputServices,
 } from '@kbn/visualization-ui-components/public';
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
   createCopiedAnnotation,
@@ -41,7 +33,7 @@ import { getAnnotationAccessor } from './get_annotation_accessor';
 export const GroupEditorControls = ({
   group,
   update,
-  setSelectedAnnotation,
+  setSelectedAnnotation: _setSelectedAnnotation,
   selectedAnnotation,
   TagSelector,
   dataViews: globalDataViews,
@@ -57,8 +49,6 @@ export const GroupEditorControls = ({
   createDataView: (spec: DataViewSpec) => Promise<DataView>;
   queryInputServices: QueryInputServices;
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   // save the spec for the life of the component since the user might change their mind after selecting another data view
   const [adHocDataView, setAdHocDataView] = useState<DataView>();
 
@@ -67,6 +57,19 @@ export const GroupEditorControls = ({
       createDataView(group.dataViewSpec).then(setAdHocDataView);
     }
   }, [createDataView, group.dataViewSpec]);
+
+  const setSelectedAnnotation = useCallback(
+    (newSelection: EventAnnotationConfig) => {
+      update({
+        ...group,
+        annotations: group.annotations.map((annotation) =>
+          annotation.id === newSelection.id ? newSelection : annotation
+        ),
+      });
+      _setSelectedAnnotation(newSelection);
+    },
+    [_setSelectedAnnotation, group, update]
+  );
 
   const dataViews = useMemo(() => {
     const items = [...globalDataViews];
@@ -97,7 +100,7 @@ export const GroupEditorControls = ({
       <EuiText
         size="s"
         css={css`
-          margin-bottom: ${euiTheme.size.base};
+          margin-bottom: ${euiThemeVars.euiSize};
         `}
       >
         <h4>
@@ -178,6 +181,7 @@ export const GroupEditorControls = ({
             <ReorderProvider id="annotationsGroup">
               {group.annotations.map((annotation, index) => (
                 <div
+                  key={index}
                   css={css`
                     margin-top: ${euiThemeVars.euiSizeS};
                   `}
@@ -218,6 +222,7 @@ export const GroupEditorControls = ({
               `}
             >
               <EmptyDimensionButton
+                dataTestSubj="addAnnotation"
                 label="Add annotation"
                 ariaLabel="Add annotation"
                 onClick={() => {
