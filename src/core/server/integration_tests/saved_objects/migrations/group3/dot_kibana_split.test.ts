@@ -405,8 +405,7 @@ describe('split .kibana index into multiple system indices', () => {
     );
   };
 
-  // eslint-disable-next-line jest/no-focused-tests
-  fdescribe('when multiple Kibana migrators run in parallel', () => {
+  describe('when multiple Kibana migrators run in parallel', () => {
     it.each([
       '7.13.0_concurrent_5k_foo.zip',
       '7.13.0_with_unknown_so.zip',
