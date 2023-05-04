@@ -68,7 +68,7 @@ export interface HeaderSectionProps extends HeaderProps {
   toggleQuery?: (status: boolean) => void;
   toggleStatus?: boolean;
   title: string | React.ReactNode;
-  inspectTitle?: string;
+  inspectTitle?: React.ReactNode;
   titleSize?: EuiTitleSize;
   tooltip?: string;
 }
@@ -193,7 +193,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                       queryId={id}
                       multiple={inspectMultiple}
                       showInspectButton={showInspectButton}
-                      title={inspectTitle != null ? inspectTitle : title}
+                      title={inspectTitle ?? title}
                     />
                   </EuiFlexItem>
                 )}
