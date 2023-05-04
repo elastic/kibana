@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "26d2d9935c51f506b7b236984491999f3f6847f2e29fc7147745bdd6de2d775a",
-    "index": "auditbeat-bulk",
+    "index": ".alerts-security.alerts-default",
     "source": {
       "kibana.version": "8.5.0-SNAPSHOT",
       "kibana.alert.rule.category": "Custom Query Rule",
