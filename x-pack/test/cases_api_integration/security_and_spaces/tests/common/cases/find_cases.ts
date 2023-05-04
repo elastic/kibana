@@ -828,7 +828,6 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest: supertestWithoutAuth,
           query: {
             owner: 'securitySolutionFixture',
-            searchFields: 'owner',
           },
           auth: {
             user: obsSec,
