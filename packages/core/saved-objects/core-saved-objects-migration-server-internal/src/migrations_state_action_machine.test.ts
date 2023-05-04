@@ -99,6 +99,7 @@ describe('migrationsStateActionMachine', () => {
       abort,
     });
     const logs = loggingSystemMock.collect(mockLogger);
+    // the 'done' log is the 5th entry in the list
     const doneLog = logs.info.splice(4, 1)[0][0];
     expect(doneLog).toMatch(/\[.my-so-index\] Migration completed after \d+ms/);
     expect(logs).toMatchSnapshot();

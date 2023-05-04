@@ -31,7 +31,7 @@ describe('Stage: indexStateUpdateDone', () => {
     context = createContextMock();
   });
 
-  it('INDEX_STATE_UPDATE_DONE -> DOCUMENTS_UPDATE_INIT when successful and newIndexCreation is false', () => {
+  it('INDEX_STATE_UPDATE_DONE -> DOCUMENTS_UPDATE_INIT when successful and skipDocumentMigration is false', () => {
     const state = createState({
       skipDocumentMigration: false,
     });
@@ -45,7 +45,7 @@ describe('Stage: indexStateUpdateDone', () => {
     });
   });
 
-  it('INDEX_STATE_UPDATE_DONE -> DONE when successful and newIndexCreation is true', () => {
+  it('INDEX_STATE_UPDATE_DONE -> DONE when successful and skipDocumentMigration is true', () => {
     const state = createState({
       skipDocumentMigration: true,
     });
