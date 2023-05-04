@@ -101,7 +101,7 @@ export const TitleDocsPopover: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="indexPatternEditor.titleDocsPopover.useCrossClusterSearchDescription"
-                  defaultMessage="For cross-cluster search, precede with the cluster name followed by a colon(:)."
+                  defaultMessage="For cross-cluster search, precede with the cluster name followed by a colon (:)."
                 />
               </p>
               <p>
