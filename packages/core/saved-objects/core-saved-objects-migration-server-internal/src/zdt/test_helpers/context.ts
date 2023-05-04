@@ -13,7 +13,7 @@ import {
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   SavedObjectTypeRegistry,
-  SavedObjectsMigrationConfigType,
+  type SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
