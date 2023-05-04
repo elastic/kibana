@@ -226,7 +226,7 @@ const enrollHostWithFleet = async ({
   }
 
   // create a file to test file operations; `execute` and `get-file`
-  log.info('Creating a test files on the VM to test file operations');
+  log.info('Creating a test file on the VM to test file operations');
   execa('multipass', [
     'exec',
     vmName,
