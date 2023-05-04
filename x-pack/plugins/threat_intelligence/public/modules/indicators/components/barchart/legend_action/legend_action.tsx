@@ -20,7 +20,6 @@ import {
 } from './test_ids';
 import { BUTTON_LABEL } from './translations';
 import { StackByValueInfo } from '../field_selector';
-import { useTimeZone } from '../../../../../hooks/use_kibana_ui_settings';
 
 export interface IndicatorBarchartLegendActionProps {
   /**
