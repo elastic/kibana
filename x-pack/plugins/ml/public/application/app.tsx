@@ -75,7 +75,7 @@ export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
 const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
   const redirectToMlAccessDeniedPage = async () => {
-    // access maybe be denied to an expired license, so check the license status first
+    // access maybe be denied due to an expired license, so check the license status first
     // if the license has expired, redirect to the license management page
     const license = await firstValueFrom(deps.licensing.license$);
     const redirectPage =
