@@ -342,7 +342,7 @@ Management::
 * Adds secondary authorization header to Transforms in Fleet {kibana-pull}154665[#154665]
 * Adds improvements for supporting counter fields in Transforms {kibana-pull}154171[#154171]
 * Adds `_schedule_now` action to transform list {kibana-pull}153545[#153545]
-* Adds link from Index management {kibana-pull}152640[#152640]
+* Adds link to Discover from Index Management so users can directly look at documents of their indices {kibana-pull}152640[#152640]
 * Adds health information for alerting rule in Transforms{kibana-pull}152561[#152561]
 * Adds improvements for index pattern input in the data view flyout {kibana-pull}152138[#152138]
 * Adds a new description for the metadata field in ingest pipelines {kibana-pull}150935[#150935]
