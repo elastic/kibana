@@ -48,7 +48,7 @@ function RuleSnoozeDescription(): JSX.Element {
       },
     },
   } = useKibana().services;
-  const manageDetectionRulesSnoozeSection = `${manageDetectionRules}#snooze-rules-ui`;
+  const manageDetectionRulesSnoozeSection = `${manageDetectionRules}#edit-rules-settings`;
 
   return (
     <FormattedMessage
