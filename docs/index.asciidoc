@@ -1,4 +1,4 @@
-[[kibana-guide]]
+[id="kibana-guide",canonical-url="https://www.elastic.co/guide/en/kibana/current/index.html"]
 = Kibana Guide
 
 :include-xpack:  true

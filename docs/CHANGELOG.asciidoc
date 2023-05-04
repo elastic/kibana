@@ -112,7 +112,7 @@ Fleet::
 Lens & Visualizations::
 Fixes normalizeTable performance bottleneck in *Lens* {kibana-pull}135792[#135792]
 
-[[release-notes-8.3.2]]
+[id="release-notes-8.3.2",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.3.2
 
 Review the following information about the {kib} 8.3.2 release.
@@ -246,7 +246,7 @@ Platform::
 * Fixes an issue where importing/copying the same saved object to the same space multiple times using the "Check for existing objects" option could fail or cause duplicates to be created {kibana-pull}135358[#135358]
 * Fixes a bug where {es} nodes that stopped, then started again, were unreachable by {kib} for a given amount of requests when {kib} was configured to connect to multiple {es} nodes {kibana-pull}134628[#134628]
 
-[[release-notes-8.3.0]]
+[id="release-notes-8.3.0",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.3.0
 
 Review the following information about the {kib} 8.3.0 release.
