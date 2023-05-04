@@ -105,13 +105,14 @@ export function Controls() {
   const cy = useContext(CytoscapeContext);
   const { urlParams } = useLegacyUrlParams();
 
-  const {
-    query: { kuery },
-  } = useAnyOfApmParams(
-    '/service-map',
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
-  );
+  // const {
+  //   query: { kuery },
+  // } = useAnyOfApmParams(
+  //   '/service-map',
+  //   '/services/{serviceName}/service-map',
+  //   '/mobile-services/{serviceName}/service-map'
+  // );
+  const kuery = '';
 
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
   const duration = parseInt(theme.eui.euiAnimSpeedFast, 10);
