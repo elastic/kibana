@@ -73,6 +73,7 @@
     "management": ["src/legacy/core_plugins/management", "src/plugins/management"],
     "monaco": "packages/kbn-monaco/src",
     "navigation": "src/plugins/navigation",
+    "navigationEmbeddable": "src/plugins/navigation_embeddable",
     "newsfeed": "src/plugins/newsfeed",
     "presentationUtil": "src/plugins/presentation_util",
     "randomSampling": "x-pack/packages/kbn-random-sampling",
