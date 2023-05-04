@@ -42,6 +42,7 @@ describe('ESGeoGridSource', () => {
     get() {
       return {
         getIndexPattern: () => 'foo-*',
+        getName: () => 'foo-*',
         fields: {
           getByName() {
             return {

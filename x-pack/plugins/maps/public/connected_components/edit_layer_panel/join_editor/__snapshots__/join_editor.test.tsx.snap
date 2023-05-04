@@ -39,21 +39,26 @@ exports[`Should render join editor 1`] = `
     onChange={[Function]}
     onRemove={[Function]}
   />
-  <EuiTextAlign
-    textAlign="center"
+  <EuiSkeletonText
+    isLoading={false}
+    lines={1}
   >
-    <AddJoinButton
-      disabledReason=""
-      isDisabled={true}
-      label="Add spatial join"
-      onClick={[Function]}
-    />
-    <AddJoinButton
-      disabledReason="Vector tiles can only support a single join."
-      isDisabled={false}
-      label="Add term join"
-      onClick={[Function]}
-    />
-  </EuiTextAlign>
+    <EuiTextAlign
+      textAlign="center"
+    >
+      <AddJoinButton
+        disabledReason=""
+        isDisabled={true}
+        label="Add spatial join"
+        onClick={[Function]}
+      />
+      <AddJoinButton
+        disabledReason="Vector tiles can only support a single join."
+        isDisabled={false}
+        label="Add term join"
+        onClick={[Function]}
+      />
+    </EuiTextAlign>
+  </EuiSkeletonText>
 </div>
 `;

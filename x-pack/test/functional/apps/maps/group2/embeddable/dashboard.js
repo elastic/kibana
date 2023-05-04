@@ -88,7 +88,7 @@ export default function ({ getPageObjects, getService }) {
       await inspector.close();
 
       expect(singleExampleRequest).to.be(true);
-      expect(selectedExampleRequest).to.equal('logstash-*');
+      expect(selectedExampleRequest).to.equal('logstash-* grid request');
     });
 
     it('should apply container state (time, query, filters) to embeddable when loaded', async () => {
