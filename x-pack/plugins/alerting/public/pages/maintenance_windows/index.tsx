@@ -37,10 +37,13 @@ export const MaintenanceWindowsPage = React.memo(() => {
     docLinks,
   } = useKibana().services;
   const { isAtLeastPlatinum } = useLicense();
+  const hasLicense = isAtLeastPlatinum();
 
   const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
 
-  const { isLoading, maintenanceWindows, refetch } = useFindMaintenanceWindows();
+  const { isLoading, maintenanceWindows, refetch } = useFindMaintenanceWindows({
+    enabled: hasLicense,
+  });
 
   useBreadcrumbs(AlertingDeepLinkId.maintenanceWindows);
 
@@ -56,7 +59,6 @@ export const MaintenanceWindowsPage = React.memo(() => {
     maintenanceWindows.length === 0 &&
     showWindowMaintenance &&
     writeWindowMaintenance;
-  const hasLicense = isAtLeastPlatinum();
 
   const readOnly = showWindowMaintenance && !writeWindowMaintenance;
 

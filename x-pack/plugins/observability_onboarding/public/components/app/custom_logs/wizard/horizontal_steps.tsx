@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiStepsHorizontal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useWizard } from '.';
 
 export function HorizontalSteps() {
-  const { getPath } = useWizard();
+  const { getPath, goToStep } = useWizard();
   const [currentStep, ...previousSteps] = getPath().reverse();
 
   function getStatus(stepKey: ReturnType<typeof getPath>[0]) {
@@ -23,28 +24,63 @@ export function HorizontalSteps() {
     return 'incomplete';
   }
 
+  function isDisabled(stepKey: ReturnType<typeof getPath>[0]) {
+    return getStatus(stepKey) === 'incomplete';
+  }
+
   return (
     <EuiStepsHorizontal
       steps={[
         {
-          title: 'Name logs',
-          status: getStatus('nameLogs'),
-          onClick: () => {},
+          title: i18n.translate(
+            'xpack.observability_onboarding.steps.selectLogs',
+            {
+              defaultMessage: 'Select logs',
+            }
+          ),
+          status: getStatus('selectLogs'),
+          onClick: () => {
+            goToStep('selectLogs');
+          },
         },
         {
-          title: 'Configure logs',
+          title: i18n.translate(
+            'xpack.observability_onboarding.steps.configureLogs',
+            {
+              defaultMessage: 'Configure logs',
+            }
+          ),
           status: getStatus('configureLogs'),
-          onClick: () => {},
+          disabled: isDisabled('configureLogs'),
+          onClick: () => {
+            goToStep('configureLogs');
+          },
         },
         {
-          title: 'Install shipper',
+          title: i18n.translate(
+            'xpack.observability_onboarding.steps.installShipper',
+            {
+              defaultMessage: 'Install shipper',
+            }
+          ),
           status: getStatus('installElasticAgent'),
-          onClick: () => {},
+          disabled: isDisabled('installElasticAgent'),
+          onClick: () => {
+            goToStep('installElasticAgent');
+          },
         },
         {
-          title: 'Import data',
-          status: getStatus('importData'),
-          onClick: () => {},
+          title: i18n.translate(
+            'xpack.observability_onboarding.steps.collectLogs',
+            {
+              defaultMessage: 'Collect logs',
+            }
+          ),
+          status: getStatus('collectLogs'),
+          disabled: isDisabled('collectLogs'),
+          onClick: () => {
+            goToStep('collectLogs');
+          },
         },
       ]}
     />

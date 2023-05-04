@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { CommentsResponse } from '@kbn/cases-plugin/common/api';
+import { CommentsFindResponse } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getPostCaseRequest,
@@ -26,6 +26,7 @@ import {
   getSpaceUrlPrefix,
   createCase,
   superUserSpace1Auth,
+  findAttachments,
 } from '../../../../common/lib/api';
 
 import {
@@ -221,10 +222,11 @@ export default ({ getService }: FtrProviderContext): void => {
             caseID: obsCase.id,
           },
         ]) {
-          const { body: caseComments }: { body: CommentsResponse } = await supertestWithoutAuth
-            .get(`${getSpaceUrlPrefix(space1)}${CASES_URL}/${scenario.caseID}/comments/_find`)
-            .auth(scenario.user.username, scenario.user.password)
-            .expect(200);
+          const caseComments = await findAttachments({
+            supertest: supertestWithoutAuth,
+            caseId: scenario.caseID,
+            auth: { user: scenario.user, space: space1 },
+          });
 
           ensureSavedObjectIsAuthorized(
             caseComments.comments,
@@ -279,7 +281,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: obsCase.id,
         });
 
-        const { body: res }: { body: CommentsResponse } = await supertestWithoutAuth
+        const { body: res }: { body: CommentsFindResponse } = await supertestWithoutAuth
           .get(
             `${getSpaceUrlPrefix('space1')}${CASES_URL}/${
               obsCase.id
