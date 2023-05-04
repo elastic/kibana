@@ -2,6 +2,14 @@ env:
   MY_VAR: SomeValue
 
 steps:
+  - command: .buildkite/scripts/lifecycle/pre_build.sh
+    label: Pre-Build
+    timeout_in_minutes: 10
+    agents:
+      queue: kibana-default
+
+  - wait
+
   - command: 'ts-node .buildkite/scripts/steps/gh_labels.ts BUILDKITE_MESSAGE'
     label: Grab GH Labels by parsing a pre-existing env var
     agents:
@@ -11,13 +19,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-  # - command: .buildkite/scripts/lifecycle/pre_build.sh
-  #   label: Pre-Build
-  #   timeout_in_minutes: 10
-  #   agents:
-  #     queue: kibana-default
-
-  # - wait
 
   # - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
   #   label: 'Pick Test Group Run Order'
