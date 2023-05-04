@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { keyBy, partition } from 'lodash';
@@ -19,6 +19,7 @@ import type {
   RegistryStream,
   UpdatePackagePolicy,
 } from '../../common';
+import { SO_SEARCH_LIMIT } from '../../common';
 
 import {
   doesPackageHaveIntegrations,
@@ -41,6 +42,7 @@ import { SECRETS_INDEX } from '../constants';
 import { auditLoggingService } from './audit_logging';
 
 import { appContextService } from './app_context';
+import { packagePolicyService } from './package_policy';
 
 interface SecretPath {
   path: string;
@@ -103,7 +105,84 @@ export async function createSecrets(opts: {
   }
 }
 
-export async function deleteSecrets(opts: {
+export async function deleteSecretsIfNotReferenced(opts: {
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  ids: string[];
+}): Promise<void> {
+  const { esClient, soClient, ids } = opts;
+  const logger = appContextService.getLogger();
+  const packagePoliciesUsingSecrets = await findPackagePoliciesUsingSecrets({
+    soClient,
+    ids,
+  });
+
+  if (packagePoliciesUsingSecrets.length) {
+    packagePoliciesUsingSecrets.forEach(({ id, policyIds }) => {
+      logger.debug(
+        `Not deleting secret with id ${id} is still in use by package policies: ${policyIds.join(
+          ', '
+        )}`
+      );
+    });
+  }
+
+  const secretsToDelete = ids.filter((id) => {
+    return !packagePoliciesUsingSecrets.some((packagePolicy) => packagePolicy.id === id);
+  });
+
+  if (!secretsToDelete.length) {
+    return;
+  }
+
+  await _deleteSecrets({
+    esClient,
+    ids: secretsToDelete,
+  });
+}
+
+export async function findPackagePoliciesUsingSecrets(opts: {
+  soClient: SavedObjectsClientContract;
+  ids: string[];
+}): Promise<Array<{ id: string; policyIds: string[] }>> {
+  const { soClient, ids } = opts;
+  const packagePolicies = await packagePolicyService.list(soClient, {
+    kuery: `ingest-package-policies.secret_references.id: (${ids.join(' or ')})`,
+    perPage: SO_SEARCH_LIMIT,
+    page: 1,
+  });
+
+  if (!packagePolicies.total) {
+    return [];
+  }
+
+  // create a map of secret_references.id to package policy id
+  const packagePoliciesBySecretId = packagePolicies.items.reduce((acc, packagePolicy) => {
+    packagePolicy?.secret_references?.forEach((secretReference) => {
+      if (!acc[secretReference.id]) {
+        acc[secretReference.id] = [];
+      }
+      acc[secretReference.id].push(packagePolicy.id);
+    });
+    return acc;
+  }, {} as Record<string, string[]>);
+
+  const res = [];
+
+  for (const id of ids) {
+    if (packagePoliciesBySecretId[id]) {
+      res.push({
+        id,
+        policyIds: packagePoliciesBySecretId[id],
+      });
+    }
+  }
+
+  return res;
+}
+
+// use deleteSecretsIfNotReferenced
+export async function _deleteSecrets(opts: {
   esClient: ElasticsearchClient;
   ids: string[];
 }): Promise<void> {
