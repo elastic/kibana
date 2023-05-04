@@ -83,11 +83,9 @@ export function retryResultSeconds(
 let SlackApiUrl = 'https://slack.com/api/';
 
 export function internalSetSlackApiURL(url: string): void {
-  console.log('SET URL', url);
   SlackApiUrl = url;
 }
 
 export function internalGetSlackApiURL(): string {
-  console.log('GET SLACK URL', SlackApiUrl);
   return SlackApiUrl;
 }
