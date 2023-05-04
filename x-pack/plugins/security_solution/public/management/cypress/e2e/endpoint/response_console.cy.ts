@@ -85,12 +85,11 @@ describe('Response console', () => {
     });
   });
 
-  describe('User journey for Processes commands: list, kill and suspend process.', () => {
+  describe('User journey for Processes operations: list, kill and suspend process', () => {
     let response: IndexedFleetEndpointPolicyResponse;
     let initialAgentData: Agent;
     let cronPID: string;
     let newCronPID: string;
-    const filePath = `/home/ubuntu/32-mb-test-file`;
 
     before(() => {
       getAgentByHostName(endpointHostname).then((agentData) => {
@@ -168,6 +167,34 @@ describe('Response console', () => {
       inputConsoleCommand(`suspend-process --pid ${newCronPID}`);
       submitCommand();
       waitForCommandToBeExecuted('suspend-process');
+    });
+  });
+
+  describe('User journey for Processes commands: list, kill and suspend process.', () => {
+    let response: IndexedFleetEndpointPolicyResponse;
+    let initialAgentData: Agent;
+
+    const filePath = `/home/ubuntu/32-mb-test-file`;
+
+    before(() => {
+      getAgentByHostName(endpointHostname).then((agentData) => {
+        initialAgentData = agentData;
+      });
+
+      getEndpointIntegrationVersion().then((version) =>
+        createAgentPolicyTask(version).then((data) => {
+          response = data;
+        })
+      );
+    });
+
+    after(() => {
+      if (initialAgentData?.policy_id) {
+        reassignAgentPolicy(initialAgentData.id, initialAgentData.policy_id);
+      }
+      if (response) {
+        cy.task('deleteIndexedFleetEndpointPolicies', response);
+      }
     });
 
     it('"get-file --path" - should retrieve a file', () => {
