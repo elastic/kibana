@@ -32,6 +32,10 @@ export function TransformManagementProvider({ getService }: FtrProviderContext) 
       await testSubjects.existOrFail('transformCreateFirstButton');
     },
 
+    async assertTransformsReauthorizeCalloutExists() {
+      await testSubjects.existOrFail('transformPageReauthorizeCallout');
+    },
+
     async assertCreateFirstTransformButtonEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled('transformCreateFirstButton');
       expect(isEnabled).to.eql(

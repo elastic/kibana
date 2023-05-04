@@ -21,9 +21,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const transform = getService('transform');
 
-  // If transform was created with sufficient -> should still authorize and start
-  // If transform was created with insufficient -> should still authorize and start
-
   function getTransformIdByUser(username: USER) {
     return `transform-by-${username}`;
   }
@@ -51,6 +48,8 @@ export default ({ getService }: FtrProviderContext) => {
     await transform.api.deleteIndices(destinationIndex);
   }
 
+  // If transform was created with sufficient permissions -> should create and start
+  // If transform was created with insufficient permissions -> should create but not start
   describe('/api/transform/reauthorize_transforms', function () {
     const apiKeysForTransformUsers = new Map<USER, SecurityCreateApiKeyResponse>();
 
