@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
 import { IBasePath } from '@kbn/core/server';
@@ -13,8 +13,10 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import {
   SyntheticsCommonState,
-  SyntheticsCommonStateType,
+  SyntheticsCommonStateCodec,
+  SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
+import { getSyntheticsMonitorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
 import { AlertOverviewStatus } from './status_rule/status_rule_executor';
 
@@ -24,7 +26,7 @@ export const updateState = (
   meta?: SyntheticsCommonState['meta']
 ): SyntheticsCommonState => {
   const now = new Date().toISOString();
-  const decoded = SyntheticsCommonStateType.decode(state);
+  const decoded = SyntheticsCommonStateCodec.decode(state);
   if (!isRight(decoded)) {
     const triggerVal = isTriggeredNow ? now : undefined;
     return {
@@ -62,6 +64,30 @@ export const generateAlertMessage = (messageTemplate: string, fields: Record<str
   return Mustache.render(messageTemplate, { context: { ...fields }, state: { ...fields } });
 };
 
+export const getFullViewInAppMessage = (
+  basePath: IBasePath,
+  spaceId: string,
+  relativeViewInAppUrl: string
+) => {
+  const relativeLinkLabel = i18n.translate(
+    'xpack.synthetics.alerts.monitorStatus.relativeLink.label',
+    {
+      defaultMessage: `Relative link`,
+    }
+  );
+  const absoluteLinkLabel = i18n.translate(
+    'xpack.synthetics.alerts.monitorStatus.absoluteLink.label',
+    {
+      defaultMessage: `Link`,
+    }
+  );
+  if (basePath.publicBaseUrl) {
+    return `${absoluteLinkLabel}: ${getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl)}`;
+  } else {
+    return `${relativeLinkLabel}: ${getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl)}`;
+  }
+};
+
 export const getViewInAppUrl = (
   basePath: IBasePath,
   spaceId: string,
@@ -73,6 +99,29 @@ export const getAlertDetailsUrl = (
   spaceId: string,
   alertUuid: string | null
 ) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
+
+export const getRelativeViewInAppUrl = ({
+  configId,
+  locationId,
+  errorStartedAt,
+  dateRangeEnd = 'now',
+}: {
+  configId: string;
+  locationId: string;
+  errorStartedAt: string;
+  dateRangeEnd?: string;
+}) => {
+  const dateRangeStart = moment(errorStartedAt).subtract('5', 'minutes').toISOString();
+
+  const relativeViewInAppUrl = getSyntheticsMonitorRouteFromMonitorId({
+    configId,
+    dateRangeEnd,
+    dateRangeStart,
+    locationId,
+  });
+
+  return relativeViewInAppUrl;
+};
 
 export const setRecoveredAlertsContext = ({
   alertFactory,
@@ -94,34 +143,81 @@ export const setRecoveredAlertsContext = ({
     const recoveredAlertId = alert.getId();
     const alertUuid = getAlertUuid?.(recoveredAlertId) || undefined;
 
-    const state = alert.getState() as SyntheticsCommonState;
+    const state = alert.getState() as SyntheticsCommonState & SyntheticsMonitorStatusAlertState;
 
     let recoveryReason = '';
+    let recoveryStatus = 'has recovered.';
     let isUp = false;
+    let linkMessage = '';
 
     if (state?.idWithLocation && staleDownConfigs[state.idWithLocation]) {
       const { idWithLocation } = state;
       const downConfig = staleDownConfigs[idWithLocation];
       if (downConfig.isDeleted) {
-        recoveryReason = i18n.translate('xpack.synthetics.alerts.monitorStatus.deleteMonitor', {
-          defaultMessage: `Monitor has been deleted`,
-        });
+        recoveryStatus = i18n.translate(
+          'xpack.synthetics.alerts.monitorStatus.deleteMonitor.status',
+          {
+            defaultMessage: `has been deleted`,
+          }
+        );
+        recoveryReason = i18n.translate(
+          'xpack.synthetics.alerts.monitorStatus.deleteMonitor.reason',
+          {
+            defaultMessage: `The monitor has been deleted`,
+          }
+        );
       } else if (downConfig.isLocationRemoved) {
-        recoveryReason = i18n.translate('xpack.synthetics.alerts.monitorStatus.removedLocation', {
-          defaultMessage: `Location has been removed from the monitor`,
-        });
+        recoveryStatus = i18n.translate(
+          'xpack.synthetics.alerts.monitorStatus.removedLocation.reason',
+          {
+            defaultMessage: `has recovered`,
+          }
+        );
+        recoveryReason = i18n.translate(
+          'xpack.synthetics.alerts.monitorStatus.removedLocation.reason',
+          {
+            defaultMessage: `This location has been removed from the monitor`,
+          }
+        );
       }
     }
 
     if (state?.idWithLocation && upConfigs[state.idWithLocation]) {
-      isUp = Boolean(upConfigs[state.idWithLocation]) || false;
-      recoveryReason = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck', {
-        defaultMessage: `Monitor has recovered with status Up`,
+      const { idWithLocation, configId, locationId, errorStartedAt } = state;
+      const upConfig = upConfigs[idWithLocation];
+      isUp = Boolean(upConfig) || false;
+      const upTimestamp = upConfig.ping['@timestamp'];
+      const checkedAt = moment(upTimestamp).format('HH:MM:SS on DD/MM/YYYY');
+      // const diff = moment(errorStartedAt).diff(upTimestamp, 'hours');
+      // console.log('duration', diff);
+      recoveryStatus = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.status', {
+        defaultMessage: `is now Up`,
       });
+      recoveryReason = i18n.translate('xpack.synthetics.alerts.monitorStatus.upCheck.reason', {
+        defaultMessage: `The monitor returned to an Up state at {checkedAt}`,
+        values: {
+          checkedAt,
+        },
+      });
+
+      const dateRangeEnd = moment(upTimestamp).add('5', 'minutes').toISOString();
+
+      const relativeViewInAppUrl = getRelativeViewInAppUrl({
+        configId,
+        locationId,
+        errorStartedAt,
+        dateRangeEnd,
+      });
+
+      if (basePath && spaceId && relativeViewInAppUrl) {
+        linkMessage = getFullViewInAppMessage(basePath, spaceId, relativeViewInAppUrl);
+      }
     }
 
     alert.setContext({
       ...state,
+      recoveryStatus,
+      linkMessage,
       ...(isUp ? { status: 'up' } : {}),
       ...(recoveryReason ? { [RECOVERY_REASON]: recoveryReason } : {}),
       ...(basePath && spaceId && alertUuid

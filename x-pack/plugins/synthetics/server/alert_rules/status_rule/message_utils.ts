@@ -43,7 +43,15 @@ export const getMonitorSummary = (
 ): MonitorSummaryStatusRule => {
   const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
   const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
-  const checkedAt = moment(monitorInfo['@timestamp']).format('LLL');
+  const checkedAt = moment(monitorInfo['@timestamp']).format('HH:MM:SS on DD/MM/YYYY');
+  const typeToLabelMap: Record<string, string> = {
+    http: 'HTTP',
+    tcp: 'TCP',
+    icmp: 'ICMP',
+    browser: i18n.translate('xpack.synthetics.alertRules.monitorStatus.browser.label', {
+      defaultMessage: 'browser',
+    }),
+  };
 
   return {
     checkedAt,
@@ -52,7 +60,7 @@ export const getMonitorSummary = (
     monitorUrl: monitorInfo.url?.full!,
     monitorId: monitorInfo.monitor?.id,
     monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
-    monitorType: monitorInfo.monitor?.type,
+    monitorType: typeToLabelMap[monitorInfo.monitor?.type] || monitorInfo.monitor?.type,
     lastErrorMessage: monitorInfo.error?.message!,
     locationName: monitorInfo.observer?.geo?.name!,
     hostName: monitorInfo.agent?.name!,

@@ -268,7 +268,7 @@ describe('Alert Actions factory', () => {
           dedupKey: expect.any(String),
           eventAction: 'resolve',
           summary:
-            'The alert for the monitor {{context.monitorName}} checking {{{context.monitorUrl}}} from {{context.locationName}} is no longer active: {{context.recoveryReason}}.',
+            'The alert for {{context.monitorName}} ({{context.locationName}}) {{context.monitorType}} monitor is no longer active: {{context.recoveryReason}}.\nThe latest error received was: "{{{context.lastErrorMessage}}}".\n{{{context.linkMessage}}}',
         },
       },
       {
@@ -378,7 +378,7 @@ describe('Alert Actions factory', () => {
           dedupKey: expect.any(String),
           eventAction: 'resolve',
           summary:
-            'The alert for the monitor {{context.monitorName}} checking {{{context.monitorUrl}}} from {{context.locationName}} is no longer active: {{context.recoveryReason}}.',
+            'The alert for {{context.monitorName}} ({{context.locationName}}) {{context.monitorType}} monitor is no longer active: {{context.recoveryReason}}.\nThe latest error received was: "{{{context.lastErrorMessage}}}".\n{{{context.linkMessage}}}',
         },
       },
       {
@@ -406,7 +406,7 @@ describe('Alert Actions factory', () => {
             eventAction: 'trigger',
             severity: 'error',
             summary:
-              'Monitor {{context.monitorName}} with url {{{context.monitorUrl}}} from {{context.observerLocation}} {{{context.statusMessage}}} The latest error message is {{{context.latestErrorMessage}}}',
+              '{{context.monitorName}} {{context.monitorType}} monitor is {{{context.status}}} from {{context.locationName}} at {{context.checkedAt}}.\nThe error received is: "{{{context.lastErrorMessage}}}".\n{{{context.linkMessage}}}',
           },
           id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         },
@@ -433,10 +433,9 @@ describe('Alert Actions factory', () => {
             path: '',
             text: '',
           },
-          message:
-            'The alert for the monitor {{context.monitorName}} checking {{{context.monitorUrl}}} from {{context.locationName}} is no longer active: {{context.recoveryReason}}.',
+          message: `The alert for {{context.monitorName}} ({{context.locationName}}) {{context.monitorType}} monitor is no longer active: {{context.recoveryReason}}.\nThe latest error received was: "{{{context.lastErrorMessage}}}".\n{{{context.linkMessage}}}`,
           subject:
-            'The monitor {{context.monitorName}} checking {{{context.monitorUrl}}} has recovered.',
+            '{{context.monitorName}} ({{context.locationName}}) {{context.recoveryStatus}} - Elastic Synthetics',
           to: ['test@email.com'],
         },
       },
@@ -450,9 +449,9 @@ describe('Alert Actions factory', () => {
             path: '',
             text: '',
           },
-          message:
-            'The monitor {{context.monitorName}} checking {{{context.monitorUrl}}} from {{context.locationName}} last ran at {{context.checkedAt}} and is {{{context.status}}}. The last error received is: {{{context.lastErrorMessage}}}.',
-          subject: 'The monitor {{context.monitorName}} checking {{{context.monitorUrl}}} is down.',
+          message: `{{context.monitorName}} {{context.monitorType}} monitor is {{{context.status}}} from {{context.locationName}} at {{context.checkedAt}}.\nThe error received is: "{{{context.lastErrorMessage}}}".\n{{{context.linkMessage}}}`,
+          subject:
+            '{{context.monitorName}} ({{context.locationName}}) is Down - Elastic Synthetics',
           to: ['test@email.com'],
         },
       },

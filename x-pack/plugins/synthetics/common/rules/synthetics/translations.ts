@@ -11,33 +11,35 @@ export const SyntheticsMonitorStatusTranslations = {
   defaultActionMessage: i18n.translate(
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultActionMessage',
     {
-      defaultMessage:
-        'The monitor {monitorName} checking {monitorUrl} from {locationName} last ran at {checkedAt} and is {status}. The last error received is: {lastErrorMessage}.',
+      defaultMessage: `{monitorName} {monitorType} monitor is {status} from {locationName} at {checkedAt}.\nThe error received is: "{lastErrorMessage}".\n{linkMessage}`,
       values: {
         monitorName: '{{context.monitorName}}',
-        monitorUrl: '{{{context.monitorUrl}}}',
+        monitorType: '{{context.monitorType}}',
         status: '{{{context.status}}}',
         lastErrorMessage: '{{{context.lastErrorMessage}}}',
         locationName: '{{context.locationName}}',
         checkedAt: '{{context.checkedAt}}',
+        linkMessage: '{{{context.linkMessage}}}',
       },
     }
   ),
   defaultSubjectMessage: i18n.translate(
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultSubjectMessage',
     {
-      defaultMessage: 'The monitor {monitorName} checking {monitorUrl} is down.',
+      defaultMessage: '{monitorName} ({locationName}) is Down - Elastic Synthetics',
       values: {
         monitorName: '{{context.monitorName}}',
-        monitorUrl: '{{{context.monitorUrl}}}',
+        locationName: '{{context.locationName}}',
       },
     }
   ),
   defaultRecoverySubjectMessage: i18n.translate(
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultRecoverySubjectMessage',
     {
-      defaultMessage: 'The monitor {monitorName} checking {monitorUrl} has recovered.',
+      defaultMessage: '{monitorName} ({locationName}) {recoveryStatus} - Elastic Synthetics',
       values: {
+        recoveryStatus: '{{context.recoveryStatus}}',
+        locationName: '{{context.locationName}}',
         monitorName: '{{context.monitorName}}',
         monitorUrl: '{{{context.monitorUrl}}}',
       },
@@ -47,12 +49,15 @@ export const SyntheticsMonitorStatusTranslations = {
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultRecoveryMessage',
     {
       defaultMessage:
-        'The alert for the monitor {monitorName} checking {monitorUrl} from {locationName} is no longer active: {recoveryReason}.',
+        'The alert for {monitorName} ({locationName}) {monitorType} monitor is no longer active: {recoveryReason}.\nThe latest error received was: "{lastErrorMessage}".\n{linkMessage}',
       values: {
         monitorName: '{{context.monitorName}}',
+        monitorType: '{{context.monitorType}}',
         monitorUrl: '{{{context.monitorUrl}}}',
         locationName: '{{context.locationName}}',
+        lastErrorMessage: '{{{context.lastErrorMessage}}}',
         recoveryReason: '{{context.recoveryReason}}',
+        linkMessage: '{{{context.linkMessage}}}',
       },
     }
   ),

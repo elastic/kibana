@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { isEmpty } from 'lodash';
+import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
-import { getSyntheticsMonitorRouteFromMonitorId } from '../../../common/utils/get_synthetics_monitor_url';
-import { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
+import {
+  SyntheticsCommonState,
+  SyntheticsMonitorStatusAlertState,
+} from '../../../common/runtime_types/alert_rules/common';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { OverviewStatus } from '../../../common/runtime_types';
 import { StatusRuleExecutor } from './status_rule_executor';
@@ -24,6 +25,8 @@ import {
   updateState,
   getAlertDetailsUrl,
   getViewInAppUrl,
+  getRelativeViewInAppUrl,
+  getFullViewInAppMessage,
 } from '../common';
 import { getActionVariables } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
@@ -70,7 +73,6 @@ export const registerSyntheticsStatusCheckRule = (
       const {
         alertFactory,
         getAlertUuid,
-        getAlertStartedDate,
         savedObjectsClient,
         scopedClusterClient,
         alertWithLifecycle,
@@ -98,10 +100,20 @@ export const registerSyntheticsStatusCheckRule = (
           fields: getMonitorAlertDocument(monitorSummary),
         });
         const alertUuid = getAlertUuid(alertId);
-        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
+        const alertState = alert.getState() as SyntheticsMonitorStatusAlertState;
+        const errorStartedAt: string = alertState.errorStartedAt || ping['@timestamp'];
+
+        const relativeViewInAppUrl = getRelativeViewInAppUrl({
+          configId,
+          errorStartedAt,
+          locationId,
+        });
 
         const context = {
           ...monitorSummary,
+          errorStartedAt,
+          linkMessage: getFullViewInAppMessage(basePath, spaceId, relativeViewInAppUrl),
+          [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
         };
 
         alert.replaceState({
@@ -110,17 +122,9 @@ export const registerSyntheticsStatusCheckRule = (
           idWithLocation,
         });
 
-        const relativeViewInAppUrl = getSyntheticsMonitorRouteFromMonitorId({
-          configId,
-          dateRangeEnd: 'now',
-          dateRangeStart: indexedStartedAt,
-          locationId,
-        });
-
         alert.scheduleActions(MONITOR_STATUS.id, {
-          [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid),
-          [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
           ...context,
+          [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid),
         });
       });
 
