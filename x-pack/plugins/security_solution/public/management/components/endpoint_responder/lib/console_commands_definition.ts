@@ -32,6 +32,10 @@ import {
 import { getCommandAboutInfo } from './get_command_about_info';
 
 import { validateUnitOfTime } from './utils';
+import {
+  CONSOLE_RESPONSE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -67,61 +71,6 @@ const executeTimeoutValidator = (argData: ParsedArgData): true | string => {
   }
 };
 
-const commandToCapabilitiesPrivilegesMap = new Map<
-  ConsoleResponseActionCommands,
-  { capability: EndpointCapabilities; privilege: (privileges: EndpointPrivileges) => boolean }
->([
-  [
-    'isolate',
-    {
-      capability: 'isolation',
-      privilege: (privileges: EndpointPrivileges) => privileges.canIsolateHost,
-    },
-  ],
-  [
-    'release',
-    {
-      capability: 'isolation',
-      privilege: (privileges: EndpointPrivileges) => privileges.canUnIsolateHost,
-    },
-  ],
-  [
-    'kill-process',
-    {
-      capability: 'kill_process',
-      privilege: (privileges: EndpointPrivileges) => privileges.canKillProcess,
-    },
-  ],
-  [
-    'suspend-process',
-    {
-      capability: 'suspend_process',
-      privilege: (privileges: EndpointPrivileges) => privileges.canSuspendProcess,
-    },
-  ],
-  [
-    'processes',
-    {
-      capability: 'running_processes',
-      privilege: (privileges: EndpointPrivileges) => privileges.canGetRunningProcesses,
-    },
-  ],
-  [
-    'get-file',
-    {
-      capability: 'get_file',
-      privilege: (privileges: EndpointPrivileges) => privileges.canWriteFileOperations,
-    },
-  ],
-  [
-    'execute',
-    {
-      capability: 'execute',
-      privilege: (privileges: EndpointPrivileges) => privileges.canWriteExecuteOperations,
-    },
-  ],
-]);
-
 export const getRbacControl = ({
   commandName,
   privileges,
@@ -129,14 +78,14 @@ export const getRbacControl = ({
   commandName: ConsoleResponseActionCommands;
   privileges: EndpointPrivileges;
 }): boolean => {
-  return Boolean(commandToCapabilitiesPrivilegesMap.get(commandName)?.privilege(privileges));
+  return Boolean(privileges[RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[commandName]]);
 };
 
 const capabilitiesAndPrivilegesValidator = (command: Command): true | string => {
   const privileges = command.commandDefinition.meta.privileges;
   const endpointCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
   const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
-  const responderCapability = commandToCapabilitiesPrivilegesMap.get(commandName)?.capability;
+  const responderCapability = CONSOLE_RESPONSE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
   let errorMessage = '';
   if (!responderCapability) {
     errorMessage = errorMessage.concat(UPGRADE_ENDPOINT_FOR_RESPONDER);
@@ -194,7 +143,8 @@ export const getEndpointConsoleCommands = ({
   const isExecuteEnabled = ExperimentalFeaturesService.get().responseActionExecuteEnabled;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
-    const responderCapability = commandToCapabilitiesPrivilegesMap.get(commandName)?.capability;
+    const responderCapability =
+      CONSOLE_RESPONSE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
     if (responderCapability) {
       return endpointCapabilities.includes(responderCapability);
     }
