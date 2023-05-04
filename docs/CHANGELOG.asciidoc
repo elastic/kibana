@@ -368,7 +368,6 @@ Querying & Filtering::
 * Adds improvements to the saved query terminology {kibana-pull}154517[#154517]
 
 Security::
-* Adds the ability to configure remote index privileges directly from Role management {kibana-pull}154948[#154948]
 * Adds the Cloud_defend process index as a source and merged process event handling {kibana-pull}153213[#153213]
 
 [float]
