@@ -2430,7 +2430,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       index: this.getIndexForType(type),
       refresh,
       require_alias: true,
-      _source: true,
+      _source: false,
       body: {
         script: {
           source: `
