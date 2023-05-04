@@ -17,21 +17,14 @@ interface MonitorErrorsCountProps {
   to: string;
   monitorId: string[];
   id: string;
-  location: ReturnType<typeof useSelectedLocation>;
 }
 
-export const MonitorErrorsCount = ({
-  monitorId,
-  from,
-  to,
-  id,
-  location,
-}: MonitorErrorsCountProps) => {
+export const MonitorErrorsCount = ({ monitorId, from, to, id }: MonitorErrorsCountProps) => {
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
-  const selectedLocation = location;
+  const selectedLocation = useSelectedLocation();
 
   const time = useMemo(() => ({ from, to }), [from, to]);
 

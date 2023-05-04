@@ -41,7 +41,6 @@ export const ErrorsTabContent = ({
               <EuiFlexItem>
                 {monitorId && (
                   <MonitorErrorsCount
-                    location={location}
                     from={time.from}
                     to={time.to}
                     monitorId={[monitorId]}

@@ -38,7 +38,6 @@ export const deleteMonitorBulk = async ({
   const { logger, telemetry, stackVersion } = server;
 
   try {
-    throw new Error('error originating from delete monitor');
     const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
       id: DEFAULT_SPACE_ID,
     };
