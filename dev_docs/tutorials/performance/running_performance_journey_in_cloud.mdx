@@ -1,0 +1,89 @@
+---
+id: kibDevTutorialRunningPerformanceJourneyInCloud
+slug: /kibana-dev-docs/tutorial/performance/running_performance_journey_in_cloud
+title: Running Performance Journey In Cloud
+summary: Learn how to run performance journey against Cloud cluster
+date: 2023-05-04
+tags: ['kibana', 'onboarding', 'setup', 'performance', 'development', 'telemetry']
+---
+
+## Overview
+As a way to better understand user experience with Kibana in cloud, we support running performance journeys against
+Cloud deployments.
+The process takes a few steps:
+- Create a cloud deployment
+- Re-configure deployment with APM enabled and reporting metrics to the monitoring cluster
+- Create a user with `superuser` role
+- Checkout the branch that matches your cloud deployment version
+- Run the performance journey
+
+### Re-configure deployment for Kibana and Elasticsearch
+We use [kibana-ops-e2e-perf](https://kibana-ops-e2e-perf.kb.us-central1.gcp.cloud.es.io/) cluster to monitor performance testing.
+
+If you would like to report APM metrics to this cluster, you need to copy `APM_SERVER_URL` and `APM_PUBLIC_TOKEN`
+from [journey_apm_config.ts](https://github.com/elastic/kibana/blob/main/packages/kbn-journeys/journey/journey_apm_config.ts)
+
+#### Change Elasticsearch configuration
+
+In the ESS Admin Console, find your deployment and navigate to `Security` page. Click `Add Settings` under `Elasticsearch keystore` and add new entry:
+Setting name: `tracing.apm.secret_token`
+Secret: <APM_PUBLIC_TOKEN value>
+Navigate to Advanced Edit page and change Deployment configuration by adding the following JSON object to `resources.elasticsearch.plan.elasticsearch`:
+```
+"user_settings_override_json": {
+  "tracing.apm.enabled": "true",
+  "tracing.apm.agent.service_name": "elasticsearch",
+  "tracing.apm.agent.server_url": <APM_SERVER_URL value>,
+  "tracing.apm.agent.metrics_interval": "120s",
+  "tracing.apm.agent.transaction_sample_rate": "1",
+  "tracing.apm.agent.environment": "development"
+}
+```
+
+Save changes and make sure cluster is restarted successfully.
+
+#### Change Kibana configuration
+Navigate to Advanced Edit page and change Deployment Configuration by adding the following JSON object to `resources.kibana.plan.kibana`:
+```
+"user_settings_override_json": {
+  "elastic.apm.active": true,
+  "elastic.apm.centralConfig": false,
+  "elastic.apm.breakdownMetrics": false,
+  "elastic.apm.captureSpanStackTraces": false,
+  "elastic.apm.environment": "development",
+  "elastic.apm.agent.service_name": "kibana-ess",
+  "elastic.apm.secretToken": <APM_PUBLIC_TOKEN value>,
+  "elastic.apm.agent.server_url": <APM_SERVER_URL value>,
+  "elastic.apm.agent.contextPropagationOnly": "false",
+  "elastic.apm.agent.captureBody": "all",
+  "elastic.apm.agent.captureRequestHeaders": "true",
+  "elastic.apm.agent.longFieldMaxLength": "300000",
+  "elastic.apm.agent.metrics_interval": "120s",
+  "elastic.apm.agent.transaction_sample_rate": "1",
+  "elastic.apm.propagateTracestate": true,
+  "elastic.apm.sanitizeFieldNames": "password,passwd,pwd,secret,*key,*token*,*session*,*credit*,*card*,*auth*,set-cookie,pw,pass,connect.sid",
+  "elastic.apm.globalLabels.deploymentId": <DEPLOYMENT_ID>,
+  "elastic.apm.globalLabels.journeyName": <YOUR_JOURNEY_NAME>
+}
+```
+
+Note: DEPLOYMENT_ID and YOUR_JOURNEY_NAME values are optional labels to find the APM traces for your run.
+
+Save changes and make sure cluster is restarted successfully.
+
+### Run the journey
+Make sure you have created user with `superuser` role and the Kibana repo branch is matching your deployment version.
+Set env variables to run FTR against your cloud deployment:
+```
+export TEST_KIBANA_URL=https://<username>:<password>@<kibana_url>
+export TEST_ES_URL=https://<username>:<password>@j<elasticsearch_url>:<port>
+export TEST_CLOUD=1
+```
+
+Run your journey with the command:
+
+```
+node scripts/functional_test_runner.js --config x-pack/performance/journeys/$YOUR_JOURNEY_NAME.ts`
+```
+
+
