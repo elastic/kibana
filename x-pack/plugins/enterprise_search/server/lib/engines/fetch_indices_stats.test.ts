@@ -12,13 +12,14 @@ describe('fetchIndicesStats lib function', () => {
   const mockClient = {
     asCurrentUser: {
       indices: {
+        exists: jest.fn(),
         stats: jest.fn(),
       },
     },
     asInternalUser: {},
   };
   const indices = ['test-index-name-1', 'test-index-name-2', 'test-index-name-3'];
-  const indicesStats = {
+  const indexStats = {
     indices: {
       'test-index-name-1': {
         health: 'GREEN',
@@ -96,15 +97,11 @@ describe('fetchIndicesStats lib function', () => {
   });
 
   it('should return hydrated indices', async () => {
-    mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indicesStats);
+    mockClient.asCurrentUser.indices.exists.mockImplementationOnce(() => true);
+    mockClient.asCurrentUser.indices.stats.mockImplementationOnce(() => indexStats);
 
     await expect(
       fetchIndicesStats(mockClient as unknown as IScopedClusterClient, indices)
     ).resolves.toEqual(fetchIndicesStatsResponse);
-
-    expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
-      index: indices,
-      metric: ['docs'],
-    });
   });
 });

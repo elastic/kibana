@@ -13,7 +13,7 @@ import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { EuiComboBox, EuiComboBoxProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FieldIcon } from '@kbn/unified-field-list-plugin/public';
 import classNames from 'classnames';
-import { DataType } from './types';
+import type { DataType } from './types';
 import { TruncatedLabel } from './truncated_label';
 import type { FieldOptionValue, FieldOption } from './types';
 
