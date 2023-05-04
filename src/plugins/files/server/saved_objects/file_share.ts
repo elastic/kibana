@@ -17,19 +17,13 @@ import { FILE_SHARE_SO_TYPE } from '../../common/constants';
  * Internet.
  */
 
-type Properties = Record<keyof FileShare, SavedObjectsFieldMapping>;
+type Properties = Pick<Record<keyof FileShare, SavedObjectsFieldMapping>, 'created' | 'token'>;
 
 const properties: Properties = {
   created: {
     type: 'date',
   },
-  valid_until: {
-    type: 'long',
-  },
   token: {
-    type: 'keyword',
-  },
-  name: {
     type: 'keyword',
   },
 };
