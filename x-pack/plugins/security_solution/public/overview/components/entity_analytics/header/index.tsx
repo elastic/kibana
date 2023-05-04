@@ -32,9 +32,10 @@ import { useQueryInspector } from '../../../../common/components/page/manage_que
 import { ENTITY_ANALYTICS_ANOMALIES_PANEL } from '../anomalies';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { FormattedCount } from '../../../../common/components/formatted_number';
+import { SEVERITY_COLOR } from '../../detection_response/utils';
 
 const StyledEuiTitle = styled(EuiTitle)`
-  color: ${({ theme: { eui } }) => eui.euiColorDanger};
+  color: ${({ theme: { eui } }) => SEVERITY_COLOR.critical};
 `;
 
 const HOST_RISK_QUERY_ID = 'hostRiskScoreKpiQuery';

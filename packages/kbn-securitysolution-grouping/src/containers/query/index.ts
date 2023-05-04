@@ -7,8 +7,7 @@
  */
 
 import { getEmptyValue, getFieldTypeMissingValues } from './helpers';
-import { GroupingBucket } from '../..';
-import { RawBucket } from '../../..';
+import { GroupingAggregation } from '../..';
 import type { GroupingQueryArgs, GroupingQuery } from './types';
 /** The maximum number of groups to render */
 export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;
@@ -84,6 +83,16 @@ export const getGroupingQuery = ({
           : {}),
       },
     },
+
+    unitsCountWithoutNull: { value_count: { field: groupByField } },
+    unitsCount: {
+      value_count: {
+        field: groupByField,
+        missing: getFieldTypeMissingValues(selectedGroupEsTypes)[0],
+      },
+    },
+    groupsCount: { cardinality: { field: groupByField } },
+
     ...(rootAggregations
       ? rootAggregations.reduce((aggObj, subAgg) => Object.assign(aggObj, subAgg), {})
       : {}),
@@ -110,12 +119,17 @@ export const getGroupingQuery = ({
 /**
  * Parses the grouping query response to add the isNullGroup
  * flag to the buckets and to format the bucket keys
- * @param buckets buckets returned from the grouping query
+ * @param selectedGroup from the grouping query
+ * @param aggs aggs returned from the grouping query
  */
 export const parseGroupingQuery = <T>(
-  buckets: Array<RawBucket<T>>
-): Array<RawBucket<T> & GroupingBucket> =>
-  buckets.map((group) => {
+  selectedGroup: string,
+  aggs?: GroupingAggregation<T>
+): GroupingAggregation<T> | {} => {
+  if (!aggs) {
+    return {};
+  }
+  const groupByFields = aggs?.groupByFields?.buckets?.map((group) => {
     if (!Array.isArray(group.key)) {
       return group;
     }
@@ -126,12 +140,26 @@ export const parseGroupingQuery = <T>(
       ? {
           ...group,
           key: [group.key[0]],
+          selectedGroup,
           key_as_string: group.key[0],
         }
       : {
           ...group,
           key: [emptyValue],
+          selectedGroup,
           key_as_string: emptyValue,
           isNullGroup: true,
         };
   });
+
+  return {
+    ...aggs,
+    groupByFields: { buckets: groupByFields },
+    groupsCount: {
+      value:
+        (aggs.unitsCount?.value !== aggs.unitsCountWithoutNull?.value
+          ? (aggs.groupsCount?.value ?? 0) + 1
+          : aggs.groupsCount?.value) ?? 0,
+    },
+  };
+};
