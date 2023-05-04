@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../../../common/types/api';
 
-import { GenerateEngineApiKeyLogic } from '../../../../api/generate_engine_api_key/generate_engine_api_key_logic';
+import { GenerateEngineApiKeyLogic } from '../../../../../enterprise_search_content/api/generate_engine_api_key/generate_engine_api_key_logic';
 
 interface GenerateApiKeyModalActions {
   setKeyName(keyName: string): { keyName: string };
