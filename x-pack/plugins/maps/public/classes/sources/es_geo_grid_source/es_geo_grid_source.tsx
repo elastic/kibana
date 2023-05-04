@@ -354,14 +354,28 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         : this.getId();
       const esResponse: estypes.SearchResponse<unknown> = await this._runEsQuery({
         requestId,
-        requestName: `${layerName} (${requestCount})`,
+        requestName: i18n.translate(
+          'xpack.maps.source.esGrid.compositeInspector.requestName',
+          {
+            defaultMessage: '{layerName} {bucketsName} composite request ({requestCount})',
+            values: {
+              bucketsName: this.getBucketsName(),
+              layerName,
+              requestCount, 
+            },
+          }
+        ),
         searchSource,
         registerCancelCallback,
         requestDescription: i18n.translate(
           'xpack.maps.source.esGrid.compositeInspectorDescription',
           {
-            defaultMessage: 'Elasticsearch geo grid aggregation request: {requestId}',
-            values: { requestId },
+            defaultMessage: 'Get {bucketsName} from data view: {dataViewName}, geospatial field: {geoFieldName}',
+            values: {
+              bucketsName: this.getBucketsName(),
+              dataViewName: indexPattern.getName(),
+              geoFieldName: this._descriptor.geoField,
+            },
           }
         ),
         searchSessionId,
@@ -437,12 +451,29 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 
     const esResponse = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: layerName,
+      requestName: i18n.translate(
+        'xpack.maps.source.esGrid.inspector.requestName',
+        {
+          defaultMessage: '{layerName} {bucketsName} request',
+          values: {
+            bucketsName: this.getBucketsName(),
+            layerName, 
+          },
+        }
+      ),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
-        defaultMessage: 'Elasticsearch geo grid aggregation request',
-      }),
+      requestDescription: i18n.translate(
+        'xpack.maps.source.esGrid.inspector.requestDescription',
+        {
+          defaultMessage: 'Get {bucketsName} from data view: {dataViewName}, geospatial field: {geoFieldName}',
+          values: {
+            bucketsName: this.getBucketsName(),
+            dataViewName: indexPattern.getName(),
+            geoFieldName: this._descriptor.geoField,
+          },
+        }
+      ),
       searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_geo_grid_source:cluster' },

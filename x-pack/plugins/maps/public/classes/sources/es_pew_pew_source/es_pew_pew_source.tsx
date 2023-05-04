@@ -190,11 +190,19 @@ export class ESPewPewSource extends AbstractESAggSource {
 
     const esResponse = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: layerName,
+      requestName: i18n.translate('xpack.maps.pewPew.requestName', {
+        defaultMessage: '{layerName} paths request',
+        values: { layerName },
+      }),
       searchSource,
       registerCancelCallback,
       requestDescription: i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
-        defaultMessage: 'Source-destination connections request',
+        defaultMessage: 'Get paths from data view: {dataViewName}, source: {sourceFieldName}, destination: {destFieldName}',
+        values: {
+          dataViewName: indexPattern.getName(),
+          destFieldName: this._descriptor.destGeoField,
+          sourceFieldName: this._descriptor.sourceGeoField,
+        }
       }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(

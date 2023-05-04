@@ -351,10 +351,21 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     const resp = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: layerName,
+      requestName: i18n.translate('xpack.maps.esSearchSource.topHits.requestName', {
+        defaultMessage: '{layerName} top hits request',
+        values: { layerName },
+      }),
       searchSource,
       registerCancelCallback,
-      requestDescription: 'Elasticsearch document top hits request',
+      requestDescription: i18n.translate('xpack.maps.esSearchSource.topHits.requestDescription', {
+        defaultMessage:
+          'Get top hits from data view: {dataViewName}, entities: {entitiesFieldName}, geospatial field: {geoFieldName}',
+        values: {
+          dataViewName: indexPattern.getName(),
+          entitiesFieldName: topHitsSplitFieldName,
+          geoFieldName: this._descriptor.geoField,
+        },
+      }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_search_source:top_hits' },

@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }) {
   const inspector = getService('inspector');
   const security = getService('security');
 
-  describe.only('layer with joins', () => {
+  describe('layer with joins', () => {
     before(async () => {
       await security.testUser.setRoles(
         ['global_maps_all', 'geoshape_data_reader', 'meta_for_geoshape_data_reader'],
