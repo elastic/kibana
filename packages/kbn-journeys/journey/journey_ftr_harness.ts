@@ -102,10 +102,7 @@ export class JourneyFtrHarness {
     this.context = await browser.newContext();
 
     if (this.journeyConfig.shouldAutoLogin()) {
-      const cookie = await this.auth.login({
-        username: this.config.get('servers.kibana.username'),
-        password: this.config.get('servers.kibana.password'),
-      });
+      const cookie = await this.auth.login();
       await this.context.addCookies([cookie]);
     }
 
@@ -376,6 +373,7 @@ export class JourneyFtrHarness {
       kibanaServer: this.kibanaServer,
       es: this.es,
       retry: this.retry,
+      auth: this.auth,
     });
 
     return this.#_ctx;
