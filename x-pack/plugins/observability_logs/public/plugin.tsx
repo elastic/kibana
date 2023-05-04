@@ -21,7 +21,7 @@ export class ObservabilityLogsPlugin
   public start(core: CoreStart, plugins: ObservabilityLogsStartDeps): ObservabilityLogsPluginStart {
     const { discover } = plugins;
 
-    discover.customize('log-data-stream-selector', async ({ customizations, stateContainer }) => {
+    discover.customize('observability-logs', async ({ customizations, stateContainer }) => {
       customizations.set({
         id: 'search_bar',
         CustomDataViewPicker: () => {
