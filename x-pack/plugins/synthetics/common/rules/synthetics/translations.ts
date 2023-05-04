@@ -41,7 +41,6 @@ export const SyntheticsMonitorStatusTranslations = {
         recoveryStatus: '{{context.recoveryStatus}}',
         locationName: '{{context.locationName}}',
         monitorName: '{{context.monitorName}}',
-        monitorUrl: '{{{context.monitorUrl}}}',
       },
     }
   ),
@@ -53,7 +52,6 @@ export const SyntheticsMonitorStatusTranslations = {
       values: {
         monitorName: '{{context.monitorName}}',
         monitorType: '{{context.monitorType}}',
-        monitorUrl: '{{{context.monitorUrl}}}',
         locationName: '{{context.locationName}}',
         lastErrorMessage: '{{{context.lastErrorMessage}}}',
         recoveryReason: '{{context.recoveryReason}}',

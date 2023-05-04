@@ -168,7 +168,7 @@ export const setRecoveredAlertsContext = ({
         );
       } else if (downConfig.isLocationRemoved) {
         recoveryStatus = i18n.translate(
-          'xpack.synthetics.alerts.monitorStatus.removedLocation.reason',
+          'xpack.synthetics.alerts.monitorStatus.removedLocation.status',
           {
             defaultMessage: `has recovered`,
           }
