@@ -121,135 +121,7 @@ export class SavedMap {
 
   async whenReady() {
     await whenLicenseInitialized();
-
-    if (!this._mapEmbeddableInput) {
-      this._attributes = {
-        title: '',
-        description: '',
-      };
-    } else {
-      const { attributes: doc, metaInfo } = await getMapAttributeService().unwrapAttributes(
-        this._mapEmbeddableInput
-      );
-      const { references, ...savedObjectAttributes } = doc;
-      this._attributes = savedObjectAttributes;
-      if (metaInfo?.sharingSavedObjectProps) {
-        this._sharingSavedObjectProps = metaInfo.sharingSavedObjectProps;
-      }
-      const savedObjectsTagging = getSavedObjectsTagging();
-      if (savedObjectsTagging && references && references.length) {
-        this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
-      }
-    }
-
-    this._reportUsage();
-
-    if (this._attributes?.mapStateJSON) {
-      try {
-        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
-        if (mapState.adHocDataViews && mapState.adHocDataViews.length > 0) {
-          const dataViewService = getIndexPatternService();
-          const promises = mapState.adHocDataViews.map((spec) => {
-            return dataViewService.create(spec);
-          });
-          await Promise.all(promises);
-        }
-      } catch (e) {
-        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
-      }
-    }
-
-    if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapSettings !== undefined) {
-      this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableInput.mapSettings));
-    } else if (this._attributes?.mapStateJSON) {
-      try {
-        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
-        if (mapState.settings) {
-          this._store.dispatch(setMapSettingsFromEncodedState(mapState.settings));
-        }
-      } catch (e) {
-        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
-      }
-    }
-
-    let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
-    if (this._mapEmbeddableInput && this._mapEmbeddableInput.isLayerTOCOpen !== undefined) {
-      isLayerTOCOpen = this._mapEmbeddableInput.isLayerTOCOpen;
-    } else if (this._attributes?.uiStateJSON) {
-      try {
-        const uiState = JSON.parse(this._attributes.uiStateJSON) as SerializedUiState;
-        if ('isLayerTOCOpen' in uiState) {
-          isLayerTOCOpen = uiState.isLayerTOCOpen;
-        }
-      } catch (e) {
-        // ignore malformed uiStateJSON, not a critical error for viewing map - map will just use defaults
-      }
-    }
-    this._store.dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
-
-    let openTOCDetails: string[] = [];
-    if (this._mapEmbeddableInput && this._mapEmbeddableInput.openTOCDetails !== undefined) {
-      openTOCDetails = this._mapEmbeddableInput.openTOCDetails;
-    } else if (this._attributes?.uiStateJSON) {
-      try {
-        const uiState = JSON.parse(this._attributes.uiStateJSON) as SerializedUiState;
-        if ('openTOCDetails' in uiState) {
-          openTOCDetails = uiState.openTOCDetails;
-        }
-      } catch (e) {
-        // ignore malformed uiStateJSON, not a critical error for viewing map - map will just use defaults
-      }
-    }
-    this._store.dispatch(setOpenTOCDetails(openTOCDetails));
-
-    if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapCenter !== undefined) {
-      this._store.dispatch(
-        setGotoWithCenter({
-          lat: this._mapEmbeddableInput.mapCenter.lat,
-          lon: this._mapEmbeddableInput.mapCenter.lon,
-          zoom: this._mapEmbeddableInput.mapCenter.zoom,
-        })
-      );
-    } else if (this._attributes?.mapStateJSON) {
-      try {
-        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
-        this._store.dispatch(
-          setGotoWithCenter({
-            lat: mapState.center.lat,
-            lon: mapState.center.lon,
-            zoom: mapState.zoom,
-          })
-        );
-      } catch (e) {
-        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
-      }
-    }
-
-    let layerList: LayerDescriptor[] = [];
-    if (this._attributes.layerListJSON) {
-      try {
-        layerList = JSON.parse(this._attributes.layerListJSON) as LayerDescriptor[];
-      } catch (e) {
-        throw new Error('Malformed saved object: unable to parse layerListJSON');
-      }
-    } else {
-      const basemapLayerDescriptor = createBasemapLayerDescriptor();
-      if (basemapLayerDescriptor) {
-        layerList.push(basemapLayerDescriptor);
-      }
-      if (this._defaultLayers.length) {
-        layerList.push(...this._defaultLayers);
-      }
-    }
-    this._store.dispatch<any>(replaceLayerList(layerList));
-    if (this._mapEmbeddableInput && this._mapEmbeddableInput.hiddenLayers !== undefined) {
-      this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableInput.hiddenLayers));
-    }
-    this._initialLayerListConfig = copyPersistentState(layerList);
-
-    if (this._defaultLayerWizard) {
-      this._store.dispatch<any>(setAutoOpenLayerWizardId(this._defaultLayerWizard));
-    }
+    await this._syncStoreWithInput();
   }
 
   hasUnsavedChanges = () => {
@@ -426,6 +298,11 @@ export class SavedMap {
     return getIsAllowByValueEmbeddables() && !!this._originatingApp && !hasSavedObjectId;
   }
 
+  public async syncWithInput(lastInput: MapEmbeddableInput) {
+    this._mapEmbeddableInput = lastInput;
+    await this._syncStoreWithInput();
+  }
+
   public async save({
     newDescription,
     newTitle,
@@ -536,6 +413,137 @@ export class SavedMap {
     }
 
     return;
+  }
+
+  private async _syncStoreWithInput() {
+    if (!this._mapEmbeddableInput) {
+      this._attributes = {
+        title: '',
+        description: '',
+      };
+    } else {
+      const { attributes: doc, metaInfo } = await getMapAttributeService().unwrapAttributes(
+        this._mapEmbeddableInput
+      );
+      const { references, ...savedObjectAttributes } = doc;
+      this._attributes = savedObjectAttributes;
+      if (metaInfo?.sharingSavedObjectProps) {
+        this._sharingSavedObjectProps = metaInfo.sharingSavedObjectProps;
+      }
+      const savedObjectsTagging = getSavedObjectsTagging();
+      if (savedObjectsTagging && references && references.length) {
+        this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
+      }
+    }
+
+    this._reportUsage();
+
+    if (this._attributes?.mapStateJSON) {
+      try {
+        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+        if (mapState.adHocDataViews && mapState.adHocDataViews.length > 0) {
+          const dataViewService = getIndexPatternService();
+          const promises = mapState.adHocDataViews.map((spec) => {
+            return dataViewService.create(spec);
+          });
+          await Promise.all(promises);
+        }
+      } catch (e) {
+        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+      }
+    }
+
+    if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapSettings !== undefined) {
+      this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableInput.mapSettings));
+    } else if (this._attributes?.mapStateJSON) {
+      try {
+        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+        if (mapState.settings) {
+          this._store.dispatch(setMapSettingsFromEncodedState(mapState.settings));
+        }
+      } catch (e) {
+        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+      }
+    }
+
+    let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
+    if (this._mapEmbeddableInput && this._mapEmbeddableInput.isLayerTOCOpen !== undefined) {
+      isLayerTOCOpen = this._mapEmbeddableInput.isLayerTOCOpen;
+    } else if (this._attributes?.uiStateJSON) {
+      try {
+        const uiState = JSON.parse(this._attributes.uiStateJSON) as SerializedUiState;
+        if ('isLayerTOCOpen' in uiState) {
+          isLayerTOCOpen = uiState.isLayerTOCOpen;
+        }
+      } catch (e) {
+        // ignore malformed uiStateJSON, not a critical error for viewing map - map will just use defaults
+      }
+    }
+    this._store.dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
+
+    let openTOCDetails: string[] = [];
+    if (this._mapEmbeddableInput && this._mapEmbeddableInput.openTOCDetails !== undefined) {
+      openTOCDetails = this._mapEmbeddableInput.openTOCDetails;
+    } else if (this._attributes?.uiStateJSON) {
+      try {
+        const uiState = JSON.parse(this._attributes.uiStateJSON) as SerializedUiState;
+        if ('openTOCDetails' in uiState) {
+          openTOCDetails = uiState.openTOCDetails;
+        }
+      } catch (e) {
+        // ignore malformed uiStateJSON, not a critical error for viewing map - map will just use defaults
+      }
+    }
+    this._store.dispatch(setOpenTOCDetails(openTOCDetails));
+
+    if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapCenter !== undefined) {
+      this._store.dispatch(
+        setGotoWithCenter({
+          lat: this._mapEmbeddableInput.mapCenter.lat,
+          lon: this._mapEmbeddableInput.mapCenter.lon,
+          zoom: this._mapEmbeddableInput.mapCenter.zoom,
+        })
+      );
+    } else if (this._attributes?.mapStateJSON) {
+      try {
+        const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+        this._store.dispatch(
+          setGotoWithCenter({
+            lat: mapState.center.lat,
+            lon: mapState.center.lon,
+            zoom: mapState.zoom,
+          })
+        );
+      } catch (e) {
+        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+      }
+    }
+
+    let layerList: LayerDescriptor[] = [];
+    if (this._attributes.layerListJSON) {
+      try {
+        layerList = JSON.parse(this._attributes.layerListJSON) as LayerDescriptor[];
+      } catch (e) {
+        throw new Error('Malformed saved object: unable to parse layerListJSON');
+      }
+    } else {
+      const basemapLayerDescriptor = createBasemapLayerDescriptor();
+      if (basemapLayerDescriptor) {
+        layerList.push(basemapLayerDescriptor);
+      }
+      if (this._defaultLayers.length) {
+        layerList.push(...this._defaultLayers);
+      }
+    }
+    this._store.dispatch<any>(replaceLayerList(layerList));
+    if (this._mapEmbeddableInput && this._mapEmbeddableInput.hiddenLayers !== undefined) {
+      this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableInput.hiddenLayers));
+    }
+    this._initialLayerListConfig = copyPersistentState(layerList);
+
+    if (this._defaultLayerWizard) {
+      this._store.dispatch<any>(setAutoOpenLayerWizardId(this._defaultLayerWizard));
+    }
   }
 
   private async _syncAttributesWithStore() {

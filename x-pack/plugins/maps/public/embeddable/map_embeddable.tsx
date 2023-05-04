@@ -377,6 +377,10 @@ export class MapEmbeddable
     this._isSharable = isSharable;
   }
 
+  public onReset(lastInput: MapByValueInput) {
+    this._savedMap.syncWithInput(lastInput);
+  }
+
   getInspectorAdapters() {
     return getInspectorAdapters(this._savedMap.getStore().getState());
   }

@@ -18,6 +18,8 @@ import {
   type EmbeddableInput,
   type EmbeddableOutput,
   type EmbeddableFactory,
+  isErrorEmbeddable,
+  isResettableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
@@ -330,13 +332,11 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.dispatch.resetToLastSavedInput({});
     const {
       explicitInput: { timeRange, refreshInterval },
-      componentState: {
-        lastSavedInput: { timeRestore: lastSavedTimeRestore },
-      },
+      componentState: { lastSavedInput },
     } = this.getState();
 
     // if we are using the unified search integration, we need to force reset the time picker.
-    if (this.creationOptions?.useUnifiedSearchIntegration && lastSavedTimeRestore) {
+    if (this.creationOptions?.useUnifiedSearchIntegration && lastSavedInput.timeRestore) {
       const {
         data: {
           query: {
@@ -346,6 +346,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       } = pluginServices.getServices();
       if (timeRange) timeFilterService.setTime(timeRange);
       if (refreshInterval) timeFilterService.setRefreshInterval(refreshInterval);
+    }
+
+    for (const child of Object.values(this.children)) {
+      const lastSavedChildInput = lastSavedInput.panels[child.id].explicitInput;
+      if (!isErrorEmbeddable(child) && isResettableEmbeddable(child)) {
+        child.onReset(lastSavedChildInput);
+      }
     }
   }
 
