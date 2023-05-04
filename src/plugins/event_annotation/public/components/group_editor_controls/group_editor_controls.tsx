@@ -205,7 +205,12 @@ export const GroupEditorControls = ({
                         defaultMessage: 'Annotations',
                       })}
                       onClick={() => setSelectedAnnotation(annotation)}
-                      onRemoveClick={() => {}}
+                      onRemoveClick={() =>
+                        update({
+                          ...group,
+                          annotations: group.annotations.filter(({ id }) => id !== annotation.id),
+                        })
+                      }
                       accessorConfig={getAnnotationAccessor(annotation)}
                       label={annotation.label}
                     >

@@ -211,7 +211,7 @@ describe('event annotation group editor', () => {
     act(() => {
       wrapper.setProps({
         selectedAnnotation: annotations[0],
-        // group: { ...group, annotations },
+        group: { ...group, annotations },
       });
     });
 
@@ -221,7 +221,27 @@ describe('event annotation group editor', () => {
     });
 
     expect(updateMock).toHaveBeenCalledTimes(1);
-    expect(updateMock.mock.calls[0][0].annotations[0]).toMatchInlineSnapshot(`undefined`);
+    expect(updateMock.mock.calls[0][0].annotations[0].color).toBe('newColor');
     expect(setSelectedAnnotationMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('removes an annotation from a group', () => {
+    const annotations = [getDefaultManualAnnotation('1', ''), getDefaultManualAnnotation('2', '')];
+
+    act(() => {
+      wrapper.setProps({
+        group: { ...group, annotations },
+      });
+    });
+
+    act(() => {
+      wrapper
+        .find('button[data-test-subj="indexPattern-dimension-remove"]')
+        .last()
+        .simulate('click');
+    });
+
+    expect(updateMock).toHaveBeenCalledTimes(1);
+    expect(updateMock.mock.calls[0][0].annotations).toEqual(annotations.slice(0, 1));
   });
 });
