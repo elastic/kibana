@@ -409,7 +409,7 @@ Enterprise Search::
 For the Elastic Enterprise Search 8.8.0 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
 
 Fleet::
-* Fixes package license check to use new constraints.elastic.subs… {kibana-pull}154831[#154831]
+* Fixes package license check to use new `conditions.elastic.subscription` field {kibana-pull}154831[#154831]
 * Fixes the OpenAPI spec from `/agent/upload` to `/agent/uploads` for Agent uploads API {kibana-pull}151722[#151722]
 
 Infrastructure::
