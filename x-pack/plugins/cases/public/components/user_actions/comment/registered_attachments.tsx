@@ -24,7 +24,7 @@ import type {
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { UserActionTimestamp } from '../timestamp';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
-import type { CommentResponse } from '../../../../common/api';
+import type { Comment } from '../../../../common/api';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import {
@@ -50,10 +50,10 @@ type BuilderArgs<C, R> = Pick<
 /**
  * Provides a render function for attachment type
  */
-const getAttachmentRenderer = memoize((attachmentViewObject: AttachmentViewObject) => {
+const getAttachmentRenderer = memoize(() => {
   let AttachmentElement: React.ReactElement;
 
-  const renderCallback = (props: object) => {
+  const renderCallback = (attachmentViewObject: AttachmentViewObject, props: object) => {
     if (!attachmentViewObject.children) return;
 
     if (!AttachmentElement) {
@@ -69,7 +69,7 @@ const getAttachmentRenderer = memoize((attachmentViewObject: AttachmentViewObjec
 });
 
 export const createRegisteredAttachmentUserActionBuilder = <
-  C extends CommentResponse,
+  C extends Comment,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   R extends AttachmentTypeRegistry<AttachmentType<any>>
 >({
@@ -120,7 +120,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
 
     const attachmentViewObject = attachmentType.getAttachmentViewObject(props);
 
-    const renderer = getAttachmentRenderer(attachmentViewObject);
+    const renderer = getAttachmentRenderer();
     const actions = attachmentViewObject.getActions?.(props) ?? [];
     const [primaryActions, nonPrimaryActions] = partition(actions, 'isPrimary');
     const visiblePrimaryActions = primaryActions.slice(0, 2);
@@ -164,7 +164,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
             />
           </UserActionContentToolbar>
         ),
-        children: renderer(props),
+        children: renderer(attachmentViewObject, props),
       },
     ];
   },

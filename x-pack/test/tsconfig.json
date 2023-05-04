@@ -125,5 +125,6 @@
     "@kbn/guided-onboarding-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/stack-connectors-plugin",
+    "@kbn/ml-anomaly-utils",
   ]
 }
