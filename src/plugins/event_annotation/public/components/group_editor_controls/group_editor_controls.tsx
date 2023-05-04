@@ -236,9 +236,8 @@ export const GroupEditorControls = ({
                     new Date().toISOString()
                   );
 
-                  update({ ...group, annotations: [...group.annotations, newAnnotation] });
-
                   setSelectedAnnotation(newAnnotation);
+                  update({ ...group, annotations: [...group.annotations, newAnnotation] });
                 }}
               />
             </div>
