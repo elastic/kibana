@@ -14,6 +14,9 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import { nodeBuilder } from '@kbn/es-query';
 
+import { buildNode as buildFunctionNode } from '@kbn/es-query/src/kuery/node_types/function';
+import { buildNode as buildWildcardNode } from '@kbn/es-query/src/kuery/node_types/wildcard';
+
 import {
   installationStatuses,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -167,11 +170,29 @@ export async function getInstalledPackages(options: {
     // Name filter
     ...(nameQuery && { searchFields: ['name'] }),
     ...(nameQuery && { search: `${nameQuery}* | ${nameQuery}` }),
-    // Filter to installed packages only
-    filter: nodeBuilder.is(
-      `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
-      installationStatuses.Installed
-    ),
+    filter: nodeBuilder.and([
+      // Filter to installed packages only
+      nodeBuilder.is(
+        `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
+        installationStatuses.Installed
+      ),
+      // Filter for a "queryable" marker
+      buildFunctionNode(
+        'nested',
+        `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
+        nodeBuilder.is('type', 'index_template')
+      ),
+      // "Type" filter
+      ...(type
+        ? [
+            buildFunctionNode(
+              'nested',
+              `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
+              nodeBuilder.is('id', buildWildcardNode(`${type}-*`))
+            ),
+          ]
+        : []),
+    ]),
   });
 
   const integrations = packageSavedObjects.saved_objects.map((integrationSavedObject) => {
