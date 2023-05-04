@@ -79,7 +79,8 @@ export const EnrichedDataRow: React.FC<{
 export const ThreatSummaryPanelHeader: React.FC<{
   title: string | React.ReactNode;
   toolTipContent: React.ReactNode;
-}> = ({ title, toolTipContent }) => {
+  toolTipTitle?: React.ReactNode;
+}> = ({ title, toolTipContent, toolTipTitle }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onClick = useCallback(() => {
@@ -111,7 +112,7 @@ export const ThreatSummaryPanelHeader: React.FC<{
             />
           }
         >
-          <EuiPopoverTitle>{title}</EuiPopoverTitle>
+          <EuiPopoverTitle>{toolTipTitle ?? title}</EuiPopoverTitle>
           <EuiText size="s" style={{ width: '270px' }}>
             {toolTipContent}
           </EuiText>

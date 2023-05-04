@@ -16,6 +16,7 @@ import type {
   CaseUserActionTypeWithAll,
   CaseUserActionsStats,
   CaseUsers,
+  CasesFindResponseUI,
   CasesUI,
 } from '../../common/ui/types';
 import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
@@ -72,7 +73,7 @@ import type {
   CaseUI,
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
-  CaseUserActions,
+  UserActionUI,
 } from './types';
 
 import {
@@ -186,7 +187,7 @@ export const findCaseUserActions = async (
     ...response,
     userActions: convertUserActionsToCamelCase(
       decodeCaseUserActionsResponse(response.userActions)
-    ) as CaseUserActions[],
+    ) as UserActionUI[],
   };
 };
 
@@ -223,7 +224,7 @@ export const getCases = async ({
     sortOrder: 'desc',
   },
   signal,
-}: FetchCasesProps): Promise<CasesUI> => {
+}: FetchCasesProps): Promise<CasesFindResponseUI> => {
   const query = {
     ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
     ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
@@ -262,7 +263,7 @@ export const patchCase = async (
   >,
   version: string,
   signal: AbortSignal
-): Promise<CaseUI[]> => {
+): Promise<CasesUI> => {
   const response = await KibanaServices.get().http.fetch<Cases>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases: [{ ...updatedCase, id: caseId, version }] }),
@@ -274,7 +275,7 @@ export const patchCase = async (
 export const updateCases = async (
   cases: CaseUpdateRequest[],
   signal: AbortSignal
-): Promise<CaseUI[]> => {
+): Promise<CasesUI> => {
   if (cases.length === 0) {
     return [];
   }

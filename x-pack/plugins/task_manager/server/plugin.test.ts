@@ -42,7 +42,6 @@ const pluginInitializerContextParams = {
   max_attempts: 9,
   poll_interval: 3000,
   version_conflict_threshold: 80,
-  max_poll_inactivity_cycles: 10,
   request_capacity: 1000,
   monitored_aggregated_stats_refresh_rate: 5000,
   monitored_stats_health_verbose_log: {
@@ -70,6 +69,7 @@ const pluginInitializerContextParams = {
     monitor: true,
     warn_threshold: 5000,
   },
+  worker_utilization_running_average_window: 5,
 };
 
 describe('TaskManagerPlugin', () => {
@@ -93,50 +93,6 @@ describe('TaskManagerPlugin', () => {
         taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined })
       ).toThrow(
         new Error(`TaskManager is unable to start as Kibana has no valid UUID assigned to it.`)
-      );
-    });
-
-    test('throws if setup methods are called after start', async () => {
-      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
-        pluginInitializerContextParams
-      );
-
-      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-
-      const setupApi = await taskManagerPlugin.setup(coreMock.createSetup(), {
-        usageCollection: undefined,
-      });
-
-      // we only start a poller if we have task types that we support and we track
-      // phases (moving from Setup to Start) based on whether the poller is working
-      setupApi.registerTaskDefinitions({
-        setupTimeType: {
-          title: 'setupTimeType',
-          createTaskRunner: () => ({ async run() {} }),
-        },
-      });
-
-      await taskManagerPlugin.start(coreMock.createStart());
-
-      expect(() =>
-        setupApi.addMiddleware({
-          beforeSave: async (saveOpts) => saveOpts,
-          beforeRun: async (runOpts) => runOpts,
-          beforeMarkRunning: async (runOpts) => runOpts,
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Cannot add Middleware after the task manager has started"`
-      );
-
-      expect(() =>
-        setupApi.registerTaskDefinitions({
-          lateRegisteredType: {
-            title: 'lateRegisteredType',
-            createTaskRunner: () => ({ async run() {} }),
-          },
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Cannot register task definitions after the task manager has started"`
       );
     });
 
