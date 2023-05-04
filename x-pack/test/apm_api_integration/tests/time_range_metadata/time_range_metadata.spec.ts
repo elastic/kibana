@@ -114,7 +114,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ).length
             ).to.eql(3);
           });
-          it('returns true when summary field is available inside but not outside the range', async () => {
+          it('returns false when summary field is available inside but not outside the range', async () => {
             const response = await getTimeRangeMedata({
               start: moment(localStart).subtract(30, 'minutes'),
               end: moment(localEnd),
