@@ -18,15 +18,15 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       await createUsersAndRoles(es, supertest);
     });
 
-    loadTestFile(require.resolve('./copy_to_space'));
-    loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
-    loadTestFile(require.resolve('./create'));
-    loadTestFile(require.resolve('./delete'));
-    loadTestFile(require.resolve('./get_all'));
-    loadTestFile(require.resolve('./get_shareable_references'));
-    loadTestFile(require.resolve('./get'));
-    loadTestFile(require.resolve('./update'));
-    loadTestFile(require.resolve('./update_objects_spaces'));
-    loadTestFile(require.resolve('./disable_legacy_url_aliases'));
+    // total runtime ~ 17m
+    loadTestFile(require.resolve('./resolve_copy_to_space_conflicts')); // ~ 10m
+    loadTestFile(require.resolve('./create')); // ~ 2m
+    loadTestFile(require.resolve('./delete')); // ~ 1m 20s
+    loadTestFile(require.resolve('./get_all')); // ~ 50s
+    loadTestFile(require.resolve('./get_shareable_references')); // ~ 30s
+    loadTestFile(require.resolve('./get')); // ~ 30s
+    loadTestFile(require.resolve('./update')); // ~ 30s
+    loadTestFile(require.resolve('./update_objects_spaces')); // ~ 1m
+    loadTestFile(require.resolve('./disable_legacy_url_aliases')); // ~ 30s
   });
 }
