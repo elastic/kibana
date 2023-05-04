@@ -39,7 +39,8 @@ Review important information about the {kib} 8.5.x releases.
 //* <<release-notes-8.0.0-alpha1>>
 
 --
-[[release-notes-8.5.3]]
+
+[id="release-notes-8.5.3",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.5.3
 
 Review the following information about the {kib} 8.5.3 release.
@@ -239,7 +240,7 @@ Uptime::
 * Adjust forumla for synthetics monitor availability {kibana-pull}144868[#144868]
 * TLS alert - do not alert when status cannot be determined {kibana-pull}144767[#144767]
 
-[[release-notes-8.5.0]]
+[id="release-notes-8.5.0",canonical-url="https://www.elastic.co/guide/en/kibana/current/release-notes.html"]
 == {kib} 8.5.0
 
 Review the following information about the {kib} 8.5.0 release.
