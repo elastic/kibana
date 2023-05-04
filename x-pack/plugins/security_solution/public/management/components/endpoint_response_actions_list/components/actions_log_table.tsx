@@ -167,6 +167,7 @@ const getResponseActionListTableColumns = ({
           .join(', ');
 
         let hostnames = _hostnames;
+
         if (!_hostnames) {
           if (hosts.length > 1) {
             // when action was for a single agent and no host name
@@ -210,12 +211,11 @@ const getResponseActionListTableColumns = ({
       },
     },
     {
-      field: 'status',
       name: TABLE_COLUMN_NAMES.status,
       width: !showHostNames ? '15%' : '10%',
-      render: (_status: ActionListApiResponse['data'][number]['status']) => {
+      render: (action: ActionListApiResponse['data'][number]) => {
+        const _status = action.errors?.length ? 'failed' : action.status;
         const status = getActionStatus(_status);
-
         return (
           <EuiToolTip content={status} anchorClassName="eui-textTruncate">
             <StatusBadge
