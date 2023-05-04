@@ -137,7 +137,7 @@ export const TableRowActions: React.FunctionComponent<{
       );
     }
   }
-    
+
   if (diagnosticFileUploadEnabled) {
     menuItems.push(
       <EuiContextMenuItem
