@@ -14,7 +14,7 @@ import {
   type DataFrameAnalyticsId,
   type DataFrameAnalysisConfigType,
   type FeatureProcessor,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import { RuntimeMappings } from '../../../../../../../common/types/fields';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';

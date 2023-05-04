@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { DATA_FRAME_TASK_STATE } from '@kbn/ml-data-frame-analytics';
+import { DATA_FRAME_TASK_STATE } from '@kbn/ml-data-frame-analytics-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';

@@ -16,7 +16,7 @@ import {
   type TopClasses,
   isClassificationFeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import { RegressionDecisionPath } from './decision_path_regression';
 import { DecisionPathJSONViewer } from './decision_path_json_viewer';
 import { ClassificationDecisionPath } from './decision_path_classification';

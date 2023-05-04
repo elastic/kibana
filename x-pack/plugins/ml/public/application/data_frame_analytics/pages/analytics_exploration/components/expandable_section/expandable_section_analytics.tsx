@@ -11,7 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { getAnalysisType, type DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics';
+import {
+  getAnalysisType,
+  type DataFrameAnalysisConfigType,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { ml } from '../../../../../services/ml_api_service';
 

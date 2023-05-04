@@ -14,7 +14,7 @@ import type {
   FeatureImportanceBaseline,
   TopClass,
   TopClasses,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import {
   isDecisionPathData,
   useDecisionPathData,

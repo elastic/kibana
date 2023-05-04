@@ -12,7 +12,7 @@ import { EuiCard, EuiIcon, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic
 import {
   type DataFrameAnalysisConfigType,
   ANALYSIS_CONFIG_TYPE,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 

@@ -24,7 +24,7 @@ import {
   getAnalysisType,
   type DataFrameAnalyticsId,
   type DataFrameAnalyticsStats,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import {
   getDataFrameAnalyticsProgressPhase,
   isDataFrameAnalyticsFailed,

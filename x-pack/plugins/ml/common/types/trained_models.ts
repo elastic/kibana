@@ -10,7 +10,7 @@ import type {
   DataFrameAnalyticsConfig,
   FeatureImportanceBaseline,
   TotalFeatureImportance,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import type { XOR } from './common';
 import type { MlSavedObjectType } from './saved_objects';
 

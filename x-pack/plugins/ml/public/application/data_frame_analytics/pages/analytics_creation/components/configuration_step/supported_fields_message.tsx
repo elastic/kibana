@@ -14,7 +14,7 @@ import {
   ANALYSIS_CONFIG_TYPE,
   BASIC_NUMERICAL_TYPES,
   EXTENDED_NUMERICAL_TYPES,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
 import { OMIT_FIELDS } from '../../../../../../../common/constants/field_types';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';

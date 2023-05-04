@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
 import { uniqWith, isEqual } from 'lodash';
 import cytoscape from 'cytoscape';
-import { JOB_MAP_NODE_TYPES, type AnalyticsMapReturnType } from '@kbn/ml-data-frame-analytics';
+import {
+  JOB_MAP_NODE_TYPES,
+  type AnalyticsMapReturnType,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { ml } from '../../../services/ml_api_service';
 
 interface GetDataObjectParameter {

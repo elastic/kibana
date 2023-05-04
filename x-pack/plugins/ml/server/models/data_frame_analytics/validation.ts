@@ -17,7 +17,7 @@ import {
   ANALYSIS_CONFIG_TYPE,
   type AnalysisConfig,
   type DataFrameAnalyticsConfig,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import {
   ALL_CATEGORIES,
   FRACTION_EMPTY_LIMIT,

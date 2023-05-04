@@ -13,7 +13,7 @@ import {
   isRegressionAnalysis,
   isOutlierAnalysis,
   isClassificationAnalysis,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { DataFrameAnalyticsListRow } from '../analytics_list/common';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
 import { getFeatureCount, getOutlierScoreFieldName } from './common';
 

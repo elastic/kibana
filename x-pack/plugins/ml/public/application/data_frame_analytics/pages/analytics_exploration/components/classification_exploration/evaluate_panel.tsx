@@ -25,7 +25,7 @@ import {
   getDependentVar,
   type DataFrameAnalyticsConfig,
   type DataFrameTaskStateType,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 

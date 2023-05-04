@@ -16,7 +16,7 @@ import {
   type EvaluateMetrics,
   type TrackTotalHitsSearchResponse,
   ANALYSIS_CONFIG_TYPE,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
 import { SavedSearchQuery } from '../../contexts/ml';

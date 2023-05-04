@@ -13,7 +13,7 @@ import { useUrlState } from '@kbn/ml-url-state';
 import {
   ANALYSIS_CONFIG_TYPE,
   type DataFrameAnalysisConfigType,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import { OutlierExploration } from './components/outlier_exploration';
 import { RegressionExploration } from './components/regression_exploration';
 import { ClassificationExploration } from './components/classification_exploration';

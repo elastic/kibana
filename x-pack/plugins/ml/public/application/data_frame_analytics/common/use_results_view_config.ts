@@ -17,7 +17,7 @@ import {
   type DataFrameAnalyticsConfig,
   type DataFrameTaskStateType,
   type TotalFeatureImportance,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { getDataViewIdFromName } from '../../util/index_utils';
 import { ml } from '../../services/ml_api_service';

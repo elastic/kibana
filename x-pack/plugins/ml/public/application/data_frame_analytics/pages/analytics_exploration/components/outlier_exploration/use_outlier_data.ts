@@ -17,7 +17,7 @@ import {
   DEFAULT_RESULTS_FIELD,
   FEATURE_INFLUENCE,
   type DataFrameAnalyticsConfig,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 import {

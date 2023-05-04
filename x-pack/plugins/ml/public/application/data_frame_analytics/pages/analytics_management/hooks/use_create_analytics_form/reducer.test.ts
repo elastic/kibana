@@ -7,7 +7,10 @@
 
 import { merge } from 'lodash';
 
-import { ANALYSIS_CONFIG_TYPE, type DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics';
+import {
+  ANALYSIS_CONFIG_TYPE,
+  type DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { ACTION } from './actions';
 import {

@@ -15,7 +15,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics';
+import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
 
 import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../../../common/types/fields';

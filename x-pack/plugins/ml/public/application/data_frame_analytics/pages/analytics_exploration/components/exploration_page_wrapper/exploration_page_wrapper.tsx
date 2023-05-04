@@ -15,7 +15,7 @@ import {
   ANALYSIS_CONFIG_TYPE,
   type DataFrameAnalyticsConfig,
   type DataFrameTaskStateType,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
 

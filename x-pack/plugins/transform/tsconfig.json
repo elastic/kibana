@@ -60,7 +60,7 @@
     "@kbn/core-lifecycle-server",
     "@kbn/security-plugin",
     "@kbn/ml-error-utils",
-    "@kbn/ml-data-frame-analytics"
+    "@kbn/ml-data-frame-analytics-utils"
   ],
   "exclude": [
     "target/**/*",

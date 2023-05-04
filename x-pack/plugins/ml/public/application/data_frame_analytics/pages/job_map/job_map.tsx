@@ -9,7 +9,7 @@ import React, { FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics';
+import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 import { Cytoscape, Controls, JobMapLegend } from './components';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';

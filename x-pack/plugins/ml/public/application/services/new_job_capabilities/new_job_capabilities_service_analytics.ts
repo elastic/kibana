@@ -22,7 +22,7 @@ import {
   OUTLIER_SCORE,
   TOP_CLASSES,
   type DataFrameAnalyticsConfig,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import type { Field, NewJobCapsResponse } from '../../../../common/types/fields';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 import { ml } from '../ml_api_service';

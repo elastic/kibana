@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { FormMessage, State, SourceIndexMap } from './state';
 

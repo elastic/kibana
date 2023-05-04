@@ -14,7 +14,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { ANALYSIS_CONFIG_TYPE } from '@kbn/ml-data-frame-analytics';
+import { ANALYSIS_CONFIG_TYPE } from '@kbn/ml-data-frame-analytics-utils';
 import {
   State,
   UNSET_CONFIG_ITEM,

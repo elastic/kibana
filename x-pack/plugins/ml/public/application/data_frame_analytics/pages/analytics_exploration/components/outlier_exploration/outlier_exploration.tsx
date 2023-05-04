@@ -10,7 +10,7 @@ import React, { useCallback, useState, FC } from 'react';
 import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { isOutlierAnalysis, FEATURE_INFLUENCE } from '@kbn/ml-data-frame-analytics';
+import { isOutlierAnalysis, FEATURE_INFLUENCE } from '@kbn/ml-data-frame-analytics-utils';
 
 import {
   useColorRange,

@@ -35,7 +35,7 @@ import {
   type RegressionTotalFeatureImportance,
   type ClassificationTotalFeatureImportance,
   type FeatureImportanceClassName,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 

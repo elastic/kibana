@@ -31,7 +31,7 @@ import {
   isRegressionAnalysis,
   type DataFrameAnalyticsConfig,
   INDEX_STATUS,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import type { DataGridItem } from '../../../../../components/data_grid';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../../../../../common/types/es_client';

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { DuplicateDataViewError } from '@kbn/data-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';

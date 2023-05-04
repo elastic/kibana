@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   DataFrameAnalyticsConfig,
   DataFrameTaskStateType,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { useMlKibana } from '../../../../../contexts/kibana';

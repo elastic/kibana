@@ -14,7 +14,7 @@ import {
   type TopClasses,
   isClassificationFeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import type { ExtendedFeatureImportance } from './decision_path_popover';
 
 export type DecisionPathPlotData = Array<[string, number, number]>;

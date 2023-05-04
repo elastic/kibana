@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { useUrlState } from '@kbn/ml-url-state';
-import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics';
+import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 

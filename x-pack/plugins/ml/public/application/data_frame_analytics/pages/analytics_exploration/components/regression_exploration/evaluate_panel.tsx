@@ -24,7 +24,7 @@ import {
   type DataFrameAnalyticsConfig,
   type DataFrameTaskStateType,
   ANALYSIS_CONFIG_TYPE,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { SavedSearchQuery } from '../../../../../contexts/ml';

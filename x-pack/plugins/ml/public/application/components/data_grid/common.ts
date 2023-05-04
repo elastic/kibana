@@ -30,7 +30,7 @@ import {
   FEATURE_INFLUENCE,
   OUTLIER_SCORE,
   TOP_CLASSES,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';

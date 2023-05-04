@@ -7,7 +7,7 @@
 
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
-import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { MlApiServices } from '../../../services/ml_api_service';
 import type { JobType } from '../../../../../common/types/saved_objects';
 import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';

@@ -10,7 +10,7 @@ import {
   isRegressionAnalysis,
   isClassificationAnalysis,
   type DataFrameAnalyticsConfig,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CanvasElementColorStats } from '../canvas_element';

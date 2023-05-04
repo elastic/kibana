@@ -9,7 +9,10 @@ import React, { FC, useMemo } from 'react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
-import { getAnalysisType, type DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics';
+import {
+  getAnalysisType,
+  type DataFrameAnalysisConfigType,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { useMlLink, useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
 import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { getViewLinkStatus } from '../../../data_frame_analytics/pages/analytics_management/components/action_view/get_view_link_status';

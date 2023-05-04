@@ -20,7 +20,7 @@ import {
   ANALYSIS_CONFIG_TYPE,
   DATA_FRAME_TASK_STATE,
   type DataFrameAnalyticsId,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { useNavigateToPath } from '../../../../../contexts/kibana';

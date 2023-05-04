@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlUrlConfig, MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
-import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlKibana } from '../../../contexts/kibana';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';

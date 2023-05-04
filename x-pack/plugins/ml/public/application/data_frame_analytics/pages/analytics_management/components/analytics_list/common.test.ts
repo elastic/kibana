@@ -7,7 +7,10 @@
 
 import StatsMock from './__mocks__/analytics_stats.json';
 
-import { type DataFrameAnalyticsStats, DATA_FRAME_TASK_STATE } from '@kbn/ml-data-frame-analytics';
+import {
+  type DataFrameAnalyticsStats,
+  DATA_FRAME_TASK_STATE,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import {
   getDataFrameAnalyticsProgress,

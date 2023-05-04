@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { type DataFrameAnalyticsConfig, DATA_FRAME_TASK_STATE } from '@kbn/ml-data-frame-analytics';
+import {
+  type DataFrameAnalyticsConfig,
+  DATA_FRAME_TASK_STATE,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';

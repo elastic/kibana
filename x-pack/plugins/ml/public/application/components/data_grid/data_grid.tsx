@@ -38,7 +38,7 @@ import {
   ANALYSIS_CONFIG_TYPE,
   DEFAULT_RESULTS_FIELD,
   INDEX_STATUS,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_histograms';
 

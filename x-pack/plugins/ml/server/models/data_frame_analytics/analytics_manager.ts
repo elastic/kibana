@@ -17,7 +17,7 @@ import {
   type AnalyticsMapReturnType,
   type AnalyticsMapNodeElement,
   type MapElements,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import {
   ExtendAnalyticsMapArgs,
   GetAnalyticsMapArgs,

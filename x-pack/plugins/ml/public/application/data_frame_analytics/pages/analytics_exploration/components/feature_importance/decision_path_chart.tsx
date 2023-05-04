@@ -28,7 +28,7 @@ import { euiLightVars as euiVars } from '@kbn/ui-theme';
 import {
   type FeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import type { DecisionPathPlotData } from './use_classification_path_data';
 import { formatSingleValue } from '../../../../../formatters/format_value';
 const { euiColorFullShade, euiColorMediumShade } = euiVars;

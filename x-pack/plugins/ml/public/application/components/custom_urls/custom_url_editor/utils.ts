@@ -21,7 +21,7 @@ import {
   isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
   DEFAULT_RESULTS_FIELD,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';

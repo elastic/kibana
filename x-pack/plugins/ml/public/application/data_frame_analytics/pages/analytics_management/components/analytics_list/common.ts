@@ -14,7 +14,7 @@ import {
   type DataFrameAnalysisConfigType,
   type DataFrameAnalyticsStats,
   type DataFrameTaskStateType,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 export enum DATA_FRAME_MODE {
   BATCH = 'batch',

@@ -27,7 +27,7 @@ import {
   ANALYSIS_CONFIG_TYPE,
   NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
   ANALYSIS_ADVANCED_FIELDS,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import { HyperParameters } from './hyper_parameters';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { getModelMemoryLimitErrors } from '../../../analytics_management/hooks/use_create_analytics_form/reducer';

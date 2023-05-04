@@ -13,7 +13,7 @@ import type {
   UpdateDataFrameAnalyticsConfig,
   DataFrameAnalyticsConfig,
   DataFrameAnalyticsStats,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';

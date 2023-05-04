@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataFrameAnalyticsId } from '@kbn/ml-data-frame-analytics';
+import type { DataFrameAnalyticsId } from '@kbn/ml-data-frame-analytics-utils';
 import { useMlContext } from '../../../contexts/ml';
 import { ml } from '../../../services/ml_api_service';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';

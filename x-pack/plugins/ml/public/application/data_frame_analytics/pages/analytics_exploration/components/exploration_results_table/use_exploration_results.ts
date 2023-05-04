@@ -25,7 +25,7 @@ import {
   TOP_CLASSES,
   type DataFrameAnalyticsConfig,
   type FeatureImportanceBaseline,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { MlApiServices } from '../../../../../services/ml_api_service';
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';

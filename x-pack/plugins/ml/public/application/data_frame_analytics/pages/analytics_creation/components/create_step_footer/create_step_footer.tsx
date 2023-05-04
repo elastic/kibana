@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import {
   type DataFrameAnalysisConfigType,
   DATA_FRAME_TASK_STATE,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import { getDataFrameAnalyticsProgressPhase } from '../../../analytics_management/components/analytics_list/common';
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
 import { useMlKibana } from '../../../../../contexts/kibana';

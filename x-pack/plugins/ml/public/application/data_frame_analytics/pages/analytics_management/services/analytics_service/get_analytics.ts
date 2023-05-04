@@ -10,7 +10,7 @@ import {
   getAnalysisType,
   type DataFrameAnalysisConfigType,
   DATA_FRAME_TASK_STATE,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import { ml } from '../../../../../services/ml_api_service';
 import {
   GetDataFrameAnalyticsStatsResponseError,

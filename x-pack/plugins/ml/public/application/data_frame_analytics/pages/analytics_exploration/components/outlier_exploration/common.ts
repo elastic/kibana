@@ -9,7 +9,7 @@ import {
   type DataFrameAnalyticsConfig,
   FEATURE_INFLUENCE,
   OUTLIER_SCORE,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { DataGridItem } from '../../../../../components/data_grid';
 

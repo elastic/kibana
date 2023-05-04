@@ -10,7 +10,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import {
   JOB_MAP_NODE_TYPES,
   type DeleteDataFrameAnalyticsWithIndexStatus,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import type { RouteInitialization } from '../types';

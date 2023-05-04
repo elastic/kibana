@@ -33,7 +33,7 @@ import {
   DATA_FRAME_TASK_STATE,
   type DataFrameAnalyticsConfig,
   type UpdateDataFrameAnalyticsConfig,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlKibana, useMlApiContext } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';

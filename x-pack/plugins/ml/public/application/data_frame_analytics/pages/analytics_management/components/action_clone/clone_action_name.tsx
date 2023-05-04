@@ -18,7 +18,7 @@ import {
   isRegressionAnalysis,
   DEFAULT_RESULTS_FIELD,
   type DataFrameAnalyticsConfig,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES } from '../../hooks/use_create_analytics_form';

@@ -26,7 +26,7 @@ import {
   ANALYSIS_CONFIG_TYPE,
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 import {

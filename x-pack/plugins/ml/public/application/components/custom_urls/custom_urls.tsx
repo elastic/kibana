@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
-import { isDataFrameAnalyticsConfigs } from '@kbn/ml-data-frame-analytics';
+import { isDataFrameAnalyticsConfigs } from '@kbn/ml-data-frame-analytics-utils';
 import { MlKibanaReactContextValue } from '../../contexts/kibana';
 import { CustomUrlEditor, CustomUrlList } from './custom_url_editor';
 import {

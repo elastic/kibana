@@ -17,7 +17,7 @@ import {
   type DataFrameAnalyticsConfig,
   type DataFrameTaskStateType,
   DATA_FRAME_TASK_STATE,
-} from '@kbn/ml-data-frame-analytics';
+} from '@kbn/ml-data-frame-analytics-utils';
 import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { setupModuleBodySchema } from '@kbn/ml-plugin/server/routes/schemas/modules';

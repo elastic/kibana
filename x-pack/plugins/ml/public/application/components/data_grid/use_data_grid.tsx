@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
-import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics';
+import { INDEX_STATUS } from '@kbn/ml-data-frame-analytics-utils';
 
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../../common/types/es_client';
 import { ChartData } from '../../../../common/types/field_histograms';

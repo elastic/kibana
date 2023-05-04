@@ -7,7 +7,10 @@
 
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 
-import type { DfAnalyticsExplainResponse, FieldSelectionItem } from '@kbn/ml-data-frame-analytics';
+import type {
+  DfAnalyticsExplainResponse,
+  FieldSelectionItem,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { ml } from '../../../../../services/ml_api_service';
 import {
   getJobConfigFromFormState,

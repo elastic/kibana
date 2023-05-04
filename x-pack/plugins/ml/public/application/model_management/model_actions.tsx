@@ -19,7 +19,10 @@ import {
   CURATED_MODEL_TAG,
   MODEL_STATE,
 } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
-import { getAnalysisType, type DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics';
+import {
+  getAnalysisType,
+  type DataFrameAnalysisConfigType,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';

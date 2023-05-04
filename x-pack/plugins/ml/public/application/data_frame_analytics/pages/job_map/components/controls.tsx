@@ -27,7 +27,7 @@ import {
   EuiPortal,
   EuiTitle,
 } from '@elastic/eui';
-import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics';
+import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 import { CytoscapeContext } from './cytoscape';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/util/date_utils';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
