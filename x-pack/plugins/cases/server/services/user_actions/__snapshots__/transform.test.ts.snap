@@ -331,3 +331,313 @@ Object {
   "total": 1,
 }
 `;
+
+exports[`transform transformToExternalModel formats the payload correctly for: create case 1`] = `
+Object {
+  "attributes": Object {
+    "action": "create",
+    "comment_id": null,
+    "created_at": "abc",
+    "created_by": Object {
+      "email": "a",
+      "full_name": "abc",
+      "username": "b",
+    },
+    "owner": "securitySolution",
+    "payload": Object {
+      "assignees": undefined,
+      "connector": Object {
+        "fields": Object {
+          "issueType": "bug",
+          "parent": "2",
+          "priority": "high",
+        },
+        "id": "1",
+        "name": ".jira",
+        "type": ".jira",
+      },
+      "description": "a desc",
+      "owner": "securitySolution",
+      "settings": Object {
+        "syncAlerts": false,
+      },
+      "severity": "low",
+      "status": "open",
+      "tags": Array [],
+      "title": "a title",
+    },
+    "type": "create_case",
+  },
+  "id": "100",
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "associated-cases",
+      "type": "cases",
+    },
+    Object {
+      "id": "1",
+      "name": "connectorId",
+      "type": "action",
+    },
+  ],
+  "type": "cases-user-actions",
+}
+`;
+
+exports[`transform transformToExternalModel formats the payload correctly for: create connector 1`] = `
+Object {
+  "attributes": Object {
+    "action": "create",
+    "comment_id": null,
+    "created_at": "abc",
+    "created_by": Object {
+      "email": "a",
+      "full_name": "abc",
+      "username": "b",
+    },
+    "owner": "securitySolution",
+    "payload": Object {
+      "connector": Object {
+        "fields": Object {
+          "issueType": "bug",
+          "parent": "2",
+          "priority": "high",
+        },
+        "id": "1",
+        "name": ".jira",
+        "type": ".jira",
+      },
+    },
+    "type": "connector",
+  },
+  "id": "100",
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "associated-cases",
+      "type": "cases",
+    },
+    Object {
+      "id": "1",
+      "name": "connectorId",
+      "type": "action",
+    },
+  ],
+  "type": "cases-user-actions",
+}
+`;
+
+exports[`transform transformToExternalModel formats the payload correctly for: description 1`] = `
+Object {
+  "attributes": Object {
+    "action": "create",
+    "comment_id": null,
+    "created_at": "abc",
+    "created_by": Object {
+      "email": "a",
+      "full_name": "abc",
+      "username": "b",
+    },
+    "owner": "securitySolution",
+    "payload": Object {
+      "description": "test",
+    },
+    "type": "description",
+  },
+  "id": "100",
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "associated-cases",
+      "type": "cases",
+    },
+  ],
+  "type": "cases-user-actions",
+}
+`;
+
+exports[`transform transformToExternalModel formats the payload correctly for: external reference 1`] = `
+Object {
+  "attributes": Object {
+    "action": "create",
+    "comment_id": "external-reference-test-id",
+    "created_at": "abc",
+    "created_by": Object {
+      "email": "a",
+      "full_name": "abc",
+      "username": "b",
+    },
+    "owner": "securitySolution",
+    "payload": Object {
+      "comment": Object {
+        "externalReferenceAttachmentTypeId": ".test",
+        "externalReferenceId": "my-id",
+        "externalReferenceMetadata": null,
+        "externalReferenceStorage": Object {
+          "soType": "test-so",
+          "type": "savedObject",
+        },
+        "owner": "securitySolution",
+        "type": "externalReference",
+      },
+    },
+    "type": "comment",
+  },
+  "id": "100",
+  "references": Array [
+    Object {
+      "id": "my-id",
+      "name": "externalReferenceId",
+      "type": "test-so",
+    },
+    Object {
+      "id": "1",
+      "name": "associated-cases",
+      "type": "cases",
+    },
+    Object {
+      "id": "external-reference-test-id",
+      "name": "associated-cases-comments",
+      "type": "cases-comments",
+    },
+  ],
+  "type": "cases-user-actions",
+}
+`;
+
+exports[`transform transformToExternalModel formats the payload correctly for: persistable state 1`] = `
+Object {
+  "attributes": Object {
+    "action": "create",
+    "comment_id": "persistable-state-test-id",
+    "created_at": "abc",
+    "created_by": Object {
+      "email": "a",
+      "full_name": "abc",
+      "username": "b",
+    },
+    "owner": "securitySolution",
+    "payload": Object {
+      "comment": Object {
+        "owner": "securitySolutionFixture",
+        "persistableStateAttachmentState": Object {
+          "foo": "foo",
+          "injectedId": "testRef",
+        },
+        "persistableStateAttachmentTypeId": ".test",
+        "type": "persistableState",
+      },
+    },
+    "type": "comment",
+  },
+  "id": "100",
+  "references": Array [
+    Object {
+      "id": "testRef",
+      "name": "myTestReference",
+      "type": "test-so",
+    },
+    Object {
+      "id": "1",
+      "name": "associated-cases",
+      "type": "cases",
+    },
+    Object {
+      "id": "persistable-state-test-id",
+      "name": "associated-cases-comments",
+      "type": "cases-comments",
+    },
+  ],
+  "type": "cases-user-actions",
+}
+`;
+
+exports[`transform transformToExternalModel formats the payload correctly for: push connector 1`] = `
+Object {
+  "attributes": Object {
+    "action": "push_to_service",
+    "comment_id": null,
+    "created_at": "abc",
+    "created_by": Object {
+      "email": "a",
+      "full_name": "abc",
+      "username": "b",
+    },
+    "owner": "securitySolution",
+    "payload": Object {
+      "externalService": Object {
+        "connector_id": "100",
+        "connector_name": ".jira",
+        "external_id": "100",
+        "external_title": "awesome",
+        "external_url": "http://www.google.com",
+        "pushed_at": "2019-11-25T21:54:48.952Z",
+        "pushed_by": Object {
+          "email": "testemail@elastic.co",
+          "full_name": "elastic",
+          "username": "elastic",
+        },
+      },
+    },
+    "type": "pushed",
+  },
+  "id": "100",
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "associated-cases",
+      "type": "cases",
+    },
+    Object {
+      "id": "100",
+      "name": "pushConnectorId",
+      "type": "action",
+    },
+  ],
+  "type": "cases-user-actions",
+}
+`;
+
+exports[`transform transformToExternalModel formats the payload correctly for: update connector 1`] = `
+Object {
+  "attributes": Object {
+    "action": "update",
+    "comment_id": null,
+    "created_at": "abc",
+    "created_by": Object {
+      "email": "a",
+      "full_name": "abc",
+      "username": "b",
+    },
+    "owner": "securitySolution",
+    "payload": Object {
+      "connector": Object {
+        "fields": Object {
+          "issueType": "bug",
+          "parent": "2",
+          "priority": "high",
+        },
+        "id": "1",
+        "name": ".jira",
+        "type": ".jira",
+      },
+    },
+    "type": "connector",
+  },
+  "id": "100",
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "associated-cases",
+      "type": "cases",
+    },
+    Object {
+      "id": "1",
+      "name": "connectorId",
+      "type": "action",
+    },
+  ],
+  "type": "cases-user-actions",
+}
+`;

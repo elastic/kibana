@@ -8,6 +8,7 @@
 import {
   legacyTransformFindResponseToExternalModel,
   transformFindResponseToExternalModel,
+  transformToExternalModel,
 } from './transform';
 import { createSOFindResponse } from '../test_utils';
 import {
@@ -25,6 +26,8 @@ import { createPersistableStateAttachmentTypeRegistryMock } from '../../attachme
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
 import type { ConnectorUserAction } from '../../../common/api';
 import { Actions } from '../../../common/api';
+import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
+import type { SavedObject } from '@kbn/core/server';
 
 describe('transform', () => {
   const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
@@ -179,6 +182,30 @@ describe('transform', () => {
       });
     });
 
+    describe('persistable state attachments', () => {
+      it('populates the persistable state', () => {
+        const transformed = transformer(
+          createSOFindResponse([createUserActionFindSO(createPersistableStateUserAction())]),
+          persistableStateAttachmentTypeRegistry
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
+
+        expect(transformed).toMatchSnapshot();
+      });
+    });
+
+    describe('external references', () => {
+      it('populates the external references attributes', () => {
+        const transformed = transformer(
+          createSOFindResponse([createUserActionFindSO(createExternalReferenceUserAction())]),
+          persistableStateAttachmentTypeRegistry
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
+
+        expect(transformed).toMatchSnapshot();
+      });
+    });
+  });
+
+  describe('connectors', () => {
     describe('create connector', () => {
       const userAction = createConnectorUserAction();
       testConnectorId(persistableStateAttachmentTypeRegistry, userAction, 'connector.id');
@@ -203,27 +230,144 @@ describe('transform', () => {
       const userAction = createCaseUserAction();
       testConnectorId(persistableStateAttachmentTypeRegistry, userAction, 'connector.id');
     });
+  });
 
-    describe('persistable state attachments', () => {
-      it('populates the persistable state', () => {
-        const transformed = transformer(
-          createSOFindResponse([createUserActionFindSO(createPersistableStateUserAction())]),
-          persistableStateAttachmentTypeRegistry
-        ) as SavedObjectsFindResponse<ConnectorUserAction>;
+  describe('transformToExternalModel', () => {
+    it('returns the correct fields', () => {
+      const transformed = transformToExternalModel(
+        createConnectorUserAction(),
+        persistableStateAttachmentTypeRegistry
+      );
 
-        expect(transformed).toMatchSnapshot();
-      });
+      expect(transformed.attributes).toMatchInlineSnapshot(`
+        Object {
+          "action": "create",
+          "comment_id": null,
+          "created_at": "abc",
+          "created_by": Object {
+            "email": "a",
+            "full_name": "abc",
+            "username": "b",
+          },
+          "owner": "securitySolution",
+          "payload": Object {
+            "connector": Object {
+              "fields": Object {
+                "issueType": "bug",
+                "parent": "2",
+                "priority": "high",
+              },
+              "id": "1",
+              "name": ".jira",
+              "type": ".jira",
+            },
+          },
+          "type": "connector",
+        }
+      `);
     });
 
-    describe('external references', () => {
-      it('populates the external references attributes', () => {
-        const transformed = transformer(
-          createSOFindResponse([createUserActionFindSO(createExternalReferenceUserAction())]),
-          persistableStateAttachmentTypeRegistry
-        ) as SavedObjectsFindResponse<ConnectorUserAction>;
+    it('preserves the saved object fields and attributes when inject the ids', () => {
+      const transformed = transformToExternalModel(
+        createConnectorUserAction(),
+        persistableStateAttachmentTypeRegistry
+      );
 
-        expect(transformed).toMatchSnapshot();
+      expect(transformed).toMatchInlineSnapshot(`
+        Object {
+          "attributes": Object {
+            "action": "create",
+            "comment_id": null,
+            "created_at": "abc",
+            "created_by": Object {
+              "email": "a",
+              "full_name": "abc",
+              "username": "b",
+            },
+            "owner": "securitySolution",
+            "payload": Object {
+              "connector": Object {
+                "fields": Object {
+                  "issueType": "bug",
+                  "parent": "2",
+                  "priority": "high",
+                },
+                "id": "1",
+                "name": ".jira",
+                "type": ".jira",
+              },
+            },
+            "type": "connector",
+          },
+          "id": "100",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "associated-cases",
+              "type": "cases",
+            },
+            Object {
+              "id": "1",
+              "name": "connectorId",
+              "type": "action",
+            },
+          ],
+          "type": "cases-user-actions",
+        }
+      `);
+    });
+
+    it('sets comment_id to null when it cannot find the reference', () => {
+      const userAction = {
+        ...createUserActionSO({ action: Actions.create, commentId: '5' }),
+        references: [],
+      };
+      const transformed = transformToExternalModel(
+        userAction,
+        persistableStateAttachmentTypeRegistry
+      );
+
+      expect(transformed.attributes.comment_id).toBeNull();
+    });
+
+    it('sets comment_id correctly when it finds the reference', () => {
+      const userAction = createUserActionSO({
+        action: Actions.create,
+        commentId: '5',
       });
+
+      const transformed = transformToExternalModel(
+        userAction,
+        persistableStateAttachmentTypeRegistry
+      );
+
+      expect(transformed.attributes.comment_id).toEqual('5');
+    });
+
+    const userActions = [
+      ['create connector', createConnectorUserAction()],
+      ['update connector', updateConnectorUserAction()],
+      ['push connector', pushConnectorUserAction()],
+      ['create case', createCaseUserAction()],
+      ['persistable state', createPersistableStateUserAction()],
+      ['external reference', createExternalReferenceUserAction()],
+      [
+        'description',
+        createUserActionSO({
+          action: Actions.create,
+          payload: { description: 'test' },
+          type: 'description',
+        }),
+      ],
+    ] as Array<[string, SavedObject<UserActionPersistedAttributes>]>;
+
+    it.each(userActions)('formats the payload correctly for: %s', (_, userAction) => {
+      const transformed = transformToExternalModel(
+        userAction,
+        persistableStateAttachmentTypeRegistry
+      );
+
+      expect(transformed).toMatchSnapshot();
     });
   });
 });

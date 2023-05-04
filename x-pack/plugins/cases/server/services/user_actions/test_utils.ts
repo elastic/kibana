@@ -10,7 +10,7 @@ import type {
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import { omit, get } from 'lodash';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -42,7 +42,7 @@ import {
   persistableStateAttachment,
 } from '../../attachment_framework/mocks';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import { transformFindResponseToExternalModel } from './transform';
+import { transformFindResponseToExternalModel, transformToExternalModel } from './transform';
 
 export const createUserActionFindSO = (
   userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>
@@ -235,56 +235,107 @@ export const testConnectorId = (
   path: string,
   expectedConnectorId = '1'
 ) => {
-  it('does set payload.connector.id to none when it cannot find the reference', () => {
-    const userActionWithEmptyRef = { ...userAction, references: [] };
-    const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([createUserActionFindSO(userActionWithEmptyRef)]),
-      persistableStateAttachmentTypeRegistry
-    );
+  describe('transformFindResponseToExternalModel', () => {
+    it('does set payload.connector.id to none when it cannot find the reference', () => {
+      const userActionWithEmptyRef = { ...userAction, references: [] };
+      const transformed = transformFindResponseToExternalModel(
+        createSOFindResponse([createUserActionFindSO(userActionWithEmptyRef)]),
+        persistableStateAttachmentTypeRegistry
+      );
 
-    expect(get(transformed.saved_objects[0].attributes.payload, path)).toBe('none');
+      expect(get(transformed.saved_objects[0].attributes.payload, path)).toBe('none');
+    });
+
+    it('does not populate the payload.connector.id when the reference exists but the action is not of type connector', () => {
+      const invalidUserAction = {
+        ...userAction,
+        attributes: { ...userAction.attributes, type: 'not-connector' },
+      };
+      const transformed = transformFindResponseToExternalModel(
+        createSOFindResponse([
+          createUserActionFindSO(
+            invalidUserAction as SavedObject<CaseUserActionAttributesWithoutConnectorId>
+          ),
+        ]),
+        persistableStateAttachmentTypeRegistry
+      );
+
+      expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
+    });
+
+    it('does not populate the payload.connector.id when the reference exists but the payload does not contain a connector', () => {
+      const invalidUserAction = {
+        ...userAction,
+        attributes: { ...userAction.attributes, payload: {} },
+      };
+      const transformed = transformFindResponseToExternalModel(
+        createSOFindResponse([
+          createUserActionFindSO(
+            invalidUserAction as SavedObject<CaseUserActionAttributesWithoutConnectorId>
+          ),
+        ]),
+        persistableStateAttachmentTypeRegistry
+      ) as SavedObjectsFindResponse<ConnectorUserAction>;
+
+      expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
+    });
+
+    it('populates the payload.connector.id', () => {
+      const transformed = transformFindResponseToExternalModel(
+        createSOFindResponse([createUserActionFindSO(userAction)]),
+        persistableStateAttachmentTypeRegistry
+      ) as SavedObjectsFindResponse<ConnectorUserAction>;
+
+      expect(get(transformed.saved_objects[0].attributes.payload, path)).toEqual(
+        expectedConnectorId
+      );
+    });
   });
 
-  it('does not populate the payload.connector.id when the reference exists but the action is not of type connector', () => {
-    const invalidUserAction = {
-      ...userAction,
-      attributes: { ...userAction.attributes, type: 'not-connector' },
-    };
-    const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([
-        createUserActionFindSO(
-          invalidUserAction as SavedObject<CaseUserActionAttributesWithoutConnectorId>
-        ),
-      ]),
-      persistableStateAttachmentTypeRegistry
-    );
+  describe('transformToExternalModel', () => {
+    it('does set payload.connector.id to none when it cannot find the reference', () => {
+      const userActionWithEmptyRef = { ...userAction, references: [] };
+      const transformed = transformToExternalModel(
+        userActionWithEmptyRef,
+        persistableStateAttachmentTypeRegistry
+      );
 
-    expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
-  });
+      expect(get(transformed.attributes.payload, path)).toBe('none');
+    });
 
-  it('does not populate the payload.connector.id when the reference exists but the payload does not contain a connector', () => {
-    const invalidUserAction = {
-      ...userAction,
-      attributes: { ...userAction.attributes, payload: {} },
-    };
-    const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([
-        createUserActionFindSO(
-          invalidUserAction as SavedObject<CaseUserActionAttributesWithoutConnectorId>
-        ),
-      ]),
-      persistableStateAttachmentTypeRegistry
-    ) as SavedObjectsFindResponse<ConnectorUserAction>;
+    it('does not populate the payload.connector.id when the reference exists but the action is not of type connector', () => {
+      const invalidUserAction = {
+        ...userAction,
+        attributes: { ...userAction.attributes, type: 'not-connector' },
+      };
+      const transformed = transformToExternalModel(
+        invalidUserAction,
+        persistableStateAttachmentTypeRegistry
+      );
 
-    expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
-  });
+      expect(get(transformed.attributes.payload, path)).toBeUndefined();
+    });
 
-  it('populates the payload.connector.id', () => {
-    const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([createUserActionFindSO(userAction)]),
-      persistableStateAttachmentTypeRegistry
-    ) as SavedObjectsFindResponse<ConnectorUserAction>;
+    it('does not populate the payload.connector.id when the reference exists but the payload does not contain a connector', () => {
+      const invalidUserAction = {
+        ...userAction,
+        attributes: { ...userAction.attributes, payload: {} },
+      };
+      const transformed = transformToExternalModel(
+        invalidUserAction,
+        persistableStateAttachmentTypeRegistry
+      );
 
-    expect(get(transformed.saved_objects[0].attributes.payload, path)).toEqual(expectedConnectorId);
+      expect(get(transformed.attributes.payload, path)).toBeUndefined();
+    });
+
+    it('populates the payload.connector.id', () => {
+      const transformed = transformToExternalModel(
+        userAction,
+        persistableStateAttachmentTypeRegistry
+      );
+
+      expect(get(transformed.attributes.payload, path)).toEqual(expectedConnectorId);
+    });
   });
 };
