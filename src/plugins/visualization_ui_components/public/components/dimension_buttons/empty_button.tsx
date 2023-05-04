@@ -29,7 +29,7 @@ export const EmptyDimensionButton = ({
     <EuiButtonEmpty
       css={css`
         width: 100%;
-        border-radius: ${euiThemeVars.euiBorderRadius};
+        border-radius: ${euiThemeVars.euiBorderRadius} !important;
         border: ${euiThemeVars.euiBorderWidthThin} dashed ${euiThemeVars.euiBorderColor} !important;
       `}
       color="text" // as far as I can tell all this currently adds is the correct active background color
