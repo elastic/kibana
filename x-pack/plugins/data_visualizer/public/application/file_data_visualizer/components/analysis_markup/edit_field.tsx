@@ -21,7 +21,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FindFileStructureResponse, InputOverrides } from '../../../../../../file_upload/common';
+import { FindFileStructureResponse, InputOverrides } from '@kbn/file-upload-plugin/common';
 import { createUrlOverrides } from '../../../common/components/utils/utils';
 
 import { TopValues } from '../../../common/components/top_values/top_values';
